@@ -29,7 +29,7 @@ def usage_stats_profiler_config() -> dict:
                 "expectation_configuration_builders": [
                     {
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_values_to_match_regex",
                         "meta": {"details": {"note": "Hello World"}},
                     }
                 ],
@@ -146,7 +146,7 @@ def test_anonymize_profiler_run(
                 "anonymized_expectation_configuration_builders": [
                     {
                         "parent_class": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_values_to_match_regex",
                     }
                 ],
                 "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
@@ -181,7 +181,7 @@ def test_anonymize_profiler_run_custom_values(
                 "anonymized_expectation_configuration_builders": [
                     {
                         "anonymized_class": "0d70a2037f19cf1764afad97c7395167",
-                        "expectation_type": "expect_custom_expectation",
+                        "anonymized_expectation_type": "c7c23fbf56041786bf024a2407031b27",
                         "parent_class": "__not_recognized__",
                     }
                 ],
@@ -216,7 +216,7 @@ def test_anonymize_profiler_run_multiple_rules(
                 "anonymized_expectation_configuration_builders": [
                     {
                         "parent_class": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_values_to_match_regex",
                     }
                 ],
                 "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
@@ -268,7 +268,7 @@ def test_anonymize_profiler_run_multiple_rules_custom_values(
                 "anonymized_expectation_configuration_builders": [
                     {
                         "anonymized_class": "0d70a2037f19cf1764afad97c7395167",
-                        "expectation_type": "expect_custom_expectation",
+                        "anonymized_expectation_type": "c7c23fbf56041786bf024a2407031b27",
                         "parent_class": "__not_recognized__",
                     }
                 ],
@@ -289,7 +289,7 @@ def test_anonymize_profiler_run_multiple_rules_custom_values(
                 "anonymized_expectation_configuration_builders": [
                     {
                         "anonymized_class": "71128204dee66972b5cfc8851b216508",
-                        "expectation_type": "expect_additional_custom_expectation",
+                        "anonymized_expectation_type": "828b498d29af626836697ba1622ca234",
                         "parent_class": "__not_recognized__",
                     }
                 ],
@@ -348,7 +348,7 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
                 "anonymized_expectation_configuration_builders": [
                     {
                         "parent_class": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_values_to_match_regex",
                     }
                 ],
                 "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
@@ -397,7 +397,7 @@ def test_anonymize_profiler_run_with_condition_in_expectation_configuration_buil
                     {
                         "anonymized_condition": "553b1c035d9b602798d64d23d63abd32",
                         "parent_class": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "expectation_type": "expect_column_values_to_match_regex",
                     }
                 ],
                 "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",

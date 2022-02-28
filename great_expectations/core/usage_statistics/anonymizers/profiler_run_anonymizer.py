@@ -5,6 +5,9 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
 )
+from great_expectations.expectations.registry import (
+    list_registered_expectation_implementations,
+)
 from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
@@ -69,6 +72,7 @@ class ProfilerRunAnonymizer(Anonymizer):
             DefaultExpectationConfigurationBuilder,
             ExpectationConfigurationBuilder,
         ]
+        self._ge_expectation_types = set(list_registered_expectation_implementations())
 
         self._salt = salt
         self._batch_request_anonymizer = BatchRequestAnonymizer(self._salt)
@@ -225,9 +229,17 @@ class ProfilerRunAnonymizer(Anonymizer):
             },
         )
 
-        anonymized_expectation_configuration_builder[
+        expectation_type: Optional[str] = expectation_configuration_builder.get(
             "expectation_type"
-        ] = expectation_configuration_builder.get("expectation_type")
+        )
+        if expectation_type in self._ge_expectation_types:
+            anonymized_expectation_configuration_builder[
+                "expectation_type"
+            ] = expectation_type
+        else:
+            anonymized_expectation_configuration_builder[
+                "anonymized_expectation_type"
+            ] = self.anonymize(expectation_type)
 
         condition: Optional[str] = expectation_configuration_builder.get("condition")
         if condition:
