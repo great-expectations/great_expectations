@@ -242,13 +242,11 @@ def compute_quantiles(
         metric_values,
         q=(false_positive_rate / 2),
         axis=0,
-        method="linear",  # can be omitted ("linear" is default)
     )
     upper_quantile = np.quantile(
         metric_values,
         q=1.0 - (false_positive_rate / 2),
         axis=0,
-        method="linear",  # can be omitted ("linear" is default)
     )
     return lower_quantile, upper_quantile
 
