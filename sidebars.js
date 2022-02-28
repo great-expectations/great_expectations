@@ -85,6 +85,13 @@ module.exports = {
                 'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3'
               ]
             },
+            {
+              type: 'category',
+              label: 'Miscellaneous',
+              items: [
+                { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' }
+              ]
+            },
             { type: 'doc', id: 'guides/setup/index', label: 'Setup: Index' }
           ]
         }
@@ -184,13 +191,26 @@ module.exports = {
                 'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
                 'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
                 'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
-                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data'
+                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
+                { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
+                { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' }
               ]
             },
             {
               type: 'category',
               label: 'Configuring Profilers',
-              items: []
+              items: [
+                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
+                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Advanced skills',
+              items: [
+                'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
+                'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database'
+              ]
             },
             {
               type: 'category',
@@ -205,6 +225,7 @@ module.exports = {
                   type: 'category',
                   label: 'Adding Features to Custom Expectations',
                   items: [
+                    'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
                     'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
                     'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
                     'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
@@ -213,17 +234,6 @@ module.exports = {
                     'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
                   ]
                 }
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Advanced',
-              items: [
-                'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
-                'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
-                'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
               ]
             },
             { type: 'doc', id: 'guides/expectations/index', label: 'Index' }
@@ -316,8 +326,16 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Contributing Expectations',
+          label: 'Contributing specifics',
           items: [
+            {
+              type: 'category',
+              label: 'How to contribute how-to guides',
+              items: [
+                { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
+                { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
+              ]
+            },
             'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
           ]
         },
@@ -340,7 +358,14 @@ module.exports = {
         {
           type: 'category',
           label: 'Supplemental documentation',
-          items: []
+          items: [
+            { type: 'doc', id: 'reference/core_concepts', label: 'Introduction' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+            { type: 'doc', id: 'reference/data_discovery' },
+            { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
+          ]
         },
         { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
         'glossary',
