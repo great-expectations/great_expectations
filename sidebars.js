@@ -359,11 +359,9 @@ module.exports = {
           type: 'category',
           label: 'Supplemental documentation',
           items: [
-            { type: 'doc', id: 'reference/core_concepts', label: 'Introduction' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
             { type: 'doc', id: 'reference/data_discovery' },
-            { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
             { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         },
@@ -391,8 +389,7 @@ module.exports = {
               label: 'Expectations',
               collapsed: true,
               items: [
-                'terms/expectation',
-                { type: 'doc', id: 'reference/expectations/expectations' },
+                { type: 'doc', id: 'terms/expectation', label: 'Expectations: Overview' },
                 { type: 'doc', id: 'reference/expectations/conditional_expectations' },
                 { type: 'doc', id: 'reference/expectations/distributional_expectations' },
                 { type: 'doc', id: 'reference/expectations/implemented_expectations' },
@@ -410,7 +407,7 @@ module.exports = {
               type: 'category',
               label: 'Stores',
               items: [
-                'terms/store',
+                { type: 'doc', id: 'terms/store', label: 'Stores: Overview' },
                 'terms/checkpoint_store',
                 'terms/data_docs_store',
                 'terms/evaluation_parameter_store',
