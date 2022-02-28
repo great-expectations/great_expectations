@@ -128,6 +128,20 @@ class DomainBuilder(Builder, ABC):
             parameters=None,
         )
 
+    def get_batch_ids(
+        self,
+        variables: Optional[ParameterContainer] = None,
+    ) -> Optional[List[str]]:
+        """
+
+        Args:
+            variables:
+
+        Returns:
+
+        """
+        return self._get_batch_ids(variables=variables)
+
     def get_batch_id(
         self,
         variables: Optional[ParameterContainer] = None,
