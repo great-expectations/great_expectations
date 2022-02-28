@@ -257,25 +257,69 @@ def compute_quantiles(
     return lower_quantile, upper_quantile
 
 
-def compute_bootstrap_quantiles_point_estimate(
+def _compute_bootstrap_quantiles_point_estimate_legacy(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
 ) -> Tuple[Number, Number]:
     """
-    Internal implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
-    See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+    An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
+    parameter of interest (lower and upper quantiles in this case). See
+    https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+
+    This implementation has been replaced by "compute_bootstrap_quantiles_bias_corrected_point_estimate" and only
+    remains to demonstrate the performance improvement achieved by correcting for bias. Upon the implementation of a
+    Machine Learning Lifecycle framework, the performance improvement can be documented and this legacy method can be
+    removed from the codebase.
+    """
+    bootstraps: np.ndarray = np.random.choice(
+        metric_values, size=(n_resamples, metric_values.size)
+    )
+    lower_quantiles: Union[np.nd_array, Number] = np.quantile(
+        bootstraps,
+        q=false_positive_rate / 2,
+        axis=1,
+        method="linear",  # can be omitted ("linear" is default)
+    )
+    lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
+    upper_quantiles: Union[np.nd_array, Number] = np.quantile(
+        bootstraps,
+        q=1.0 - (false_positive_rate / 2),
+        axis=1,
+        method="linear",  # can be omitted ("linear" is default)
+    )
+    upper_quantile_point_estimate: Number = np.mean(upper_quantiles)
+    return lower_quantile_point_estimate, upper_quantile_point_estimate
+
+
+def compute_bootstrap_quantiles_bias_corrected_point_estimate(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+) -> Tuple[Number, Number]:
+    """
+    An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
+    parameter of interest (lower and upper quantiles in this case). See
+    https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
 
     This implementation is sub-par compared to the one available from the "SciPy" standard library
-    ("https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"), because it introduces bias and
-    does not handle multi-dimensional statistics (unlike "scipy.stats.bootstrap", which corrects for bias and is
-    vectorized, thus having the ability to accept a multi-dimensional statistic function and process all dimensions).
+    ("https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"), because it does not handle
+    multi-dimensional statistics. "scipy.stats.bootstrap" is vectorized, thus having the ability to accept a
+    multi-dimensional statistic function and process all dimensions.
 
-    This implementation will be replaced by "scipy.stats.bootstrap" when Great Expectations can be upgraded to use a
-    more up-to-date version of the "scipy" Python package (the currently used version does not have "bootstrap").
+    Unfortunately, as of February 28th, 2022, the SciPy implementation has two issues: 1) it only returns a confidence
+    interval and not a point estimate for the population parameter of interest, which is what we require for our use
+    cases. 2) It can not handle multi-dimensional statistics and correct for bias simultaneously. You must either use
+    one feature or the other.
 
-    Additional future direction (potentially as a contribution submission to the "SciPy" community) include developing
-    enhancements to bootstrapped estimator based on theory presented in "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf":
+    This implementation could only be replaced by "scipy.stats.bootstrap" if Great Expectations drops support for
+    Python 3.6, thereby enabling us to use a more up-to-date version of the "scipy" Python package (the currently used
+    version does not have "bootstrap"). Also, as discussed above, two contributions would need to be made to the SciPy
+    package to enable 1) bias correction for multi-dimensional statistics and 2) a return value of a point estimate for
+    the population parameter of interest (lower and upper quantiles in this case).
+
+    Additional future direction could include developing enhancements to bootstrapped estimator based on theory
+    presented in "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf":
     @article{Andrews2000a,
         added-at = {2008-04-25T10:38:44.000+0200},
         author = {Andrews, Donald W. K. and Buchinsky, Moshe},
@@ -310,35 +354,6 @@ def compute_bootstrap_quantiles_point_estimate(
         method="linear",  # can be omitted ("linear" is default)
     )
     lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
-    upper_quantiles: Union[np.nd_array, Number] = np.quantile(
-        bootstraps,
-        q=1.0 - (false_positive_rate / 2),
-        axis=1,
-        method="linear",  # can be omitted ("linear" is default)
-    )
-    upper_quantile_point_estimate: Number = np.mean(upper_quantiles)
-    return lower_quantile_point_estimate, upper_quantile_point_estimate
-
-
-def compute_bootstrap_quantiles_bias_corrected_point_estimate(
-    metric_values: np.ndarray,
-    false_positive_rate: np.float64,
-    n_resamples: int,
-) -> Tuple[Number, Number]:
-    """
-    Internal implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
-    See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
-    """
-    bootstraps: np.ndarray = np.random.choice(
-        metric_values, size=(n_resamples, metric_values.size)
-    )
-    lower_quantiles: Union[np.nd_array, Number] = np.quantile(
-        bootstraps,
-        q=false_positive_rate / 2,
-        axis=1,
-        method="linear",  # can be omitted ("linear" is default)
-    )
-    lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
 
     lower_quantile_residuals: Union[np.ndarray, Number] = (
         lower_quantiles - lower_quantile_point_estimate
@@ -362,53 +377,6 @@ def compute_bootstrap_quantiles_bias_corrected_point_estimate(
     upper_quantile_bias: Number = sum(upper_quantile_residuals) / len(upper_quantiles)
     upper_quantile_bias_corrected_point_estimate = (
         upper_quantile_point_estimate + upper_quantile_bias
-    )
-
-    return (
-        lower_quantile_bias_corrected_point_estimate,
-        upper_quantile_bias_corrected_point_estimate,
-    )
-
-
-def compute_bootstrap_quantiles(
-    metric_values: np.ndarray,
-    false_positive_rate: np.float64,
-    n_resamples: int,
-) -> Tuple[Number, Number]:
-    """
-    SciPy implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
-    See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
-    """
-    # compute the mean of the quantiles of the bootstrapped samples
-    (
-        lower_quantile_point_estimate,
-        upper_quantile_point_estimate,
-    ) = compute_bootstrap_quantiles_point_estimate(
-        metric_values=metric_values,
-        false_positive_rate=false_positive_rate,
-        n_resamples=n_resamples,
-    )
-
-    return lower_quantile_point_estimate, upper_quantile_point_estimate
-
-
-def compute_bootstrap_quantiles_bc(
-    metric_values: np.ndarray,
-    false_positive_rate: np.float64,
-    n_resamples: int,
-) -> Tuple[Number, Number]:
-    """
-    SciPy implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
-    See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
-    """
-    # compute the mean of the quantiles of the bootstrapped samples
-    (
-        lower_quantile_bias_corrected_point_estimate,
-        upper_quantile_bias_corrected_point_estimate,
-    ) = compute_bootstrap_quantiles_bias_corrected_point_estimate(
-        metric_values=metric_values,
-        false_positive_rate=false_positive_rate,
-        n_resamples=n_resamples,
     )
 
     return (
