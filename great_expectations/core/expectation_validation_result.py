@@ -155,7 +155,8 @@ class ExpectationValidationResult(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def validate_result_dict(self, result):
+    @staticmethod
+    def validate_result_dict(result):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
         if result.get("unexpected_percent") and (
