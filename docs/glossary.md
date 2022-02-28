@@ -3,63 +3,65 @@ id: glossary
 title: "Glossary of Terms"
 ---
 
-**Batch:** A selection of records from a Data Asset.
+[**Action:**](./terms/action) A Python class with a run method that takes a Validation Result and does something with it
 
-**Batch Request:** Provided to a Datasource in order to create a Batch.
+[**Batch:**](./terms/batch) A selection of records from a Data Asset.
 
-**CLI:** Command Line Interface
+[**Batch Request:**](./terms/batch_request) Provided to a Datasource in order to create a Batch.
 
-**Catalog Asset:** A collection of records within a Datasource which is usually named based on the underlying data system and sliced in different ways to correspond to multiple desired specifications.
+[**CLI:**](./terms/cli) Command Line Interface
 
-**Checkpoint:** The primary means for validating data in a production deployment of Great Expectations.
+[**Checkpoint:**](./terms/checkpoint) The primary means for validating data in a production deployment of Great Expectations.
 
-**Custom Expectation:** An extension of the `Expectation` class, developed outside of the Great Expectations library.
+[**Checkpoint Store:**](./terms/checkpoint_store) A connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.
 
-**Data Asset:** A collection of records within a Datasource which is usually named based on the underlying data system and sliced to correspond to a desired specification.
+[**Custom Expectation:**](./terms/custom_expectation) An extension of the `Expectation` class, developed outside of the Great Expectations library.
 
-**Data Connector:** Provides the configuration details based on the source data system which are needed by a Datasource to define Data Assets.
+[**Data Asset:**](./terms/data_asset) A collection of records within a Datasource which is usually named based on the underlying data system and sliced to correspond to a desired specification.
 
-**Data Context:** The primary entry point for a Great Expectations deployment, with configurations and methods for all supporting components.
+[**Data Connector:**](./terms/data_connector) Provides the configuration details based on the source data system which are needed by a Datasource to define Data Assets.
 
-**Data Docs:** Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.
+[**Data Context:**](./terms/data_context) The primary entry point for a Great Expectations deployment, with configurations and methods for all supporting components.
 
-**Datasource:** Provides a standard API for accessing and interacting with data from a wide variety of source systems.
+[**Data Docs:**](./terms/data_docs) Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.
 
-**Evaluation Parameter:** A parameter used during Validation of an Expectation to reference simple expressions or previously generated metrics.
+[**Data Docs Store:**](./terms/data_docs_store) A connector to store and retrieve information pertaining to Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.
 
-**Evaluation Parameter Store:** A connector to store and retrieve information about parameters used during Validation of an Expectation which reference simple expressions or previously generated metrics.
+[**Datasource:**](./terms/datasource) Provides a standard API for accessing and interacting with data from a wide variety of source systems.
 
-**Execution Engine:** A system capable of processing data to compute Metrics.
+[**Evaluation Parameter:**](./terms/evaluation_parameter) A dynamic value used during Validation of an Expectation which is populated by evaluating simple expressions or by referencing previously generated metrics.
 
-**Expectation:** A verifiable assertion about data.
+[**Evaluation Parameter Store:**](./terms/evaluation_parameter_store) A connector to store and retrieve information about parameters used during Validation of an Expectation which reference simple expressions or previously generated metrics.
 
-**Expectation Store:** A connector to store and retrieve information about collections of verifiable assertions about data.
+[**Execution Engine:**](./terms/execution_engine) A system capable of processing data to compute Metrics.
 
-**Expectation Suite:** A collection of verifiable assertions about data.
+[**Expectation:**](./terms/expectation) A verifiable assertion about data.
 
-**Metric:** A computed attribute of data such as the mean of a column.
+[**Expectation Store:**](./terms/expectation_store) A connector to store and retrieve information about collections of verifiable assertions about data.
 
-**Metric Store:** A connector to store and retrieve information about computed attributes of data, such as the mean of a column.
+[**Expectation Suite:**](./terms/expectation_suite) A collection of verifiable assertions about data.
 
-**Plugin:** Extends Great Expectations' components and/or functionality at the project level.
+[**Metric:**](./terms/metric) A computed attribute of data such as the mean of a column.
 
-**Profiler:** Generates Metrics and candidate Expectations from data.
+[**Metric Store:**](./terms/metric_store) A connector to store and retrieve information about computed attributes of data, such as the mean of a column.
 
-**Renderer:** A method for converting Expectations, Validation Results, etc. into Data Docs or other output such as email notifications or slack messages.
+[**Plugin:**](./terms/plugin) Extends Great Expectations' components and/or functionality.
 
-**Store:** A connector to store and retrieve information about metadata in Great Expectations.
+[**Profiler:**](./terms/profiler) Generates Metrics and candidate Expectations from data.
 
-**Supporting Resource:** A resource external to the Great Expectations code base which Great Expectations utilizes.
+[**Profiling:**](./terms/profiler) The act of generating Metrics and candidate Expectations from data.
 
-**Validation:** The act of applying an Expectation Suite to a Batch.
+[**Renderer:**](./terms/renderer) A method for converting Expectations, Validation Results, etc. into Data Docs or other output such as email notifications or slack messages.
 
-**Validation Action:** A Python class with a run method that takes the result of validating a Batch against an Expectation Suite and does something with it
+[**Store:**](./terms/store) A connector to store and retrieve information about metadata in Great Expectations.
 
-**Validation Operator:** Triggers Validation Actions after Validation completes.
+[**Supporting Resource:**](./terms/supporting_resource) A resource external to the Great Expectations code base which Great Expectations utilizes.
 
-**Validation Result:** Generated when data is Validated against an Expectation Suite.
+[**Validation:**](./guides/validation/validate_data_overview) The act of applying an Expectation Suite to a Batch.
 
-**Validation Result Store:** A connector to store and retrieve information about objects generated when data is Validated against an Expectation Suite.
+[**Validation Result:**](./terms/validation_result) Generated when data is Validated against an Expectation or Expectation Suite.
 
-**Validator:** Used to run an Expectation Suite against data.
+[**Validation Result Store:**](./terms/validation_result_store) A connector to store and retrieve information about objects generated when data is Validated against an Expectation Suite.
+
+[**Validator:**](./terms/validator) Used to run an Expectation Suite against data.
 

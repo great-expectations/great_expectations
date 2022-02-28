@@ -7,7 +7,7 @@ def build_glossary_tuples(source_json_path):
         # Read the contents as a json
         data = json.load(json_file)
         # Convert to list of tuples containing ("term", "definition", "url")
-        data_list = [(x['term'], x['definition']) for x in data.values()]
+        data_list = [(x['term'], x['definition'], x['url']) for x in data.values()]
         # Order list alphabetically by "term"
         data_list.sort(key=lambda y: y[0])
         # return the ordered list.
@@ -20,8 +20,8 @@ def build_glossary_page(orderd_list_of_terms_tuples, glossary_file_path):
         # Write the glossary page header
         glossary_file.write("---\nid: glossary\ntitle: \"Glossary of Terms\"\n---\n\n")
         # iterate the glossary list of tuples and write glossary entries.
-        for term, definition in orderd_list_of_terms_tuples:
-            glossary_file.write(f"**{term}:** {definition}\n\n")
+        for term, definition, url in orderd_list_of_terms_tuples:
+            glossary_file.write(f"[**{term}:**](./{url}) {definition}\n\n")
 
 
 def all_together_now(source_json_path, glossary_file_path):

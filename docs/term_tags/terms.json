@@ -56,7 +56,8 @@
   },
   "data_docs_store": {
     "term": "Data Docs Store",
-    "definition": "A connector to store and retrieve information pertaining to Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc."
+    "definition": "A connector to store and retrieve information pertaining to Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.",
+    "url": "terms/data_docs_store"
   },
   "datasource": {
     "term": "Datasource",
