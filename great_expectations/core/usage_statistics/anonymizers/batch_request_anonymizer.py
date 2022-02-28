@@ -49,13 +49,12 @@ class BatchRequestAnonymizer(Anonymizer):
             )
 
             # Clean object until all falsy values are removed
-            # while any(not attr for attr in anonymized_batch_request_dict.values()):
-            breakpoint()
-            deep_filter_properties_iterable(
-                properties=anonymized_batch_request_dict,
-                clean_falsy=True,
-                inplace=True,
-            )
+            while any(not attr for attr in anonymized_batch_request_dict.values()):
+                deep_filter_properties_iterable(
+                    properties=anonymized_batch_request_dict,
+                    clean_falsy=True,
+                    inplace=True,
+                )
 
             anonymized_batch_request_required_top_level_properties: dict = {}
             batch_request_optional_top_level_keys: List[str] = []
