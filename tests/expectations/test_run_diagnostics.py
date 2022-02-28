@@ -28,151 +28,101 @@ def test_expectation_self_check():
     print(json.dumps(expectation_diagnostic.to_dict(), indent=2))
 
     assert expectation_diagnostic.to_dict() == {
-        "examples": [],
-        "library_metadata": {
-            "maturity": "CONCEPT_ONLY",
-            "tags": [],
-            "contributors": [],
-            "requirements": [],
-            "has_full_test_suite": False,
-            "manually_reviewed_code": False,
-            "library_metadata_passed_checks": False,
-            "package": None,
-        },
         "description": {
             "camel_name": "ExpectColumnValuesToEqualThree",
-            "snake_name": "expect_column_values_to_equal_three",
-            "short_description": "",
             "docstring": "",
+            "short_description": "",
+            "snake_name": "expect_column_values_to_equal_three",
         },
+        "errors": [],
+        "examples": [],
         "execution_engines": {
             "PandasExecutionEngine": True,
-            "SqlAlchemyExecutionEngine": True,
             "SparkDFExecutionEngine": True,
+            "SqlAlchemyExecutionEngine": True,
         },
         "gallery_examples": [],
-        "renderers": [
-            {
-                "name": "atomic.diagnostic.observed_value",
-                "is_supported": True,
-                "is_standard": False,
-                "samples": [],
-            },
-            {
-                "name": "atomic.prescriptive.summary",
-                "is_supported": True,
-                "is_standard": False,
-                "samples": [],
-            },
-            {
-                "name": "renderer.answer",
-                "is_supported": False,
-                "is_standard": True,
-                "samples": [],
-            },
-            {
-                "name": "renderer.diagnostic.meta_properties",
-                "is_supported": True,
-                "is_standard": False,
-                "samples": [],
-            },
-            {
-                "name": "renderer.diagnostic.observed_value",
-                "is_supported": True,
-                "is_standard": True,
-                "samples": [],
-            },
-            {
-                "name": "renderer.diagnostic.status_icon",
-                "is_supported": True,
-                "is_standard": True,
-                "samples": [],
-            },
-            {
-                "name": "renderer.diagnostic.unexpected_statement",
-                "is_supported": True,
-                "is_standard": True,
-                "samples": [],
-            },
-            {
-                "name": "renderer.diagnostic.unexpected_table",
-                "is_supported": True,
-                "is_standard": True,
-                "samples": [],
-            },
-            {
-                "name": "renderer.prescriptive",
-                "is_supported": True,
-                "is_standard": True,
-                "samples": [],
-            },
-            {
-                "name": "renderer.question",
-                "is_supported": False,
-                "is_standard": True,
-                "samples": [],
-            },
-        ],
-        "metrics": [],
-        "tests": [],
-        "errors": [],
+        "library_metadata": {
+            "contributors": [],
+            "has_full_test_suite": False,
+            "library_metadata_passed_checks": False,
+            "manually_reviewed_code": False,
+            "maturity": "CONCEPT_ONLY",
+            "package": None,
+            "requirements": [],
+            "tags": [],
+        },
         "maturity_checklist": {
             "beta": [
                 {
                     "doc_url": None,
-                    "message": "Has basic input validation and type checking",
+                    "message": "Has basic input validation and " "type checking",
                     "passed": False,
                     "sub_messages": [
                         {
-                            "message": "No example found to get kwargs for ExpectationConfiguration",
+                            "message": "No example "
+                            "found to get "
+                            "kwargs for "
+                            "ExpectationConfiguration",
+                            "passed": False,
+                        },
+                        {
+                            "message": "No " "validate_configuration " "method defined",
                             "passed": False,
                         },
                     ],
                 },
                 {
                     "doc_url": None,
-                    "message": "Has both statement Renderers: prescriptive and diagnostic",
-                    "passed": True,
+                    "message": "Has both statement Renderers: "
+                    "prescriptive and diagnostic",
+                    "passed": False,
                     "sub_messages": [],
                 },
                 {
                     "doc_url": None,
-                    "message": "Has core logic that passes tests for all applicable Execution Engines and SQL dialects",
+                    "message": "Has core logic that passes tests "
+                    "for all applicable Execution "
+                    "Engines and SQL dialects",
                     "passed": False,
                     "sub_messages": [
-                        {
-                            "message": "There are no test results",
-                            "passed": False,
-                        }
+                        {"message": "There are no " "test results", "passed": False}
                     ],
                 },
             ],
             "experimental": [
                 {
                     "doc_url": None,
-                    "message": "Has a library_metadata object",
+                    "message": "Has a library_metadata " "object",
                     "passed": False,
                     "sub_messages": [],
                 },
                 {
                     "doc_url": None,
-                    "message": "Has a docstring, including a one-line short description",
+                    "message": "Has a docstring, "
+                    "including a one-line "
+                    "short description",
                     "passed": False,
                     "sub_messages": [],
                 },
                 {
                     "doc_url": None,
-                    "message": "Has at least one positive and negative example case, and all test cases pass",
+                    "message": "Has at least one "
+                    "positive and negative "
+                    "example case, and all "
+                    "test cases pass",
                     "passed": False,
                     "sub_messages": [],
                 },
                 {
                     "doc_url": None,
-                    "message": "Has core logic and passes tests on at least one Execution Engine",
+                    "message": "Has core logic and "
+                    "passes tests on at least "
+                    "one Execution Engine",
                     "passed": False,
                     "sub_messages": [
                         {
-                            "message": "There are no test results",
+                            "message": "There " "are no " "test " "results",
                             "passed": False,
                         }
                     ],
@@ -187,18 +137,86 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Has a full suite of tests, as determined by a code owner",
+                    "message": "Has a full suite of tests, "
+                    "as determined by a code "
+                    "owner",
                     "passed": False,
                     "sub_messages": [],
                 },
                 {
                     "doc_url": None,
-                    "message": "Has passed a manual review by a code owner for code standards and style guides",
+                    "message": "Has passed a manual review "
+                    "by a code owner for code "
+                    "standards and style guides",
                     "passed": False,
                     "sub_messages": [],
                 },
             ],
         },
+        "metrics": [],
+        "renderers": [
+            {
+                "is_standard": False,
+                "is_supported": True,
+                "name": "atomic.diagnostic.observed_value",
+                "samples": [],
+            },
+            {
+                "is_standard": False,
+                "is_supported": True,
+                "name": "atomic.prescriptive.summary",
+                "samples": [],
+            },
+            {
+                "is_standard": True,
+                "is_supported": False,
+                "name": "renderer.answer",
+                "samples": [],
+            },
+            {
+                "is_standard": False,
+                "is_supported": True,
+                "name": "renderer.diagnostic.meta_properties",
+                "samples": [],
+            },
+            {
+                "is_standard": True,
+                "is_supported": True,
+                "name": "renderer.diagnostic.observed_value",
+                "samples": [],
+            },
+            {
+                "is_standard": True,
+                "is_supported": True,
+                "name": "renderer.diagnostic.status_icon",
+                "samples": [],
+            },
+            {
+                "is_standard": True,
+                "is_supported": True,
+                "name": "renderer.diagnostic.unexpected_statement",
+                "samples": [],
+            },
+            {
+                "is_standard": True,
+                "is_supported": True,
+                "name": "renderer.diagnostic.unexpected_table",
+                "samples": [],
+            },
+            {
+                "is_standard": True,
+                "is_supported": True,
+                "name": "renderer.prescriptive",
+                "samples": [],
+            },
+            {
+                "is_standard": True,
+                "is_supported": False,
+                "name": "renderer.question",
+                "samples": [],
+            },
+        ],
+        "tests": [],
     }
 
 
@@ -375,7 +393,7 @@ def test_expectation__get_renderers():
         assert isinstance(element, ExpectationRendererDiagnostics)
 
     print([rd.name for rd in renderer_diagnostics])
-    assert set([rd.name for rd in renderer_diagnostics]) == {
+    assert {rd.name for rd in renderer_diagnostics} == {
         "renderer.diagnostic.unexpected_statement",
         "renderer.diagnostic.meta_properties",
         "renderer.diagnostic.unexpected_table",
@@ -440,7 +458,7 @@ def test_expectation__get_renderers():
         assert isinstance(element, ExpectationRendererDiagnostics)
 
     assert len(renderer_diagnostics) == 10
-    assert set([rd.name for rd in renderer_diagnostics]) == {
+    assert {rd.name for rd in renderer_diagnostics} == {
         "renderer.diagnostic.observed_value",
         "renderer.prescriptive",
         "renderer.diagnostic.meta_properties",
@@ -496,7 +514,7 @@ def test_expectation__get_renderers():
         assert isinstance(element, ExpectationRendererDiagnostics)
 
     assert len(renderer_diagnostics) == 10
-    assert set([rd.name for rd in renderer_diagnostics]) == {
+    assert {rd.name for rd in renderer_diagnostics} == {
         "renderer.diagnostic.observed_value",
         "renderer.prescriptive",
         "renderer.diagnostic.meta_properties",
