@@ -1005,14 +1005,27 @@ class Expectation(metaclass=MetaExpectation):
             errors=[],  #!!!FIXME!!!
         )
 
-    def print_diagnostic_checklist(self) -> str:
+    def print_diagnostic_checklist(
+        self,
+        diagnostics: Optional[ExpectationDiagnostics] = None,
+        show_failed_tests: bool = False,
+    ) -> str:
         """Runs self.run_diagnostics and generates a diagnostic checklist.
 
         This output from this method is a thin wrapper for ExpectationDiagnostics.generate_checklist()
         This method is experimental.
         """
 
-        diagnostics: ExpectationDiagnostics = self.run_diagnostics()
+        if diagnostics is None:
+            diagnostics = self.run_diagnostics()
+
+        if show_failed_tests:
+            for test in diagnostics.tests:
+                if test.test_passed is False:
+                    print(f"=== {test.test_title} ({test.backend}) ===\n")
+                    print(test.stack_trace)
+                    print(80 * "=" + "\n")
+
         checklist: str = diagnostics.generate_checklist()
         print(checklist)
 
