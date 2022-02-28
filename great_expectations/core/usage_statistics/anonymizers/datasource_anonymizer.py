@@ -144,18 +144,15 @@ class DatasourceAnonymizer(Anonymizer):
 
     def is_parent_class_recognized(self, config) -> Optional[str]:
         return self._is_parent_class_recognized(
-            classes_to_check=self._ge_classes + self._legacy_ge_classes,
             object_config=config,
         )
 
     def is_parent_class_recognized_v2_api(self, config) -> Optional[str]:
         return self._is_parent_class_recognized(
-            classes_to_check=self._legacy_ge_classes,
             object_config=config,
         )
 
     def is_parent_class_recognized_v3_api(self, config) -> Optional[str]:
         return self._is_parent_class_recognized(
-            classes_to_check=self._ge_classes,
             object_config=config,
         )

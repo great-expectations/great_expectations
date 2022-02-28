@@ -71,24 +71,25 @@ def test_anonymizer__is_parent_class_recognized():
     """
     anonymizer = Anonymizer()
 
-    # classes_to_check in order of inheritance hierarchy
-    classes_to_check = [TestClass, BaseTestClass]
+    # As these classes are declared within the "tests" module,
+    # we need to be explicit that they originate outside of "great_expectations"
+    parent_module_prefix: str = "tests"
+
     assert (
         anonymizer._is_parent_class_recognized(
-            classes_to_check=classes_to_check, object_class=MyCustomTestClass
+            object_class=MyCustomTestClass, parent_module_prefix=parent_module_prefix
         )
         == "TestClass"
     )
     assert (
         anonymizer._is_parent_class_recognized(
-            classes_to_check=classes_to_check, object_class=SomeOtherClass
+            object_class=SomeOtherClass, parent_module_prefix=parent_module_prefix
         )
         is None
     )
-    classes_to_check = [BaseTestClass]
     assert (
         anonymizer._is_parent_class_recognized(
-            classes_to_check=classes_to_check, object_class=TestClass
+            object_class=TestClass, parent_module_prefix=parent_module_prefix
         )
         == "BaseTestClass"
     )
@@ -97,23 +98,21 @@ def test_anonymizer__is_parent_class_recognized():
     my_custom_test_class = MyCustomTestClass()
     test_class = TestClass()
     some_other_class = SomeOtherClass()
-    classes_to_check = [TestClass, BaseTestClass]
     assert (
         anonymizer._is_parent_class_recognized(
-            classes_to_check=classes_to_check, object_=my_custom_test_class
+            object_=my_custom_test_class, parent_module_prefix=parent_module_prefix
         )
         == "TestClass"
     )
     assert (
         anonymizer._is_parent_class_recognized(
-            classes_to_check=classes_to_check, object_=some_other_class
+            object_=some_other_class, parent_module_prefix=parent_module_prefix
         )
         is None
     )
-    classes_to_check = [BaseTestClass]
     assert (
         anonymizer._is_parent_class_recognized(
-            classes_to_check=classes_to_check, object_=test_class
+            object_=test_class, parent_module_prefix=parent_module_prefix
         )
         == "BaseTestClass"
     )
@@ -131,23 +130,23 @@ def test_anonymizer__is_parent_class_recognized():
         "class_name": "SomeOtherClass",
         "module_name": "tests.core.usage_statistics.test_anonymizer",
     }
-    classes_to_check = [TestClass, BaseTestClass]
     assert (
         anonymizer._is_parent_class_recognized(
-            classes_to_check=classes_to_check, object_config=my_custom_test_class_config
+            object_config=my_custom_test_class_config,
+            parent_module_prefix=parent_module_prefix,
         )
         == "TestClass"
     )
     assert (
         anonymizer._is_parent_class_recognized(
-            classes_to_check=classes_to_check, object_config=some_other_class_config
+            object_config=some_other_class_config,
+            parent_module_prefix=parent_module_prefix,
         )
         is None
     )
-    classes_to_check = [BaseTestClass]
     assert (
         anonymizer._is_parent_class_recognized(
-            classes_to_check=classes_to_check, object_config=test_class_config
+            object_config=test_class_config, parent_module_prefix=parent_module_prefix
         )
         == "BaseTestClass"
     )

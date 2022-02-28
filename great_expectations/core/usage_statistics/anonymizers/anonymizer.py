@@ -95,10 +95,10 @@ class Anonymizer:
 
     @staticmethod
     def _is_parent_class_recognized(
-        classes_to_check,
-        object_=None,
-        object_class=None,
-        object_config=None,
+        object_: Optional[object] = None,
+        object_class: Optional[type] = None,
+        object_config: Optional[dict] = None,
+        parent_module_prefix: str = "great_expectations",
     ) -> Optional[str]:
         """
         Check if the parent class is a subclass of any core GE class.
@@ -117,11 +117,16 @@ class Anonymizer:
                 object_module_name = object_config.get("module_name")
                 object_class = load_class(object_class_name, object_module_name)
 
-            for class_to_check in classes_to_check:
-                if issubclass(object_class, class_to_check):
-                    return class_to_check.__name__
+            bases: Tuple[type, ...] = object_class.__bases__
+            if len(bases) == 0:
+                return None
 
-            return None
+            parent: type
+            for parent in bases:
+                if parent.__module__.startswith(parent_module_prefix):
+                    return parent.__name__
 
         except AttributeError:
-            return None
+            pass
+
+        return None
