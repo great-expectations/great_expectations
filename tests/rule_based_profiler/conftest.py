@@ -1,12 +1,10 @@
 import datetime
-import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
-from great_expectations import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
@@ -19,9 +17,6 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.parameter_container import (
-    VARIABLES_KEY,
 )
 from tests.conftest import skip_if_python_below_minimum_version
 
