@@ -254,7 +254,7 @@ module.exports = {
                 'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
                 'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
                 'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
-                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
+                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint'
               ]
             },
             {
@@ -336,12 +336,79 @@ module.exports = {
     {
       type: 'category',
       label: 'Reference',
-      items: []
+      items: [
+        {
+          type: 'category',
+          label: 'Supplemental documentation',
+          items: []
+        },
+        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
+        'glossary',
+        {
+          type: 'category',
+          label: 'Technical Terms',
+          items: [
+            'terms/action',
+            'terms/batch',
+            'terms/batch_request',
+            'terms/custom_expectation',
+            'terms/checkpoint',
+            'terms/cli',
+            'terms/datasource',
+            'terms/data_context',
+            'terms/data_asset',
+            'terms/data_connector',
+            'terms/data_docs',
+            'terms/evaluation_parameter',
+            'terms/execution_engine',
+            {
+              type: 'category',
+              label: 'Expectations',
+              collapsed: true,
+              items: [
+                'terms/expectation',
+                { type: 'doc', id: 'reference/expectations/expectations' },
+                { type: 'doc', id: 'reference/expectations/conditional_expectations' },
+                { type: 'doc', id: 'reference/expectations/distributional_expectations' },
+                { type: 'doc', id: 'reference/expectations/implemented_expectations' },
+                { type: 'doc', id: 'reference/expectation_suite_operations' },
+                { type: 'doc', id: 'reference/expectations/result_format' },
+                { type: 'doc', id: 'reference/expectations/standard_arguments' }
+              ]
+            },
+            'terms/expectation_suite',
+            'terms/metric',
+            'terms/plugin',
+            'terms/profiler',
+            'terms/plugin',
+            {
+              type: 'category',
+              label: 'Stores',
+              items: [
+                'terms/store',
+                'terms/checkpoint_store',
+                'terms/data_docs_store',
+                'terms/evaluation_parameter_store',
+                'terms/expectation_store',
+                'terms/metric_store',
+                'terms/validation_result_store'
+              ]
+            },
+            'terms/renderer',
+            'terms/supporting_resource',
+            'terms/validator',
+            'terms/validation_result'
+          ]
+        }
+      ]
     },
     {
       type: 'category',
       label: 'Updates and migration',
-      items: []
+      items: [
+        { type: 'doc', id: 'changelog' },
+        { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
+      ]
     }
   ]
 }
