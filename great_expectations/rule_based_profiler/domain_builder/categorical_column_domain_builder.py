@@ -12,7 +12,6 @@ from great_expectations.rule_based_profiler.types.domain import (
     build_domains_from_column_names,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import Validator
 
 
 class CategoricalColumnDomainBuilder(DomainBuilder):
@@ -94,7 +93,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         """
 
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
-        validator: Validator = self.get_validator(variables=variables)
+        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
 
         # Here we use a single get_metric call to get column names to build the
         # rest of the metrics.
@@ -122,7 +121,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
 
     def _get_table_column_names_from_active_batch(
         self,
-        validator: Validator,
+        validator: "Validator",  # noqa: F821
     ):
         """Retrieve table column names from the active batch.
 
@@ -193,7 +192,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
 
     def _columns_meeting_cardinality_limit(
         self,
-        validator: Validator,
+        validator: "Validator",  # noqa: F821
         table_column_names: List[str],
         metrics_for_cardinality_check: List[Dict[str, List[MetricConfiguration]]],
     ) -> List[str]:
