@@ -1050,7 +1050,7 @@ def test_batch_request_sql_with_schema(
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",
-        "data_asset_name": "my_second_data_asset",
+        "data_asset_name": "main.my_second_data_asset",
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
@@ -1080,7 +1080,7 @@ def test_batch_request_sql_with_schema(
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",
-        "data_asset_name": "table_2",
+        "data_asset_name": "main.table_2",
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
