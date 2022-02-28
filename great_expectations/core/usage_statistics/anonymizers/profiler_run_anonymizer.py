@@ -62,8 +62,8 @@ class ProfilerRunAnonymizer(Anonymizer):
             DomainBuilder,
         ]
         self._ge_parameter_builders = [
-            MetricMultiBatchParameterBuilder,
             NumericMetricRangeMultiBatchParameterBuilder,
+            MetricMultiBatchParameterBuilder,
             RegexPatternStringParameterBuilder,
             SimpleDateFormatStringParameterBuilder,
             ParameterBuilder,
