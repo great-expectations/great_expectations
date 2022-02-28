@@ -1,6 +1,6 @@
 import logging
 from hashlib import md5
-from typing import Optional
+from typing import Optional, Tuple
 
 from great_expectations.util import load_class
 
@@ -69,23 +69,25 @@ class Anonymizer:
             object_class_name = object_class.__name__
             object_module_name = object_class.__module__
 
-            # Is the class in question a core GE class?
-            # What is the parent of the class in question?
+            if object_module_name.startswith("great_expectations"):
+                anonymized_info_dict["parent_class"] = object_class_name
+            else:
+                bases: Tuple[type, ...] = object_class.__bases__
+                if len(bases) == 1:
+                    parent_class: type = bases[0]
+                    parent_module_name: str = parent_class.__module__
+                    if parent_module_name.startswith("great_expectations"):
+                        anonymized_info_dict["parent_class"] = parent_class.__name__
+                    else:
+                        anonymized_info_dict["parent_class"] = "__not_recognized__"
 
-            if not object_module_name.startswith("great_expectations"):
+            if not anonymized_info_dict.get("parent_class"):
+                anonymized_info_dict["parent_class"] = "__not_recognized__"
                 anonymized_info_dict["anonymized_class"] = self.anonymize(
                     object_class_name
                 )
 
-            bases = object_class.__bases__
-            parent_class = bases[0]
-            parent_module_name = parent_class.__module__
-            if parent_module_name.startswith("great_expectations"):
-                anonymized_info_dict["parent_class"] = parent_class.__name__
-            else:
-                anonymized_info_dict["parent_class"] = "__not_recognized__"
-
-        except (AttributeError, IndexError):
+        except AttributeError:
             anonymized_info_dict["parent_class"] = "__not_recognized__"
             anonymized_info_dict["anonymized_class"] = self.anonymize(object_class_name)
 
