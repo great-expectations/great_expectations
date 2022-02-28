@@ -1,8 +1,6 @@
 import itertools
 from typing import Any, Collection, Dict, List, Optional, Set, Union
 
-import numpy as np
-
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
