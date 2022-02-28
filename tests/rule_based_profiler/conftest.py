@@ -1069,23 +1069,23 @@ def profiler_with_placeholder_args(
 
 
 @pytest.fixture
-def usage_stats_profiler_config() -> RuleBasedProfilerConfig:
+def profiler_config_with_placeholder_args_custom_values() -> RuleBasedProfilerConfig:
     config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="my_profiler",
         config_version=1.0,
         rules={
             "rule_1": {
-                "domain_builder": {"class_name": "TableDomainBuilder"},
+                "domain_builder": {"class_name": "MyCustomDomainBuilder"},
                 "expectation_configuration_builders": [
                     {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_values_to_match_regex",
-                        "meta": {"details": {"note": "Hello World"}},
+                        "class_name": "MyCustomExpectationConfigurationBuilder",
+                        "expectation_type": "expect_custom_expectation",
+                        "meta": {"details": {"note": "My custom config"}},
                     }
                 ],
                 "parameter_builders": [
                     {
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "class_name": "MyCustomParameterBuilder",
                         "metric_name": "my_metric",
                         "name": "my_parameter",
                     }
@@ -1095,3 +1095,65 @@ def usage_stats_profiler_config() -> RuleBasedProfilerConfig:
         variables={"my_variable": "my_value"},
     )
     return config
+
+
+@pytest.fixture
+def profiler_config_with_placeholder_args_multiple_rules(
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+) -> RuleBasedProfilerConfig:
+    rules: dict = profiler_config_with_placeholder_args.rules
+    rule: dict = {
+        "domain_builder": {"class_name": "TableDomainBuilder"},
+        "parameter_builders": [
+            {
+                "class_name": "MetricMultiBatchParameterBuilder",
+                "metric_name": "my_other_metric",
+                "name": "my_additional_parameter",
+            }
+        ],
+        "expectation_configuration_builders": [
+            {
+                "class_name": "DefaultExpectationConfigurationBuilder",
+                "expectation_type": "expect_column_values_to_be_between",
+                "meta": {"details": {"note": "Here's another rule"}},
+            }
+        ],
+    }
+    rules["rule_2"] = rule
+    return RuleBasedProfilerConfig(
+        name=profiler_config_with_placeholder_args.name,
+        config_version=profiler_config_with_placeholder_args.config_version,
+        rules=rules,
+        variables=profiler_config_with_placeholder_args.variables,
+    )
+
+
+@pytest.fixture
+def profiler_config_with_placeholder_args_multiple_rules_custom_values(
+    profiler_config_with_placeholder_args_custom_values: RuleBasedProfilerConfig,
+) -> RuleBasedProfilerConfig:
+    rules: dict = profiler_config_with_placeholder_args_custom_values.rules
+    rule: dict = {
+        "domain_builder": {"class_name": "MyAdditionalCustomDomainBuilder"},
+        "parameter_builders": [
+            {
+                "class_name": "MyAdditionalCustomParameterBuilder",
+                "metric_name": "yet_another_metric",
+                "name": "yet_another_parameter",
+            }
+        ],
+        "expectation_configuration_builders": [
+            {
+                "class_name": "MyAdditionalCustomExpectationConfigurationBuilder",
+                "expectation_type": "expect_additional_custom_expectation",
+                "meta": {"details": {"note": "Here's another rule"}},
+            }
+        ],
+    }
+    rules["rule_2"] = rule
+    return RuleBasedProfilerConfig(
+        name=profiler_config_with_placeholder_args_custom_values.name,
+        config_version=profiler_config_with_placeholder_args_custom_values.config_version,
+        rules=rules,
+        variables=profiler_config_with_placeholder_args_custom_values.variables,
+    )

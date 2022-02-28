@@ -5,10 +5,13 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
 )
-from great_expectations.expectations.registry import (
-    list_registered_expectation_implementations,
+from great_expectations.core.usage_statistics.util import (
+    aggregate_all_core_expectation_types,
 )
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (
+    CategoricalColumnDomainBuilder,
+)
 from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
@@ -45,6 +48,9 @@ from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_stri
 from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
     SimpleDateFormatStringParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (
+    ValueSetMultiBatchParameterBuilder,
+)
 from great_expectations.util import deep_filter_properties_iterable
 
 logger = logging.getLogger(__name__)
@@ -56,6 +62,7 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         # ordered bottom up in terms of inheritance order
         self._ge_domain_builders = [
+            CategoricalColumnDomainBuilder,
             SimpleColumnSuffixDomainBuilder,
             SimpleSemanticTypeColumnDomainBuilder,
             ColumnDomainBuilder,
@@ -63,6 +70,7 @@ class ProfilerRunAnonymizer(Anonymizer):
             DomainBuilder,
         ]
         self._ge_parameter_builders = [
+            ValueSetMultiBatchParameterBuilder,
             NumericMetricRangeMultiBatchParameterBuilder,
             MetricMultiBatchParameterBuilder,
             RegexPatternStringParameterBuilder,
@@ -73,7 +81,8 @@ class ProfilerRunAnonymizer(Anonymizer):
             DefaultExpectationConfigurationBuilder,
             ExpectationConfigurationBuilder,
         ]
-        self._ge_expectation_types = set(list_registered_expectation_implementations())
+
+        self._ge_expectation_types = aggregate_all_core_expectation_types()
 
         self._salt = salt
         self._batch_request_anonymizer = BatchRequestAnonymizer(self._salt)

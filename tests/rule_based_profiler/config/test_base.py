@@ -317,7 +317,8 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
 
 
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
-    profiler_with_placeholder_args: RuleBasedProfiler, usage_stats_profiler_config: dict
+    profiler_with_placeholder_args: RuleBasedProfiler,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
     datasource_name: str = "my_datasource"
     data_connector_name: str = "my_basic_data_connector"
@@ -330,7 +331,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
     )
 
     # Add batch requests to fixture before running method
-    rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
+    rules: Dict[str, dict] = profiler_config_with_placeholder_args.rules
     rules["rule_1"]["domain_builder"]["batch_request"] = batch_request
 
     config: RuleBasedProfilerConfig = (
