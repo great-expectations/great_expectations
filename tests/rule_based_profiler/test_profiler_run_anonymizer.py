@@ -318,9 +318,6 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
                             "anonymized_data_connector_name": "123a3221fc4b65014d061cce4a71782e",
                             "anonymized_datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
                         },
-                        "batch_request_optional_top_level_keys": [
-                            "data_connector_query"
-                        ],
                     },
                     "parent_class": "TableDomainBuilder",
                 },
@@ -339,9 +336,6 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
                                 "anonymized_data_connector_name": "123a3221fc4b65014d061cce4a71782e",
                                 "anonymized_datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
                             },
-                            "batch_request_optional_top_level_keys": [
-                                "data_connector_query"
-                            ],
                         },
                         "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
                         "parent_class": "MetricMultiBatchParameterBuilder",
