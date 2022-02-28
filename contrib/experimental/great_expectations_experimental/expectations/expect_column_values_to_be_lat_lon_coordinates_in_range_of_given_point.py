@@ -438,7 +438,6 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@austiezr",  # Don't forget to add your github handle here!
         ],
-        "package": "Geospatial Data",
     }
 
 
