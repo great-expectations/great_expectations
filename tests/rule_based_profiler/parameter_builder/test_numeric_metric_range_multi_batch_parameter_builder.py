@@ -50,7 +50,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_container.parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value: dict = {
+    expected_value_dict: dict = {
         "value": {"value_range": None},
         "details": {
             "metric_configuration": {
@@ -61,14 +61,29 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    actual_value = get_parameter_value_by_fully_qualified_parameter_name(
+    actual_value_dict: dict = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters={domain.id: parameter_container},
     )
-    value = actual_value.pop("value")
-    actual_value["value"] = {"value_range": None}
 
-    assert actual_value == expected_value
+    actual_value = actual_value_dict.pop("value").pop("value_range")
+    actual_value_dict["value"] = {"value_range": None}
 
-    assert type(value["value_range"]) == np.ndarray
+    assert actual_value_dict == expected_value_dict
+
+    expected_value = np.array([7824, 8811])
+
+    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
+    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+    rtol: float = 0.01
+    atol: float = 0
+
+    # bootstrap results should be stable +/- 1%
+    np.testing.assert_allclose(
+        actual=actual_value,
+        desired=expected_value,
+        rtol=rtol,
+        atol=atol,
+        err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",
+    )

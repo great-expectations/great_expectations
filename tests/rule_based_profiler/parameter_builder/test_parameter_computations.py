@@ -101,7 +101,7 @@ def test_bootstrap_bias_corrected_point_estimate_efficacy():
         )
 
 
-def test_compare_bootstrap_point_estimate_efficacy_bias_correction():
+def test_compare_bootstrap_point_estimate_efficacy_with_bias_corrected():
     experiment_repetitions = 20
     # This works for sample size 1000 (used in other efficacy tests), but is very slow.
     # Regardless, bootstrap is typically used for smaller sample sizes and should be tested as such.
@@ -163,4 +163,5 @@ def test_compare_bootstrap_point_estimate_efficacy_bias_correction():
                 >= actual_bias_corrected_false_positive_rates[column]
             )
 
+    # bias correction should improve performance at least 95% of the time
     assert sum(improvement) / len(improvement) >= 0.95

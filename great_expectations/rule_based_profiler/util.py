@@ -1,11 +1,9 @@
 import copy
-import logging
 import uuid
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-from scipy import stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -20,8 +18,6 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-
-logger = logging.getLogger(__name__)
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
