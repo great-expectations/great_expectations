@@ -143,7 +143,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.name}": {
-                "value": metric_values,
+                "value": metric_values.tolist(),
                 "details": details,
             },
         }
