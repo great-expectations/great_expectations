@@ -1,4 +1,6 @@
-from typing import Dict
+import importlib
+from types import ModuleType
+from typing import Any, Dict, List
 
 import pytest
 
@@ -479,3 +481,45 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
     assert converted_batch_request["datasource_name"] == datasource_name
     assert converted_batch_request["data_connector_name"] == data_connector_name
     assert converted_batch_request["data_asset_name"] == data_asset_name
+
+
+def test_all_builder_classes_are_recognized_as_profiler_run_anonymizer_attrs(
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
+) -> None:
+    """
+    Ensure that every ParameterBuilder, DomainBuilder, and ExpectationConfigurationBuilder
+    is included within the `self._ge_...` attributes of the ProfilerRunAnonymizer.
+
+    This test is designed to catch instances where a new builder class is introduced but
+    not included in the ProfilerRunAnonymizer.
+    """
+
+    def gather_all_builder_classes(module_path: str, builder_type: str) -> List[Any]:
+        module: ModuleType = importlib.import_module(module_path)
+        builders: List[Any] = [
+            obj for name, obj in module.__dict__.items() if name.endswith(builder_type)
+        ]
+        return builders
+
+    domain_builders: List[str] = gather_all_builder_classes(
+        "great_expectations.rule_based_profiler.domain_builder", "DomainBuilder"
+    )
+    assert all(
+        d in profiler_run_anonymizer._ge_domain_builders for d in domain_builders
+    )
+
+    parameter_builders: List[str] = gather_all_builder_classes(
+        "great_expectations.rule_based_profiler.parameter_builder", "ParameterBuilder"
+    )
+    assert all(
+        p in profiler_run_anonymizer._ge_parameter_builders for p in parameter_builders
+    )
+
+    expectation_configuration_builders: List[str] = gather_all_builder_classes(
+        "great_expectations.rule_based_profiler.expectation_configuration_builder",
+        "ExpectationConfigurationBuilder",
+    )
+    assert all(
+        e in profiler_run_anonymizer._ge_expectation_configuration_builders
+        for e in expectation_configuration_builders
+    )

@@ -55,9 +55,9 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         # ordered bottom up in terms of inheritance order
         self._ge_domain_builders = [
-            ColumnDomainBuilder,
             SimpleColumnSuffixDomainBuilder,
             SimpleSemanticTypeColumnDomainBuilder,
+            ColumnDomainBuilder,
             TableDomainBuilder,
             DomainBuilder,
         ]
