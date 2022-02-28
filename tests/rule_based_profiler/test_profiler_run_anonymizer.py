@@ -50,7 +50,32 @@ def usage_stats_profiler_config() -> dict:
 
 @pytest.fixture
 def usage_stats_profiler_config_custom_values() -> dict:
-    pass
+    config: dict = {
+        "name": "my_profiler",
+        "config_version": 1.0,
+        "rules": {
+            "rule_1": {
+                "domain_builder": {"class_name": "MyCustomDomainBuilder"},
+                "expectation_configuration_builders": [
+                    {
+                        "class_name": "MyCustomExpectationConfigurationBuilder",
+                        "expectation_type": "expect_custom_expectation",
+                        "meta": {"details": {"note": "My custom config"}},
+                    }
+                ],
+                "parameter_builders": [
+                    {
+                        "class_name": "MyCustomParameterBuilder",
+                        "metric_name": "my_metric",
+                        "name": "my_parameter",
+                    }
+                ],
+            }
+        },
+        "variable_count": 1,
+        "rule_count": 1,
+    }
+    return config
 
 
 @pytest.fixture
@@ -59,18 +84,18 @@ def usage_stats_profiler_config_multiple_rules(
 ) -> dict:
     rule: dict = {
         "domain_builder": {"class_name": "TableDomainBuilder"},
-        "expectation_configuration_builders": [
-            {
-                "class_name": "DefaultExpectationConfigurationBuilder",
-                "expectation_type": "expect_column_values_to_be_between",
-                "meta": {"details": {"note": "Here's another rule"}},
-            }
-        ],
         "parameter_builders": [
             {
                 "class_name": "MetricMultiBatchParameterBuilder",
                 "metric_name": "my_other_metric",
                 "name": "my_additional_parameter",
+            }
+        ],
+        "expectation_configuration_builders": [
+            {
+                "class_name": "DefaultExpectationConfigurationBuilder",
+                "expectation_type": "expect_column_values_to_be_between",
+                "meta": {"details": {"note": "Here's another rule"}},
             }
         ],
     }
@@ -80,14 +105,35 @@ def usage_stats_profiler_config_multiple_rules(
 
 
 @pytest.fixture
-def usage_stats_profiler_config_multiple_rules_custom_values():
-    pass
+def usage_stats_profiler_config_multiple_rules_custom_values(
+    usage_stats_profiler_config_custom_values: dict,
+) -> dict:
+    rule: dict = {
+        "domain_builder": {"class_name": "MyAdditionalCustomDomainBuilder"},
+        "parameter_builders": [
+            {
+                "class_name": "MyAdditionalCustomParameterBuilder",
+                "metric_name": "yet_another_metric",
+                "name": "yet_another_parameter",
+            }
+        ],
+        "expectation_configuration_builders": [
+            {
+                "class_name": "MyAdditionalCustomExpectationConfigurationBuilder",
+                "expectation_type": "expect_additional_custom_expectation",
+                "meta": {"details": {"note": "Here's another rule"}},
+            }
+        ],
+    }
+    usage_stats_profiler_config_custom_values["rules"]["rule_2"] = rule
+    usage_stats_profiler_config_custom_values["rule_count"] += 1
+    return usage_stats_profiler_config_custom_values
 
 
 def test_anonymize_profiler_run(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
     usage_stats_profiler_config: dict,
-):
+) -> None:
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
         **usage_stats_profiler_config
     )
@@ -120,14 +166,45 @@ def test_anonymize_profiler_run(
 def test_anonymize_profiler_run_custom_values(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
     usage_stats_profiler_config_custom_values: dict,
-):
-    pass
+) -> None:
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+        **usage_stats_profiler_config_custom_values
+    )
+    assert anonymized_result == {
+        "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
+        "anonymized_rules": [
+            {
+                "anonymized_domain_builder": {
+                    "anonymized_class": "d2972bccf7a2a0ff91ba9369a86dcbe1",
+                    "parent_class": "__not_recognized__",
+                },
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "anonymized_class": "0d70a2037f19cf1764afad97c7395167",
+                        "expectation_type": "expect_custom_expectation",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+                "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_class": "c73849d7016ce7ab68e24465361a717a",
+                        "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+            }
+        ],
+        "config_version": 1.0,
+        "rule_count": 1,
+        "variable_count": 1,
+    }
 
 
 def test_anonymize_profiler_run_multiple_rules(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
     usage_stats_profiler_config_multiple_rules: dict,
-):
+) -> None:
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
         **usage_stats_profiler_config_multiple_rules
     )
@@ -176,14 +253,66 @@ def test_anonymize_profiler_run_multiple_rules(
 def test_anonymize_profiler_run_multiple_rules_custom_values(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
     usage_stats_profiler_config_multiple_rules_custom_values: dict,
-):
-    pass
+) -> None:
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+        **usage_stats_profiler_config_multiple_rules_custom_values
+    )
+    assert anonymized_result == {
+        "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
+        "anonymized_rules": [
+            {
+                "anonymized_domain_builder": {
+                    "anonymized_class": "d2972bccf7a2a0ff91ba9369a86dcbe1",
+                    "parent_class": "__not_recognized__",
+                },
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "anonymized_class": "0d70a2037f19cf1764afad97c7395167",
+                        "expectation_type": "expect_custom_expectation",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+                "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_class": "c73849d7016ce7ab68e24465361a717a",
+                        "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+            },
+            {
+                "anonymized_domain_builder": {
+                    "anonymized_class": "df79fd715bf3ea514c3f4e3006025b24",
+                    "parent_class": "__not_recognized__",
+                },
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "anonymized_class": "71128204dee66972b5cfc8851b216508",
+                        "expectation_type": "expect_additional_custom_expectation",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+                "anonymized_name": "0bac2cecbb0cf8bb704e86710941434e",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_class": "fcbd493bd096d894cf83506bc23a0729",
+                        "anonymized_name": "5af4c6b6dedc5f9b3b840709e957c4ed",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+            },
+        ],
+        "config_version": 1.0,
+        "rule_count": 2,
+        "variable_count": 1,
+    }
 
 
 def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
     usage_stats_profiler_config: dict,
-):
+) -> None:
     # Add batch requests to fixture before running method
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -249,7 +378,7 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
 def test_anonymize_profiler_run_with_condition_in_expectation_configuration_builder(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
     usage_stats_profiler_config: dict,
-):
+) -> None:
     rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
     expectation_configuration_builder: dict = rules["rule_1"][
         "expectation_configuration_builders"
@@ -288,7 +417,7 @@ def test_anonymize_profiler_run_with_condition_in_expectation_configuration_buil
 
 def test_resolve_config_using_acceptable_arguments(
     profiler_with_placeholder_args: RuleBasedProfiler,
-):
+) -> None:
     config: dict = RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
         profiler=profiler_with_placeholder_args
     )
@@ -307,7 +436,7 @@ def test_resolve_config_using_acceptable_arguments(
 
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
     profiler_with_placeholder_args: RuleBasedProfiler,
-):
+) -> None:
     rule_name: str = "my_rule"
     assert all(rule.name != rule_name for rule in profiler_with_placeholder_args.rules)
 
@@ -321,7 +450,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
 
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
     profiler_with_placeholder_args: RuleBasedProfiler, usage_stats_profiler_config: dict
-):
+) -> None:
     datasource_name = "my_datasource"
     data_connector_name = "my_basic_data_connector"
     data_asset_name = "my_data_asset"
