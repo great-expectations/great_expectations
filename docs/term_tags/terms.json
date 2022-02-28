@@ -138,11 +138,6 @@
     "definition": "A Python class with a run method that takes a Validation Result and does something with it",
     "url": "terms/action"
   },
-  "validation_operator": {
-    "term": "Validation Operator",
-    "definition": "Triggers Validation Actions after Validation completes.",
-    "url": "terms/validation_operator"
-  },
   "validation_result": {
     "term": "Validation Result",
     "definition": "Generated when data is Validated against an Expectation or Expectation Suite.",
