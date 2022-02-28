@@ -9,6 +9,7 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
@@ -18,6 +19,9 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     ParameterNode,
+)
+from great_expectations.rule_based_profiler.types.parameter_container import (
+    VARIABLES_KEY,
 )
 from tests.conftest import skip_if_python_below_minimum_version
 
@@ -1070,11 +1074,11 @@ def profiler_with_placeholder_args(
 
 
 @pytest.fixture
-def usage_stats_profiler_config() -> dict:
-    config: dict = {
-        "name": "my_profiler",
-        "config_version": 1.0,
-        "rules": {
+def usage_stats_profiler_config() -> RuleBasedProfilerConfig:
+    config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="my_profiler",
+        config_version=1.0,
+        rules={
             "rule_1": {
                 "domain_builder": {"class_name": "TableDomainBuilder"},
                 "expectation_configuration_builders": [
@@ -1093,7 +1097,6 @@ def usage_stats_profiler_config() -> dict:
                 ],
             }
         },
-        "variable_count": 1,
-        "rule_count": 1,
-    }
+        variables={"my_variable": "my_value"},
+    )
     return config

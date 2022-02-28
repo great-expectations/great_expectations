@@ -288,20 +288,16 @@ def test_rule_based_profiler_from_commented_map():
 def test_resolve_config_using_acceptable_arguments(
     profiler_with_placeholder_args: RuleBasedProfiler,
 ) -> None:
-    config: dict = RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-        profiler=profiler_with_placeholder_args
+    config: RuleBasedProfilerConfig = (
+        RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+            profiler=profiler_with_placeholder_args
+        )
     )
 
-    # Ensure we have expected keys while also removing unnecessary ones
-    assert all(
-        attr in config
-        for attr in ("name", "config_version", "rules", "variable_count", "rule_count")
-    )
-    assert all(
-        attr not in config for attr in ("class_name", "module_name", "variables")
-    )
-
-    assert config["variable_count"] == 1 and config["rule_count"] == 1
+    # The resolved config is equivalent to the old one but is a new instance
+    old_config: RuleBasedProfilerConfig = profiler_with_placeholder_args.config
+    assert id(old_config) != id(config)
+    assert old_config.__dict__ == config.__dict__
 
 
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
@@ -311,19 +307,21 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
     assert all(rule.name != rule_name for rule in profiler_with_placeholder_args.rules)
 
     rules: Dict[str, dict] = {rule_name: {"foo": "bar"}}
-    config: dict = RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-        profiler=profiler_with_placeholder_args, rules=rules
+    config: RuleBasedProfilerConfig = (
+        RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+            profiler=profiler_with_placeholder_args, rules=rules
+        )
     )
 
-    assert len(config["rules"]) == 1 and rule_name in config["rules"]
+    assert len(config.rules) == 1 and rule_name in config.rules
 
 
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
     profiler_with_placeholder_args: RuleBasedProfiler, usage_stats_profiler_config: dict
 ) -> None:
-    datasource_name = "my_datasource"
-    data_connector_name = "my_basic_data_connector"
-    data_asset_name = "my_data_asset"
+    datasource_name: str = "my_datasource"
+    data_connector_name: str = "my_basic_data_connector"
+    data_asset_name: str = "my_data_asset"
 
     batch_request: BatchRequest = BatchRequest(
         datasource_name=datasource_name,
@@ -335,17 +333,15 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
     rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
     rules["rule_1"]["domain_builder"]["batch_request"] = batch_request
 
-    config: dict = RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-        profiler=profiler_with_placeholder_args, rules=rules
+    config: RuleBasedProfilerConfig = (
+        RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+            profiler=profiler_with_placeholder_args, rules=rules
+        )
     )
 
-    assert all(
-        attr in config
-        for attr in ("name", "config_version", "rules", "variable_count", "rule_count")
-    )
-
-    domain_builder: dict = config["rules"]["rule_1"]["domain_builder"]
+    domain_builder: dict = config.rules["rule_1"]["domain_builder"]
     converted_batch_request: dict = domain_builder["batch_request"]
+
     assert converted_batch_request["datasource_name"] == datasource_name
     assert converted_batch_request["data_connector_name"] == data_connector_name
     assert converted_batch_request["data_asset_name"] == data_asset_name

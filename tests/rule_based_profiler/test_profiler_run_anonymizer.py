@@ -4,12 +4,10 @@ from typing import Any, Dict, List
 
 import pytest
 
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
     ProfilerRunAnonymizer,
 )
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 
 @pytest.fixture
@@ -21,11 +19,11 @@ def profiler_run_anonymizer() -> ProfilerRunAnonymizer:
 
 
 @pytest.fixture
-def usage_stats_profiler_config_custom_values() -> dict:
-    config: dict = {
-        "name": "my_profiler",
-        "config_version": 1.0,
-        "rules": {
+def usage_stats_profiler_config_custom_values() -> RuleBasedProfilerConfig:
+    config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="my_profiler",
+        config_version=1.0,
+        rules={
             "rule_1": {
                 "domain_builder": {"class_name": "MyCustomDomainBuilder"},
                 "expectation_configuration_builders": [
@@ -44,16 +42,16 @@ def usage_stats_profiler_config_custom_values() -> dict:
                 ],
             }
         },
-        "variable_count": 1,
-        "rule_count": 1,
-    }
+        variables={"my_variable": "my_value"},
+    )
     return config
 
 
 @pytest.fixture
 def usage_stats_profiler_config_multiple_rules(
-    usage_stats_profiler_config: dict,
-) -> dict:
+    usage_stats_profiler_config: RuleBasedProfilerConfig,
+) -> RuleBasedProfilerConfig:
+    rules: dict = usage_stats_profiler_config.rules
     rule: dict = {
         "domain_builder": {"class_name": "TableDomainBuilder"},
         "parameter_builders": [
@@ -71,15 +69,20 @@ def usage_stats_profiler_config_multiple_rules(
             }
         ],
     }
-    usage_stats_profiler_config["rules"]["rule_2"] = rule
-    usage_stats_profiler_config["rule_count"] += 1
-    return usage_stats_profiler_config
+    rules["rule_2"] = rule
+    return RuleBasedProfilerConfig(
+        name=usage_stats_profiler_config.name,
+        config_version=usage_stats_profiler_config.config_version,
+        rules=rules,
+        variables=usage_stats_profiler_config.variables,
+    )
 
 
 @pytest.fixture
 def usage_stats_profiler_config_multiple_rules_custom_values(
-    usage_stats_profiler_config_custom_values: dict,
-) -> dict:
+    usage_stats_profiler_config_custom_values: RuleBasedProfilerConfig,
+) -> RuleBasedProfilerConfig:
+    rules: dict = usage_stats_profiler_config_custom_values.rules
     rule: dict = {
         "domain_builder": {"class_name": "MyAdditionalCustomDomainBuilder"},
         "parameter_builders": [
@@ -97,17 +100,21 @@ def usage_stats_profiler_config_multiple_rules_custom_values(
             }
         ],
     }
-    usage_stats_profiler_config_custom_values["rules"]["rule_2"] = rule
-    usage_stats_profiler_config_custom_values["rule_count"] += 1
-    return usage_stats_profiler_config_custom_values
+    rules["rule_2"] = rule
+    return RuleBasedProfilerConfig(
+        name=usage_stats_profiler_config_custom_values.name,
+        config_version=usage_stats_profiler_config_custom_values.config_version,
+        rules=rules,
+        variables=usage_stats_profiler_config_custom_values.variables,
+    )
 
 
 def test_anonymize_profiler_run(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
-    usage_stats_profiler_config: dict,
+    usage_stats_profiler_config: RuleBasedProfilerConfig,
 ) -> None:
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
-        **usage_stats_profiler_config
+        usage_stats_profiler_config
     )
     assert anonymized_result == {
         "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
@@ -137,10 +144,10 @@ def test_anonymize_profiler_run(
 
 def test_anonymize_profiler_run_custom_values(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
-    usage_stats_profiler_config_custom_values: dict,
+    usage_stats_profiler_config_custom_values: RuleBasedProfilerConfig,
 ) -> None:
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
-        **usage_stats_profiler_config_custom_values
+        usage_stats_profiler_config_custom_values
     )
     assert anonymized_result == {
         "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
@@ -175,10 +182,10 @@ def test_anonymize_profiler_run_custom_values(
 
 def test_anonymize_profiler_run_multiple_rules(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
-    usage_stats_profiler_config_multiple_rules: dict,
+    usage_stats_profiler_config_multiple_rules: RuleBasedProfilerConfig,
 ) -> None:
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
-        **usage_stats_profiler_config_multiple_rules
+        usage_stats_profiler_config_multiple_rules
     )
     assert anonymized_result == {
         "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
@@ -224,10 +231,10 @@ def test_anonymize_profiler_run_multiple_rules(
 
 def test_anonymize_profiler_run_multiple_rules_custom_values(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
-    usage_stats_profiler_config_multiple_rules_custom_values: dict,
+    usage_stats_profiler_config_multiple_rules_custom_values: RuleBasedProfilerConfig,
 ) -> None:
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
-        **usage_stats_profiler_config_multiple_rules_custom_values
+        usage_stats_profiler_config_multiple_rules_custom_values
     )
     assert anonymized_result == {
         "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
@@ -283,7 +290,7 @@ def test_anonymize_profiler_run_multiple_rules_custom_values(
 
 def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
-    usage_stats_profiler_config: dict,
+    usage_stats_profiler_config: RuleBasedProfilerConfig,
 ) -> None:
     # Add batch requests to fixture before running method
     batch_request: dict = {
@@ -291,13 +298,13 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "my_data_asset",
     }
-    rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
+    rules: Dict[str, dict] = usage_stats_profiler_config.rules
     rule: dict = rules["rule_1"]
     rule["domain_builder"]["batch_request"] = batch_request
     rule["parameter_builders"][0]["batch_request"] = batch_request
 
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
-        **usage_stats_profiler_config
+        usage_stats_profiler_config
     )
     assert anonymized_result == {
         "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
@@ -349,16 +356,16 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
 
 def test_anonymize_profiler_run_with_condition_in_expectation_configuration_builder(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
-    usage_stats_profiler_config: dict,
+    usage_stats_profiler_config: RuleBasedProfilerConfig,
 ) -> None:
-    rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
+    rules: Dict[str, dict] = usage_stats_profiler_config.rules
     expectation_configuration_builder: dict = rules["rule_1"][
         "expectation_configuration_builders"
     ][0]
     expectation_configuration_builder["condition"] = "my_condition"
 
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
-        **usage_stats_profiler_config
+        usage_stats_profiler_config
     )
     assert anonymized_result == {
         "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",

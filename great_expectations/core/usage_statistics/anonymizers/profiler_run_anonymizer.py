@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
@@ -8,6 +8,7 @@ from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymiz
 from great_expectations.expectations.registry import (
     list_registered_expectation_implementations,
 )
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
@@ -77,34 +78,35 @@ class ProfilerRunAnonymizer(Anonymizer):
         self._salt = salt
         self._batch_request_anonymizer = BatchRequestAnonymizer(self._salt)
 
-    def anonymize_profiler_run(self, *args: List[Any], **kwargs: dict) -> dict:
+    def anonymize_profiler_run(self, profiler_config: RuleBasedProfilerConfig) -> dict:
         """
         Traverse the entire RuleBasedProfiler configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
         """
-        name: Optional[str] = kwargs.get("name")
+        name: str = profiler_config.name
         anonymized_name: Optional[str] = self.anonymize(name)
 
-        config_version: float = kwargs.get("config_version", 1.0)
-        variable_count: int = kwargs.get("variable_count", 0)
-        rule_count: int = kwargs.get("rule_count", 0)
+        config_version: float = profiler_config.config_version
 
-        rules: Dict[str, dict] = kwargs.get("rules", {})
+        rules: Dict[str, dict] = profiler_config.rules
         anonymized_rules: List[dict] = self._anonymize_rules(rules)
+        rule_count: int = len(rules)
+
+        variables: dict = profiler_config.variables or {}
+        variable_count: int = len(variables)
 
         anonymized_profiler_run_properties_dict: dict = {
             "anonymized_name": anonymized_name,
             "config_version": config_version,
-            "variable_count": variable_count,
-            "rule_count": rule_count,
             "anonymized_rules": anonymized_rules,
+            "rule_count": rule_count,
+            "variable_count": variable_count,
         }
 
         deep_filter_properties_iterable(
             properties=anonymized_profiler_run_properties_dict,
             clean_falsy=True,
             inplace=True,
-            delete_fields={"class_name"},
         )
 
         return anonymized_profiler_run_properties_dict

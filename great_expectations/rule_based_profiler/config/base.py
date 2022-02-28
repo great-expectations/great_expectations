@@ -304,28 +304,27 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         return RuleBasedProfilerConfigSchema
 
     # noinspection PyUnusedLocal,PyUnresolvedReferences
-    @staticmethod
+    @classmethod
     def resolve_config_using_acceptable_arguments(
+        cls,
         profiler: "RuleBasedProfiler",  # noqa: F821
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-    ) -> dict:
-        runtime_config: dict = profiler.config.to_dict()
+    ) -> "RuleBasedProfilerConfig":
+        runtime_config: RuleBasedProfilerConfig = profiler.config
 
         # If applicable, override config attributes with runtime args
-        if variables:
-            runtime_config["variables"] = variables
-        if rules:
-            runtime_config["rules"] = rules
+        runtime_rules: dict = rules if rules is not None else runtime_config.rules
+        runtime_variables: Optional[dict] = (
+            variables if variables is not None else runtime_config.variables
+        )
 
-        runtime_config["variable_count"] = len(runtime_config["variables"])
-        runtime_config["rule_count"] = len(runtime_config["rules"])
-
-        for attr in ("class_name", "module_name", "variables"):
-            runtime_config.pop(attr)
-            logger.debug("Removed unnecessary attr %s from profiler config", attr)
-
-        return runtime_config
+        return cls(
+            name=runtime_config.name,
+            config_version=runtime_config.config_version,
+            rules=runtime_rules,
+            variables=runtime_variables,
+        )
 
 
 class RuleBasedProfilerConfigSchema(Schema):
