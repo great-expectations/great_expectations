@@ -94,7 +94,7 @@ class Anonymizer:
         return anonymized_info_dict
 
     @staticmethod
-    def _is_parent_class_recognized(
+    def _get_parent_class(
         object_: Optional[object] = None,
         object_class: Optional[type] = None,
         object_config: Optional[dict] = None,
@@ -102,7 +102,7 @@ class Anonymizer:
     ) -> Optional[str]:
         """
         Check if the parent class is a subclass of any core GE class.
-        This private method is intended to be used by anonymizers in a public `is_parent_class_recognized()` method. These anonymizers define and provide the core GE classes_to_check.
+        This private method is intended to be used by anonymizers in a public `get_parent_class()` method. These anonymizers define and provide the core GE classes_to_check.
         Returns:
             The name of the parent class found, or None if no parent class was found
         """

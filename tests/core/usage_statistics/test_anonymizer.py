@@ -45,7 +45,7 @@ def test_anonymizer_consistent_salt():
 
 
 # The following empty classes are used in this test module only.
-# They are used to ensure class hierarchy is appropriately processed by Anonymizer._is_parent_class_recognized()
+# They are used to ensure class hierarchy is appropriately processed by Anonymizer._get_parent_class()
 
 
 class BaseTestClass:
@@ -64,10 +64,10 @@ class SomeOtherClass:
     pass
 
 
-def test_anonymizer__is_parent_class_recognized():
+def test_anonymizer__get_parent_class():
     """
     What does this test and why?
-    The method Anonymizer._is_parent_class_recognized() should return the name of the parent class if it is or is a subclass of one of the classes_to_check. If not, it should return None. It should do so regardless of the parameter used to pass in the object definition (object_, object_class, object_config). It should also return the first matching class in classes_to_check, even if a later class also matches.
+    The method Anonymizer._get_parent_class() should return the name of the parent class if it is or is a subclass of one of the classes_to_check. If not, it should return None. It should do so regardless of the parameter used to pass in the object definition (object_, object_class, object_config). It should also return the first matching class in classes_to_check, even if a later class also matches.
     """
     anonymizer = Anonymizer()
 
@@ -76,19 +76,19 @@ def test_anonymizer__is_parent_class_recognized():
     parent_module_prefix: str = "tests"
 
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer._get_parent_class(
             object_class=MyCustomTestClass, parent_module_prefix=parent_module_prefix
         )
         == "TestClass"
     )
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer._get_parent_class(
             object_class=SomeOtherClass, parent_module_prefix=parent_module_prefix
         )
         is None
     )
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer._get_parent_class(
             object_class=TestClass, parent_module_prefix=parent_module_prefix
         )
         == "BaseTestClass"
@@ -99,19 +99,19 @@ def test_anonymizer__is_parent_class_recognized():
     test_class = TestClass()
     some_other_class = SomeOtherClass()
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer._get_parent_class(
             object_=my_custom_test_class, parent_module_prefix=parent_module_prefix
         )
         == "TestClass"
     )
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer._get_parent_class(
             object_=some_other_class, parent_module_prefix=parent_module_prefix
         )
         is None
     )
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer._get_parent_class(
             object_=test_class, parent_module_prefix=parent_module_prefix
         )
         == "BaseTestClass"
@@ -131,21 +131,21 @@ def test_anonymizer__is_parent_class_recognized():
         "module_name": "tests.core.usage_statistics.test_anonymizer",
     }
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer._get_parent_class(
             object_config=my_custom_test_class_config,
             parent_module_prefix=parent_module_prefix,
         )
         == "TestClass"
     )
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer._get_parent_class(
             object_config=some_other_class_config,
             parent_module_prefix=parent_module_prefix,
         )
         is None
     )
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer._get_parent_class(
             object_config=test_class_config, parent_module_prefix=parent_module_prefix
         )
         == "BaseTestClass"
