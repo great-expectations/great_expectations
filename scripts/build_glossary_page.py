@@ -21,7 +21,7 @@ def build_glossary_page(orderd_list_of_terms_tuples, glossary_file_path):
         glossary_file.write("---\nid: glossary\ntitle: \"Glossary of Terms\"\n---\n\n")
         # iterate the glossary list of tuples and write glossary entries.
         for term, definition, url in orderd_list_of_terms_tuples:
-            glossary_file.write(f"[**{term}:**](./{url}) {definition}\n\n")
+            glossary_file.write(f"[**{term}:**](./{url}.md) {definition}\n\n")
 
 
 def all_together_now(source_json_path, glossary_file_path):
