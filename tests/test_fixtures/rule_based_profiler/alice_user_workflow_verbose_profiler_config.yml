@@ -142,3 +142,21 @@ rules:
             format: markdown
             content:
               - "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+  my_rule_for_one_cardinality:
+    domain_builder:
+      class_name: CategoricalColumnDomainBuilder
+      module_name: great_expectations.rule_based_profiler.domain_builder
+      batch_request: $variables.alice_single_batch_data_batch_request
+      limit_mode: ONE
+    parameter_builders:
+      - name: my_user_agent_value_set
+        class_name: ValueSetMultiBatchParameterBuilder
+        batch_request: $variables.alice_single_batch_data_batch_request
+        module_name: great_expectations.rule_based_profiler.parameter_builder
+        metric_domain_kwargs: $domain.domain_kwargs
+    expectation_configuration_builders:
+      - expectation_type: expect_column_values_to_be_in_set
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        value_set: $parameter.my_user_agent_value_set.value
