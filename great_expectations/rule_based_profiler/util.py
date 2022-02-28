@@ -275,14 +275,12 @@ def _compute_bootstrap_quantiles_point_estimate_legacy(
         bootstraps,
         q=false_positive_rate / 2,
         axis=1,
-        method="linear",  # can be omitted ("linear" is default)
     )
     lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
     upper_quantiles: Union[np.nd_array, Number] = np.quantile(
         bootstraps,
         q=1.0 - (false_positive_rate / 2),
         axis=1,
-        method="linear",  # can be omitted ("linear" is default)
     )
     upper_quantile_point_estimate: Number = np.mean(upper_quantiles)
     return lower_quantile_point_estimate, upper_quantile_point_estimate
@@ -297,6 +295,10 @@ def compute_bootstrap_quantiles_bias_corrected_point_estimate(
     An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
     parameter of interest (lower and upper quantiles in this case). See
     https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+
+    The methods implemented here can be found in:
+    Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 124-139).
+        Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
 
     This implementation is sub-par compared to the one available from the "SciPy" standard library
     ("https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"), because it does not handle
@@ -347,7 +349,6 @@ def compute_bootstrap_quantiles_bias_corrected_point_estimate(
         bootstraps,
         q=false_positive_rate / 2,
         axis=1,
-        method="linear",  # can be omitted ("linear" is default)
     )
     lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
 
@@ -355,7 +356,7 @@ def compute_bootstrap_quantiles_bias_corrected_point_estimate(
         lower_quantiles - lower_quantile_point_estimate
     )
     lower_quantile_bias: Number = sum(lower_quantile_residuals) / len(lower_quantiles)
-    lower_quantile_bias_corrected_point_estimate = (
+    lower_quantile_bias_corrected_point_estimate: Number = (
         lower_quantile_point_estimate + lower_quantile_bias
     )
 
@@ -363,7 +364,6 @@ def compute_bootstrap_quantiles_bias_corrected_point_estimate(
         bootstraps,
         q=1.0 - (false_positive_rate / 2),
         axis=1,
-        method="linear",  # can be omitted ("linear" is default)
     )
     upper_quantile_point_estimate: Number = np.mean(upper_quantiles)
 
@@ -371,7 +371,7 @@ def compute_bootstrap_quantiles_bias_corrected_point_estimate(
         upper_quantiles - upper_quantile_point_estimate
     )
     upper_quantile_bias: Number = sum(upper_quantile_residuals) / len(upper_quantiles)
-    upper_quantile_bias_corrected_point_estimate = (
+    upper_quantile_bias_corrected_point_estimate: Number = (
         upper_quantile_point_estimate + upper_quantile_bias
     )
 
