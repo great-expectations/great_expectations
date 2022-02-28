@@ -1,4 +1,7 @@
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+import itertools
+from typing import Any, Collection, Dict, List, Optional, Set, Union
+
+import numpy as np
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -120,7 +123,9 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         unique_parameter_values: Set[
             Any
-        ] = _get_unique_values_from_iterable_of_iterables(parameter_value_node["value"])
+        ] = _get_unique_values_from_nested_collection_of_sets(
+            parameter_value_node["value"]
+        )
 
         parameter_values: Dict[str, Any] = {
             fully_qualified_parameter_name: {
@@ -136,16 +141,19 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         return parameter_container
 
 
-def _get_unique_values_from_iterable_of_iterables(
-    iterable: Iterable[Iterable[Any]],
+def _get_unique_values_from_nested_collection_of_sets(
+    collection: Collection[Collection[Set[Any]]],
 ) -> Set[Any]:
-    """Get unique values from an iterable of iterables e.g. a list of sets.
+    """Get unique values from a collection of sets e.g. a list of sets.
 
     Args:
-        iterable: List, Set containing iterables of values.
+        collection: Collection of Sets containing collections of values.
+            can be nested Collections.
 
     Returns:
         Single flattened set containing unique values.
     """
 
-    return set().union(*iterable)
+    flattened: List[Set[Any]] = list(itertools.chain.from_iterable(collection))
+    unique_values: Set[Any] = set().union(*flattened)
+    return unique_values
