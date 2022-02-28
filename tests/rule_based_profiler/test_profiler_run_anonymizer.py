@@ -88,7 +88,6 @@ def test_anonymize_profiler_run(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
     usage_stats_profiler_config: dict,
 ):
-
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
         **usage_stats_profiler_config
     )
@@ -97,10 +96,10 @@ def test_anonymize_profiler_run(
         "config_version": 1.0,
         "anonymized_rules": [
             {
-                "anonymized_domain_builder": {"class_name": "TableDomainBuilder"},
+                "anonymized_domain_builder": {"parent_class": "TableDomainBuilder"},
                 "anonymized_expectation_configuration_builders": [
                     {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     }
                 ],
@@ -108,7 +107,7 @@ def test_anonymize_profiler_run(
                 "anonymized_parameter_builders": [
                     {
                         "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
                     }
                 ],
             }
@@ -136,10 +135,10 @@ def test_anonymize_profiler_run_multiple_rules(
         "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
         "anonymized_rules": [
             {
-                "anonymized_domain_builder": {"class_name": "TableDomainBuilder"},
+                "anonymized_domain_builder": {"parent_class": "TableDomainBuilder"},
                 "anonymized_expectation_configuration_builders": [
                     {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     }
                 ],
@@ -147,15 +146,15 @@ def test_anonymize_profiler_run_multiple_rules(
                 "anonymized_parameter_builders": [
                     {
                         "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
                     }
                 ],
             },
             {
-                "anonymized_domain_builder": {"class_name": "TableDomainBuilder"},
+                "anonymized_domain_builder": {"parent_class": "TableDomainBuilder"},
                 "anonymized_expectation_configuration_builders": [
                     {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_values_to_be_between",
                     }
                 ],
@@ -163,7 +162,7 @@ def test_anonymize_profiler_run_multiple_rules(
                 "anonymized_parameter_builders": [
                     {
                         "anonymized_name": "b7719efec76c6ebe30230fc1ec023beb",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
                     }
                 ],
             },
@@ -215,11 +214,11 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
                             "data_connector_query"
                         ],
                     },
-                    "class_name": "TableDomainBuilder",
+                    "parent_class": "TableDomainBuilder",
                 },
                 "anonymized_expectation_configuration_builders": [
                     {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     }
                 ],
@@ -237,7 +236,7 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
                             ],
                         },
                         "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
                     }
                 ],
             }
@@ -264,11 +263,11 @@ def test_anonymize_profiler_run_with_condition_in_expectation_configuration_buil
         "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
         "anonymized_rules": [
             {
-                "anonymized_domain_builder": {"class_name": "TableDomainBuilder"},
+                "anonymized_domain_builder": {"parent_class": "TableDomainBuilder"},
                 "anonymized_expectation_configuration_builders": [
                     {
                         "anonymized_condition": "553b1c035d9b602798d64d23d63abd32",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     }
                 ],
@@ -276,7 +275,7 @@ def test_anonymize_profiler_run_with_condition_in_expectation_configuration_buil
                 "anonymized_parameter_builders": [
                     {
                         "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
                     }
                 ],
             }

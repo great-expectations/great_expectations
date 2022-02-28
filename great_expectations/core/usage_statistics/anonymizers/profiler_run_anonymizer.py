@@ -51,20 +51,21 @@ class ProfilerRunAnonymizer(Anonymizer):
         super().__init__(salt=salt)
 
         # ordered bottom up in terms of inheritance order
-        self._ge_classes = [
-            # DomainBuilders
+        self._ge_domain_builders = [
             ColumnDomainBuilder,
             SimpleColumnSuffixDomainBuilder,
             SimpleSemanticTypeColumnDomainBuilder,
             TableDomainBuilder,
             DomainBuilder,
-            # ParameterBuilders
+        ]
+        self._ge_parameter_builders = [
             MetricMultiBatchParameterBuilder,
             NumericMetricRangeMultiBatchParameterBuilder,
             RegexPatternStringParameterBuilder,
             SimpleDateFormatStringParameterBuilder,
             ParameterBuilder,
-            # ExpectationConfigurationBuilders
+        ]
+        self._ge_expectation_configuration_builders = [
             DefaultExpectationConfigurationBuilder,
             ExpectationConfigurationBuilder,
         ]
@@ -77,46 +78,44 @@ class ProfilerRunAnonymizer(Anonymizer):
         Traverse the entire RuleBasedProfiler configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
         """
-        anonymized_info_dict: dict = {}
-
         name: Optional[str] = kwargs.get("name")
-        anonymized_info_dict["anonymized_name"] = self.anonymize(name)
+        anonymized_name: Optional[str] = self.anonymize(name)
 
-        anonymized_info_dict["config_version"] = kwargs.get("config_version", 1.0)
-        anonymized_info_dict["variable_count"] = kwargs.get("variable_count", 0)
-        anonymized_info_dict["rule_count"] = kwargs.get("rule_count", 0)
+        config_version: float = kwargs.get("config_version", 1.0)
+        variable_count: int = kwargs.get("variable_count", 0)
+        rule_count: int = kwargs.get("rule_count", 0)
 
         rules: Dict[str, dict] = kwargs.get("rules", {})
-        anonymized_info_dict["anonymized_rules"] = self._anonymize_rules(
-            rules, anonymized_info_dict
-        )
+        anonymized_rules: List[dict] = self._anonymize_rules(rules)
 
-        breakpoint()
+        anonymized_profiler_run_properties_dict: dict = {
+            "anonymized_name": anonymized_name,
+            "config_version": config_version,
+            "variable_count": variable_count,
+            "rule_count": rule_count,
+            "anonymized_rules": anonymized_rules,
+        }
+
         deep_filter_properties_iterable(
-            properties=anonymized_info_dict,
+            properties=anonymized_profiler_run_properties_dict,
             clean_falsy=True,
             inplace=True,
+            delete_fields={"class_name"},
         )
 
-        return anonymized_info_dict
+        return anonymized_profiler_run_properties_dict
 
-    def _anonymize_rules(
-        self, rules: Dict[str, dict], anonymized_info_dict: dict
-    ) -> List[dict]:
+    def _anonymize_rules(self, rules: Dict[str, dict]) -> List[dict]:
         anonymized_rules: List[dict] = []
 
         for name, rule in rules.items():
-            anonymized_rule: dict = self._anonymize_rule(
-                name, rule, anonymized_info_dict
-            )
+            anonymized_rule: dict = self._anonymize_rule(name, rule)
             anonymized_rules.append(anonymized_rule)
             logger.debug("Anonymized rule %s", name)
 
         return anonymized_rules
 
-    def _anonymize_rule(
-        self, name: str, rule: dict, anonymized_info_dict: dict
-    ) -> dict:
+    def _anonymize_rule(self, name: str, rule: dict) -> dict:
         anonymized_rule: dict = {}
         anonymized_rule["anonymized_name"] = self.anonymize(name)
 
@@ -124,12 +123,12 @@ class ProfilerRunAnonymizer(Anonymizer):
         if domain_builder is not None:
             anonymized_rule[
                 "anonymized_domain_builder"
-            ] = self._anonymize_domain_builder(domain_builder, anonymized_info_dict)
+            ] = self._anonymize_domain_builder(domain_builder)
 
         parameter_builders: List[dict] = rule.get("parameter_builders", [])
         anonymized_rule[
             "anonymized_parameter_builders"
-        ] = self._anonymize_parameter_builders(parameter_builders, anonymized_info_dict)
+        ] = self._anonymize_parameter_builders(parameter_builders)
 
         expectation_configuration_builders: List[dict] = rule.get(
             "expectation_configuration_builders", []
@@ -137,20 +136,20 @@ class ProfilerRunAnonymizer(Anonymizer):
         anonymized_rule[
             "anonymized_expectation_configuration_builders"
         ] = self._anonymize_expectation_configuration_builders(
-            expectation_configuration_builders, anonymized_info_dict
+            expectation_configuration_builders
         )
 
         return anonymized_rule
 
-    def _anonymize_domain_builder(
-        self, domain_builder: dict, anonymized_info_dict: dict
-    ) -> dict:
+    def _anonymize_domain_builder(self, domain_builder: dict) -> dict:
         anonymized_domain_builder: dict = self.anonymize_object_info(
-            object_=domain_builder,
-            anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
+            object_config=domain_builder,
+            anonymized_info_dict={},
+            ge_classes=self._ge_domain_builders,
+            runtime_environment={
+                "module_name": "great_expectations.rule_based_profiler.domain_builder"
+            },
         )
-        anonymized_domain_builder["class_name"] = domain_builder.get("class_name")
 
         batch_request: Optional[dict] = domain_builder.get("batch_request")
         if batch_request:
@@ -162,25 +161,26 @@ class ProfilerRunAnonymizer(Anonymizer):
         return anonymized_domain_builder
 
     def _anonymize_parameter_builders(
-        self, parameter_builders: List[dict], anonymized_info_dict: dict
+        self, parameter_builders: List[dict]
     ) -> List[dict]:
         anonymized_parameter_builders: List[dict] = []
 
         for parameter_builder in parameter_builders:
             anonymized_parameter_builder: dict = self._anonymize_parameter_builder(
-                parameter_builder, anonymized_info_dict
+                parameter_builder
             )
             anonymized_parameter_builders.append(anonymized_parameter_builder)
 
         return anonymized_parameter_builders
 
-    def _anonymize_parameter_builder(
-        self, parameter_builder: dict, anonymized_info_dict: dict
-    ) -> dict:
+    def _anonymize_parameter_builder(self, parameter_builder: dict) -> dict:
         anonymized_parameter_builder: dict = self.anonymize_object_info(
-            object_=parameter_builder,
-            anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
+            object_config=parameter_builder,
+            anonymized_info_dict={},
+            ge_classes=self._ge_parameter_builders,
+            runtime_environment={
+                "module_name": "great_expectations.rule_based_profiler.parameter_builder"
+            },
         )
 
         anonymized_parameter_builder["anonymized_name"] = self.anonymize(
@@ -191,22 +191,20 @@ class ProfilerRunAnonymizer(Anonymizer):
         if batch_request:
             anonymized_parameter_builder[
                 "anonymized_batch_request"
-            ] = self._batch_request_anonymizer.anonymize_batch_request(
-                *(), **batch_request
-            )
+            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
             logger.debug("Anonymized batch request in ParameterBuilder")
 
         return anonymized_parameter_builder
 
     def _anonymize_expectation_configuration_builders(
-        self, expectation_configuration_builders: List[dict], anonymized_info_dict: dict
+        self, expectation_configuration_builders: List[dict]
     ) -> List[dict]:
         anonymized_expectation_configuration_builders: List[dict] = []
 
         for expectation_configuration_builder in expectation_configuration_builders:
             anonymized_expectation_configuration_builder: dict = (
                 self._anonymize_expectation_configuration_builder(
-                    expectation_configuration_builder, anonymized_info_dict
+                    expectation_configuration_builder
                 )
             )
             anonymized_expectation_configuration_builders.append(
@@ -216,12 +214,15 @@ class ProfilerRunAnonymizer(Anonymizer):
         return anonymized_expectation_configuration_builders
 
     def _anonymize_expectation_configuration_builder(
-        self, expectation_configuration_builder: dict, anonymized_info_dict: dict
+        self, expectation_configuration_builder: dict
     ) -> dict:
         anonymized_expectation_configuration_builder: dict = self.anonymize_object_info(
-            object_=expectation_configuration_builder,
-            anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
+            object_config=expectation_configuration_builder,
+            anonymized_info_dict={},
+            ge_classes=self._ge_expectation_configuration_builders,
+            runtime_environment={
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder"
+            },
         )
 
         anonymized_expectation_configuration_builder[
