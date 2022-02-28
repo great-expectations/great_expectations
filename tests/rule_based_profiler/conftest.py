@@ -1067,3 +1067,33 @@ def profiler_with_placeholder_args(
         **profiler_config_dict, data_context=empty_data_context
     )
     return profiler
+
+
+@pytest.fixture
+def usage_stats_profiler_config() -> dict:
+    config: dict = {
+        "name": "my_profiler",
+        "config_version": 1.0,
+        "rules": {
+            "rule_1": {
+                "domain_builder": {"class_name": "TableDomainBuilder"},
+                "expectation_configuration_builders": [
+                    {
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_values_to_match_regex",
+                        "meta": {"details": {"note": "Hello World"}},
+                    }
+                ],
+                "parameter_builders": [
+                    {
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "metric_name": "my_metric",
+                        "name": "my_parameter",
+                    }
+                ],
+            }
+        },
+        "variable_count": 1,
+        "rule_count": 1,
+    }
+    return config

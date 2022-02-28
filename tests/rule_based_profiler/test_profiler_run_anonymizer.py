@@ -21,36 +21,6 @@ def profiler_run_anonymizer() -> ProfilerRunAnonymizer:
 
 
 @pytest.fixture
-def usage_stats_profiler_config() -> dict:
-    config: dict = {
-        "name": "my_profiler",
-        "config_version": 1.0,
-        "rules": {
-            "rule_1": {
-                "domain_builder": {"class_name": "TableDomainBuilder"},
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_values_to_match_regex",
-                        "meta": {"details": {"note": "Hello World"}},
-                    }
-                ],
-                "parameter_builders": [
-                    {
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "metric_name": "my_metric",
-                        "name": "my_parameter",
-                    }
-                ],
-            }
-        },
-        "variable_count": 1,
-        "rule_count": 1,
-    }
-    return config
-
-
-@pytest.fixture
 def usage_stats_profiler_config_custom_values() -> dict:
     config: dict = {
         "name": "my_profiler",
@@ -415,72 +385,6 @@ def test_anonymize_profiler_run_with_condition_in_expectation_configuration_buil
         "rule_count": 1,
         "variable_count": 1,
     }
-
-
-def test_resolve_config_using_acceptable_arguments(
-    profiler_with_placeholder_args: RuleBasedProfiler,
-) -> None:
-    config: dict = RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-        profiler=profiler_with_placeholder_args
-    )
-
-    # Ensure we have expected keys while also removing unnecessary ones
-    assert all(
-        attr in config
-        for attr in ("name", "config_version", "rules", "variable_count", "rule_count")
-    )
-    assert all(
-        attr not in config for attr in ("class_name", "module_name", "variables")
-    )
-
-    assert config["variable_count"] == 1 and config["rule_count"] == 1
-
-
-def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
-    profiler_with_placeholder_args: RuleBasedProfiler,
-) -> None:
-    rule_name: str = "my_rule"
-    assert all(rule.name != rule_name for rule in profiler_with_placeholder_args.rules)
-
-    rules: Dict[str, dict] = {rule_name: {"foo": "bar"}}
-    config: dict = RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-        profiler=profiler_with_placeholder_args, rules=rules
-    )
-
-    assert len(config["rules"]) == 1 and rule_name in config["rules"]
-
-
-def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
-    profiler_with_placeholder_args: RuleBasedProfiler, usage_stats_profiler_config: dict
-) -> None:
-    datasource_name = "my_datasource"
-    data_connector_name = "my_basic_data_connector"
-    data_asset_name = "my_data_asset"
-
-    batch_request: BatchRequest = BatchRequest(
-        datasource_name=datasource_name,
-        data_connector_name=data_connector_name,
-        data_asset_name=data_asset_name,
-    )
-
-    # Add batch requests to fixture before running method
-    rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
-    rules["rule_1"]["domain_builder"]["batch_request"] = batch_request
-
-    config: dict = RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-        profiler=profiler_with_placeholder_args, rules=rules
-    )
-
-    assert all(
-        attr in config
-        for attr in ("name", "config_version", "rules", "variable_count", "rule_count")
-    )
-
-    domain_builder: dict = config["rules"]["rule_1"]["domain_builder"]
-    converted_batch_request: dict = domain_builder["batch_request"]
-    assert converted_batch_request["datasource_name"] == datasource_name
-    assert converted_batch_request["data_connector_name"] == data_connector_name
-    assert converted_batch_request["data_asset_name"] == data_asset_name
 
 
 def test_all_builder_classes_are_recognized_as_profiler_run_anonymizer_attrs(
