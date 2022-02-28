@@ -117,7 +117,6 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
             "test_backends": [
                 {
                     "backend": "pandas",
-                    "dialects": None,
                 },
                 {
                     "backend": "sqlalchemy",
@@ -125,7 +124,6 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
                 },
                 {
                     "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }
