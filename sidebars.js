@@ -12,6 +12,51 @@ module.exports = {
         { type: 'doc', id: 'tutorials/getting_started/tutorial_validate_data', label: '4. Validate Data' },
         { type: 'doc', id: 'tutorials/getting_started/tutorial_review', label: 'Review and next steps' }
       ]
+    },
+    {
+      type: 'category',
+      label: 'Step 1: Setup',
+      items: []
+    },
+    {
+      type: 'category',
+      label: 'Step 1: Setup',
+      items: []
+    },
+    {
+      type: 'category',
+      label: 'Step 2: Connect to data',
+      items: []
+    },
+    {
+      type: 'category',
+      label: 'Step 3: Create Expectations',
+      items: []
+    },
+    {
+      type: 'category',
+      label: 'Step 4: Validate data',
+      items: []
+    },
+    {
+      type: 'category',
+      label: 'Reference Architectures',
+      items: []
+    },
+    {
+      type: 'category',
+      label: 'Contributing',
+      items: []
+    },
+    {
+      type: 'category',
+      label: 'Reference',
+      items: []
+    },
+    {
+      type: 'category',
+      label: 'Updates and migration',
+      items: []
     }
   ]
 }
