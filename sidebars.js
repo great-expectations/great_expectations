@@ -172,7 +172,63 @@ module.exports = {
       type: 'category',
       label: 'Step 3: Create Expectations',
       items: [
-        { type: 'doc', id: 'guides/expectations/create_expectations_overview', label: 'Overview' }
+        { type: 'doc', id: 'guides/expectations/create_expectations_overview', label: 'Overview' },
+        {
+          type: 'category',
+          label: 'How-to guides',
+          items: [
+            {
+              type: 'category',
+              label: 'Core skills',
+              items: [
+                'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
+                'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
+                'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
+                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Configuring Profilers',
+              items: []
+            },
+            {
+              type: 'category',
+              label: 'Creating Custom Expectations',
+              items: [
+                'guides/expectations/creating_custom_expectations/overview',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
+                {
+                  type: 'category',
+                  label: 'Adding Features to Custom Expectations',
+                  items: [
+                    'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
+                    'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
+                    'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
+                    'guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation',
+                    'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
+                    'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
+                  ]
+                }
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Advanced',
+              items: [
+                'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
+                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
+                'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
+                'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
+                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
+              ]
+            },
+            { type: 'doc', id: 'guides/expectations/index', label: 'Index' }
+          ]
+        }
       ]
     },
     {
@@ -195,7 +251,15 @@ module.exports = {
     {
       type: 'category',
       label: 'Contributing',
-      items: []
+      items: [
+        {
+          type: 'category',
+          label: 'Custom Expectations',
+          items: [
+            'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
+          ]
+        }
+      ]
     },
     {
       type: 'category',
