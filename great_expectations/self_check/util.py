@@ -1521,9 +1521,9 @@ def generate_expectation_tests(
         # Some Expectations (mostly contrib) explicitly list test_backends/dialects to test with
         if d.test_backends:
             for tb in d.test_backends:
-                engines_to_include[tb["backend"]] = True
-                if tb["backend"] == "sqlalchemy":
-                    for dialect in tb["dialects"]:
+                engines_to_include[tb.backend] = True
+                if tb.backend == "sqlalchemy":
+                    for dialect in tb.dialects:
                         dialects_to_include[dialect] = True
         else:
             engines_to_include[
