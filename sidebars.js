@@ -16,27 +16,50 @@ module.exports = {
     {
       type: 'category',
       label: 'Step 1: Setup',
-      items: []
-    },
-    {
-      type: 'category',
-      label: 'Step 1: Setup',
-      items: []
+      items: [
+        { type: 'doc', id: 'guides/setup/setup_overview', label: 'Overview' },
+        {
+          type: 'category',
+          label: 'How-to guides',
+          items: []
+        }
+      ]
     },
     {
       type: 'category',
       label: 'Step 2: Connect to data',
-      items: []
+      items: [
+        { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview', label: 'Overview' },
+        {
+          type: 'category',
+          label: 'How-to guides',
+          items: []
+        }
+      ]
     },
     {
       type: 'category',
       label: 'Step 3: Create Expectations',
-      items: []
+      items: [
+        { type: 'doc', id: 'guides/expectations/create_expectations_overview', label: 'Overview' },
+        {
+          type: 'category',
+          label: 'How-to guides',
+          items: []
+        }
+      ]
     },
     {
       type: 'category',
       label: 'Step 4: Validate data',
-      items: []
+      items: [
+        { type: 'doc', id: 'guides/validation/validate_data_overview', label: 'Overview' },
+        {
+          type: 'category',
+          label: 'How-to guides',
+          items: []
+        }
+      ]
     },
     {
       type: 'category',
