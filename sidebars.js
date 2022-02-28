@@ -21,7 +21,72 @@ module.exports = {
         {
           type: 'category',
           label: 'How-to guides',
-          items: []
+          items: [
+            {
+              type: 'category',
+              label: 'Installation',
+              items: [
+                'guides/setup/installation/local',
+                'guides/setup/installation/hosted_environment'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Data Contexts',
+              items: [
+                'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
+                'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
+                'guides/setup/configuring_data_contexts/how_to_configure_credentials',
+                'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Metadata Stores',
+              items: [
+                {
+                  type: 'category',
+                  label: 'Expectation Stores',
+                  items: [
+                    'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql'
+                  ]
+                },
+                {
+                  type: 'category',
+                  label: 'Validation Result Stores',
+                  items: [
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql'
+                  ]
+                },
+                {
+                  type: 'category',
+                  label: 'Metric Stores',
+                  items: [
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore'
+                  ]
+                }
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Data Docs',
+              items: [
+                'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem',
+                'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage',
+                'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs',
+                'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3'
+              ]
+            },
+            { type: 'doc', id: 'guides/setup/index', label: 'Setup: Index' }
+          ]
         }
       ]
     },
