@@ -285,7 +285,16 @@ module.exports = {
     {
       type: 'category',
       label: 'Reference Architectures',
-      items: []
+      items: [
+        'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
+        'deployment_patterns/how_to_use_great_expectations_in_databricks',
+        'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
+        'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
+        'deployment_patterns/how_to_use_great_expectations_with_airflow',
+        'deployment_patterns/how_to_use_great_expectations_in_flyte',
+        'deployment_patterns/how_to_use_great_expectations_in_deepnote',
+        { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
+      ]
     },
     {
       type: 'category',
@@ -293,11 +302,35 @@ module.exports = {
       items: [
         {
           type: 'category',
-          label: 'Custom Expectations',
+          label: 'Contributing basics',
+          items: [
+            { type: 'doc', id: 'contributing/contributing', label: 'Introduction' },
+            { type: 'doc', id: 'contributing/contributing_setup' },
+            { type: 'doc', id: 'contributing/contributing_checklist' },
+            { type: 'doc', id: 'contributing/contributing_github' },
+            { type: 'doc', id: 'contributing/contributing_test' },
+            { type: 'doc', id: 'contributing/contributing_maturity' },
+            { type: 'doc', id: 'contributing/contributing_misc' },
+            { type: 'doc', id: 'contributing/contributing_package' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Contributing Expectations',
           items: [
             'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
           ]
-        }
+        },
+        {
+          type: 'category',
+          label: 'Style guides',
+          items: [
+            { type: 'doc', id: 'contributing/style_guides/docs_style' },
+            { type: 'doc', id: 'contributing/style_guides/code_style' },
+            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' }
+          ]
+        },
+        'contributing/index'
       ]
     },
     {
