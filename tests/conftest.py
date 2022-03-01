@@ -54,6 +54,9 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
+    DEFAULT_CANDIDATE_STRINGS,
+)
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -5335,7 +5338,10 @@ def alice_columnar_table_single_batch(empty_data_context):
                                 "value": event_ts_column_data[
                                     "observed_strftime_format"
                                 ],  # Pin to event_ts column
-                                "details": {"success_ratio": 1.0},
+                                "details": {
+                                    "success_ratio": 1.0,
+                                    "candidate_strings": DEFAULT_CANDIDATE_STRINGS,
+                                },
                             },
                         },
                         "meta": {

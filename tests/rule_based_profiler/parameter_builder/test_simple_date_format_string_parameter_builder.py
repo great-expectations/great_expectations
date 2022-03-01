@@ -1,5 +1,3 @@
-from typing import Set
-
 import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
@@ -8,68 +6,14 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.rule_based_profiler.parameter_builder import (
     SimpleDateFormatStringParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
+    DEFAULT_CANDIDATE_STRINGS,
+)
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-
-DEFAULT_CANDIDATE_STRINGS: Set[str] = {
-    "%Y-%m-%d",
-    "%Y-%m-%d %H:%M:%S",
-    "%m-%d-%Y",
-    "%Y-%m-%dT%z",
-    "%y-%m-%d",
-    "%Y %b %d %H:%M:%S.%f %Z",
-    "%b %d %H:%M:%S %z %Y",
-    "%d/%b/%Y:%H:%M:%S %z",
-    "%b %d, %Y %H:%M:%S %p",
-    "%b %d %Y %H:%M:%S",
-    "%b %d %H:%M:%S %Y",
-    "%b %d %H:%M:%S %z",
-    "%b %d %H:%M:%S",
-    "%Y-%m-%d'T'%H:%M:%S%z",
-    "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
-    "%Y-%m-%d %H:%M:%S %z",
-    "%Y-%m-%d %H:%M:%S%z",
-    "%Y-%m-%d %H:%M:%S,%f",
-    "%Y/%m/%d*%H:%M:%S",
-    "%Y %b %d %H:%M:%S.%f*%Z",
-    "%Y %b %d %H:%M:%S.%f",
-    "%Y-%m-%d %H:%M:%S,%f%z",
-    "%Y-%m-%d %H:%M:%S.%f",
-    "%Y-%m-%d %H:%M:%S.%f%z",
-    "%Y-%m-%d'T'%H:%M:%S.%f",
-    "%Y-%m-%d'T'%H:%M:%S",
-    "%Y-%m-%d'T'%H:%M:%S'%z'",
-    "%Y-%m-%d*%H:%M:%S:%f",
-    "%Y-%m-%d*%H:%M:%S",
-    "%y-%m-%d %H:%M:%S,%f %z",
-    "%y-%m-%d %H:%M:%S,%f",
-    "%y-%m-%d %H:%M:%S",
-    "%y/%m/%d %H:%M:%S",
-    "%y%m%d %H:%M:%S",
-    "%Y%m%d %H:%M:%S.%f",
-    "%m/%d/%y*%H:%M:%S",
-    "%m/%d/%Y*%H:%M:%S",
-    "%m/%d/%Y*%H:%M:%S*%f",
-    "%m/%d/%y %H:%M:%S %z",
-    "%m/%d/%Y %H:%M:%S %z",
-    "%H:%M:%S",
-    "%H:%M:%S.%f",
-    "%H:%M:%S,%f",
-    "%d/%b %H:%M:%S,%f",
-    "%d/%b/%Y:%H:%M:%S",
-    "%d/%b/%Y %H:%M:%S",
-    "%d-%b-%Y %H:%M:%S",
-    "%d-%b-%Y %H:%M:%S.%f",
-    "%d %b %Y %H:%M:%S",
-    "%d %b %Y %H:%M:%S*%f",
-    "%m%d_%H:%M:%S",
-    "%m%d_%H:%M:%S.%f",
-    "%m/%d/%Y %H:%M:%S %p:%f",
-    "%m/%d/%Y %H:%M:%S %p",
-}
 
 
 def test_simple_date_format_parameter_builder_instantiation():
@@ -147,7 +91,10 @@ def test_simple_date_format_parameter_builder_alice(
     fully_qualified_parameter_name_for_value: str = "$parameter.my_date_format"
     expected_value: dict = {
         "value": "%Y-%m-%d %H:%M:%S",
-        "details": {"success_ratio": 1.0},
+        "details": {
+            "success_ratio": 1.0,
+            "candidate_strings": sorted(DEFAULT_CANDIDATE_STRINGS),
+        },
     }
 
     assert (
@@ -212,7 +159,10 @@ def test_simple_date_format_parameter_builder_bobby(
     )
     expected_value: dict = {
         "value": "%Y-%m-%d %H:%M:%S",
-        "details": {"success_ratio": 1.0},
+        "details": {
+            "success_ratio": 1.0,
+            "candidate_strings": sorted(DEFAULT_CANDIDATE_STRINGS),
+        },
     }
 
     assert (
