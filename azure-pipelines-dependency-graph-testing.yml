@@ -357,6 +357,6 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --filter 'tests/cli' --aws-integration -v
+              dgtest run great_expectations --filter 'tests/cli' --aws-integration -vv
 
             displayName: 'dgtest'
