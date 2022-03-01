@@ -22,7 +22,7 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: "DataContext",  # noqa: F821
-        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
@@ -31,11 +31,11 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
         """
         Args:
             data_context: DataContext
+            batch_list: explicitly specified Batch objects foruse in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
-
         super().__init__(
-            batch=batch,
+            batch_list=batch_list,
             data_context=data_context,
             batch_request=batch_request,
         )

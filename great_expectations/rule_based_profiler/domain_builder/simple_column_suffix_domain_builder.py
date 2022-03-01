@@ -15,19 +15,19 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: "DataContext",  # noqa: F821
-        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         column_name_suffixes: Optional[List[str]] = None,
     ):
         """
         Args:
             data_context: DataContext
+            batch_list: explicitly specified Batch objects foruse in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
-
         super().__init__(
             data_context=data_context,
-            batch=batch,
+            batch_list=batch_list,
             batch_request=batch_request,
         )
 

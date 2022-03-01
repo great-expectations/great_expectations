@@ -24,21 +24,21 @@ class DomainBuilder(Builder, ABC):
 
     exclude_field_names: Set[str] = {
         "data_context",
-        "batch",
+        "batch_list",
     }
 
     def __init__(
         self,
-        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Args:
             data_context: DataContext
+            batch_list: explicitly specified Batch objects foruse in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
-
         if data_context is None:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"{self.__class__.__name__} requires a data_context, but none was provided."
@@ -47,7 +47,7 @@ class DomainBuilder(Builder, ABC):
         self._data_context = data_context
         self._batch_request = batch_request
 
-        self._batch = batch
+        self._batch_list = batch_list
 
     def get_domains(
         self,
@@ -64,13 +64,13 @@ class DomainBuilder(Builder, ABC):
     def domain_type(self) -> Union[str, MetricDomainTypes]:
         pass
 
+    """
+    Full getter/setter accessors for "batch_request" and "batch_list" are for configuring DomainBuilder dynamically.
+    """
+
     @property
     def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
         return self._batch_request
-
-    """
-    Full getter/setter accessors for "batch_request" and "batch" are for configuring DomainBuilder dynamically.
-    """
 
     @batch_request.setter
     def batch_request(
@@ -79,12 +79,12 @@ class DomainBuilder(Builder, ABC):
         self._batch_request = value
 
     @property
-    def batch(self) -> Optional[Batch]:
-        return self._batch
+    def batch_list(self) -> Optional[List[Batch]]:
+        return self._batch_list
 
-    @batch.setter
-    def batch(self, value: Batch) -> None:
-        self._batch = value
+    @batch_list.setter
+    def batch_list(self, value: List[Batch]) -> None:
+        self._batch_list = value
 
     @property
     def data_context(self) -> "DataContext":  # noqa: F821
@@ -106,22 +106,9 @@ class DomainBuilder(Builder, ABC):
         variables: Optional[ParameterContainer] = None,
     ) -> Optional["Validator"]:  # noqa: F821
         return get_validator_using_batch_list_or_batch_request(
-            purpose="domain_builder",
+            purpose="parameter_builder",
             data_context=self.data_context,
-            batch_list=[self.batch],
-            batch_request=self.batch_request,
-            domain=None,
-            variables=variables,
-            parameters=None,
-        )
-
-    def _get_batch_ids(
-        self,
-        variables: Optional[ParameterContainer] = None,
-    ) -> Optional[List[str]]:
-        return get_batch_ids_from_batch_list_or_batch_request(
-            data_context=self.data_context,
-            batch_list=[self.batch],
+            batch_list=self.batch_list,
             batch_request=self.batch_request,
             domain=None,
             variables=variables,
@@ -132,21 +119,20 @@ class DomainBuilder(Builder, ABC):
         self,
         variables: Optional[ParameterContainer] = None,
     ) -> Optional[List[str]]:
-        """
-
-        Args:
-            variables:
-
-        Returns:
-
-        """
-        return self._get_batch_ids(variables=variables)
+        return get_batch_ids_from_batch_list_or_batch_request(
+            data_context=self.data_context,
+            batch_list=self.batch_list,
+            batch_request=self.batch_request,
+            domain=None,
+            variables=variables,
+            parameters=None,
+        )
 
     def get_batch_id(
         self,
         variables: Optional[ParameterContainer] = None,
     ) -> str:
-        batch_ids: Optional[List[str]] = self._get_batch_ids(
+        batch_ids: Optional[List[str]] = self.get_batch_ids(
             variables=variables,
         )
         num_batch_ids: int = len(batch_ids)
