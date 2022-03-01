@@ -72,10 +72,15 @@ DEFAULT_CANDIDATE_STRINGS: Set[str] = {
 }
 
 
-def test_simple_date_format_parameter_builder_instantiation():
+def test_simple_date_format_parameter_builder_instantiation(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
     date_format_string_parameter: SimpleDateFormatStringParameterBuilder = (
         SimpleDateFormatStringParameterBuilder(
             name="my_simple_date_format_string_parameter_builder",
+            data_context=data_context,
         )
     )
 
@@ -84,17 +89,22 @@ def test_simple_date_format_parameter_builder_instantiation():
     assert date_format_string_parameter.candidate_strings is None
 
 
-def test_simple_date_format_parameter_builder_zero_batch_id_error():
+def test_simple_date_format_parameter_builder_zero_batch_id_error(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
     date_format_string_parameter: SimpleDateFormatStringParameterBuilder = (
         SimpleDateFormatStringParameterBuilder(
             name="my_simple_date_format_string_parameter_builder",
+            data_context=data_context,
         )
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(domain_type=MetricDomainTypes.COLUMN)
 
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
-        date_format_string_parameter._build_parameters(
+        date_format_string_parameter.build_parameters(
             parameter_container=parameter_container, domain=domain
         )
 
@@ -121,8 +131,8 @@ def test_simple_date_format_parameter_builder_alice(
         SimpleDateFormatStringParameterBuilder(
             name="my_date_format",
             metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
             batch_request=batch_request,
+            data_context=data_context,
         )
     )
 
@@ -137,7 +147,7 @@ def test_simple_date_format_parameter_builder_alice(
 
     assert parameter_container.parameter_nodes is None
 
-    date_format_string_parameter._build_parameters(
+    date_format_string_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -185,8 +195,8 @@ def test_simple_date_format_parameter_builder_bobby(
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_strings=candidate_strings,
             threshold=threshold,
-            data_context=data_context,
             batch_request=batch_request,
+            data_context=data_context,
         )
     )
 
@@ -201,11 +211,14 @@ def test_simple_date_format_parameter_builder_bobby(
 
     assert parameter_container.parameter_nodes is None
 
-    date_format_string_parameter._build_parameters(
+    date_format_string_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
-    assert len(parameter_container.parameter_nodes) == 1
+    assert (
+        parameter_container.parameter_nodes is None
+        or len(parameter_container.parameter_nodes) == 1
+    )
 
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_simple_date_format_string_parameter_builder"
