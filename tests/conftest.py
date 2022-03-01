@@ -5208,48 +5208,38 @@ def alice_columnar_table_single_batch(empty_data_context):
 
     my_rule_for_user_ids_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_of_type",
-                "kwargs": {
-                    "column": "user_id",
-                    "type_": "INTEGER",
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_be_of_type",
+            kwargs={
+                "column": "user_id",
+                "type_": "INTEGER",
+            },
+            meta={},
         ),
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_between",
-                "kwargs": {
-                    "min_value": 1000,
-                    "max_value": 999999999999,
-                    "column": "user_id",
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_be_between",
+            kwargs={
+                "min_value": 1000,
+                "max_value": 999999999999,
+                "column": "user_id",
+            },
+            meta={},
         ),
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_not_be_null",
-                "kwargs": {
-                    "column": "user_id",
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_not_be_null",
+            kwargs={
+                "column": "user_id",
+            },
+            meta={},
         ),
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_less_than",
-                "meta": {},
-                "kwargs": {"value": 9488404, "column": "user_id"},
-            }
+            expectation_type="expect_column_values_to_be_less_than",
+            meta={},
+            kwargs={"value": 9488404, "column": "user_id"},
         ),
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_greater_than",
-                "meta": {},
-                "kwargs": {"value": 397433, "column": "user_id"},
-            }
+            expectation_type="expect_column_values_to_be_greater_than",
+            meta={},
+            kwargs={"value": 397433, "column": "user_id"},
         ),
     ]
 
@@ -5278,97 +5268,83 @@ def alice_columnar_table_single_batch(empty_data_context):
         my_rule_for_timestamps_expectation_configurations.extend(
             [
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_of_type",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "type_": "TIMESTAMP",
-                        },
-                        "meta": {},
-                    }
+                    expectation_type="expect_column_values_to_be_of_type",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "type_": "TIMESTAMP",
+                    },
+                    meta={},
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_increasing",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                        },
-                        "meta": {},
-                    }
+                    expectation_type="expect_column_values_to_be_increasing",
+                    kwargs={
+                        "column": column_data["column_name"],
+                    },
+                    meta={},
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                        },
-                        "meta": {},
-                    }
+                    expectation_type="expect_column_values_to_be_dateutil_parseable",
+                    kwargs={
+                        "column": column_data["column_name"],
+                    },
+                    meta={},
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_min_to_be_between",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "min_value": "2004-10-19T10:23:54",  # From variables
-                            "max_value": "2004-10-19T10:23:54",  # From variables
-                        },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
-                                ],
-                            }
-                        },
-                    }
+                    expectation_type="expect_column_min_to_be_between",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "min_value": "2004-10-19T10:23:54",  # From variables
+                        "max_value": "2004-10-19T10:23:54",  # From variables
+                    },
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
+                            ],
+                        }
+                    },
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_max_to_be_between",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "min_value": "2004-10-19T10:23:54",  # From variables
-                            "max_value": event_ts_column_data[
-                                "observed_max_time_str"
+                    expectation_type="expect_column_max_to_be_between",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "min_value": "2004-10-19T10:23:54",  # From variables
+                        "max_value": event_ts_column_data[
+                            "observed_max_time_str"
+                        ],  # Pin to event_ts column
+                    },
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+                            ],
+                        }
+                    },
+                ),
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_match_strftime_format",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "strftime_format": {
+                            "value": event_ts_column_data[
+                                "observed_strftime_format"
                             ],  # Pin to event_ts column
-                        },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
-                                ],
-                            }
-                        },
-                    }
-                ),
-                ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_match_strftime_format",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "strftime_format": {
-                                "value": event_ts_column_data[
-                                    "observed_strftime_format"
-                                ],  # Pin to event_ts column
-                                "details": {
-                                    "success_ratio": 1.0,
-                                    "candidate_strings": sorted(
-                                        DEFAULT_CANDIDATE_STRINGS
-                                    ),
-                                },
+                            "details": {
+                                "success_ratio": 1.0,
+                                "candidate_strings": sorted(DEFAULT_CANDIDATE_STRINGS),
                             },
                         },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
-                                ],
-                            }
-                        },
-                    }
+                    },
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                            ],
+                        }
+                    },
                 ),
             ]
         )
@@ -5377,16 +5353,14 @@ def alice_columnar_table_single_batch(empty_data_context):
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_in_set",
-                "kwargs": {
-                    "column": "user_agent",
-                    "value_set": [
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-                    ],
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "user_agent",
+                "value_set": [
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+                ],
+            },
+            meta={},
         ),
     ]
 
