@@ -756,6 +756,7 @@ anonymized_domain_builder_schema = {
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
     },
     "type": "object",
     "properties": {
@@ -763,6 +764,7 @@ anonymized_domain_builder_schema = {
         "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
         "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
     },
+    "additionalProperties": False,
     "required": ["parent_class"],
 }
 
@@ -772,6 +774,7 @@ anonymized_parameter_builder_schema = {
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
     },
     "type": "object",
     "properties": {
@@ -780,6 +783,7 @@ anonymized_parameter_builder_schema = {
         "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
         "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
     },
+    "additionalProperties": False,
     "required": ["anonymized_name", "parent_class"],
 }
 
@@ -797,6 +801,7 @@ anonymized_expectation_configuration_builder_schema = {
         "anonymized_expectation_type": {"$ref": "#/definitions/anonymized_string"},
         "anonymized_condition": {"$ref": "#/definitions/anonymized_string"},
     },
+    "additionalProperties": False,
     "required": ["parent_class"],
 }
 
@@ -805,6 +810,8 @@ anonymized_rule_schema = {
     "title": "anonymized-rules",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
         "anonymized_domain_builder": anonymized_domain_builder_schema,
         "anonymized_parameter_builder": anonymized_parameter_builder_schema,
         "anonymized_expectation_configuration_builder": anonymized_expectation_configuration_builder_schema,
@@ -828,6 +835,7 @@ anonymized_rule_schema = {
             },
         },
     },
+    "additionalProperties": False,
     "required": ["anonymized_name", "anonymized_expectation_configuration_builders"],
 }
 
@@ -838,6 +846,11 @@ anonymized_rule_based_profiler_run_schema = {
         "empty_payload": empty_payload_schema,
         "anonymized_string": anonymized_string_schema,
         "anonymized_rule": anonymized_rule_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_domain_builder": anonymized_domain_builder_schema,
+        "anonymized_parameter_builder": anonymized_parameter_builder_schema,
+        "anonymized_expectation_configuration_builder": anonymized_expectation_configuration_builder_schema,
     },
     "oneOf": [
         {
