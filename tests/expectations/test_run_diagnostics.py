@@ -127,10 +127,6 @@ def test_expectation_self_check():
                             "message": "No example found to get kwargs for ExpectationConfiguration",
                             "passed": False,
                         },
-                        {
-                            "message": "No validate_configuration method defined",
-                            "passed": False,
-                        },
                     ],
                 },
                 {
