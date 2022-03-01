@@ -314,19 +314,22 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     ) -> "RuleBasedProfilerConfig":
         runtime_config: RuleBasedProfilerConfig = profiler.config
 
-        effective_rules: List["Rule"] = profiler.reconcile_profiler_rules(rules=rules)
-        runtime_rules: Dict[str, dict] = {
-            rule.name: rule.to_dict() for rule in effective_rules
-        }
+        runtime_variables: dict = profiler.reconcile_profiler_variables_as_dict(
+            variables
+        )
 
-        # TODO(cdkini): Clean this up
-        runtime_variables: Dict[str, dict] = variables or {}
+        effective_rules: Dict[str, "Rule"] = profiler.reconcile_profiler_rules_as_dict(
+            rules=rules
+        )
+        runtime_rules: Dict[str, dict] = {
+            k: v.to_dict() for k, v in effective_rules.items()
+        }
 
         return cls(
             name=runtime_config.name,
             config_version=runtime_config.config_version,
-            rules=runtime_rules,
             variables=runtime_variables,
+            rules=runtime_rules,
         )
 
 
