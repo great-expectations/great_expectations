@@ -589,7 +589,7 @@ class Validator:
             rule.domain_builder.column_names = [column_name]
             if ignore_batch_request or rule.domain_builder.batch_request is None:
                 # A DomainBuilder that emits MetricDomainTypes.COLUMN type Domain object needs exactly 1 Batch of data.
-                rule.domain_builder.batch = self.active_batch
+                rule.domain_builder.batch_list = [self.active_batch]
         elif domain_type == MetricDomainTypes.TABLE:
             pass  # No action is needed.
         else:
