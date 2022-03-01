@@ -1,5 +1,6 @@
 from collections import defaultdict
 from dataclasses import asdict, dataclass
+from inspect import getmodule
 from typing import List, Tuple
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -353,12 +354,33 @@ class ExpectationDiagnostics(SerializableDictDot):
         # sparsely implemented
         # all_renderer_types = {"diagnostic", "prescriptive", "question", "descriptive"}
         all_renderer_types = {"diagnostic", "prescriptive"}
-        renderer_names = [
-            name
-            for name in dir(expectation_instance)
-            if name.endswith("renderer") and name.startswith("_")
-        ]
-        renderer_types = {name.split("_")[1] for name in renderer_names}
+
+        if "core" in getmodule(expectation_instance).__file__:
+            renderer_names = [
+                name
+                for name in dir(expectation_instance)
+                if (
+                    (name.endswith("renderer") or name.endswith("summary"))
+                    and name.startswith("_")
+                )
+                or name.startswith("_atomic")
+            ]
+        else:
+            renderer_names = [
+                name
+                for name in expectation_instance.__class__.__dict__
+                if (
+                    (name.endswith("renderer") or name.endswith("summary"))
+                    and name.startswith("_")
+                )
+                or name.startswith("_atomic")
+            ]
+
+        renderer_types = {
+            name.split("_")[2] if "atomic" in name else name.split("_")[1]
+            for name in renderer_names
+        }
+
         if renderer_types - {"question", "descriptive"} == all_renderer_types:
             passed = True
         return ExpectationDiagnosticCheckMessage(
