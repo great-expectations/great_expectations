@@ -85,11 +85,6 @@ class ParameterBuilder(Builder, ABC):
         ```
     """
 
-    exclude_field_names: Set[str] = {
-        "data_context",
-        "batch_list",
-    }
-
     def __init__(
         self,
         name: str,
@@ -108,12 +103,13 @@ class ParameterBuilder(Builder, ABC):
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
         """
+        super().__init__(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            data_context=data_context,
+        )
 
         self._name = name
-        self._batch_request = batch_request
-        self._data_context = data_context
-
-        self._batch_list = batch_list
 
     def build_parameters(
         self,
