@@ -94,7 +94,7 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error():
     domain: Domain = Domain(domain_type=MetricDomainTypes.COLUMN)
 
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
-        date_format_string_parameter._build_parameters(
+        date_format_string_parameter.build_parameters(
             parameter_container=parameter_container, domain=domain
         )
 
@@ -137,7 +137,7 @@ def test_simple_date_format_parameter_builder_alice(
 
     assert parameter_container.parameter_nodes is None
 
-    date_format_string_parameter._build_parameters(
+    date_format_string_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -201,11 +201,14 @@ def test_simple_date_format_parameter_builder_bobby(
 
     assert parameter_container.parameter_nodes is None
 
-    date_format_string_parameter._build_parameters(
+    date_format_string_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
-    assert len(parameter_container.parameter_nodes) == 1
+    assert (
+        parameter_container.parameter_nodes is None
+        or len(parameter_container.parameter_nodes) == 1
+    )
 
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_simple_date_format_string_parameter_builder"

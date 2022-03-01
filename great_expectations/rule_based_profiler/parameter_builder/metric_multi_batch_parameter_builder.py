@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -8,11 +8,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     MetricComputationResult,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    build_parameter_container,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -69,6 +65,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
 
         self._reduce_scalar_metric = reduce_scalar_metric
 
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"$parameter.{self.name}"
+
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
     """
@@ -107,13 +107,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> Tuple[Any, dict]:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
         details.
 
-        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
-        ptional details
+        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
         """
         metric_computation_result: MetricComputationResult = self.get_metrics(
             metric_name=self.metric_name,
@@ -141,13 +140,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         if reduce_scalar_metric and metric_values.shape[1] == 1:
             metric_values = metric_values[:, 0]
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.name}": {
-                "value": metric_values.tolist(),
-                "details": details,
-            },
-        }
-
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
+        return (
+            metric_values.tolist(),
+            details,
         )

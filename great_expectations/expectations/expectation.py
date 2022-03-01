@@ -30,6 +30,7 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
     ExpectationLegacyTestCaseAdapter,
     ExpectationTestCase,
     ExpectationTestDataCases,
+    TestBackend,
     TestData,
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
@@ -1094,6 +1095,10 @@ class Expectation(metaclass=MetaExpectation):
                 copied_example["tests"] = included_test_cases
                 copied_example.pop("_notes", None)
                 copied_example.pop("only_for", None)
+                if "test_backends" in copied_example:
+                    copied_example["test_backends"] = [
+                        TestBackend(**tb) for tb in copied_example["test_backends"]
+                    ]
                 included_examples.append(ExpectationTestDataCases(**copied_example))
 
         return included_examples
