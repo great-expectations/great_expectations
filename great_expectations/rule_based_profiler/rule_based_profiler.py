@@ -984,7 +984,9 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
 
         rules: Dict[
             str, Dict[str, Any]
-        ] = profiler._generate_rule_overrides_from_batch_request(batch_request)
+        ] = profiler._generate_rule_overrides_from_batch_request(
+            batch_request=batch_request
+        )
 
         result: ExpectationSuite = profiler.run(
             rules=rules,
@@ -994,7 +996,8 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         return result
 
     def _generate_rule_overrides_from_batch_request(
-        self, batch_request: Union[BatchRequest, RuntimeBatchRequest, dict]
+        self,
+        batch_request: Union[BatchRequest, RuntimeBatchRequest, dict],
     ) -> Dict[str, Dict[str, Any]]:
         """Iterates through the profiler's builder attributes and generates a set of
         Rules that contain overrides from the input batch request. This only applies to
