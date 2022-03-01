@@ -2059,7 +2059,6 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
         ),
         mock.call(
             {
-                "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
@@ -2100,6 +2099,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
                         "runtime_configuration",
                     ],
                 },
+                "event": "checkpoint.run",
                 "success": True,
             }
         ),
