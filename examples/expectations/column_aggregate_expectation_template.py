@@ -7,6 +7,7 @@ For detailed instructions on how to use it, please see:
 from typing import Dict
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
