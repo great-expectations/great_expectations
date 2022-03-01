@@ -8,7 +8,7 @@ argon2-cffi==20.1.0
 astroid==2.4.2
 attrs==19.3.0
 autoapi==2.0.1
-Babel==2.8.0
+Babel==2.9.1
 backcall==0.2.0
 bleach==3.3.0
 certifi==2020.6.20
