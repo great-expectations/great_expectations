@@ -102,7 +102,7 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L72
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L103
 ```
 
 with this one:
@@ -264,7 +264,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L63-L69
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L94-L99
 ```
 
 would become

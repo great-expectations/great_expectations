@@ -34,7 +34,7 @@ You can find the template file for a custom [ColumnExpectation here](https://git
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash 
-mv column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to_be_between_custom.py
+cp column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to_be_between_custom.py
 ```
 
 <details>
@@ -105,7 +105,7 @@ with something like:
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L84
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L114
 ```
 
 with this one:
@@ -248,7 +248,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L65-L71
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L95-L101
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -284,7 +284,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L75-L80
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L105-L110
 ```
 
 would become

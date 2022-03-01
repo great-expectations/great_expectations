@@ -330,6 +330,11 @@ class ExpectationDiagnostics(SerializableDictDot):
                     "passed": False,
                 }
             )
+        if "validate_configuration" not in expectation_instance.__class__.__dict__:
+            passed = False
+            sub_messages.append(
+                {"message": "No validate_configuration method defined", "passed": False}
+            )
         else:
             expectation_config = ExpectationConfiguration(
                 expectation_type=expectation_instance.expectation_type,
