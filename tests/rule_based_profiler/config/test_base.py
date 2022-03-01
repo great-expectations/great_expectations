@@ -294,10 +294,14 @@ def test_resolve_config_using_acceptable_arguments(
         )
     )
 
-    # The resolved config is equivalent to the old one but is a new instance
     old_config: RuleBasedProfilerConfig = profiler_with_placeholder_args.config
+
+    # Brand new config is created but existing attributes are unchanged
     assert id(old_config) != id(config)
-    assert old_config.__dict__ == config.__dict__
+    assert all(
+        old_config[attr] == config[attr]
+        for attr in ("class_name", "config_version", "module_name", "name")
+    )
 
 
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
@@ -306,7 +310,31 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
     rule_name: str = "my_new_rule"
     assert all(rule.name != rule_name for rule in profiler_with_placeholder_args.rules)
 
-    rules: Dict[str, dict] = {rule_name: {"foo": "bar"}}
+    rule: dict = {
+        "domain_builder": {
+            "class_name": "TableDomainBuilder",
+            "module_name": "great_expectations.rule_based_profiler.domain_builder",
+        },
+        "parameter_builders": [
+            {
+                "class_name": "MetricMultiBatchParameterBuilder",
+                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                "metric_name": "my_other_metric",
+                "name": "my_additional_parameter",
+            }
+        ],
+        "expectation_configuration_builders": [
+            {
+                "class_name": "DefaultExpectationConfigurationBuilder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                "expectation_type": "expect_column_values_to_be_between",
+                "meta": {"details": {"note": "Here's another rule"}},
+            }
+        ],
+    }
+
+    rules: Dict[str, dict] = {rule_name: rule}
+
     config: RuleBasedProfilerConfig = (
         RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
             profiler=profiler_with_placeholder_args, rules=rules
@@ -330,9 +358,32 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
         data_asset_name=data_asset_name,
     )
 
-    # Add batch requests to fixture before running method
-    rules: Dict[str, dict] = profiler_config_with_placeholder_args.rules
-    rules["rule_1"]["domain_builder"]["batch_request"] = batch_request
+    rule: dict = {
+        "domain_builder": {
+            "class_name": "TableDomainBuilder",
+            "module_name": "great_expectations.rule_based_profiler.domain_builder",
+            "batch_request": batch_request,
+        },
+        "parameter_builders": [
+            {
+                "class_name": "MetricMultiBatchParameterBuilder",
+                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                "metric_name": "my_other_metric",
+                "name": "my_additional_parameter",
+            }
+        ],
+        "expectation_configuration_builders": [
+            {
+                "class_name": "DefaultExpectationConfigurationBuilder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                "expectation_type": "expect_column_values_to_be_between",
+                "meta": {"details": {"note": "Here's another rule"}},
+            }
+        ],
+    }
+
+    rule_name: str = "rule_with_batch_request"
+    rules: Dict[str, dict] = {rule_name: rule}
 
     config: RuleBasedProfilerConfig = (
         RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
@@ -340,7 +391,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
         )
     )
 
-    domain_builder: dict = config.rules["rule_1"]["domain_builder"]
+    domain_builder: dict = config.rules[rule_name]["domain_builder"]
     converted_batch_request: dict = domain_builder["batch_request"]
 
     assert converted_batch_request["datasource_name"] == datasource_name

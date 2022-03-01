@@ -309,23 +309,18 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     def resolve_config_using_acceptable_arguments(
         cls,
         profiler: "RuleBasedProfiler",  # noqa: F821
-        variables: Optional[Dict[str, Any]] = None,
-        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        variables: Optional[dict] = None,
+        rules: Optional[Dict[str, dict]] = None,
     ) -> "RuleBasedProfilerConfig":
         runtime_config: RuleBasedProfilerConfig = profiler.config
 
-        runtime_rules: Dict[str, dict] = copy.deepcopy(runtime_config.rules)
+        effective_rules: List["Rule"] = profiler.reconcile_profiler_rules(rules=rules)
+        runtime_rules: Dict[str, dict] = {
+            rule.name: rule.to_dict() for rule in effective_rules
+        }
 
-        runtime_variables: Dict[str, dict]
-        if runtime_config.variables is not None:
-            runtime_variables = copy.deepcopy(runtime_config.variables)
-        else:
-            runtime_variables = {}
-
-        if rules:
-            runtime_rules.update(rules)
-        if variables:
-            runtime_variables.update(variables)
+        # TODO(cdkini): Clean this up
+        runtime_variables: Dict[str, dict] = variables or {}
 
         return cls(
             name=runtime_config.name,
