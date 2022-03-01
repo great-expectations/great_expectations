@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Any, Collection, Set, cast
 
 import pytest
 
@@ -57,12 +57,15 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
 
     assert parameter_container.parameter_nodes is None
 
-    value_set_multi_batch_parameter_builder._build_parameters(
+    value_set_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
     )
 
-    assert len(parameter_container.parameter_nodes) == 1
+    assert (
+        parameter_container.parameter_nodes is None
+        or len(parameter_container.parameter_nodes) == 1
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_event_type_value_set"
     expected_value_set: Set[int] = {73, 19, 22}
@@ -121,12 +124,15 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
 
     assert parameter_container.parameter_nodes is None
 
-    value_set_multi_batch_parameter_builder._build_parameters(
+    value_set_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
     )
 
-    assert len(parameter_container.parameter_nodes) == 1
+    assert (
+        parameter_container.parameter_nodes is None
+        or len(parameter_container.parameter_nodes) == 1
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_user_agent_value_set"
     expected_value_set: Set[str] = {
@@ -191,7 +197,10 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         domain=domain,
     )
 
-    assert len(parameter_container.parameter_nodes) == 1
+    assert (
+        parameter_container.parameter_nodes is None
+        or len(parameter_container.parameter_nodes) == 1
+    )
 
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_passenger_count_value_set"
@@ -256,7 +265,10 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         domain=domain,
     )
 
-    assert len(parameter_container.parameter_nodes) == 1
+    assert (
+        parameter_container.parameter_nodes is None
+        or len(parameter_container.parameter_nodes) == 1
+    )
 
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_store_and_fwd_flag_value_set"
@@ -311,4 +323,8 @@ def test__get_unique_values_from_nested_collection_of_sets(test_input, expected)
     Tests that all types of string / int inputs are processed appropriately
     by _get_unique_values_from_nested_collection_of_sets
     """
-    assert _get_unique_values_from_nested_collection_of_sets(test_input) == expected
+    test_input = cast(Collection[Collection[Set[Any]]], test_input)
+    assert (
+        _get_unique_values_from_nested_collection_of_sets(collection=test_input)
+        == expected
+    )

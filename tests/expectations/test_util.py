@@ -425,6 +425,10 @@ def test_table_column_reflection_fallback(test_backends, sa):
         assert not validation_result.success
 
 
+@pytest.mark.skipif(
+    sqlalchemy is None,
+    reason="sqlalchemy is not installed",
+)
 def test__generate_expectation_tests__with_test_backends():
     expectation_type = "whatever"
     data = TestData(stuff=[1, 2, 3, 4, 5])
@@ -466,6 +470,10 @@ def test__generate_expectation_tests__with_test_backends():
     assert backends_to_use == ["sqlite"]
 
 
+@pytest.mark.skipif(
+    sqlalchemy is None,
+    reason="sqlalchemy is not installed",
+)
 def test__generate_expectation_tests__with_test_backends2():
     expectation_type = "whatever"
     data = TestData(stuff=[1, 2, 3, 4, 5])
@@ -511,6 +519,10 @@ def test__generate_expectation_tests__with_test_backends2():
     assert sorted(backends_to_use) == ["pandas", "sqlite"]
 
 
+@pytest.mark.skipif(
+    sqlalchemy is None,
+    reason="sqlalchemy is not installed",
+)
 def test__generate_expectation_tests__with_no_test_backends():
     expectation_type = "whatever"
     data = TestData(stuff=[1, 2, 3, 4, 5])

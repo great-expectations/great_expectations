@@ -48,7 +48,7 @@ def test_meta_not_dict_exception(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -105,7 +105,7 @@ def test_condition_not_string_exception(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -161,7 +161,7 @@ def test_default_expectation_configuration_builder_alice_null_condition(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -184,7 +184,7 @@ def test_default_expectation_configuration_builder_alice_null_condition(
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}
     )
 
@@ -219,7 +219,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -242,7 +242,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}
     )
 
@@ -278,7 +278,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -301,7 +301,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}
     )
 
@@ -336,7 +336,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -363,7 +363,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}, variables=variables
     )
 
@@ -398,7 +398,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -425,7 +425,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}, variables=variables
     )
 
@@ -460,7 +460,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -487,7 +487,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}, variables=variables
     )
 
@@ -522,7 +522,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -549,7 +549,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}, variables=variables
     )
 
@@ -584,7 +584,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -611,7 +611,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}, variables=variables
     )
 
@@ -646,7 +646,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -673,7 +673,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}, variables=variables
     )
 
@@ -708,7 +708,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -735,7 +735,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}, variables=variables
     )
 
@@ -770,7 +770,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -797,7 +797,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}, variables=variables
     )
 
@@ -832,7 +832,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -859,7 +859,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}, variables=variables
     )
 
@@ -894,7 +894,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    min_user_id_parameter._build_parameters(
+    min_user_id_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -921,7 +921,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
 
     expectation_configuration: Optional[
         ExpectationConfiguration
-    ] = default_expectation_configuration_builder._build_expectation_configuration(
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
         domain=domain, parameters={domain.id: parameter_container}, variables=variables
     )
 
