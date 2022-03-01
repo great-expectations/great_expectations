@@ -88,7 +88,7 @@ def test_simple_date_format_parameter_builder_instantiation():
     )
 
     assert date_format_string_parameter.threshold == 1.0
-    assert date_format_string_parameter.candidate_strings is None
+    assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
 
 
 def test_simple_date_format_parameter_builder_zero_batch_id_error():
@@ -133,7 +133,7 @@ def test_simple_date_format_parameter_builder_alice(
         )
     )
 
-    assert date_format_string_parameter.candidate_strings is None
+    assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
     assert date_format_string_parameter._threshold == 1.0
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -146,8 +146,6 @@ def test_simple_date_format_parameter_builder_alice(
     date_format_string_parameter._build_parameters(
         parameter_container=parameter_container, domain=domain
     )
-
-    assert date_format_string_parameter._candidate_strings == DEFAULT_CANDIDATE_STRINGS
 
     # noinspection PyTypeChecker
     assert len(parameter_container.parameter_nodes) == 1
@@ -179,10 +177,10 @@ def test_simple_date_format_parameter_builder_bobby(
     )
 
     metric_domain_kwargs: dict = {"column": "pickup_datetime"}
-    candidate_strings: set[str] = {
+    candidate_strings: list[str] = [
         "%Y-%m-%d",
         "%Y-%m-%d %H:%M:%S",
-    }
+    ]
     threshold: float = 0.9
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -201,7 +199,7 @@ def test_simple_date_format_parameter_builder_bobby(
         )
     )
 
-    assert date_format_string_parameter._candidate_strings == candidate_strings
+    assert date_format_string_parameter._candidate_strings == set(candidate_strings)
     assert date_format_string_parameter._threshold == 0.9
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -215,8 +213,6 @@ def test_simple_date_format_parameter_builder_bobby(
         parameter_container=parameter_container, domain=domain
     )
 
-    assert date_format_string_parameter._candidate_strings != DEFAULT_CANDIDATE_STRINGS
-
     assert len(parameter_container.parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = (
@@ -226,7 +222,7 @@ def test_simple_date_format_parameter_builder_bobby(
         "value": "%Y-%m-%d %H:%M:%S",
         "details": {
             "success_ratio": 1.0,
-            "candidate_strings": sorted(DEFAULT_CANDIDATE_STRINGS),
+            "candidate_strings": candidate_strings,
         },
     }
 

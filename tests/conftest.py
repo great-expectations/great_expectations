@@ -5221,7 +5221,7 @@ def alice_columnar_table_single_batch(empty_data_context):
             **{
                 "expectation_type": "expect_column_values_to_be_between",
                 "kwargs": {
-                    "min_value": 397433,  # From the data
+                    "min_value": 1000,
                     "max_value": 999999999999,
                     "column": "user_id",
                 },
@@ -5235,6 +5235,20 @@ def alice_columnar_table_single_batch(empty_data_context):
                     "column": "user_id",
                 },
                 "meta": {},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_less_than",
+                "meta": {},
+                "kwargs": {"value": 9488404, "column": "user_id"},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_greater_than",
+                "meta": {},
+                "kwargs": {"value": 397433, "column": "user_id"},
             }
         ),
     ]
@@ -5340,7 +5354,9 @@ def alice_columnar_table_single_batch(empty_data_context):
                                 ],  # Pin to event_ts column
                                 "details": {
                                     "success_ratio": 1.0,
-                                    "candidate_strings": DEFAULT_CANDIDATE_STRINGS,
+                                    "candidate_strings": sorted(
+                                        DEFAULT_CANDIDATE_STRINGS
+                                    ),
                                 },
                             },
                         },
@@ -6180,7 +6196,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "column": "pickup_datetime",
                     "strftime_format": {
                         "value": "%Y-%m-%d %H:%M:%S",
-                        "details": {"success_ratio": 1.0},
+                        "details": {
+                            "success_ratio": 1.0,
+                            "candidate_strings": [
+                                "%Y-%m-%d %H:%M:%S",
+                                "%y-%m-%d",
+                            ],
+                        },
                     },
                 },
                 "meta": {
@@ -6200,7 +6222,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "column": "dropoff_datetime",
                     "strftime_format": {
                         "value": "%Y-%m-%d %H:%M:%S",
-                        "details": {"success_ratio": 1.0},
+                        "details": {
+                            "success_ratio": 1.0,
+                            "candidate_strings": [
+                                "%Y-%m-%d %H:%M:%S",
+                                "%y-%m-%d",
+                            ],
+                        },
                     },
                 },
                 "meta": {
