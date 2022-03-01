@@ -2511,7 +2511,51 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "profiler.run",
-            "event_payload": {},
+            "event_payload": {
+                "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
+                "anonymized_rules": [
+                    {
+                        "anonymized_domain_builder": {
+                            "parent_class": "TableDomainBuilder"
+                        },
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                            }
+                        ],
+                        "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
+                        "anonymized_parameter_builders": [
+                            {
+                                "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
+                                "anonymized_class": "dasfj238fefasfa90sdf23j39202f2j2",
+                                "parent_class": "MetricMultiBatchParameterBuilder",
+                            }
+                        ],
+                    },
+                    {
+                        "anonymized_domain_builder": {
+                            "parent_class": "TableDomainBuilder"
+                        },
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "anonymized_expectation_type": "239asdfjaew832hg20sdjwd9922e9e2u",
+                            }
+                        ],
+                        "anonymized_name": "0bac2cecbb0cf8bb704e86710941434e",
+                        "anonymized_parameter_builders": [
+                            {
+                                "anonymized_name": "b7719efec76c6ebe30230fc1ec023beb",
+                                "parent_class": "MetricMultiBatchParameterBuilder",
+                            }
+                        ],
+                    },
+                ],
+                "config_version": 1.0,
+                "rule_count": 2,
+                "variable_count": 1,
+            },
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:28.070Z",
