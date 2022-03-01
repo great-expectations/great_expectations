@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -8,11 +8,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     MetricComputationResult,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    build_parameter_container,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -33,9 +29,9 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Args:
@@ -49,9 +45,9 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
             otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
-            data_context: DataContext
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            data_context: DataContext
         """
         super().__init__(
             name=name,
@@ -68,6 +64,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         self._replace_nan_with_zero = replace_nan_with_zero
 
         self._reduce_scalar_metric = reduce_scalar_metric
+
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"$parameter.{self.name}"
 
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
@@ -107,13 +107,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> Tuple[Any, dict]:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
         details.
 
-        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
-        ptional details
+        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
         """
         metric_computation_result: MetricComputationResult = self.get_metrics(
             metric_name=self.metric_name,
@@ -141,13 +140,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         if reduce_scalar_metric and metric_values.shape[1] == 1:
             metric_values = metric_values[:, 0]
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.name}": {
-                "value": metric_values.tolist(),
-                "details": details,
-            },
-        }
-
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
+        return (
+            metric_values.tolist(),
+            details,
         )

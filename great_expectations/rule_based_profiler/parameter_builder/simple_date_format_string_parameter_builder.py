@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
@@ -8,16 +8,74 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     MetricValues,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    build_parameter_container,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_CANDIDATE_STRINGS: Set[str] = {
+    "%H:%M:%S",
+    "%H:%M:%S,%f",
+    "%H:%M:%S.%f",
+    "%Y %b %d %H:%M:%S.%f",
+    "%Y %b %d %H:%M:%S.%f %Z",
+    "%Y %b %d %H:%M:%S.%f*%Z",
+    "%Y%m%d %H:%M:%S.%f",
+    "%Y-%m-%d",
+    "%Y-%m-%d %H:%M:%S",
+    "%Y-%m-%d %H:%M:%S %z",
+    "%Y-%m-%d %H:%M:%S%z",
+    "%Y-%m-%d %H:%M:%S,%f",
+    "%Y-%m-%d %H:%M:%S,%f%z",
+    "%Y-%m-%d %H:%M:%S.%f",
+    "%Y-%m-%d %H:%M:%S.%f%z",
+    "%Y-%m-%d'T'%H:%M:%S",
+    "%Y-%m-%d'T'%H:%M:%S%z",
+    "%Y-%m-%d'T'%H:%M:%S'%z'",
+    "%Y-%m-%d'T'%H:%M:%S.%f",
+    "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
+    "%Y-%m-%d*%H:%M:%S",
+    "%Y-%m-%d*%H:%M:%S:%f",
+    "%Y-%m-%dT%z",
+    "%Y/%m/%d",
+    "%Y/%m/%d*%H:%M:%S",
+    "%b %d %H:%M:%S",
+    "%b %d %H:%M:%S %Y",
+    "%b %d %H:%M:%S %z",
+    "%b %d %H:%M:%S %z %Y",
+    "%b %d %Y %H:%M:%S",
+    "%b %d, %Y %H:%M:%S %p",
+    "%d %b %Y %H:%M:%S",
+    "%d %b %Y %H:%M:%S*%f",
+    "%d-%b-%Y %H:%M:%S",
+    "%d-%b-%Y %H:%M:%S.%f",
+    "%d-%m-%Y",
+    "%d/%b %H:%M:%S,%f",
+    "%d/%b/%Y %H:%M:%S",
+    "%d/%b/%Y:%H:%M:%S",
+    "%d/%b/%Y:%H:%M:%S %z",
+    "%d/%m/%Y",
+    "%m%d_%H:%M:%S",
+    "%m%d_%H:%M:%S.%f",
+    "%m-%d-%Y",
+    "%m/%d/%Y",
+    "%m/%d/%Y %H:%M:%S %p",
+    "%m/%d/%Y %H:%M:%S %p:%f",
+    "%m/%d/%Y %H:%M:%S %z",
+    "%m/%d/%Y*%H:%M:%S",
+    "%m/%d/%Y*%H:%M:%S*%f",
+    "%m/%d/%y %H:%M:%S %z",
+    "%m/%d/%y*%H:%M:%S",
+    "%y%m%d %H:%M:%S",
+    "%y-%m-%d",
+    "%y-%m-%d %H:%M:%S",
+    "%y-%m-%d %H:%M:%S,%f",
+    "%y-%m-%d %H:%M:%S,%f %z",
+    "%y/%m/%d",
+    "%y/%m/%d %H:%M:%S",
+}
 
 
 class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
@@ -27,63 +85,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     has the lowest unexpected_count ratio.
     """
 
-    CANDIDATE_STRINGS: Set[str] = {
-        "%Y-%m-%d",
-        "%m-%d-%Y",
-        "%y-%m-%d",
-        "%Y-%m-%dT%z",
-        "%Y-%m-%d %H:%M:%S",
-        "%Y %b %d %H:%M:%S.%f %Z",
-        "%b %d %H:%M:%S %z %Y",
-        "%d/%b/%Y:%H:%M:%S %z",
-        "%b %d, %Y %H:%M:%S %p",
-        "%b %d %Y %H:%M:%S",
-        "%b %d %H:%M:%S %Y",
-        "%b %d %H:%M:%S %z",
-        "%b %d %H:%M:%S",
-        "%Y-%m-%d'T'%H:%M:%S%z",
-        "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
-        "%Y-%m-%d %H:%M:%S %z",
-        "%Y-%m-%d %H:%M:%S%z",
-        "%Y-%m-%d %H:%M:%S,%f",
-        "%Y/%m/%d*%H:%M:%S",
-        "%Y %b %d %H:%M:%S.%f*%Z",
-        "%Y %b %d %H:%M:%S.%f",
-        "%Y-%m-%d %H:%M:%S,%f%z",
-        "%Y-%m-%d %H:%M:%S.%f",
-        "%Y-%m-%d %H:%M:%S.%f%z",
-        "%Y-%m-%d'T'%H:%M:%S.%f",
-        "%Y-%m-%d'T'%H:%M:%S",
-        "%Y-%m-%d'T'%H:%M:%S'%z'",
-        "%Y-%m-%d*%H:%M:%S:%f",
-        "%Y-%m-%d*%H:%M:%S",
-        "%y-%m-%d %H:%M:%S,%f %z",
-        "%y-%m-%d %H:%M:%S,%f",
-        "%y-%m-%d %H:%M:%S",
-        "%y/%m/%d %H:%M:%S",
-        "%y%m%d %H:%M:%S",
-        "%Y%m%d %H:%M:%S.%f",
-        "%m/%d/%y*%H:%M:%S",
-        "%m/%d/%Y*%H:%M:%S",
-        "%m/%d/%Y*%H:%M:%S*%f",
-        "%m/%d/%y %H:%M:%S %z",
-        "%m/%d/%Y %H:%M:%S %z",
-        "%H:%M:%S",
-        "%H:%M:%S.%f",
-        "%H:%M:%S,%f",
-        "%d/%b %H:%M:%S,%f",
-        "%d/%b/%Y:%H:%M:%S",
-        "%d/%b/%Y %H:%M:%S",
-        "%d-%b-%Y %H:%M:%S",
-        "%d-%b-%Y %H:%M:%S.%f",
-        "%d %b %Y %H:%M:%S",
-        "%d %b %Y %H:%M:%S*%f",
-        "%m%d_%H:%M:%S",
-        "%m%d_%H:%M:%S.%f",
-        "%m/%d/%Y %H:%M:%S %p:%f",
-        "%m/%d/%Y %H:%M:%S %p",
-    }
-
     def __init__(
         self,
         name: str,
@@ -91,9 +92,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[float, str] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Configure this SimpleDateFormatStringParameterBuilder
@@ -105,9 +106,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             metric_value_kwargs: used in MetricConfiguration
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_strings: a list of candidate date format strings that will replace the default
-            data_context: DataContext
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            data_context: DataContext
         """
         super().__init__(
             name=name,
@@ -121,7 +122,14 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         self._threshold = threshold
 
-        self._candidate_strings = candidate_strings
+        if candidate_strings is not None and isinstance(candidate_strings, list):
+            self._candidate_strings = set(candidate_strings)
+        else:
+            self._candidate_strings = DEFAULT_CANDIDATE_STRINGS
+
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"$parameter.{self.name}"
 
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
@@ -155,12 +163,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> ParameterContainer:
+    ) -> Tuple[Any, dict]:
         """
         Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold.
 
-        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
+        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
         """
         metric_computation_result: MetricComputationResult
 
@@ -193,10 +201,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        if candidate_strings is not None and isinstance(candidate_strings, list):
-            candidate_strings = set(candidate_strings)
-        else:
-            candidate_strings = SimpleDateFormatStringParameterBuilder.CANDIDATE_STRINGS
 
         # Gather "metric_value_kwargs" for all candidate "strftime_format" strings.
         fmt_string: str
@@ -260,14 +264,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best_fmt_string = fmt_string
                 best_ratio = ratio
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.name}": {
-                "value": best_fmt_string,
-                "details": {"success_ratio": best_ratio},
+        return (
+            best_fmt_string,
+            {
+                "success_ratio": best_ratio,
+                "candidate_strings": sorted(candidate_strings),
             },
-        }
-
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
         )
-        return parameter_container

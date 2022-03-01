@@ -2,7 +2,7 @@ import copy
 import itertools
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, make_dataclass
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -14,6 +14,7 @@ from great_expectations.rule_based_profiler.types import (
     Builder,
     Domain,
     ParameterContainer,
+    build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
 from great_expectations.rule_based_profiler.util import (
@@ -84,11 +85,6 @@ class ParameterBuilder(Builder, ABC):
         ```
     """
 
-    exclude_field_names: Set[str] = {
-        "data_context",
-        "batch_list",
-    }
-
     def __init__(
         self,
         name: str,
@@ -107,12 +103,13 @@ class ParameterBuilder(Builder, ABC):
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
         """
+        super().__init__(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            data_context=data_context,
+        )
 
         self._name = name
-        self._batch_request = batch_request
-        self._data_context = data_context
-
-        self._batch_list = batch_list
 
     def build_parameters(
         self,
@@ -120,13 +117,39 @@ class ParameterBuilder(Builder, ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
-        self._build_parameters(
+        parameter_computation_impl: Optional[Callable] = None,
+    ) -> None:
+        computed_parameter_value: Any
+        parameter_computation_details: dict
+
+        if parameter_computation_impl is None:
+            parameter_computation_impl = self._build_parameters
+
+        (
+            computed_parameter_value,
+            parameter_computation_details,
+        ) = parameter_computation_impl(
             parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
+
+        parameter_values: Dict[str, Any] = {
+            self.fully_qualified_parameter_name: {
+                "value": computed_parameter_value,
+                "details": parameter_computation_details,
+            },
+        }
+
+        build_parameter_container(
+            parameter_container=parameter_container, parameter_values=parameter_values
+        )
+
+    @property
+    @abstractmethod
+    def fully_qualified_parameter_name(self) -> str:
+        pass
 
     @property
     def name(self) -> str:
@@ -165,7 +188,13 @@ class ParameterBuilder(Builder, ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> Tuple[Any, dict]:
+        """
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
+        details.
+
+        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        """
         pass
 
     def get_validator(

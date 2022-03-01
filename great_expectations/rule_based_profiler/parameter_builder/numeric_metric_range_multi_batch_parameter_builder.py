@@ -11,11 +11,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     MetricComputationResult,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    build_parameter_container,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
     compute_bootstrap_quantiles_bias_corrected_point_estimate,
@@ -70,9 +66,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Args:
@@ -96,15 +92,15 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
-            data_context: DataContext
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            data_context: DataContext
         """
         super().__init__(
             name=name,
-            data_context=data_context,
             batch_list=batch_list,
             batch_request=batch_request,
+            data_context=data_context,
         )
 
         self._metric_name = metric_name
@@ -144,6 +140,10 @@ detected.
                     )
 
         self._truncate_values = truncate_values
+
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"$parameter.{self.name}"
 
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
@@ -205,13 +205,12 @@ detected.
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> Tuple[Any, dict]:
         """
          Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
          details.
 
-         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
-         ptional details
+         return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
 
          The algorithm operates according to the following steps:
          1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
@@ -287,17 +286,11 @@ detected.
             **estimator_kwargs,
         )
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.name}": {
-                "value": {
-                    "value_range": metric_value_range.tolist(),
-                },
-                "details": details,
+        return (
+            {
+                "value_range": metric_value_range.tolist(),
             },
-        }
-
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
+            details,
         )
 
     def _estimate_metric_value_range(
