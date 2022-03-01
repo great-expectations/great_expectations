@@ -2705,7 +2705,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
                                 },
                                 "batch_request_optional_top_level_keys": [
                                     "batch_spec_passthrough",
-                                    "data_connector_query",
                                 ],
                                 "batch_spec_passthrough_keys": ["reader_options"],
                                 "data_connector_query_keys": ["index"],
