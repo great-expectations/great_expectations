@@ -124,19 +124,6 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameter_value_node["value"]
         )
 
-        # TODO: <Alex>ALEX</Alex>
-        # parameter_values: Dict[str, Any] = {
-        #     fully_qualified_parameter_name: {
-        #         "value": unique_parameter_values,
-        #         "details": parameter_value_node_details,
-        #     },
-        # }
-
-        # build_parameter_container(
-        #     parameter_container=parameter_container, parameter_values=parameter_values
-        # )
-        # TODO: <Alex>ALEX</Alex>
-
         return (
             fully_qualified_parameter_name,
             unique_parameter_values,
