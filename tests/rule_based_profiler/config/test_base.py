@@ -307,10 +307,13 @@ def test_resolve_config_using_acceptable_arguments(
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
     profiler_with_placeholder_args: RuleBasedProfiler,
 ) -> None:
-    rule_name: str = "my_new_rule"
-    assert all(rule.name != rule_name for rule in profiler_with_placeholder_args.rules)
+    runtime_override_rule_name: str = "my_runtime_override_rule"
+    assert all(
+        rule.name != runtime_override_rule_name
+        for rule in profiler_with_placeholder_args.rules
+    )
 
-    rule: dict = {
+    runtime_override_rule: dict = {
         "domain_builder": {
             "class_name": "TableDomainBuilder",
             "module_name": "great_expectations.rule_based_profiler.domain_builder",
@@ -333,20 +336,21 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
         ],
     }
 
-    rules: Dict[str, dict] = {rule_name: rule}
+    runtime_override_rules: Dict[str, dict] = {
+        runtime_override_rule_name: runtime_override_rule
+    }
 
     config: RuleBasedProfilerConfig = (
         RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-            profiler=profiler_with_placeholder_args, rules=rules
+            profiler=profiler_with_placeholder_args, rules=runtime_override_rules
         )
     )
 
-    assert len(config.rules) == 2 and rule_name in config.rules
+    assert len(config.rules) == 2 and runtime_override_rule_name in config.rules
 
 
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
     profiler_with_placeholder_args: RuleBasedProfiler,
-    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
     datasource_name: str = "my_datasource"
     data_connector_name: str = "my_basic_data_connector"
@@ -358,7 +362,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
         data_asset_name=data_asset_name,
     )
 
-    rule: dict = {
+    runtime_override_rule: dict = {
         "domain_builder": {
             "class_name": "TableDomainBuilder",
             "module_name": "great_expectations.rule_based_profiler.domain_builder",
@@ -382,16 +386,18 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
         ],
     }
 
-    rule_name: str = "rule_with_batch_request"
-    rules: Dict[str, dict] = {rule_name: rule}
+    runtime_override_rule_name: str = "rule_with_batch_request"
+    runtime_override_rules: Dict[str, dict] = {
+        runtime_override_rule_name: runtime_override_rule
+    }
 
     config: RuleBasedProfilerConfig = (
         RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-            profiler=profiler_with_placeholder_args, rules=rules
+            profiler=profiler_with_placeholder_args, rules=runtime_override_rules
         )
     )
 
-    domain_builder: dict = config.rules[rule_name]["domain_builder"]
+    domain_builder: dict = config.rules[runtime_override_rule_name]["domain_builder"]
     converted_batch_request: dict = domain_builder["batch_request"]
 
     assert converted_batch_request["datasource_name"] == datasource_name
