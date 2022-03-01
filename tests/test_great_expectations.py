@@ -1064,6 +1064,10 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="pyarrow"),
+        reason="pyarrow is not installed",
+    )
     def test_read_feather(self):
         pandas_version = re.match(r"(\d+)\.(\d+)\..+", pd.__version__)
         if pandas_version is None:
@@ -1079,6 +1083,11 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="pyarrow")
+        and not is_library_loadable(library_name="fastparquet"),
+        reason="pyarrow and fastparquet are not installed",
+    )
     def test_read_parquet(self):
         """
         This test is unusual, because on travis (but only on travis), we have observed problems importing pyarrow,
