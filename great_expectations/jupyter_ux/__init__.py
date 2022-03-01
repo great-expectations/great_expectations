@@ -7,7 +7,7 @@ from datetime import datetime
 
 import pandas as pd
 import tzlocal
-from IPython.core.display import HTML, display
+from IPython.display import HTML, display
 from packaging import version
 
 pd.set_option("display.max_rows", None)
