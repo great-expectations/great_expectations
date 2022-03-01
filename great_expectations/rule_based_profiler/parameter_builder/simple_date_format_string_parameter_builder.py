@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
@@ -8,11 +8,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     MetricValues,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    build_parameter_container,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -131,6 +127,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         else:
             self._candidate_strings = DEFAULT_CANDIDATE_STRINGS
 
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"$parameter.{self.name}"
+
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
     """
@@ -163,12 +163,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> ParameterContainer:
+    ) -> Tuple[Any, dict]:
         """
         Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold.
 
-        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
+        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
         """
         metric_computation_result: MetricComputationResult
 
@@ -272,9 +272,4 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                     "candidate_strings": sorted(candidate_strings),
                 },
             },
-        }
-
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
         )
-        return parameter_container

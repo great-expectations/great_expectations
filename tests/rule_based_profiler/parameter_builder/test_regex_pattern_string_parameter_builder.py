@@ -1,13 +1,9 @@
 from typing import List, Set
 
-import pytest
-
-import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.parameter_builder import (
     RegexPatternStringParameterBuilder,
-    regex_pattern_string_parameter_builder,
 )
 from great_expectations.rule_based_profiler.types import (
     Domain,
@@ -91,14 +87,10 @@ def test_regex_pattern_string_parameter_builder_alice(
     )
     assert parameter_container.parameter_nodes is None
 
-    regex_pattern_string_parameter._build_parameters(
+    regex_pattern_string_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
     fully_qualified_parameter_name_for_value: str = "$parameter.my_regex"
-    expected_value: dict = {
-        "value": [r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$"],
-        "details": {"success_ratio": [1.0]},
-    }
     expected_value: dict = {
         "value": [r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$"],
         "details": {
@@ -163,7 +155,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
 
     assert parameter_container.parameter_nodes is None
 
-    regex_parameter._build_parameters(
+    regex_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
@@ -228,7 +220,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
 
     assert parameter_container.parameter_nodes is None
 
-    regex_parameter._build_parameters(
+    regex_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
 
