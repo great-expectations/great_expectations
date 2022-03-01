@@ -176,6 +176,9 @@
         },
         "mssql": {
           "empty_column": "VARCHAR"
+        },
+        "bigquery": {
+          "empty_column": "STRING"
         }
       },
       "tests": [{
@@ -228,7 +231,7 @@
     },
     {
       "title": "basic_negative_test_case_datetime_set",
-      "suppress_test_for": ["sqlite"],
+      "suppress_test_for": ["sqlite", "bigquery"],
       "exact_match_out": false,
       "in": {
         "column": "dates",
@@ -240,6 +243,22 @@
         "unexpected_index_list": [0],
         "unexpected_list": ["2018-01-01T00:00:00"]
       }
-    }]
+    },
+    {
+      "title": "basic_negative_test_case_datetime_set_bigquery",
+      "only_for": ["bigquery"],
+      "exact_match_out": false,
+      "in": {
+        "column": "dates",
+        "value_set": ["2018-01-02", "2018-01-02 00:34:01"],
+        "parse_strings_as_datetimes": true
+      },
+      "out": {
+        "success": false,
+        "unexpected_index_list": [0],
+        "unexpected_list": ["2018-01-01"]
+      }
+    }
+    ]
   }]
 }

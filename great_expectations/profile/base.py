@@ -8,6 +8,7 @@ from typing import Any
 from dateutil.parser import parse
 
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.dataset import Dataset
@@ -106,119 +107,6 @@ class ProfilerCardinality(Enum):
     MANY = "many"
     VERY_MANY = "very many"
     UNIQUE = "unique"
-
-
-class ProfilerTypeMapping:
-    """Useful backend type mapping for building profilers."""
-
-    INT_TYPE_NAMES = [
-        "INTEGER",
-        "integer",
-        "int",
-        "int_",
-        "int8",
-        "int16",
-        "int32",
-        "int64",
-        "uint8",
-        "uint16",
-        "uint32",
-        "uint64",
-        "INT",
-        "INTEGER",
-        "INT64",
-        "TINYINT",
-        "BYTEINT",
-        "SMALLINT",
-        "BIGINT",
-        "IntegerType",
-        "LongType",
-    ]
-    FLOAT_TYPE_NAMES = [
-        "FLOAT",
-        "FLOAT4",
-        "FLOAT8",
-        "FLOAT64",
-        "DOUBLE",
-        "DOUBLE_PRECISION",
-        "NUMERIC",
-        "FloatType",
-        "DoubleType",
-        "float",
-        "float_",
-        "float16",
-        "float32",
-        "float64",
-        "number",
-        "DECIMAL",
-        "REAL",
-    ]
-    STRING_TYPE_NAMES = [
-        "CHAR",
-        "NCHAR",
-        "VARCHAR",
-        "NVARCHAR",
-        "TEXT",
-        "NTEXT",
-        "STRING",
-        "StringType",
-        "string",
-        "str",
-        "object",
-        "dtype('O')",
-    ]
-    BOOLEAN_TYPE_NAMES = [
-        "BOOLEAN",
-        "boolean",
-        "BOOL",
-        "TINYINT",
-        "BIT",
-        "bool",
-        "BooleanType",
-    ]
-    DATETIME_TYPE_NAMES = [
-        "DATE",
-        "TIME",
-        "DATETIME",
-        "DATETIME2",
-        "DATETIME64",
-        "SMALLDATETIME",
-        "DATETIMEOFFSET",
-        "TIMESTAMP",
-        "Timestamp",
-        "TimestampType",
-        "DateType",
-        "datetime64",
-        "datetime64[ns]",
-        "timedelta[ns]",
-        "<M8[ns]",
-    ]
-    BINARY_TYPE_NAMES = [
-        "BINARY",
-        "binary",
-        "VARBINARY",
-        "varbinary",
-        "IMAGE",
-        "image",
-    ]
-    CURRENCY_TYPE_NAMES = [
-        "MONEY",
-        "money",
-        "SMALLMONEY",
-        "smallmoney",
-    ]
-    IDENTIFIER_TYPE_NAMES = [
-        "UNIQUEIDENTIFIER",
-        "uniqueidentifier",
-    ]
-    MISCELLANEOUS_TYPE_NAMES = [
-        "SQL_VARIANT",
-        "sql_variant",
-    ]
-    RECORD_TYPE_NAMES = [
-        "JSON",
-        "json",
-    ]
 
 
 profiler_data_types_with_mapping = {

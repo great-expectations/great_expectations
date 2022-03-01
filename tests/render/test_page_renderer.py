@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from collections import OrderedDict
 
 import mistune
@@ -540,6 +541,13 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
     import pprint
 
     pprint.pprint(rendered_validation_results["sections"])
+
+    # replace version of vega-lite in res to match snapshot test
+    content_block = rendered_validation_results["sections"][5]["content_blocks"][1][
+        "table"
+    ][10][2]["content_blocks"][1]
+    content_block["graph"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"])
+
     # with open(file_relative_path(__file__, "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_end_nc.json"), "w") as f:
     #     json.dump(rendered_validation_results, f, indent=2)
     pprint.pprint(ValidationResultsPageRenderer_render_with_run_info_at_end)
@@ -560,6 +568,13 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
         titanic_profiled_evrs_1
     ).to_json_dict()
     print(rendered_validation_results)
+
+    # replace version of vega-lite in res to match snapshot test
+    content_block = rendered_validation_results["sections"][5]["content_blocks"][1][
+        "table"
+    ][10][2]["content_blocks"][1]
+    content_block["graph"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"])
+
     # with open(file_relative_path(__file__, "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start_nc.json"), "w") as f:
     #     json.dump(rendered_validation_results, f, indent=2)
 

@@ -1,19 +1,21 @@
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
-from ...render.renderer.renderer import renderer
-from ...render.types import (
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    InvalidExpectationConfigurationError,
+)
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import (
     RenderedBulletListContent,
     RenderedStringTemplateContent,
     ValueListContent,
 )
-from ...render.util import (
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
 
 try:
     import sqlalchemy as sa
@@ -107,8 +109,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "mostly",
         "parse_strings_as_datetimes",
     )
-
     default_kwarg_values = {"value_set": None, "parse_strings_as_datetimes": False}
+    args_keys = (
+        "column",
+        "value_set",
+    )
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -350,7 +355,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         return new_block
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         if not super().validate_configuration(configuration):
             return False
         try:

@@ -1,29 +1,22 @@
+import copy
 import json
-from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
-from great_expectations.core.batch import (
-    delete_runtime_parameters_batch_data_references_from_config,
-    get_runtime_parameters_batch_data_references_from_config,
-    restore_runtime_parameters_batch_data_references_into_config,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    CheckpointConfigSchema,
-)
+from great_expectations.data_asset.util import recursively_convert_to_json_serializable
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.types import DictDot
+from great_expectations.types import SerializableDictDot, safe_deep_copy
 
 
-class CheckpointResult(DictDot):
+class CheckpointResult(SerializableDictDot):
     """
     The run_results property forms the backbone of this type and defines the basic contract for what a checkpoint's
     run method returns. It is a dictionary where the top-level keys are the ValidationResultIdentifiers of
@@ -91,7 +84,7 @@ class CheckpointResult(DictDot):
         self._validation_results_by_validation_result_identifier = None
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.checkpoint_config.name
 
     @property
@@ -289,42 +282,83 @@ class CheckpointResult(DictDot):
         return self._validation_statistics
 
     def to_json_dict(self) -> dict:
-        return checkpointResultSchema.dump(self)
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        serializeable_dict: dict = {
+            "run_id": self.run_id.to_json_dict(),
+            "run_results": convert_to_json_serializable(
+                data=recursively_convert_to_json_serializable(test_obj=self.run_results)
+            ),
+            "checkpoint_config": self.checkpoint_config.to_json_dict(),
+            "success": convert_to_json_serializable(data=self.success),
+        }
+        serializeable_dict = recursively_convert_to_json_serializable(
+            test_obj=serializeable_dict
+        )
+        return serializeable_dict
+
+    def __getstate__(self):
+        """
+        In order for object to be picklable, its "__dict__" or or result of calling "__getstate__()" must be picklable.
+        """
+        return self.to_json_dict()
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+
+        memo[id(self)] = result
+
+        attributes_to_copy = set(CheckpointResultSchema().fields.keys())
+        for key in attributes_to_copy:
+            try:
+                value = self[key]
+                value_copy = safe_deep_copy(data=value, memo=memo)
+                setattr(result, key, value_copy)
+            except AttributeError:
+                pass
+
+        return result
 
     def __repr__(self):
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(
-            config=self["checkpoint_config"]
-        )
-        delete_runtime_parameters_batch_data_references_from_config(
-            config=self["checkpoint_config"]
-        )
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         serializeable_dict: dict = self.to_json_dict()
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self["checkpoint_config"],
-            batch_data_references=batch_data_references,
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=serializeable_dict["checkpoint_config"],
-            batch_data_references=batch_data_references,
-            replace_value_with_type_string=True,
-        )
         return json.dumps(serializeable_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class CheckpointResultSchema(Schema):
     # JC: I think this needs to be changed to be an instance of a new type called CheckpointResult,
     # which would include the top-level keys run_id, config, name, and a list of results.
     run_id = fields.Nested(RunIdentifierSchema)
-    run_results = fields.Dict()
-    checkpoint_config = fields.Nested(CheckpointConfigSchema)
-    success = fields.Bool()
+    run_results = fields.Dict(required=False, allow_none=True)
+    checkpoint_config = fields.Dict(required=False, allow_none=True)
+    success = fields.Boolean(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
-        data = deepcopy(data)
+        data = copy.deepcopy(data)
         data._run_results = convert_to_json_serializable(data.run_results)
         return data
 

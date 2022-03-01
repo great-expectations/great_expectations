@@ -1,23 +1,22 @@
 from typing import Any, List, Optional, Union
 
+from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
-from ...core import ExpectationValidationResult
-from ...exceptions import InvalidExpectationConfigurationError
-from ...render.renderer.renderer import renderer
-from ...render.types import (
+from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import (
     RenderedBulletListContent,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
-from ...render.util import (
+from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation
 
 try:
     import sqlalchemy as sa
@@ -39,12 +38,12 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
-
-    Keyword Args:
         min_value (int or None): \
             The minimum value for a column entry length.
         max_value (int or None): \
             The maximum value for a column entry length.
+
+    Keyword Args:
         mostly (None or a float between 0 and 1): \
             Return `"success": True` if at least mostly fraction of values match the expectation. \
             For more detail, see :ref:`mostly`.
@@ -99,7 +98,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "strict_max",
         "mostly",
     )
-
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
@@ -112,8 +110,15 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "min_value",
+        "max_value",
+    )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
 
         if configuration is None:

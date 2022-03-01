@@ -93,41 +93,48 @@ try:
 except (ImportError, KeyError, AttributeError):
     snowflake = None
 
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import pybigquery.sqlalchemy_bigquery
+    import sqlalchemy_bigquery as sqla_bigquery
 
-    ###
-    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-    # to define an attribute "dialect". A PR has been submitted to fix this upstream
-    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-    # fix isn't present, add this "dialect" attribute here:
-    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
-        pybigquery.sqlalchemy_bigquery.dialect = (
-            pybigquery.sqlalchemy_bigquery.BigQueryDialect
-        )
-
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sa.dialects.registry.register(
-        "bigquery", "pybigquery.sqlalchemy_bigquery", "dialect"
-    )
-    try:
-        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
-        bigquery_types_tuple = None
-    except AttributeError:
-        # In older versions of the pybigquery driver, types were not exported, so we use a hack
-        logger.warning(
-            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-        )
-        from collections import namedtuple
-
-        BigQueryTypes = namedtuple(
-            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
-        )
-        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except (ImportError, AttributeError):
+    sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     bigquery_types_tuple = None
-    pybigquery = None
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+
+        warnings.warn(
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning,
+        )
+        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
+        ###
+        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+        # to define an attribute "dialect". A PR has been submitted to fix this upstream
+        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+        # fix isn't present, add this "dialect" attribute here:
+        if not hasattr(sqla_bigquery, "dialect"):
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
+
+        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        try:
+            getattr(sqla_bigquery, "INTEGER")
+            bigquery_types_tuple = None
+        except AttributeError:
+            # In older versions of the pybigquery driver, types were not exported, so we use a hack
+            logger.warning(
+                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+            )
+            from collections import namedtuple
+
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+    except (ImportError, AttributeError):
+        sqla_bigquery = None
+        bigquery_types_tuple = None
+        pybigquery = None
 
 try:
     import teradatasqlalchemy.dialect
@@ -156,7 +163,7 @@ def _get_dialect_type_module(dialect):
         if (
             isinstance(
                 dialect,
-                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+                sqla_bigquery.BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):
@@ -236,9 +243,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             self.engine = engine
         else:
-            concurrency = (
-                concurrency if concurrency is not None else ConcurrencyConfig()
-            )
+            concurrency: ConcurrencyConfig
+            if data_context is None or data_context.concurrency is None:
+                concurrency = ConcurrencyConfig()
+            else:
+                concurrency = data_context.concurrency
+
             concurrency.add_sqlalchemy_create_engine_parameters(kwargs)
 
             if credentials is not None:
@@ -253,6 +263,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 raise InvalidConfigError(
                     "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
                 )
+
+        # these are two backends where temp_table_creation is not supported we set the default value to False.
+        if self.engine.dialect.name.lower() in [
+            "trino",
+            "awsathena",  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
+        ]:
+            self._create_temp_table = False
 
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
@@ -282,7 +299,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         elif self.engine.dialect.name.lower() == "bigquery":
             self.dialect_module = import_library_module(
-                module_name="pybigquery.sqlalchemy_bigquery"
+                module_name=_BIGQUERY_MODULE_NAME
             )
         elif self.engine.dialect.name.lower() == "teradatasql":
             # WARNING: Teradata Support is experimental, functionality is not fully under test
@@ -499,7 +516,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     domain_kwargs["row_condition"]
                 )
                 selectable = (
-                    sa.select(sa.text("*"))
+                    sa.select([sa.text("*")])
                     .select_from(selectable)
                     .where(parsed_condition)
                 )
@@ -1091,11 +1108,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
-        ) and (
-            self.engine.dialect.name.lower()
-            not in [
-                "trino",
-            ]
         )
 
         if isinstance(batch_spec, RuntimeQueryBatchSpec):

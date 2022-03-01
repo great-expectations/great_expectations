@@ -1,22 +1,21 @@
 import logging
 import os
-from collections import OrderedDict
-from typing import List
+from collections import OrderedDict, defaultdict
+from typing import Dict, List, Tuple, Union
 
 from dateutil.parser import parse
 
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.render.util import num_to_str
-
-from ...core import ExpectationSuite
-from ...core.expectation_validation_result import ExpectationSuiteValidationResult
-from ...core.run_identifier import RunIdentifier
-from ...validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
-)
-from ..types import (
+from great_expectations.render.renderer.renderer import Renderer
+from great_expectations.render.types import (
     CollapseContent,
+    RenderedComponentContent,
     RenderedDocumentContent,
     RenderedHeaderContent,
     RenderedMarkdownContent,
@@ -25,7 +24,10 @@ from ..types import (
     RenderedTableContent,
     TextContent,
 )
-from .renderer import Renderer
+from great_expectations.render.util import num_to_str
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +90,70 @@ class ValidationResultsPageRenderer(Renderer):
         validation_results: ExpectationSuiteValidationResult,
         evaluation_parameters=None,
     ):
-        run_id = validation_results.meta["run_id"]
+        # Gather run identifiers
+        run_name, run_time = self._parse_run_values(validation_results)
+        expectation_suite_name = validation_results.meta["expectation_suite_name"]
+        batch_kwargs = (
+            validation_results.meta.get("batch_kwargs", {})
+            or validation_results.meta.get("batch_spec", {})
+            or {}
+        )
+
+        # Add datasource key to batch_kwargs if missing
+        if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
+            # Check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
+            if len(expectation_suite_name.split(".")) == 4:
+                batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
+
+        columns = self._group_evrs_by_column(validation_results, expectation_suite_name)
+        overview_content_blocks = [
+            self._render_validation_header(validation_results),
+            self._render_validation_statistics(validation_results=validation_results),
+        ]
+
+        collapse_content_blocks = [
+            self._render_validation_info(validation_results=validation_results)
+        ]
+        collapse_content_block = self._generate_collapse_content_block(
+            collapse_content_blocks, validation_results
+        )
+
+        if not self.run_info_at_end:
+            overview_content_blocks.append(collapse_content_block)
+
+        sections = self._collect_rendered_document_content_sections(
+            validation_results,
+            overview_content_blocks,
+            collapse_content_blocks,
+            columns,
+        )
+
+        # Determine whether we have a custom run_name
+        data_asset_name = batch_kwargs.get("data_asset_name", "")
+        page_title = self._determine_page_title(
+            run_name, run_time, data_asset_name, expectation_suite_name
+        )
+
+        return RenderedDocumentContent(
+            **{
+                "renderer_type": "ValidationResultsPageRenderer",
+                "page_title": page_title,
+                "batch_kwargs": batch_kwargs
+                if "batch_kwargs" in validation_results.meta
+                else None,
+                "batch_spec": batch_kwargs
+                if "batch_spec" in validation_results.meta
+                else None,
+                "expectation_suite_name": expectation_suite_name,
+                "sections": sections,
+                "utm_medium": "validation-results-page",
+            }
+        )
+
+    def _parse_run_values(
+        self, validation_results: ExpectationSuiteValidationResult
+    ) -> Tuple[str, str]:
+        run_id: Union[str, dict, RunIdentifier] = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -98,31 +163,22 @@ class ValidationResultsPageRenderer(Renderer):
         elif isinstance(run_id, dict):
             run_name = run_id.get("run_name") or "__none__"
             try:
-                run_time = parse(run_id.get("run_time")).strftime("%Y-%m-%dT%H:%M:%SZ")
+                t = run_id.get("run_time", "")
+                run_time = parse(t).strftime("%Y-%m-%dT%H:%M:%SZ")
             except (ValueError, TypeError):
                 run_time = "__none__"
         elif isinstance(run_id, RunIdentifier):
             run_name = run_id.run_name or "__none__"
             run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
-        expectation_suite_name = validation_results.meta["expectation_suite_name"]
-        batch_kwargs = (
-            validation_results.meta.get("batch_kwargs", {})
-            or validation_results.meta.get("batch_spec", {})
-            or {}
-        )
+        return run_name, run_time
 
-        # add datasource key to batch_kwargs if missing
-        if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
-            # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
-            if len(expectation_suite_name.split(".")) == 4:
-                if "batch_kwargs" in validation_results.meta:
-                    batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
-                else:
-                    batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
-
-        # Group EVRs by column
-        columns = {}
+    def _group_evrs_by_column(
+        self,
+        validation_results: ExpectationSuiteValidationResult,
+        expectation_suite_name: str,
+    ) -> Dict[str, list]:
+        columns = defaultdict(list)
         try:
             suite_meta = (
                 self._data_context.get_expectation_suite(expectation_suite_name).meta
@@ -142,59 +198,31 @@ class ValidationResultsPageRenderer(Renderer):
             else:
                 column = "Table-Level Expectations"
 
-            if column not in columns:
-                columns[column] = []
             columns[column].append(evr)
 
-        ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
-        overview_content_blocks = [
-            self._render_validation_header(validation_results),
-            self._render_validation_statistics(validation_results=validation_results),
+        return columns
+
+    def _generate_collapse_content_block(
+        self,
+        collapse_content_blocks: List[RenderedTableContent],
+        validation_results: ExpectationSuiteValidationResult,
+    ) -> CollapseContent:
+
+        attrs = [
+            ("batch_markers", "Batch Markers"),
+            ("batch_kwargs", "Batch Kwargs"),
+            ("batch_parameters", "Batch Parameters"),
+            ("batch_spec", "Batch Spec"),
+            ("batch_request", "Batch Definition"),
         ]
 
-        collapse_content_blocks = [
-            self._render_validation_info(validation_results=validation_results)
-        ]
-
-        if validation_results.meta.get("batch_markers"):
-            collapse_content_blocks.append(
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_markers"),
-                    header="Batch Markers",
+        for attr, header in attrs:
+            if validation_results.meta.get(attr):
+                table = self._render_nested_table_from_dict(
+                    input_dict=validation_results.meta.get(attr),
+                    header=header,
                 )
-            )
-
-        if validation_results.meta.get("batch_kwargs"):
-            collapse_content_blocks.append(
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results.meta.get("batch_kwargs"),
-                    header="Batch Kwargs",
-                )
-            )
-
-        if validation_results.meta.get("batch_parameters"):
-            collapse_content_blocks.append(
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results.meta.get("batch_parameters"),
-                    header="Batch Parameters",
-                )
-            )
-
-        if validation_results.meta.get("batch_spec"):
-            collapse_content_blocks.append(
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results.meta.get("batch_spec"),
-                    header="Batch Spec",
-                )
-            )
-
-        if validation_results.meta.get("batch_request"):
-            collapse_content_blocks.append(
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results.meta.get("batch_request"),
-                    header="Batch Definition",
-                )
-            )
+                collapse_content_blocks.append(table)
 
         collapse_content_block = CollapseContent(
             **{
@@ -207,9 +235,16 @@ class ValidationResultsPageRenderer(Renderer):
             }
         )
 
-        if not self.run_info_at_end:
-            overview_content_blocks.append(collapse_content_block)
+        return collapse_content_block
 
+    def _collect_rendered_document_content_sections(
+        self,
+        validation_results: ExpectationSuiteValidationResult,
+        overview_content_blocks: List[RenderedComponentContent],
+        collapse_content_blocks: List[RenderedTableContent],
+        columns: Dict[str, list],
+    ) -> List[RenderedSectionContent]:
+        ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
         sections = [
             RenderedSectionContent(
                 **{
@@ -244,8 +279,15 @@ class ValidationResultsPageRenderer(Renderer):
                 )
             ]
 
-        data_asset_name = batch_kwargs.get("data_asset_name")
-        # Determine whether we have a custom run_name
+        return sections
+
+    def _determine_page_title(
+        self,
+        run_name: str,
+        run_time: str,
+        data_asset_name: str,
+        expectation_suite_name: str,
+    ) -> str:
         try:
             run_name_as_time = parse(run_name)
         except ValueError:
@@ -259,28 +301,14 @@ class ValidationResultsPageRenderer(Renderer):
         if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
             include_run_name = True
 
-        page_title = "Validations / " + str(expectation_suite_name)
+        page_title = f"Validations / {expectation_suite_name}"
         if data_asset_name:
-            page_title += " / " + str(data_asset_name)
+            page_title += f" / {data_asset_name}"
         if include_run_name:
-            page_title += " / " + str(run_name)
-        page_title += " / " + str(run_time)
+            page_title += f" / {run_name}"
+        page_title += f" / {run_time}"
 
-        return RenderedDocumentContent(
-            **{
-                "renderer_type": "ValidationResultsPageRenderer",
-                "page_title": page_title,
-                "batch_kwargs": batch_kwargs
-                if "batch_kwargs" in validation_results.meta
-                else None,
-                "batch_spec": batch_kwargs
-                if "batch_spec" in validation_results.meta
-                else None,
-                "expectation_suite_name": expectation_suite_name,
-                "sections": sections,
-                "utm_medium": "validation-results-page",
-            }
-        )
+        return page_title
 
     @classmethod
     def _get_meta_properties_notes(cls, suite_meta):

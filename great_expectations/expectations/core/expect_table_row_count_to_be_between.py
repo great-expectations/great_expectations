@@ -1,21 +1,17 @@
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.types import (
-    RenderedAtomicContent,
-    RenderedStringTemplateContent,
-    renderedAtomicValueSchema,
-)
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import TableExpectation
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 
 class ExpectTableRowCountToBeBetween(TableExpectation):
@@ -73,10 +69,56 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     }
 
     metric_dependencies = ("table.row_count",)
-
     success_keys = (
         "min_value",
         "max_value",
+        "auto",
+        "profiler_config",
+    )
+
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        variables={
+            "num_bootstrap_samples": 9999,
+            "false_positive_rate": 0.05,
+            "truncate_values": {
+                "lower_bound": 0,
+                "upper_bound": None,
+            },
+            "round_decimals": 0,
+        },
+        rules={
+            "row_count_range_rule": {
+                "domain_builder": {
+                    "class_name": "TableDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "parameter_builders": [
+                    {
+                        "name": "row_count_range",
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_name": "table.row_count",
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "truncate_values": "$variables.truncate_values",
+                        "round_decimals": "$variables.round_decimals",
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_table_row_count_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "meta": {
+                            "profiler_details": "$parameter.row_count_range.details",
+                        },
+                        "min_value": "$parameter.row_count_range.value.value_range[0]",
+                        "max_value": "$parameter.row_count_range.value.value_range[1]",
+                    }
+                ],
+            },
+        },
     )
 
     default_kwarg_values = {
@@ -86,9 +128,17 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
+    args_keys = (
+        "min_value",
+        "max_value",
+    )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -103,6 +153,8 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         # Setting up a configuration
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
+
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

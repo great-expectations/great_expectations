@@ -9,6 +9,7 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import ProfilerError
@@ -21,7 +22,6 @@ from great_expectations.expectations.metrics.util import attempt_allowing_relati
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
     ProfilerSemanticTypes,
-    ProfilerTypeMapping,
     profiler_data_types_with_mapping,
 )
 from great_expectations.util import is_nan
@@ -110,7 +110,9 @@ class UserConfigurableProfiler:
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
 
+        context: Optional["DataContext"] = None
         if isinstance(self.profile_dataset, Batch):
+            context = self.profile_dataset.data_context
             self.profile_dataset = Validator(
                 execution_engine=self.profile_dataset.data.execution_engine,
                 batches=[self.profile_dataset],
@@ -119,11 +121,22 @@ class UserConfigurableProfiler:
                 MetricConfiguration("table.columns", {})
             )
         elif isinstance(self.profile_dataset, Validator):
+            context = self.profile_dataset.data_context
             self.all_table_columns = self.profile_dataset.get_metric(
                 MetricConfiguration("table.columns", {})
             )
         else:
             self.all_table_columns = self.profile_dataset.get_table_columns()
+
+        # Check to see if the user has disabled progress bars
+        self._enable_progress_bars = True
+        if context:
+            progress_bars = context.progress_bars
+            if progress_bars:
+                if "globally" in progress_bars:
+                    self._enable_progress_bars = progress_bars["globally"]
+                if "profilers" in progress_bars:
+                    self._enable_progress_bars = progress_bars["profilers"]
 
         self.semantic_types_dict = semantic_types_dict
         assert isinstance(self.semantic_types_dict, (dict, type(None)))
@@ -297,7 +310,10 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             )
 
         with tqdm(
-            desc="Profiling Columns", total=len(self.column_info), delay=5
+            desc="Profiling Columns",
+            total=len(self.column_info),
+            delay=5,
+            disable=not self._enable_progress_bars,
         ) as pbar:
             for column_name, column_info in self.column_info.items():
                 pbar.set_postfix_str(f"Column={column_name}")
@@ -342,7 +358,12 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
 
         self._build_expectations_table(profile_dataset=self.profile_dataset)
 
-        with tqdm(desc="Profiling", total=len(self.column_info), delay=5) as pbar:
+        with tqdm(
+            desc="Profiling",
+            total=len(self.column_info),
+            delay=5,
+            disable=not self._enable_progress_bars,
+        ) as pbar:
             for column_name, column_info in self.column_info.items():
                 pbar.set_postfix_str(f"Column={column_name}")
                 data_type = column_info.get("type")

@@ -2,16 +2,15 @@ import json
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation
 
 try:
     import sqlalchemy as sa
@@ -29,6 +28,8 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
+        json_schema  (str): \
+            The JSON schema (in string form) to match
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
@@ -87,8 +88,14 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": True,
     }
+    args_keys = (
+        "column",
+        "json_schema",
+    )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
 
         return True

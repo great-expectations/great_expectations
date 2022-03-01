@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -24,7 +25,7 @@ try:
     from sqlalchemy.engine import Engine, reflection
     from sqlalchemy.engine.interfaces import Dialect
     from sqlalchemy.exc import OperationalError
-    from sqlalchemy.sql import Insert, Select
+    from sqlalchemy.sql import Insert, Select, TableClause
     from sqlalchemy.sql.elements import (
         BinaryExpression,
         ColumnElement,
@@ -44,6 +45,7 @@ except ImportError:
     BinaryExpression = None
     ColumnElement = None
     Label = None
+    TableClause = None
     TextClause = None
     literal = None
     custom_op = None
@@ -63,45 +65,55 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import pybigquery.sqlalchemy_bigquery
+    import sqlalchemy_bigquery as sqla_bigquery
 
-    ###
-    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-    # to define an attribute "dialect". A PR has been submitted to fix this upstream
-    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-    # fix isn't present, add this "dialect" attribute here:
-    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
-        pybigquery.sqlalchemy_bigquery.dialect = (
-            pybigquery.sqlalchemy_bigquery.BigQueryDialect
-        )
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "dialect")
-    try:
-        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
-        bigquery_types_tuple = None
-    except AttributeError:
-        # In older versions of the pybigquery driver, types were not exported, so we use a hack
-        logger.warning(
-            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-        )
-        from collections import namedtuple
-
-        BigQueryTypes = namedtuple(
-            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
-        )
-        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
+    registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
     bigquery_types_tuple = None
-    pybigquery = None
-    namedtuple = None
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+
+        warnings.warn(
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning,
+        )
+        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
+        ###
+        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+        # to define an attribute "dialect". A PR has been submitted to fix this upstream
+        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+        # fix isn't present, add this "dialect" attribute here:
+        if not hasattr(sqla_bigquery, "dialect"):
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
+        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        try:
+            getattr(sqla_bigquery, "INTEGER")
+            bigquery_types_tuple = None
+        except AttributeError:
+            # In older versions of the pybigquery driver, types were not exported, so we use a hack
+            logger.warning(
+                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+            )
+            from collections import namedtuple
+
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+    except ImportError:
+        sqla_bigquery = None
+        bigquery_types_tuple = None
+        pybigquery = None
+        namedtuple = None
 
 try:
     import teradatasqlalchemy.dialect
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
     teradatasqlalchemy = None
+    teradatatypes = None
 
 
 def get_dialect_regex_expression(column, regex, dialect, positive=True):
@@ -217,7 +229,7 @@ def _get_dialect_type_module(dialect=None):
         if (
             isinstance(
                 dialect,
-                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+                sqla_bigquery.BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):
@@ -307,7 +319,7 @@ def get_sqlalchemy_column_metadata(
                 sqlalchemy_engine=engine,
             )
 
-        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
+        # Use fallback because mssql reflection mechanism does not throw an error but returns an empty list
         if len(columns) == 0:
             columns = column_reflection_fallback(
                 selectable=table_selectable,
@@ -329,26 +341,105 @@ def column_reflection_fallback(
     if dialect.name.lower() == "mssql":
         # Get column names and types from the database
         # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
-        columns_query: str = f"""
-SELECT
-    SCHEMA_NAME(tab.schema_id) AS schema_name,
-    tab.name AS table_name,
-    col.column_id AS column_id,
-    col.name AS column_name,
-    t.name AS column_data_type,
-    col.max_length AS column_max_length,
-    col.precision AS column_precision
-FROM sys.tables AS tab
-    INNER JOIN sys.columns AS col
-    ON tab.object_id = col.object_id
-    LEFT JOIN sys.types AS t
-    ON col.user_type_id = t.user_type_id
-WHERE tab.name = '{selectable}'
-ORDER BY schema_name,
-    table_name,
-    column_id
-"""
-        col_info_query: TextClause = sa.text(columns_query)
+        tables_table_clause: TableClause = sa.table(
+            "tables",
+            sa.column("object_id"),
+            sa.column("schema_id"),
+            sa.column("name"),
+            schema="sys",
+        ).alias("sys_tables_table_clause")
+        tables_table_query: Select = (
+            sa.select(
+                [
+                    tables_table_clause.c.object_id.label("object_id"),
+                    sa.func.schema_name(tables_table_clause.c.schema_id).label(
+                        "schema_name"
+                    ),
+                    tables_table_clause.c.name.label("table_name"),
+                ]
+            )
+            .select_from(tables_table_clause)
+            .alias("sys_tables_table_subquery")
+        )
+        columns_table_clause: TableClause = sa.table(
+            "columns",
+            sa.column("object_id"),
+            sa.column("user_type_id"),
+            sa.column("column_id"),
+            sa.column("name"),
+            sa.column("max_length"),
+            sa.column("precision"),
+            schema="sys",
+        ).alias("sys_columns_table_clause")
+        columns_table_query: Select = (
+            sa.select(
+                [
+                    columns_table_clause.c.object_id.label("object_id"),
+                    columns_table_clause.c.user_type_id.label("user_type_id"),
+                    columns_table_clause.c.column_id.label("column_id"),
+                    columns_table_clause.c.name.label("column_name"),
+                    columns_table_clause.c.max_length.label("column_max_length"),
+                    columns_table_clause.c.precision.label("column_precision"),
+                ]
+            )
+            .select_from(columns_table_clause)
+            .alias("sys_columns_table_subquery")
+        )
+        types_table_clause: TableClause = sa.table(
+            "types",
+            sa.column("user_type_id"),
+            sa.column("name"),
+            schema="sys",
+        ).alias("sys_types_table_clause")
+        types_table_query: Select = (
+            sa.select(
+                [
+                    types_table_clause.c.user_type_id.label("user_type_id"),
+                    types_table_clause.c.name.label("column_data_type"),
+                ]
+            )
+            .select_from(types_table_clause)
+            .alias("sys_types_table_subquery")
+        )
+        inner_join_conditions: BinaryExpression = sa.and_(
+            *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
+        )
+        outer_join_conditions: BinaryExpression = sa.and_(
+            *(
+                columns_table_query.columns.user_type_id
+                == types_table_query.columns.user_type_id,
+            )
+        )
+        col_info_query: Select = (
+            sa.select(
+                [
+                    tables_table_query.c.schema_name,
+                    tables_table_query.c.table_name,
+                    columns_table_query.c.column_id,
+                    columns_table_query.c.column_name,
+                    types_table_query.c.column_data_type,
+                    columns_table_query.c.column_max_length,
+                    columns_table_query.c.column_precision,
+                ]
+            )
+            .select_from(
+                tables_table_query.join(
+                    right=columns_table_query,
+                    onclause=inner_join_conditions,
+                    isouter=False,
+                ).join(
+                    right=types_table_query,
+                    onclause=outer_join_conditions,
+                    isouter=True,
+                )
+            )
+            .where(tables_table_query.c.table_name == selectable.name)
+            .order_by(
+                tables_table_query.c.schema_name.asc(),
+                tables_table_query.c.table_name.asc(),
+                columns_table_query.c.column_id.asc(),
+            )
+        )
         col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
             col_info_query
         ).fetchall()

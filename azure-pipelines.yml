@@ -1,9 +1,29 @@
+# This file is responsible for configuring the `great_expectations` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# The pipeline is run under the following conditions:
+#   - On the main branch when a weekly release is being cut
+#   - On the develop branch as scheduled by the below cron job
+#
+#  `great_expectations` runs the entire test suite and is meant to safeguard the codebase against any errors that may have slipped through the cracks
+#  from `dependency_graph`. Additionally, it is responsible for deployment during the weekly release cut.
+
+schedules:
+- cron: 0 */4 * * *
+  displayName: Scheduled Runs
+  branches:
+    include:
+    - develop
+    exclude:
+    - main
+  always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
+
 trigger:
   branches:
     include:
-    - pre_pr-*
-    - develop
+    - pre_pr-* # Can be used to test both `great_expectations` and `dependency_graph` pipelines
     - main
+    exclude:
+    - develop
 
 resources:
   containers:
@@ -31,49 +51,20 @@ resources:
     ports:
       - 1433:1433
 
+# The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-  isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
-  - stage: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
-    jobs:
-      - job: changes
-        steps:
-          - task: ChangedFiles@1
-            name: CheckChanges
-            inputs:
-              verbose: true
-              rules: |
-                [ContribChanged]
-                contrib/**
-
-                [ExperimentalChanged]
-                contrib/experimental/**
-
-                [DocsChanged]
-                docs/**
-                tests/integration/docusaurus/**
-                tests/integration/fixtures/**
-                tests/test_sets/**
-
-                [GEChanged]
-                great_expectations/**
-                tests/**
-                /*.txt
-                /*.yml
-
   - stage: lint
-    dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
       - job: lint
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -81,7 +72,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==21.8b0 pyupgrade==2.7.2
+              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==22.1.0 pyupgrade==2.7.2
               EXIT_STATUS=0
               isort . --check-only --skip docs/ || EXIT_STATUS=$?
               black --check --exclude docs/ . || EXIT_STATUS=$?
@@ -90,13 +81,13 @@ stages:
               exit $EXIT_STATUS
 
   - stage: required
-    dependsOn: [scope_check, lint]
+    dependsOn: [lint]
     pool:
       vmImage: 'ubuntu-18.04'
 
     jobs:
       - job: compatibility_matrix
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         variables:
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
@@ -127,7 +118,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - bash: pip install numpy
@@ -171,7 +162,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
 
         services:
           postgres: postgres
@@ -204,7 +195,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -245,13 +236,13 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint]
+    dependsOn: [lint]
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
       - job: test_usage_stats_messages
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         variables:
           python.version: '3.8'
 
@@ -279,11 +270,11 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint]
+    dependsOn: [lint]
 
     jobs:
       - job: mysql
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
 
         services:
           mysql: mysql
@@ -297,7 +288,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -326,7 +317,7 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
 
         services:
           mssql: mssql
@@ -340,7 +331,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -358,13 +349,13 @@ stages:
             displayName: 'pytest'
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint, usage_stats_integration, required, db_integration]
+    dependsOn: [lint]
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
       - job: test_cli
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
 
         services:
           postgres: postgres
@@ -378,7 +369,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -398,17 +389,22 @@ stages:
             displayName: 'pytest'
 
   - stage: deploy_gallery
-    condition: and(succeeded(), or(eq(variables.isMain, true), eq(variables.isDevelop, true)))
+    condition: and(succeeded(), eq(variables.isMain, true))
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-18.04'
     dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
       - job: build_gallery
         variables:
           python.version: '3.7'
-          GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+          GE_pytest_pip_opts: '"pyspark<3.0.0" "cookiecutter==1.7.3" "google-cloud-bigquery-storage" --requirement requirements-dev.txt --constraint constraints-dev.txt'
           GE_pytest_opts: ''
+
+        services:
+          postgres: postgres
+          mysql: mysql
+          mssql: mssql
 
         steps:
           - task: UsePythonVersion@0
@@ -416,7 +412,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -427,12 +423,45 @@ stages:
           - script: |
               pip install $(GE_pytest_pip_opts)
               pip install --requirement requirements.txt
-              pip install  .
+              pip install  --editable .
             displayName: 'Install dependencies'
+
+          - script: |
+              printf 'Waiting for MySQL database to accept connections'
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+            displayName: 'Wait for MySQL database to initialise'
+
+          - script: |
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+            displayName: 'Configure mysql'
+
+          - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+            displayName: 'Configure mssql'
+
+#         - task: DownloadSecureFile@1
+#           name: gcp_authkey
+#           displayName: 'Download Google Service Account'
+#           inputs:
+#             secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+#             retryCount: '2'
 
           - bash: python ./build_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
+#           env:
+#             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+#             GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+#             GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+#             GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
+
+          - bash: python ./build_package_gallery.py
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Build Package Gallery'
 
           - task: S3Upload@1
             inputs:
@@ -468,7 +497,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |

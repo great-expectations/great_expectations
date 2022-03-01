@@ -1,8 +1,10 @@
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
-from ..expectation import ColumnPairMapExpectation, InvalidExpectationConfigurationError
+from great_expectations.expectations.expectation import (
+    ColumnPairMapExpectation,
+    InvalidExpectationConfigurationError,
+)
 
 
 class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
@@ -57,7 +59,15 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "catch_exceptions": False,
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    args_keys = (
+        "column_A",
+        "column_B",
+        "value_pairs_set",
+    )
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration

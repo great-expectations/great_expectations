@@ -8,10 +8,7 @@ import warnings
 from typing import Dict, Optional, Union
 from urllib.parse import urljoin
 
-from great_expectations.core import (
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-)
+from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 
 try:
@@ -237,7 +234,10 @@ class SlackNotificationAction(ValidationAction):
 
             # this will actually send the POST request to the Slack webapp server
             slack_notif_result = send_slack_notification(
-                query, slack_webhook=self.slack_webhook
+                query,
+                slack_webhook=self.slack_webhook,
+                slack_token=self.slack_token,
+                slack_channel=self.slack_channel,
             )
             return {"slack_notification_result": slack_notif_result}
 
@@ -1126,7 +1126,7 @@ class CloudNotificationAction(ValidationAction):
 
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
-            f"/accounts/{self.data_context.ge_cloud_config.account_id}/contracts/"
+            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/contracts/"
             f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
         )
         auth_headers = {

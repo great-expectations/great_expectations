@@ -1,7 +1,7 @@
 import copy
 import os
 import sys
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import click
 
@@ -40,19 +40,11 @@ except ImportError:
 @click.pass_context
 def suite(ctx):
     """Expectation Suite operations"""
-    directory: str = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context: DataContext = toolkit.load_data_context_with_error_handling(
-        directory=directory,
-        from_cli_upgrade_command=False,
-    )
-    # TODO consider moving this all the way up in to the CLIState constructor
-    ctx.obj.data_context = context
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
     usage_stats_prefix = f"cli.suite.{ctx.invoked_subcommand}"
     send_usage_message(
-        data_context=context,
+        data_context=ctx.obj.data_context,
         event=f"{usage_stats_prefix}.begin",
         success=True,
     )
@@ -87,10 +79,13 @@ def suite(ctx):
 @click.option(
     "--profile",
     "-p",
-    is_flag=True,
-    default=False,
-    help="""Generate a starting expectation suite automatically so you can refine it further. Assumes --interactive
-flag.
+    "profiler_name",
+    is_flag=False,
+    flag_value="",
+    default=None,
+    help="""Generate a starting expectation suite automatically so you can refine it further.
+    Takes in an optional name; if provided, a profiler of that name will be retrieved from your Data Context.
+    Assumes --interactive flag.
 """,
 )
 @click.option(
@@ -110,14 +105,14 @@ Assumes --interactive flag.
 )
 @click.pass_context
 def suite_new(
-    ctx,
-    expectation_suite,
-    interactive_flag,
-    manual_flag,
-    profile,
-    batch_request,
-    no_jupyter,
-):
+    ctx: click.Context,
+    expectation_suite: Optional[str],
+    interactive_flag: bool,
+    manual_flag: bool,
+    profiler_name: Optional[str],
+    batch_request: Optional[str],
+    no_jupyter: bool,
+) -> None:
     """
     Create a new Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
@@ -125,9 +120,10 @@ def suite_new(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    processed_flags: Dict[
-        str, Optional[Union[bool, CLISuiteInteractiveFlagCombinations]]
-    ] = _process_suite_new_flags_and_prompt(
+    # Only set to true if `--profile` or `--profile <PROFILER_NAME>`
+    profile: bool = _determine_profile(profiler_name)
+
+    interactive_mode, profile = _process_suite_new_flags_and_prompt(
         context=context,
         usage_event_end=usage_event_end,
         interactive_flag=interactive_flag,
@@ -139,12 +135,25 @@ def suite_new(
     _suite_new_workflow(
         context=context,
         expectation_suite_name=expectation_suite,
-        interactive_mode=processed_flags["interactive_mode"],
-        profile=processed_flags["profile"],
+        interactive_mode=interactive_mode,
+        profile=profile,
+        profiler_name=profiler_name,
         no_jupyter=no_jupyter,
         usage_event=usage_event_end,
         batch_request=batch_request,
     )
+
+
+def _determine_profile(profiler_name: Optional[str]) -> bool:
+    profile: bool = profiler_name is not None
+    if profile:
+        if profiler_name:
+            msg = "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
+        else:
+            msg = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
+        cli_message(string=f"<yellow>{msg}</yellow>")
+
+    return profile
 
 
 def _process_suite_new_flags_and_prompt(
@@ -154,7 +163,7 @@ def _process_suite_new_flags_and_prompt(
     manual_flag: bool,
     profile: bool,
     batch_request: Optional[str] = None,
-) -> Dict[str, Optional[Union[bool, CLISuiteInteractiveFlagCombinations]]]:
+) -> Tuple[CLISuiteInteractiveFlagCombinations, bool]:
     """
     Process various optional suite new flags and prompt if there is not enough information from the flags.
     Args:
@@ -166,12 +175,11 @@ def _process_suite_new_flags_and_prompt(
         batch_request: --batch-request from the `suite new` CLI command
 
     Returns:
-        Dictionary with keys of processed parameters and boolean values e.g.
-        {"interactive": True, "profile": False}
+        Tuple with keys of processed parameters and boolean values
     """
 
     interactive_mode: Optional[CLISuiteInteractiveFlagCombinations]
-    interactive_mode = _suite_new_convert_flags_to_interactive_mode(
+    interactive_mode = _suite_convert_flags_to_interactive_mode(
         interactive_flag, manual_flag
     )
 
@@ -192,23 +200,21 @@ def _process_suite_new_flags_and_prompt(
     else:
         interactive_mode, profile = _suite_new_mode_from_prompt(profile)
 
-    return {
-        "interactive_mode": interactive_mode,
-        "profile": profile,
-    }
+    return interactive_mode, profile
 
 
 def _suite_new_workflow(
     context: DataContext,
-    expectation_suite_name: str,
+    expectation_suite_name: Optional[str],
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     profile: bool,
+    profiler_name: Optional[str],
     no_jupyter: bool,
     usage_event: str,
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = None,
-):
+) -> None:
     try:
         datasource_name: Optional[str] = None
         data_asset_name: Optional[str] = None
@@ -276,6 +282,7 @@ def _suite_new_workflow(
             context=context,
             expectation_suite_name=expectation_suite_name,
             profile=profile,
+            profiler_name=profiler_name,
             usage_event=usage_event,
             interactive_mode=interactive_mode,
             no_jupyter=no_jupyter,
@@ -311,7 +318,7 @@ def _suite_new_workflow(
         raise e
 
 
-def _suite_new_convert_flags_to_interactive_mode(
+def _suite_convert_flags_to_interactive_mode(
     interactive_flag: bool, manual_flag: bool
 ) -> CLISuiteInteractiveFlagCombinations:
     if interactive_flag is True and manual_flag is True:
@@ -343,44 +350,44 @@ def _suite_new_process_profile_and_batch_request_flags(
 ) -> CLISuiteInteractiveFlagCombinations:
 
     # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
+    interactive_flag = interactive_mode.value["interactive_flag"]
+
+    if profile:
+        if interactive_flag is None:
+            cli_message(
+                "<green>Entering interactive mode since you passed the --profile flag</green>"
+            )
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE
+            )
+        elif interactive_flag is True:
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
+            )
+        elif interactive_flag is False:
+            cli_message(
+                "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
+            )
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE
+            )
+
     # Assume batch needed if user passes --profile
-    if profile and interactive_mode.value["interactive_flag"] is None:
-        cli_message(
-            "<green>Entering interactive mode since you passed the --profile flag</green>"
-        )
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE
-        )
-    elif profile and interactive_mode.value["interactive_flag"] is True:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
-        )
-    elif profile and interactive_mode.value["interactive_flag"] is False:
-        cli_message(
-            "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
-        )
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE
-        )
-    # Assume batch needed if user passes --batch-request
-    elif (batch_request is not None) and (
-        interactive_mode.value["interactive_flag"] is None
-    ):
-        cli_message(
-            "<green>Entering interactive mode since you passed the --batch-request flag</green>"
-        )
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
-        )
-    elif (batch_request is not None) and (
-        interactive_mode.value["interactive_flag"] is False
-    ):
-        cli_message(
-            "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
-        )
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
-        )
+    elif batch_request is not None:
+        if interactive_flag is None:
+            cli_message(
+                "<green>Entering interactive mode since you passed the --batch-request flag</green>"
+            )
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
+            )
+        elif interactive_flag is False:
+            cli_message(
+                "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
+            )
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
+            )
 
     return interactive_mode
 
@@ -390,7 +397,7 @@ def _exit_early_if_error(
     context: DataContext,
     usage_event_end: str,
     interactive_mode: CLISuiteInteractiveFlagCombinations,
-):
+) -> None:
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
         send_usage_message(
@@ -417,7 +424,9 @@ def _suite_new_user_provided_any_flag(
     return user_provided_any_flag_skip_prompt
 
 
-def _suite_new_mode_from_prompt(profile: bool):
+def _suite_new_mode_from_prompt(
+    profile: bool,
+) -> Tuple[CLISuiteInteractiveFlagCombinations, bool]:
     suite_create_method: str = click.prompt(
         """
 How would you like to create your Expectation Suite?
@@ -499,14 +508,14 @@ Assumes --interactive flag.  Incompatible with --datasource-name option.
 )
 @click.pass_context
 def suite_edit(
-    ctx,
-    expectation_suite,
-    interactive_flag,
-    manual_flag,
-    datasource_name,
-    batch_request,
-    no_jupyter,
-):
+    ctx: click.Context,
+    expectation_suite: str,
+    interactive_flag: bool,
+    manual_flag: bool,
+    datasource_name: Optional[str],
+    batch_request: Optional[str],
+    no_jupyter: bool,
+) -> None:
     """
     Edit an existing Expectation Suite.
 
@@ -540,6 +549,7 @@ def suite_edit(
         context=context,
         expectation_suite_name=expectation_suite,
         profile=False,
+        profiler_name=None,
         usage_event=usage_event_end,
         interactive_mode=interactive_mode,
         no_jupyter=no_jupyter,
@@ -579,25 +589,14 @@ def _process_suite_edit_flags_and_prompt(
     interactive_mode: CLISuiteInteractiveFlagCombinations
 
     # Convert interactive / no-interactive flags to interactive
-    if interactive_flag is True and manual_flag is True:
+    interactive_mode = _suite_convert_flags_to_interactive_mode(
+        interactive_flag, manual_flag
+    )
+    if (
+        interactive_mode
+        == CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
+    ):
         error_message = """Please choose either --interactive or --manual, you may not choose both."""
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
-        )
-    elif interactive_flag is False and manual_flag is False:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
-        )
-    elif interactive_flag is True and manual_flag is False:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
-        )
-    elif interactive_flag is False and manual_flag is True:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE
-        )
-    else:
-        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
 
     if (datasource_name is not None) and (batch_request is not None):
         error_message = """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
@@ -690,6 +689,7 @@ def _suite_edit_workflow(
     context: DataContext,
     expectation_suite_name: str,
     profile: bool,
+    profiler_name: Optional[str],
     usage_event: str,
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     no_jupyter: bool,
@@ -703,7 +703,7 @@ def _suite_edit_workflow(
     ] = None,
     suppress_usage_message: bool = False,
     assume_yes: bool = False,
-):
+) -> None:
     # suppress_usage_message flag is for the situation where _suite_edit_workflow is called by _suite_new_workflow().
     # when called by _suite_new_workflow(), the flag will be set to True, otherwise it will default to False
     if suppress_usage_message:
@@ -767,22 +767,23 @@ def _suite_edit_workflow(
         notebook_name: str = f"edit_{expectation_suite_name}.ipynb"
         notebook_path: str = _get_notebook_path(context, notebook_name)
 
+        renderer: SuiteProfileNotebookRenderer
         if profile:
             if not assume_yes:
                 toolkit.prompt_profile_to_create_a_suite(
                     data_context=context, expectation_suite_name=expectation_suite_name
                 )
 
-            renderer: SuiteProfileNotebookRenderer = SuiteProfileNotebookRenderer(
+            renderer = SuiteProfileNotebookRenderer(
                 context=context,
                 expectation_suite_name=expectation_suite_name,
+                profiler_name=profiler_name,
                 batch_request=batch_request,
             )
             renderer.render_to_disk(notebook_file_path=notebook_path)
         else:
-            SuiteEditNotebookRenderer.from_data_context(
-                data_context=context
-            ).render_to_disk(
+            renderer = SuiteEditNotebookRenderer.from_data_context(data_context=context)
+            renderer.render_to_disk(
                 suite=suite,
                 notebook_file_path=notebook_path,
                 batch_request=batch_request,
@@ -846,7 +847,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 @mark.cli_as_deprecation
 @suite.command(name="demo")
 @click.pass_context
-def suite_demo(ctx):
+def suite_demo(ctx: click.Context) -> None:
     """This command is not supported in the v3 (Batch Request) API."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -864,7 +865,7 @@ def suite_demo(ctx):
 @suite.command(name="delete")
 @click.argument("suite")
 @click.pass_context
-def suite_delete(ctx, suite):
+def suite_delete(ctx: click.Context, suite: str) -> None:
     """
     Delete an Expectation Suite from the Expectation Store.
     """
@@ -915,7 +916,7 @@ def suite_delete(ctx, suite):
 
 @suite.command(name="list")
 @click.pass_context
-def suite_list(ctx):
+def suite_list(ctx: click.Context) -> None:
     """List existing Expectation Suites."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -956,7 +957,7 @@ def suite_list(ctx):
     )
 
 
-def _get_notebook_path(context, notebook_name):
+def _get_notebook_path(context: DataContext, notebook_name: str):
     return os.path.abspath(
         os.path.join(
             context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name

@@ -8,7 +8,7 @@ Expectations are the workhorse abstraction in Great Expectations. Each Expectati
 The CLI will help you create your first Expectation Suite. Suites are simply collections of Expectations. In order to create a new suite, we will use the built-in profiler to automatically create an Expectation Suite called `getting_started_expectation_suite_taxi.demo`. Type the following into your terminal:
 
 ```console
-great_expectations --v3-api suite new
+great_expectations suite new
 ```
 
 You will see the output below. Choose `3` to create the Expectation Suite Automatically, using a profiler, and `1` to profile the January taxi data in `yellow_tripdata_sample_2019-01.csv`.

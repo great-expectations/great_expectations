@@ -2,7 +2,6 @@ import datetime
 import logging
 from pathlib import Path
 from string import Template
-from urllib.parse import urlparse
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import nested_update
@@ -244,11 +243,12 @@ class SqlAlchemyDatasource(LegacyDatasource):
                 self.engine = kwargs.pop("engine")
 
             else:
-                concurrency = (
-                    data_context.concurrency
-                    if data_context is not None
-                    else ConcurrencyConfig()
-                )
+                concurrency: ConcurrencyConfig
+                if data_context is None or data_context.concurrency is None:
+                    concurrency = ConcurrencyConfig()
+                else:
+                    concurrency = data_context.concurrency
+
                 concurrency.add_sqlalchemy_create_engine_parameters(kwargs)
 
                 # If a connection string or url was provided, use that.

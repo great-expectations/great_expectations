@@ -22,7 +22,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
 from great_expectations.expectations.metrics import MetaMetricProvider
-from great_expectations.expectations.metrics.import_manager import F, Window, sa
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
@@ -2405,10 +2405,14 @@ def _spark_column_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
-        rows = filtered.select(F.col(column_name)).collect()
+        rows = filtered.select(
+            F.col(column_name).alias(column_name)
+        ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
     else:
         rows = (
-            filtered.select(F.col(column_name))
+            filtered.select(
+                F.col(column_name).alias(column_name)
+            )  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
             .limit(result_format["partial_unexpected_count"])
             .collect()
         )
@@ -2450,7 +2454,7 @@ def _spark_column_map_condition_value_counts(
 
     result_format = metric_value_kwargs["result_format"]
 
-    value_counts = filtered.groupBy(F.col(column_name)).count()
+    value_counts = filtered.groupBy(F.col(column_name).alias(column_name)).count()
     if result_format["result_format"] == "COMPLETE":
         rows = value_counts.collect()
     else:
@@ -2532,10 +2536,20 @@ def _spark_column_pair_map_condition_values(
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
-        rows = filtered.select([F.col(column_A_name), F.col(column_B_name)]).collect()
+        rows = filtered.select(
+            [
+                F.col(column_A_name).alias(column_A_name),
+                F.col(column_B_name).alias(column_B_name),
+            ]
+        ).collect()
     else:
         rows = (
-            filtered.select([F.col(column_A_name), F.col(column_B_name)])
+            filtered.select(
+                [
+                    F.col(column_A_name).alias(column_A_name),
+                    F.col(column_B_name).alias(column_B_name),
+                ]
+            )
             .limit(result_format["partial_unexpected_count"])
             .collect()
         )
@@ -2621,7 +2635,9 @@ def _spark_multicolumn_map_condition_values(
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
-    column_selector = [F.col(column_name) for column_name in column_list]
+    column_selector = [
+        F.col(column_name).alias(column_name) for column_name in column_list
+    ]
 
     domain_values = filtered.select(column_selector)
 
@@ -3225,8 +3241,22 @@ class ColumnMapMetricProvider(MapMetricProvider):
         table_domain_kwargs: dict = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
+        dependencies["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+            metric_dependencies=None,
+        )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
             metric_dependencies=None,
@@ -3275,8 +3305,22 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
             for k, v in metric.metric_domain_kwargs.items()
             if k not in ["column_A", "column_B", "ignore_row_if"]
         }
+        dependencies["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+            metric_dependencies=None,
+        )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
             metric_dependencies=None,
@@ -3323,8 +3367,22 @@ class MulticolumnMapMetricProvider(MapMetricProvider):
             for k, v in metric.metric_domain_kwargs.items()
             if k not in ["column_list", "ignore_row_if"]
         }
+        dependencies["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+            metric_dependencies=None,
+        )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
             metric_dependencies=None,

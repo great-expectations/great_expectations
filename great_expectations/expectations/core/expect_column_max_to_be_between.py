@@ -3,9 +3,8 @@ from typing import Dict, Optional
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
@@ -17,8 +16,8 @@ except ImportError:
     pass
 
 
-from ...render.renderer.renderer import renderer
-from ..expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.render.renderer.renderer import renderer
 
 
 class ExpectColumnMaxToBeBetween(ColumnExpectation):
@@ -35,6 +34,10 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                    The minimum number of unique values allowed.
                max_value (comparable type or None): \
                    The maximum number of unique values allowed.
+               strict_min (boolean):
+                   If True, the minimal column minimum must be strictly larger than min_value, default=False
+               strict_max (boolean):
+                   If True, the maximal column minimum must be strictly smaller than max_value, default=False
 
            Keyword Args:
                parse_strings_as_datetimes (Boolean or None): \
@@ -42,10 +45,6 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                    comparisons.
                output_strftime_format (str or None): \
                    A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
-               strict_min (boolean):
-                   If True, the minimal column minimum must be strictly larger than min_value, default=False
-               strict_max (boolean):
-                   If True, the maximal column minimum must be strictly smaller than max_value, default=False
 
            Other Parameters:
                result_format (str or None): \
@@ -112,10 +111,13 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
         "parse_strings_as_datetimes": False,
     }
+    args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 
     """ A Column Map MetricProvider Decorator for the Maximum"""
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -128,6 +130,8 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
+
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

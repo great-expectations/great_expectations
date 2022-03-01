@@ -4,6 +4,7 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
+from packaging import version
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -118,8 +119,14 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "type_list",
+    )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert "type_list" in configuration.kwargs, "type_list is required"
@@ -337,11 +344,18 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 except TypeError:
                     try:
                         pd_type = getattr(pd, type_)
-                        if isinstance(pd_type, type):
-                            comp_types.append(pd_type)
                     except AttributeError:
                         pass
-
+                    else:
+                        if isinstance(pd_type, type):
+                            comp_types.append(pd_type)
+                            try:
+                                if isinstance(
+                                    pd_type(), pd.core.dtypes.base.ExtensionDtype
+                                ):
+                                    comp_types.append(pd_type())
+                            except TypeError:
+                                pass
                     try:
                         pd_type = getattr(pd.core.dtypes.dtypes, type_)
                         if isinstance(pd_type, type):
@@ -352,6 +366,31 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 native_type = _native_type_type_map(type_)
                 if native_type is not None:
                     comp_types.extend(native_type)
+
+            # TODO: Remove when Numpy >=1.21 is pinned as a dependency
+            _pandas_supports_extension_dtypes = version.parse(
+                pd.__version__
+            ) >= version.parse("0.24")
+            _numpy_doesnt_support_extensions_properly = version.parse(
+                np.__version__
+            ) < version.parse("1.21")
+            if (
+                _numpy_doesnt_support_extensions_properly
+                and _pandas_supports_extension_dtypes
+            ):
+                # This works around a bug where Pandas nullable int types aren't compatible with Numpy dtypes
+                # Note: Can't do set difference, the whole bugfix is because numpy types can't be compared to
+                # ExtensionDtypes
+                actual_type_is_ext_dtype = isinstance(
+                    actual_column_type, pd.core.dtypes.base.ExtensionDtype
+                )
+                comp_types = {
+                    dtype
+                    for dtype in comp_types
+                    if isinstance(dtype, pd.core.dtypes.base.ExtensionDtype)
+                    == actual_type_is_ext_dtype
+                }
+            ###
 
             success = actual_column_type in comp_types
 
@@ -460,15 +499,19 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             actual_column_types_list = execution_engine.resolve_metrics(
                 [table_column_types_configuration]
             )[table_column_types_configuration.id]
-            actual_column_type = [
-                type_dict["type"]
-                for type_dict in actual_column_types_list
-                if type_dict["name"] == column_name
-            ][0]
+            try:
+                actual_column_type = [
+                    type_dict["type"]
+                    for type_dict in actual_column_types_list
+                    if type_dict["name"] == column_name
+                ][0]
+            except IndexError:
+                actual_column_type = None
 
             # only use column map version if column dtype is object
             if (
-                actual_column_type.type.__name__ == "object_"
+                actual_column_type
+                and actual_column_type.type.__name__ == "object_"
                 and expected_types_list is not None
             ):
                 # this resets dependencies using  ColumnMapExpectation.get_validation_dependencies

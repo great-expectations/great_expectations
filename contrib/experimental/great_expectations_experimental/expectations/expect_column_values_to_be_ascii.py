@@ -301,5 +301,4 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToBeAscii().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToBeAscii().print_diagnostic_checklist()

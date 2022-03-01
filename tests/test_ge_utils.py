@@ -7,7 +7,7 @@ import pytest
 import great_expectations as ge
 from great_expectations.core.util import nested_update
 from great_expectations.util import (
-    convert_nulls_to_None,
+    convert_json_string_to_be_python_compliant,
     deep_filter_properties_iterable,
     filter_properties_dict,
     get_currently_executing_function_call_arguments,
@@ -248,17 +248,7 @@ def test_linter_leaves_clean_code():
     assert lint_code(code) == "foo = [1, 2, 3]\n"
 
 
-def test_convert_nulls_to_None_no_match():
-    text = """
-    "kwargs": {"max_value": 10000, "min_value": 10000},
-    "expectation_type": "expect_table_row_count_to_be_between",
-    "meta": {},
-    """
-    res = convert_nulls_to_None(text)
-    assert res == text
-
-
-def test_convert_nulls_to_None_with_match(caplog):
+def test_convert_json_string_to_be_python_compliant_null_replacement(caplog):
     text = """
     "ge_cloud_id": null,
     "expectation_context": {"description": null},
@@ -269,7 +259,7 @@ def test_convert_nulls_to_None_with_match(caplog):
     """
 
     with caplog.at_level(logging.INFO):
-        res = convert_nulls_to_None(text)
+        res = convert_json_string_to_be_python_compliant(text)
 
     assert res == expected
     assert (
@@ -280,6 +270,52 @@ def test_convert_nulls_to_None_with_match(caplog):
         "Replaced 'description: null' with 'description: None' before writing to file"
         in caplog.text
     )
+
+
+def test_convert_json_string_to_be_python_compliant_bool_replacement(caplog):
+    text = """
+    "meta": {},
+    "kwargs": {
+        "column": "input_date",
+        "max_value": "2027-09-03 00:00:00",
+        "min_value": "2015-01-01 00:00:00",
+        "parse_strings_as_datetimes": true,
+        "catch_exceptions": false
+    },
+    """
+    expected = """
+    "meta": {},
+    "kwargs": {
+        "column": "input_date",
+        "max_value": "2027-09-03 00:00:00",
+        "min_value": "2015-01-01 00:00:00",
+        "parse_strings_as_datetimes": True,
+        "catch_exceptions": False
+    },
+    """
+
+    with caplog.at_level(logging.INFO):
+        res = convert_json_string_to_be_python_compliant(text)
+
+    assert res == expected
+    assert (
+        "Replaced '\"parse_strings_as_datetimes\": true' with '\"parse_strings_as_datetimes\": True' before writing to file"
+        in caplog.text
+    )
+    assert (
+        "Replaced '\"catch_exceptions\": false' with '\"catch_exceptions\": False' before writing to file"
+        in caplog.text
+    )
+
+
+def test_convert_json_string_to_be_python_compliant_no_replacement():
+    text = """
+    "kwargs": {"max_value": 10000, "min_value": 10000},
+    "expectation_type": "expect_table_row_count_to_be_between",
+    "meta": {},
+    """
+    res = convert_json_string_to_be_python_compliant(text)
+    assert res == text
 
 
 def test_get_currently_executing_function_call_arguments(a=None, *args, **kwargs):
@@ -324,6 +360,7 @@ def test_filter_properties_dict():
             delete_fields={
                 "integer_zero",
                 "scientific_notation_floating_point_number",
+                "string",
             },
             clean_falsy=True,
         )
@@ -526,3 +563,24 @@ def test_deep_filter_properties_iterable():
 def test_hyphen():
     txt: str = "suite_validation_result"
     assert hyphen(txt=txt) == "suite-validation-result"
+
+
+def test_deep_filter_properties_iterable_on_batch_request_dict():
+    batch_request: dict = {
+        "datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
+        "data_connector_name": "123a3221fc4b65014d061cce4a71782e",
+        "data_asset_name": "eac128c5824b698c22b441ada61022d4",
+        "batch_spec_passthrough": {},
+        "data_connector_query": {"batch_filter_parameters": {}},
+        "limit": None,
+    }
+
+    deep_filter_properties_iterable(
+        properties=batch_request, clean_nulls=True, clean_falsy=True, inplace=True
+    )
+
+    assert batch_request == {
+        "datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
+        "data_connector_name": "123a3221fc4b65014d061cce4a71782e",
+        "data_asset_name": "eac128c5824b698c22b441ada61022d4",
+    }

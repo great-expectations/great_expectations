@@ -46,18 +46,10 @@ class SupportedDatabaseBackends(enum.Enum):
 @click.pass_context
 def datasource(ctx):
     """Datasource operations"""
-    directory: str = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context: DataContext = toolkit.load_data_context_with_error_handling(
-        directory=directory,
-        from_cli_upgrade_command=False,
-    )
-    # TODO consider moving this all the way up in to the CLIState constructor
-    ctx.obj.data_context = context
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
     usage_stats_prefix = f"cli.datasource.{ctx.invoked_subcommand}"
     send_usage_message(
-        data_context=context,
+        data_context=ctx.obj.data_context,
         event=f"{usage_stats_prefix}.begin",
         success=True,
     )
@@ -87,7 +79,7 @@ def datasource_new(ctx, name, jupyter):
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -158,7 +150,7 @@ def datasource_list(ctx):
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -201,6 +193,8 @@ What data would you like Great Expectations to connect to?
             return None
         selected_database = _prompt_user_for_database_backend()
         helper = _get_sql_yaml_helper_class(selected_database, datasource_name)
+    else:
+        helper = None
 
     helper.send_backend_choice_usage_message(context)
     if not helper.verify_libraries_installed():
@@ -400,6 +394,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         username: str = "YOUR_USERNAME",
         password: str = "YOUR_PASSWORD",
         database: str = "YOUR_DATABASE",
+        schema_name: str = "YOUR_SCHEMA",
     ):
         super().__init__(
             datasource_type=DatasourceTypes.SQL,
@@ -412,6 +407,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         self.username = username
         self.password = password
         self.database = database
+        self.schema_name = schema_name
 
     def credentials_snippet(self) -> str:
         return f'''\
@@ -419,7 +415,8 @@ host = "{self.host}"
 port = "{self.port}"
 username = "{self.username}"
 password = "{self.password}"
-database = "{self.database}"'''
+database = "{self.database}"
+schema_name = "{self.schema_name}"'''
 
     def yaml_snippet(self) -> str:
         yaml_str = '''f"""
@@ -440,7 +437,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
         return yaml_str
 
     def _yaml_innards(self) -> str:
@@ -451,7 +448,8 @@ data_connectors:
     port: '{port}'
     username: {username}
     password: {password}
-    database: {database}"""
+    database: {database}
+    schema_name: {schema_name}"""
 
     def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
@@ -498,7 +496,6 @@ class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
             },
             driver="postgresql",
             port=5432,
-            database="postgres",
         )
 
     def verify_libraries_installed(self) -> bool:
@@ -651,15 +648,21 @@ class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
     def credentials_snippet(self) -> str:
         return '''\
 # The SQLAlchemy url/connection string for the BigQuery connection
-# (reference: https://github.com/mxmzdlv/pybigquery#connection-string-parameters)"""
+# (reference: https://github.com/googleapis/python-bigquery-sqlalchemy#connection-string-parameters)"""
 connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
 
     def verify_libraries_installed(self) -> bool:
-        return verify_library_dependent_modules(
+        pybigquery_ok = verify_library_dependent_modules(
             python_import_name="pybigquery.sqlalchemy_bigquery",
             pip_library_name="pybigquery",
             module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
         )
+        sqlalchemy_bigquery_ok = verify_library_dependent_modules(
+            python_import_name="sqlalchemy_bigquery",
+            pip_library_name="sqlalchemy_bigquery",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        return pybigquery_ok or sqlalchemy_bigquery_ok
 
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
@@ -728,7 +731,7 @@ What are you processing your files with?
 
 def _get_files_helper(
     selection: str, context_root_dir: str, datasource_name: Optional[str] = None
-) -> Union[PandasYamlHelper, SparkYamlHelper,]:
+) -> Union[PandasYamlHelper, SparkYamlHelper]:
     helper_class_by_selection = {
         "1": PandasYamlHelper,
         "2": SparkYamlHelper,

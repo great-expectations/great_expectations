@@ -34,7 +34,7 @@ Steps
    From the command line, run:
 
    ```bash
-   great_expectations --v3-api suite new
+   great_expectations suite new
    ```
 
 2. **Create Expectation Configurations in the helper notebook**
