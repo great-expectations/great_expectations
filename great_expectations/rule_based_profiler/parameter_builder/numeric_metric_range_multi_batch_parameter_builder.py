@@ -141,6 +141,10 @@ detected.
 
         self._truncate_values = truncate_values
 
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"$parameter.{self.name}"
+
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
     """
@@ -201,13 +205,12 @@ detected.
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[str, Any, dict]:
+    ) -> Tuple[Any, dict]:
         """
          Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
          details.
 
-         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
-         ptional details
+         return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
 
          The algorithm operates according to the following steps:
          1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
@@ -284,7 +287,7 @@ detected.
         )
 
         return (
-            f"$parameter.{self.name}",
+            self.fully_qualified_parameter_name,
             {
                 "value_range": metric_value_range.tolist(),
             },

@@ -123,7 +123,6 @@ class ParameterBuilder(Builder, ABC):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         parameter_computation_impl: Optional[Callable] = None,
     ) -> None:
-        parameter_name: str
         computed_parameter_value: Any
         parameter_computation_details: dict
 
@@ -131,7 +130,6 @@ class ParameterBuilder(Builder, ABC):
             parameter_computation_impl = self._build_parameters
 
         (
-            parameter_name,
             computed_parameter_value,
             parameter_computation_details,
         ) = parameter_computation_impl(
@@ -142,7 +140,7 @@ class ParameterBuilder(Builder, ABC):
         )
 
         parameter_values: Dict[str, Any] = {
-            parameter_name: {
+            self.fully_qualified_parameter_name: {
                 "value": computed_parameter_value,
                 "details": parameter_computation_details,
             },
@@ -151,6 +149,11 @@ class ParameterBuilder(Builder, ABC):
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
+
+    @property
+    @abstractmethod
+    def fully_qualified_parameter_name(self) -> str:
+        pass
 
     @property
     def name(self) -> str:
@@ -189,7 +192,13 @@ class ParameterBuilder(Builder, ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[str, Any, dict]:
+    ) -> Tuple[Any, dict]:
+        """
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
+        details.
+
+        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        """
         pass
 
     def get_validator(

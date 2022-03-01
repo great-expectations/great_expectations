@@ -88,7 +88,13 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[str, Any, dict]:
+    ) -> Tuple[Any, dict]:
+        """
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
+        details.
+
+        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        """
         # Build the list of unique values for each batch
         super().build_parameters(
             parameter_container=parameter_container,
@@ -100,21 +106,24 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         # Retrieve and replace the list of unique values for each batch with
         # the set of unique values for all batches in the given domain.
-        fully_qualified_parameter_name: str = f"$parameter.{self.name}"
         parameter_value_node: ParameterNode = (
             get_parameter_value_by_fully_qualified_parameter_name(
-                fully_qualified_parameter_name=fully_qualified_parameter_name,
+                fully_qualified_parameter_name=self.fully_qualified_parameter_name,
                 domain=domain,
                 parameters={domain.id: parameter_container},
             )
         )
 
-        fully_qualified_parameter_name_details: str = f"$parameter.{self.name}.details"
+        fully_qualified_parameter_name_details: str = (
+            f"{self.fully_qualified_parameter_name}.details"
+        )
         parameter_value_node_details: ParameterNode = (
             get_parameter_value_by_fully_qualified_parameter_name(
                 fully_qualified_parameter_name=fully_qualified_parameter_name_details,
                 domain=domain,
-                parameters={domain.id: parameter_container},
+                parameters={
+                    domain.id: parameter_container,
+                },
             )
         )
 
@@ -125,7 +134,6 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         )
 
         return (
-            fully_qualified_parameter_name,
             unique_parameter_values,
             parameter_value_node_details,
         )

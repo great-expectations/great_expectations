@@ -74,6 +74,10 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         self._candidate_regexes = candidate_regexes
 
+    @property
+    def fully_qualified_parameter_name(self) -> str:
+        return f"$parameter.{self.name}"
+
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
     """
@@ -106,12 +110,12 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[str, Any, dict]:
+    ) -> Tuple[Any, dict]:
         """
         Check the percentage of values matching the REGEX string, and return the best fit, or None if no
         string exceeds the configured threshold.
 
-        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
+        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
         """
         metric_computation_result: MetricComputationResult
 
@@ -212,7 +216,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         )
 
         return (
-            f"$parameter.{self.name}",
             regex_string_success_list,
             {
                 "evaluated_regexes": dict(
