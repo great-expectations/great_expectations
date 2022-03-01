@@ -1,5 +1,5 @@
 import itertools
-from typing import Any, Collection, Dict, List, Optional, Set, Union
+from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -12,7 +12,6 @@ from great_expectations.rule_based_profiler.types import (
 )
 from great_expectations.rule_based_profiler.types.parameter_container import (
     ParameterNode,
-    build_parameter_container,
 )
 
 
@@ -89,14 +88,14 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> ParameterContainer:
-
+    ) -> Tuple[str, Any, dict]:
         # Build the list of unique values for each batch
-        super()._build_parameters(
+        super().build_parameters(
             parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
+            parameter_computation_impl=super()._build_parameters,
         )
 
         # Retrieve and replace the list of unique values for each batch with
@@ -125,18 +124,24 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameter_value_node["value"]
         )
 
-        parameter_values: Dict[str, Any] = {
-            fully_qualified_parameter_name: {
-                "value": unique_parameter_values,
-                "details": parameter_value_node_details,
-            },
-        }
+        # TODO: <Alex>ALEX</Alex>
+        # parameter_values: Dict[str, Any] = {
+        #     fully_qualified_parameter_name: {
+        #         "value": unique_parameter_values,
+        #         "details": parameter_value_node_details,
+        #     },
+        # }
 
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
+        # build_parameter_container(
+        #     parameter_container=parameter_container, parameter_values=parameter_values
+        # )
+        # TODO: <Alex>ALEX</Alex>
+
+        return (
+            fully_qualified_parameter_name,
+            unique_parameter_values,
+            parameter_value_node_details,
         )
-
-        return parameter_container
 
 
 def _get_unique_values_from_nested_collection_of_sets(

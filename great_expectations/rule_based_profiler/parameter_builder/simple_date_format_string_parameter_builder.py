@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
@@ -8,11 +8,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     MetricValues,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    build_parameter_container,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -155,7 +151,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> ParameterContainer:
+    ) -> Tuple[str, Any, dict]:
         """
         Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold.
@@ -260,14 +256,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best_fmt_string = fmt_string
                 best_ratio = ratio
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.name}": {
-                "value": best_fmt_string,
-                "details": {"success_ratio": best_ratio},
+        return (
+            f"$parameter.{self.name}",
+            best_fmt_string,
+            {
+                "success_ratio": best_ratio,
             },
-        }
-
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
         )
-        return parameter_container

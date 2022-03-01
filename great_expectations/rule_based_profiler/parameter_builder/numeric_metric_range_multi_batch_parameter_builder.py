@@ -11,11 +11,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     MetricComputationResult,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    build_parameter_container,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
     compute_bootstrap_quantiles,
@@ -205,7 +201,7 @@ detected.
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> Tuple[str, Any, dict]:
         """
          Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
          details.
@@ -287,17 +283,12 @@ detected.
             **estimator_kwargs,
         )
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.name}": {
-                "value": {
-                    "value_range": metric_value_range.tolist(),
-                },
-                "details": details,
+        return (
+            f"$parameter.{self.name}",
+            {
+                "value_range": metric_value_range.tolist(),
             },
-        }
-
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
+            details,
         )
 
     def _estimate_metric_value_range(

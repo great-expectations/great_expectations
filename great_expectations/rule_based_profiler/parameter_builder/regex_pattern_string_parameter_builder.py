@@ -8,11 +8,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     MetricValues,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    build_parameter_container,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -110,7 +106,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> ParameterContainer:
+    ) -> Tuple[str, Any, dict]:
         """
         Check the percentage of values matching the REGEX string, and return the best fit, or None if no
         string exceeds the configured threshold.
@@ -215,21 +211,16 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             regex_string_success_ratios
         )
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.name}": {
-                "value": regex_string_success_list,
-                "details": {
-                    "evaluated_regexes": dict(
-                        zip(sorted_regex_string_list, sorted_ratio_list)
-                    ),
-                    "threshold": threshold,
-                },
+        return (
+            f"$parameter.{self.name}",
+            regex_string_success_list,
+            {
+                "evaluated_regexes": dict(
+                    zip(sorted_regex_string_list, sorted_ratio_list)
+                ),
+                "threshold": threshold,
             },
-        }
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
         )
-        return parameter_container
 
     @staticmethod
     def _get_regex_matched_greater_than_threshold(

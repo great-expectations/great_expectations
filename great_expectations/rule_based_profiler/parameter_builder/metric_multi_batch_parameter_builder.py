@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -107,13 +107,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> Tuple[str, Any, dict]:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
         details.
 
-        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
-        ptional details
+        returns: Tuple containing parameter_name, computed_parameter_value, and parameter_computation_details metadata.
         """
         metric_computation_result: MetricComputationResult = self.get_metrics(
             metric_name=self.metric_name,
@@ -141,13 +140,8 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         if reduce_scalar_metric and metric_values.shape[1] == 1:
             metric_values = metric_values[:, 0]
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.name}": {
-                "value": metric_values.tolist(),
-                "details": details,
-            },
-        }
-
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
+        return (
+            f"$parameter.{self.name}",
+            metric_values.tolist(),
+            details,
         )
