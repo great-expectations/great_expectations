@@ -287,7 +287,6 @@ detected.
         )
 
         return (
-            self.fully_qualified_parameter_name,
             {
                 "value_range": metric_value_range.tolist(),
             },
