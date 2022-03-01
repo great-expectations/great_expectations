@@ -264,12 +264,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best_fmt_string = fmt_string
                 best_ratio = ratio
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.name}": {
-                "value": best_fmt_string,
-                "details": {
-                    "success_ratio": best_ratio,
-                    "candidate_strings": sorted(candidate_strings),
-                },
+        return (
+            best_fmt_string,
+            {
+                "success_ratio": best_ratio,
+                "candidate_strings": sorted(candidate_strings),
             },
         )
