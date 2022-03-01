@@ -258,7 +258,8 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -313,7 +314,8 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         caplog,
@@ -387,7 +389,8 @@ def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         caplog,
@@ -455,7 +458,8 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         caplog,
@@ -522,7 +526,8 @@ def test_checkpoint_list_with_no_checkpoints(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -577,7 +582,8 @@ def test_checkpoint_list_with_single_checkpoint(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         caplog,
@@ -646,7 +652,8 @@ def test_checkpoint_list_with_eight_checkpoints(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         caplog,
@@ -710,7 +717,8 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         caplog,
@@ -787,7 +795,8 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert mock_subprocess.call_count == 1
     assert mock_webbroser.call_count == 0
@@ -906,7 +915,8 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1033,7 +1043,8 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1241,7 +1252,8 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1679,7 +1691,8 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert expected_events == actual_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1831,7 +1844,6 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
         ),
         mock.call(
             {
-                "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
@@ -1844,9 +1856,6 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
                                     "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
                                     "anonymized_data_asset_name": "c30b60089ede018ad9680153ba85adaf",
                                 },
-                                "batch_request_optional_top_level_keys": [
-                                    "data_connector_query"
-                                ],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
                             "anonymized_action_list": [
@@ -1870,6 +1879,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
                         "runtime_configuration",
                     ],
                 },
+                "event": "checkpoint.run",
                 "success": True,
             }
         ),
@@ -1891,7 +1901,8 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
 
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert expected_events == actual_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -2109,7 +2120,8 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert expected_events == actual_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -2325,7 +2337,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert expected_events == actual_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -2467,7 +2480,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
         ),
         mock.call(
             {
-                "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
@@ -2480,9 +2492,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
                                     "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
                                     "anonymized_data_asset_name": "61b23df5338c9164d0f9514847cba679",
                                 },
-                                "batch_request_optional_top_level_keys": [
-                                    "data_connector_query"
-                                ],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
                             "anonymized_action_list": [
@@ -2506,6 +2515,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
                         "runtime_configuration",
                     ],
                 },
+                "event": "checkpoint.run",
                 "success": True,
             }
         ),
@@ -2526,7 +2536,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert expected_events == actual_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -2741,7 +2752,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert expected_events == actual_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -2950,7 +2962,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert expected_events == actual_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -3088,7 +3101,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
         ),
         mock.call(
             {
-                "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
@@ -3101,9 +3113,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
                                     "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
                                     "anonymized_data_asset_name": "96a15275c07d53de6b4a9464704b12d8",
                                 },
-                                "batch_request_optional_top_level_keys": [
-                                    "data_connector_query"
-                                ],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
                             "anonymized_action_list": [
@@ -3127,6 +3136,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
                         "runtime_configuration",
                     ],
                 },
+                "event": "checkpoint.run",
                 "success": False,
             }
         ),
@@ -3147,7 +3157,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert expected_events == actual_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -3364,7 +3375,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     ]
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert expected_events == actual_events
+    for actual, expected in zip(actual_events, expected_events):
+        assert actual == expected
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
