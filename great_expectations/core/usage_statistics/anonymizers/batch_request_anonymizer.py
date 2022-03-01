@@ -47,7 +47,6 @@ class BatchRequestAnonymizer(Anonymizer):
             anonymized_batch_request_dict = standardize_batch_request_display_ordering(
                 batch_request=anonymized_batch_request_dict
             )
-
             deep_filter_properties_iterable(
                 properties=anonymized_batch_request_dict,
                 clean_falsy=True,
