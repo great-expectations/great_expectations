@@ -754,14 +754,16 @@ anonymized_domain_builder_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-domain-builder",
     "definitions": {
+        "anonymized_string": anonymized_string_schema,
         "anonymized_batch_request": anonymized_batch_request_schema,
     },
     "type": "object",
     "properties": {
-        "class_name": {"type": "string", "maxLength": 256},
+        "parent_class": {"type": "string", "maxLength": 256},
+        "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
         "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
     },
-    "required": ["class_name"],
+    "required": ["parent_class"],
 }
 
 anonymized_parameter_builder_schema = {
@@ -774,10 +776,11 @@ anonymized_parameter_builder_schema = {
     "type": "object",
     "properties": {
         "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
-        "class_name": {"type": "string", "maxLength": 256},
+        "parent_class": {"type": "string", "maxLength": 256},
+        "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
         "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
     },
-    "required": ["anonymized_name", "class_name"],
+    "required": ["anonymized_name", "parent_class"],
 }
 
 anonymized_expectation_configuration_builder_schema = {
@@ -788,11 +791,13 @@ anonymized_expectation_configuration_builder_schema = {
     },
     "type": "object",
     "properties": {
-        "class_name": {"type": "string", "maxLength": 256},
+        "parent_class": {"type": "string", "maxLength": 256},
+        "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
         "expectation_type": {"type": "string", "maxLength": 256},
+        "anonymized_expectation_type": {"$ref": "#/definitions/anonymized_string"},
         "anonymized_condition": {"$ref": "#/definitions/anonymized_string"},
     },
-    "required": ["class_name", "expectation_type"],
+    "required": ["parent_class"],
 }
 
 anonymized_rule_schema = {
