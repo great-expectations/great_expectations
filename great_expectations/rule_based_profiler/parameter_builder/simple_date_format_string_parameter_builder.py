@@ -126,7 +126,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         self._threshold = threshold
 
-        self._candidate_strings = candidate_strings
+        if candidate_strings is not None and isinstance(candidate_strings, list):
+            self._candidate_strings = set(candidate_strings)
+        else:
+            self._candidate_strings = DEFAULT_CANDIDATE_STRINGS
 
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
@@ -198,12 +201,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        if candidate_strings is not None and isinstance(candidate_strings, list):
-            candidate_strings = set(candidate_strings)
-        else:
-            candidate_strings = (
-                SimpleDateFormatStringParameterBuilder.DEFAULT_CANDIDATE_STRINGS
-            )
 
         # Gather "metric_value_kwargs" for all candidate "strftime_format" strings.
         fmt_string: str
