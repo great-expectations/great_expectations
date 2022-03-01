@@ -930,11 +930,11 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
+@retry_probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@retry_probabilistic_test
 def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
@@ -1007,12 +1007,12 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     )
 
 
+@retry_probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time("09/26/2019 13:42:41")
-@retry_probabilistic_test
 def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
@@ -1075,11 +1075,11 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     )
 
 
+@retry_probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@retry_probabilistic_test
 def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     quentin_columnar_table_multi_batch_data_context,
     quentin_columnar_table_multi_batch,
@@ -1169,11 +1169,11 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                 )
 
 
+@retry_probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@retry_probabilistic_test
 @freeze_time("09/26/2019 13:42:41")
 def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes(
     quentin_columnar_table_multi_batch_data_context,

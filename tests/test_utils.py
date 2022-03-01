@@ -43,8 +43,6 @@ from great_expectations.data_context.store.util import (
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
 from great_expectations.data_context.util import build_store_from_config
 
-MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES: int = 3
-
 logger = logging.getLogger(__name__)
 
 
@@ -556,7 +554,7 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
 
 
 def retry_probabilistic_test(
-    max_num_retries: int = MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES,
+    max_num_retries: int = 3,
 ) -> Callable:
     def execute_probabilistic_test_decorator(func: Callable) -> Callable:
         @wraps(func)
