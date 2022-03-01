@@ -27,7 +27,7 @@ class Builder(SerializableDictDot):
         """
         Args:
             data_context: DataContext
-            batch_list: explicitly specified Batch objects foruse in DomainBuilder
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
         if data_context is None:

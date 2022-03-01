@@ -21,7 +21,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
     ):
         """
         Args:
-            batch_list: explicitly specified Batch objects foruse in DomainBuilder
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
             data_context: DataContext
         """

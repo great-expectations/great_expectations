@@ -45,7 +45,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         these will not be considered.
 
         Args:
-            batch_list: explicitly specified Batch objects foruse in DomainBuilder
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
             limit_mode: CardinalityLimitMode or string name of the mode
