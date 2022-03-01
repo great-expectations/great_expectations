@@ -1364,9 +1364,11 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
     return False
 
 
+# here is the first instance
+# shouldn't all of these flags be FALSE?!?!? 2022-03-01
 def build_test_backends_list(
     include_pandas=True,
-    include_spark=True,
+    include_spark=False,
     include_sqlalchemy=True,
     include_sqlite=True,
     include_postgresql=False,
