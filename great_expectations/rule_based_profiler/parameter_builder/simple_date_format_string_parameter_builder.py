@@ -15,6 +15,68 @@ from great_expectations.rule_based_profiler.util import (
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_CANDIDATE_STRINGS: Set[str] = {
+    "%H:%M:%S",
+    "%H:%M:%S,%f",
+    "%H:%M:%S.%f",
+    "%Y %b %d %H:%M:%S.%f",
+    "%Y %b %d %H:%M:%S.%f %Z",
+    "%Y %b %d %H:%M:%S.%f*%Z",
+    "%Y%m%d %H:%M:%S.%f",
+    "%Y-%m-%d",
+    "%Y-%m-%d %H:%M:%S",
+    "%Y-%m-%d %H:%M:%S %z",
+    "%Y-%m-%d %H:%M:%S%z",
+    "%Y-%m-%d %H:%M:%S,%f",
+    "%Y-%m-%d %H:%M:%S,%f%z",
+    "%Y-%m-%d %H:%M:%S.%f",
+    "%Y-%m-%d %H:%M:%S.%f%z",
+    "%Y-%m-%d'T'%H:%M:%S",
+    "%Y-%m-%d'T'%H:%M:%S%z",
+    "%Y-%m-%d'T'%H:%M:%S'%z'",
+    "%Y-%m-%d'T'%H:%M:%S.%f",
+    "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
+    "%Y-%m-%d*%H:%M:%S",
+    "%Y-%m-%d*%H:%M:%S:%f",
+    "%Y-%m-%dT%z",
+    "%Y/%m/%d",
+    "%Y/%m/%d*%H:%M:%S",
+    "%b %d %H:%M:%S",
+    "%b %d %H:%M:%S %Y",
+    "%b %d %H:%M:%S %z",
+    "%b %d %H:%M:%S %z %Y",
+    "%b %d %Y %H:%M:%S",
+    "%b %d, %Y %H:%M:%S %p",
+    "%d %b %Y %H:%M:%S",
+    "%d %b %Y %H:%M:%S*%f",
+    "%d-%b-%Y %H:%M:%S",
+    "%d-%b-%Y %H:%M:%S.%f",
+    "%d-%m-%Y",
+    "%d/%b %H:%M:%S,%f",
+    "%d/%b/%Y %H:%M:%S",
+    "%d/%b/%Y:%H:%M:%S",
+    "%d/%b/%Y:%H:%M:%S %z",
+    "%d/%m/%Y",
+    "%m%d_%H:%M:%S",
+    "%m%d_%H:%M:%S.%f",
+    "%m-%d-%Y",
+    "%m/%d/%Y",
+    "%m/%d/%Y %H:%M:%S %p",
+    "%m/%d/%Y %H:%M:%S %p:%f",
+    "%m/%d/%Y %H:%M:%S %z",
+    "%m/%d/%Y*%H:%M:%S",
+    "%m/%d/%Y*%H:%M:%S*%f",
+    "%m/%d/%y %H:%M:%S %z",
+    "%m/%d/%y*%H:%M:%S",
+    "%y%m%d %H:%M:%S",
+    "%y-%m-%d",
+    "%y-%m-%d %H:%M:%S",
+    "%y-%m-%d %H:%M:%S,%f",
+    "%y-%m-%d %H:%M:%S,%f %z",
+    "%y/%m/%d",
+    "%y/%m/%d %H:%M:%S",
+}
+
 
 class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     """
@@ -22,63 +84,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     column_values.match_strftime_format.unexpected_count metric for each candidate format and returning the format that
     has the lowest unexpected_count ratio.
     """
-
-    CANDIDATE_STRINGS: Set[str] = {
-        "%Y-%m-%d",
-        "%m-%d-%Y",
-        "%y-%m-%d",
-        "%Y-%m-%dT%z",
-        "%Y-%m-%d %H:%M:%S",
-        "%Y %b %d %H:%M:%S.%f %Z",
-        "%b %d %H:%M:%S %z %Y",
-        "%d/%b/%Y:%H:%M:%S %z",
-        "%b %d, %Y %H:%M:%S %p",
-        "%b %d %Y %H:%M:%S",
-        "%b %d %H:%M:%S %Y",
-        "%b %d %H:%M:%S %z",
-        "%b %d %H:%M:%S",
-        "%Y-%m-%d'T'%H:%M:%S%z",
-        "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
-        "%Y-%m-%d %H:%M:%S %z",
-        "%Y-%m-%d %H:%M:%S%z",
-        "%Y-%m-%d %H:%M:%S,%f",
-        "%Y/%m/%d*%H:%M:%S",
-        "%Y %b %d %H:%M:%S.%f*%Z",
-        "%Y %b %d %H:%M:%S.%f",
-        "%Y-%m-%d %H:%M:%S,%f%z",
-        "%Y-%m-%d %H:%M:%S.%f",
-        "%Y-%m-%d %H:%M:%S.%f%z",
-        "%Y-%m-%d'T'%H:%M:%S.%f",
-        "%Y-%m-%d'T'%H:%M:%S",
-        "%Y-%m-%d'T'%H:%M:%S'%z'",
-        "%Y-%m-%d*%H:%M:%S:%f",
-        "%Y-%m-%d*%H:%M:%S",
-        "%y-%m-%d %H:%M:%S,%f %z",
-        "%y-%m-%d %H:%M:%S,%f",
-        "%y-%m-%d %H:%M:%S",
-        "%y/%m/%d %H:%M:%S",
-        "%y%m%d %H:%M:%S",
-        "%Y%m%d %H:%M:%S.%f",
-        "%m/%d/%y*%H:%M:%S",
-        "%m/%d/%Y*%H:%M:%S",
-        "%m/%d/%Y*%H:%M:%S*%f",
-        "%m/%d/%y %H:%M:%S %z",
-        "%m/%d/%Y %H:%M:%S %z",
-        "%H:%M:%S",
-        "%H:%M:%S.%f",
-        "%H:%M:%S,%f",
-        "%d/%b %H:%M:%S,%f",
-        "%d/%b/%Y:%H:%M:%S",
-        "%d/%b/%Y %H:%M:%S",
-        "%d-%b-%Y %H:%M:%S",
-        "%d-%b-%Y %H:%M:%S.%f",
-        "%d %b %Y %H:%M:%S",
-        "%d %b %Y %H:%M:%S*%f",
-        "%m%d_%H:%M:%S",
-        "%m%d_%H:%M:%S.%f",
-        "%m/%d/%Y %H:%M:%S %p:%f",
-        "%m/%d/%Y %H:%M:%S %p",
-    }
 
     def __init__(
         self,
@@ -117,7 +122,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         self._threshold = threshold
 
-        self._candidate_strings = candidate_strings
+        if candidate_strings is not None and isinstance(candidate_strings, list):
+            self._candidate_strings = set(candidate_strings)
+        else:
+            self._candidate_strings = DEFAULT_CANDIDATE_STRINGS
 
     @property
     def fully_qualified_parameter_name(self) -> str:
@@ -193,10 +201,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        if candidate_strings is not None and isinstance(candidate_strings, list):
-            candidate_strings = set(candidate_strings)
-        else:
-            candidate_strings = SimpleDateFormatStringParameterBuilder.CANDIDATE_STRINGS
 
         # Gather "metric_value_kwargs" for all candidate "strftime_format" strings.
         fmt_string: str
@@ -264,5 +268,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             best_fmt_string,
             {
                 "success_ratio": best_ratio,
+                "candidate_strings": sorted(candidate_strings),
             },
         )
