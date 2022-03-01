@@ -2,8 +2,9 @@ import logging
 import os
 import uuid
 from contextlib import contextmanager
+from functools import wraps
 from pathlib import Path
-from typing import Generator, List, Union, cast
+from typing import Any, Callable, Generator, List, Optional, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -41,6 +42,8 @@ from great_expectations.data_context.store.util import (
 )
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
 from great_expectations.data_context.util import build_store_from_config
+
+MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES: int = 3
 
 logger = logging.getLogger(__name__)
 
@@ -550,3 +553,34 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     finally:
         athena_connection.close()
         engine.dispose()
+
+
+def retry_probabilistic_test(
+    max_num_retries: int = MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES,
+) -> Callable:
+    def execute_probabilistic_test_decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def run_pytest_method(*args, **kwargs) -> Any:
+            assertion_error: Optional[AssertionError] = None
+
+            all_assertions_passed: bool = False
+
+            idx: int = 0
+            while idx < max_num_retries:
+                try:
+                    func(*args, **kwargs)
+                    all_assertions_passed = True
+                except AssertionError as assertion_error:
+                    all_assertions_passed = False
+
+                if all_assertions_passed:
+                    break
+
+                idx += 1
+
+            if not all_assertions_passed:
+                raise assertion_error
+
+        return run_pytest_method
+
+    return execute_probabilistic_test_decorator
