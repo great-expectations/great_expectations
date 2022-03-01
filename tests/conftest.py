@@ -6428,7 +6428,6 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
 
 
 @pytest.fixture
-@retry_probabilistic_test
 def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     """
     About the "Bobster" User Workflow Fixture
