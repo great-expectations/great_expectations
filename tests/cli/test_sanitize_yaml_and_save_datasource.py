@@ -1,6 +1,7 @@
 import pytest
 
 from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
+from great_expectations.util import is_library_loadable
 
 
 def test_sanitize_yaml_and_save_datasource_raises_error_on_empty_yaml(
@@ -65,6 +66,10 @@ connection_string: sqlite://"""
     assert obs == {}
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="psycopg2"),
+    reason="psycopg2 is not installed",
+)
 def test_sanitize_yaml_and_save_datasource_works_with_credentials(
     sa,
     empty_data_context,
