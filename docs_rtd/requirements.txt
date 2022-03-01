@@ -25,7 +25,7 @@ idna==2.10
 imagesize==1.2.0
 importlib-metadata==1.7.0
 ipykernel==5.3.4
-ipython==7.17.0
+ipython==7.31.1
 ipython-genutils==0.2.0
 ipywidgets==7.5.1
 jedi==0.17.2
