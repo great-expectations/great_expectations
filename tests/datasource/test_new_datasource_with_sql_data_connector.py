@@ -29,6 +29,14 @@ try:
 except ImportError:
     sqlalchemy = None
 
+try:
+    import sqlalchemy_bigquery as sqla_bigquery
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+    except ImportError:
+        sqla_bigquery = None
+
 yaml = YAML()
 
 
@@ -502,6 +510,10 @@ tables:
     # Here we should test getting another batch
 
 
+@pytest.mark.skipif(
+    sqla_bigquery is None,
+    reason="sqlalchemy_bigquery/pybigquery is not installed",
+)
 def test_basic_instantiation_with_bigquery_creds(sa, empty_data_context):
     context = empty_data_context
     my_data_source = instantiate_class_from_config(

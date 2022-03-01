@@ -13,6 +13,9 @@ from great_expectations.core.batch import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetGCSDataConnector
+from great_expectations.datasource.data_connector.configured_asset_gcs_data_connector import (
+    storage,
+)
 from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAML()
@@ -226,6 +229,10 @@ def expected_batch_definitions_sorted():
     return expected
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -255,6 +262,10 @@ def test_instantiation_without_args(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -291,6 +302,10 @@ def test_instantiation_with_filename_arg(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.list_gcs_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -327,6 +342,10 @@ def test_instantiation_with_info_arg(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -370,6 +389,10 @@ def test_instantiation_with_test_yaml_config(
     assert report_object == expected_config_dict
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -425,6 +448,10 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
     assert mock_emit.call_args_list == expected_call_args_list
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -479,6 +506,10 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
     }
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -516,6 +547,10 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         )
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -575,6 +610,10 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         my_data_connector.get_batch_definition_list_from_batch_request()
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -624,6 +663,10 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         )
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -698,6 +741,10 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -772,6 +819,10 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -857,6 +908,10 @@ def test_return_all_batch_definitions_basic_sorted(
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -964,6 +1019,10 @@ def test_return_all_batch_definitions_returns_specified_partition(
     assert my_batch_definition == expected_batch_definition
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
 )
@@ -1049,6 +1108,10 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
 )
@@ -1118,6 +1181,10 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
         )
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
 )
@@ -1183,6 +1250,10 @@ def test_return_all_batch_definitions_too_many_sorters(
         )
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
 )
@@ -1314,6 +1385,10 @@ assets:
     )
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
 )
