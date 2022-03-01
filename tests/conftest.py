@@ -113,9 +113,9 @@ def pytest_configure(config):
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--no-spark",
+        "--spark",
         action="store_true",
-        help="If set, suppress all tests against the spark test suite",
+        help="If set, execute tests against the spark test suite",
     )
     parser.addoption(
         "--no-sqlalchemy",
@@ -123,9 +123,9 @@ def pytest_addoption(parser):
         help="If set, suppress all tests using sqlalchemy",
     )
     parser.addoption(
-        "--no-postgresql",
+        "--postgresql",
         action="store_true",
-        help="If set, suppress all tests against postgresql",
+        help="If set, execute tests against postgresql",
     )
     parser.addoption(
         "--mysql",
@@ -179,9 +179,9 @@ def build_test_backends_list(metafunc):
 
 def build_test_backends_list_cfe(metafunc):
     include_pandas: bool = True
-    include_spark: bool = not metafunc.config.getoption("--no-spark")
+    include_spark: bool = metafunc.config.getoption("--spark")
     include_sqlalchemy: bool = not metafunc.config.getoption("--no-sqlalchemy")
-    include_postgresql = not metafunc.config.getoption("--no-postgresql")
+    include_postgresql: bool = metafunc.config.getoption("--postgresql")
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
