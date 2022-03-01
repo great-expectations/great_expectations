@@ -92,9 +92,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[float, str] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Configure this SimpleDateFormatStringParameterBuilder
@@ -106,9 +106,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             metric_value_kwargs: used in MetricConfiguration
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_strings: a list of candidate date format strings that will replace the default
-            data_context: DataContext
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            data_context: DataContext
         """
         super().__init__(
             name=name,

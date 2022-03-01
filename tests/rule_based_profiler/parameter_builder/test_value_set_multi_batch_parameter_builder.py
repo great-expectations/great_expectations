@@ -14,15 +14,26 @@ from great_expectations.rule_based_profiler.util import (
 )
 
 
-def test_instantiation_value_set_multi_batch_parameter_builder():
+def test_instantiation_value_set_multi_batch_parameter_builder(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
     _: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder(
         name="my_name",
+        data_context=data_context,
     )
 
 
-def test_instantiation_value_set_multi_batch_parameter_builder_no_name():
+def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
     with pytest.raises(TypeError) as excinfo:
-        _: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder()
+        _: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder(
+            data_context=data_context,
+        )
     assert "__init__() missing 1 required positional argument: 'name'" in str(
         excinfo.value
     )
@@ -32,6 +43,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
+
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
         "data_connector_name": "alice_columnar_table_single_batch_data_connector",
@@ -99,6 +111,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     This tests that non-numeric columns are handled appropriately,
     """
     data_context: DataContext = alice_columnar_table_single_batch_context
+
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
         "data_connector_name": "alice_columnar_table_single_batch_data_connector",

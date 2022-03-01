@@ -425,18 +425,30 @@ def pyathena_dataset(sa):
     return dataset
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyathena"),
+    reason="pyathena is not installed",
+)
 def test_expect_column_values_to_be_of_type_string_dialect_pyathena(pyathena_dataset):
     assert pyathena_dataset.expect_column_values_to_be_of_type(
         "col", type_="STRINGTYPE"
     ).success
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyathena"),
+    reason="pyathena is not installed",
+)
 def test_expect_column_values_to_be_in_type_list_pyathena(pyathena_dataset):
     assert pyathena_dataset.expect_column_values_to_be_in_type_list(
         "col", type_list=["STRINGTYPE", "BOOLEAN"]
     ).success
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyathena"),
+    reason="pyathena is not installed",
+)
 def test_expect_column_values_to_match_like_pattern_pyathena(pyathena_dataset):
     assert pyathena_dataset.expect_column_values_to_match_like_pattern(
         "col", like_pattern="test%"

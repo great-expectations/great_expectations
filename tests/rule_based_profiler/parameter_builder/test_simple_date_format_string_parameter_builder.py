@@ -80,10 +80,15 @@ DEFAULT_CANDIDATE_STRINGS: Set[str] = {
 }
 
 
-def test_simple_date_format_parameter_builder_instantiation():
+def test_simple_date_format_parameter_builder_instantiation(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
     date_format_string_parameter: SimpleDateFormatStringParameterBuilder = (
         SimpleDateFormatStringParameterBuilder(
             name="my_simple_date_format_string_parameter_builder",
+            data_context=data_context,
         )
     )
 
@@ -91,10 +96,15 @@ def test_simple_date_format_parameter_builder_instantiation():
     assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
 
 
-def test_simple_date_format_parameter_builder_zero_batch_id_error():
+def test_simple_date_format_parameter_builder_zero_batch_id_error(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
     date_format_string_parameter: SimpleDateFormatStringParameterBuilder = (
         SimpleDateFormatStringParameterBuilder(
             name="my_simple_date_format_string_parameter_builder",
+            data_context=data_context,
         )
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -128,8 +138,8 @@ def test_simple_date_format_parameter_builder_alice(
         SimpleDateFormatStringParameterBuilder(
             name="my_date_format",
             metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
             batch_request=batch_request,
+            data_context=data_context,
         )
     )
 
@@ -194,8 +204,8 @@ def test_simple_date_format_parameter_builder_bobby(
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_strings=candidate_strings,
             threshold=threshold,
-            data_context=data_context,
             batch_request=batch_request,
+            data_context=data_context,
         )
     )
 
