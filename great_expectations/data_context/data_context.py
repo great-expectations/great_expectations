@@ -2268,11 +2268,11 @@ class BaseDataContext(ConfigPeer):
                 resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
             )
         else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key: Union[ExpectationSuiteIdentifier, None] = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
 
-        if key in self.expectations_store:
+        if self.expectations_store.has_key(key):
             expectations_schema_dict: dict = self.expectations_store.get(key)
             # create the ExpectationSuite from constructor
             return ExpectationSuite(**expectations_schema_dict, data_context=self)
