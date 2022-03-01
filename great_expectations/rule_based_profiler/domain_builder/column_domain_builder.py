@@ -11,21 +11,21 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 class ColumnDomainBuilder(DomainBuilder):
     def __init__(
         self,
-        data_context: "DataContext",  # noqa: F821
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
         column_names: Optional[List[str]] = None,
     ):
         """
         Args:
-            data_context: DataContext
             batch_list: explicitly specified Batch objects foruse in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+            data_context: DataContext
         """
         super().__init__(
-            data_context=data_context,
             batch_list=batch_list,
             batch_request=batch_request,
+            data_context=data_context,
         )
 
         self._column_names = column_names

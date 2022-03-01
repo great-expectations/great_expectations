@@ -21,9 +21,9 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        data_context: "DataContext",  # noqa: F821
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[int] = None,
         max_proportion_unique: Optional[int] = None,
@@ -45,10 +45,9 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         these will not be considered.
 
         Args:
-            data_context: DataContext associated with this profiler.
             batch_list: explicitly specified Batch objects foruse in DomainBuilder
-            batch_request: BatchRequest to be optionally used to define batches
-                to consider for this domain builder.
+            batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
+            data_context: DataContext associated with this profiler.
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
@@ -60,9 +59,9 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
                 excluded from consideration, cardinality is not computed.
         """
         super().__init__(
-            data_context=data_context,
             batch_list=batch_list,
             batch_request=batch_request,
+            data_context=data_context,
         )
 
         self._cardinality_checker = CardinalityChecker(

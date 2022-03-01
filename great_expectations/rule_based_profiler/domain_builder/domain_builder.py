@@ -22,11 +22,6 @@ class DomainBuilder(Builder, ABC):
     A DomainBuilder provides methods to get domains based on one or more batches of data.
     """
 
-    exclude_field_names: Set[str] = {
-        "data_context",
-        "batch_list",
-    }
-
     def __init__(
         self,
         batch_list: Optional[List[Batch]] = None,
@@ -35,19 +30,15 @@ class DomainBuilder(Builder, ABC):
     ):
         """
         Args:
-            data_context: DataContext
             batch_list: explicitly specified Batch objects foruse in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+            data_context: DataContext
         """
-        if data_context is None:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"{self.__class__.__name__} requires a data_context, but none was provided."
-            )
-
-        self._data_context = data_context
-        self._batch_request = batch_request
-
-        self._batch_list = batch_list
+        super().__init__(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            data_context=data_context,
+        )
 
     def get_domains(
         self,
