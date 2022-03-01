@@ -2272,7 +2272,7 @@ class BaseDataContext(ConfigPeer):
                 expectation_suite_name=expectation_suite_name
             )
 
-        if self.expectations_store.has_key(key):
+        if key in self.expectations_store:
             expectations_schema_dict: dict = self.expectations_store.get(key)
             # create the ExpectationSuite from constructor
             return ExpectationSuite(**expectations_schema_dict, data_context=self)
