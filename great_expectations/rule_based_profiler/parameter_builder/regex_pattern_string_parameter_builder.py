@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     AttributedResolvedMetrics,
     MetricComputationResult,
@@ -47,8 +47,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[float, str] = 1.0,
         candidate_regexes: Optional[Union[Iterable[str], str]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Configure this RegexPatternStringParameterBuilder
@@ -58,11 +59,13 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_regexes: a list of candidate regex strings that will REPLACE the default
-            data_context: DataContext
+            batch_list: Optional[List[Batch]] = None,
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            data_context: DataContext
         """
         super().__init__(
             name=name,
+            batch_list=batch_list,
             data_context=data_context,
             batch_request=batch_request,
         )

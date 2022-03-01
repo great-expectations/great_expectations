@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Union
 
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.domain_builder.cardinality_checker import (
@@ -21,8 +21,9 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        data_context: "DataContext",  # noqa: F821
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[int] = None,
         max_proportion_unique: Optional[int] = None,
@@ -44,9 +45,9 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         these will not be considered.
 
         Args:
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
+            batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
-            batch_request: BatchRequest to be optionally used to define batches
-                to consider for this domain builder.
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
@@ -57,10 +58,10 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             exclude_columns: If provided, these columns are pre-filtered and
                 excluded from consideration, cardinality is not computed.
         """
-
         super().__init__(
-            data_context=data_context,
+            batch_list=batch_list,
             batch_request=batch_request,
+            data_context=data_context,
         )
 
         self._cardinality_checker = CardinalityChecker(
@@ -92,13 +93,15 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             List of domains that match the desired cardinality.
         """
 
-        batch_ids: List[str] = self.get_batch_ids(variables=variables)
         validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
 
         # Here we use a single get_metric call to get column names to build the
         # rest of the metrics.
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)
+
         table_column_names: List[str] = self._get_table_column_names_from_active_batch(
             validator=validator,
+            batch_id=batch_ids[-1],  # active_batch_id
         )
 
         metrics_for_cardinality_check: List[
@@ -122,6 +125,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
     def _get_table_column_names_from_active_batch(
         self,
         validator: "Validator",  # noqa: F821
+        batch_id: str,
     ):
         """Retrieve table column names from the active batch.
 
@@ -136,7 +140,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             metric=MetricConfiguration(
                 metric_name="table.columns",
                 metric_domain_kwargs={
-                    "batch_id": validator.active_batch_id,
+                    "batch_id": batch_id,
                 },
                 metric_value_kwargs=None,
                 metric_dependencies=None,

@@ -1642,7 +1642,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             {
                 "event_payload": {
                     "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
-                    "config_version": 1.0,
+                    "config_version": 1,
                     "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
                     "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
                     "anonymized_action_list": [
@@ -1696,9 +1696,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                                     "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                                     "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
                                 },
-                                "batch_request_optional_top_level_keys": [
-                                    "data_connector_query"
-                                ],
                             },
                             "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
                             "anonymized_action_list": [
@@ -1793,7 +1790,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             {
                 "event_payload": {
                     "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
-                    "config_version": 1.0,
+                    "config_version": 1,
                     "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
                     "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
                     "anonymized_action_list": [
@@ -1847,9 +1844,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                                     "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                                     "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
                                 },
-                                "batch_request_optional_top_level_keys": [
-                                    "data_connector_query"
-                                ],
                             },
                             "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
                             "anonymized_action_list": [
