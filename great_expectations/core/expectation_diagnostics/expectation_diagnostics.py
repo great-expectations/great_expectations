@@ -327,20 +327,23 @@ class ExpectationDiagnostics(SerializableDictDot):
             sub_messages.append(
                 {
                     "message": "No example found to get kwargs for ExpectationConfiguration",
-                    "passed": False,
+                    "passed": passed,
                 }
             )
-        if "validate_configuration" not in expectation_instance.__class__.__dict__:
-            passed = False
-            sub_messages.append(
-                {"message": "No validate_configuration method defined", "passed": False}
-            )
         else:
-            expectation_config = ExpectationConfiguration(
-                expectation_type=expectation_instance.expectation_type,
-                kwargs=first_test.input,
-            )
-            passed = expectation_instance.validate_configuration(expectation_config)
+            if "validate_configuration" not in expectation_instance.__class__.__dict__:
+                sub_messages.append(
+                    {
+                        "message": "No validate_configuration method defined",
+                        "passed": passed,
+                    }
+                )
+            else:
+                expectation_config = ExpectationConfiguration(
+                    expectation_type=expectation_instance.expectation_type,
+                    kwargs=first_test.input,
+                )
+                passed = expectation_instance.validate_configuration(expectation_config)
 
         return ExpectationDiagnosticCheckMessage(
             message="Has basic input validation and type checking",
