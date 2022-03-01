@@ -6476,7 +6476,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         1.0e3
     )
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = (
-        4.00
+        3.00
     )
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value: int = round(
