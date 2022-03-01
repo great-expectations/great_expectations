@@ -2073,7 +2073,6 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
                                 },
                                 "batch_request_optional_top_level_keys": [
                                     "batch_spec_passthrough",
-                                    "data_connector_query",
                                 ],
                                 "batch_spec_passthrough_keys": ["reader_options"],
                             },
@@ -2690,7 +2689,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
         ),
         mock.call(
             {
-                "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
@@ -2705,6 +2703,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
                                 },
                                 "batch_request_optional_top_level_keys": [
                                     "batch_spec_passthrough",
+                                    "data_connector_query",
                                 ],
                                 "batch_spec_passthrough_keys": ["reader_options"],
                                 "data_connector_query_keys": ["index"],
@@ -2731,6 +2730,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
                         "runtime_configuration",
                     ],
                 },
+                "event": "checkpoint.run",
                 "success": True,
             }
         ),
