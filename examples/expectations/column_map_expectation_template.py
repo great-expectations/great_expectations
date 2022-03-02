@@ -5,6 +5,7 @@ For detailed instructions on how to use it, please see:
 """
 
 import json
+from typing import Optional
 
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
@@ -12,7 +13,10 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
