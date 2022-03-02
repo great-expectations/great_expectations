@@ -1,69 +1,39 @@
-from typing import Dict
+import importlib
+from types import ModuleType
+from typing import Any, Dict, List
 
 import pytest
 
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
     ProfilerRunAnonymizer,
 )
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 
 
 @pytest.fixture
 def profiler_run_anonymizer() -> ProfilerRunAnonymizer:
-    # Standardize the salt so our tests are deterinistic
+    # Standardize the salt so our tests are deterimistic
     salt: str = "00000000-0000-0000-0000-00000000a004"
     anonymizer: ProfilerRunAnonymizer = ProfilerRunAnonymizer(salt=salt)
     return anonymizer
 
 
-@pytest.fixture
-def usage_stats_profiler_config() -> dict:
-    config: dict = {
-        "name": "my_profiler",
-        "config_version": 1.0,
-        "rules": {
-            "rule_1": {
-                "domain_builder": {"class_name": "TableDomainBuilder"},
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                        "meta": {"details": {"note": "Hello World"}},
-                    }
-                ],
-                "parameter_builders": [
-                    {
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "metric_name": "my_metric",
-                        "name": "my_parameter",
-                    }
-                ],
-            }
-        },
-        "variable_count": 1,
-        "rule_count": 1,
-    }
-    return config
-
-
 def test_anonymize_profiler_run(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
-    usage_stats_profiler_config: dict,
-):
-
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+) -> None:
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
-        **usage_stats_profiler_config
+        profiler_config_with_placeholder_args
     )
     assert anonymized_result == {
-        "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
+        "anonymized_name": "4baf3d43f149c9f9e87d5cfe36074f49",
         "config_version": 1.0,
         "anonymized_rules": [
             {
-                "anonymized_domain_builder": {"class_name": "TableDomainBuilder"},
+                "anonymized_domain_builder": {"parent_class": "TableDomainBuilder"},
                 "anonymized_expectation_configuration_builders": [
                     {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     }
                 ],
@@ -71,36 +41,182 @@ def test_anonymize_profiler_run(
                 "anonymized_parameter_builders": [
                     {
                         "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
                     }
                 ],
             }
         ],
-        "variable_count": 1,
         "rule_count": 1,
+        "variable_count": 1,
+    }
+
+
+def test_anonymize_profiler_run_custom_values(
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    profiler_config_with_placeholder_args_custom_values: RuleBasedProfilerConfig,
+) -> None:
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+        profiler_config_with_placeholder_args_custom_values
+    )
+    assert anonymized_result == {
+        "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
+        "anonymized_rules": [
+            {
+                "anonymized_domain_builder": {
+                    "anonymized_class": "d2972bccf7a2a0ff91ba9369a86dcbe1",
+                    "parent_class": "__not_recognized__",
+                },
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "anonymized_class": "0d70a2037f19cf1764afad97c7395167",
+                        "anonymized_expectation_type": "c7c23fbf56041786bf024a2407031b27",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+                "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_class": "c73849d7016ce7ab68e24465361a717a",
+                        "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+            }
+        ],
+        "config_version": 1.0,
+        "rule_count": 1,
+        "variable_count": 1,
+    }
+
+
+def test_anonymize_profiler_run_multiple_rules(
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    profiler_config_with_placeholder_args_multiple_rules: RuleBasedProfilerConfig,
+) -> None:
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+        profiler_config_with_placeholder_args_multiple_rules
+    )
+    assert anonymized_result == {
+        "anonymized_name": "4baf3d43f149c9f9e87d5cfe36074f49",
+        "config_version": 1.0,
+        "anonymized_rules": [
+            {
+                "anonymized_domain_builder": {"parent_class": "TableDomainBuilder"},
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
+                    }
+                ],
+                "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
+                    }
+                ],
+            },
+            {
+                "anonymized_domain_builder": {"parent_class": "TableDomainBuilder"},
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_values_to_be_between",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
+                    }
+                ],
+                "anonymized_name": "0bac2cecbb0cf8bb704e86710941434e",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_name": "b7719efec76c6ebe30230fc1ec023beb",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
+                    }
+                ],
+            },
+        ],
+        "rule_count": 2,
+        "variable_count": 1,
+    }
+
+
+def test_anonymize_profiler_run_multiple_rules_custom_values(
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    profiler_config_with_placeholder_args_multiple_rules_custom_values: RuleBasedProfilerConfig,
+) -> None:
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+        profiler_config_with_placeholder_args_multiple_rules_custom_values
+    )
+    assert anonymized_result == {
+        "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
+        "anonymized_rules": [
+            {
+                "anonymized_domain_builder": {
+                    "anonymized_class": "d2972bccf7a2a0ff91ba9369a86dcbe1",
+                    "parent_class": "__not_recognized__",
+                },
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "anonymized_class": "0d70a2037f19cf1764afad97c7395167",
+                        "anonymized_expectation_type": "c7c23fbf56041786bf024a2407031b27",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+                "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_class": "c73849d7016ce7ab68e24465361a717a",
+                        "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+            },
+            {
+                "anonymized_domain_builder": {
+                    "anonymized_class": "df79fd715bf3ea514c3f4e3006025b24",
+                    "parent_class": "__not_recognized__",
+                },
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "anonymized_class": "71128204dee66972b5cfc8851b216508",
+                        "anonymized_expectation_type": "828b498d29af626836697ba1622ca234",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+                "anonymized_name": "0bac2cecbb0cf8bb704e86710941434e",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_class": "fcbd493bd096d894cf83506bc23a0729",
+                        "anonymized_name": "5af4c6b6dedc5f9b3b840709e957c4ed",
+                        "parent_class": "__not_recognized__",
+                    }
+                ],
+            },
+        ],
+        "config_version": 1.0,
+        "rule_count": 2,
+        "variable_count": 1,
     }
 
 
 def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
-    usage_stats_profiler_config: dict,
-):
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+) -> None:
     # Add batch requests to fixture before running method
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "my_data_asset",
     }
-    rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
+    rules: Dict[str, dict] = profiler_config_with_placeholder_args.rules
     rule: dict = rules["rule_1"]
     rule["domain_builder"]["batch_request"] = batch_request
     rule["parameter_builders"][0]["batch_request"] = batch_request
 
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
-        **usage_stats_profiler_config
+        profiler_config_with_placeholder_args
     )
     assert anonymized_result == {
-        "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
+        "anonymized_name": "4baf3d43f149c9f9e87d5cfe36074f49",
         "config_version": 1.0,
         "anonymized_rules": [
             {
@@ -110,17 +226,14 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
                             "anonymized_data_asset_name": "eac128c5824b698c22b441ada61022d4",
                             "anonymized_data_connector_name": "123a3221fc4b65014d061cce4a71782e",
                             "anonymized_datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
-                        },
-                        "batch_request_optional_top_level_keys": [
-                            "data_connector_query"
-                        ],
+                        }
                     },
-                    "class_name": "TableDomainBuilder",
+                    "parent_class": "TableDomainBuilder",
                 },
                 "anonymized_expectation_configuration_builders": [
                     {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
                     }
                 ],
                 "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
@@ -131,123 +244,95 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
                                 "anonymized_data_asset_name": "eac128c5824b698c22b441ada61022d4",
                                 "anonymized_data_connector_name": "123a3221fc4b65014d061cce4a71782e",
                                 "anonymized_datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
-                            },
-                            "batch_request_optional_top_level_keys": [
-                                "data_connector_query"
-                            ],
+                            }
                         },
                         "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
                     }
                 ],
             }
         ],
-        "variable_count": 1,
         "rule_count": 1,
+        "variable_count": 1,
     }
 
 
 def test_anonymize_profiler_run_with_condition_in_expectation_configuration_builder(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
-    usage_stats_profiler_config: dict,
-):
-    rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+) -> None:
+    rules: Dict[str, dict] = profiler_config_with_placeholder_args.rules
     expectation_configuration_builder: dict = rules["rule_1"][
         "expectation_configuration_builders"
     ][0]
     expectation_configuration_builder["condition"] = "my_condition"
 
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
-        **usage_stats_profiler_config
+        profiler_config_with_placeholder_args
     )
     assert anonymized_result == {
-        "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
+        "anonymized_name": "4baf3d43f149c9f9e87d5cfe36074f49",
+        "config_version": 1.0,
         "anonymized_rules": [
             {
-                "anonymized_domain_builder": {"class_name": "TableDomainBuilder"},
+                "anonymized_domain_builder": {"parent_class": "TableDomainBuilder"},
                 "anonymized_expectation_configuration_builders": [
                     {
                         "anonymized_condition": "553b1c035d9b602798d64d23d63abd32",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
                     }
                 ],
                 "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
                 "anonymized_parameter_builders": [
                     {
                         "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
-                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
                     }
                 ],
             }
         ],
-        "config_version": 1.0,
         "rule_count": 1,
         "variable_count": 1,
     }
 
 
-def test_resolve_config_using_acceptable_arguments(
-    profiler_with_placeholder_args: RuleBasedProfiler,
-):
-    config: dict = ProfilerRunAnonymizer.resolve_config_using_acceptable_arguments(
-        profiler=profiler_with_placeholder_args
+def test_all_builder_classes_are_recognized_as_profiler_run_anonymizer_attrs(
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
+) -> None:
+    """
+    Ensure that every ParameterBuilder, DomainBuilder, and ExpectationConfigurationBuilder
+    is included within the `self._ge_...` attributes of the ProfilerRunAnonymizer.
+
+    This test is designed to catch instances where a new builder class is introduced but
+    not included in the ProfilerRunAnonymizer.
+    """
+
+    def gather_all_builder_classes(module_path: str, builder_type: str) -> List[Any]:
+        module: ModuleType = importlib.import_module(module_path)
+        builders: List[Any] = [
+            obj for name, obj in module.__dict__.items() if name.endswith(builder_type)
+        ]
+        return builders
+
+    domain_builders: List[str] = gather_all_builder_classes(
+        "great_expectations.rule_based_profiler.domain_builder", "DomainBuilder"
     )
+    for domain_builder in domain_builders:
+        assert domain_builder in profiler_run_anonymizer._ge_domain_builders
 
-    # Ensure we have expected keys while also removing unnecessary ones
-    assert all(
-        attr in config
-        for attr in ("name", "config_version", "rules", "variable_count", "rule_count")
+    parameter_builders: List[str] = gather_all_builder_classes(
+        "great_expectations.rule_based_profiler.parameter_builder", "ParameterBuilder"
     )
-    assert all(
-        attr not in config for attr in ("class_name", "module_name", "variables")
+    for parameter_builder in parameter_builders:
+        assert parameter_builder in profiler_run_anonymizer._ge_parameter_builders
+
+    expectation_configuration_builders: List[str] = gather_all_builder_classes(
+        "great_expectations.rule_based_profiler.expectation_configuration_builder",
+        "ExpectationConfigurationBuilder",
     )
-
-    assert config["variable_count"] == 1 and config["rule_count"] == 1
-
-
-def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
-    profiler_with_placeholder_args: RuleBasedProfiler,
-):
-    rule_name: str = "my_rule"
-    assert all(rule.name != rule_name for rule in profiler_with_placeholder_args.rules)
-
-    rules: Dict[str, dict] = {rule_name: {"foo": "bar"}}
-    config: dict = ProfilerRunAnonymizer.resolve_config_using_acceptable_arguments(
-        profiler=profiler_with_placeholder_args, rules=rules
-    )
-
-    assert len(config["rules"]) == 1 and rule_name == config["rules"][0]["name"]
-
-
-def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
-    profiler_with_placeholder_args: RuleBasedProfiler, usage_stats_profiler_config: dict
-):
-    datasource_name = "my_datasource"
-    data_connector_name = "my_basic_data_connector"
-    data_asset_name = "my_data_asset"
-
-    batch_request: BatchRequest = BatchRequest(
-        datasource_name=datasource_name,
-        data_connector_name=data_connector_name,
-        data_asset_name=data_asset_name,
-    )
-
-    # Add batch requests to fixture before running method
-    rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
-    rules["rule_1"]["domain_builder"]["batch_request"] = batch_request
-
-    config: dict = ProfilerRunAnonymizer.resolve_config_using_acceptable_arguments(
-        profiler=profiler_with_placeholder_args, rules=rules
-    )
-
-    assert all(
-        attr in config
-        for attr in ("name", "config_version", "rules", "variable_count", "rule_count")
-    )
-
-    domain_builder: dict = config["rules"][0]["domain_builder"]
-    converted_batch_request: dict = domain_builder["batch_request"]
-    assert converted_batch_request["datasource_name"] == datasource_name
-    assert converted_batch_request["data_connector_name"] == data_connector_name
-    assert converted_batch_request["data_asset_name"] == data_asset_name
+    for expectation_configuration_builder in expectation_configuration_builders:
+        assert (
+            expectation_configuration_builder
+            in profiler_run_anonymizer._ge_expectation_configuration_builders
+        )

@@ -1,21 +1,17 @@
 import configparser
-import logging
 import os
 import shutil
 from copy import deepcopy
-from typing import Any
 from unittest import mock
 
 import pytest
 
 from great_expectations.core.usage_statistics.usage_statistics import (
-    get_profiler_run_usage_statistics,
     run_validation_operator_usage_statistics,
 )
 from great_expectations.data_context import BaseDataContext, DataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -580,51 +576,3 @@ def test_opt_out_etc_overrides_yml_v013(tmp_path_factory, monkeypatch):
         context = DataContext(context_root_dir=context_path)
         project_config = context._project_config
         assert project_config.anonymous_usage_statistics.enabled is False
-
-
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-def test_get_profiler_run_usage_statistics_with_handler(
-    mock_data_context: mock.MagicMock,
-):
-    profiler = RuleBasedProfiler(
-        name="my_profiler", config_version=1.0, data_context=mock_data_context
-    )
-    payload = get_profiler_run_usage_statistics(profiler)
-    assert payload != {}  # TODO(cdkini): Improve this assertion
-
-
-def test_get_profiler_run_usage_statistics_without_handler():
-    # Without a DataContext, the usage stats handler is not propogated down to the RBP
-    profiler = RuleBasedProfiler(
-        name="my_profiler",
-        config_version=1.0,
-    )
-    payload = get_profiler_run_usage_statistics(profiler)
-    assert payload == {}
-
-
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler"
-)
-def test_get_profiler_run_usage_statistics_logs_exception(
-    mock_usage_stats_handler: mock.MagicMock,
-    mock_data_context: mock.MagicMock,
-    caplog: Any,
-):
-    # Ensure that the ProfilerRunAnonymizer on the mocked UsageStatisticsHandler will throw an Exception
-    mock_profiler_run_anonymizer = mock_usage_stats_handler._profiler_run_anonymizer
-    mock_profiler_run_anonymizer.resolve_config_using_acceptable_arguments.side_effect = Exception(
-        "mocked error"
-    )
-    mock_data_context._usage_statistics_handler = mock_usage_stats_handler
-
-    profiler = RuleBasedProfiler(
-        name="my_profiler", config_version=1.0, data_context=mock_data_context
-    )
-    with caplog.at_level(logging.DEBUG):
-        payload = get_profiler_run_usage_statistics(profiler)
-
-    assert "Unable to create anonymized_profiler_run payload" in caplog.text
-    assert "mocked error" in caplog.text
-    assert payload == {}
