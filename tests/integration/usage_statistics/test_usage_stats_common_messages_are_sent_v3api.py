@@ -182,3 +182,5 @@ def test_common_usage_stats_are_sent_no_mocking(
     assert events == expected_events
 
     assert not usage_stats_invalid_messages_exist(caplog.messages)
+
+    # TODO(cdkini): Write RBP test!
