@@ -17,6 +17,11 @@ except ImportError:
 
 import click
 
+try:
+    from pybigquery.parse_url import parse_url as parse_bigquery_url
+except (ImportError, ModuleNotFoundError):
+    parse_bigquery_url = None
+
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.datasource import (
     BaseDatasource,
@@ -384,6 +389,15 @@ Would you like to continue?"""
                     data_connector_name=data_connector_name,
                     msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
                 )
+
+    if (
+        datasource.execution_engine.engine.dialect.name.lower() == "bigquery"
+        and parse_bigquery_url is not None
+    ):
+        # bigquery table needs to contain the project id if it differs from the credentials project
+        if len(data_asset_name.split(".")) < 3:
+            project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
+            data_asset_name = "{}.{}".format(project_id, data_asset_name)
 
     return data_asset_name
 

@@ -1,13 +1,12 @@
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core import IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.types import SerializableDictDot
-from great_expectations.types.base import SerializableDotDict
+from great_expectations.types import SerializableDictDot, SerializableDotDict
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
@@ -142,3 +141,26 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
                 source[key] = self._convert_dictionaries_to_domain_kwargs(source=value)
 
         return source
+
+
+def build_domains_from_column_names(column_names: List[str]) -> List[Domain]:
+    """Build column type domains from column names.
+
+    Args:
+        column_names: List of columns to convert.
+
+    Returns:
+        A list of column type Domain objects built from column names.
+    """
+    column_name: str
+    domains: List[Domain] = [
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": column_name,
+            },
+        )
+        for column_name in column_names
+    ]
+
+    return domains

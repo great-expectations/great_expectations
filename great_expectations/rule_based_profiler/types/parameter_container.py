@@ -16,8 +16,7 @@ from pyparsing import (
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.types import Domain
-from great_expectations.types import SerializableDictDot
-from great_expectations.types.base import SerializableDotDict
+from great_expectations.types import SerializableDictDot, SerializableDotDict
 from great_expectations.util import deep_filter_properties_iterable
 
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
@@ -44,7 +43,7 @@ attribute_name = Word(alphas, alphanums + "_.") + ZeroOrMore(
     )
     ^ (
         Suppress(Literal("["))
-        + Word(nums).setParseAction(lambda s, l, t: [int(t[0])])
+        + Word(nums + "-").setParseAction(lambda s, l, t: [int(t[0])])
         + Suppress(Literal("]"))
     )
 )
@@ -102,8 +101,11 @@ class ParameterNode(SerializableDotDict):
     the situations where multiple long fully-qualified parameter names have overlapping intermediate parts (see below).
     """
 
+    def to_dict(self) -> dict:
+        return dict(self)
+
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=dict(self))
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 @dataclass
@@ -337,7 +339,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Union[Any, ParameterNode]]:
     """
-    Get the parameter value from the current rule state using the fully-qualified parameter name.
+    Get the parameter value from the current "rule state" using the fully-qualified parameter name.
     A fully-qualified parameter name must be a dot-delimited string, or the name of a parameter (without the dots).
     Args
         :param fully_qualified_parameter_name: str -- A dot-separated string key starting with $ for fetching parameters

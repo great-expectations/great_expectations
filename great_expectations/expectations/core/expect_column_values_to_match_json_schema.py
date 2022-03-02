@@ -93,7 +93,9 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         "json_schema",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
 
         return True

@@ -91,7 +91,9 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     }
     args_keys = ("column",)
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         return super().validate_configuration(configuration)
 
     @classmethod

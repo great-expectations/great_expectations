@@ -9,6 +9,11 @@ import uuid
 
 import click
 
+try:
+    from pybigquery.parse_url import parse_url as parse_bigquery_url
+except (ImportError, ModuleNotFoundError):
+    parse_bigquery_url = None
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli.v012 import toolkit
@@ -770,7 +775,7 @@ def _collect_snowflake_credentials_key_pair():
 def _collect_bigquery_credentials(default_credentials=None):
     sqlalchemy_url = click.prompt(
         """What is the SQLAlchemy url/connection string for the BigQuery connection?
-(reference: https://github.com/mxmzdlv/pybigquery#connection-string-parameters)
+(reference: https://github.com/googleapis/python-bigquery-sqlalchemy#connection-string-parameters)
 """,
         show_default=False,
     ).strip()
@@ -1366,6 +1371,11 @@ Would you like to continue?"""
     datasource = context.get_datasource(datasource_name)
 
     if datasource.engine.dialect.name.lower() == "bigquery":
+        # bigquery table needs to contain the project id if it differs from the credentials project
+        if len(data_asset_name.split(".")) < 3:
+            project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
+            data_asset_name = "{}.{}".format(project_id, data_asset_name)
+
         # bigquery also requires special handling
         bigquery_temp_table = click.prompt(
             "Great Expectations will create a table to use for "
@@ -1443,11 +1453,17 @@ def _verify_snowflake_dependent_modules() -> bool:
 
 
 def _verify_bigquery_dependent_modules() -> bool:
-    return verify_library_dependent_modules(
+    pybigquery_ok = verify_library_dependent_modules(
         python_import_name="pybigquery.sqlalchemy_bigquery",
         pip_library_name="pybigquery",
         module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
+    sqlalchemy_bigquery_ok = verify_library_dependent_modules(
+        python_import_name="sqlalchemy_bigquery",
+        pip_library_name="sqlalchemy_bigquery",
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    )
+    return pybigquery_ok or sqlalchemy_bigquery_ok
 
 
 def _verify_pyspark_dependent_modules() -> bool:

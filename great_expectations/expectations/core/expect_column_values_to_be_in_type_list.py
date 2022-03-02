@@ -124,7 +124,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "type_list",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert "type_list" in configuration.kwargs, "type_list is required"
@@ -497,15 +499,19 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             actual_column_types_list = execution_engine.resolve_metrics(
                 [table_column_types_configuration]
             )[table_column_types_configuration.id]
-            actual_column_type = [
-                type_dict["type"]
-                for type_dict in actual_column_types_list
-                if type_dict["name"] == column_name
-            ][0]
+            try:
+                actual_column_type = [
+                    type_dict["type"]
+                    for type_dict in actual_column_types_list
+                    if type_dict["name"] == column_name
+                ][0]
+            except IndexError:
+                actual_column_type = None
 
             # only use column map version if column dtype is object
             if (
-                actual_column_type.type.__name__ == "object_"
+                actual_column_type
+                and actual_column_type.type.__name__ == "object_"
                 and expected_types_list is not None
             ):
                 # this resets dependencies using  ColumnMapExpectation.get_validation_dependencies

@@ -211,16 +211,26 @@ module.exports = {
               type: 'category',
               label: 'Creating Custom Expectations',
               items: [
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
+                'guides/expectations/creating_custom_expectations/overview',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
+                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
+                //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
             },
             {
               type: 'category',
-              label: 'Contributing',
+              label: 'Adding Features to Custom Expectations',
               items: [
-                'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
+                'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation',
+                'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
+                'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
+                // 'guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation',
+                // 'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
+                'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
+                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
+                //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
             },
             {
@@ -228,11 +238,18 @@ module.exports = {
               label: 'Advanced',
               items: [
                 'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                'guides/expectations/advanced/how_to_create_renderers_for_custom_expectations',
+                //'guides/expectations/advanced/how_to_create_renderers_for_custom_expectations',
                 'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
                 'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
                 'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
                 'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
+              ]
+            },
+            {
+              type: 'category',
+              label: "Contributing",
+              items: [
+                  'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
               ]
             }
           ]
@@ -306,7 +323,8 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_flyte'
+        'deployment_patterns/how_to_use_great_expectations_in_flyte',
+        'deployment_patterns/how_to_use_great_expectations_in_deepnote'
         // {
         // type: 'category',
         // label: 'Contributing',
@@ -370,6 +388,7 @@ module.exports = {
         { type: 'doc', id: 'contributing/contributing_test' },
         { type: 'doc', id: 'contributing/contributing_maturity' },
         { type: 'doc', id: 'contributing/contributing_misc' },
+        { type: 'doc', id: 'contributing/contributing_package'},
         {
           type: 'category',
           label: 'Style guides',

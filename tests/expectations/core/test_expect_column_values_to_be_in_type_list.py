@@ -8,8 +8,13 @@ from great_expectations.self_check.util import (
     build_pandas_validator_with_data,
     build_sa_validator_with_data,
 )
+from great_expectations.util import is_library_loadable
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyathena"),
+    reason="pyathena is not installed",
+)
 def test_expect_column_values_to_be_in_type_list_dialect_pyathena(sa):
     from pyathena import sqlalchemy_athena
 
