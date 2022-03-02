@@ -7,9 +7,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
-from build.lib.great_expectations.core.usage_statistics.usage_statistics import (
-    usage_statistics_enabled_method,
-)
 from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
@@ -21,6 +18,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_profiler_run_usage_statistics,
+    usage_statistics_enabled_method,
 )
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.data_context.store import ProfilerStore
@@ -150,6 +148,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         if variables is None:
             variables = {}
+
+        if data_context:
+            self._usage_statistics_handler = data_context._usage_statistics_handler
+        else:
+            self._usage_statistics_handler = None
 
         # Necessary to annotate ExpectationSuite during `run()`
         self._citation = {

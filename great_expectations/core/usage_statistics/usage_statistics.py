@@ -83,6 +83,9 @@ class UsageStatisticsHandler:
         from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
             ExpectationSuiteAnonymizer,
         )
+        from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
+            ProfilerRunAnonymizer,
+        )
         from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
             StoreAnonymizer,
         )
@@ -101,6 +104,7 @@ class UsageStatisticsHandler:
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
+        self._profiler_run_anonymizer = ProfilerRunAnonymizer(data_context_id)
 
         try:
             self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
@@ -577,11 +581,13 @@ def get_profiler_run_usage_statistics(
     *args,
     **kwargs,
 ) -> dict:
+    usage_statistics_handler: Optional[
+        UsageStatisticsHandler
+    ] = profiler._usage_statistics_handler
+
     data_context_id: Optional[str] = None
-    try:
-        data_context_id = profiler.data_context.data_context_id
-    except AttributeError:
-        data_context_id = None
+    if usage_statistics_handler:
+        data_context_id = usage_statistics_handler._data_context_id
 
     anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
