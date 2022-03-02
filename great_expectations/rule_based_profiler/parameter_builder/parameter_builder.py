@@ -137,7 +137,7 @@ class ParameterBuilder(Builder, ABC):
 
         parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
-                "value": computed_parameter_value,
+                "value": convert_to_json_serializable(data=computed_parameter_value),
                 "details": parameter_computation_details,
             },
         }

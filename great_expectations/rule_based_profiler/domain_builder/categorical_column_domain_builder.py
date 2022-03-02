@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Set, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -18,6 +18,10 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
     """
     This DomainBuilder uses column cardinality to identify domains.
     """
+
+    exclude_field_names: Set[str] = DomainBuilder.exclude_field_names | {
+        "cardinality_checker",
+    }
 
     def __init__(
         self,
@@ -75,6 +79,10 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
     @property
     def domain_type(self) -> Union[str, MetricDomainTypes]:
         return MetricDomainTypes.COLUMN
+
+    @property
+    def cardinality_checker(self) -> CardinalityChecker:
+        return self._cardinality_checker
 
     @property
     def exclude_columns(self) -> List[str]:
@@ -171,7 +179,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             List of dicts of the form [{column_name: List[MetricConfiguration]},...]
         """
 
-        limit_mode: CardinalityLimitMode = self._cardinality_checker.limit_mode
+        limit_mode: CardinalityLimitMode = self.cardinality_checker.limit_mode
 
         column_name: str
         metric_configurations: List[Dict[str, List[MetricConfiguration]]] = [
@@ -228,7 +236,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
                         metric_value = validator.get_metric(metric=metric_config)
 
                         batch_cardinality_within_limit: bool = (
-                            self._cardinality_checker.cardinality_within_limit(
+                            self.cardinality_checker.cardinality_within_limit(
                                 metric_value=metric_value
                             )
                         )

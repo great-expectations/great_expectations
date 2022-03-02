@@ -110,11 +110,11 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                         "expectation_type": "expect_table_row_count_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "min_value": "$parameter.row_count_range.value.value_range[0]",
+                        "max_value": "$parameter.row_count_range.value.value_range[1]",
                         "meta": {
                             "profiler_details": "$parameter.row_count_range.details",
                         },
-                        "min_value": "$parameter.row_count_range.value.value_range[0]",
-                        "max_value": "$parameter.row_count_range.value.value_range[1]",
                     }
                 ],
             },

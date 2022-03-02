@@ -130,7 +130,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         unique_parameter_values: Set[
             Any
         ] = _get_unique_values_from_nested_collection_of_sets(
-            parameter_value_node["value"]
+            parameter_value_node.value
         )
 
         return (
@@ -153,5 +153,6 @@ def _get_unique_values_from_nested_collection_of_sets(
     """
 
     flattened: List[Set[Any]] = list(itertools.chain.from_iterable(collection))
-    unique_values: Set[Any] = set().union(*flattened)
+    unique_values: Set[Any] = set(filter(None, set().union(*flattened)))
+
     return unique_values
