@@ -566,7 +566,7 @@ def get_checkpoint_run_usage_statistics(
             )
         except Exception as e:
             logger.debug(
-                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_checkpoint_run_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
             )
 
     return payload
@@ -583,7 +583,7 @@ def get_profiler_run_usage_statistics(
     except AttributeError:
         data_context_id = None
 
-    anonymizer: Anonymizer = _anonymizers.get(data_context_id, None)
+    anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
@@ -597,18 +597,20 @@ def get_profiler_run_usage_statistics(
                 profiler._usage_statistics_handler._profiler_run_anonymizer
             )
 
-            resolved_runtime_config: "RuleBasedProfilerConfig" = (
+            resolved_runtime_config: "RuleBasedProfilerConfig" = (  # noqa: F821
                 profiler_run_anonymizer.resolve_config_using_acceptable_arguments(
-                    *(profiler,), **kwargs
+                    profiler=profiler,
+                    variables=kwargs.get("variables"),
+                    rules=kwargs.get("rules"),
                 )
             )
 
-            payload = profiler_run_anonymizer.anonymize_profiler_run(
-                *(profiler,), **resolved_runtime_kwargs
+            payload: dict = profiler_run_anonymizer.anonymize_profiler_run(
+                resolved_runtime_config
             )
         except Exception as e:
             logger.debug(
-                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_profiler_run_usage_statistics: Unable to create anonymized_profiler_run payload field"
             )
 
     return payload
