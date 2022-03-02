@@ -1749,8 +1749,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
         return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        if not super().validate_configuration(configuration):
-            return False
+        super().validate_configuration(configuration)
         try:
             assert (
                 "column" in configuration.kwargs
@@ -1963,8 +1962,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        if not super().validate_configuration(configuration):
-            return False
+        super().validate_configuration(configuration)
         try:
             assert (
                 "column_A" in configuration.kwargs
@@ -2162,8 +2160,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        if not super().validate_configuration(configuration):
-            return False
+        super().validate_configuration(configuration)
         try:
             assert (
                 "column_list" in configuration.kwargs
