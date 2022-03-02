@@ -26,9 +26,11 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     {1, 4, 8} and batch 2 {2, 8, 10} the unique values returned by this
     parameter builder are the set union, or {1, 2, 4, 8, 10}
 
-    Note: The computation of the unique values across batches is done within
-    this ParameterBuilder so please be aware that testing large columns with
-    high cardinality could require a large amount of memory.
+    Notes:
+        1. The computation of the unique values across batches is done within
+           this ParameterBuilder so please be aware that testing large columns with
+           high cardinality could require a large amount of memory.
+        2. This ParameterBuilder filters null values out from the unique value_set.
     """
 
     def __init__(
