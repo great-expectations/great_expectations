@@ -66,7 +66,7 @@ from great_expectations.self_check.util import (
     get_dataset,
     get_sqlite_connection_url,
 )
-from great_expectations.util import is_library_loadable
+from great_expectations.util import is_library_loadable, probabilistic_test
 from tests.test_utils import create_files_in_directory
 
 RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
@@ -225,6 +225,15 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_aws_integration)
         if "docs" in item.keywords:
             item.add_marker(skip_docs_integration)
+
+
+@pytest.fixture
+def always_failing_test():
+    @probabilistic_test
+    def failing_test_func():
+        assert False, "Executing 'test_method()' failed."
+
+    return failing_test_func
 
 
 @pytest.fixture(autouse=True)
