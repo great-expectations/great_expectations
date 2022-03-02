@@ -572,6 +572,53 @@ def get_checkpoint_run_usage_statistics(
     return payload
 
 
+def get_profiler_run_usage_statistics(
+    profiler: "RuleBasedProfiler", *args, **kwargs  # noqa: F821
+) -> dict:
+    usage_statistics_handler: Optional[
+        UsageStatisticsHandler
+    ] = profiler._usage_statistics_handler
+
+    data_context_id: Optional[str] = None
+    try:
+        data_context_id = usage_statistics_handler.data_context_id
+    except AttributeError:
+        data_context_id = None
+
+    anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+
+    payload: dict = {}
+
+    if usage_statistics_handler:
+        # noinspection PyBroadException
+        try:
+            profiler_run_anonymizer: "ProfilerRunAnonymizer" = (  # noqa: F821
+                usage_statistics_handler._profiler_run_anonymizer
+            )
+
+            resolved_runtime_kwargs: dict = (
+                profiler_run_anonymizer.resolve_config_using_acceptable_arguments(
+                    *(profiler,), **kwargs
+                )
+            )
+
+            payload = profiler_run_anonymizer.anonymize_profiler_run(
+                *(profiler,), **resolved_runtime_kwargs
+            )
+        except Exception as e:
+            logger.debug(
+                "%s: %s type: %s, get_batch_list_usage_statistics: Unable to create anonymized_profiler_run payload field",
+                UsageStatsExceptionPrefix.EMIT_EXCEPTION.value,
+                e,
+                type(e),
+            )
+
+    return payload
+
+
 def send_usage_message(
     data_context: "DataContext",  # noqa: F821
     event: str,
