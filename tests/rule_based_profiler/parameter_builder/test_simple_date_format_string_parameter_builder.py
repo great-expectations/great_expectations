@@ -11,11 +11,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
     DEFAULT_CANDIDATE_STRINGS,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    get_parameter_value_by_fully_qualified_parameter_name,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )

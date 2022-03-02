@@ -10,8 +10,10 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
+from great_expectations.util import probabilistic_test
 
 
+@probabilistic_test
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -76,7 +78,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
     # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
-    rtol: float = 0.01
+    rtol: float = 1.0e-2
     atol: float = 0
 
     # bootstrap results should be stable +/- 1%
