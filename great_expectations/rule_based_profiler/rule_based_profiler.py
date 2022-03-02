@@ -150,7 +150,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             variables = {}
 
         if data_context:
-            self._usage_statistics_handler = data_context._usage_statistics_handler
+            self._usage_statistics_handler = data_context.usage_statistics_handler
         else:
             self._usage_statistics_handler = None
 
@@ -414,9 +414,14 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if variables is None:
             variables = {}
 
-        variables_configs: dict = (
-            self.variables.to_dict()["parameter_nodes"]["variables"]["variables"] or {}
-        )
+        variables_configs: dict
+        try:
+            variables_configs = self.variables.to_dict()["parameter_nodes"][
+                "variables"
+            ]["variables"]
+        except Exception as e:
+            logger.warning("Could not convert existing variables to dict: %s", e)
+            variables_configs = {}
 
         if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
             variables_configs = nested_update(

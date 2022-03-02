@@ -27,6 +27,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 STOP_SIGNAL = object()
 
@@ -578,6 +579,8 @@ def get_checkpoint_run_usage_statistics(
 
 def get_profiler_run_usage_statistics(
     profiler: "RuleBasedProfiler",  # noqa: F821
+    variables: Optional[dict] = None,
+    rules: Optional[dict] = None,
     *args,
     **kwargs,
 ) -> dict:
@@ -596,18 +599,18 @@ def get_profiler_run_usage_statistics(
 
     payload: dict = {}
 
-    if profiler._usage_statistics_handler:
+    if usage_statistics_handler:
         # noinspection PyBroadException
         try:
             profiler_run_anonymizer: "ProfilerRunAnonymizer" = (  # noqa: F821
-                profiler._usage_statistics_handler._profiler_run_anonymizer
+                usage_statistics_handler._profiler_run_anonymizer
             )
 
             resolved_runtime_config: "RuleBasedProfilerConfig" = (  # noqa: F821
-                profiler_run_anonymizer.resolve_config_using_acceptable_arguments(
+                RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
                     profiler=profiler,
-                    variables=kwargs.get("variables"),
-                    rules=kwargs.get("rules"),
+                    variables=variables,
+                    rules=rules,
                 )
             )
 

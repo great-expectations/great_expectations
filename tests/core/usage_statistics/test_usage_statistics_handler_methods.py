@@ -1,4 +1,6 @@
 import logging
+from typing import Any
+from unittest import mock
 
 import pytest
 
@@ -8,9 +10,12 @@ from great_expectations.core.usage_statistics.schemas import (
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
+    get_profiler_run_usage_statistics,
 )
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from tests.core.usage_statistics.util import usage_stats_invalid_messages_exist
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -271,3 +276,80 @@ def test_build_init_payload(
         }
     ]
     assert init_payload["anonymized_expectation_suites"] == []
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_get_profiler_run_usage_statistics_with_handler_valid_payload_no_overrides(
+    mock_data_context: mock.MagicMock,
+):
+    pass  # TODO(cdkini): Write test!
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_get_profiler_run_usage_statistics_with_handler_valid_payload_yes_overrides(
+    mock_data_context: mock.MagicMock,
+):
+    pass  # TODO(cdkini): Write test!
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_get_profiler_run_usage_statistics_with_handler_invalid_payload(
+    mock_data_context: mock.MagicMock,
+):
+    # Ensure that real handler gets passed down by the context
+    handler: UsageStatisticsHandler = UsageStatisticsHandler(
+        mock_data_context, "my_id", "my_url"
+    )
+    mock_data_context.usage_statistics_handler = handler
+
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_profiler", config_version=1.0, data_context=mock_data_context
+    )
+
+    payload: dict = get_profiler_run_usage_statistics(profiler)
+
+    # Payload won't pass schema validation due to a lack of rules but we can confirm that it is anonymized
+    assert payload == {
+        "anonymized_name": "a0061ec021855cd2b3a994dd8d90fe5d",
+        "config_version": 1.0,
+        "rule_count": 0,
+        "variable_count": 0,
+    }
+
+
+def test_get_profiler_run_usage_statistics_without_handler():
+    # Without a DataContext, the usage stats handler is not propogated down to the RBP
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_profiler",
+        config_version=1.0,
+    )
+    payload: dict = get_profiler_run_usage_statistics(profiler)
+    assert payload == {}
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler"
+)
+@mock.patch(
+    "great_expectations.rule_based_profiler.config.base.RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments"
+)
+def test_get_profiler_run_usage_statistics_logs_exception(
+    mock_resolve_config: mock.MagicMock,
+    mock_usage_stats_handler: mock.MagicMock,
+    mock_data_context: mock.MagicMock,
+    caplog: Any,
+):
+    # Ensure that the ProfilerRunAnonymizer on the mocked UsageStatisticsHandler will throw an Exception
+    mock_resolve_config.side_effect = Exception("mocked error")
+    mock_data_context._usage_statistics_handler = mock_usage_stats_handler
+
+    profiler = RuleBasedProfiler(
+        name="my_profiler", config_version=1.0, data_context=mock_data_context
+    )
+    with caplog.at_level(logging.DEBUG):
+        payload = get_profiler_run_usage_statistics(profiler)
+
+    assert "Unable to create anonymized_profiler_run payload" in caplog.text
+    assert "mocked error" in caplog.text
+    assert payload == {}
