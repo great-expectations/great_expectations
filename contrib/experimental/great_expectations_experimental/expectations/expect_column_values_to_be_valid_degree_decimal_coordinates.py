@@ -47,12 +47,47 @@ class ColumnValuesMatchSomeCriteria(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
-    """TODO: Add a docstring here"""
+class ExpectColumnValuesToBeValidDegreeDecimalCoordinates(ColumnMapExpectation):
+    """Expect column values to contain degree-decimal, lat/lon coordinates."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    examples = []
+    examples = [
+        {
+            "data": {
+                "tuple_float": [
+                    (62.75955799999999, -164.483752),
+                    (62.7673475, -164.4996625),
+                    (62.7698675, -164.5034575),
+                    (62.76901333333333, -164.50339),
+                    (62.76906333333334, -164.50353333333337),
+                ],
+                "mixed_types": [
+                    "[62.75955799999999, -164.483752]",
+                    [62.7673475, -164.4996625],
+                    (62.7698675, -164.5034575),
+                    "(62.76901333333333, -164.50339)",
+                    True,
+                ],
+            },
+            "tests": [
+                {
+                    "title": "basic_positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "tuple_float", "mostly": 1},
+                    "out": {"success": True},
+                },
+                {
+                    "title": "basic_positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mixed_types", "mostly": 1},
+                    "out": {"success": False},
+                },
+            ],
+        }
+    ]
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
@@ -103,4 +138,4 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToMatchSomeCriteria().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidDegreeDecimalCoordinates().print_diagnostic_checklist()
