@@ -383,7 +383,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         effective_variables: ParameterContainer
         if variables and isinstance(variables, dict):
             variables_configs: dict = self.reconcile_profiler_variables_as_dict(
-                variables, reconciliation_strategy
+                variables=variables, reconciliation_strategy=reconciliation_strategy
             )
             effective_variables = build_parameter_container_for_variables(
                 variables_configs=variables_configs
