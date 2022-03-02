@@ -42,7 +42,8 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration:
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine
     ✔ All 3 tests for pandas are passing
- ✔ Has basic input validation and type checking
+   Has basic input validation and type checking
+      No validate_configuration method defined
  ✔ Has both statement Renderers: prescriptive and diagnostic
  ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
     ✔ All 3 tests for pandas are passing
@@ -68,7 +69,8 @@ Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration:
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine
     ✔ All 3 tests for pandas are passing
- ✔ Has basic input validation and type checking
+   Has basic input validation and type checking
+      No validate_configuration method defined
    Has both statement Renderers: prescriptive and diagnostic
  ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
     ✔ All 3 tests for pandas are passing
