@@ -375,7 +375,7 @@ def test_expectation__get_renderers():
         assert isinstance(element, ExpectationRendererDiagnostics)
 
     print([rd.name for rd in renderer_diagnostics])
-    assert set([rd.name for rd in renderer_diagnostics]) == {
+    assert {rd.name for rd in renderer_diagnostics} == {
         "renderer.diagnostic.unexpected_statement",
         "renderer.diagnostic.meta_properties",
         "renderer.diagnostic.unexpected_table",
@@ -440,7 +440,7 @@ def test_expectation__get_renderers():
         assert isinstance(element, ExpectationRendererDiagnostics)
 
     assert len(renderer_diagnostics) == 10
-    assert set([rd.name for rd in renderer_diagnostics]) == {
+    assert {rd.name for rd in renderer_diagnostics} == {
         "renderer.diagnostic.observed_value",
         "renderer.prescriptive",
         "renderer.diagnostic.meta_properties",
@@ -496,7 +496,7 @@ def test_expectation__get_renderers():
         assert isinstance(element, ExpectationRendererDiagnostics)
 
     assert len(renderer_diagnostics) == 10
-    assert set([rd.name for rd in renderer_diagnostics]) == {
+    assert {rd.name for rd in renderer_diagnostics} == {
         "renderer.diagnostic.observed_value",
         "renderer.prescriptive",
         "renderer.diagnostic.meta_properties",
