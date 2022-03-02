@@ -137,7 +137,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         )
 
         return (
-            sorted(unique_parameter_values),
+            unique_parameter_values,
             parameter_value_node_details,
         )
 
@@ -156,6 +156,12 @@ def _get_unique_values_from_nested_collection_of_sets(
     """
 
     flattened: List[Set[Any]] = list(itertools.chain.from_iterable(collection))
+
+    """
+    In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to
+    reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
+    resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
+    """
     unique_values: Set[Any] = set(
         filter(
             lambda element: element is not None,
