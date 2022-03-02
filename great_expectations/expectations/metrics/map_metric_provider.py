@@ -1,3 +1,4 @@
+import inspect
 import logging
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Type, Union
@@ -2723,7 +2724,7 @@ class MapMetricProvider(MetricProvider):
         ):
             return
 
-        for attr, candidate_metric_fn in cls.__dict__.items():
+        for attr, candidate_metric_fn in inspect.getmembers(cls):
             if not hasattr(candidate_metric_fn, "metric_engine"):
                 # This is not a metric
                 continue
