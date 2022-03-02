@@ -29,7 +29,7 @@ To avoid surprises and help clearly define your Custom Expectation, it can be he
 
 Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
     
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L117-L132
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L132
 ```
 
 :::note
@@ -77,8 +77,7 @@ allows us to access these functions even when PySpark is not installed.
 <summary>Applying Python Functions</summary>
 <code>F.udf</code> allows us to use a Python function as a Spark User Defined Function for Column Map Expectations, 
 giving us the ability to define custom functions and apply them to our data.
-
-
+<br/><br/>
 Here is an example of <code>F.udf</code> applied to <code>ExpectColumnValuesToEqualThree</code>:
 
 ```python
@@ -90,6 +89,8 @@ def _spark(cls, column, strftime_format, **kwargs):
     success_udf = F.udf(is_equal_to_three, sparktypes.BooleanType())
     return success_udf(column)
 ```
+
+For more on <code>F.udf</code> and the functionality it provides, see the <a href="https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.functions.udf.html">Apache Spark UDF documentation</a>.
 </details>
 </TabItem> 
     

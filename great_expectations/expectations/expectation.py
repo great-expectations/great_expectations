@@ -30,6 +30,7 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
     ExpectationLegacyTestCaseAdapter,
     ExpectationTestCase,
     ExpectationTestDataCases,
+    TestBackend,
     TestData,
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
@@ -1005,14 +1006,27 @@ class Expectation(metaclass=MetaExpectation):
             errors=[],  #!!!FIXME!!!
         )
 
-    def print_diagnostic_checklist(self) -> str:
+    def print_diagnostic_checklist(
+        self,
+        diagnostics: Optional[ExpectationDiagnostics] = None,
+        show_failed_tests: bool = False,
+    ) -> str:
         """Runs self.run_diagnostics and generates a diagnostic checklist.
 
         This output from this method is a thin wrapper for ExpectationDiagnostics.generate_checklist()
         This method is experimental.
         """
 
-        diagnostics: ExpectationDiagnostics = self.run_diagnostics()
+        if diagnostics is None:
+            diagnostics = self.run_diagnostics()
+
+        if show_failed_tests:
+            for test in diagnostics.tests:
+                if test.test_passed is False:
+                    print(f"=== {test.test_title} ({test.backend}) ===\n")
+                    print(test.stack_trace)
+                    print(80 * "=" + "\n")
+
         checklist: str = diagnostics.generate_checklist()
         print(checklist)
 
@@ -1081,6 +1095,10 @@ class Expectation(metaclass=MetaExpectation):
                 copied_example["tests"] = included_test_cases
                 copied_example.pop("_notes", None)
                 copied_example.pop("only_for", None)
+                if "test_backends" in copied_example:
+                    copied_example["test_backends"] = [
+                        TestBackend(**tb) for tb in copied_example["test_backends"]
+                    ]
                 included_examples.append(ExpectationTestDataCases(**copied_example))
 
         return included_examples
@@ -1090,7 +1108,7 @@ class Expectation(metaclass=MetaExpectation):
 
         if self.__doc__ is not None:
             docstring = self.__doc__
-            short_description = self.__doc__.split("\n")[0]
+            short_description = next(line for line in self.__doc__.split("\n") if line)
         else:
             docstring = ""
             short_description = ""

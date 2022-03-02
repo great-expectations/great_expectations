@@ -37,19 +37,23 @@ def _library_not_loaded_test(
         assert "Which database backend are you using" in stdout
         assert "Give your new Datasource a short name" in stdout
         assert (
-            """Next, we will configure database credentials and store them in the `my_db` section
-    of this config file: great_expectations/uncommitted/config_variables.yml"""
+            "Next, we will configure database credentials and store them in the `my_db` section"
             in stdout
         )
         assert (
-            f"""Great Expectations relies on the library `{library_import_name}` to connect to your data, \
-    but the package `{library_name}` containing this library is not installed.
-        Would you like Great Expectations to try to execute `pip install {library_name}` for you?"""
+            f"Great Expectations relies on the library `{library_import_name}` to connect to your data"
             in stdout
         )
         assert (
-            f"""\nOK, exiting now.
-        - Please execute `pip install {library_name}` before trying again."""
+            f"but the package `{library_name}` containing this library is not installed"
+            in stdout
+        )
+        assert (
+            f"Would you like Great Expectations to try to execute `pip install {library_name}` for you?"
+            in stdout
+        )
+        assert (
+            f"Please execute `pip install {library_name}` before trying again."
             in stdout
         )
 
@@ -71,31 +75,25 @@ def _library_not_loaded_test(
         assert (
             obs_tree
             == """\
-    great_expectations/
-        .gitignore
-        great_expectations.yml
-        checkpoints/
-        expectations/
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    checkpoints/
+    expectations/
+        .ge_store_backend_id
+    plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
+    profilers/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        validations/
             .ge_store_backend_id
-        notebooks/
-            pandas/
-                validation_playground.ipynb
-            spark/
-                validation_playground.ipynb
-            sql/
-                validation_playground.ipynb
-        plugins/
-            custom_data_docs/
-                renderers/
-                styles/
-                    data_docs_custom_styles.css
-                views/
-        uncommitted/
-            config_variables.yml
-            data_docs/
-            validations/
-                .ge_store_backend_id
-    """
+"""
         )
 
         assert_no_logging_messages_or_tracebacks(my_caplog, result)
@@ -227,16 +225,18 @@ def test_cli_init_spark_without_library_installed_instructs_user(
         assert "What data would you like Great Expectations to connect to" in stdout
         assert "What are you processing your files with" in stdout
         assert (
-            f"""Great Expectations relies on the library `pyspark` to connect to your data, \
-    but the package `pyspark` containing this library is not installed.
-        Would you like Great Expectations to try to execute `pip install pyspark` for you?"""
+            f"Great Expectations relies on the library `pyspark` to connect to your data"
             in stdout
         )
         assert (
-            f"""\nOK, exiting now.
-        - Please execute `pip install pyspark` before trying again."""
+            f"but the package `pyspark` containing this library is not installed."
             in stdout
         )
+        assert (
+            f"Would you like Great Expectations to try to execute `pip install pyspark` for you?"
+            in stdout
+        )
+        assert f"Please execute `pip install pyspark` before trying again." in stdout
         # assert "Great Expectations relies on the library `pyspark`" in stdout
         # assert "Please `pip install pyspark` before trying again" in stdout
 
@@ -258,31 +258,25 @@ def test_cli_init_spark_without_library_installed_instructs_user(
         assert (
             obs_tree
             == """\
-    great_expectations/
-        .gitignore
-        great_expectations.yml
-        checkpoints/
-        expectations/
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    checkpoints/
+    expectations/
+        .ge_store_backend_id
+    plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
+    profilers/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        validations/
             .ge_store_backend_id
-        notebooks/
-            pandas/
-                validation_playground.ipynb
-            spark/
-                validation_playground.ipynb
-            sql/
-                validation_playground.ipynb
-        plugins/
-            custom_data_docs/
-                renderers/
-                styles/
-                    data_docs_custom_styles.css
-                views/
-        uncommitted/
-            config_variables.yml
-            data_docs/
-            validations/
-                .ge_store_backend_id
-    """
+"""
         )
 
         assert_no_logging_messages_or_tracebacks(caplog, result)
