@@ -1,6 +1,9 @@
+from typing import Dict
+
 import pytest
 from ruamel.yaml.comments import CommentedMap
 
+from great_expectations.core.batch import BatchRequest
 from great_expectations.marshmallow__shade.exceptions import ValidationError
 from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
@@ -15,6 +18,7 @@ from great_expectations.rule_based_profiler.config import (
     RuleConfig,
     RuleConfigSchema,
 )
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 
 def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
@@ -279,3 +283,123 @@ def test_rule_based_profiler_from_commented_map():
     commented_map = CommentedMap(data)
     config = RuleBasedProfilerConfig.from_commented_map(commented_map)
     assert all(hasattr(config, k) for k in data)
+
+
+def test_resolve_config_using_acceptable_arguments(
+    profiler_with_placeholder_args: RuleBasedProfiler,
+) -> None:
+    config: RuleBasedProfilerConfig = (
+        RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+            profiler=profiler_with_placeholder_args
+        )
+    )
+
+    old_config: RuleBasedProfilerConfig = profiler_with_placeholder_args.config
+
+    # Brand new config is created but existing attributes are unchanged
+    assert id(old_config) != id(config)
+    assert all(
+        old_config[attr] == config[attr]
+        for attr in ("class_name", "config_version", "module_name", "name")
+    )
+
+
+def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
+    profiler_with_placeholder_args: RuleBasedProfiler,
+) -> None:
+    runtime_override_rule_name: str = "my_runtime_override_rule"
+    assert all(
+        rule.name != runtime_override_rule_name
+        for rule in profiler_with_placeholder_args.rules
+    )
+
+    runtime_override_rule: dict = {
+        "domain_builder": {
+            "class_name": "TableDomainBuilder",
+            "module_name": "great_expectations.rule_based_profiler.domain_builder",
+        },
+        "parameter_builders": [
+            {
+                "class_name": "MetricMultiBatchParameterBuilder",
+                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                "metric_name": "my_other_metric",
+                "name": "my_additional_parameter",
+            }
+        ],
+        "expectation_configuration_builders": [
+            {
+                "class_name": "DefaultExpectationConfigurationBuilder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                "expectation_type": "expect_column_values_to_be_between",
+                "meta": {"details": {"note": "Here's another rule"}},
+            }
+        ],
+    }
+
+    runtime_override_rules: Dict[str, dict] = {
+        runtime_override_rule_name: runtime_override_rule
+    }
+
+    config: RuleBasedProfilerConfig = (
+        RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+            profiler=profiler_with_placeholder_args, rules=runtime_override_rules
+        )
+    )
+
+    assert len(config.rules) == 2 and runtime_override_rule_name in config.rules
+
+
+def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
+    profiler_with_placeholder_args: RuleBasedProfiler,
+) -> None:
+    datasource_name: str = "my_datasource"
+    data_connector_name: str = "my_basic_data_connector"
+    data_asset_name: str = "my_data_asset"
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name=datasource_name,
+        data_connector_name=data_connector_name,
+        data_asset_name=data_asset_name,
+    )
+
+    runtime_override_rule: dict = {
+        "domain_builder": {
+            "class_name": "TableDomainBuilder",
+            "module_name": "great_expectations.rule_based_profiler.domain_builder",
+            "batch_request": batch_request,
+        },
+        "parameter_builders": [
+            {
+                "class_name": "MetricMultiBatchParameterBuilder",
+                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                "metric_name": "my_other_metric",
+                "name": "my_additional_parameter",
+            }
+        ],
+        "expectation_configuration_builders": [
+            {
+                "class_name": "DefaultExpectationConfigurationBuilder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                "expectation_type": "expect_column_values_to_be_between",
+                "meta": {"details": {"note": "Here's another rule"}},
+            }
+        ],
+    }
+
+    runtime_override_rule_name: str = "rule_with_batch_request"
+    runtime_override_rules: Dict[str, dict] = {
+        runtime_override_rule_name: runtime_override_rule
+    }
+
+    config: RuleBasedProfilerConfig = (
+        RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+            profiler=profiler_with_placeholder_args, rules=runtime_override_rules
+        )
+    )
+
+    domain_builder: dict = config.rules[runtime_override_rule_name]["domain_builder"]
+    converted_batch_request: dict = domain_builder["batch_request"]
+
+    assert converted_batch_request["datasource_name"] == datasource_name
+    assert converted_batch_request["data_connector_name"] == data_connector_name
+    assert converted_batch_request["data_asset_name"] == data_asset_name
