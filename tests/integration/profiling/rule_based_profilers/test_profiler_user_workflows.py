@@ -22,10 +22,16 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.util import probabilistic_test
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 yaml = YAML()
+
+# Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
+# (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+RTOL: float = 1.0e-7
+ATOL: float = 5.0e-2
 
 
 def test_alice_columnar_table_single_batch_batches_are_accessible(
@@ -924,6 +930,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1000,6 +1007,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     )
 
 
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1067,6 +1075,7 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     )
 
 
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1133,11 +1142,6 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         ]["tolls_amount"]
     )
 
-    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
-    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
-    rtol: float = 1.0e-7
-    atol: float = 5.0e-2
-
     value_ranges: List[Tuple[Tuple[float, float]]]
     paired_quantiles: zip
     column_quantiles: List[List[Number]]
@@ -1159,12 +1163,13 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                 np.testing.assert_allclose(
                     actual=value_ranges[0][idx],
                     desired=value_ranges[1][idx],
-                    rtol=rtol,
-                    atol=atol,
-                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {atol + rtol * abs(value_ranges[1][idx])} tolerance.",
+                    rtol=RTOL,
+                    atol=ATOL,
+                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
                 )
 
 
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1228,11 +1233,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
     }
 
-    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
-    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
-    rtol: float = 1.0e-7
-    atol: float = 5.0e-2
-
     value_ranges_expected: List[List[float]]
     value_ranges_computed: List[List[float]]
 
@@ -1260,9 +1260,9 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             np.testing.assert_allclose(
                 actual=value_ranges[0][idx],
                 desired=value_ranges[1][idx],
-                rtol=rtol,
-                atol=atol,
-                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {atol + rtol * abs(value_ranges[1][idx])} tolerance.",
+                rtol=RTOL,
+                atol=ATOL,
+                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
             )
 
     parameter_builder_batch_request: dict
@@ -1373,9 +1373,9 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             np.testing.assert_allclose(
                 actual=value_ranges[0][idx],
                 desired=value_ranges[1][idx],
-                rtol=rtol,
-                atol=atol,
-                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {atol + rtol * abs(value_ranges[1][idx])} tolerance.",
+                rtol=RTOL,
+                atol=ATOL,
+                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
             )
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
