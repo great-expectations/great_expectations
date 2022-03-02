@@ -22,19 +22,6 @@ logger.setLevel(logging.INFO)
 yaml = YAML()
 
 
-# @dataclass
-# class ExpectationCompletenessCheck(SerializableDictDot):
-#     message: str
-#     passed: bool
-
-
-# @dataclass
-# class ExpectationCompletenessChecklist(SerializableDictDot):
-#     experimental: List[ExpectationCompletenessCheck]
-#     beta: List[ExpectationCompletenessCheck]
-#     production: List[ExpectationCompletenessCheck]
-
-
 @dataclass
 class PackageCompletenessStatus(SerializableDictDot):
     concept_only: int
@@ -42,14 +29,6 @@ class PackageCompletenessStatus(SerializableDictDot):
     beta: int
     production: int
     total: int
-
-
-# @dataclass
-# class RenderedExpectation(SerializableDictDot):
-#     name: str
-#     tags: List[str]
-#     supported: List[str]
-#     status: ExpectationCompletenessChecklist
 
 
 @dataclass
