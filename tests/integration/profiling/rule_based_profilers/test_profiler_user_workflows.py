@@ -935,7 +935,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@probabilistic_test
 def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
