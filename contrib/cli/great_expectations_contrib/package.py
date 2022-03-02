@@ -22,17 +22,17 @@ logger.setLevel(logging.INFO)
 yaml = YAML()
 
 
-@dataclass
-class ExpectationCompletenessCheck(SerializableDictDot):
-    message: str
-    passed: bool
+# @dataclass
+# class ExpectationCompletenessCheck(SerializableDictDot):
+#     message: str
+#     passed: bool
 
 
-@dataclass
-class ExpectationCompletenessChecklist(SerializableDictDot):
-    experimental: List[ExpectationCompletenessCheck]
-    beta: List[ExpectationCompletenessCheck]
-    production: List[ExpectationCompletenessCheck]
+# @dataclass
+# class ExpectationCompletenessChecklist(SerializableDictDot):
+#     experimental: List[ExpectationCompletenessCheck]
+#     beta: List[ExpectationCompletenessCheck]
+#     production: List[ExpectationCompletenessCheck]
 
 
 @dataclass
@@ -44,12 +44,12 @@ class PackageCompletenessStatus(SerializableDictDot):
     total: int
 
 
-@dataclass
-class RenderedExpectation(SerializableDictDot):
-    name: str
-    tags: List[str]
-    supported: List[str]
-    status: ExpectationCompletenessChecklist
+# @dataclass
+# class RenderedExpectation(SerializableDictDot):
+#     name: str
+#     tags: List[str]
+#     supported: List[str]
+#     status: ExpectationCompletenessChecklist
 
 
 @dataclass
@@ -98,7 +98,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
     package_name: Optional[str] = None
     icon: Optional[str] = None
     description: Optional[str] = None
-    expectations: Optional[List[RenderedExpectation]] = None
+    expectations: Optional[List[ExpectationDiagnostics]] = None
     expectation_count: Optional[int] = None
     dependencies: Optional[List[Dependency]] = None
     maturity: Optional[Maturity] = None
@@ -168,14 +168,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         status = {maturity.name: 0 for maturity in Maturity}
 
         for diagnostic in diagnostics:
-            expectation = RenderedExpectation(
-                name=diagnostic.description.snake_name,
-                tags=diagnostic.library_metadata.tags,
-                supported=[],
-                status=diagnostic.maturity_checklist,  # Should be converted to the proper type
-            )
-            expectations.append(expectation)
-
+            expectations.append(diagnostic)
             expectation_maturity = diagnostic.library_metadata.maturity
             status[expectation_maturity] += 1
 
