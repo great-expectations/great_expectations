@@ -5,7 +5,6 @@ For detailed instructions on how to use it, please see:
 """
 
 import json
-from typing import Optional
 
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
@@ -47,47 +46,12 @@ class ColumnValuesMatchSomeCriteria(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidDegreeDecimalCoordinates(ColumnMapExpectation):
-    """Expect column values to contain degree-decimal, lat/lon coordinates."""
+class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
+    """TODO: Add a docstring here"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    examples = [
-        {
-            "data": {
-                "tuple_float": [
-                    (62.75955799999999, -164.483752),
-                    (62.7673475, -164.4996625),
-                    (62.7698675, -164.5034575),
-                    (62.76901333333333, -164.50339),
-                    (62.76906333333334, -164.50353333333337),
-                ],
-                "mixed_types": [
-                    "[62.75955799999999, -164.483752]",
-                    [62.7673475, -164.4996625],
-                    (62.7698675, -164.5034575),
-                    "(62.76901333333333, -164.50339)",
-                    True,
-                ],
-            },
-            "tests": [
-                {
-                    "title": "basic_positive_test",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {"column": "tuple_float", "mostly": 1},
-                    "out": {"success": True},
-                },
-                {
-                    "title": "basic_positive_test",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {"column": "mixed_types", "mostly": 1},
-                    "out": {"success": False},
-                },
-            ],
-        }
-    ]
+    examples = []
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
@@ -99,35 +63,6 @@ class ExpectColumnValuesToBeValidDegreeDecimalCoordinates(ColumnMapExpectation):
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
-        return True
-
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
@@ -138,4 +73,4 @@ class ExpectColumnValuesToBeValidDegreeDecimalCoordinates(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidDegreeDecimalCoordinates().print_diagnostic_checklist()
+    ExpectColumnValuesToMatchSomeCriteria().print_diagnostic_checklist()
