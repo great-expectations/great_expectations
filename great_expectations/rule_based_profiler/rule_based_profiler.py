@@ -382,20 +382,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         effective_variables: ParameterContainer
         if variables and isinstance(variables, dict):
-            variables_configs: dict = self.variables.to_dict()["parameter_nodes"][
-                "variables"
-            ]["variables"]
-
-            if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
-                variables_configs = nested_update(
-                    variables_configs,
-                    variables,
-                )
-            elif reconciliation_strategy == ReconciliationStrategy.REPLACE:
-                variables_configs = variables
-            elif reconciliation_strategy == ReconciliationStrategy.UPDATE:
-                variables_configs.update(variables)
-
+            variables_configs: dict = self.reconcile_profiler_variables_as_dict(
+                variables=variables, reconciliation_strategy=reconciliation_strategy
+            )
             effective_variables = build_parameter_container_for_variables(
                 variables_configs=variables_configs
             )
@@ -403,6 +392,30 @@ class BaseRuleBasedProfiler(ConfigPeer):
             effective_variables = self.variables
 
         return effective_variables
+
+    def reconcile_profiler_variables_as_dict(
+        self,
+        variables: Optional[Dict[str, Any]],
+        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.variables,
+    ) -> dict:
+        if variables is None:
+            variables = {}
+
+        variables_configs: dict = (
+            self.variables.to_dict()["parameter_nodes"]["variables"]["variables"] or {}
+        )
+
+        if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
+            variables_configs = nested_update(
+                variables_configs,
+                variables,
+            )
+        elif reconciliation_strategy == ReconciliationStrategy.REPLACE:
+            variables_configs = variables
+        elif reconciliation_strategy == ReconciliationStrategy.UPDATE:
+            variables_configs.update(variables)
+
+        return variables_configs
 
     def reconcile_profiler_rules(
         self,
@@ -421,6 +434,16 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param reconciliation_directives directives for how each rule component should be overwritten
         :return: reconciled rules in their canonical List[Rule] object form
         """
+        effective_rules: Dict[str, Rule] = self.reconcile_profiler_rules_as_dict(
+            rules, reconciliation_directives
+        )
+        return list(effective_rules.values())
+
+    def reconcile_profiler_rules_as_dict(
+        self,
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
+    ) -> Dict[str, Rule]:
         if rules is None:
             rules = {}
 
@@ -443,8 +466,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             for rule_name, rule_config in override_rule_configs.items()
         }
         effective_rules.update(override_rules)
-
-        return list(effective_rules.values())
+        return effective_rules
 
     @staticmethod
     def _reconcile_rule_config(
