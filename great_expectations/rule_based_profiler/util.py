@@ -216,8 +216,6 @@ def get_parameter_value(
                 variables=variables,
                 parameters=parameters,
             )
-            if isinstance(parameter_reference[key], (list, set, tuple)):
-                parameter_reference[key] = sorted(parameter_reference[key])
     elif isinstance(parameter_reference, str) and parameter_reference.startswith("$"):
         parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=parameter_reference,
@@ -233,8 +231,6 @@ def get_parameter_value(
                     variables=variables,
                     parameters=parameters,
                 )
-                if isinstance(parameter_reference[key], (list, set, tuple)):
-                    parameter_reference[key] = sorted(parameter_reference[key])
 
     return parameter_reference
 

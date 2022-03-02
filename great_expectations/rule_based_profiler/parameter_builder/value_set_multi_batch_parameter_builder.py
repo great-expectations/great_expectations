@@ -137,7 +137,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         )
 
         return (
-            unique_parameter_values,
+            sorted(unique_parameter_values),
             parameter_value_node_details,
         )
 
