@@ -85,7 +85,7 @@ By convention, your [**Metric**](../../../reference/metrics.md) class is defined
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L46
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L50
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -93,7 +93,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L47
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L51
 ```
 
 with something like:
@@ -102,7 +102,7 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L102
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L106
 ```
 
 with this one:
@@ -206,7 +206,7 @@ Next, choose a Metric Identifier for your Metric. By convention, Metric Identifi
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L27
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L31
 ```
 
 with
@@ -216,7 +216,7 @@ with
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L55
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L59
 ```
 
 with
@@ -230,7 +230,7 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L24
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L28
 ```
 
 with 
@@ -268,7 +268,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L93-L98
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L97-L102
 ```
 
 would become
