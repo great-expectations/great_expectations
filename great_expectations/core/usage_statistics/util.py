@@ -1,10 +1,14 @@
 import logging
-from typing import Optional
+from typing import List, Optional, Set
 
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message as send_usage_stats_message,
 )
 from great_expectations.data_context.data_context import BaseDataContext
+from great_expectations.dataset.dataset import Dataset
+from great_expectations.expectations.registry import (
+    list_registered_expectation_implementations,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -31,3 +35,17 @@ def send_usage_message(
             event_payload=event_payload,
             success=success,
         )
+
+
+def aggregate_all_core_expectation_types() -> Set[str]:
+    v2_batchkwargs_api_supported_expectation_types: List[str] = [
+        el for el in Dataset.__dict__.keys() if el.startswith("expect_")
+    ]
+
+    v3_batchrequest_api_supported_expectation_types: List[
+        str
+    ] = list_registered_expectation_implementations()
+
+    return set(v2_batchkwargs_api_supported_expectation_types).union(
+        set(v3_batchrequest_api_supported_expectation_types)
+    )
