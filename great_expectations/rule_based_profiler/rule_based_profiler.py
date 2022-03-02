@@ -7,6 +7,9 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
+from build.lib.great_expectations.core.usage_statistics.usage_statistics import (
+    usage_statistics_enabled_method,
+)
 from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
@@ -16,6 +19,9 @@ from great_expectations.core.batch import (
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.usage_statistics import (
+    get_profiler_run_usage_statistics,
+)
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -306,6 +312,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
         return expectation_configuration_builder
 
+    @usage_statistics_enabled_method(
+        event_name="profiler.run",
+        args_payload_fn=get_profiler_run_usage_statistics,
+    )
     def run(
         self,
         variables: Optional[Dict[str, Any]] = None,
