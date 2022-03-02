@@ -22,9 +22,9 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.util import probabilistic_test
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
-from tests.test_utils import retry_probabilistic_test
 
 yaml = YAML()
 
@@ -930,7 +930,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
-@retry_probabilistic_test
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1007,7 +1007,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     )
 
 
-@retry_probabilistic_test
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1075,7 +1075,7 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     )
 
 
-@retry_probabilistic_test
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1165,11 +1165,11 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     desired=value_ranges[1][idx],
                     rtol=RTOL,
                     atol=ATOL,
-                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {atol + rtol * abs(value_ranges[1][idx])} tolerance.",
+                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
                 )
 
 
-@retry_probabilistic_test
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1262,7 +1262,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                 desired=value_ranges[1][idx],
                 rtol=RTOL,
                 atol=ATOL,
-                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {atol + rtol * abs(value_ranges[1][idx])} tolerance.",
+                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
             )
 
     parameter_builder_batch_request: dict
@@ -1375,7 +1375,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                 desired=value_ranges[1][idx],
                 rtol=RTOL,
                 atol=ATOL,
-                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {atol + rtol * abs(value_ranges[1][idx])} tolerance.",
+                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
             )
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
