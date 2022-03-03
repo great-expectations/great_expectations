@@ -242,6 +242,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
 
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -382,6 +383,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -630,6 +632,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
