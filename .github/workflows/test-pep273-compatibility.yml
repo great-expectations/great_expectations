@@ -35,7 +35,7 @@ jobs:
 
       - name: Install GE from sources into extra_libraries_dir
         run: |
-          pip install . -t extra_libraries_dir
+          pip install . -t extra_libraries_dir -c constraints.txt
 
       - name: Remove sources
         shell: bash
