@@ -1373,6 +1373,7 @@ def build_test_backends_list(
     include_mysql=False,
     include_mssql=False,
     include_bigquery=False,
+    include_aws=False,
     raise_exceptions_for_backends: bool = True,
 ) -> List[str]:
     """Attempts to identify supported backends by checking which imports are available."""
@@ -1502,6 +1503,23 @@ def build_test_backends_list(
             else:
                 test_backends += ["bigquery"]
 
+        if include_aws:
+            # TODO need to come up with a better way to do this check.
+            # currently this checks the 3 default EVN variables that boto3 looks for
+            aws_access_key_id: Optional[str] = os.getenv("AWS_ACCESS_KEY_ID")
+            aws_secret_access_key: Optional[str] = os.getenv("AWS_SECRET_ACCESS_KEY")
+            aws_session_token: Optional[str] = os.getenv("AWS_SESSION_TOKEN")
+            if (
+                not aws_access_key_id
+                and not aws_secret_access_key
+                and not aws_session_token
+            ):
+                logger.warning(
+                    f"AWS tests are requested, but credentials were not set up"
+                )
+        else:
+            # TODO ensure that test_script_runner is able to use this
+            test_backends += ["aws"]
     return test_backends
 
 

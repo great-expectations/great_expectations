@@ -212,8 +212,6 @@ def build_test_backends_list_cfe(metafunc):
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
-    # check this to either in build_test_backends_list_v3 so that it's consistent:
-    # decision : either remove --aws from here, or carry it all the way through? (so that we can use it in test_script_runner.py)
     include_aws: bool = metafunc.config.getoption("--aws")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
@@ -223,6 +221,7 @@ def build_test_backends_list_cfe(metafunc):
         include_mysql=include_mysql,
         include_mssql=include_mssql,
         include_bigquery=include_bigquery,
+        include_aws=include_aws,
     )
     return test_backend_names
 

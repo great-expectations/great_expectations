@@ -172,7 +172,6 @@ class ExpectationsStore(Store):
         return expectation_suite_dict
 
     def get(self, key) -> dict:
-        # Store will return dict which will be converted to ExpectationSuite object.
         return super().get(key)
 
     def remove_key(self, key):
