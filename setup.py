@@ -72,7 +72,7 @@ config = {
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
     "extras_require": {
-        "airflow": req_airflwow + req_boto,
+        "airflow": req_airflow + req_boto,
         "arrow": req_arrow,
         "athena": req_athena,
         "aws_secrets": req_boto,
