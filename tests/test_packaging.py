@@ -93,7 +93,9 @@ def test_requirements_files():
             f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)
         }
 
-    with open(file_relative_path(__file__, "../requirements-dev-postgresql.txt")) as req:
+    with open(
+        file_relative_path(__file__, "../requirements-dev-postgresql.txt")
+    ) as req:
         requirements_dev_postgresql = {
             f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)
         }
