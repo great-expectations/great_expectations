@@ -282,14 +282,90 @@ def test_build_init_payload(
 def test_get_profiler_run_usage_statistics_with_handler_valid_payload_no_overrides(
     mock_data_context: mock.MagicMock,
 ):
-    pass  # TODO(cdkini): Write test!
+    # Ensure that real handler gets passed down by the context
+    handler: UsageStatisticsHandler = UsageStatisticsHandler(
+        mock_data_context, "my_id", "my_url"
+    )
+    mock_data_context.usage_statistics_handler = handler
+
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_profiler", config_version=1.0, data_context=mock_data_context, rules={}
+    )
+
+    payload: dict = get_profiler_run_usage_statistics(profiler=profiler, rules={})
+    assert payload == {}
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_get_profiler_run_usage_statistics_with_handler_valid_payload_yes_overrides(
     mock_data_context: mock.MagicMock,
 ):
-    pass  # TODO(cdkini): Write test!
+    # Ensure that real handler gets passed down by the context
+    handler: UsageStatisticsHandler = UsageStatisticsHandler(
+        mock_data_context, "my_id", "my_url"
+    )
+    mock_data_context.usage_statistics_handler = handler
+
+    override_rules = {
+        "rule_0": {
+            "domain_builder": {
+                "class_name": "ColumnDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder",
+            },
+            "parameter_builders": [
+                {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                    "name": "my_parameter",
+                    "metric_name": "my_metric",
+                },
+                {
+                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                    "name": "my_other_parameter",
+                    "metric_name": "my_other_metric",
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+            ],
+        },
+    }
+
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_profiler", config_version=1.0, data_context=mock_data_context
+    )
+
+    payload: dict = get_profiler_run_usage_statistics(
+        profiler=profiler, rules=override_rules
+    )
+    assert payload == {}
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
@@ -306,7 +382,7 @@ def test_get_profiler_run_usage_statistics_with_handler_invalid_payload(
         name="my_profiler", config_version=1.0, data_context=mock_data_context
     )
 
-    payload: dict = get_profiler_run_usage_statistics(profiler)
+    payload: dict = get_profiler_run_usage_statistics(profiler=profiler)
 
     # Payload won't pass schema validation due to a lack of rules but we can confirm that it is anonymized
     assert payload == {
@@ -323,7 +399,7 @@ def test_get_profiler_run_usage_statistics_without_handler():
         name="my_profiler",
         config_version=1.0,
     )
-    payload: dict = get_profiler_run_usage_statistics(profiler)
+    payload: dict = get_profiler_run_usage_statistics(profiler=profiler)
     assert payload == {}
 
 
@@ -348,7 +424,7 @@ def test_get_profiler_run_usage_statistics_logs_exception(
         name="my_profiler", config_version=1.0, data_context=mock_data_context
     )
     with caplog.at_level(logging.DEBUG):
-        payload = get_profiler_run_usage_statistics(profiler)
+        payload = get_profiler_run_usage_statistics(profiler=profiler)
 
     assert "Unable to create anonymized_profiler_run payload" in caplog.text
     assert "mocked error" in caplog.text

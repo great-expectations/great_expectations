@@ -88,3 +88,6 @@ class Builder(SerializableDictDot):
         refactoring infeasible at the present time.
         """
         return self.__repr__()
+
+    def _type(self) -> str:
+        return self.__class__.__name__
