@@ -26,6 +26,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     GeCloudConfig,
@@ -6418,6 +6419,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -6588,6 +6590,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -6726,6 +6729,7 @@ def quentin_columnar_table_multi_batch_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")

@@ -128,8 +128,15 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"]
     )
 
-    assert mock_emit.call_count != 0
-    assert mock_emit.call_args_list == []
+    assert mock_emit.call_count == 43
+
+    assert all(
+        payload[0][0]["event"] == "data_context.get_batch_list"
+        for payload in mock_emit.call_args_list[:-1]
+    )
+
+    expected_profiler_run_event: mock._Call = mock.call()
+    assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
 
 # noinspection PyUnusedLocal
@@ -253,8 +260,15 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         ]["expected_expectation_suite"]
     )
 
-    assert mock_emit.call_count != 0
-    assert mock_emit.call_args_list == []
+    assert mock_emit.call_count == 100
+
+    assert all(
+        payload[0][0]["event"] == "data_context.get_batch_list"
+        for payload in mock_emit.call_args_list[:-1]
+    )
+
+    expected_profiler_run_event: mock._Call = mock.call()
+    assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
 
 @pytest.mark.skipif(
@@ -1025,8 +1039,15 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
 
-    assert mock_emit.call_count != 0
-    assert mock_emit.call_args_list == []
+    assert mock_emit.call_count == 3
+
+    assert all(
+        payload[0][0]["event"] == "data_context.get_batch_list"
+        for payload in mock_emit.call_args_list[:-1]
+    )
+
+    expected_profiler_run_event: mock._Call = mock.call()
+    assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
 
 @probabilistic_test
@@ -1194,8 +1215,15 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
                 )
 
-    assert mock_emit.call_count != 0
-    assert mock_emit.call_args_list == []
+    assert mock_emit.call_count == 11
+
+    assert all(
+        payload[0][0]["event"] == "data_context.get_batch_list"
+        for payload in mock_emit.call_args_list[:-1]
+    )
+
+    expected_profiler_run_event: mock._Call = mock.call()
+    assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
 
 @probabilistic_test
