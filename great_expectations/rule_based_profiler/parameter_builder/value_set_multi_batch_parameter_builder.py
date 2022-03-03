@@ -5,13 +5,12 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    get_parameter_value_by_fully_qualified_parameter_name,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.types.parameter_container import (
     ParameterNode,
+)
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
 )
 
 
@@ -27,9 +26,11 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     {1, 4, 8} and batch 2 {2, 8, 10} the unique values returned by this
     parameter builder are the set union, or {1, 2, 4, 8, 10}
 
-    Note: The computation of the unique values across batches is done within
-    this ParameterBuilder so please be aware that testing large columns with
-    high cardinality could require a large amount of memory.
+    Notes:
+        1. The computation of the unique values across batches is done within
+           this ParameterBuilder so please be aware that testing large columns with
+           high cardinality could require a large amount of memory.
+        2. This ParameterBuilder filters null values out from the unique value_set.
     """
 
     def __init__(
@@ -107,10 +108,13 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         # Retrieve and replace the list of unique values for each batch with
         # the set of unique values for all batches in the given domain.
         parameter_value_node: ParameterNode = (
-            get_parameter_value_by_fully_qualified_parameter_name(
-                fully_qualified_parameter_name=self.fully_qualified_parameter_name,
+            get_parameter_value_and_validate_return_type(
                 domain=domain,
-                parameters={domain.id: parameter_container},
+                parameter_reference=self.fully_qualified_parameter_name,
+                expected_return_type=None,
+                parameters={
+                    domain.id: parameter_container,
+                },
             )
         )
 
@@ -118,9 +122,10 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             f"{self.fully_qualified_parameter_name}.details"
         )
         parameter_value_node_details: ParameterNode = (
-            get_parameter_value_by_fully_qualified_parameter_name(
-                fully_qualified_parameter_name=fully_qualified_parameter_name_details,
+            get_parameter_value_and_validate_return_type(
                 domain=domain,
+                parameter_reference=fully_qualified_parameter_name_details,
+                expected_return_type=None,
                 parameters={
                     domain.id: parameter_container,
                 },
@@ -130,7 +135,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         unique_parameter_values: Set[
             Any
         ] = _get_unique_values_from_nested_collection_of_sets(
-            parameter_value_node["value"]
+            parameter_value_node.value
         )
 
         return (
@@ -153,5 +158,17 @@ def _get_unique_values_from_nested_collection_of_sets(
     """
 
     flattened: List[Set[Any]] = list(itertools.chain.from_iterable(collection))
-    unique_values: Set[Any] = set().union(*flattened)
+
+    """
+    In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to
+    reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
+    resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
+    """
+    unique_values: Set[Any] = set(
+        filter(
+            lambda element: element is not None,
+            set().union(*flattened),
+        )
+    )
+
     return unique_values
