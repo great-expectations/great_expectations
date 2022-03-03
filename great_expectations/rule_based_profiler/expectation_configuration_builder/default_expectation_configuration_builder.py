@@ -236,7 +236,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
     def _build_boolean_result(
         self,
-        binary_list: List[Union[bool, str]],
+        binary_list: Union[ParseResults, List[Union[bool, str]]],
     ) -> bool:
         """Recursively build boolean result from binary list
 

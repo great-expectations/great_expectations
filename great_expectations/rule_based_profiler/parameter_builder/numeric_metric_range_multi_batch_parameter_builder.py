@@ -288,7 +288,7 @@ detected.
 
         return (
             {
-                "value_range": metric_value_range.tolist(),
+                "value_range": metric_value_range,
             },
             details,
         )

@@ -141,6 +141,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             metric_values = metric_values[:, 0]
 
         return (
-            metric_values.tolist(),
+            metric_values,
             details,
         )
