@@ -31,7 +31,7 @@ If you call the `print_diagnostic_checklist()` method on your Custom Expectation
 ✔ Has core logic and passes tests on at least one Execution Engine
   ...
 ✔ Has basic input validation and type checking
-✔ Has all three statement Renderers: descriptive, prescriptive, diagnostic
+✔ Has both statement Renderers: prescriptive and diagnostic
 ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
   ...
 ✔ Passes all linting checks

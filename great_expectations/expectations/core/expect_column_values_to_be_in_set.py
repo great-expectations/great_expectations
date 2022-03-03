@@ -358,8 +358,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> bool:
-        if not super().validate_configuration(configuration):
-            return False
+        super().validate_configuration(configuration)
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
             assert (
