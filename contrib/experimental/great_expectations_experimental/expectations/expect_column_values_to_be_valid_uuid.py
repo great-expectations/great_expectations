@@ -151,9 +151,9 @@ class ExpectColumnValuesToBeValidUUID(ColumnMapExpectation):
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "tags": [],  # Tags for this Expectation in the Gallery
+        "tags": ["typed-entities"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@your_name_here",  # Don't forget to add your github handle here!
+            "@joshua-stauffer",  # Don't forget to add your github handle here!
         ],
     }
 
