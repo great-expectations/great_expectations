@@ -320,32 +320,9 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         effective_rules: Dict[str, "Rule"] = profiler.reconcile_profiler_rules_as_dict(
             rules=rules
         )
-        runtime_rules: Dict[str, dict] = {}
-        for name, rule in effective_rules.items():
-            rule_as_dict: dict = rule.to_dict()
-
-            domain_builder_as_dict: dict = rule_as_dict["domain_builder"]
-            domain_builder_as_dict["class_name"] = rule.domain_builder._type()
-
-            if rule.parameter_builders:
-                for i, parameter_builder in enumerate(rule.parameter_builders):
-                    parameter_builder_as_dict: dict = rule_as_dict[
-                        "parameter_builders"
-                    ][i]
-                    parameter_builder_as_dict["class_name"] = parameter_builder._type()
-
-            if rule.expectation_configuration_builders:
-                for i, expectation_configuration_builder in enumerate(
-                    rule.expectation_configuration_builders
-                ):
-                    expectation_configuration_builder_as_dict: dict = rule_as_dict[
-                        "expectation_configuration_builders"
-                    ][i]
-                    expectation_configuration_builder_as_dict[
-                        "class_name"
-                    ] = expectation_configuration_builder._type()
-
-            runtime_rules[name] = rule_as_dict
+        runtime_rules: Dict[str, dict] = {
+            name: rule.to_dict() for name, rule in effective_rules.items()
+        }
 
         return cls(
             name=runtime_config.name,
