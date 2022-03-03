@@ -40,6 +40,12 @@ class Builder(SerializableDictDot):
 
         self._batch_list = batch_list
 
+    def to_dict(self) -> dict:
+        dict_obj: dict = super().to_dict()
+        dict_obj["class_name"] = self.__class__.__name__
+        dict_obj["module_name"] = self.__class__.__module__
+        return dict_obj
+
     def to_json_dict(self) -> dict:
         """
         # TODO: <Alex>2/4/2022</Alex>
