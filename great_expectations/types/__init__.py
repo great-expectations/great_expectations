@@ -135,7 +135,7 @@ class DictDot:
 
     def to_dict(self) -> dict:
         new_dict = {
-            key: self[key]
+            key: self.get(key)
             for key in self.property_names(
                 include_keys=self.include_field_names,
                 exclude_keys=self.exclude_field_names,
