@@ -3,7 +3,7 @@ from typing import Union
 import pytest
 
 from great_expectations.exceptions import ProfilerConfigurationError
-from great_expectations.rule_based_profiler.domain_builder.cardinality_checker import (
+from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (
     AbsoluteCardinalityLimit,
     CardinalityChecker,
     CardinalityLimitMode,
