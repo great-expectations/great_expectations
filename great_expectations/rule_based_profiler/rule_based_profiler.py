@@ -831,6 +831,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def to_json_dict(self) -> dict:
         rule: Rule
         serializeable_dict: dict = {
+            "class_name": self.__class__.__name__,
+            "module_name": self.__class__.__module__,
             "name": self.name,
             "variables": self.variables.to_dict()["parameter_nodes"]["variables"][
                 "variables"
@@ -840,7 +842,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return serializeable_dict
 
     def __repr__(self) -> str:
-        json_dict: dict = self.to_json_dict()
+        json_dict: dict = self.config.to_json_dict()
         return json.dumps(json_dict, indent=2)
 
     def __str__(self) -> str:
