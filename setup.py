@@ -6,6 +6,57 @@ import versioneer
 with open("requirements.txt") as f:
     required = f.read().splitlines()
 
+with open("requirements-dev-lite.txt") as f:
+    dev_lite = f.read().splitlines()
+
+req_boto = [req for req in dev_lite if req.startswith("boto")]
+req_sqlalchemy = [req for req in dev_lite if req.startswith("sqlalchemy")]
+
+with open("requirements-dev-airflow.txt") as f:
+    req_airflow = f.read().splitlines()
+
+with open("requirements-dev-arrow.txt") as f:
+    req_arrow = f.read().splitlines()
+
+with open("requirements-dev-athena.txt") as f:
+    req_athena = f.read().splitlines()
+
+with open("requirements-dev-azure.txt") as f:
+    req_azure = f.read().splitlines()
+
+with open("requirements-dev-bigquery.txt") as f:
+    req_bigquery = f.read().splitlines()
+
+with open("requirements-dev-dremio.txt") as f:
+    req_dremio = f.read().splitlines()
+
+with open("requirements-dev-excel.txt") as f:
+    req_excel = f.read().splitlines()
+
+with open("requirements-dev-mssql.txt") as f:
+    req_mssql = f.read().splitlines()
+
+with open("requirements-dev-mysql.txt") as f:
+    req_mysql = f.read().splitlines()
+
+with open("requirements-dev-pagerduty.txt") as f:
+    req_pagerduty = f.read().splitlines()
+
+with open("requirements-dev-postgresql.txt") as f:
+    req_postgresql = f.read().splitlines()
+
+with open("requirements-dev-redshift.txt") as f:
+    req_redshift = f.read().splitlines()
+
+with open("requirements-dev-snowflake.txt") as f:
+    req_snowflake = f.read().splitlines()
+
+with open("requirements-dev-spark.txt") as f:
+    req_spark = f.read().splitlines()
+
+with open("requirements-dev-teradata.txt") as f:
+    req_teradata = f.read().splitlines()
+
 # try:
 #    import pypandoc
 #    long_description = pypandoc.convert_file('README.md', 'rst')
@@ -21,19 +72,27 @@ config = {
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
     "extras_require": {
-        "spark": ["pyspark>=2.3.2"],
-        "sqlalchemy": ["sqlalchemy>=1.3.18"],
-        "airflow": ["apache-airflow[s3]>=1.9.0", "boto3>=1.7.3"],
-        "gcp": [
-            "google-cloud-storage>=1.28.0",
-            "google-cloud-secret-manager>=1.0.0",
-            "sqlalchemy-bigquery>=1.3.0",
-        ],
-        "redshift": ["psycopg2>=2.8"],
-        "s3": ["boto3>=1.14"],
-        "aws_secrets": ["boto3>=1.8.7"],
-        "azure_secrets": ["azure-identity>=1.0.0", "azure-keyvault-secrets>=4.0.0"],
-        "snowflake": ["snowflake-sqlalchemy>=1.2"],
+        "airflow": req_airflwow + req_boto,
+        "arrow": req_arrow,
+        "athena": req_athena,
+        "aws_secrets": req_boto,
+        "azure": req_azure,
+        "azure_secrets": req_azure,
+        "bigquery": req_bigquery,
+        "dremio": req_dremio,
+        "excel": req_excel,
+        "gcp": req_bigquery,
+        "mssql": req_mssql,
+        "mysql": req_mysql,
+        "pagerduty": req_pagerduty,
+        "postgresql": req_postgresql,
+        "redshift": req_redshift,
+        # "s3": ["boto3>=1.14"],
+        "s3": req_boto,
+        "snowflake": snowflake,
+        "spark": req_spark,
+        "sqlalchemy": req_sqlalchemy,
+        "teradata": req_teradata,
     },
     "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
     "entry_points": {

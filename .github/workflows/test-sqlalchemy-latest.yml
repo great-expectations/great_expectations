@@ -37,7 +37,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies including latest sqlalchemy version
         run: |
-          pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt -c constraints-dev.txt
+          pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt -c constraints-dev.txt
           pip install .
           pip install --requirement requirements.txt -c constraints-dev.txt
           pip install --upgrade SQLAlchemy
