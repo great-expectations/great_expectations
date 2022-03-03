@@ -183,7 +183,11 @@ class AssetConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=False, allow_none=True)
-    class_name = fields.String(required=False, allow_none=True, missing="Asset")
+    class_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="Asset",
+    )
     module_name = fields.String(
         required=False,
         all_none=True,
@@ -270,17 +274,33 @@ class SorterConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=True)
-    class_name = fields.String(required=True)
-    module_name = fields.String(
-        missing="great_expectations.datasource.data_connector.sorter"
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
     )
-    orderby = fields.String(required=False, missing="asc", allow_none=False)
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.datasource.data_connector.sorter",
+    )
+    orderby = fields.String(
+        required=False,
+        allow_none=True,
+        missing="asc",
+    )
 
     # allow_none = True because it is only used by some Sorters
     reference_list = fields.List(
-        cls_or_instance=fields.Str(), required=False, missing=None, allow_none=True
+        cls_or_instance=fields.Str(),
+        required=False,
+        missing=None,
+        allow_none=True,
     )
-    datetime_format = fields.String(required=False, missing=None, allow_none=True)
+    datetime_format = fields.String(
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -387,8 +407,15 @@ class DataConnectorConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.datasource.data_connector")
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
+    )
+    module_name = fields.String(
+        required=False,
+        allow_nonw=True,
+        missing="great_expectations.datasource.data_connector",
+    )
 
     assets = fields.Dict(
         keys=fields.Str(),
@@ -677,8 +704,15 @@ class ExecutionEngineConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.execution_engine")
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
+    )
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.execution_engine",
+    )
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
@@ -818,8 +852,16 @@ class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(missing="Datasource")
-    module_name = fields.String(missing="great_expectations.datasource")
+    class_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="Datasource",
+    )
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.datasource",
+    )
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
     spark_config = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
@@ -2124,10 +2166,15 @@ class CheckpointConfigSchema(Schema):
         allow_none=True,
     )
     template_name = fields.String(required=False, allow_none=True)
-    module_name = fields.String(
-        required=False, allow_none=True, missing="great_expectations.checkpoint"
+    class_name = fields.Str(
+        required=False,
+        allow_none=True,
     )
-    class_name = fields.Str(required=False, allow_none=True)
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.checkpoint",
+    )
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
     expectation_suite_ge_cloud_id = fields.UUID(required=False, allow_none=True)
