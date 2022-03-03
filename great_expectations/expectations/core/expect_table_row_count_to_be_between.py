@@ -79,6 +79,8 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
+        class_name="RuleBasedProfilerConfig",
+        module_name="great_expectations.rule_based_profiler",
         variables={
             "num_bootstrap_samples": 9999,
             "false_positive_rate": 0.05,
