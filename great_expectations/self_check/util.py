@@ -1517,9 +1517,6 @@ def build_test_backends_list(
                 logger.warning(
                     f"AWS tests are requested, but credentials were not set up"
                 )
-        else:
-            # TODO ensure that test_script_runner is able to use this
-            test_backends += ["aws"]
     return test_backends
 
 
