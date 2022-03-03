@@ -87,8 +87,9 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def from_commented_map(cls, commented_map: CommentedMap):
         try:
-            config: Union[dict, BaseYamlConfig]
-            config = cls._get_schema_instance().load(commented_map)
+            config: Union[dict, BaseYamlConfig] = cls._get_schema_instance().load(
+                commented_map
+            )
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
             return config

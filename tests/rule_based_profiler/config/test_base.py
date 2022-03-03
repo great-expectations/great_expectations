@@ -18,6 +18,9 @@ from great_expectations.rule_based_profiler.config import (
     RuleConfig,
     RuleConfigSchema,
 )
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 
@@ -288,18 +291,30 @@ def test_rule_based_profiler_from_commented_map():
 def test_resolve_config_using_acceptable_arguments(
     profiler_with_placeholder_args: RuleBasedProfiler,
 ) -> None:
-    config: RuleBasedProfilerConfig = (
+    old_config: RuleBasedProfilerConfig = profiler_with_placeholder_args.config
+    old_config.module_name = profiler_with_placeholder_args.__class__.__module__
+
+    # Roundtrip through schema validation to add/or restore any missing fields.
+    old_deserialized_config: dict = ruleBasedProfilerConfigSchema.load(
+        old_config.to_json_dict()
+    )
+    old_config = RuleBasedProfilerConfig(**old_deserialized_config)
+
+    # Brand new config is created but existing attributes are unchanged
+    new_config: RuleBasedProfilerConfig = (
         RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-            profiler=profiler_with_placeholder_args
+            profiler=profiler_with_placeholder_args,
         )
     )
 
-    old_config: RuleBasedProfilerConfig = profiler_with_placeholder_args.config
+    # Roundtrip through schema validation to add/or restore any missing fields.
+    # new_deserialized_config: dict = ruleBasedProfilerConfigSchema.load(new_config.to_json_dict())
+    new_deserialized_config: dict = new_config.to_json_dict()
+    new_config = RuleBasedProfilerConfig(**new_deserialized_config)
 
-    # Brand new config is created but existing attributes are unchanged
-    assert id(old_config) != id(config)
+    assert id(old_config) != id(new_config)
     assert all(
-        old_config[attr] == config[attr]
+        old_config[attr] == new_config[attr]
         for attr in ("class_name", "config_version", "module_name", "name")
     )
 
@@ -324,25 +339,30 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
                 "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                 "metric_name": "my_other_metric",
                 "name": "my_additional_parameter",
-            }
+            },
         ],
         "expectation_configuration_builders": [
             {
                 "class_name": "DefaultExpectationConfigurationBuilder",
                 "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                 "expectation_type": "expect_column_values_to_be_between",
-                "meta": {"details": {"note": "Here's another rule"}},
-            }
+                "meta": {
+                    "details": {
+                        "note": "Here's another rule",
+                    },
+                },
+            },
         ],
     }
 
     runtime_override_rules: Dict[str, dict] = {
-        runtime_override_rule_name: runtime_override_rule
+        runtime_override_rule_name: runtime_override_rule,
     }
 
     config: RuleBasedProfilerConfig = (
         RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-            profiler=profiler_with_placeholder_args, rules=runtime_override_rules
+            profiler=profiler_with_placeholder_args,
+            rules=runtime_override_rules,
         )
     )
 
@@ -374,15 +394,19 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
                 "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                 "metric_name": "my_other_metric",
                 "name": "my_additional_parameter",
-            }
+            },
         ],
         "expectation_configuration_builders": [
             {
                 "class_name": "DefaultExpectationConfigurationBuilder",
                 "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                 "expectation_type": "expect_column_values_to_be_between",
-                "meta": {"details": {"note": "Here's another rule"}},
-            }
+                "meta": {
+                    "details": {
+                        "note": "Here's another rule",
+                    },
+                },
+            },
         ],
     }
 
@@ -393,7 +417,8 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
 
     config: RuleBasedProfilerConfig = (
         RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
-            profiler=profiler_with_placeholder_args, rules=runtime_override_rules
+            profiler=profiler_with_placeholder_args,
+            rules=runtime_override_rules,
         )
     )
 

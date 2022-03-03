@@ -1,8 +1,10 @@
+import json
 import logging
 from typing import Any, Dict, List, Optional, Type, Union
 
 from ruamel.yaml.comments import CommentedMap
 
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -11,8 +13,12 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-from great_expectations.types import DictDot
-from great_expectations.util import filter_properties_dict
+from great_expectations.rule_based_profiler.types import ParameterContainer
+from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -73,8 +79,10 @@ class NotNullSchema(Schema):
         Returns:
             A cleaned dictionary that has no null values
         """
+        # noinspection PyArgumentList
         for key in original.keys():
             if key not in output and not key.startswith("_"):
+                # noinspection PyUnresolvedReferences
                 output[key] = original[key]
 
         cleaned_output = filter_properties_dict(
@@ -114,12 +122,12 @@ class DomainBuilderConfigSchema(NotNullSchema):
     __config_class__ = DomainBuilderConfig
 
     class_name = fields.String(
-        required=False,
-        all_none=True,
+        required=True,
+        allow_none=False,
     )
     module_name = fields.String(
         required=False,
-        all_none=True,
+        allow_none=True,
         missing="great_expectations.rule_based_profiler.domain_builder",
     )
     batch_request = fields.Raw(
@@ -162,12 +170,12 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         allow_none=False,
     )
     class_name = fields.String(
-        required=False,
-        all_none=True,
+        required=True,
+        allow_none=False,
     )
     module_name = fields.String(
         required=False,
-        all_none=True,
+        allow_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
     )
     batch_request = fields.Raw(
@@ -206,12 +214,12 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     __config_class__ = ExpectationConfigurationBuilderConfig
 
     class_name = fields.String(
-        required=False,
-        all_none=True,
+        required=True,
+        allow_none=False,
     )
     module_name = fields.String(
         required=False,
-        all_none=True,
+        allow_none=True,
         missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
     )
     expectation_type = fields.Str(
@@ -230,7 +238,7 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     )
 
 
-class RuleConfig(DictDot):
+class RuleConfig(SerializableDictDot):
     def __init__(
         self,
         expectation_configuration_builders: List[
@@ -242,6 +250,49 @@ class RuleConfig(DictDot):
         self.domain_builder = domain_builder
         self.parameter_builders = parameter_builders
         self.expectation_configuration_builders = expectation_configuration_builders
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class RuleConfigSchema(NotNullSchema):
@@ -289,8 +340,10 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self.name = name
         self.config_version = config_version
         self.rules = rules
-        self.class_name = class_name
-        self.module_name = module_name
+        if class_name is not None:
+            self.class_name = class_name
+        if module_name is not None:
+            self.module_name = module_name
         self.variables = variables
 
         super().__init__(commented_map=commented_map)
@@ -303,31 +356,81 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:  # noqa: F821
         return RuleBasedProfilerConfigSchema
 
-    # noinspection PyUnusedLocal,PyUnresolvedReferences
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
+
     @classmethod
     def resolve_config_using_acceptable_arguments(
         cls,
         profiler: "RuleBasedProfiler",  # noqa: F821
         variables: Optional[dict] = None,
         rules: Optional[Dict[str, dict]] = None,
-    ) -> "RuleBasedProfilerConfig":
+    ) -> "RuleBasedProfilerConfig":  # noqa: F821
         runtime_config: RuleBasedProfilerConfig = profiler.config
 
-        runtime_variables: dict = profiler.reconcile_profiler_variables_as_dict(
-            variables
+        runtime_variables: Optional[
+            ParameterContainer
+        ] = profiler.reconcile_profiler_variables(variables)
+        runtime_variables_configs: dict = (
+            runtime_variables.to_dict()["parameter_nodes"]["variables"]["variables"]
+            or {}
         )
 
-        effective_rules: Dict[str, "Rule"] = profiler.reconcile_profiler_rules_as_dict(
+        effective_rules: List["Rule"] = profiler.reconcile_profiler_rules(  # noqa: F821
             rules=rules
         )
+
+        rule: "Rule"  # noqa: F821
         runtime_rules: Dict[str, dict] = {
-            k: v.to_dict() for k, v in effective_rules.items()
+            rule.name: rule.to_json_dict() for rule in effective_rules
         }
 
         return cls(
+            class_name=profiler.__class__.__name__,
+            module_name=profiler.__class__.__module__,
             name=runtime_config.name,
             config_version=runtime_config.config_version,
-            variables=runtime_variables,
+            variables=runtime_variables_configs,
             rules=runtime_rules,
         )
 
@@ -347,13 +450,11 @@ class RuleBasedProfilerConfigSchema(Schema):
     )
     class_name = fields.String(
         required=False,
-        all_none=True,
         allow_none=True,
         missing="RuleBasedProfiler",
     )
     module_name = fields.String(
         required=False,
-        all_none=True,
         allow_none=True,
         missing="great_expectations.rule_based_profiler",
     )
