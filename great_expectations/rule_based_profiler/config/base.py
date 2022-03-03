@@ -305,6 +305,34 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:  # noqa: F821
         return RuleBasedProfilerConfigSchema
 
+    # noinspection PyUnusedLocal,PyUnresolvedReferences
+    @classmethod
+    def resolve_config_using_acceptable_arguments(
+        cls,
+        profiler: "RuleBasedProfiler",  # noqa: F821
+        variables: Optional[dict] = None,
+        rules: Optional[Dict[str, dict]] = None,
+    ) -> "RuleBasedProfilerConfig":
+        runtime_config: RuleBasedProfilerConfig = profiler.config
+
+        runtime_variables: dict = profiler.reconcile_profiler_variables_as_dict(
+            variables
+        )
+
+        effective_rules: Dict[str, "Rule"] = profiler.reconcile_profiler_rules_as_dict(
+            rules=rules
+        )
+        runtime_rules: Dict[str, dict] = {
+            k: v.to_dict() for k, v in effective_rules.items()
+        }
+
+        return cls(
+            name=runtime_config.name,
+            config_version=runtime_config.config_version,
+            variables=runtime_variables,
+            rules=runtime_rules,
+        )
+
 
 class RuleBasedProfilerConfigSchema(Schema):
     """
