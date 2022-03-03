@@ -29,8 +29,8 @@ jobs:
           python-version: ${{matrix.python}}
 
       - name: Setup base system (Linux)
-        run: |
         if: runner.os == 'Linux'
+        run: |
           pip install --upgrade wheel setuptools
           pip install -r requirements.txt
 
