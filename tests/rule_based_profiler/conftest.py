@@ -1063,7 +1063,8 @@ def profiler_with_placeholder_args(
     profiler_config_dict.pop("class_name", None)
     profiler_config_dict.pop("module_name", None)
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        **profiler_config_dict, data_context=empty_data_context
+        **profiler_config_dict,
+        data_context=empty_data_context,
     )
     return profiler
 
