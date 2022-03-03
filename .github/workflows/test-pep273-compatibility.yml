@@ -30,10 +30,12 @@ jobs:
 
       - name: Setup base system (Linux)
         run: |
+        if: runner.os == 'Linux'
           pip install --upgrade wheel setuptools
           pip install -r requirements.txt
 
       - name: Install GE from sources into extra_libraries_dir (Linux)
+        if: runner.os == 'Linux'
         run: |
           pip install . -t extra_libraries_dir
 
