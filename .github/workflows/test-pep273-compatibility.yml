@@ -31,7 +31,7 @@ jobs:
       - name: Setup base system
         run: |
           pip install --upgrade wheel setuptools
-          pip install -r requirements.txt
+          pip install -r requirements.txt -c constraints-dev.txt
 
       - name: Install GE from sources into extra_libraries_dir
         run: |
