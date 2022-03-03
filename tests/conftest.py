@@ -5424,12 +5424,12 @@ def alice_columnar_table_single_batch(empty_data_context):
 @pytest.fixture
 def alice_columnar_table_single_batch_context(
     monkeypatch,
-    empty_data_context,
+    empty_data_context_stats_enabled,
     alice_columnar_table_single_batch,
 ):
     skip_if_python_below_minimum_version()
 
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
     data_path: str = os.path.join(context.root_directory, data_relative_path)

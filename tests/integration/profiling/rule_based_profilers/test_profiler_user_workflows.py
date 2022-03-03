@@ -2,6 +2,7 @@ import datetime
 import uuid
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, cast
+from unittest import mock
 
 import numpy as np
 import pandas as pd
@@ -85,7 +86,11 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
 
 
 @freeze_time("09/26/2019 13:42:41")
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_alice_profiler_user_workflow_single_batch(
+    mock_emit,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
@@ -122,6 +127,9 @@ def test_alice_profiler_user_workflow_single_batch(
         expectation_suite
         == alice_columnar_table_single_batch["expected_expectation_suite"]
     )
+
+    assert mock_emit.call_count != 0
+    assert mock_emit.call_args_list == []
 
 
 # noinspection PyUnusedLocal
@@ -198,7 +206,11 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     reason="requires numpy version 1.21.0 or newer",
 )
 @freeze_time("09/26/2019 13:42:41")
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
+    mock_emit,
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch,
 ):
@@ -240,6 +252,9 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
             "test_configuration_oneshot_sampling_method"
         ]["expected_expectation_suite"]
     )
+
+    assert mock_emit.call_count != 0
+    assert mock_emit.call_args_list == []
 
 
 @pytest.mark.skipif(
@@ -935,7 +950,11 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
+    mock_emit,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
 ):
@@ -1005,6 +1024,9 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
             "test_configuration_bootstrap_sampling_method"
         ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
+
+    assert mock_emit.call_count != 0
+    assert mock_emit.call_args_list == []
 
 
 @probabilistic_test
@@ -1080,7 +1102,11 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
+    mock_emit,
     quentin_columnar_table_multi_batch_data_context,
     quentin_columnar_table_multi_batch,
 ):
@@ -1167,6 +1193,9 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     atol=ATOL,
                     err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
                 )
+
+    assert mock_emit.call_count != 0
+    assert mock_emit.call_args_list == []
 
 
 @probabilistic_test
