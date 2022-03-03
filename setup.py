@@ -89,7 +89,7 @@ config = {
         "redshift": req_redshift,
         # "s3": ["boto3>=1.14"],
         "s3": req_boto,
-        "snowflake": snowflake,
+        "snowflake": req_snowflake,
         "spark": req_spark,
         "sqlalchemy": req_sqlalchemy,
         "teradata": req_teradata,
