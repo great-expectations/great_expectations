@@ -2163,8 +2163,9 @@ class CheckpointConfigSchema(Schema):
     )
     template_name = fields.String(required=False, allow_none=True)
     class_name = fields.Str(
-        required=True,
-        allow_none=False,
+        required=False,
+        allow_none=True,
+        missing="Checkpoint",
     )
     module_name = fields.String(
         required=False,

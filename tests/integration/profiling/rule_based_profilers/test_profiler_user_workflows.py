@@ -828,7 +828,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
         "data_connector_query": {
-            "index": -1,
+            "index": 1,
         },
     }
 
@@ -838,7 +838,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
         "data_connector_query": {
-            "index": ":-1",
+            "index": "1",
         },
     }
 
