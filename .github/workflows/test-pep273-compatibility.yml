@@ -30,12 +30,12 @@ jobs:
 
       - name: Setup base system
         run: |
-          pip install --upgrade wheel setuptools -c constraints.txt
-          pip install -r requirements.txt -c constraints.txt
+          pip install --upgrade wheel setuptools -c constraints_py36.txt
+          pip install -r requirements.txt -c constraints_py36.txt
 
       - name: Install GE from sources into extra_libraries_dir
         run: |
-          pip install . -t extra_libraries_dir -c constraints.txt
+          pip install . -t extra_libraries_dir -c constraints_py36.txt
 
       - name: Remove sources
         shell: bash
