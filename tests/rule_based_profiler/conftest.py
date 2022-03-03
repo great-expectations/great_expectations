@@ -1,12 +1,10 @@
 import datetime
-import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
-from great_expectations import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
@@ -1061,8 +1059,8 @@ def profiler_with_placeholder_args(
     skip_if_python_below_minimum_version()
 
     profiler_config_dict: dict = profiler_config_with_placeholder_args.to_json_dict()
-    profiler_config_dict.pop("class_name")
-    profiler_config_dict.pop("module_name")
+    profiler_config_dict.pop("class_name", None)
+    profiler_config_dict.pop("module_name", None)
     profiler: RuleBasedProfiler = RuleBasedProfiler(
         **profiler_config_dict, data_context=empty_data_context
     )

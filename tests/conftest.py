@@ -5097,6 +5097,9 @@ def profiler_config_with_placeholder_args(
     return RuleBasedProfilerConfig(
         name=profiler_name,
         class_name="RuleBasedProfiler",
+        # TODO: <Alex>ALEX</Alex>
+        # module_name="great_expectations.rule_based_profilerHORSE",
+        # TODO: <Alex>ALEX</Alex>
         config_version=1.0,
         variables={
             "false_positive_threshold": 1.0e-2,
@@ -5170,8 +5173,18 @@ def populated_profiler_store(
 ) -> ProfilerStore:
     skip_if_python_below_minimum_version()
 
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(
+        profiler_config_with_placeholder_args
+    )
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(serialized_config)
+
+    profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        **deserialized_config
+    )
+
     profiler_store = empty_profiler_store
-    profiler_store.set(key=profiler_key, value=profiler_config_with_placeholder_args)
+    profiler_store.set(key=profiler_key, value=profiler_config)
     return profiler_store
 
 

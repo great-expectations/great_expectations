@@ -507,14 +507,6 @@ class Validator:
 
         domain_type: MetricDomainTypes
 
-        self._validate_rule_and_update_rule_properties(
-            rule=rule,
-            expectation_type=expectation_type,
-            expectation_kwargs=expectation_kwargs,
-            success_keys=success_keys,
-            ignore_batch_request=True,
-        )
-
         if override_profiler_config is None:
             override_profiler_config = {}
 
@@ -560,12 +552,12 @@ class Validator:
 
             rule = profiler.rules[0]
 
-            self._validate_rule_and_update_rule_properties(
-                rule=rule,
-                expectation_type=expectation_type,
-                expectation_kwargs=expectation_kwargs,
-                success_keys=success_keys,
-            )
+        self._validate_rule_and_update_rule_properties(
+            rule=rule,
+            expectation_type=expectation_type,
+            expectation_kwargs=expectation_kwargs,
+            success_keys=success_keys,
+        )
 
         return profiler
 

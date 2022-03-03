@@ -114,12 +114,12 @@ class DomainBuilderConfigSchema(NotNullSchema):
     __config_class__ = DomainBuilderConfig
 
     class_name = fields.String(
-        required=False,
-        all_none=True,
+        required=True,
+        allow_none=False,
     )
     module_name = fields.String(
         required=False,
-        all_none=True,
+        allow_none=True,
         missing="great_expectations.rule_based_profiler.domain_builder",
     )
     batch_request = fields.Raw(
@@ -162,12 +162,12 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         allow_none=False,
     )
     class_name = fields.String(
-        required=False,
-        all_none=True,
+        required=True,
+        allow_none=False,
     )
     module_name = fields.String(
         required=False,
-        all_none=True,
+        allow_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
     )
     batch_request = fields.Raw(
@@ -206,12 +206,12 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     __config_class__ = ExpectationConfigurationBuilderConfig
 
     class_name = fields.String(
-        required=False,
-        all_none=True,
+        required=True,
+        allow_none=False,
     )
     module_name = fields.String(
         required=False,
-        all_none=True,
+        allow_none=True,
         missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
     )
     expectation_type = fields.Str(
@@ -289,8 +289,10 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self.name = name
         self.config_version = config_version
         self.rules = rules
-        self.class_name = class_name
-        self.module_name = module_name
+        if class_name is not None:
+            self.class_name = class_name
+        if module_name is not None:
+            self.module_name = module_name
         self.variables = variables
 
         super().__init__(commented_map=commented_map)
@@ -319,13 +321,11 @@ class RuleBasedProfilerConfigSchema(Schema):
     )
     class_name = fields.String(
         required=False,
-        all_none=True,
         allow_none=True,
         missing="RuleBasedProfiler",
     )
     module_name = fields.String(
         required=False,
-        all_none=True,
         allow_none=True,
         missing="great_expectations.rule_based_profiler",
     )
