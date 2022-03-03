@@ -79,7 +79,7 @@ except ImportError:
         "Unable to load pandas; install optional pandas dependency for support."
     )
 
-MAX_METRIC_COMPUTATION_RETRIES = 3
+MAX_METRIC_COMPUTATION_RETRIES: int = 3
 
 
 ValidationStatistics = namedtuple(
