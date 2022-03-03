@@ -28,14 +28,27 @@ jobs:
         with:
           python-version: ${{matrix.python}}
 
-      - name: Setup base system
+      - name: Setup base system (Linux)
+        if: runner.os == 'Linux'
         run: |
           pip install --upgrade wheel setuptools
           pip install -r requirements.txt
 
-      - name: Install GE from sources into extra_libraries_dir
+      - name: Install GE from sources into extra_libraries_dir (Linux)
+        if: runner.os == 'Linux'
         run: |
           pip install . -t extra_libraries_dir
+
+      - name: Setup base system (Win)
+        if: runner.os == 'Windows'
+        run: |
+          pip install --upgrade wheel setuptools -c constraints_py36.txt
+          pip install -r requirements.txt -c constraints_py36.txt
+
+      - name: Install GE from sources into extra_libraries_dir (Win)
+        if: runner.os == 'Windows'
+        run: |
+          pip install . -t extra_libraries_dir -c constraints_py36.txt
 
       - name: Remove sources
         shell: bash
