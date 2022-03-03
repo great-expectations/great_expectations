@@ -1,4 +1,3 @@
-import sys
 from typing import List
 from unittest import mock
 
