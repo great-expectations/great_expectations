@@ -7,6 +7,7 @@ import os
 import random
 import shutil
 import sys
+import warnings
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -112,6 +113,12 @@ def pytest_configure(config):
 
 
 def pytest_addoption(parser):
+    # note: --no-spark will be deprecated in favor of --spark
+    parser.addoption(
+        "--no-spark",
+        action="store_true",
+        help="If set, suppress tests against the spark test suite",
+    )
     parser.addoption(
         "--spark",
         action="store_true",
@@ -126,6 +133,12 @@ def pytest_addoption(parser):
         "--postgresql",
         action="store_true",
         help="If set, execute tests against postgresql",
+    )
+    # note: --no-postgresql will be deprecated in favor of --postgresql
+    parser.addoption(
+        "--no-postgresql",
+        action="store_true",
+        help="If set, supress tests against postgresql",
     )
     parser.addoption(
         "--mysql",
@@ -181,6 +194,17 @@ def build_test_backends_list(metafunc):
 
 
 def build_test_backends_list_cfe(metafunc):
+    # adding deprecation warnings
+    if metafunc.config.getoption("--no-postgresql"):
+        warnings.warn(
+            "--no-sqlalchemy is being deprecated in favor of the --postgresql flag. Please adjust your tests accordingly",
+            DeprecationWarning,
+        )
+    if metafunc.config.getoption("--no-spark"):
+        warnings.warn(
+            "--no-spark is being deprecated in favor of the --spark flag. Please adjust your tests accordingly.",
+            DeprecationWarning,
+        )
     include_pandas: bool = True
     include_spark: bool = metafunc.config.getoption("--spark")
     include_sqlalchemy: bool = not metafunc.config.getoption("--no-sqlalchemy")

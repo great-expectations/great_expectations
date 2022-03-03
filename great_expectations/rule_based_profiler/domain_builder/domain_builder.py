@@ -126,8 +126,6 @@ class DomainBuilder(Builder, ABC):
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             variables=variables,
         )
-        print("HELLO HELLO")
-        print(batch_ids)
         num_batch_ids: int = len(batch_ids)
         if num_batch_ids != 1:
             raise ge_exceptions.ProfilerExecutionError(
