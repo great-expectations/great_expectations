@@ -95,9 +95,8 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
                 domain=domain,
                 parameter_reference=self.fully_qualified_parameter_name,
                 expected_return_type=None,
-                parameters={
-                    domain.id: parameter_container,
-                },
+                variables=variables,
+                parameters=parameters,
             )
         )
 
