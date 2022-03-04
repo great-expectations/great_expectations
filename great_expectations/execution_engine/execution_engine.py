@@ -515,9 +515,14 @@ class ExecutionEngine(ABC):
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
         """
-        assert domain_type == MetricDomainTypes.TABLE
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = {}
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+        assert (
+            domain_type == MetricDomainTypes.TABLE
+        ), "This method only supports MetricDomainTypes.TABLE"
+
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
 
         if accessor_keys is not None and len(list(accessor_keys)) > 0:
             for key in accessor_keys:
