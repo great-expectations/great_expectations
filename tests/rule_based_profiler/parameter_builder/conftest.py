@@ -30,20 +30,27 @@ def _generate_distribution_parameters(
 
     bimodal_mean_1: int = 4000
     bimodal_stdev_1: int = 500
-    bimodal_lower_quantile_1: Number = stats.norm.ppf(
-        q=false_positive_rate / 2, loc=bimodal_mean_1, scale=bimodal_stdev_1
-    )
-    bimodal_upper_quantile_1: Number = stats.norm.ppf(
-        q=1 - false_positive_rate / 2, loc=bimodal_mean_1, scale=bimodal_stdev_1
-    )
-
     bimodal_mean_2: int = 6000
     bimodal_stdev_2: int = 500
-    bimodal_lower_quantile_2: Number = stats.norm.ppf(
-        q=false_positive_rate / 2, loc=bimodal_mean_2, scale=bimodal_stdev_2
+    bimodal_approximation = np.concatenate(
+        [
+            stats.norm.rvs(
+                loc=bimodal_mean_1,
+                scale=bimodal_stdev_1,
+                size=5000,
+            ),
+            stats.norm.rvs(
+                loc=bimodal_mean_2,
+                scale=bimodal_stdev_2,
+                size=5000,
+            ),
+        ]
     )
-    bimodal_upper_quantile_2: Number = stats.norm.ppf(
-        q=1 - false_positive_rate / 2, loc=bimodal_mean_2, scale=bimodal_stdev_2
+    bimodal_lower_quantile = np.quantile(
+        a=bimodal_approximation, q=false_positive_rate / 2
+    )
+    bimodal_upper_quantile = np.quantile(
+        a=bimodal_approximation, q=1 - false_positive_rate / 2
     )
 
     exponential_shape: int = 1.5
@@ -78,12 +85,10 @@ def _generate_distribution_parameters(
         "bimodal": {
             "mean_1": bimodal_mean_1,
             "stdev_1": bimodal_stdev_1,
-            "lower_quantile_1": bimodal_lower_quantile_1,
-            "upper_quantile_1": bimodal_upper_quantile_1,
             "mean_2": bimodal_mean_2,
             "stdev_2": bimodal_stdev_2,
-            "lower_quantile_2": bimodal_lower_quantile_2,
-            "upper_quantile_2": bimodal_upper_quantile_2,
+            "lower_quantile": bimodal_lower_quantile,
+            "upper_quantile": bimodal_upper_quantile,
         },
         "exponential": {
             "shape": exponential_shape,
@@ -149,6 +154,38 @@ def bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive():
     ] = _generate_distribution_parameters(false_positive_rate=false_positive_rate)
     distribution_samples: pd.DataFrame = _generate_distribution_samples(
         distribution_parameters=distribution_parameters, size=1000
+    )
+    return {
+        "false_positive_rate": false_positive_rate,
+        "distribution_parameters": distribution_parameters,
+        "distribution_samples": distribution_samples,
+    }
+
+
+@pytest.fixture
+def bootstrap_distribution_parameters_and_36_samples_with_01_false_positive():
+    false_positive_rate: np.float64 = np.float64(0.01)
+    distribution_parameters: Dict[
+        str, Dict[str, Number]
+    ] = _generate_distribution_parameters(false_positive_rate=false_positive_rate)
+    distribution_samples: pd.DataFrame = _generate_distribution_samples(
+        distribution_parameters=distribution_parameters, size=36
+    )
+    return {
+        "false_positive_rate": false_positive_rate,
+        "distribution_parameters": distribution_parameters,
+        "distribution_samples": distribution_samples,
+    }
+
+
+@pytest.fixture
+def bootstrap_distribution_parameters_and_5_samples_with_01_false_positive():
+    false_positive_rate: np.float64 = np.float64(0.01)
+    distribution_parameters: Dict[
+        str, Dict[str, Number]
+    ] = _generate_distribution_parameters(false_positive_rate=false_positive_rate)
+    distribution_samples: pd.DataFrame = _generate_distribution_samples(
+        distribution_parameters=distribution_parameters, size=36
     )
     return {
         "false_positive_rate": false_positive_rate,

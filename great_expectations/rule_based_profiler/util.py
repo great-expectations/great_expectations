@@ -4,6 +4,7 @@ from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from scipy import stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -251,7 +252,7 @@ def compute_quantiles(
     return lower_quantile, upper_quantile
 
 
-def _compute_bootstrap_quantiles_point_estimate_legacy(
+def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
@@ -284,7 +285,7 @@ def _compute_bootstrap_quantiles_point_estimate_legacy(
     return lower_quantile_point_estimate, upper_quantile_point_estimate
 
 
-def compute_bootstrap_quantiles_bias_corrected_point_estimate(
+def _compute_bootstrap_quantiles_point_estimate_bias_corrected(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
@@ -377,3 +378,53 @@ def compute_bootstrap_quantiles_bias_corrected_point_estimate(
         lower_quantile_bias_corrected_point_estimate,
         upper_quantile_bias_corrected_point_estimate,
     )
+
+
+def _compute_bootstrap_quantiles_point_estimate_scipy(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+    method: Optional[str] = "BCa",
+):
+    bootstraps: tuple = (metric_values,)  # bootstrap samples must be in a sequence
+
+    lower_quantile_bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
+        bootstraps,
+        lambda data: np.quantile(
+            data,
+            q=false_positive_rate / 2,
+        ),
+        vectorized=False,
+        confidence_level=1.0 - false_positive_rate,
+        n_resamples=n_resamples,
+        method=method,
+    )
+    upper_quantile_bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
+        bootstraps,
+        lambda data: np.quantile(
+            data,
+            q=1.0 - (false_positive_rate / 2),
+        ),
+        vectorized=False,
+        confidence_level=1.0 - false_positive_rate,
+        n_resamples=n_resamples,
+        method=method,
+    )
+
+    lower_quantile_confidence_interval: stats.bootstrap.BootstrapResult.ConfidenceInterval = (
+        lower_quantile_bootstrap_result.confidence_interval
+    )
+    lower_quantile_point_estimate: np.float64 = np.mean(
+        [
+            lower_quantile_confidence_interval.low,
+            lower_quantile_confidence_interval.high,
+        ]
+    )
+    upper_quantile_confidence_interal: stats.bootstrap.BootstrapResult.ConfidenceInterval = (
+        upper_quantile_bootstrap_result.confidence_interval
+    )
+    upper_quantile_point_estimate: np.float64 = np.mean(
+        [upper_quantile_confidence_interal.low, upper_quantile_confidence_interal.high]
+    )
+
+    return lower_quantile_point_estimate, upper_quantile_point_estimate
