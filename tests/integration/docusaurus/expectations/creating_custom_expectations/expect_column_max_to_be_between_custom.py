@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )

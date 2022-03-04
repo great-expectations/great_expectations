@@ -186,6 +186,7 @@ def get_parameter_value_and_validate_return_type(
         variables=variables,
         parameters=parameters,
     )
+
     if expected_return_type is not None:
         if not isinstance(parameter_reference, expected_return_type):
             raise ge_exceptions.ProfilerExecutionError(

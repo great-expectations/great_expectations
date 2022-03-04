@@ -750,6 +750,135 @@ anonymized_legacy_profiler_build_suite_payload_schema = {
     "additionalProperties": False,
 }
 
+anonymized_domain_builder_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-domain-builder",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+    },
+    "type": "object",
+    "properties": {
+        "parent_class": {"type": "string", "maxLength": 256},
+        "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
+        "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
+    },
+    "additionalProperties": False,
+    "required": ["parent_class"],
+}
+
+anonymized_parameter_builder_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-parameter-builder",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+    },
+    "type": "object",
+    "properties": {
+        "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+        "parent_class": {"type": "string", "maxLength": 256},
+        "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
+        "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
+    },
+    "additionalProperties": False,
+    "required": ["anonymized_name", "parent_class"],
+}
+
+anonymized_expectation_configuration_builder_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-expectation-configuration-builder",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+    },
+    "type": "object",
+    "properties": {
+        "parent_class": {"type": "string", "maxLength": 256},
+        "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
+        "expectation_type": {"type": "string", "maxLength": 256},
+        "anonymized_expectation_type": {"$ref": "#/definitions/anonymized_string"},
+        "anonymized_condition": {"$ref": "#/definitions/anonymized_string"},
+    },
+    "additionalProperties": False,
+    "required": ["parent_class"],
+}
+
+anonymized_rule_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-rules",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_domain_builder": anonymized_domain_builder_schema,
+        "anonymized_parameter_builder": anonymized_parameter_builder_schema,
+        "anonymized_expectation_configuration_builder": anonymized_expectation_configuration_builder_schema,
+    },
+    "type": "object",
+    "properties": {
+        "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+        "anonymized_domain_builder": {
+            "$ref": "#/definitions/anonymized_domain_builder"
+        },
+        "anonymized_parameter_builders": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {"$ref": "#/definitions/anonymized_parameter_builder"},
+        },
+        "anonymized_expectation_configuration_builders": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+                "$ref": "#/definitions/anonymized_expectation_configuration_builder"
+            },
+        },
+    },
+    "additionalProperties": False,
+    "required": ["anonymized_name", "anonymized_expectation_configuration_builders"],
+}
+
+anonymized_rule_based_profiler_run_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-rule-based-profiler-run-payload",
+    "definitions": {
+        "empty_payload": empty_payload_schema,
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_rule": anonymized_rule_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_domain_builder": anonymized_domain_builder_schema,
+        "anonymized_parameter_builder": anonymized_parameter_builder_schema,
+        "anonymized_expectation_configuration_builder": anonymized_expectation_configuration_builder_schema,
+    },
+    "oneOf": [
+        {
+            "type": "object",
+            "properties": {
+                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+                "config_version": {"type": "number", "minimum": 1},
+                "rule_count": {"type": "number", "minimum": 0},
+                "variable_count": {"type": "number", "minimum": 0},
+                "anonymized_rules": {
+                    "type": "array",
+                    "maxItems": 1000,
+                    "items": {"$ref": "#/definitions/anonymized_rule"},
+                },
+            },
+            "required": [
+                "anonymized_name",
+                "config_version",
+                "rule_count",
+                "variable_count",
+                "anonymized_rules",
+            ],
+            "additionalProperties": False,
+        },
+        {"$ref": "#/definitions/empty_payload"},
+    ],
+}
+
 anonymized_usage_statistics_record_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-usage-statistics-record",
@@ -781,6 +910,11 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_validations": anonymized_validations_list_schema,
         "anonymized_checkpoint_run": anonymized_checkpoint_run_schema,
         "anonymized_legacy_profiler_build_suite_payload": anonymized_legacy_profiler_build_suite_payload_schema,
+        "anonymized_domain_builder": anonymized_domain_builder_schema,
+        "anonymized_parameter_builder": anonymized_parameter_builder_schema,
+        "anonymized_expectation_configuration_builder": anonymized_expectation_configuration_builder_schema,
+        "anonymized_rule": anonymized_rule_schema,
+        "anonymized_rule_based_profiler_run": anonymized_rule_based_profiler_run_schema,
     },
     "type": "object",
     "properties": {
@@ -930,6 +1064,17 @@ anonymized_usage_statistics_record_schema = {
                 },
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_legacy_profiler_build_suite_payload"
+                },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": ["profiler.run"],
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_rule_based_profiler_run"
                 },
             },
         },
