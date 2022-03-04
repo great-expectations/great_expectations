@@ -4,6 +4,9 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
+    build_simple_domains_from_column_names,
+)
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -75,15 +78,7 @@ class ColumnDomainBuilder(DomainBuilder):
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
-        column_name: str
-        domains: List[Domain] = [
-            Domain(
-                domain_type=self.domain_type,
-                domain_kwargs={
-                    "column": column_name,
-                },
-            )
-            for column_name in self.column_names
-        ]
-
-        return domains
+        return build_simple_domains_from_column_names(
+            column_names=self.column_names,
+            domain_type=self.domain_type,
+        )
