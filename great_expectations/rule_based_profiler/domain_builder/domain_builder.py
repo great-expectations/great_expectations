@@ -4,16 +4,16 @@ from typing import List, Optional, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_validator as get_validator_using_batch_list_or_batch_request,
+)
 from great_expectations.rule_based_profiler.types import (
     Builder,
     Domain,
     ParameterContainer,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_validator as get_validator_using_batch_list_or_batch_request,
 )
 
 

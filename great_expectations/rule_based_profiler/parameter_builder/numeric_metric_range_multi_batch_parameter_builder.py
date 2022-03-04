@@ -6,13 +6,13 @@ import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.rule_based_profiler.util import (
+from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     compute_bootstrap_quantiles,
     compute_quantiles,
     get_parameter_value_and_validate_return_type,
 )
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.util import is_numeric
 
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (  # isort:skip

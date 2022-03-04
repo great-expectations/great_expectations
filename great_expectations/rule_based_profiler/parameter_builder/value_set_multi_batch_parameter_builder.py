@@ -2,15 +2,15 @@ import itertools
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.types.parameter_container import (
     ParameterNode,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
 )
 
 
