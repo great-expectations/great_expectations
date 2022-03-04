@@ -385,9 +385,11 @@ def parse_evaluation_parameter(
                     res = ge_urn.parseString(ob)
                     if res["urn_type"] == "stores":
                         store = data_context.stores.get(res["store_name"])
-                        expr.exprStack[i] = str(store.get_query_result(
-                            res["metric_name"], res.get("metric_kwargs", {})
-                        ))  # value placed back in stack must be a string
+                        expr.exprStack[i] = str(
+                            store.get_query_result(
+                                res["metric_name"], res.get("metric_kwargs", {})
+                            )
+                        )  # value placed back in stack must be a string
                     else:
                         # handle other urn_types here, but note that validations URNs are being resolved elsewhere.
                         pass
