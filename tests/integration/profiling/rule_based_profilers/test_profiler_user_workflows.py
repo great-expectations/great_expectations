@@ -135,7 +135,139 @@ def test_alice_profiler_user_workflow_single_batch(
         for payload in mock_emit.call_args_list[:-1]
     )
 
-    expected_profiler_run_event: mock._Call = mock.call()
+    expected_profiler_run_event: mock._Call = mock.call(
+        {
+            "event_payload": {
+                "anonymized_name": "d14b790a7220112fb21634f6e69c1d16",
+                "config_version": 1.0,
+                "anonymized_rules": [
+                    {
+                        "anonymized_name": "a1abba4aac932b0a4970784b1677a3aa",
+                        "anonymized_domain_builder": {
+                            "parent_class": "DomainBuilder",
+                            "anonymized_class": "882e46312a5cc75c5d4a6e3d49906219",
+                            "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                        },
+                        "anonymized_parameter_builders": [
+                            {
+                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "anonymized_name": "7f5d7f75f2cf6d583b917a808cb90d14",
+                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                            },
+                            {
+                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "anonymized_name": "2d6bf03890f4da06901ed1e84fdfc1c5",
+                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                            },
+                        ],
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_be_of_type",
+                            },
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_be_between",
+                            },
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_not_be_null",
+                            },
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "anonymized_expectation_type": "afa32dedc1789cd5a3aa26a3f77abaa4",
+                                "anonymized_condition": "abf728b62a943ad8ddb9c729f69fec9c",
+                            },
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "anonymized_expectation_type": "1c8034f9abb893dab0aa565391bae552",
+                                "anonymized_condition": "14d5944073af1bdd5da91c5f81f49a65",
+                            },
+                        ],
+                    },
+                    {
+                        "anonymized_name": "b5dd398e2fd90f21f4bb1acfa9ae1806",
+                        "anonymized_domain_builder": {
+                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                        },
+                        "anonymized_parameter_builders": [
+                            {
+                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "anonymized_name": "bfba8a19047258a99199e5d2a041ee07",
+                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                            },
+                            {
+                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "anonymized_name": "7172a7905c8541ecfa04a94884e5a6b0",
+                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                            },
+                            {
+                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "anonymized_name": "47fe1085625b524fa6c70f37f3edd8b8",
+                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                            },
+                            {
+                                "parent_class": "SimpleDateFormatStringParameterBuilder",
+                                "anonymized_name": "8309ea5879692c2c942d780b5d5fae98",
+                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                            },
+                        ],
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_be_of_type",
+                            },
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_be_increasing",
+                            },
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_be_dateutil_parseable",
+                            },
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_min_to_be_between",
+                            },
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_max_to_be_between",
+                            },
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_match_strftime_format",
+                            },
+                        ],
+                    },
+                    {
+                        "anonymized_name": "0dc87bf5a434b135aaac00681c90bfe1",
+                        "anonymized_domain_builder": {
+                            "parent_class": "CategoricalColumnDomainBuilder",
+                            "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                        },
+                        "anonymized_parameter_builders": [
+                            {
+                                "parent_class": "ValueSetMultiBatchParameterBuilder",
+                                "anonymized_name": "f14da8c59fc14103d13b7ecc218968d1",
+                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                            }
+                        ],
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_be_in_set",
+                            }
+                        ],
+                    },
+                ],
+                "rule_count": 3,
+                "variable_count": 6,
+            },
+            "event": "profiler.run",
+            "success": True,
+        }
+    )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
 
@@ -267,7 +399,158 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         for payload in mock_emit.call_args_list[:-1]
     )
 
-    expected_profiler_run_event: mock._Call = mock.call()
+    expected_profiler_run_event: mock._Call = mock.call(
+        {
+            "event_payload": {
+                "anonymized_name": "43c8704c864dd10feed13219062f0228",
+                "config_version": 1.0,
+                "anonymized_rules": [
+                    {
+                        "anonymized_name": "7980584b8d0c7c8a66dbeaaf4b067885",
+                        "anonymized_domain_builder": {
+                            "parent_class": "TableDomainBuilder"
+                        },
+                        "anonymized_parameter_builders": [
+                            {
+                                "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
+                                "anonymized_name": "dc1bc513697628c3a7f5b73494234a01",
+                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                            }
+                        ],
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_table_row_count_to_be_between",
+                            }
+                        ],
+                    },
+                    {
+                        "anonymized_name": "9b95e917ab153669bcd32ec522604556",
+                        "anonymized_domain_builder": {
+                            "parent_class": "SimpleSemanticTypeColumnDomainBuilder",
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                    "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                    "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                                "data_connector_query_keys": ["index"],
+                            },
+                        },
+                        "anonymized_parameter_builders": [
+                            {
+                                "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
+                                "anonymized_name": "ace31374d026e07ec630c7459915e628",
+                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                            },
+                            {
+                                "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
+                                "anonymized_name": "f2dcb0a322c3ab161d0fd33e6bac3d7f",
+                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                            },
+                        ],
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_min_to_be_between",
+                            },
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_max_to_be_between",
+                            },
+                        ],
+                    },
+                    {
+                        "anonymized_name": "716348d3985f11679de53ec2b6ce5987",
+                        "anonymized_domain_builder": {
+                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                    "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                    "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                                "data_connector_query_keys": ["index"],
+                            },
+                        },
+                        "anonymized_parameter_builders": [
+                            {
+                                "parent_class": "SimpleDateFormatStringParameterBuilder",
+                                "anonymized_name": "49526fea6686e5f87be493967a5ba6b7",
+                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                            }
+                        ],
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_match_strftime_format",
+                            }
+                        ],
+                    },
+                    {
+                        "anonymized_name": "38f59421a7c7b59a45b547a73c7714f9",
+                        "anonymized_domain_builder": {
+                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                    "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                    "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                                "data_connector_query_keys": ["index"],
+                            },
+                        },
+                        "anonymized_parameter_builders": [
+                            {
+                                "parent_class": "RegexPatternStringParameterBuilder",
+                                "anonymized_name": "2a791a71865e26a98b3f9f89ef83556b",
+                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                            }
+                        ],
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_match_regex",
+                            }
+                        ],
+                    },
+                    {
+                        "anonymized_name": "57a6fe0ec12e12107fc275b42855ab1c",
+                        "anonymized_domain_builder": {
+                            "parent_class": "CategoricalColumnDomainBuilder",
+                            "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                        },
+                        "anonymized_parameter_builders": [
+                            {
+                                "parent_class": "ValueSetMultiBatchParameterBuilder",
+                                "anonymized_name": "73b050124a17a420f2fb3e605f7111b2",
+                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                            }
+                        ],
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_values_to_be_in_set",
+                            }
+                        ],
+                    },
+                ],
+                "rule_count": 5,
+                "variable_count": 4,
+            },
+            "event": "profiler.run",
+            "success": True,
+        }
+    )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
 
@@ -1049,7 +1332,39 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         for payload in mock_emit.call_args_list[:-1]
     )
 
-    expected_profiler_run_event: mock._Call = mock.call()
+    expected_profiler_run_event: mock._Call = mock.call(
+        {
+            "event_payload": {
+                "anonymized_name": "510b23dfd19c492f33d114b184f245e8",
+                "config_version": 1.0,
+                "anonymized_rules": [
+                    {
+                        "anonymized_name": "7980584b8d0c7c8a66dbeaaf4b067885",
+                        "anonymized_domain_builder": {
+                            "parent_class": "TableDomainBuilder"
+                        },
+                        "anonymized_parameter_builders": [
+                            {
+                                "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
+                                "anonymized_name": "dc1bc513697628c3a7f5b73494234a01",
+                                "anonymized_batch_request": "f541f435b3e4a9d550ab56c22b5def8d",
+                            }
+                        ],
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_table_row_count_to_be_between",
+                            }
+                        ],
+                    }
+                ],
+                "rule_count": 1,
+                "variable_count": 2,
+            },
+            "event": "profiler.run",
+            "success": True,
+        }
+    )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
 
@@ -1225,7 +1540,50 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         for payload in mock_emit.call_args_list[:-1]
     )
 
-    expected_profiler_run_event: mock._Call = mock.call()
+    expected_profiler_run_event: mock._Call = mock.call(
+        {
+            "event_payload": {
+                "anonymized_name": "0592a9cacfa4ce642536161869d1ba19",
+                "config_version": 1.0,
+                "anonymized_rules": [
+                    {
+                        "anonymized_name": "f54fc6b216560f2a56a3cced587fb6e3",
+                        "anonymized_domain_builder": {
+                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                    "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                    "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                                "data_connector_query_keys": ["index"],
+                            },
+                        },
+                        "anonymized_parameter_builders": [
+                            {
+                                "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
+                                "anonymized_name": "71243c854c0c04e9e014d02a793abe55",
+                                "anonymized_batch_request": "f541f435b3e4a9d550ab56c22b5def8d",
+                            }
+                        ],
+                        "anonymized_expectation_configuration_builders": [
+                            {
+                                "parent_class": "DefaultExpectationConfigurationBuilder",
+                                "expectation_type": "expect_column_quantile_values_to_be_between",
+                            }
+                        ],
+                    }
+                ],
+                "rule_count": 1,
+                "variable_count": 5,
+            },
+            "event": "profiler.run",
+            "success": True,
+        }
+    )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
 

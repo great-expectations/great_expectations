@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
@@ -172,9 +172,18 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         batch_request: Optional[dict] = domain_builder.get("batch_request")
         if batch_request:
+            anonymized_batch_request: Optional[Union[str, dict]]
+            if isinstance(batch_request, str):
+                anonymized_batch_request = self.anonymize(batch_request)
+            else:
+                anonymized_batch_request = (
+                    self._batch_request_anonymizer.anonymize_batch_request(
+                        **batch_request
+                    )
+                )
             anonymized_domain_builder[
                 "anonymized_batch_request"
-            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
+            ] = anonymized_batch_request
             logger.debug("Anonymized batch request in DomainBuilder")
 
         return anonymized_domain_builder
@@ -208,9 +217,18 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         batch_request: Optional[dict] = parameter_builder.get("batch_request")
         if batch_request:
+            anonymized_batch_request: Optional[Union[str, dict]]
+            if isinstance(batch_request, str):
+                anonymized_batch_request = self.anonymize(batch_request)
+            else:
+                anonymized_batch_request = (
+                    self._batch_request_anonymizer.anonymize_batch_request(
+                        **batch_request
+                    )
+                )
             anonymized_parameter_builder[
                 "anonymized_batch_request"
-            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
+            ] = anonymized_batch_request
             logger.debug("Anonymized batch request in ParameterBuilder")
 
         return anonymized_parameter_builder

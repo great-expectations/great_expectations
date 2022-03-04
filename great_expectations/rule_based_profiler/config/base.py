@@ -340,10 +340,8 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self.name = name
         self.config_version = config_version
         self.rules = rules
-        if class_name is not None:
-            self.class_name = class_name
-        if module_name is not None:
-            self.module_name = module_name
+        self.class_name = class_name
+        self.module_name = module_name
         self.variables = variables
 
         super().__init__(commented_map=commented_map)
@@ -408,29 +406,23 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     ) -> "RuleBasedProfilerConfig":  # noqa: F821
         runtime_config: RuleBasedProfilerConfig = profiler.config
 
-        runtime_variables: Optional[
-            ParameterContainer
-        ] = profiler.reconcile_profiler_variables(variables)
-        runtime_variables_configs: dict = (
-            runtime_variables.to_dict()["parameter_nodes"]["variables"]["variables"]
-            or {}
+        runtime_variables: dict = profiler.reconcile_profiler_variables_as_dict(
+            variables=variables
         )
 
-        effective_rules: List["Rule"] = profiler.reconcile_profiler_rules(  # noqa: F821
-            rules=rules
-        )
-
-        rule: "Rule"  # noqa: F821
+        effective_rules: Dict[
+            str, "Rule"  # noqa: F821
+        ] = profiler.reconcile_profiler_rules_as_dict(rules=rules)
         runtime_rules: Dict[str, dict] = {
             name: rule.to_dict() for name, rule in effective_rules.items()
         }
 
         return cls(
-            class_name=profiler.__class__.__name__,
-            module_name=profiler.__class__.__module__,
+            class_name=runtime_config.class_name,
+            module_name=runtime_config.module_name,
             name=runtime_config.name,
             config_version=runtime_config.config_version,
-            variables=runtime_variables_configs,
+            variables=runtime_variables,
             rules=runtime_rules,
         )
 
