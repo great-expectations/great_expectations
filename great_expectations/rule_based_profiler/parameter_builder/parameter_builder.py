@@ -2,7 +2,7 @@ import copy
 import itertools
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, make_dataclass
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -137,7 +137,7 @@ class ParameterBuilder(Builder, ABC):
 
         parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
-                "value": computed_parameter_value,
+                "value": convert_to_json_serializable(data=computed_parameter_value),
                 "details": parameter_computation_details,
             },
         }

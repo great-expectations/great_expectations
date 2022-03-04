@@ -1,4 +1,4 @@
-from typing import Any, Collection, Set, cast
+from typing import Any, Collection, Dict, List, Optional, Set, cast
 
 import pytest
 
@@ -69,9 +69,15 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert (
@@ -79,8 +85,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         or len(parameter_container.parameter_nodes) == 1
     )
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_event_type_value_set"
-    expected_value_set: Set[int] = {73, 19, 22}
+    expected_value_set: List[int] = [19, 22, 73]
     expected_parameter_value: dict = {
         "value": expected_value_set,
         "details": {
@@ -92,15 +97,19 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         },
     }
 
-    assert (
-        get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=fully_qualified_parameter_name_for_value,
-            expected_return_type=dict,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_parameter_value
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_event_type_value_set"
+    actual_parameter_value: Optional[
+        Any
+    ] = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=fully_qualified_parameter_name_for_value,
+        expected_return_type=None,
+        variables=variables,
+        parameters=parameters,
     )
+
+    assert sorted(actual_parameter_value.value) == expected_parameter_value["value"]
+    assert actual_parameter_value.details == expected_parameter_value["details"]
 
 
 def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
@@ -137,9 +146,15 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert (
@@ -147,10 +162,9 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         or len(parameter_container.parameter_nodes) == 1
     )
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_user_agent_value_set"
-    expected_value_set: Set[str] = {
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    }
+    expected_value_set: List[str] = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
+    ]
     expected_parameter_value: dict = {
         "value": expected_value_set,
         "details": {
@@ -162,15 +176,19 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         },
     }
 
-    assert (
-        get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=fully_qualified_parameter_name_for_value,
-            expected_return_type=dict,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_parameter_value
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_user_agent_value_set"
+    actual_parameter_value: Optional[
+        Any
+    ] = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=fully_qualified_parameter_name_for_value,
+        expected_return_type=None,
+        variables=variables,
+        parameters=parameters,
     )
+
+    assert sorted(actual_parameter_value.value) == expected_parameter_value["value"]
+    assert actual_parameter_value.details == expected_parameter_value["details"]
 
 
 def test_value_set_multi_batch_parameter_builder_bobby_numeric(
@@ -205,9 +223,15 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert (
@@ -215,10 +239,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         or len(parameter_container.parameter_nodes) == 1
     )
 
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_passenger_count_value_set"
-    )
-    expected_value_set: Set[int] = {0, 1, 2, 3, 4, 5, 6}
+    expected_value_set: List[int] = [0, 1, 2, 3, 4, 5, 6]
     expected_parameter_value: dict = {
         "value": expected_value_set,
         "details": {
@@ -230,15 +251,21 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         },
     }
 
-    assert (
-        get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=fully_qualified_parameter_name_for_value,
-            expected_return_type=dict,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_parameter_value
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_passenger_count_value_set"
     )
+    actual_parameter_value: Optional[
+        Any
+    ] = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=fully_qualified_parameter_name_for_value,
+        expected_return_type=None,
+        variables=variables,
+        parameters=parameters,
+    )
+
+    assert sorted(actual_parameter_value.value) == expected_parameter_value["value"]
+    assert actual_parameter_value.details == expected_parameter_value["details"]
 
 
 def test_value_set_multi_batch_parameter_builder_bobby_string(
@@ -273,9 +300,15 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert (
@@ -283,10 +316,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         or len(parameter_container.parameter_nodes) == 1
     )
 
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_store_and_fwd_flag_value_set"
-    )
-    expected_value_set: Set[str] = {"N", "Y"}
+    expected_value_set: List[str] = ["N", "Y"]
     expected_parameter_value: dict = {
         "value": expected_value_set,
         "details": {
@@ -298,15 +328,21 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         },
     }
 
-    assert (
-        get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=fully_qualified_parameter_name_for_value,
-            expected_return_type=dict,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_parameter_value
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_store_and_fwd_flag_value_set"
     )
+    actual_parameter_value: Optional[
+        Any
+    ] = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=fully_qualified_parameter_name_for_value,
+        expected_return_type=None,
+        variables=variables,
+        parameters=parameters,
+    )
+
+    assert sorted(actual_parameter_value.value) == expected_parameter_value["value"]
+    assert actual_parameter_value.details == expected_parameter_value["details"]
 
 
 @pytest.mark.parametrize(

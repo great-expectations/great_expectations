@@ -3,6 +3,7 @@ from typing import Callable, Dict, Optional
 
 from numpy import array
 
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -15,7 +16,6 @@ from great_expectations.execution_engine.execution_engine import (
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.expectations.metrics import (
