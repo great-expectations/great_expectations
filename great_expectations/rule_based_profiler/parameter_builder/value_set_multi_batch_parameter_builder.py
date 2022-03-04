@@ -43,7 +43,6 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
-
         Args:
             name: the name of this parameter -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
@@ -57,31 +56,15 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         super().__init__(
             name=name,
             metric_name="column.distinct_values",
+            metric_domain_kwargs=metric_domain_kwargs,
+            metric_value_kwargs=metric_value_kwargs,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            reduce_scalar_metric=False,
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
-            reduce_scalar_metric=False,
-            enforce_numeric_metric=False,
         )
-
-        self._metric_domain_kwargs = metric_domain_kwargs
-        self._metric_value_kwargs = metric_value_kwargs
-
-    """
-    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
-    """
-
-    @property
-    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
-        return self._metric_domain_kwargs
-
-    @property
-    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
-        return self._metric_value_kwargs
-
-    @metric_value_kwargs.setter
-    def metric_value_kwargs(self, value: Optional[Union[str, dict]]) -> None:
-        self._metric_value_kwargs = value
 
     def _build_parameters(
         self,
@@ -112,35 +95,16 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
                 domain=domain,
                 parameter_reference=self.fully_qualified_parameter_name,
                 expected_return_type=None,
-                parameters={
-                    domain.id: parameter_container,
-                },
+                variables=variables,
+                parameters=parameters,
             )
-        )
-
-        fully_qualified_parameter_name_details: str = (
-            f"{self.fully_qualified_parameter_name}.details"
-        )
-        parameter_value_node_details: ParameterNode = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=fully_qualified_parameter_name_details,
-                expected_return_type=None,
-                parameters={
-                    domain.id: parameter_container,
-                },
-            )
-        )
-
-        unique_parameter_values: Set[
-            Any
-        ] = _get_unique_values_from_nested_collection_of_sets(
-            parameter_value_node.value
         )
 
         return (
-            unique_parameter_values,
-            parameter_value_node_details,
+            _get_unique_values_from_nested_collection_of_sets(
+                collection=parameter_value_node.value
+            ),
+            parameter_value_node.details,
         )
 
 
