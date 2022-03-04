@@ -2,7 +2,6 @@
 --requirement requirements-dev-contrib.txt
 --requirement requirements-dev-sqlalchemy.txt
 
---requirement requirements-dev-airflow.txt
 --requirement requirements-dev-arrow.txt
 --requirement requirements-dev-excel.txt
 --requirement requirements-dev-pagerduty.txt

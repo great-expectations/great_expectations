@@ -43,11 +43,6 @@ def test_requirements_files():
             f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)
         }
 
-    with open(file_relative_path(__file__, "../requirements-dev-airflow.txt")) as req:
-        requirements_dev_airflow = {
-            f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)
-        }
-
     with open(file_relative_path(__file__, "../requirements-dev-arrow.txt")) as req:
         requirements_dev_arrow = {
             f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(req)
@@ -143,7 +138,6 @@ def test_requirements_files():
         requirements
         | requirements_dev_contrib
         | requirements_dev_sqlalchemy
-        | requirements_dev_airflow
         | requirements_dev_arrow
         | requirements_dev_excel
         | requirements_dev_pagerduty
@@ -156,7 +150,6 @@ def test_requirements_files():
         | requirements_dev_contrib
         | requirements_dev_spark
         | requirements_dev_sqlalchemy
-        | requirements_dev_airflow
         | requirements_dev_arrow
         | requirements_dev_athena
         | requirements_dev_azure
