@@ -416,10 +416,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         variables_configs: dict
         try:
-            variables_configs = (
-                self.variables.to_dict()["parameter_nodes"]["variables"]["variables"]
-                or {}
-            )
+            variables_configs = self.variables.to_dict()["parameter_nodes"][
+                "variables"
+            ]["variables"]
         except (TypeError, KeyError) as e:
             variables_configs = {}
             logger.warning("Could not convert existing variables to dict: %s", e)
