@@ -209,10 +209,11 @@ validator.head(n_rows=5, fetch_all=False)
         self._add_profiler_instructions()
         self.add_code_cell(
             code=f"""\
-suite = context.run_profiler_with_dynamic_arguments(
+profiler_result = context.run_profiler_with_dynamic_arguments(
     name="{self._profiler_name}",
     expectation_suite_name=expectation_suite_name,
 )
+suite = profiler_result.expectation_suite
 """,
             lint=True,
         )

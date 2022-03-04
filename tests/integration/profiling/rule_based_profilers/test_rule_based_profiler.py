@@ -8,6 +8,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.profiler_result import ProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -146,7 +147,7 @@ def test_profile_includes_citations(
         data_context=data_context,
     )
 
-    profiler_result = profiler.run(
+    profiler_result: ProfilerResult = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
@@ -185,7 +186,7 @@ def test_profile_excludes_citations(
         data_context=data_context,
     )
 
-    profiler_result = profiler.run(
+    profiler_result: ProfilerResult = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],

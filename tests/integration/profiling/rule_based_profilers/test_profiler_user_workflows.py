@@ -21,6 +21,7 @@ from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.profiler_result import ProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import probabilistic_test
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -112,7 +113,7 @@ def test_alice_profiler_user_workflow_single_batch(
         data_context=data_context,
     )
 
-    profiler_result = profiler.run(
+    profiler_result: ProfilerResult = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],

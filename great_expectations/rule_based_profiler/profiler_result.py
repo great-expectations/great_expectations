@@ -3,6 +3,10 @@ from great_expectations.types import SerializableDictDot
 
 
 class ProfilerResult(SerializableDictDot):
+    """
+    TODO(cdkini): Write docstr!
+    """
+
     def __init__(
         self,
         expectation_suite: ExpectationSuite,
