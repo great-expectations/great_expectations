@@ -1060,10 +1060,11 @@ def profiler_with_placeholder_args(
     skip_if_python_below_minimum_version()
 
     profiler_config_dict: dict = profiler_config_with_placeholder_args.to_json_dict()
-    profiler_config_dict.pop("class_name")
-    profiler_config_dict.pop("module_name")
+    profiler_config_dict.pop("class_name", None)
+    profiler_config_dict.pop("module_name", None)
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        **profiler_config_dict, data_context=empty_data_context
+        **profiler_config_dict,
+        data_context=empty_data_context,
     )
     return profiler
 
