@@ -9,6 +9,7 @@ from ruamel import yaml
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -167,11 +168,17 @@ def test_common_usage_stats_are_sent_no_mocking(
         },
     )
 
+    profiler = RuleBasedProfiler(
+        name="my_profiler", config_version=1.0, data_context=context
+    )
+    profiler.run()
+
     expected_events.append("data_context.get_batch_list")
     expected_events.append("data_asset.validate")
     expected_events.append("data_context.build_data_docs")
     expected_events.append("checkpoint.run")
     expected_events.append("data_context.run_checkpoint")
+    expected_events.append("profiler.run")
 
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
 
@@ -182,5 +189,3 @@ def test_common_usage_stats_are_sent_no_mocking(
     assert events == expected_events
 
     assert not usage_stats_invalid_messages_exist(caplog.messages)
-
-    # TODO(cdkini): Write RBP test!
