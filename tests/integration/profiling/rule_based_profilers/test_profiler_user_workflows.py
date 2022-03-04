@@ -138,26 +138,26 @@ def test_alice_profiler_user_workflow_single_batch(
     expected_profiler_run_event: mock._Call = mock.call(
         {
             "event_payload": {
-                "anonymized_name": "d14b790a7220112fb21634f6e69c1d16",
+                "anonymized_name": "c0c231f6aeb70917b2620fe9db5ef37a",
                 "config_version": 1.0,
                 "anonymized_rules": [
                     {
-                        "anonymized_name": "a1abba4aac932b0a4970784b1677a3aa",
+                        "anonymized_name": "39ae30bfcad35923fb8b7a7116f3022e",
                         "anonymized_domain_builder": {
                             "parent_class": "DomainBuilder",
-                            "anonymized_class": "882e46312a5cc75c5d4a6e3d49906219",
-                            "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                            "anonymized_class": "029f19d1e293b2064ef38e125b00b766",
+                            "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
-                                "anonymized_name": "7f5d7f75f2cf6d583b917a808cb90d14",
-                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                                "anonymized_name": "920340ce448b3ed6588e0251515a2a27",
+                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
                             },
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
-                                "anonymized_name": "2d6bf03890f4da06901ed1e84fdfc1c5",
-                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                                "anonymized_name": "f2d0104249259947ead19d06fb790a1b",
+                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
                             },
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -175,42 +175,42 @@ def test_alice_profiler_user_workflow_single_batch(
                             },
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "anonymized_expectation_type": "afa32dedc1789cd5a3aa26a3f77abaa4",
-                                "anonymized_condition": "abf728b62a943ad8ddb9c729f69fec9c",
+                                "anonymized_expectation_type": "3fea9d9d77c50b52b83d384e0618e38e",
+                                "anonymized_condition": "03c3e4bf66ce500cbe7c096d10ec9958",
                             },
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "anonymized_expectation_type": "1c8034f9abb893dab0aa565391bae552",
-                                "anonymized_condition": "14d5944073af1bdd5da91c5f81f49a65",
+                                "anonymized_expectation_type": "fd537690d8f1275e08ca65276440d61d",
+                                "anonymized_condition": "32c60e2d854af267448fe502bae27675",
                             },
                         ],
                     },
                     {
-                        "anonymized_name": "b5dd398e2fd90f21f4bb1acfa9ae1806",
+                        "anonymized_name": "0ff3e48f4f6e43c32ed508616f895e08",
                         "anonymized_domain_builder": {
                             "parent_class": "SimpleColumnSuffixDomainBuilder",
-                            "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                            "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
-                                "anonymized_name": "bfba8a19047258a99199e5d2a041ee07",
-                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                                "anonymized_name": "f645ad20dc69fa19bcd51f0cb801fd86",
+                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
                             },
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
-                                "anonymized_name": "7172a7905c8541ecfa04a94884e5a6b0",
-                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                                "anonymized_name": "a41ba465ecb1585e49fb20d2e9c42ac1",
+                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
                             },
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
-                                "anonymized_name": "47fe1085625b524fa6c70f37f3edd8b8",
-                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                                "anonymized_name": "beeced6625a0f38601c3fba816bd7893",
+                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
                             },
                             {
                                 "parent_class": "SimpleDateFormatStringParameterBuilder",
-                                "anonymized_name": "8309ea5879692c2c942d780b5d5fae98",
-                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                                "anonymized_name": "1a4a0fa8e57515f433ae52c64518fa48",
+                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
                             },
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -241,16 +241,16 @@ def test_alice_profiler_user_workflow_single_batch(
                         ],
                     },
                     {
-                        "anonymized_name": "0dc87bf5a434b135aaac00681c90bfe1",
+                        "anonymized_name": "991c773a25913637f32ef48ba06a50b1",
                         "anonymized_domain_builder": {
                             "parent_class": "CategoricalColumnDomainBuilder",
-                            "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                            "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "ValueSetMultiBatchParameterBuilder",
-                                "anonymized_name": "f14da8c59fc14103d13b7ecc218968d1",
-                                "anonymized_batch_request": "eb017f781d06d97d2fd0ff7acab2b9ba",
+                                "anonymized_name": "1e547675babc18cc90d71de18573b7d0",
+                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [

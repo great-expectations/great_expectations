@@ -414,7 +414,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
             str, "Rule"  # noqa: F821
         ] = profiler.reconcile_profiler_rules_as_dict(rules=rules)
         runtime_rules: Dict[str, dict] = {
-            name: rule.to_dict() for name, rule in effective_rules.items()
+            name: rule.to_json_dict() for name, rule in effective_rules.items()
         }
 
         return cls(
