@@ -3604,10 +3604,11 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = f"""\
-suite = context.run_profiler_with_dynamic_arguments(
+profiler_result = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
     expectation_suite_name=expectation_suite_name,
 )
+suite = profiler_result.expectation_suite
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
 
@@ -3728,10 +3729,11 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     assert len(cells_of_interest_dict) == 1
 
     profiler_code_cell: str = f"""\
-suite = context.run_profiler_with_dynamic_arguments(
+profiler_result = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
     expectation_suite_name=expectation_suite_name,
 )
+suite = profiler_result.expectation_suite
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
 

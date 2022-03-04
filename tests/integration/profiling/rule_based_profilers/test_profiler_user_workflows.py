@@ -112,12 +112,14 @@ def test_alice_profiler_user_workflow_single_batch(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiler_result = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
         include_citation=True,
     )
+    expectation_suite: ExpectationSuite = profiler_result.expectation_suite
+
     assert (
         expectation_suite
         == alice_columnar_table_single_batch["expected_expectation_suite"]
@@ -227,12 +229,14 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiler_run = profiler.run(
         expectation_suite_name=bobby_columnar_table_multi_batch[
             "test_configuration_oneshot_sampling_method"
         ]["expectation_suite_name"],
         include_citation=True,
     )
+
+    expectation_suite: ExpectationSuite = profiler_run.expectation_suite
 
     assert (
         expectation_suite
@@ -969,13 +973,15 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiler_run = profiler.run(
         expectation_suite_name=bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
             "test_configuration_bootstrap_sampling_method"
         ][
             "expectation_suite_name"
         ],
     )
+    expectation_suite: ExpectationSuite = profiler_run.expectation_suite
+
     expect_table_row_count_to_be_between_expectation_configuration_kwargs: dict = (
         expectation_suite.to_json_dict()["expectations"][0]["kwargs"]
     )
@@ -1110,11 +1116,12 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiler_run = profiler.run(
         expectation_suite_name=quentin_columnar_table_multi_batch["test_configuration"][
             "expectation_suite_name"
         ],
     )
+    expectation_suite: ExpectationSuite = profiler_run.expectation_suite
 
     expectation_configuration_dict: dict
     column_name: str

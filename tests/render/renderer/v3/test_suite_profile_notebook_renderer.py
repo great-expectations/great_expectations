@@ -309,7 +309,7 @@ from great_expectations.exceptions import DataContextError""",
     "data_asset_name": "Titanic_1912",
 }""",
         # Profiler instantiation/usage
-        """suite = context.run_profiler_with_dynamic_arguments(
+        """profiler_result = context.run_profiler_with_dynamic_arguments(
     name="my_profiler",
     expectation_suite_name=expectation_suite_name,
 )""",

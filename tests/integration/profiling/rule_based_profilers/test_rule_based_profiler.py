@@ -146,12 +146,14 @@ def test_profile_includes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiler_result = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
         include_citation=True,
     )
+
+    expectation_suite: ExpectationSuite = profiler_result.expectation_suite
 
     assert len(expectation_suite.meta["citations"]) > 0
 
@@ -183,11 +185,13 @@ def test_profile_excludes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiler_result = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
         include_citation=False,
     )
+
+    expectation_suite: ExpectationSuite = profiler_result.expectation_suite
 
     assert expectation_suite.meta.get("citations") is None
