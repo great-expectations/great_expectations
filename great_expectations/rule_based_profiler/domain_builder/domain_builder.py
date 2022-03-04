@@ -97,7 +97,7 @@ class DomainBuilder(Builder, ABC):
         variables: Optional[ParameterContainer] = None,
     ) -> Optional["Validator"]:  # noqa: F821
         return get_validator_using_batch_list_or_batch_request(
-            purpose="parameter_builder",
+            purpose="domain_builder",
             data_context=self.data_context,
             batch_list=self.batch_list,
             batch_request=self.batch_request,
