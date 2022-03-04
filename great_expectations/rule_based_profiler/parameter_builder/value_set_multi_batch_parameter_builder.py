@@ -100,29 +100,11 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             )
         )
 
-        fully_qualified_parameter_name_details: str = (
-            f"{self.fully_qualified_parameter_name}.details"
-        )
-        parameter_value_node_details: ParameterNode = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=fully_qualified_parameter_name_details,
-                expected_return_type=None,
-                parameters={
-                    domain.id: parameter_container,
-                },
-            )
-        )
-
-        unique_parameter_values: Set[
-            Any
-        ] = _get_unique_values_from_nested_collection_of_sets(
-            parameter_value_node.value
-        )
-
         return (
-            unique_parameter_values,
-            parameter_value_node_details,
+            _get_unique_values_from_nested_collection_of_sets(
+                collection=parameter_value_node.value
+            ),
+            parameter_value_node.details,
         )
 
 
