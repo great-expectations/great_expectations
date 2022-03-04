@@ -118,6 +118,51 @@ def test_parse_evaluation_parameter():
     )
 
 
+def test_query_store_results_in_evaluation_parameters(data_context_with_query_store):
+    TITANIC_ROW_COUNT = 1313  # taken from the titanic db conftest
+    DISTINCT_TITANIC_ROW_COUNT = 4
+
+    test_cases = [
+        {
+            "context": "parse_evaluation_parameters correctly resolves a stores URN",
+            "parameter_expression": 'urn:great_expectations:stores:my_query_store:col_count',
+            "res_func": lambda x: x == TITANIC_ROW_COUNT
+        },
+        {
+            "context": "and can handle an operator",
+            "parameter_expression": 'urn:great_expectations:stores:my_query_store:col_count * 2',
+            "res_func": lambda x: x == TITANIC_ROW_COUNT * 2
+        },
+        {
+            "context": "can even handle multiple operators",
+            "parameter_expression": 'urn:great_expectations:stores:my_query_store:col_count * 0 + 100',
+            "res_func": lambda x: x == 100
+        },
+        {
+            "context": "allows stores URNs with functions",
+            "parameter_expression": 'cos(urn:great_expectations:stores:my_query_store:col_count)',
+            "res_func": lambda x: math.isclose(math.cos(TITANIC_ROW_COUNT), x)
+        },
+        {
+            "context": "multiple stores URNs can be used",
+            "parameter_expression": "urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count",
+            "res_func": lambda x: x == TITANIC_ROW_COUNT - DISTINCT_TITANIC_ROW_COUNT
+        },
+        {
+            "context": "complex expressions can combine operators, urns, and functions",
+            "parameter_expression": "abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count)",
+            "res_func": lambda x:  x == TITANIC_ROW_COUNT + DISTINCT_TITANIC_ROW_COUNT
+        }
+    ]
+    for case in test_cases:
+        res = parse_evaluation_parameter(
+            parameter_expression=case["parameter_expression"],
+            evaluation_parameters=None,
+            data_context=data_context_with_query_store
+        )
+        assert case["res_func"](res) is True, f"{case['context']}"
+
+
 def test_parser_timing():
     """We currently reuse the parser, clearing the stack between calls, which is about 10 times faster than not
     doing so. But these operations are really quick, so this may not be necessary."""
