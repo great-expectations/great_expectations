@@ -414,10 +414,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if variables is None:
             variables = {}
 
-        variables_configs: dict
-        variables_configs = self.variables.to_dict()["parameter_nodes"]["variables"][
-            "variables"
-        ]
+        variables_configs: dict = (
+            self.variables.to_dict()["parameter_nodes"]["variables"]["variables"] or {}
+        )
 
         if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
             variables_configs = nested_update(

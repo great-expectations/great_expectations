@@ -26,6 +26,10 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 from great_expectations.util import probabilistic_test
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from tests.core.usage_statistics.util import (
+    usage_stats_exceptions_exist,
+    usage_stats_invalid_messages_exist,
+)
 
 yaml = YAML()
 
@@ -91,6 +95,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
 )
 def test_alice_profiler_user_workflow_single_batch(
     mock_emit,
+    caplog,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
@@ -135,140 +140,151 @@ def test_alice_profiler_user_workflow_single_batch(
         for payload in mock_emit.call_args_list[:-1]
     )
 
-    expected_profiler_run_event: mock._Call = mock.call(
-        {
-            "event_payload": {
-                "anonymized_name": "c0c231f6aeb70917b2620fe9db5ef37a",
-                "config_version": 1.0,
-                "anonymized_rules": [
-                    {
-                        "anonymized_name": "39ae30bfcad35923fb8b7a7116f3022e",
-                        "anonymized_domain_builder": {
-                            "parent_class": "DomainBuilder",
-                            "anonymized_class": "029f19d1e293b2064ef38e125b00b766",
-                            "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
-                        },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
-                                "anonymized_name": "920340ce448b3ed6588e0251515a2a27",
-                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
-                            },
-                            {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
-                                "anonymized_name": "f2d0104249259947ead19d06fb790a1b",
-                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
-                            },
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_of_type",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_between",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_not_be_null",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "anonymized_expectation_type": "3fea9d9d77c50b52b83d384e0618e38e",
-                                "anonymized_condition": "03c3e4bf66ce500cbe7c096d10ec9958",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "anonymized_expectation_type": "fd537690d8f1275e08ca65276440d61d",
-                                "anonymized_condition": "32c60e2d854af267448fe502bae27675",
-                            },
-                        ],
+    expected_profiler_run_payload: dict = {
+        "event_payload": {
+            "anonymized_name": "0481bcf98600fd04aa24df03d05cdcf5",
+            "config_version": 1.0,
+            "anonymized_rules": [
+                {
+                    "anonymized_name": "b9c8ed2ae9948de069a857628bb4291a",
+                    "anonymized_domain_builder": {
+                        "parent_class": "DomainBuilder",
+                        "anonymized_class": "9c8f42e45ec72197d6fb4d0d5194c89d",
+                        "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
                     },
-                    {
-                        "anonymized_name": "0ff3e48f4f6e43c32ed508616f895e08",
-                        "anonymized_domain_builder": {
-                            "parent_class": "SimpleColumnSuffixDomainBuilder",
-                            "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
+                    "anonymized_parameter_builders": [
+                        {
+                            "parent_class": "MetricMultiBatchParameterBuilder",
+                            "anonymized_name": "2b4df3c7cf39207db3e08477e1ea8f79",
+                            "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
                         },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
-                                "anonymized_name": "f645ad20dc69fa19bcd51f0cb801fd86",
-                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
-                            },
-                            {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
-                                "anonymized_name": "a41ba465ecb1585e49fb20d2e9c42ac1",
-                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
-                            },
-                            {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
-                                "anonymized_name": "beeced6625a0f38601c3fba816bd7893",
-                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
-                            },
-                            {
-                                "parent_class": "SimpleDateFormatStringParameterBuilder",
-                                "anonymized_name": "1a4a0fa8e57515f433ae52c64518fa48",
-                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
-                            },
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_of_type",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_increasing",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_min_to_be_between",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_max_to_be_between",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_match_strftime_format",
-                            },
-                        ],
-                    },
-                    {
-                        "anonymized_name": "991c773a25913637f32ef48ba06a50b1",
-                        "anonymized_domain_builder": {
-                            "parent_class": "CategoricalColumnDomainBuilder",
-                            "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
+                        {
+                            "parent_class": "MetricMultiBatchParameterBuilder",
+                            "anonymized_name": "bea5e4c3943006d008899cdb1ebc3fb4",
+                            "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
                         },
-                        "anonymized_parameter_builders": [
-                            {
-                                "parent_class": "ValueSetMultiBatchParameterBuilder",
-                                "anonymized_name": "1e547675babc18cc90d71de18573b7d0",
-                                "anonymized_batch_request": "b8ddef3c0fa1eb800d2cff8a8e4d4df8",
-                            }
-                        ],
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_be_in_set",
-                            }
-                        ],
+                    ],
+                    "anonymized_expectation_configuration_builders": [
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_values_to_be_of_type",
+                        },
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_values_to_be_between",
+                        },
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_values_to_not_be_null",
+                        },
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "anonymized_expectation_type": "49e0013b377d4c7d9604d73fd672aa63",
+                            "anonymized_condition": "a2e517a17f9590295b4210da954796cf",
+                        },
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "anonymized_expectation_type": "5a4993ff394c8cf957dbe7964798f5a5",
+                            "anonymized_condition": "567ccfc06fecff803aa8533476b84936",
+                        },
+                    ],
+                },
+                {
+                    "anonymized_name": "116c25bb5cf9b84958846024fe1c2b7b",
+                    "anonymized_domain_builder": {
+                        "parent_class": "SimpleColumnSuffixDomainBuilder",
+                        "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
                     },
-                ],
-                "rule_count": 3,
-                "variable_count": 6,
-            },
-            "event": "profiler.run",
-            "success": True,
-        }
-    )
-    assert mock_emit.call_args_list[-1] == expected_profiler_run_event
+                    "anonymized_parameter_builders": [
+                        {
+                            "parent_class": "MetricMultiBatchParameterBuilder",
+                            "anonymized_name": "fa3ce9b81f1acc2f2730005e05737ea7",
+                            "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                        },
+                        {
+                            "parent_class": "MetricMultiBatchParameterBuilder",
+                            "anonymized_name": "0bb947e516b26696a66787dc936570b7",
+                            "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                        },
+                        {
+                            "parent_class": "MetricMultiBatchParameterBuilder",
+                            "anonymized_name": "66093b34c0c2e4ff275edf1752bcd27e",
+                            "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                        },
+                        {
+                            "parent_class": "SimpleDateFormatStringParameterBuilder",
+                            "anonymized_name": "c5caa53c1ee64365b96ec96a285a6b3a",
+                            "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                        },
+                    ],
+                    "anonymized_expectation_configuration_builders": [
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_values_to_be_of_type",
+                        },
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_values_to_be_increasing",
+                        },
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_values_to_be_dateutil_parseable",
+                        },
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_min_to_be_between",
+                        },
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_max_to_be_between",
+                        },
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_values_to_match_strftime_format",
+                        },
+                    ],
+                },
+                {
+                    "anonymized_name": "83a71ec7b61bbdb8eb728ebc428f8aea",
+                    "anonymized_domain_builder": {
+                        "parent_class": "CategoricalColumnDomainBuilder",
+                        "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                    },
+                    "anonymized_parameter_builders": [
+                        {
+                            "parent_class": "ValueSetMultiBatchParameterBuilder",
+                            "anonymized_name": "46d405b0294a06e1335c04bf1441dabf",
+                            "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                        }
+                    ],
+                    "anonymized_expectation_configuration_builders": [
+                        {
+                            "parent_class": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_values_to_be_in_set",
+                        }
+                    ],
+                },
+            ],
+            "rule_count": 3,
+            "variable_count": 6,
+        },
+        "event": "profiler.run",
+        "success": True,
+    }
+
+    # As the salt used for anonymizers is not consistent, we want to ensure that
+    # expected == actual while also accounting for different anonymized values
+    actual_profiler_run_payload: dict = mock_emit.call_args_list[-1][0][0]
+    for (k, v), (k2, v2) in zip(
+        expected_profiler_run_payload.items(), actual_profiler_run_payload.items()
+    ):
+        assert k == k2
+        if isinstance(v, str) and not k.startswith("anonymized_"):
+            assert v == v2
+
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 # noinspection PyUnusedLocal
@@ -350,6 +366,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
 )
 def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
     mock_emit,
+    caplog,
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_columnar_table_multi_batch,
 ):
@@ -552,6 +569,10 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         }
     )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
+
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @probabilistic_test
@@ -1255,6 +1276,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 )
 def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
     mock_emit,
+    caplog,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
 ):
@@ -1367,6 +1389,10 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @probabilistic_test
 @pytest.mark.skipif(
@@ -1446,6 +1472,7 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
 )
 def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     mock_emit,
+    caplog,
     quentin_columnar_table_multi_batch_data_context,
     quentin_columnar_table_multi_batch,
 ):
@@ -1585,6 +1612,10 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         }
     )
     assert mock_emit.call_args_list[-1] == expected_profiler_run_event
+
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @probabilistic_test
