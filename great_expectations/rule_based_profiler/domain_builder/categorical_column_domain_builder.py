@@ -304,11 +304,8 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         Returns:
             List of domains that match the desired cardinality.
         """
-
         validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
 
-        # Here we use a single get_metric call to get column names to build the
-        # rest of the metrics.
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
 
         table_column_names: List[str] = self._get_table_column_names_from_active_batch(

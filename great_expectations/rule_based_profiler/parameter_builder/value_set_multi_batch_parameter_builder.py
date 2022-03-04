@@ -90,21 +90,19 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         # Retrieve and replace the list of unique values for each batch with
         # the set of unique values for all batches in the given domain.
-        parameter_value_node: ParameterNode = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.fully_qualified_parameter_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.fully_qualified_parameter_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
 
         return (
             _get_unique_values_from_nested_collection_of_sets(
-                collection=parameter_value_node.value
+                collection=parameter_node.value
             ),
-            parameter_value_node.details,
+            parameter_node.details,
         )
 
 

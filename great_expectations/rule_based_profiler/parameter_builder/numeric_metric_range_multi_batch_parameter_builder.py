@@ -6,11 +6,6 @@ import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
-    MetricComputationDetails,
-    MetricComputationResult,
-    ParameterBuilder,
-)
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
@@ -19,6 +14,13 @@ from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_numeric
+
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (  # isort:skip
+    MetricComputationResult,
+    MetricValues,
+    MetricComputationDetails,
+    ParameterBuilder,
+)
 
 MAX_DECIMALS: int = 9
 
@@ -242,7 +244,7 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        metric_values: np.ndarray = metric_computation_result.metric_values
+        metric_values: MetricValues = metric_computation_result.metric_values
         details: MetricComputationDetails = metric_computation_result.details
 
         # Obtain sampling_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -278,7 +280,7 @@ detected.
             }
 
         metric_value_range: np.ndarray = self._estimate_metric_value_range(
-            metric_values=metric_values,
+            metric_values=cast(np.ndarray, metric_values),
             estimator=estimator,
             domain=domain,
             variables=variables,

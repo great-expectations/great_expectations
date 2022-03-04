@@ -260,8 +260,6 @@ class ParameterBuilder(Builder, ABC):
         significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
-        # IDs of Batch objects used to compute the metric -- commonly obtained via the "get_batch_ids()"
-        # method in this module, although it can readily accept the list of Batch IDs generated through any other means.
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
             variables=variables,
