@@ -762,7 +762,12 @@ anonymized_domain_builder_schema = {
     "properties": {
         "parent_class": {"type": "string", "maxLength": 256},
         "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
-        "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
+        "anonymized_batch_request": {
+            "oneOf": [
+                {"$ref": "#/definitions/anonymized_string"},
+                {"$ref": "#/definitions/anonymized_batch_request"},
+            ]
+        },
     },
     "additionalProperties": False,
     "required": ["parent_class"],
@@ -781,7 +786,12 @@ anonymized_parameter_builder_schema = {
         "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
         "parent_class": {"type": "string", "maxLength": 256},
         "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
-        "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
+        "anonymized_batch_request": {
+            "oneOf": [
+                {"$ref": "#/definitions/anonymized_string"},
+                {"$ref": "#/definitions/anonymized_batch_request"},
+            ]
+        },
     },
     "additionalProperties": False,
     "required": ["anonymized_name", "parent_class"],

@@ -166,6 +166,10 @@ def test_anonymized_domain_builder_schema():
                 }
             },
         },
+        {
+            "parent_class": "TableDomainBuilder",
+            "anonymized_batch_request": "eg78ebde1957385a02d8736cd2c9a6d9",
+        },
     ]
 
     for message in messages:
@@ -193,6 +197,11 @@ def test_anonymized_parameter_builder_schema() -> None:
                     "anonymized_datasource_name": "eg78ebde1957385a02d8736cd2c9a6d9",
                 }
             },
+        },
+        {
+            "anonymized_name": "bdea123asdh13r90asdfh1209adsfh0a",
+            "parent_class": "RegexPatternStringParameterBuilder",
+            "anonymized_batch_request": "eg78ebde1957385a02d8736cd2c9a6d9",
         },
     ]
 
