@@ -25,6 +25,7 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.profiler_result import ProfilerResult
 
 try:
     from typing import Literal
@@ -3348,7 +3349,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         rules: Optional[dict] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> ProfilerResult:
         return RuleBasedProfiler.run_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
@@ -3370,7 +3371,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ge_cloud_id: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> ProfilerResult:
         return RuleBasedProfiler.run_profiler_on_data(
             data_context=self,
             profiler_store=self.profiler_store,

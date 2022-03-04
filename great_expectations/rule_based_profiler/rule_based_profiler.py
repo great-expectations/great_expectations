@@ -42,6 +42,7 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder.ex
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
+from great_expectations.rule_based_profiler.profiler_result import ProfilerResult
 from great_expectations.rule_based_profiler.rule.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
@@ -313,7 +314,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> ProfilerResult:
         """
         Args:
             :param variables attribute name/value pairs (overrides)
@@ -362,7 +363,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     send_usage_event=False,
                 )
 
-        return expectation_suite
+        result: ProfilerResult = ProfilerResult(
+            expectation_suite=expectation_suite, effective_profiler=self
+        )
+
+        return result
 
     def reconcile_profiler_variables(
         self,
@@ -949,7 +954,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         rules: Optional[dict] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> ProfilerResult:
 
         profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
             data_context=data_context,
@@ -958,7 +963,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             ge_cloud_id=ge_cloud_id,
         )
 
-        result: ExpectationSuite = profiler.run(
+        result: ProfilerResult = profiler.run(
             variables=variables,
             rules=rules,
             expectation_suite_name=expectation_suite_name,
@@ -976,7 +981,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         ge_cloud_id: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> ProfilerResult:
         profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
             data_context=data_context,
             profiler_store=profiler_store,
@@ -990,7 +995,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             batch_request=batch_request
         )
 
-        result: ExpectationSuite = profiler.run(
+        result: ProfilerResult = profiler.run(
             rules=rules,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
