@@ -7,6 +7,9 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 from great_expectations.exceptions import ProfilerConfigurationError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
+    build_simple_domains_from_column_names,
+)
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -325,18 +328,10 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             metrics_for_cardinality_check=metrics_for_cardinality_check,
         )
 
-        column_name: str
-        domains: List[Domain] = [
-            Domain(
-                domain_type=self.domain_type,
-                domain_kwargs={
-                    "column": column_name,
-                },
-            )
-            for column_name in candidate_column_names
-        ]
-
-        return domains
+        return build_simple_domains_from_column_names(
+            column_names=candidate_column_names,
+            domain_type=self.domain_type,
+        )
 
     def _get_table_column_names_from_active_batch(
         self,
@@ -387,7 +382,9 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             List of dicts of the form [{column_name: List[MetricConfiguration]},...]
         """
 
-        limit_mode: CardinalityLimitMode = self.cardinality_checker.limit_mode
+        limit_mode: Union[
+            AbsoluteCardinalityLimit, RelativeCardinalityLimit
+        ] = self.cardinality_checker.limit_mode
 
         column_name: str
         metric_configurations: List[Dict[str, List[MetricConfiguration]]] = [
