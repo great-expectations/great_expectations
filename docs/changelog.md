@@ -24,6 +24,8 @@ title: Changelog
 * [BUGFIX] Fixes validate_configuration checking in diagnostics (#4307)
 * [BUGFIX] Update test output that should be returned from generate_diagnostic_checklist (#4317)
 * [BUGFIX] Standardizes imports in expectation templates and examples (#4320)
+* [BUGFIX] Only validate row_condition if not None (#4329)
+* [BUGFIX] Fix PEP273 Windows issue (#4328)
 * [DOCS] Fixes misc. verbiage & typos in new Custom Expectation docs (#4283)
 * [DOCS] fix formatting in configuration details block of Getting Started (#4289) (thanks @afeld)
 * [DOCS] Fixes imports and code refs to expectation templates (#4314)
@@ -33,6 +35,8 @@ title: Changelog
 * [CONTRIB] ExpectColumnValuesToBeValidDegreeDecimalCoordinates (#4319)
 * [MAINTENANCE] Refactor parameter setting for simpler ParameterBuilder interface (#4299)
 * [MAINTENANCE] SimpleDateTimeFormatStringParameterBuilder and general RBP example config updates (#4304)
+* [MAINTENANCE] Make adherence to Marshmallow Schema more robust (#4325)
+* [MAINTENANCE] Refactor rule based profiler to keep objects/utilities within intended scope (#4331)
 * [MAINTENANCE] Dependabot version upgrades (#4253, #4231, #4058, #4041, #3916, #3886, #3583, #2856, #3370, #3216, #2935, #2855, #3302, #4008, #4252)
 
 ### 0.14.8
