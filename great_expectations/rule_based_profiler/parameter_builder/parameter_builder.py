@@ -9,22 +9,24 @@ import numpy as np
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.rule_based_profiler.helpers.util import (
+    build_metric_domain_kwargs,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_validator as get_validator_using_batch_list_or_batch_request,
+)
 from great_expectations.rule_based_profiler.types import (
     Attributes,
     Builder,
     Domain,
     ParameterContainer,
     build_parameter_container,
-)
-from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
-from great_expectations.rule_based_profiler.util import (
-    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_validator as get_validator_using_batch_list_or_batch_request,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -260,8 +262,6 @@ class ParameterBuilder(Builder, ABC):
         significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
-        # IDs of Batch objects used to compute the metric -- commonly obtained via the "get_batch_ids()"
-        # method in this module, although it can readily accept the list of Batch IDs generated through any other means.
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
             variables=variables,
