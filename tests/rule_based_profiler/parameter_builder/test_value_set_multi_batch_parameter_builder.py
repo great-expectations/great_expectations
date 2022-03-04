@@ -1,4 +1,4 @@
-from typing import Any, Collection, List, Optional, Set, cast
+from typing import Any, Collection, Dict, List, Optional, Set, cast
 
 import pytest
 
@@ -69,9 +69,15 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert (
@@ -98,7 +104,8 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         domain=domain,
         parameter_reference=fully_qualified_parameter_name_for_value,
         expected_return_type=None,
-        parameters={domain.id: parameter_container},
+        variables=variables,
+        parameters=parameters,
     )
 
     assert sorted(actual_parameter_value.value) == expected_parameter_value["value"]
@@ -139,9 +146,15 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert (
@@ -170,7 +183,8 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         domain=domain,
         parameter_reference=fully_qualified_parameter_name_for_value,
         expected_return_type=None,
-        parameters={domain.id: parameter_container},
+        variables=variables,
+        parameters=parameters,
     )
 
     assert sorted(actual_parameter_value.value) == expected_parameter_value["value"]
@@ -209,9 +223,15 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert (
@@ -240,7 +260,8 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         domain=domain,
         parameter_reference=fully_qualified_parameter_name_for_value,
         expected_return_type=None,
-        parameters={domain.id: parameter_container},
+        variables=variables,
+        parameters=parameters,
     )
 
     assert sorted(actual_parameter_value.value) == expected_parameter_value["value"]
@@ -279,9 +300,15 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert (
@@ -310,7 +337,8 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         domain=domain,
         parameter_reference=fully_qualified_parameter_name_for_value,
         expected_return_type=None,
-        parameters={domain.id: parameter_container},
+        variables=variables,
+        parameters=parameters,
     )
 
     assert sorted(actual_parameter_value.value) == expected_parameter_value["value"]
