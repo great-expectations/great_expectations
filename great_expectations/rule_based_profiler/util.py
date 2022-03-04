@@ -270,13 +270,13 @@ def compute_bootstrap_quantiles_point_estimate(
     bootstraps: np.ndarray = np.random.choice(
         metric_values, size=(n_resamples, metric_values.size)
     )
-    lower_quantiles: Union[np.nd_array, Number] = np.quantile(
+    lower_quantiles: Union[np.ndarray, Number] = np.quantile(
         bootstraps,
         q=false_positive_rate / 2,
         axis=1,
     )
     lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
-    upper_quantiles: Union[np.nd_array, Number] = np.quantile(
+    upper_quantiles: Union[np.ndarray, Number] = np.quantile(
         bootstraps,
         q=1.0 - (false_positive_rate / 2),
         axis=1,
@@ -344,7 +344,7 @@ def _compute_bootstrap_quantiles_point_estimate_bias_corrected(
     bootstraps: np.ndarray = np.random.choice(
         metric_values, size=(n_resamples, metric_values.size)
     )
-    lower_quantiles: Union[np.nd_array, Number] = np.quantile(
+    lower_quantiles: Union[np.ndarray, Number] = np.quantile(
         bootstraps,
         q=false_positive_rate / 2,
         axis=1,
@@ -359,7 +359,7 @@ def _compute_bootstrap_quantiles_point_estimate_bias_corrected(
         lower_quantile_point_estimate + lower_quantile_bias
     )
 
-    upper_quantiles: Union[np.nd_array, Number] = np.quantile(
+    upper_quantiles: Union[np.ndarray, Number] = np.quantile(
         bootstraps,
         q=1.0 - (false_positive_rate / 2),
         axis=1,
