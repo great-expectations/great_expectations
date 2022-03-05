@@ -33,7 +33,11 @@ def _generate_distribution_parameters(
     bimodal_mean_2: int = 6000
     bimodal_stdev_2: int = 500
 
-    #
+    # 10,000 samples taken from a bimodal mixture of equally weighted normal distributions.
+    # This approximation is being used due to the lack of functionality in scipy.stats regarding a
+    # percent point functipn (ppf) for gaussian mixtures.
+    # For a look at a similar statistical representation and implementation in R see:
+    # https://stats.stackexchange.com/questions/390931/compute-quantile-function-from-a-mixture-of-normal-distribution
     bimodal_approximation = np.concatenate(
         [
             stats.norm.rvs(
