@@ -180,9 +180,6 @@ def pytest_addoption(parser):
     )
 
 
-# here is the second instance
-
-
 def build_test_backends_list(metafunc):
     test_backend_names: List[str] = build_test_backends_list_cfe(metafunc)
     backend_name_class_name_map: Dict[str, str] = {
