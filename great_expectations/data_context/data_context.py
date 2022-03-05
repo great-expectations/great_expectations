@@ -2268,7 +2268,7 @@ class BaseDataContext(ConfigPeer):
                 resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
             )
         else:
-            key: Union[ExpectationSuiteIdentifier, None] = ExpectationSuiteIdentifier(
+            key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
 
