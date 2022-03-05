@@ -169,22 +169,6 @@ def bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive():
 
 
 @pytest.fixture
-def bootstrap_distribution_parameters_and_36_samples_with_01_false_positive():
-    false_positive_rate: np.float64 = np.float64(0.01)
-    distribution_parameters: Dict[
-        str, Dict[str, Number]
-    ] = _generate_distribution_parameters(false_positive_rate=false_positive_rate)
-    distribution_samples: pd.DataFrame = _generate_distribution_samples(
-        distribution_parameters=distribution_parameters, size=36
-    )
-    return {
-        "false_positive_rate": false_positive_rate,
-        "distribution_parameters": distribution_parameters,
-        "distribution_samples": distribution_samples,
-    }
-
-
-@pytest.fixture
 def bootstrap_distribution_parameters_and_5_samples_with_01_false_positive():
     false_positive_rate: np.float64 = np.float64(0.01)
     distribution_parameters: Dict[
