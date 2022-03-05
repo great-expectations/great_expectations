@@ -11,6 +11,44 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     """
     Expect paired values from columns A and B to belong to a set of valid pairs.
 
+        For example:
+        ::
+            >>>d = {'fruit': ['appple','apple','apple','banana','banana'], 
+                    'color': ['red','green','yellow','yellow','red']}
+            >>>my_df = pd.DataFrame(data=d)
+            >>> my_df.expect_column_pair_values_to_be_in_set('fruit',
+                                                             'color',
+                                                            [ ('apple','red'),
+                                                              ('apple','green'),
+                                                              ('apple','yellow'),
+                                                              ('banana','yellow'),
+                                                            ]
+                                                            )
+            {
+                "success": false,
+                "meta": {},
+                "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                },
+                "result": {
+                    "element_count": 5,
+                    "unexpected_count": 1,
+                    "unexpected_percent": 20.0,
+                    "partial_unexpected_list": [
+                    [
+                        "banana",
+                        "red"
+                    ]
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 20.0,
+                    "unexpected_percent_nonmissing": 20.0
+                }
+            }
+
     Args:
         column_A (str): The first column name
         column_B (str): The second column name
