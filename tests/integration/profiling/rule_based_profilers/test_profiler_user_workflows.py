@@ -29,13 +29,6 @@ from tests.rule_based_profiler.conftest import ATOL, RTOL
 
 yaml = YAML()
 
-# TODO: <Alex>ALEX</Alex>
-# # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
-# # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
-# RTOL: float = 1.0e-7
-# ATOL: float = 5.0e-2
-# TODO: <Alex>ALEX</Alex>
-
 
 def test_alice_columnar_table_single_batch_batches_are_accessible(
     alice_columnar_table_single_batch_context,
