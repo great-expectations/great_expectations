@@ -25,13 +25,16 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 from great_expectations.util import probabilistic_test
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from tests.rule_based_profiler.conftest import ATOL, RTOL
 
 yaml = YAML()
 
-# Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
-# (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
-RTOL: float = 1.0e-7
-ATOL: float = 5.0e-2
+# TODO: <Alex>ALEX</Alex>
+# # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
+# # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+# RTOL: float = 1.0e-7
+# ATOL: float = 5.0e-2
+# TODO: <Alex>ALEX</Alex>
 
 
 def test_alice_columnar_table_single_batch_batches_are_accessible(

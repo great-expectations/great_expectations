@@ -36,6 +36,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -51,6 +52,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             metric_value_kwargs: used in MetricConfiguration
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -58,11 +60,12 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             metric_name=f"{map_metric_name}.unexpected_count",
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=False,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
             batch_list=batch_list,
             batch_request=batch_request,
+            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -107,7 +110,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         )
 
         fully_qualified_total_count_parameter_builder_name: str = (
-            f"$parameters.{total_count_parameter_builder_name}.value"
+            f"$parameter.{total_count_parameter_builder_name}"
         )
         # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         total_count_parameter_node: ParameterNode = (
@@ -144,7 +147,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             null_count_values = np.zeros(shape=(num_batch_ids,))
         else:
             fully_qualified_null_count_parameter_builder_name: str = (
-                f"$parameters.{null_count_parameter_builder_name}.value"
+                f"$parameter.{null_count_parameter_builder_name}"
             )
             # Obtain null_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
             null_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
@@ -168,16 +171,14 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         )
 
         # Retrieve "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").
-        parameter_value_node: ParameterNode = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.fully_qualified_parameter_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.fully_qualified_parameter_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
-        unexpected_count_values: MetricValues = parameter_value_node.value
+        unexpected_count_values: MetricValues = parameter_node.value
 
         unexpected_count_ratio_values: np.ndarray = (
             unexpected_count_values / nonnull_count_values
@@ -186,5 +187,5 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
 
         return (
             mean_unexpected_count_ratio,
-            parameter_value_node.details,
+            parameter_node.details,
         )
