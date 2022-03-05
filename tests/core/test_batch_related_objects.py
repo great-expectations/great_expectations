@@ -1,6 +1,3 @@
-import copy
-import datetime
-
 import pandas as pd
 import pytest
 
@@ -11,7 +8,6 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchSpec,
     IDDict,
-    RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.exceptions import InvalidBatchSpecError
@@ -88,8 +84,12 @@ def test_batch__str__method():
     "data_asset_name": "my_data_asset_name",
     "batch_identifiers": {}
   },
-  "batch_spec": "{'path': '/some/path/some.file'}",
-  "batch_markers": "{'ge_load_time': 'FAKE_LOAD_TIME'}"
+  "batch_spec": {
+    "path": "/some/path/some.file"
+  },
+  "batch_markers": {
+    "ge_load_time": "FAKE_LOAD_TIME"
+  }
 }"""
     )
 
@@ -148,33 +148,3 @@ def test_RuntimeDataBatchSpec():
             "batch_data": "we don't check types yet",
         }
     )
-
-
-def test_runtime_batch_request_deepcopy():
-    """
-    Python's built-in id() function returns the memory location of a given object.
-    It is used here to ascertain "sameness" and the lack thereof
-    of different objects.
-    """
-    df = pd.DataFrame({"a": [1, 2, 3]})
-    id_1 = id(df)
-    batch_request = RuntimeBatchRequest(
-        datasource_name="context_weeks_datasource",
-        data_connector_name="context_weeks_data_connector",
-        data_asset_name="context_weeks_processed",  # this can be anything that identifies this data_asset for you
-        runtime_parameters={"batch_data": df},  # insert our loaded dataframe
-        batch_identifiers={
-            "test_dataframe": datetime.date.today().strftime("%Y-%m-%d")
-        },
-    )
-    cp = copy.deepcopy(batch_request)
-    id_2 = id(cp.runtime_parameters["batch_data"])
-    id_3 = id(batch_request.runtime_parameters["batch_data"])
-
-    assert id_1 == id_2
-    assert id_2 == id_3
-
-    id_4 = id(batch_request.batch_identifiers)
-    id_5 = id(cp.batch_identifiers)
-
-    assert id_4 != id_5

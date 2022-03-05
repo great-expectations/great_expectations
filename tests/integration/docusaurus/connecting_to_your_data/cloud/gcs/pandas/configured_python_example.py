@@ -17,7 +17,7 @@ datasource_config = {
             "bucket_or_name": "<YOUR_GCS_BUCKET_HERE>",
             "prefix": "<BUCKET_PATH_TO_DATA>",
             "default_regex": {
-                "pattern": "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{4})-(\\d{2})\\.csv",
+                "pattern": "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(\\d{4})-(\\d{2})\\.csv",
                 "group_names": ["year", "month"],
             },
             "assets": {"taxi_data": None},
@@ -29,10 +29,10 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "bucket_or_name"
-] = "superconductive-integration-tests"
+] = "test_docs_data"
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "prefix"
-] = "data/taxi_yellow_trip_data_samples/"
+] = "data/taxi_yellow_tripdata_samples/"
 
 context.test_yaml_config(yaml.dump(datasource_config))
 

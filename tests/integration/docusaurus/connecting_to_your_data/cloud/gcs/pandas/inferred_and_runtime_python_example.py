@@ -32,10 +32,10 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "bucket_or_name"
-] = "superconductive-integration-tests"
+] = "test_docs_data"
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"
-] = "data/taxi_yellow_trip_data_samples/"
+] = "data/taxi_yellow_tripdata_samples/"
 
 context.test_yaml_config(yaml.dump(datasource_config))
 
@@ -54,7 +54,7 @@ batch_request = RuntimeBatchRequest(
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters[
     "path"
-] = f"gs://superconductive-integration-tests/data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv"
+] = f"gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -83,7 +83,7 @@ batch_request = BatchRequest(
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = (
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01"
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
 context.create_expectation_suite(
@@ -102,9 +102,9 @@ assert set(
         "default_inferred_data_connector_name"
     ]
 ) == {
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01",
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-02",
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-03",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03",
 }
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)

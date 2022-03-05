@@ -3,8 +3,10 @@ from collections import OrderedDict
 
 import pytest
 
+from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
+    ExpectationSuite,
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
 )
@@ -26,13 +28,15 @@ from great_expectations.render.renderer.content_block import (
 
 
 @pytest.fixture(scope="module")
-def titanic_expectations():
+def titanic_expectations(empty_data_context_module_scoped):
+    context: DataContext = empty_data_context_module_scoped
     with open(
         file_relative_path(__file__, "../test_sets/titanic_expectations.json")
     ) as infile:
-        return expectationSuiteSchema.load(
+        titanic_expectation_suite_dict: dict = expectationSuiteSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
         )
+        return ExpectationSuite(**titanic_expectation_suite_dict, data_context=context)
 
 
 @pytest.mark.smoketest

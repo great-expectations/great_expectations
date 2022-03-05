@@ -2,7 +2,12 @@ import logging
 from copy import deepcopy
 from typing import Any, List, Optional, Tuple
 
-from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchMarkers,
+    BatchRequestBase,
+)
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -11,6 +16,7 @@ from great_expectations.validator.validator import Validator
 logger = logging.getLogger(__name__)
 
 
+# noinspection SpellCheckingInspection
 class DataConnector:
     """
     DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
@@ -37,7 +43,7 @@ class DataConnector:
         self,
         name: str,
         datasource_name: str,
-        execution_engine: Optional[ExecutionEngine] = None,
+        execution_engine: ExecutionEngine,
         batch_spec_passthrough: Optional[dict] = None,
     ):
         """
@@ -46,9 +52,14 @@ class DataConnector:
         Args:
             name (str): required name for DataConnector
             datasource_name (str): required name for datasource
-            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+            execution_engine (ExecutionEngine): reference to ExecutionEngine
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
+        if execution_engine is None:
+            raise ge_exceptions.DataConnectorError(
+                "A non-existent/unknown ExecutionEngine instance was referenced."
+            )
+
         self._name = name
         self._datasource_name = datasource_name
         self._execution_engine = execution_engine
@@ -106,7 +117,6 @@ class DataConnector:
             batch_markers,
         )
 
-    # TODO: <Alex>9/2/2021: batch_definition->batch_spec translation should move to corresponding ExecutionEngine</Alex>
     def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
         """
         Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
@@ -173,9 +183,19 @@ class DataConnector:
         """
         raise NotImplementedError
 
+    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
+        """
+        Return the list of asset names and types known by this DataConnector.
+
+        Returns:
+            A list of tuples consisting of available names and types
+        """
+        # NOTE: Josh 20211001 only implemented in InferredAssetSqlDataConnector
+        raise NotImplementedError
+
     def get_batch_definition_list_from_batch_request(
         self,
-        batch_request: BatchRequest,
+        batch_request: BatchRequestBase,
     ) -> List[BatchDefinition]:
         raise NotImplementedError
 
@@ -331,7 +351,7 @@ class DataConnector:
 
         """
         if pretty_print:
-            print(f"\n\t\tFetching batch data...")
+            print("\n\t\tFetching batch data...")
 
         batch_definition_list: List[
             BatchDefinition
@@ -342,8 +362,7 @@ class DataConnector:
         assert len(batch_definition_list) == 1
         batch_definition: BatchDefinition = batch_definition_list[0]
 
-        # _execution_engine might be None for some tests
-        if batch_definition is None or self._execution_engine is None:
+        if batch_definition is None:
             return {}
 
         batch_data: Any
@@ -377,7 +396,7 @@ class DataConnector:
         )
 
         if pretty_print and data is not None:
-            print(f"\n\t\tShowing 5 rows")
+            print("\n\t\tShowing 5 rows")
             print(data)
 
         return {
@@ -385,13 +404,13 @@ class DataConnector:
             "n_rows": n_rows,
         }
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
+    def _validate_batch_request(self, batch_request: BatchRequestBase):
         """
         Validate batch_request by checking:
             1. if configured datasource_name matches batch_request's datasource_name
             2. if current data_connector_name matches batch_request's data_connector_name
         Args:
-            batch_request (BatchRequest): batch_request to validate
+            batch_request (BatchRequestBase): batch_request object to validate
 
         """
         if batch_request.datasource_name != self.datasource_name:

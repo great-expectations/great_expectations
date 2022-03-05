@@ -227,7 +227,7 @@ Steps
             **Note**: The credentials will be stored in ``uncommitted/config_variables.yml`` to prevent checking them into version control.
 
 
-* The default configuration of the most recent MySQL releases does not support some GROUP_BY operations used in Great Expectations. To use the full range of statistical Expectations, you need to disable the ``ONLY_FULL_GROUP_BY`` ``sql_mode`` setting. Please see the following article for more information https://stackoverflow.com/questions/36829911/how-to-resolve-order-by-clause-is-not-in-select-list-caused-mysql-5-7-with-sel).
+* The default configuration of the most recent MySQL releases does not support some GROUP_BY operations used in Great Expectations. To use the full range of statistical Expectations, you need to disable the ``ONLY_FULL_GROUP_BY`` ``sql_mode`` setting. Please see the following article for more information (https://stackoverflow.com/questions/36829911/how-to-resolve-order-by-clause-is-not-in-select-list-caused-mysql-5-7-with-sel).
 
 
 Comments

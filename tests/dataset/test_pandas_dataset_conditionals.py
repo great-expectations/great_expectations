@@ -72,7 +72,7 @@ def test_expectation_decorator_summary_mode():
             max_value=5,
             result_format="SUMMARY",
             condition_parser="pandas",
-            row_condition="group=='a'",
+            row_condition='group=="a"',
         )
         == exp_output
     )
@@ -102,7 +102,7 @@ def test_expectation_decorator_summary_mode():
             3,
             7,
             result_format="SUMMARY",
-            row_condition="group=='a'",
+            row_condition='group=="a"',
             condition_parser="pandas",
         )
         == exp_output
@@ -262,7 +262,7 @@ def test_result_format_argument_in_decorators():
             6,
             result_format=None,
             condition_parser="pandas",
-            row_condition="group=='a'",
+            row_condition='group=="a"',
         )
         == exp_output
     )
@@ -300,22 +300,19 @@ def test_result_format_argument_in_decorators():
             6,
             result_format=None,
             condition_parser="pandas",
-            row_condition="group=='a'",
+            row_condition='group=="a"',
         )
         == exp_output
     )
 
-    assert (
-        df.expect_column_values_to_be_between(
-            "y",
-            1,
-            6,
-            result_format=None,
-            condition_parser="pandas",
-            row_condition="group=='a'",
-        )
-        != df.expect_column_values_to_be_between("y", 1, 6, result_format=None)
-    )
+    assert df.expect_column_values_to_be_between(
+        "y",
+        1,
+        6,
+        result_format=None,
+        condition_parser="pandas",
+        row_condition='group=="a"',
+    ) != df.expect_column_values_to_be_between("y", 1, 6, result_format=None)
     # Test unknown output format
     with pytest.raises(ValueError):
         df.expect_column_values_to_be_between(
@@ -324,7 +321,7 @@ def test_result_format_argument_in_decorators():
             6,
             result_format="QUACK",
             condition_parser="pandas",
-            row_condition="group=='a'",
+            row_condition='group=="a"',
         )
 
     with pytest.raises(ValueError):
@@ -334,7 +331,7 @@ def test_result_format_argument_in_decorators():
             6,
             result_format="QUACK",
             condition_parser="pandas",
-            row_condition="group=='a'",
+            row_condition='group=="a"',
         )
 
 
@@ -352,16 +349,16 @@ def test_ge_pandas_subsetting_with_conditionals():
 
     # Put some simple expectations on the data frame
     df.expect_column_values_to_be_in_set(
-        "A", [1, 2, 3, 4], condition_parser="pandas", row_condition="group=='a'"
+        "A", [1, 2, 3, 4], condition_parser="pandas", row_condition='group=="a"'
     )
     df.expect_column_values_to_be_in_set(
-        "B", [5, 6, 7, 8], condition_parser="pandas", row_condition="group=='a'"
+        "B", [5, 6, 7, 8], condition_parser="pandas", row_condition='group=="a"'
     )
     df.expect_column_values_to_be_in_set(
-        "C", ["a", "b", "c", "d"], condition_parser="pandas", row_condition="group=='a'"
+        "C", ["a", "b", "c", "d"], condition_parser="pandas", row_condition='group=="a"'
     )
     df.expect_column_values_to_be_in_set(
-        "D", ["e", "f", "g", "h"], condition_parser="pandas", row_condition="group=='a'"
+        "D", ["e", "f", "g", "h"], condition_parser="pandas", row_condition='group=="a"'
     )
 
     # The subsetted data frame should:
@@ -419,7 +416,7 @@ def test_row_condition_in_expectation_config():
                 "min_value": 1,
                 "max_value": 5,
                 "result_format": "SUMMARY",
-                "row_condition": "group=='a'",
+                "row_condition": 'group=="a"',
                 "condition_parser": "pandas",
             },
             "expectation_type": "expect_column_values_to_be_between",
@@ -434,19 +431,19 @@ def test_row_condition_in_expectation_config():
             max_value=5,
             result_format="SUMMARY",
             condition_parser="pandas",
-            row_condition="group=='a'",
+            row_condition='group=="a"',
         ).expectation_config["kwargs"]
     )
 
     assert (
-        "group=='a'"
+        'group=="a"'
         == df.expect_column_values_to_be_between(
             "x",
             min_value=1,
             max_value=5,
             result_format="SUMMARY",
             condition_parser="pandas",
-            row_condition="group=='a'",
+            row_condition='group=="a"',
         ).expectation_config["kwargs"]["row_condition"]
     )
 
@@ -456,7 +453,7 @@ def test_row_condition_in_expectation_config():
         max_value=5,
         result_format="SUMMARY",
         condition_parser="pandas",
-        row_condition="group=='a'",
+        row_condition='group=="a"',
     ).expectation_config.isEquivalentTo(exp_expectation_config)
 
 
@@ -474,7 +471,7 @@ def test_condition_parser_in_expectation_config():
         max_value=5,
         result_format="SUMMARY",
         condition_parser="pandas",
-        row_condition="group=='a'",
+        row_condition='group=="a"',
     )
     assert "pandas" == observe.expectation_config["kwargs"]["condition_parser"]
 
@@ -484,6 +481,6 @@ def test_condition_parser_in_expectation_config():
             min_value=1,
             max_value=5,
             result_format="SUMMARY",
-            row_condition="group=='a'",
+            row_condition='group=="a"',
             condition_parser="SQL",
         )

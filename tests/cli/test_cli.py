@@ -36,8 +36,8 @@ def test_cli_command_help(caplog, invocation):
     assert (
         """Options:
   --version                Show the version and exit.
-  --v2-api / --v3-api      Default to v2 (Batch Kwargs) API. Use --v3-api for v3
-                           (Batch Request) API"""
+  --v3-api / --v2-api      Default to v3 (Batch Request) API. Use --v2-api for
+                           v2 (Batch Kwargs) API"""
         in result.output
     )
     assert (

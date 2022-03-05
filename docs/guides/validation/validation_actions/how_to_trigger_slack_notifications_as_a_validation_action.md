@@ -45,7 +45,7 @@ validation_notification_slack_webhook: [address to web hook]
 validation_operators:
     action_list_operator:
         # To learn how to configure sending Slack notifications during evaluation
-        # (and other customizations), read: https://docs.greatexpectations.io/en/latest/reference/validation_operators/action_list_validation_operator.html
+        # (and other customizations), read: https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/#webhook-config
         class_name: ActionListValidationOperator
         action_list:
         #--------------------------------
@@ -68,7 +68,7 @@ validation_operators:
 validation_operators:
     action_list_operator:
         # To learn how to configure sending Slack notifications during evaluation
-        # (and other customizations), read: https://docs.greatexpectations.io/en/latest/reference/validation_operators/action_list_validation_operator.html
+        # (and other customizations), read: https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/#slack-bot-config
         class_name: ActionListValidationOperator
         action_list:
         #--------------------------------

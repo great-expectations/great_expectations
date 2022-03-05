@@ -119,3 +119,42 @@ a.pagination-nav__link:hover {
 .navbar__item.navbar__link svg {
     display: none;
 }
+
+table.borderless {
+    border-collapse: collapse;
+    border: none;
+}
+
+table.borderless tr {
+    border-top: none;
+}
+
+table.borderless tr td {
+    border-collapse: collapse;
+    background-color: transparent;
+    border: none;
+    border-top: none;
+    vertical-align: center;
+}
+
+table.borderless tr:nth-child(2n) {
+    background-color: transparent;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%;
+}
+
+.tabs-container .margin-vert--md{
+    margin-top: 0 !important;
+}
+
+div[role="tabpanel"]{
+   --ifm-code-background: var(--ifm-alert-background-color-highlight);
+    border-radius: var(--ifm-alert-border-radius);
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 2px 0px;
+    border-top: 0;
+    padding: var(--ifm-alert-padding-vertical) var(--ifm-alert-padding-horizontal);
+}

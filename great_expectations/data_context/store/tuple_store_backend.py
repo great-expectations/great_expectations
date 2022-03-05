@@ -5,6 +5,7 @@ import random
 import re
 import shutil
 from abc import ABCMeta
+from typing import List, Tuple
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
@@ -341,7 +342,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return False
 
-    def list_keys(self, prefix=()):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         key_list = []
         for root, dirs, files in os.walk(
             os.path.join(self.full_base_directory, *prefix)
@@ -412,7 +413,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
             raise StoreBackendError(
-                f"""Error: No base_public_path was configured!
+                """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the TupleFilesystemStoreBackend
                 """
             )
@@ -594,7 +595,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         s3.Object(self.bucket, source_filepath).delete()
 
-    def list_keys(self):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         s3 = self._create_client()
         paginator = s3.get_paginator("list_objects_v2")
 
@@ -667,7 +669,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
             raise StoreBackendError(
-                f"""Error: No base_public_path was configured!
+                """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the
                 """
             )
@@ -680,33 +682,18 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return public_url
 
     def remove_key(self, key):
-        from botocore.exceptions import ClientError
 
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
         s3 = self._create_resource()
         s3_object_key = self._build_s3_object_key(key)
-        s3.Object(self.bucket, s3_object_key).delete()
-        if s3_object_key:
-            try:
-                #
-                objects_to_delete = s3.meta.client.list_objects_v2(
-                    Bucket=self.bucket, Prefix=self.prefix
-                )
 
-                delete_keys = {
-                    "Objects": [
-                        {"Key": k}
-                        for k in [
-                            obj["Key"] for obj in objects_to_delete.get("Contents", [])
-                        ]
-                    ]
-                }
-                s3.meta.client.delete_objects(Bucket=self.bucket, Delete=delete_keys)
-                return True
-            except ClientError as e:
-                return False
+        # Check if the object exists
+        if self.has_key(key):
+            # This implementation deletes the object if non-versioned or adds a delete marker if versioned
+            s3.Object(self.bucket, s3_object_key).delete()
+            return True
         else:
             return False
 
@@ -883,7 +870,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         blob = bucket.blob(source_filepath)
         _ = bucket.rename_blob(blob, dest_filepath)
 
-    def list_keys(self):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
         from google.cloud import storage
@@ -924,7 +912,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
             raise StoreBackendError(
-                f"""Error: No base_public_path was configured!
+                """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the
                 """
             )
@@ -1057,7 +1045,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             )
         return az_blob_key
 
-    def list_keys(self):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
         for obj in self._get_container_client().list_blobs(
@@ -1110,7 +1099,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         if copy_properties.status != "success":
             dest_blob.abort_copy(copy_properties.id)
             raise StoreBackendError(
-                f"Unable to copy blob %s with status %s"
+                "Unable to copy blob %s with status %s"
                 % (source_blob_path, copy_properties.status)
             )
         source_blob.delete_blob()

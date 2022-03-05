@@ -8,12 +8,14 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
     InferredAssetFilesystemDataConnector,
 )
+from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAML(typ="safe")
 
 
 def test_basic_instantiation(tmp_path_factory):
@@ -32,6 +34,7 @@ def test_basic_instantiation(tmp_path_factory):
         InferredAssetFilesystemDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": r"(.+)/(.+)-(\d+)\.csv",
                 "group_names": ["data_asset_name", "letter", "number"],
@@ -83,6 +86,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
         InferredAssetFilesystemDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": r"(.+)-(\d+)\.csv",
                 "group_names": [
@@ -144,6 +148,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
         InferredAssetFilesystemDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
                 "group_names": ["year_dir", "month_dir", "data_asset_name"],
@@ -249,6 +254,7 @@ def test_self_check(tmp_path_factory):
         InferredAssetFilesystemDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": r"(.+)-(\d+)\.csv",
                 "group_names": ["data_asset_name", "number"],
@@ -321,6 +327,9 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -416,6 +425,9 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -506,6 +518,9 @@ def test_nested_directory_data_asset_name_in_folder(
             - number
         pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
         """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -570,6 +585,9 @@ def test_redundant_information_in_naming_convention_random_hash(
               pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
 
               """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -629,6 +647,9 @@ def test_redundant_information_in_naming_convention_timestamp(
                 - day
               pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
       """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
     assert report_object == {
@@ -687,6 +708,9 @@ def test_redundant_information_in_naming_convention_bucket(
                   - day
               pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
               """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -952,3 +976,115 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
                 },
             )
         )
+
+
+def test_one_year_as_12_data_assets_1_batch_each(empty_data_context, tmp_path_factory):
+    context: DataContext = empty_data_context
+    base_directory: str = str(tmp_path_factory.mktemp("log_data"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "some_bucket/report_2018-01.csv",
+            "some_bucket/report_2018-02.csv",
+            "some_bucket/report_2018-03.csv",
+            "some_bucket/report_2018-04.csv",
+            "some_bucket/report_2018-05.csv",
+            "some_bucket/report_2018-06.csv",
+            "some_bucket/report_2018-07.csv",
+            "some_bucket/report_2018-08.csv",
+            "some_bucket/report_2018-09.csv",
+            "some_bucket/report_2018-10.csv",
+            "some_bucket/report_2018-11.csv",
+            "some_bucket/report_2018-12.csv",
+        ],
+    )
+    datasource_yaml: str = f"""
+    name: taxi_datasource
+    class_name: Datasource
+    module_name: great_expectations.datasource
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      class_name: PandasExecutionEngine
+    data_connectors:
+        default_inferred_data_connector_name:
+            class_name: InferredAssetFilesystemDataConnector
+            base_directory: {base_directory}/some_bucket/
+            default_regex:
+              group_names:
+                - data_asset_name
+              pattern: (.*_2018-.*)\\.csv
+    """
+    context.test_yaml_config(datasource_yaml)
+    context.add_datasource(**yaml.load(datasource_yaml))
+    datasource: Datasource = context.get_datasource(datasource_name="taxi_datasource")
+    data_asset_names: dict = datasource.get_available_data_asset_names(
+        data_connector_names="default_inferred_data_connector_name"
+    )
+    # making the result deterministic
+    data_asset_names["default_inferred_data_connector_name"].sort()
+    assert data_asset_names == {
+        "default_inferred_data_connector_name": [
+            "report_2018-01",
+            "report_2018-02",
+            "report_2018-03",
+            "report_2018-04",
+            "report_2018-05",
+            "report_2018-06",
+            "report_2018-07",
+            "report_2018-08",
+            "report_2018-09",
+            "report_2018-10",
+            "report_2018-11",
+            "report_2018-12",
+        ]
+    }
+    assert len(data_asset_names["default_inferred_data_connector_name"]) == 12
+
+
+def test_one_year_as_1_data_asset_12_batches(empty_data_context, tmp_path_factory):
+    context: DataContext = empty_data_context
+    base_directory: str = str(tmp_path_factory.mktemp("log_data"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "some_bucket/report_2018-01.csv",
+            "some_bucket/report_2018-02.csv",
+            "some_bucket/report_2018-03.csv",
+            "some_bucket/report_2018-04.csv",
+            "some_bucket/report_2018-05.csv",
+            "some_bucket/report_2018-06.csv",
+            "some_bucket/report_2018-07.csv",
+            "some_bucket/report_2018-08.csv",
+            "some_bucket/report_2018-09.csv",
+            "some_bucket/report_2018-10.csv",
+            "some_bucket/report_2018-11.csv",
+            "some_bucket/report_2018-12.csv",
+        ],
+    )
+    datasource_yaml: str = f"""
+        name: taxi_datasource
+        class_name: Datasource
+        module_name: great_expectations.datasource
+        execution_engine:
+          module_name: great_expectations.execution_engine
+          class_name: PandasExecutionEngine
+        data_connectors:
+            default_inferred_data_connector_name:
+                class_name: InferredAssetFilesystemDataConnector
+                base_directory: {base_directory}/some_bucket/
+                default_regex:
+                  group_names:
+                    - data_asset_name
+                    - month
+                  pattern: (report_2018)-(\\d.*)\\.csv
+        """
+    context.test_yaml_config(datasource_yaml)
+    context.add_datasource(**yaml.load(datasource_yaml))
+    datasource: Datasource = context.get_datasource(datasource_name="taxi_datasource")
+    data_asset_names: dict = datasource.get_available_data_asset_names(
+        data_connector_names="default_inferred_data_connector_name"
+    )
+    # making the result deterministic
+    data_asset_names["default_inferred_data_connector_name"].sort()
+    assert data_asset_names == {"default_inferred_data_connector_name": ["report_2018"]}
+    assert len(data_asset_names["default_inferred_data_connector_name"]) == 1

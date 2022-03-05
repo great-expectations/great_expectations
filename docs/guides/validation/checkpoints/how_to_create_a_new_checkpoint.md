@@ -21,7 +21,7 @@ This how-to guide assumes you have already:
 ##### 1. First, run the CLI command below.
 
 ````console
-great_expectations --v3-api checkpoint new my_checkpoint
+great_expectations checkpoint new my_checkpoint
 ````
 
 ##### 2.  Next, you will be presented with a Jupyter Notebook which will guide you through the steps of creating a checkpoint.
@@ -42,13 +42,13 @@ name: my_checkpoint
 config_version: 1
 class_name: SimpleCheckpoint
 validations:
-	- batch_request:
-datasource_name: my_datasource
-data_connector_name: my_data_connector
-data_asset_name: MyDataAsset
-data_connector_query:
-	index: -1
-expectation_suite_name: my_suite
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_data_connector
+      data_asset_name: MyDataAsset
+      data_connector_query:
+        index: -1
+    expectation_suite_name: my_suite
 """
 ````
 
@@ -101,4 +101,5 @@ For more advanced configurations of Checkpoints, please see [How to configure a 
 
 ### Additional Resources
 
-* [Check out the detailed tutorial on Checkpoints](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint)
+* [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
+* [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)

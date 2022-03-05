@@ -12,6 +12,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -37,7 +38,11 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.util import gen_directory_tree_str
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    gen_directory_tree_str,
+    is_library_loadable,
+)
 from tests.test_utils import create_files_in_directory, safe_remove
 
 try:
@@ -221,28 +226,24 @@ def test_compile_evaluation_parameter_dependencies(
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
         == {}
     )
-    expectation_suite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            parameterized_expectation_suite_name
-        )
-    )
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies(
-        expectation_suite
-    )
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
-        "source_diabetes_data.default": [
-            {
-                "metric_kwargs_id": {
-                    "column=patient_nbr": [
-                        "expect_column_unique_value_count_to_be_between.result.observed_value"
-                    ]
+    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
+    assert (
+        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
+        == {
+            "source_diabetes_data.default": [
+                {
+                    "metric_kwargs_id": {
+                        "column=patient_nbr": [
+                            "expect_column_unique_value_count_to_be_between.result.observed_value"
+                        ]
+                    }
                 }
-            }
-        ],
-        "source_patient_data.default": [
-            "expect_table_row_count_to_equal.result.observed_value"
-        ],
-    }
+            ],
+            "source_patient_data.default": [
+                "expect_table_row_count_to_equal.result.observed_value"
+            ],
+        }
+    )
 
 
 def test_list_datasources(data_context_parameterized_expectation_suite):
@@ -297,87 +298,89 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
         },
     ]
 
-    # Make sure passwords are masked in password or url fields
-    data_context_parameterized_expectation_suite.add_datasource(
-        "postgres_source_with_password",
-        initialize=False,
-        module_name="great_expectations.datasource",
-        class_name="SqlAlchemyDatasource",
-        credentials={
-            "drivername": "postgresql",
-            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-            "port": "65432",
-            "username": "username_str",
-            "password": "password_str",
-            "database": "database_str",
-        },
-    )
+    if is_library_loadable(library_name="psycopg2"):
 
-    data_context_parameterized_expectation_suite.add_datasource(
-        "postgres_source_with_password_in_url",
-        initialize=False,
-        module_name="great_expectations.datasource",
-        class_name="SqlAlchemyDatasource",
-        credentials={
-            "url": "postgresql+psycopg2://username:password@host:65432/database",
-        },
-    )
-
-    datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-    assert datasources == [
-        {
-            "name": "mydatasource",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {"class_name": "PandasDataset"},
-            "batch_kwargs_generators": {
-                "mygenerator": {
-                    "base_directory": "../data",
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "reader_options": {"engine": "python", "sep": None},
-                }
-            },
-        },
-        {
-            "name": "second_pandas_source",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {
-                "class_name": "PandasDataset",
-                "module_name": "great_expectations.dataset",
-            },
-        },
-        {
-            "name": "postgres_source_with_password",
-            "class_name": "SqlAlchemyDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {
-                "class_name": "SqlAlchemyDataset",
-                "module_name": "great_expectations.dataset",
-            },
-            "credentials": {
+        # Make sure passwords are masked in password or url fields
+        data_context_parameterized_expectation_suite.add_datasource(
+            "postgres_source_with_password",
+            initialize=False,
+            module_name="great_expectations.datasource",
+            class_name="SqlAlchemyDatasource",
+            credentials={
                 "drivername": "postgresql",
                 "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                 "port": "65432",
                 "username": "username_str",
-                "password": "***",
+                "password": "password_str",
                 "database": "database_str",
             },
-        },
-        {
-            "name": "postgres_source_with_password_in_url",
-            "class_name": "SqlAlchemyDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {
-                "class_name": "SqlAlchemyDataset",
-                "module_name": "great_expectations.dataset",
+        )
+
+        data_context_parameterized_expectation_suite.add_datasource(
+            "postgres_source_with_password_in_url",
+            initialize=False,
+            module_name="great_expectations.datasource",
+            class_name="SqlAlchemyDatasource",
+            credentials={
+                "url": "postgresql+psycopg2://username:password@host:65432/database",
             },
-            "credentials": {
-                "url": "postgresql+psycopg2://username:***@host:65432/database",
+        )
+
+        datasources = data_context_parameterized_expectation_suite.list_datasources()
+
+        assert datasources == [
+            {
+                "name": "mydatasource",
+                "class_name": "PandasDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {"class_name": "PandasDataset"},
+                "batch_kwargs_generators": {
+                    "mygenerator": {
+                        "base_directory": "../data",
+                        "class_name": "SubdirReaderBatchKwargsGenerator",
+                        "reader_options": {"engine": "python", "sep": None},
+                    }
+                },
             },
-        },
-    ]
+            {
+                "name": "second_pandas_source",
+                "class_name": "PandasDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {
+                    "class_name": "PandasDataset",
+                    "module_name": "great_expectations.dataset",
+                },
+            },
+            {
+                "name": "postgres_source_with_password",
+                "class_name": "SqlAlchemyDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {
+                    "class_name": "SqlAlchemyDataset",
+                    "module_name": "great_expectations.dataset",
+                },
+                "credentials": {
+                    "drivername": "postgresql",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+                    "port": "65432",
+                    "username": "username_str",
+                    "password": "***",
+                    "database": "database_str",
+                },
+            },
+            {
+                "name": "postgres_source_with_password_in_url",
+                "class_name": "SqlAlchemyDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {
+                    "class_name": "SqlAlchemyDataset",
+                    "module_name": "great_expectations.dataset",
+                },
+                "credentials": {
+                    "url": "postgresql+psycopg2://username:***@host:65432/database",
+                },
+            },
+        ]
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -573,6 +576,7 @@ project_path/
                 styles/
                     data_docs_custom_styles.css
                 views/
+        profilers/
         uncommitted/
             config_variables.yml
             data_docs/
@@ -708,12 +712,14 @@ def test_add_store(empty_data_context):
     assert isinstance(new_store, ExpectationsStore)
 
 
+# noinspection PyPep8Naming
 def test_ExplorerDataContext(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
     explorer_data_context = ExplorerDataContext(context_root_directory)
     assert explorer_data_context._expectation_explorer_manager
 
 
+# noinspection PyPep8Naming
 def test_ConfigOnlyDataContext__initialization(
     tmp_path_factory, basic_data_context_config
 ):
@@ -851,7 +857,11 @@ def test_data_context_updates_expectation_suite_names(
             "a_new_new_suite_name.json",
         ),
     ) as suite_file:
-        loaded_suite = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite: ExpectationSuite = ExpectationSuite(
+            **loaded_suite_dict,
+            data_context=data_context_parameterized_expectation_suite,
+        )
         assert loaded_suite.expectation_suite_name == "a_new_new_suite_name"
 
     #   3. Using the new name but having the context draw that from the suite
@@ -1074,6 +1084,7 @@ great_expectations/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -1099,6 +1110,7 @@ great_expectations/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -1157,6 +1169,7 @@ def test_data_context_create_builds_base_directories(tmp_path_factory):
     for directory in [
         "expectations",
         "plugins",
+        "profilers",
         "checkpoints",
         "uncommitted",
     ]:
@@ -1193,6 +1206,7 @@ def test_scaffold_directories(tmp_path_factory):
     assert set(os.listdir(empty_directory)) == {
         "plugins",
         "checkpoints",
+        "profilers",
         "expectations",
         ".gitignore",
         "uncommitted",
@@ -1422,13 +1436,12 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
     obs = context.get_checkpoint("my_checkpoint")
     assert isinstance(obs, Checkpoint)
-    config = obs.config
-    assert isinstance(config.to_json_dict(), dict)
-    assert config.to_json_dict() == {
-        "module_name": "great_expectations.checkpoint",
-        "class_name": "LegacyCheckpoint",
-        "config_version": None,
+    config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
+    assert isinstance(config, dict)
+    assert config == {
         "name": "my_checkpoint",
+        "class_name": "LegacyCheckpoint",
+        "module_name": "great_expectations.checkpoint",
         "batches": [
             {
                 "batch_kwargs": {
@@ -1451,7 +1464,7 @@ def test_get_checkpoint(empty_context_with_checkpoint):
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
@@ -1463,7 +1476,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
         "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
     with pytest.raises(ge_exceptions.CheckpointError) as e:
@@ -1471,7 +1484,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
 
 
 def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
@@ -1484,7 +1497,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
         "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
     with pytest.raises(ge_exceptions.InvalidCheckpointConfigError) as e:
@@ -1494,7 +1507,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
 def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
     empty_data_context,
 ):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
@@ -1511,7 +1524,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
         "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
     with pytest.raises(ge_exceptions.CheckpointError) as e:
@@ -1519,7 +1532,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
 
 
 def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
@@ -1532,7 +1545,7 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
     with pytest.raises(ge_exceptions.CheckpointError) as e:
@@ -1611,9 +1624,9 @@ def test_run_checkpoint_new_style(
 
 
 def test_get_validator_with_instantiated_expectation_suite(
-    empty_data_context, tmp_path_factory
+    empty_data_context_stats_enabled, tmp_path_factory
 ):
-    context = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -1659,7 +1672,9 @@ data_connectors:
         batch_identifiers={
             "alphanumeric": "some_file",
         },
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
     )
     assert my_validator.expectation_suite_name == "my_expectation_suite"
 
@@ -1750,6 +1765,34 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+def test_add_expectation_to_expectation_suite(
+    mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
+
+    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="my_new_expectation_suite"
+    )
+    expectation_suite.add_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        )
+    ]
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_add_checkpoint_from_yaml(mock_emit, empty_data_context_stats_enabled):
     """
     What does this test and why?
@@ -1817,7 +1860,7 @@ module_name: great_expectations.checkpoint
 class_name: Checkpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
-batch_request:
+batch_request: {}
 action_list:
   - name: store_validation_result
     action:
@@ -1854,10 +1897,30 @@ expectation_suite_ge_cloud_id:
         checkpoint_from_disk = cf.read()
 
     assert checkpoint_from_disk == expected_checkpoint_yaml
-    assert checkpoint_from_yaml.config.to_yaml_str() == expected_checkpoint_yaml
+    assert (
+        checkpoint_from_yaml.get_config(mode=ConfigOutputModes.YAML)
+        == expected_checkpoint_yaml
+    )
+    assert deep_filter_properties_iterable(
+        properties=checkpoint_from_yaml.get_config(mode=ConfigOutputModes.DICT),
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=dict(yaml.load(expected_checkpoint_yaml)),
+        clean_falsy=True,
+    )
 
-    checkpoint_from_store = context.get_checkpoint(checkpoint_name)
-    assert checkpoint_from_store.config.to_yaml_str() == expected_checkpoint_yaml
+    checkpoint_from_store = context.get_checkpoint(name=checkpoint_name)
+    assert (
+        checkpoint_from_store.get_config(mode=ConfigOutputModes.YAML)
+        == expected_checkpoint_yaml
+    )
+    assert deep_filter_properties_iterable(
+        properties=checkpoint_from_store.get_config(mode=ConfigOutputModes.DICT),
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=dict(yaml.load(expected_checkpoint_yaml)),
+        clean_falsy=True,
+    )
 
     expected_action_list = [
         {
@@ -1885,15 +1948,14 @@ expectation_suite_ge_cloud_id:
     )
 
     assert checkpoint_from_yaml.name == checkpoint_name
-    assert checkpoint_from_yaml.config.to_json_dict() == {
+    assert checkpoint_from_yaml.get_config(
+        mode=ConfigOutputModes.JSON_DICT, clean_falsy=True
+    ) == {
         "name": "my_new_checkpoint",
         "config_version": 1.0,
-        "template_name": None,
-        "module_name": "great_expectations.checkpoint",
         "class_name": "Checkpoint",
+        "module_name": "great_expectations.checkpoint",
         "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
-        "expectation_suite_name": None,
-        "batch_request": None,
         "action_list": [
             {
                 "name": "store_validation_result",
@@ -1908,9 +1970,6 @@ expectation_suite_ge_cloud_id:
                 "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
             },
         ],
-        "evaluation_parameters": {},
-        "expectation_suite_ge_cloud_id": None,
-        "runtime_configuration": {},
         "validations": [
             {
                 "batch_request": {
@@ -1922,8 +1981,6 @@ expectation_suite_ge_cloud_id:
                 "expectation_suite_name": "newsuite",
             }
         ],
-        "profilers": [],
-        "ge_cloud_id": None,
     }
 
     assert isinstance(checkpoint_from_yaml, Checkpoint)

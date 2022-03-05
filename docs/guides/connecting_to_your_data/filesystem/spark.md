@@ -150,9 +150,9 @@ the same parameters can be added to the Datasource configuration at the DataConn
 If you have a directory with 3 CSV files with each file having 10,000 lines each: 
 
 ```bash
-  taxi_data_files/yellow_trip_data_sample_2019-1.csv
-  taxi_data_files/yellow_trip_data_sample_2019-2.csv
-  taxi_data_files/yellow_trip_data_sample_2019-3.csv
+  taxi_data_files/yellow_tripdata_sample_2019-1.csv
+  taxi_data_files/yellow_tripdata_sample_2019-2.csv
+  taxi_data_files/yellow_tripdata_sample_2019-3.csv
 ```
 
 You could write a `BatchRequest` that reads in the entire folder as a single Spark Dataframe by specifying the `reader_method` to be `csv`, `header` to be set to `True` in the `reader_options`. 

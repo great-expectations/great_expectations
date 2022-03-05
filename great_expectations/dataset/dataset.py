@@ -101,7 +101,7 @@ class MetaDataset(DataAsset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -590,7 +590,7 @@ class Dataset(MetaDataset):
     def expect_table_columns_to_match_set(
         self,
         column_set: Optional[Union[Set[str], List[str]]],
-        exact_match: Optional[bool] = True,
+        exact_match: bool = True,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -2668,10 +2668,14 @@ class Dataset(MetaDataset):
 
         """
         if min_value is not None and not isinstance(min_value, Number):
-            raise ValueError("min_value must be a number")
+            raise ValueError(
+                "min_value must be a datetime (for datetime columns) or number"
+            )
 
         if max_value is not None and not isinstance(max_value, Number):
-            raise ValueError("max_value must be a number")
+            raise ValueError(
+                "max_value must be a datetime (for datetime columns) or number"
+            )
 
         column_mean = self.get_column_mean(column)
 
@@ -2922,7 +2926,7 @@ class Dataset(MetaDataset):
         quantile_value_ranges = quantile_ranges["value_ranges"]
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(
-                "quntile_values and quantiles must have the same number of elements"
+                "quantile_values and quantiles must have the same number of elements"
             )
 
         quantile_vals = self.get_column_quantiles(
@@ -3519,7 +3523,9 @@ class Dataset(MetaDataset):
                     try:
                         min_value = parse(min_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'min_value': {e}"
+                        )
 
                 if strict_min:
                     above_min = column_min > min_value
@@ -3533,7 +3539,9 @@ class Dataset(MetaDataset):
                     try:
                         max_value = parse(max_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'max_value': {e}"
+                        )
 
                 if strict_max:
                     below_max = column_min < max_value
@@ -3650,7 +3658,9 @@ class Dataset(MetaDataset):
                     try:
                         min_value = parse(min_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'min_value': {e}"
+                        )
 
                 if strict_min:
                     above_min = column_max > min_value
@@ -3664,7 +3674,9 @@ class Dataset(MetaDataset):
                     try:
                         max_value = parse(max_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'max_value': {e}"
+                        )
 
                 if strict_max:
                     below_max = column_max < max_value
@@ -4768,16 +4780,16 @@ class Dataset(MetaDataset):
             A B C
             1 3 2
             1 5 0
-            1 1 4        
-            
+            1 1 4
+
             Pass
-            
+
             A B C
             1 3 2
             1 5 1
-            1 1 4        
-            
-            Fail on row 2     
+            1 1 4
+
+            Fail on row 2
 
         Args:
             column_list (List[str]): \

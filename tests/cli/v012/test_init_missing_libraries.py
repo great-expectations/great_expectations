@@ -10,6 +10,7 @@ from great_expectations.cli.v012.python_subprocess import (
 from great_expectations.util import gen_directory_tree_str, is_library_loadable
 from tests.cli.v012.test_cli import yaml
 from tests.cli.v012.utils import assert_no_logging_messages_or_tracebacks
+from tests.test_utils import set_directory
 
 
 def _library_not_loaded_test(
@@ -23,81 +24,79 @@ def _library_not_loaded_test(
     """
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
     basedir = str(basedir)
-    os.chdir(basedir)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli, ["init", "--no-view"], input=cli_input, catch_exceptions=False
-    )
-    stdout = result.output
+    with set_directory(basedir):
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli, ["init", "--no-view"], input=cli_input, catch_exceptions=False
+        )
+        stdout = result.output
 
-    assert "Always know what to expect from your data" in stdout
-    assert "What data would you like Great Expectations to connect to" in stdout
-    assert "Which database backend are you using" in stdout
-    assert "Give your new Datasource a short name" in stdout
-    assert (
-        """Next, we will configure database credentials and store them in the `my_db` section
-of this config file: great_expectations/uncommitted/config_variables.yml"""
-        in stdout
-    )
-    assert (
-        f"""Great Expectations relies on the library `{library_import_name}` to connect to your data, \
-but the package `{library_name}` containing this library is not installed.
-    Would you like Great Expectations to try to execute `pip install {library_name}` for you?"""
-        in stdout
-    )
-    assert (
-        f"""\nOK, exiting now.
-    - Please execute `pip install {library_name}` before trying again."""
-        in stdout
-    )
+        assert "Always know what to expect from your data" in stdout
+        assert "What data would you like Great Expectations to connect to" in stdout
+        assert "Which database backend are you using" in stdout
+        assert "Give your new Datasource a short name" in stdout
+        assert (
+            "Next, we will configure database credentials and store them in the `my_db` section"
+            in stdout
+        )
+        assert (
+            f"Great Expectations relies on the library `{library_import_name}` to connect to your data"
+            in stdout
+        )
+        assert (
+            f"but the package `{library_name}` containing this library is not installed"
+            in stdout
+        )
+        assert (
+            f"Would you like Great Expectations to try to execute `pip install {library_name}` for you?"
+            in stdout
+        )
+        assert (
+            f"Please execute `pip install {library_name}` before trying again."
+            in stdout
+        )
 
-    assert "Profiling" not in stdout
-    assert "Building" not in stdout
-    assert "Data Docs" not in stdout
-    assert "Great Expectations is now set up" not in stdout
+        assert "Profiling" not in stdout
+        assert "Building" not in stdout
+        assert "Data Docs" not in stdout
+        assert "Great Expectations is now set up" not in stdout
 
-    assert result.exit_code == 1
+        assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+        assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+        config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+        assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path))
-    assert config["datasources"] == {}
+        config = yaml.load(open(config_path))
+        assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
-    assert (
-        obs_tree
-        == """\
+        obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+        assert (
+            obs_tree
+            == """\
 great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
     expectations/
         .ge_store_backend_id
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
         validations/
             .ge_store_backend_id
 """
-    )
+        )
 
-    assert_no_logging_messages_or_tracebacks(my_caplog, result)
+        assert_no_logging_messages_or_tracebacks(my_caplog, result)
 
 
 @pytest.mark.skipif(
@@ -115,25 +114,25 @@ def test_init_install_sqlalchemy(caplog, tmp_path_factory):
 
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
     basedir = str(basedir)
-    os.chdir(basedir)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli, ["init", "--no-view"], input=cli_input, catch_exceptions=False
-    )
-    stdout = result.output
+    with set_directory(basedir):
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli, ["init", "--no-view"], input=cli_input, catch_exceptions=False
+        )
+        stdout = result.output
 
-    assert "Always know what to expect from your data" in stdout
-    assert "What data would you like Great Expectations to connect to" in stdout
-    assert (
-        f"""Great Expectations relies on the library `{library_import_name}` to connect to your data, \
-but the package `{library_name}` containing this library is not installed.
-    Would you like Great Expectations to try to execute `pip install {library_name}` for you?"""
-        in stdout
-    )
+        assert "Always know what to expect from your data" in stdout
+        assert "What data would you like Great Expectations to connect to" in stdout
+        assert (
+            f"""Great Expectations relies on the library `{library_import_name}` to connect to your data, \
+    but the package `{library_name}` containing this library is not installed.
+        Would you like Great Expectations to try to execute `pip install {library_name}` for you?"""
+            in stdout
+        )
 
-    # NOW, IN AN EVIL KNOWN ONLY TO SLEEPLESS PROGRAMMERS, WE USE OUR UTILITY TO INSTALL SQLALCHEMY
-    _ = execute_shell_command_with_progress_polling("pip install sqlalchemy")
+        # NOW, IN AN EVIL KNOWN ONLY TO SLEEPLESS PROGRAMMERS, WE USE OUR UTILITY TO INSTALL SQLALCHEMY
+        _ = execute_shell_command_with_progress_polling("pip install sqlalchemy")
 
 
 @pytest.mark.skipif(
@@ -214,74 +213,70 @@ def test_cli_init_spark_without_library_installed_instructs_user(
 ):
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
     basedir = str(basedir)
-    os.chdir(basedir)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli, ["init", "--no-view"], input="\n\n1\n2\nn\n", catch_exceptions=False
-    )
-    stdout = result.output
+    with set_directory(basedir):
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli, ["init", "--no-view"], input="\n\n1\n2\nn\n", catch_exceptions=False
+        )
+        stdout = result.output
 
-    assert "Always know what to expect from your data" in stdout
-    assert "What data would you like Great Expectations to connect to" in stdout
-    assert "What are you processing your files with" in stdout
-    assert (
-        f"""Great Expectations relies on the library `pyspark` to connect to your data, \
-but the package `pyspark` containing this library is not installed.
-    Would you like Great Expectations to try to execute `pip install pyspark` for you?"""
-        in stdout
-    )
-    assert (
-        f"""\nOK, exiting now.
-    - Please execute `pip install pyspark` before trying again."""
-        in stdout
-    )
-    # assert "Great Expectations relies on the library `pyspark`" in stdout
-    # assert "Please `pip install pyspark` before trying again" in stdout
+        assert "Always know what to expect from your data" in stdout
+        assert "What data would you like Great Expectations to connect to" in stdout
+        assert "What are you processing your files with" in stdout
+        assert (
+            f"Great Expectations relies on the library `pyspark` to connect to your data"
+            in stdout
+        )
+        assert (
+            f"but the package `pyspark` containing this library is not installed."
+            in stdout
+        )
+        assert (
+            f"Would you like Great Expectations to try to execute `pip install pyspark` for you?"
+            in stdout
+        )
+        assert f"Please execute `pip install pyspark` before trying again." in stdout
+        # assert "Great Expectations relies on the library `pyspark`" in stdout
+        # assert "Please `pip install pyspark` before trying again" in stdout
 
-    assert "Profiling" not in stdout
-    assert "Building" not in stdout
-    assert "Data Docs" not in stdout
-    assert "Great Expectations is now set up" not in stdout
+        assert "Profiling" not in stdout
+        assert "Building" not in stdout
+        assert "Data Docs" not in stdout
+        assert "Great Expectations is now set up" not in stdout
 
-    assert result.exit_code == 1
+        assert result.exit_code == 1
 
-    assert os.path.isdir(os.path.join(basedir, "great_expectations"))
-    config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
-    assert os.path.isfile(config_path)
+        assert os.path.isdir(os.path.join(basedir, "great_expectations"))
+        config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
+        assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path))
-    assert config["datasources"] == {}
+        config = yaml.load(open(config_path))
+        assert config["datasources"] == {}
 
-    obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
-    assert (
-        obs_tree
-        == """\
+        obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
+        assert (
+            obs_tree
+            == """\
 great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
     expectations/
         .ge_store_backend_id
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
         validations/
             .ge_store_backend_id
 """
-    )
+        )
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+        assert_no_logging_messages_or_tracebacks(caplog, result)

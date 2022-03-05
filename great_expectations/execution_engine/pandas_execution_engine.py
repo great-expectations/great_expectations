@@ -2,7 +2,6 @@ import copy
 import datetime
 import hashlib
 import logging
-import os
 import pickle
 import random
 import warnings
@@ -31,8 +30,11 @@ logger = logging.getLogger(__name__)
 
 try:
     import boto3
+    from botocore.exceptions import ClientError, ParamValidationError
 except ImportError:
     boto3 = None
+    ClientError = None
+    ParamValidationError = None
     logger.debug(
         "Unable to load AWS connection object; install optional boto3 dependency for support"
     )
@@ -46,6 +48,7 @@ except ImportError:
     )
 
 try:
+    from google.api_core.exceptions import GoogleAPIError
     from google.auth.exceptions import DefaultCredentialsError
     from google.cloud import storage
     from google.oauth2 import service_account
@@ -108,37 +111,11 @@ Notes:
         azure_options: dict = kwargs.pop("azure_options", {})
         gcs_options: dict = kwargs.pop("gcs_options", {})
 
-        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
-        try:
-            self._s3 = boto3.client("s3", **boto3_options)
-        except (TypeError, AttributeError):
-            self._s3 = None
-
-        try:
-            if "conn_str" in azure_options:
-                self._azure = BlobServiceClient.from_connection_string(**azure_options)
-            else:
-                self._azure = BlobServiceClient(**azure_options)
-        except (TypeError, AttributeError):
-            self._azure = None
-
-        # Can only configure a GCS connection by 1) seting an env var OR 2) passing explicit credentials
-        if os.getenv("GOOGLE_APPLICATION_CREDENTIALS") is None and gcs_options == {}:
-            self._gcs = None
-        else:
-            try:
-                credentials = None  # If configured with gcloud CLI / env vars
-                if "filename" in gcs_options:
-                    credentials = service_account.Credentials.from_service_account_file(
-                        **gcs_options
-                    )
-                elif "info" in gcs_options:
-                    credentials = service_account.Credentials.from_service_account_info(
-                        **gcs_options
-                    )
-                self._gcs = storage.Client(credentials=credentials, **gcs_options)
-            except (TypeError, AttributeError):
-                self._gcs = None
+        # Instantiate cloud provider clients as None at first.
+        # They will be instantiated if/when passed cloud-specific in BatchSpec is passed in
+        self._s3 = None
+        self._azure = None
+        self._gcs = None
 
         super().__init__(*args, **kwargs)
 
@@ -150,6 +127,51 @@ Notes:
                 "gcs_options": gcs_options,
             }
         )
+
+    def _instantiate_azure_client(self):
+        azure_options = self.config.get("azure_options", {})
+        try:
+            if "conn_str" in azure_options:
+                self._azure = BlobServiceClient.from_connection_string(**azure_options)
+            else:
+                self._azure = BlobServiceClient(**azure_options)
+        except (TypeError, AttributeError):
+            self._azure = None
+
+    def _instantiate_s3_client(self):
+        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
+        boto3_options = self.config.get("boto3_options", {})
+        try:
+            self._s3 = boto3.client("s3", **boto3_options)
+        except (TypeError, AttributeError):
+            self._s3 = None
+
+    def _instantiate_gcs_client(self):
+        """
+        Helper method for instantiating GCS client when GCSBatchSpec is passed in.
+
+        The method accounts for 3 ways that a GCS connection can be configured:
+            1. setting an environment variable, which is typically GOOGLE_APPLICATION_CREDENTIALS
+            2. passing in explicit credentials via gcs_options
+            3. running Great Expectations from within a GCP container, at which you would be able to create a Client
+                without passing in an additional environment variable or explicit credentials
+        """
+        gcs_options = self.config.get("gcs_options", {})
+        try:
+            credentials = None  # If configured with gcloud CLI / env vars
+            if "filename" in gcs_options:
+                filename = gcs_options.pop("filename")
+                credentials = service_account.Credentials.from_service_account_file(
+                    filename=filename
+                )
+            elif "info" in gcs_options:
+                info = gcs_options.pop("info")
+                credentials = service_account.Credentials.from_service_account_info(
+                    info=info
+                )
+            self._gcs = storage.Client(credentials=credentials, **gcs_options)
+        except (TypeError, AttributeError, DefaultCredentialsError):
+            self._gcs = None
 
     def configure_validator(self, validator):
         super().configure_validator(validator)
@@ -199,20 +221,28 @@ Please check your config."""
 
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
+                self._instantiate_s3_client()
+            # if we were not able to instantiate S3 client, then raise error
+            if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine has been passed a S3BatchSpec,
+                    """PandasExecutionEngine has been passed a S3BatchSpec,
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
                 )
             s3_engine = self._s3
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
-            s3_url = S3Url(path)
-            if "compression" not in reader_options.keys():
-                inferred_compression_param = sniff_s3_compression(s3_url)
-                if inferred_compression_param is not None:
-                    reader_options["compression"] = inferred_compression_param
-            s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
+            try:
+                reader_method: str = batch_spec.reader_method
+                reader_options: dict = batch_spec.reader_options or {}
+                path: str = batch_spec.path
+                s3_url = S3Url(path)
+                if "compression" not in reader_options.keys():
+                    inferred_compression_param = sniff_s3_compression(s3_url)
+                    if inferred_compression_param is not None:
+                        reader_options["compression"] = inferred_compression_param
+                s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
+            except (ParamValidationError, ClientError) as error:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
+                )
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(
                     s3_url.bucket, s3_url.key
@@ -225,8 +255,11 @@ Please check your config."""
 
         elif isinstance(batch_spec, AzureBatchSpec):
             if self._azure is None:
+                self._instantiate_azure_client()
+            # if we were not able to instantiate Azure client, then raise error
+            if self._azure is None:
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine has been passed a AzureBatchSpec,
+                    """PandasExecutionEngine has been passed a AzureBatchSpec,
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
             azure_engine = self._azure
@@ -248,19 +281,27 @@ Please check your config."""
 
         elif isinstance(batch_spec, GCSBatchSpec):
             if self._gcs is None:
+                self._instantiate_gcs_client()
+            # if we were not able to instantiate GCS client, then raise error
+            if self._gcs is None:
                 raise ge_exceptions.ExecutionEngineError(
-                    f"""PandasExecutionEngine has been passed a GCSBatchSpec,
+                    """PandasExecutionEngine has been passed a GCSBatchSpec,
                         but the ExecutionEngine does not have an GCS client configured. Please check your config."""
                 )
             gcs_engine = self._gcs
             gcs_url = GCSUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
-            gcs_blob = gcs_bucket.blob(gcs_url.blob)
-            logger.debug(
-                f"Fetching GCS blob. Bucket: {gcs_url.bucket} Blob: {gcs_url.blob}"
-            )
+            try:
+                gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
+                gcs_blob = gcs_bucket.blob(gcs_url.blob)
+                logger.debug(
+                    f"Fetching GCS blob. Bucket: {gcs_url.bucket} Blob: {gcs_url.blob}"
+                )
+            except GoogleAPIError as error:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from GCS Bucket: {error}"""
+                )
             reader_fn = self._get_reader_fn(reader_method, gcs_url.blob)
             buf = BytesIO(gcs_blob.download_as_bytes())
             buf.seek(0)
@@ -311,6 +352,43 @@ Please check your config."""
 
         return self.active_batch_data.dataframe
 
+    # NOTE Abe 20201105: Any reason this shouldn't be a private method?
+    @staticmethod
+    def guess_reader_method_from_path(path):
+        """Helper method for deciding which reader to use to read in a certain path.
+
+        Args:
+            path (str): the to use to guess
+
+        Returns:
+            ReaderMethod to use for the filepath
+
+        """
+        if path.endswith(".csv") or path.endswith(".tsv"):
+            return {"reader_method": "read_csv"}
+        elif path.endswith(".parquet"):
+            return {"reader_method": "read_parquet"}
+        elif path.endswith(".xlsx") or path.endswith(".xls"):
+            return {"reader_method": "read_excel"}
+        elif path.endswith(".json"):
+            return {"reader_method": "read_json"}
+        elif path.endswith(".pkl"):
+            return {"reader_method": "read_pickle"}
+        elif path.endswith(".feather"):
+            return {"reader_method": "read_feather"}
+        elif path.endswith(".csv.gz") or path.endswith(".tsv.gz"):
+            return {
+                "reader_method": "read_csv",
+                "reader_options": {"compression": "gzip"},
+            }
+        elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
+            return {"reader_method": "read_sas"}
+
+        else:
+            raise ge_exceptions.ExecutionEngineError(
+                f'Unable to determine reader method from path: "{path}".'
+            )
+
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
         correct reader_method.
@@ -345,40 +423,6 @@ Please check your config."""
             raise ge_exceptions.ExecutionEngineError(
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
-
-    # NOTE Abe 20201105: Any reason this shouldn't be a private method?
-    @staticmethod
-    def guess_reader_method_from_path(path):
-        """Helper method for deciding which reader to use to read in a certain path.
-
-        Args:
-            path (str): the to use to guess
-
-        Returns:
-            ReaderMethod to use for the filepath
-
-        """
-        if path.endswith(".csv") or path.endswith(".tsv"):
-            return {"reader_method": "read_csv"}
-        elif path.endswith(".parquet"):
-            return {"reader_method": "read_parquet"}
-        elif path.endswith(".xlsx") or path.endswith(".xls"):
-            return {"reader_method": "read_excel"}
-        elif path.endswith(".json"):
-            return {"reader_method": "read_json"}
-        elif path.endswith(".pkl"):
-            return {"reader_method": "read_pickle"}
-        elif path.endswith(".feather"):
-            return {"reader_method": "read_feather"}
-        elif path.endswith(".csv.gz") or path.endswith(".tsv.gz"):
-            return {
-                "reader_method": "read_csv",
-                "reader_options": {"compression": "gzip"},
-            }
-
-        raise ge_exceptions.ExecutionEngineError(
-            f'Unable to determine reader method from path: "{path}".'
-        )
 
     def get_domain_records(
         self,
@@ -430,9 +474,7 @@ Please check your config."""
                 )
             else:
                 # Querying row condition
-                data = data.query(row_condition, parser=condition_parser).reset_index(
-                    drop=True
-                )
+                data = data.query(row_condition, parser=condition_parser)
 
         if "column" in domain_kwargs:
             return data
@@ -740,7 +782,7 @@ Please check your config."""
         hash_value: str = "f",
         hash_function_name: str = "md5",
     ):
-        """Hash the values in the named column, and split on that"""
+        """Hash the values in the named column, and only keep rows that match the given hash_value"""
         try:
             hash_func = getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError):

@@ -26,12 +26,16 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional
+from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse
+from packaging import version
 from pkg_resources import Distribution
 
-from great_expectations.core.expectation_suite import expectationSuiteSchema
+from great_expectations.core.expectation_suite import (
+    ExpectationSuite,
+    expectationSuiteSchema,
+)
 from great_expectations.exceptions import (
     GreatExpectationsError,
     PluginClassNotFoundError,
@@ -40,17 +44,34 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import _registered_expectations
 
 try:
+    import black
+except ImportError:
+    black = None
+
+try:
     # This library moved in python 3.8
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
     # Fallback for python < 3.8
     import importlib_metadata
 
-
 logger = logging.getLogger(__name__)
 
+try:
+    import sqlalchemy as sa
+    from sqlalchemy import Table
+    from sqlalchemy.engine import reflection
+    from sqlalchemy.sql import Select
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sa = None
+    reflection = None
+    Table = None
+    Select = None
 
-SINGULAR_TO_PLURAL_LOOKUP_DICT = {
+SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "batch": "batches",
     "checkpoint": "checkpoints",
     "data_asset": "data_assets",
@@ -62,7 +83,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "rendered_data_doc": "rendered_data_docs",
 }
 
-PLURAL_TO_SINGULAR_LOOKUP_DICT = {
+PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "batches": "batch",
     "checkpoints": "checkpoint",
     "data_assets": "data_asset",
@@ -73,6 +94,8 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
 }
+
+MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES: int = 3
 
 
 def pluralize(singular_ge_noun):
@@ -124,8 +147,8 @@ def underscore(word: str) -> str:
     return word.lower()
 
 
-def hyphen(input: str):
-    return input.replace("_", "-")
+def hyphen(txt: str):
+    return txt.replace("_", "-")
 
 
 def profile(func: Callable = None) -> Callable:
@@ -145,22 +168,32 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(func: Callable = None) -> Callable:
-    @wraps(func)
-    def compute_delta_t(*args, **kwargs) -> Any:
-        time_begin: int = int(round(time.time() * 1000))
-        try:
-            return func(*args, **kwargs)
-        finally:
-            time_end: int = int(round(time.time() * 1000))
-            delta_t: int = time_end - time_begin
-            bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-            call_args: OrderedDict = bound_args.arguments
-            print(
-                f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
-            )
+def measure_execution_time(
+    pretty_print: bool = False,
+) -> Callable:
+    def execution_time_decorator(func: Callable) -> Callable:
+        func.execution_duration_milliseconds = 0
 
-    return compute_delta_t
+        @wraps(func)
+        def compute_delta_t(*args, **kwargs) -> Any:
+            time_begin: int = int(round(time.time() * 1000))
+            try:
+                return func(*args, **kwargs)
+            finally:
+                time_end: int = int(round(time.time() * 1000))
+                delta_t: int = time_end - time_begin
+                func.execution_duration_milliseconds = delta_t
+
+                if pretty_print:
+                    bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
+                    call_args: OrderedDict = bound_args.arguments
+                    print(
+                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
+                    )
+
+        return compute_delta_t
+
+    return execution_time_decorator
 
 
 # noinspection SpellCheckingInspection
@@ -746,6 +779,50 @@ def read_pickle(
         )
 
 
+def read_sas(
+    filename,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
+    dataset_class=None,
+    expectation_suite=None,
+    profiler=None,
+    *args,
+    **kwargs,
+):
+    """Read a file using Pandas read_sas and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
+        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
+            if not specified, try to load the class named via the class_name and module_name parameters
+        expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
+
+    Returns:
+        great_expectations dataset
+    """
+    import pandas as pd
+
+    df = pd.read_sas(filename, *args, **kwargs)
+    if dataset_class is not None:
+        return _convert_to_dataset_class(
+            df=df,
+            dataset_class=dataset_class,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+    else:
+        return _load_and_convert_to_dataset_class(
+            df=df,
+            class_name=class_name,
+            module_name=module_name,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+
+
 def validate(
     data_asset,
     expectation_suite=None,
@@ -795,7 +872,12 @@ def validate(
         )
     else:
         if isinstance(expectation_suite, dict):
-            expectation_suite = expectationSuiteSchema.load(expectation_suite)
+            expectation_suite_dict: dict = expectationSuiteSchema.load(
+                expectation_suite
+            )
+            expectation_suite: ExpectationSuite = ExpectationSuite(
+                **expectation_suite_dict, data_context=data_context
+            )
         if data_asset_name is not None:
             raise ValueError(
                 "When providing an expectation suite, data_asset_name cannot also be provided."
@@ -892,34 +974,75 @@ def gen_directory_tree_str(startpath):
 
 def lint_code(code: str) -> str:
     """Lint strings of code passed in.  Optional dependency "black" must be installed."""
-    try:
-        import black
 
-        black_file_mode = black.FileMode()
-        if not isinstance(code, str):
-            raise TypeError
-        try:
-            linted_code = black.format_file_contents(
-                code, fast=True, mode=black_file_mode
-            )
-            return linted_code
-        except (black.NothingChanged, RuntimeError):
-            return code
-    except ImportError:
+    # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
+    # While this seems to resolve the issue, the root cause is yet to be determined.
+
+    if black is None:
         logger.warning(
             "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
         )
         return code
 
+    black_file_mode = black.FileMode()
+    if not isinstance(code, str):
+        raise TypeError
+    try:
+        linted_code = black.format_file_contents(code, fast=True, mode=black_file_mode)
+        return linted_code
+    except (black.NothingChanged, RuntimeError):
+        return code
+
+
+def convert_json_string_to_be_python_compliant(code: str) -> str:
+    """Cleans JSON-formatted string to adhere to Python syntax
+
+    Substitute instances of 'null' with 'None' in string representations of Python dictionaries.
+    Additionally, substitutes instances of 'true' or 'false' with their Python equivalents.
+
+    Args:
+        code: JSON string to update
+
+    Returns:
+        Clean, Python-compliant string
+
+    """
+    code = _convert_nulls_to_None(code)
+    code = _convert_json_bools_to_python_bools(code)
+    return code
+
+
+def _convert_nulls_to_None(code: str) -> str:
+    pattern = r'"([a-zA-Z0-9_]+)": null'
+    result = re.findall(pattern, code)
+    for match in result:
+        code = code.replace(f'"{match}": null', f'"{match}": None')
+        logger.info(
+            f"Replaced '{match}: null' with '{match}: None' before writing to file"
+        )
+    return code
+
+
+def _convert_json_bools_to_python_bools(code: str) -> str:
+    pattern = r'"([a-zA-Z0-9_]+)": (true|false)'
+    result = re.findall(pattern, code)
+    for match in result:
+        identifier, boolean = match
+        curr = f'"{identifier}": {boolean}'
+        updated = f'"{identifier}": {boolean.title()}'  # true -> True | false -> False
+        code = code.replace(curr, updated)
+        logger.info(f"Replaced '{curr}' with '{updated}' before writing to file")
+    return code
+
 
 def filter_properties_dict(
-    properties: dict,
-    keep_fields: Optional[list] = None,
-    delete_fields: Optional[list] = None,
-    clean_nulls: Optional[bool] = True,
-    clean_falsy: Optional[bool] = False,
-    keep_falsy_numerics: Optional[bool] = True,
-    inplace: Optional[bool] = False,
+    properties: Optional[dict] = None,
+    keep_fields: Optional[Set[str]] = None,
+    delete_fields: Optional[Set[str]] = None,
+    clean_nulls: bool = True,
+    clean_falsy: bool = False,
+    keep_falsy_numerics: bool = True,
+    inplace: bool = False,
 ) -> Optional[dict]:
     """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
 
@@ -936,18 +1059,35 @@ def filter_properties_dict(
     Returns:
         The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
     """
-    if keep_fields and delete_fields:
+    if keep_fields is None:
+        keep_fields = set()
+
+    if delete_fields is None:
+        delete_fields = set()
+
+    if keep_fields & delete_fields:
         raise ValueError(
-            "Only one of keep_fields and delete_fields filtering directives can be specified."
+            "Common keys between sets of keep_fields and delete_fields filtering directives are illegal."
         )
 
     if clean_falsy:
         clean_nulls = True
 
+    if properties is None:
+        properties = {}
+
+    if not isinstance(properties, dict):
+        raise ValueError(
+            f'Source "properties" must be a dictionary (illegal type "{str(type(properties))}" detected).'
+        )
+
     if not inplace:
         properties = copy.deepcopy(properties)
 
     keys_for_deletion: list = []
+
+    key: str
+    value: Any
 
     if keep_fields:
         keys_for_deletion.extend(
@@ -981,8 +1121,8 @@ def filter_properties_dict(
                     if not (
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
+                        or is_truthy(value=value)
                         or is_numeric(value=value)
-                        or value
                     )
                 ]
             )
@@ -994,7 +1134,7 @@ def filter_properties_dict(
                     if not (
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
-                        or value
+                        or is_truthy(value=value)
                     )
                 ]
             )
@@ -1010,12 +1150,120 @@ def filter_properties_dict(
     return properties
 
 
+def deep_filter_properties_iterable(
+    properties: Optional[Union[dict, list, set, tuple]] = None,
+    keep_fields: Optional[Set[str]] = None,
+    delete_fields: Optional[Set[str]] = None,
+    clean_nulls: bool = True,
+    clean_falsy: bool = False,
+    keep_falsy_numerics: bool = True,
+    inplace: bool = False,
+) -> Optional[Union[dict, list, set]]:
+    if isinstance(properties, dict):
+        if not inplace:
+            properties = copy.deepcopy(properties)
+
+        filter_properties_dict(
+            properties=properties,
+            keep_fields=keep_fields,
+            delete_fields=delete_fields,
+            clean_nulls=clean_nulls,
+            clean_falsy=clean_falsy,
+            keep_falsy_numerics=keep_falsy_numerics,
+            inplace=True,
+        )
+
+        key: str
+        value: Any
+        for key, value in properties.items():
+            deep_filter_properties_iterable(
+                properties=value,
+                keep_fields=keep_fields,
+                delete_fields=delete_fields,
+                clean_nulls=clean_nulls,
+                clean_falsy=clean_falsy,
+                keep_falsy_numerics=keep_falsy_numerics,
+                inplace=True,
+            )
+
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        keys_to_delete: List[str] = list(
+            filter(
+                lambda k: _is_to_be_removed_from_deep_filter_properties_iterable(
+                    value=properties[k],
+                    clean_nulls=clean_nulls,
+                    clean_falsy=clean_falsy,
+                    keep_falsy_numerics=keep_falsy_numerics,
+                ),
+                properties.keys(),
+            )
+        )
+        for key in keys_to_delete:
+            properties.pop(key)
+
+    elif isinstance(properties, (list, set, tuple)):
+        if not inplace:
+            properties = copy.deepcopy(properties)
+
+        value: Any
+        for value in properties:
+            deep_filter_properties_iterable(
+                properties=value,
+                keep_fields=keep_fields,
+                delete_fields=delete_fields,
+                clean_nulls=clean_nulls,
+                clean_falsy=clean_falsy,
+                keep_falsy_numerics=keep_falsy_numerics,
+                inplace=True,
+            )
+
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        properties = list(
+            filter(
+                lambda v: not _is_to_be_removed_from_deep_filter_properties_iterable(
+                    value=v,
+                    clean_nulls=clean_nulls,
+                    clean_falsy=clean_falsy,
+                    keep_falsy_numerics=keep_falsy_numerics,
+                ),
+                properties,
+            )
+        )
+
+    if inplace:
+        return None
+
+    return properties
+
+
+def _is_to_be_removed_from_deep_filter_properties_iterable(
+    value: Any, clean_nulls: bool, clean_falsy: bool, keep_falsy_numerics: bool
+) -> bool:
+    conditions: Tuple[bool, ...] = (
+        clean_nulls and value is None,
+        not keep_falsy_numerics and is_numeric(value) and value == 0,
+        clean_falsy and not is_numeric(value) and not value,
+    )
+    return any(condition for condition in conditions)
+
+
+def is_truthy(value: Any) -> bool:
+    try:
+        if value:
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
+
+
 def is_numeric(value: Any) -> bool:
     return value is not None and (is_int(value=value) or is_float(value=value))
 
 
 def is_int(value: Any) -> bool:
     try:
+        # noinspection PyUnusedLocal
         num: int = int(value)
     except (TypeError, ValueError):
         return False
@@ -1024,10 +1272,29 @@ def is_int(value: Any) -> bool:
 
 def is_float(value: Any) -> bool:
     try:
+        # noinspection PyUnusedLocal
         num: float = float(value)
     except (TypeError, ValueError):
         return False
     return True
+
+
+def is_nan(value: Any) -> bool:
+    """
+    If value is an array, test element-wise for NaN and return result as a boolean array.
+    If value is a scalar, return boolean.
+    Args:
+        value: The value to test
+
+    Returns:
+        The results of the test
+    """
+    import numpy as np
+
+    try:
+        return np.isnan(value)
+    except TypeError:
+        return True
 
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
@@ -1073,8 +1340,102 @@ def delete_blank_lines(text: str) -> str:
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: Optional[str] = "ge_temp_",
-    num_digits: Optional[int] = 8,
+    default_table_name_prefix: str = "ge_temp_",
+    num_digits: int = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
     return table_name
+
+
+def get_sqlalchemy_inspector(engine):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
+        insp = reflection.Inspector.from_engine(engine)
+    else:
+        insp = sa.inspect(engine)
+    return insp
+
+
+def get_sqlalchemy_url(drivername, **credentials):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Calling URL() deprecated since 1.4, URL.create() should be used instead
+        url = sa.engine.url.URL(drivername, **credentials)
+    else:
+        url = sa.engine.url.URL.create(drivername, **credentials)
+    return url
+
+
+def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
+    """
+    Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
+    without explicitly turning the inner select() into a subquery first. This helper method ensures that this
+    conversion takes place.
+
+    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
+    """
+    if version.parse(sa.__version__) >= version.parse("1.4"):
+        if isinstance(selectable, Select):
+            selectable = selectable.subquery()
+    return selectable
+
+
+def get_sqlalchemy_domain_data(domain_data):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
+        # select(query).subquery() should be used instead
+        domain_data = sa.select(["*"]).select_from(domain_data)
+    # engine.get_domain_records returns a valid select object;
+    # calling fetchall at execution is equivalent to a SELECT *
+    return domain_data
+
+
+def import_make_url():
+    """
+    Beginning from SQLAlchemy 1.4, make_url is accessed from sqlalchemy.engine; earlier versions must
+    still be accessed from sqlalchemy.engine.url to avoid import errors.
+    """
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        from sqlalchemy.engine.url import make_url
+    else:
+        from sqlalchemy.engine import make_url
+    return make_url
+
+
+def probabilistic_test(
+    func: Callable = None,
+    max_num_retries: int = MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES,
+) -> Callable:
+    @wraps(func)
+    def run_pytest_method(*args, **kwargs) -> None:
+        assertion_error: Optional[AssertionError] = None
+        error_message: Optional[str] = None
+
+        all_assertions_passed: bool = False
+
+        idx: int = 0
+        while idx < max_num_retries:
+            try:
+                func(*args, **kwargs)
+                all_assertions_passed = True
+            except AssertionError as e:
+                error_message = re.sub(r"\W+", " ", str(e)).strip()
+                logger.warning(
+                    f"""Attempt {idx + 1} to execute "{func}" failed with error "{error_message}".  Retrying."""
+                )
+                all_assertions_passed = False
+                assertion_error = e
+
+            if all_assertions_passed:
+                break
+
+            idx += 1
+
+        if not all_assertions_passed:
+            logger.error(
+                f"""Aborting trying to execute "{func}" (exceeded maximum allowed \
+{MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES} attempts).  Error "{error_message}" is being raised.
+"""
+            )
+            raise assertion_error
+
+    return run_pytest_method

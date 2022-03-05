@@ -1,11 +1,9 @@
-import json
 import random
 import uuid
 from typing import Dict
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
-from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
@@ -108,9 +106,16 @@ class ExpectationsStore(Store):
 
     _key_class = ExpectationSuiteIdentifier
 
-    def __init__(self, store_backend=None, runtime_environment=None, store_name=None):
+    def __init__(
+        self,
+        store_backend=None,
+        runtime_environment=None,
+        store_name=None,
+        data_context=None,
+    ):
         self._expectationSuiteSchema = ExpectationSuiteSchema()
-
+        # TODO: refactor so ExpectationStore can have access to DataContext. Currently used by usage_stats messages.
+        self._data_context = data_context
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -166,6 +171,9 @@ class ExpectationsStore(Store):
 
         return expectation_suite_dict
 
+    def get(self, key) -> ExpectationSuite:
+        return super().get(key)
+
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
 
@@ -211,7 +219,9 @@ class ExpectationsStore(Store):
             )
         else:
             test_key: ExpectationSuiteIdentifier = self.key_class(test_key_name)
-        test_value = ExpectationSuite(test_key_name)
+        test_value = ExpectationSuite(
+            expectation_suite_name=test_key_name, data_context=self._data_context
+        )
 
         if pretty_print:
             print(f"Attempting to add a new test key: {test_key}...")

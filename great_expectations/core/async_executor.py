@@ -42,7 +42,7 @@ class AsyncExecutor(AbstractContextManager):
 
     def __init__(
         self,
-        concurrency_config: ConcurrencyConfig,
+        concurrency_config: Optional[ConcurrencyConfig],
         max_workers: int,
     ):
         """Initializes a new AsyncExecutor instance used to organize code for multithreaded execution.
@@ -63,6 +63,9 @@ class AsyncExecutor(AbstractContextManager):
                 call to submit. Note that the maximum number of threads is also limited by
                 concurrency_config.max_database_query_concurrency.
         """
+        if concurrency_config is None:
+            concurrency_config = ConcurrencyConfig()
+
         # Only enable concurrent execution if it is enabled in the config AND there is more than 1 max worker specified.
         self._execute_concurrently = concurrency_config.enabled and max_workers > 1
 

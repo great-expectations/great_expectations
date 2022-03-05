@@ -39,7 +39,7 @@ Production code in Great Expectations must be thoroughly tested. In general, we 
 
 Experimental code in Great Expectations need only be tested lightly. We are moving to a convention where experimental features are clearly labeled in documentation and the code itself. However, this convention is not uniformly applied today.
 
-Most of Great Expectations’ integration testing is in the CLI, which naturally exercises most of the core code paths. Because integration tests require a lot of developer time to maintain, most contributions should not include new integration tests, unless they change the CLI itself.
+Most of Great Expectations’ integration testing is in the [CLI](https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_use_the_great_expectations_cli), which naturally exercises most of the core code paths. Because integration tests require a lot of developer time to maintain, most contributions should not include new integration tests, unless they change the CLI itself.
 
 Note: we do not currently test Great Expectations against all types of SQL database. CI test coverage for SQL is limited to PostgreSQL, SQLite, MSSQL, and BigQuery. We have observed some bugs because of unsupported features or differences in SQL dialects, and we are actively working to improve dialect-specific support and testing.
 

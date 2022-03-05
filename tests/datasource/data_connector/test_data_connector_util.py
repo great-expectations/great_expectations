@@ -15,6 +15,7 @@ from great_expectations.datasource.data_connector.util import (
     list_gcs_keys,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
+    storage,
 )
 
 
@@ -229,6 +230,41 @@ def test_convert_data_reference_string_to_batch_identifiers_using_regex():
         )
         is None
     )
+
+
+def test_convert_data_reference_string_to_batch_identifiers_using_regex_with_named_groups(
+    caplog,
+):
+    data_reference = "alex_20200809_1000.csv"
+    pattern = r"^(?P<name>.+)_(?P<timestamp>\d+)_(?P<price>\d+)\.csv$"
+
+    group_names = ["name", "timestamp", "price"]
+    assert convert_data_reference_string_to_batch_identifiers_using_regex(
+        data_reference=data_reference, regex_pattern=pattern, group_names=group_names
+    ) == (
+        "DEFAULT_ASSET_NAME",
+        IDDict(
+            {
+                "name": "alex",
+                "timestamp": "20200809",
+                "price": "1000",
+            }
+        ),
+    )
+
+    group_names = ["name", "timestamp", "cost"]  # Mismatch between "price" and "cost"!
+    assert convert_data_reference_string_to_batch_identifiers_using_regex(
+        data_reference=data_reference, regex_pattern=pattern, group_names=group_names
+    ) == (
+        "DEFAULT_ASSET_NAME",
+        IDDict(
+            {
+                "name": "alex",
+                "timestamp": "20200809",
+            }
+        ),
+    )
+    assert "The named group 'price' must explicitly be stated" in caplog.text
 
 
 def test_map_batch_definition_to_data_reference_string_using_regex():
@@ -466,14 +502,24 @@ def test_build_sorters_from_config_bad_config():
         build_sorters_from_config(sorters_config)
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in datasource.data_connector.util",
+)
 @mock.patch("great_expectations.datasource.data_connector.util.storage.Client")
 def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
     # Set defaults for ConfiguredAssetGCSDataConnector
     query_options = {"delimiter": None}
-    list_gcs_keys(mock_gcs_conn, query_options, recursive=False)
+    with pytest.warns(
+        UserWarning
+    ):  # warning from /datasource/data_connector/util.py:383
+        list_gcs_keys(mock_gcs_conn, query_options, recursive=False)
     assert query_options["delimiter"] == "/"
 
     # Set defaults for InferredAssetGCSDataConnector
     query_options = {"delimiter": "/"}
-    list_gcs_keys(mock_gcs_conn, query_options, recursive=True)
+    with pytest.warns(
+        UserWarning
+    ):  # warning from /datasource/data_connector/util.py:390
+        list_gcs_keys(mock_gcs_conn, query_options, recursive=True)
     assert query_options["delimiter"] is None

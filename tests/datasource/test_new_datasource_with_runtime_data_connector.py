@@ -116,8 +116,8 @@ def taxi_test_file():
         os.path.join(
             "..",
             "test_sets",
-            "taxi_yellow_trip_data_samples",
-            "yellow_trip_data_sample_2018-01.csv",
+            "taxi_yellow_tripdata_samples",
+            "yellow_tripdata_sample_2018-01.csv",
         ),
     )
 
@@ -127,7 +127,7 @@ def taxi_test_file_directory():
     return file_relative_path(
         __file__,
         os.path.join(
-            "..", "test_sets", "taxi_yellow_trip_data_samples", "first_3_files/"
+            "..", "test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"
         ),
     )
 
@@ -1021,7 +1021,7 @@ def test_batch_identifiers_and_batch_identifiers_success_no_temp_table(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
+    test_query: str = "SELECT * FROM table_full__I"
     batch_identifiers = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
@@ -1052,7 +1052,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
+    test_query: str = "SELECT * FROM table_full__I"
     batch_identifiers = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,

@@ -8,12 +8,8 @@ from functools import wraps
 import numpy as np
 import pandas as pd
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-)
+from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.types import SerializableDictDot, SerializableDotDict
 
 
 def parse_result_format(result_format):
@@ -98,15 +94,7 @@ def recursively_convert_to_json_serializable(test_obj):
 
     """
     # If it's one of our types, we pass
-    if isinstance(
-        test_obj,
-        (
-            ExpectationConfiguration,
-            ExpectationSuite,
-            ExpectationValidationResult,
-            ExpectationSuiteValidationResult,
-        ),
-    ):
+    if isinstance(test_obj, (SerializableDictDot, SerializableDotDict)):
         return test_obj
 
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
@@ -115,7 +103,7 @@ def recursively_convert_to_json_serializable(test_obj):
     try:
         if not isinstance(test_obj, list) and np.isnan(test_obj):
             # np.isnan is functionally vectorized, but we only want to apply this to single objects
-            # Hence, why we test for `not isinstance(list))`
+            # Hence, why we test for `not isinstance(list)`
             return None
     except (TypeError, ValueError):
         pass
@@ -127,6 +115,8 @@ def recursively_convert_to_json_serializable(test_obj):
     elif isinstance(test_obj, dict):
         new_dict = {}
         for key in test_obj:
+            if key == "row_condition" and test_obj[key] is not None:
+                ensure_row_condition_is_correct(test_obj[key])
             # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string
             new_dict[str(key)] = recursively_convert_to_json_serializable(test_obj[key])
 
@@ -200,4 +190,28 @@ def recursively_convert_to_json_serializable(test_obj):
         raise TypeError(
             "%s is of type %s which cannot be serialized."
             % (str(test_obj), type(test_obj).__name__)
+        )
+
+
+def ensure_row_condition_is_correct(row_condition_string):
+    """Ensure no quote nor \\\\n are introduced in row_condition string.
+
+    Otherwise it may cause an issue at the reload of the expectation.
+    An error is raised at the declaration of the expectations to ensure
+    the user is not doing a mistake. He can use double quotes for example.
+
+    Parameters
+    ----------
+    row_condition_string : str
+        the pandas query string
+    """
+    if "'" in row_condition_string:
+        raise InvalidExpectationConfigurationError(
+            f"{row_condition_string} cannot be serialized to json. "
+            "Do not introduce simple quotes in configuration."
+            "Use double quotes instead."
+        )
+    if "\n" in row_condition_string:
+        raise InvalidExpectationConfigurationError(
+            f"{repr(row_condition_string)} cannot be serialized to json. Do not introduce \\n in configuration."
         )

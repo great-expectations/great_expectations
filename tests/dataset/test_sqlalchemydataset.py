@@ -128,6 +128,45 @@ def test_sqlalchemydataset_builds_guid_for_table_name_on_custom_sql(sa):
         assert dataset._table.name == "ge_temp_12345678"
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_adding_expectation_to_sqlalchemy_dataset_not_send_usage_message(mock_emit, sa):
+    """
+    What does this test and why?
+
+    When an Expectation is called using a SqlAlchemyDataset, it validates the dataset using the implementation of
+    the Expectation. As part of the process, it also adds the Expectation to the active
+    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
+    (ie not calling add_expectations() directly) does not emit a usage_stats event.
+    """
+    engine = sa.create_engine("sqlite://")
+
+    data = pd.DataFrame(
+        {
+            "name": ["Frank", "Steve", "Jane", "Frank", "Michael"],
+            "age": [16, 21, 38, 22, 10],
+            "pet": ["fish", "python", "cat", "python", "frog"],
+        }
+    )
+    data.to_sql(name="test_sql_data", con=engine, index=False)
+
+    custom_sql = "SELECT name, pet FROM test_sql_data WHERE age > 12"
+    custom_sql_dataset = SqlAlchemyDataset(engine=engine, custom_sql=custom_sql)
+
+    custom_sql_dataset._initialize_expectations()
+    custom_sql_dataset.set_default_expectation_argument(
+        "result_format", {"result_format": "COMPLETE"}
+    )
+
+    result = custom_sql_dataset.expect_column_values_to_be_in_set(
+        "pet", ["fish", "cat", "python"]
+    )
+    # add_expectation() will not send usage_statistics event when called from a SqlAlchemy Dataset
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
+
+
 def test_sqlalchemydataset_with_custom_sql(sa):
     engine = sa.create_engine("sqlite://")
 
@@ -325,10 +364,10 @@ def test_expect_compound_columns_to_be_unique(sa):
 
     data = pd.DataFrame(
         {
-            "col1": [1, 2, 3, 1, 2, 3, None, None],
-            "col2": [1, 2, 2, 2, 2, 3, None, None],
-            "col3": [1, 1, 2, 2, 3, 2, None, None],
-            "col4": [1, None, 2, 2, None, None, None, None],
+            "col1": [1, 2, 3, 1, 2, 3, 4, 5, None],
+            "col2": [1, 2, 2, 2, 2, 3, None, None, None],
+            "col3": [1, 1, 2, 2, 3, 2, None, None, None],
+            "col4": [1, None, 2, 2, None, None, None, None, None],
         }
     )
 
@@ -342,11 +381,15 @@ def test_expect_compound_columns_to_be_unique(sa):
         ["col1", "col2", "col3"]
     ).success
     assert not dataset.expect_compound_columns_to_be_unique(
+        ["col1", "col2", "col4"]
+    ).success
+    assert dataset.expect_compound_columns_to_be_unique(
         ["col1", "col2", "col4"],
         ignore_row_if="any_value_is_missing",
     ).success
-    assert dataset.expect_compound_columns_to_be_unique(
-        ["col1", "col2", "col4"]
+    assert not dataset.expect_compound_columns_to_be_unique(
+        ["col1", "col2", "col4"],
+        ignore_row_if="never",
     ).success
 
 
@@ -368,7 +411,8 @@ def test_expect_compound_columns_to_be_unique_with_no_rows(sa):
     assert dataset.expect_compound_columns_to_be_unique(["col1", "col2"]).success
 
 
-def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
+@pytest.fixture
+def pyathena_dataset(sa):
     from pyathena import sqlalchemy_athena
 
     engine = sa.create_engine("sqlite://")
@@ -378,21 +422,34 @@ def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
     data.to_sql(name="test_sql_data", con=engine, index=False)
     dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
     dataset.dialect = sqlalchemy_athena
+    return dataset
 
-    assert dataset.expect_column_values_to_be_of_type("col", type_="STRINGTYPE").success
+
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyathena"),
+    reason="pyathena is not installed",
+)
+def test_expect_column_values_to_be_of_type_string_dialect_pyathena(pyathena_dataset):
+    assert pyathena_dataset.expect_column_values_to_be_of_type(
+        "col", type_="STRINGTYPE"
+    ).success
 
 
-def test_expect_column_values_to_be_in_type_list_pyathena(sa):
-    from pyathena import sqlalchemy_athena
-
-    engine = sa.create_engine("sqlite://")
-
-    data = pd.DataFrame({"col": ["test_val1", "test_val2"]})
-
-    data.to_sql(name="test_sql_data", con=engine, index=False)
-    dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
-    dataset.dialect = sqlalchemy_athena
-
-    assert dataset.expect_column_values_to_be_in_type_list(
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyathena"),
+    reason="pyathena is not installed",
+)
+def test_expect_column_values_to_be_in_type_list_pyathena(pyathena_dataset):
+    assert pyathena_dataset.expect_column_values_to_be_in_type_list(
         "col", type_list=["STRINGTYPE", "BOOLEAN"]
+    ).success
+
+
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyathena"),
+    reason="pyathena is not installed",
+)
+def test_expect_column_values_to_match_like_pattern_pyathena(pyathena_dataset):
+    assert pyathena_dataset.expect_column_values_to_match_like_pattern(
+        "col", like_pattern="test%"
     ).success

@@ -1,5 +1,5 @@
 ---
-title: How to validate your data using a Checkpoint
+title: How to validate data by running a Checkpoint
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx';
@@ -8,23 +8,26 @@ import TabItem from '@theme/TabItem';
 
 This guide will help you validate your data by running a Checkpoint.
 
-As stated in [Validate your data using a Checkpoint](../../tutorials/getting_started/validate_your_data.md), the best way
-to validate data in production with Great Expectations is using a [Checkpoint](../../reference/checkpoints_and_actions).
-The advantages of a [Checkpoint](../../reference/checkpoints_and_actions) are ease of use, while combining the existing
-- [Expectation Suites](../../reference/expectations/expectations),
-- [DataConnectors](../../tutorials/getting_started/connect_to_data.md),
-- [BatchRequests](../../reference/datasources#Batches), and
+As stated in the Getting Started Tutorial
+[Validate your data using a Checkpoint](../../tutorials/getting_started/validate_your_data.md), the best way
+to validate data in production with Great Expectations is using a [Checkpoint](../../reference/checkpoints_and_actions.md).
+The advantage of using a [Checkpoint](../../reference/checkpoints_and_actions.md) is ease of use, due to its principal
+capability of combining the existing configuration in order to set up and perform the validation:
+- [Expectation Suites](../../reference/expectations/expectations.md)
+- [DataConnectors](../../tutorials/getting_started/connect_to_data.md)
+- [BatchRequests](../../reference/datasources.md#batches)
 - [Validation Actions](../../reference/checkpoints_and_actions.md)
-in order to set up and perform the validation.  Otherwise, configuring these validation parameters would have to be done
-via the API.  A [Checkpoint](../../reference/checkpoints_and_actions) encapsulates this "boilerplate" and ensures that
+ 
+Otherwise, configuring these validation parameters would have to be done via the API.  A
+[Checkpoint](../../reference/checkpoints_and_actions.md) encapsulates this "boilerplate" and ensures that
 all components work in harmony together.  Finally, running a configured
-[Checkpoint](../../reference/checkpoints_and_actions) is a one-liner, as described below.
+[Checkpoint](../../reference/checkpoints_and_actions.md) is a one-liner, as described below.
 
 <Prerequisites>
 
 - Configured a [Data Context](../../tutorials/getting_started/initialize_a_data_context.md).
 - Configured an [Expectations Suite](../../tutorials/getting_started/create_your_first_expectations.md).
-- Configured a [Checkpoint](./checkpoints/how_to_create_a_new_checkpoint)
+- Configured a [Checkpoint](./checkpoints/how_to_create_a_new_checkpoint.md)
 
 </Prerequisites>
 
@@ -45,7 +48,7 @@ Steps
 1. Checkpoints can be run like applications from the command line by running:
 
 ```bash
-great_expectations --v3-api checkpoint run my_checkpoint
+great_expectations checkpoint run my_checkpoint
 Validation failed!
 ```
 
@@ -74,7 +77,7 @@ Steps
 1. First, generate the Python script with the command:
 
 ```bash
-great_expectations --v3-api checkpoint script my_checkpoint
+great_expectations checkpoint script my_checkpoint
 ```
 
 2. Next, you will see a message about where the Python script was created like:

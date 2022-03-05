@@ -58,7 +58,7 @@ out the missing implementations!
 |`expect_column_pair_values_A_to_be_greater_than_B`                              | Y          | Y       | Y         |
 |`expect_column_pair_values_to_be_in_set`                                        | Y          | Y       | Y         |
 |`expect_select_column_values_to_be_unique_within_record`                        | Y          | N       | Y         |
-|`expect_compound_columns_to_be_unique` *                                        | Y          | N       | Y         |
+|`expect_compound_columns_to_be_unique`                                          | Y          | Y       | Y         |
 |`expect_column_pair_cramers_phi_value_to_be_less_than` *                        | Y          | N       | N         |
 |`expect_multicolumn_sum_to_equal`                                               | Y          | Y       | Y         |
 

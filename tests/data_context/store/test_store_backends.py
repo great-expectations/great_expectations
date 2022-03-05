@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-import uuid
 from collections import OrderedDict
 from unittest.mock import patch
 
@@ -11,7 +10,6 @@ import pytest
 from moto import mock_s3
 
 import tests.test_utils as test_utils
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import DataContext
@@ -36,7 +34,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.self_check.util import expectationSuiteSchema
-from great_expectations.util import gen_directory_tree_str
+from great_expectations.util import gen_directory_tree_str, is_library_loadable
 
 
 @pytest.fixture()
@@ -139,7 +137,8 @@ def validation_operators_data_context(
 
 
 @pytest.fixture()
-def parameterized_expectation_suite():
+def parameterized_expectation_suite(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     fixture_path = file_relative_path(
         __file__,
         "../../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
@@ -147,7 +146,8 @@ def parameterized_expectation_suite():
     with open(
         fixture_path,
     ) as suite:
-        return expectationSuiteSchema.load(json.load(suite))
+        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(suite))
+        return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 def test_StoreBackendValidation():
@@ -589,9 +589,45 @@ def test_TupleS3StoreBackend_with_prefix():
         == f"https://s3.amazonaws.com/{bucket}/{prefix}/my_file_BBB"
     )
 
-    my_store.remove_key(("BBB",))
+    assert my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
         my_store.get(("BBB",))
+    # Check that the rest of the keys still exist in the bucket
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
+        "this_is_a_test_prefix/.ge_store_backend_id",
+        "this_is_a_test_prefix/my_file_AAA",
+    }
+
+    # Call remove_key on an already deleted object
+    assert not my_store.remove_key(("BBB",))
+    # Check that the rest of the keys still exist in the bucket
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
+        "this_is_a_test_prefix/.ge_store_backend_id",
+        "this_is_a_test_prefix/my_file_AAA",
+    }
+
+    # Call remove_key on a non-existent key
+    assert not my_store.remove_key(("NON_EXISTENT_KEY",))
+    # Check that the rest of the keys still exist in the bucket
+    assert {
+        s3_object_info["Key"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(
+            Bucket=bucket, Prefix=prefix
+        )["Contents"]
+    } == {
+        "this_is_a_test_prefix/.ge_store_backend_id",
+        "this_is_a_test_prefix/my_file_AAA",
+    }
 
     # testing base_public_path
     my_new_store = TupleS3StoreBackend(
@@ -609,82 +645,87 @@ def test_TupleS3StoreBackend_with_prefix():
     )
 
 
-@mock_s3
-def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_prefix(
-    validation_operators_data_context: DataContext,
-    parameterized_expectation_suite: ExpectationSuite,
-):
-    """
-    What does this test test and why?
+# NOTE: Chetan - 20211118: I am commenting out this test as it was introduced in: https://github.com/great-expectations/great_expectations/pull/3377
+# We've decided to roll back these changes for the time being since they introduce some unintendend consequences.
+#
+# This is a gentle reminder to future contributors to please re-enable this test when revisiting the matter.
 
-    In cases where an s3 store is used with the same prefix for both validations
-    and expectations, the list_keys() operation picks up files ending in .json
-    from both validations and expectations stores.
+# @mock_s3
+# def test_tuple_s3_store_backend_expectation_suite_and_validation_operator_share_prefix(
+#     validation_operators_data_context: DataContext,
+#     parameterized_expectation_suite: ExpectationSuite,
+# ):
+#     """
+#     What does this test test and why?
 
-    To avoid this issue, the expectation suite configuration, if available, is used
-    to locate the specific key for the suite in place of calling list_keys().
+#     In cases where an s3 store is used with the same prefix for both validations
+#     and expectations, the list_keys() operation picks up files ending in .json
+#     from both validations and expectations stores.
 
-    NOTE: It is an issue with _all stores_ when the result of list_keys() contain paths
-    with a period (.) and are passed to ExpectationSuiteIdentifier.from_tuple() method,
-    as happens in the DataContext.store_evaluation_parameters() method. The best fix is
-    to choose a different delimiter for generating expectation suite identifiers (or
-    perhaps escape the period in path names).
+#     To avoid this issue, the expectation suite configuration, if available, is used
+#     to locate the specific key for the suite in place of calling list_keys().
 
-    For now, the fix is to avoid the call to list_keys() in
-    DataContext.store_evaluation_parameters() if the expectation suite is known (from config).
-    This approach should also improve performance.
+#     NOTE: It is an issue with _all stores_ when the result of list_keys() contain paths
+#     with a period (.) and are passed to ExpectationSuiteIdentifier.from_tuple() method,
+#     as happens in the DataContext.store_evaluation_parameters() method. The best fix is
+#     to choose a different delimiter for generating expectation suite identifiers (or
+#     perhaps escape the period in path names).
 
-    This test confirms the fix for GitHub issue #3054.
-    """
-    bucket = "leakybucket"
-    prefix = "this_is_a_test_prefix"
+#     For now, the fix is to avoid the call to list_keys() in
+#     DataContext.store_evaluation_parameters() if the expectation suite is known (from config).
+#     This approach should also improve performance.
 
-    # create a bucket in Moto's mock AWS environment
-    conn = boto3.resource("s3", region_name="us-east-1")
-    conn.create_bucket(Bucket=bucket)
+#     This test confirms the fix for GitHub issue #3054.
+#     """
+#     bucket = "leakybucket"
+#     prefix = "this_is_a_test_prefix"
 
-    # replace store backends with the mock, both with the same prefix (per issue #3054)
-    validation_operators_data_context.validations_store._store_backend = (
-        TupleS3StoreBackend(
-            bucket=bucket,
-            prefix=prefix,
-        )
-    )
-    validation_operators_data_context.expectations_store._store_backend = (
-        TupleS3StoreBackend(
-            bucket=bucket,
-            prefix=prefix,
-        )
-    )
+#     # create a bucket in Moto's mock AWS environment
+#     conn = boto3.resource("s3", region_name="us-east-1")
+#     conn.create_bucket(Bucket=bucket)
 
-    validation_operators_data_context.save_expectation_suite(
-        parameterized_expectation_suite, "param_suite"
-    )
+#     # replace store backends with the mock, both with the same prefix (per issue #3054)
+#     validation_operators_data_context.validations_store._store_backend = (
+#         TupleS3StoreBackend(
+#             bucket=bucket,
+#             prefix=prefix,
+#         )
+#     )
+#     validation_operators_data_context.expectations_store._store_backend = (
+#         TupleS3StoreBackend(
+#             bucket=bucket,
+#             prefix=prefix,
+#         )
+#     )
 
-    # ensure the suite is in the context
-    assert validation_operators_data_context.expectations_store.has_key(
-        ExpectationSuiteIdentifier("param_suite")
-    )
+#     validation_operators_data_context.save_expectation_suite(
+#         parameterized_expectation_suite, "param_suite"
+#     )
 
-    res = validation_operators_data_context.run_validation_operator(
-        "store_val_res_and_extract_eval_params",
-        assets_to_validate=[
-            (
-                validation_operators_data_context.build_batch_kwargs(
-                    "my_datasource", "subdir_reader", "f1"
-                ),
-                "param_suite",
-            )
-        ],
-        evaluation_parameters={
-            "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
-            ".observed_value": 3
-        },
-    )
+#     # ensure the suite is in the context
+#     assert validation_operators_data_context.expectations_store.has_key(
+#         ExpectationSuiteIdentifier("param_suite")
+#     )
 
-    assert (
-        res["success"] is True
-    ), "No exception thrown, validation operators ran successfully"
+#     res = validation_operators_data_context.run_validation_operator(
+#         "store_val_res_and_extract_eval_params",
+#         assets_to_validate=[
+#             (
+#                 validation_operators_data_context.build_batch_kwargs(
+#                     "my_datasource", "subdir_reader", "f1"
+#                 ),
+#                 "param_suite",
+#             )
+#         ],
+#         evaluation_parameters={
+#             "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
+#             ".observed_value": 3
+#         },
+#     )
+
+#     assert (
+#         res["success"] is True
+#     ), "No exception thrown, validation operators ran successfully"
 
 
 @mock_s3
@@ -965,6 +1006,10 @@ def test_TupleS3StoreBackend_with_s3_put_options():
     assert my_store.list_keys() == [(".ge_store_backend_id",), ("AAA",)]
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google"),
+    reason="google is not installed",
+)
 def test_TupleGCSStoreBackend_base_public_path():
     """
     What does this test and why?
@@ -1012,6 +1057,10 @@ def test_TupleGCSStoreBackend_base_public_path():
     )
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google"),
+    reason="google is not installed",
+)
 def test_TupleGCSStoreBackend():
     # pytest.importorskip("google-cloud-storage")
     """
@@ -1272,7 +1321,7 @@ def test_GeCloudStoreBackend():
     ge_cloud_base_url = "https://app.greatexpectations.io/"
     ge_cloud_credentials = {
         "access_token": "1234",
-        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
     ge_cloud_resource_type = "contract"
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
@@ -1295,12 +1344,12 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.set(("contract", ""), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
-            "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
             json={
                 "data": {
                     "type": "contract",
                     "attributes": {
-                        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
                         "checkpoint_config": OrderedDict(
                             [
                                 ("name", "my_minimal_simple_checkpoint"),
@@ -1310,7 +1359,7 @@ def test_GeCloudStoreBackend():
                                 ("class_name", "SimpleCheckpoint"),
                                 ("run_name_template", None),
                                 ("expectation_suite_name", None),
-                                ("batch_request", None),
+                                ("batch_request", {}),
                                 ("action_list", []),
                                 ("evaluation_parameters", {}),
                                 ("runtime_configuration", {}),
@@ -1343,7 +1392,7 @@ def test_GeCloudStoreBackend():
                 )
             )
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
                 "-4bdd-8a42-3c35cce574c6",
                 headers={
                     "Content-Type": "application/vnd.api+json",
@@ -1360,7 +1409,7 @@ def test_GeCloudStoreBackend():
             )
             my_store_backend.list_keys()
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
                 headers={
                     "Content-Type": "application/vnd.api+json",
                     "Authorization": "Bearer 1234",
@@ -1384,7 +1433,7 @@ def test_GeCloudStoreBackend():
                 )
             )
             mock_patch.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
                 "-4bdd"
                 "-8a42-3c35cce574c6",
                 json={
@@ -1409,12 +1458,12 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.set(("rendered_data_doc", ""), OrderedDict())
         mock_post.assert_called_with(
-            "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
             json={
                 "data": {
                     "type": "rendered_data_doc",
                     "attributes": {
-                        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
                         "rendered_data_doc": OrderedDict(),
                     },
                 }
@@ -1439,7 +1488,7 @@ def test_GeCloudStoreBackend():
                 )
             )
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
                 "-4bdd-8a42-3c35cce574c6",
                 headers={
                     "Content-Type": "application/vnd.api+json",
@@ -1456,7 +1505,7 @@ def test_GeCloudStoreBackend():
             )
             my_store_backend.list_keys()
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
                 headers={
                     "Content-Type": "application/vnd.api+json",
                     "Authorization": "Bearer 1234",
@@ -1480,7 +1529,7 @@ def test_GeCloudStoreBackend():
                 )
             )
             mock_patch.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
                 "-4bdd"
                 "-8a42-3c35cce574c6",
                 json={

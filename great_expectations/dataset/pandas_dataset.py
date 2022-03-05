@@ -16,13 +16,12 @@ from scipy import stats
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.dataset import Dataset
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
-
-from .dataset import Dataset
 
 logger = logging.getLogger(__name__)
 
@@ -186,7 +185,7 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+                self = self.query(row_condition)
 
             series_A = self[column_A]
             series_B = self[column_B]
@@ -297,7 +296,7 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+                self = self.query(row_condition)
 
             test_df = self[column_list]
 
@@ -433,9 +432,7 @@ Notes:
                 " and must be 'python' or 'pandas'"
             )
         else:
-            return self.query(row_condition, parser=condition_parser).reset_index(
-                drop=True
-            )
+            return self.query(row_condition, parser=condition_parser)
 
     def get_row_count(self):
         return self.shape[0]

@@ -24,7 +24,7 @@ If you want to change documentation, but not code, we suggest using the GitHub m
 
 * Make your edits and use the Preview tab to preview changes.
 
-* Please pay close attention to the [Style Guide](/docs/contributing/contributing_style).
+* Please pay close attention to the [Style Guide](/docs/contributing/style_guides/docs_style).
 
 ### Submit a pull request
 

@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Iterator, List, Optional, cast
 
 import great_expectations.exceptions as ge_exceptions
@@ -250,6 +251,19 @@ class FilePathDataConnector(DataConnector):
             batch_definition=batch_definition
         )
         return PathBatchSpec(batch_spec)
+
+    @staticmethod
+    def sanitize_prefix(text: str) -> str:
+        """
+        Takes in a given user-prefix and cleans it to work with file-system traversal methods
+        (i.e. add '/' to the end of a string meant to represent a directory)
+        """
+        _, ext = os.path.splitext(text)
+        if ext:
+            # Provided prefix is a filename so no adjustment is necessary
+            return text
+        # Provided prefix is a directory (so we want to ensure we append it with '/')
+        return os.path.join(text, "")
 
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition

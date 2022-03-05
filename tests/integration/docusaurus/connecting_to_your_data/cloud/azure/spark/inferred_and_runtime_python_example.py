@@ -54,7 +54,7 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 ] = "superconductive-public"
 datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "name_starts_with"
-] = "data/taxi_yellow_trip_data_samples/"
+] = "data/taxi_yellow_tripdata_samples/"
 
 context.test_yaml_config(yaml.dump(datasource_config))
 
@@ -71,7 +71,7 @@ batch_request = BatchRequest(
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = (
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01"
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
 context.create_expectation_suite(
@@ -90,9 +90,9 @@ assert set(
         "default_inferred_data_connector_name"
     ]
 ) == {
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01",
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-02",
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-03",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03",
 }
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)

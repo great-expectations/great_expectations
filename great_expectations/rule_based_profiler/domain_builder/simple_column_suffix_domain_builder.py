@@ -1,10 +1,12 @@
 from typing import Iterable, List, Optional, Union
 
-from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
+from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
+    build_simple_domains_from_column_names,
+)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -15,24 +17,35 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        data_context: DataContext,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
         column_name_suffixes: Optional[List[str]] = None,
     ):
         """
         Args:
-            data_context: DataContext
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+            data_context: DataContext
         """
-
         super().__init__(
-            data_context=data_context,
+            batch_list=batch_list,
             batch_request=batch_request,
+            data_context=data_context,
         )
 
         if column_name_suffixes is None:
             column_name_suffixes = []
+
         self._column_name_suffixes = column_name_suffixes
+
+    @property
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.COLUMN
+
+    @property
+    def column_name_suffixes(self) -> Optional[List[str]]:
+        return self._column_name_suffixes
 
     def _get_domains(
         self,
@@ -43,7 +56,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         """
         column_name_suffixes: Union[
             str, Iterable, List[str]
-        ] = self._column_name_suffixes
+        ] = self.column_name_suffixes
         if isinstance(column_name_suffixes, str):
             column_name_suffixes = [column_name_suffixes]
         else:
@@ -75,15 +88,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
             )
         )
 
-        column_name: str
-        domains: List[Domain] = [
-            Domain(
-                domain_type=MetricDomainTypes.COLUMN,
-                domain_kwargs={
-                    "column": column_name,
-                },
-            )
-            for column_name in candidate_column_names
-        ]
-
-        return domains
+        return build_simple_domains_from_column_names(
+            column_names=candidate_column_names,
+            domain_type=self.domain_type,
+        )

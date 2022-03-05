@@ -31,8 +31,10 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
+    from sqlalchemy.engine.row import LegacyRow
 except ImportError:
     sqlalchemy = None
+    LegacyRow = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
@@ -206,7 +208,7 @@ def convert_to_json_serializable(data):
     try:
         if not isinstance(data, list) and pd.isna(data):
             # pd.isna is functionally vectorized, but we only want to apply this to single objects
-            # Hence, why we test for `not isinstance(list))`
+            # Hence, why we test for `not isinstance(list)`
             return None
     except TypeError:
         pass
@@ -235,6 +237,10 @@ def convert_to_json_serializable(data):
         return convert_to_json_serializable(
             dict(zip(data.schema.names, zip(*data.collect())))
         )
+
+    # SQLAlchemy serialization
+    if LegacyRow and isinstance(data, LegacyRow):
+        return dict(data)
 
     if isinstance(data, decimal.Decimal):
         if requires_lossy_conversion(data):
@@ -424,6 +430,7 @@ def datetime_to_int(dt: datetime.date) -> int:
     return int(dt.strftime("%Y%m%d%H%M%S"))
 
 
+# noinspection SpellCheckingInspection
 class AzureUrl:
     """
     Parses an Azure Blob Storage URL into its separate components.
@@ -434,12 +441,30 @@ class AzureUrl:
         Reference: WASBS -- Windows Azure Storage Blob (https://datacadamia.com/azure/wasb).
     """
 
+    AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN: str = (
+        r"^[^@]+@.+\.blob\.core\.windows\.net\/.+$"
+    )
+
+    AZURE_BLOB_STORAGE_HTTPS_URL_REGEX_PATTERN: str = (
+        r"^(https?:\/\/)?(.+?)\.blob\.core\.windows\.net/([^/]+)/(.+)$"
+    )
+    AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE: str = (
+        "{account_name}.blob.core.windows.net/{container}/{path}"
+    )
+
+    AZURE_BLOB_STORAGE_WASBS_URL_REGEX_PATTERN: str = (
+        r"^(wasbs?:\/\/)?([^/]+)@(.+?)\.blob\.core\.windows\.net/(.+)$"
+    )
+    AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE: str = (
+        "wasbs://{container}@{account_name}.blob.core.windows.net/{path}"
+    )
+
     def __init__(self, url: str):
-        search = re.search(r"^[^@]+@.+\.blob\.core\.windows\.net\/.+$", url)
+        search = re.search(
+            AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url
+        )
         if search is None:
-            search = re.search(
-                r"^(https?:\/\/)?(.+?).blob.core.windows.net/([^/]+)/(.+)$", url
-            )
+            search = re.search(AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_REGEX_PATTERN, url)
             assert (
                 search is not None
             ), "The provided URL does not adhere to the format specified by the Azure SDK (<ACCOUNT_NAME>.blob.core.windows.net/<CONTAINER>/<BLOB>)"
@@ -448,9 +473,7 @@ class AzureUrl:
             self._container = search.group(3)
             self._blob = search.group(4)
         else:
-            search = re.search(
-                r"^(wasbs?:\/\/)?([^/]+)@(.+?).blob.core.windows.net/(.+)$", url
-            )
+            search = re.search(AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_REGEX_PATTERN, url)
             assert (
                 search is not None
             ), "The provided URL does not adhere to the format specified by the Azure SDK (wasbs://<CONTAINER>@<ACCOUNT_NAME>.blob.core.windows.net/<BLOB>)"
@@ -486,8 +509,12 @@ class GCSUrl:
     Format: gs://<BUCKET_OR_NAME>/<BLOB>
     """
 
+    URL_REGEX_PATTERN: str = r"^gs://([^/]+)/(.+)$"
+
+    OBJECT_URL_TEMPLATE: str = "gs://{bucket_or_name}/{path}"
+
     def __init__(self, url: str):
-        search = re.search(r"^gs://([^/]+)/(.+)$", url)
+        search = re.search(GCSUrl.URL_REGEX_PATTERN, url)
         assert (
             search is not None
         ), "The provided URL does not adhere to the format specified by the GCS SDK (gs://<BUCKET_OR_NAME>/<BLOB>)"
@@ -505,6 +532,8 @@ class GCSUrl:
 
 # S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
 class S3Url:
+    OBJECT_URL_TEMPLATE: str = "s3a://{bucket}/{path}"
+
     """
     >>> s = S3Url("s3://bucket/hello/world")
     >>> s.bucket
@@ -560,6 +589,38 @@ class S3Url:
         return self._parsed.geturl()
 
 
+class DBFSPath:
+    """
+    Methods for converting Databricks Filesystem (DBFS) paths
+    """
+
+    @staticmethod
+    def convert_to_protocol_version(path: str) -> str:
+        if re.search(r"^\/dbfs", path):
+            candidate = path.replace("/dbfs", "dbfs:", 1)
+            if candidate == "dbfs:":
+                # Must add trailing slash
+                return "dbfs:/"
+            else:
+                return candidate
+        elif re.search(r"^dbfs:", path):
+            if path == "dbfs:":
+                # Must add trailing slash
+                return "dbfs:/"
+            return path
+        else:
+            raise ValueError("Path should start with either /dbfs or dbfs:")
+
+    @staticmethod
+    def convert_to_file_semantics_version(path: str) -> str:
+        if re.search(r"^dbfs:", path):
+            return path.replace("dbfs:", "/dbfs", 1)
+        elif re.search("^/dbfs", path):
+            return path
+        else:
+            raise ValueError("Path should start with either /dbfs or dbfs:")
+
+
 def sniff_s3_compression(s3_url: S3Url) -> str:
     """Attempts to get read_csv compression from s3_url"""
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix)
@@ -568,7 +629,7 @@ def sniff_s3_compression(s3_url: S3Url) -> str:
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
-    force_reuse_spark_context: Optional[bool] = False,
+    force_reuse_spark_context: bool = False,
 ):
     # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
     # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.

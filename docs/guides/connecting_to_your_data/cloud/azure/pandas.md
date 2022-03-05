@@ -57,6 +57,8 @@ It is also important to note that the ABS `DataConnectors` for Pandas support tw
 
 The `azure_options` dictionary is also responsible for storing any `**kwargs` you wish to pass to the ABS `BlobServiceClient` connection object.
 
+For more details regarding storing credentials for use with Great Expectations see: [How to configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials.md)
+
 For more details regarding authentication and access using `Python`, please visit the following:
 * [Azure Authentication](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage)
 * [Manage storage account access keys](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage)

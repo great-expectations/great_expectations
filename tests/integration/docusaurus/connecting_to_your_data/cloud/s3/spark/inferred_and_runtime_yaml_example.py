@@ -20,7 +20,7 @@ data_context_config = DataContextConfig(
 )
 context = BaseDataContext(project_config=data_context_config)
 
-datasource_yaml = fr"""
+datasource_yaml = rf"""
 name: my_s3_datasource
 class_name: Datasource
 execution_engine:
@@ -46,7 +46,7 @@ datasource_yaml = datasource_yaml.replace(
     "<YOUR_S3_BUCKET_HERE>", "superconductive-public"
 )
 datasource_yaml = datasource_yaml.replace(
-    "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_trip_data_samples/"
+    "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
 )
 
 context.test_yaml_config(datasource_yaml)
@@ -66,7 +66,7 @@ batch_request = RuntimeBatchRequest(
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters[
     "path"
-] = "s3a://superconductive-public/data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv"
+] = "s3a://superconductive-public/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -90,7 +90,7 @@ batch_request = BatchRequest(
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = (
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01"
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
 context.create_expectation_suite(
@@ -109,9 +109,9 @@ assert set(
         "default_inferred_data_connector_name"
     ]
 ) == {
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01",
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-02",
-    "data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-03",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03",
 }
 
 

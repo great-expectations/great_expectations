@@ -1,7 +1,7 @@
 import importlib
 import itertools
 import json
-from collections import Iterable
+from collections.abc import Iterable
 
 from great_expectations.marshmallow__shade import ValidationError
 
@@ -128,6 +128,10 @@ class ProfilerConfigurationError(ProfilerError):
 class ProfilerExecutionError(ProfilerError):
     """A runtime error for a profiler."""
 
+    pass
+
+
+class ProfilerNotFoundError(ProfilerError):
     pass
 
 
@@ -398,3 +402,11 @@ class MetricResolutionError(MetricError):
         if not isinstance(failed_metrics, Iterable):
             failed_metrics = (failed_metrics,)
         self.failed_metrics = failed_metrics
+
+
+class GeCloudError(GreatExpectationsError):
+    """
+    Generic error used to provide additional context around Cloud-specific issues.
+    """
+
+    pass

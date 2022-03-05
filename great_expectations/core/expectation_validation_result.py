@@ -155,7 +155,8 @@ class ExpectationValidationResult(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def validate_result_dict(self, result):
+    @staticmethod
+    def validate_result_dict(result):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
         if result.get("unexpected_percent") and (
@@ -369,6 +370,33 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             "Metric {} with metric_kwargs_id {} is not available.".format(
                 metric_name, metric_kwargs_id
             )
+        )
+
+    def get_failed_validation_results(self) -> "ExpectationSuiteValidationResult":
+        validation_results = [result for result in self.results if not result.success]
+
+        successful_expectations = sum(exp.success for exp in validation_results)
+        evaluated_expectations = len(validation_results)
+        unsuccessful_expectations = evaluated_expectations - successful_expectations
+        success = successful_expectations == evaluated_expectations
+        try:
+            success_percent = successful_expectations / evaluated_expectations * 100
+        except ZeroDivisionError:
+            success_percent = None
+        statistics = {
+            "successful_expectations": successful_expectations,
+            "evaluated_expectations": evaluated_expectations,
+            "unsuccessful_expectations": unsuccessful_expectations,
+            "success_percent": success_percent,
+            "success": success,
+        }
+
+        return ExpectationSuiteValidationResult(
+            success=success,
+            results=validation_results,
+            evaluation_parameters=self.evaluation_parameters,
+            statistics=statistics,
+            meta=self.meta,
         )
 
 

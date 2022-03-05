@@ -2,11 +2,12 @@ import logging
 import os
 import traceback
 from collections import OrderedDict
+from typing import Any, List, Optional, Tuple
 
 import great_expectations.exceptions as exceptions
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.store.html_site_store import (
-    GeCloudIdentifier,
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
@@ -299,7 +300,7 @@ class SiteBuilder:
         """
 
         # copy static assets
-        for site_section, site_section_builder in self.site_section_builders.items():
+        for site_section_builder in self.site_section_builders.values():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
         # GE Cloud supports JSON Site Data Docs
@@ -309,9 +310,7 @@ class SiteBuilder:
 
         self.target_store.copy_static_assets()
 
-        index_page_url, index_links_dict = self.site_index_builder.build(
-            build_index=build_index
-        )
+        _, index_links_dict = self.site_index_builder.build(build_index=build_index)
         return (
             self.get_resource_url(only_if_exists=False),
             index_links_dict,
@@ -353,6 +352,7 @@ class DefaultSiteSectionBuilder:
         **kwargs,
     ):
         self.name = name
+        self.data_context = data_context
         self.source_store = data_context.stores[source_store_name]
         self.target_store = target_store
         self.run_name_filter = run_name_filter
@@ -425,6 +425,10 @@ class DefaultSiteSectionBuilder:
                     continue
             try:
                 resource = self.source_store.get(resource_key)
+                if isinstance(resource_key, ExpectationSuiteIdentifier):
+                    resource = ExpectationSuite(
+                        **resource, data_context=self.data_context
+                    )
             except exceptions.InvalidKeyError:
                 logger.warning(
                     f"Object with Key: {str(resource_key)} could not be retrieved. Skipping..."
@@ -434,9 +438,7 @@ class DefaultSiteSectionBuilder:
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
                 logger.debug(
-                    "        Rendering expectation suite {}".format(
-                        expectation_suite_name
-                    )
+                    f"        Rendering expectation suite {expectation_suite_name}"
                 )
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
@@ -447,19 +449,12 @@ class DefaultSiteSectionBuilder:
                 )
                 if self.name == "profiling":
                     logger.debug(
-                        "        Rendering profiling for batch {}".format(
-                            resource_key.batch_identifier
-                        )
+                        f"        Rendering profiling for batch {resource_key.batch_identifier}"
                     )
                 else:
 
                     logger.debug(
-                        "        Rendering validation: run name: {}, run time: {}, suite {} for batch {}".format(
-                            run_name,
-                            run_time,
-                            expectation_suite_name,
-                            resource_key.batch_identifier,
-                        )
+                        f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"
                     )
 
             try:
@@ -489,7 +484,7 @@ class DefaultSiteSectionBuilder:
                         viewable_content,
                     )
             except Exception as e:
-                exception_message = f"""\
+                exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
@@ -678,25 +673,23 @@ class DefaultSiteIndexBuilder:
         """
         create_expectations = CallToActionButton(
             "How to Create Expectations",
-            # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations.html",
+            "https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data",
         )
         see_glossary = CallToActionButton(
             "See More Kinds of Expectations",
-            "https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html",
+            "https://greatexpectations.io/expectations",
         )
         validation_playground = CallToActionButton(
             "How to Validate Data",
-            # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation.html",
+            "https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint",
         )
         customize_data_docs = CallToActionButton(
             "How to Customize Data Docs",
-            "https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#data-docs",
+            "https://docs.greatexpectations.io/docs/reference/data_docs#customizing-html-documentation",
         )
         team_site = CallToActionButton(
             "How to Set Up a Team Site",
-            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs.html",
+            "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem",
         )
         # TODO gallery does not yet exist
         # gallery = CallToActionButton(
@@ -718,7 +711,9 @@ class DefaultSiteIndexBuilder:
         return results
 
     # TODO: deprecate dual batch api support
-    def build(self, skip_and_clean_missing=True, build_index: bool = True):
+    def build(
+        self, skip_and_clean_missing=True, build_index: bool = True
+    ) -> Tuple[Any, Optional[OrderedDict]]:
         """
         :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
         be skipped and removed from the target store
@@ -738,12 +733,46 @@ class DefaultSiteIndexBuilder:
         if self.show_how_to_buttons:
             index_links_dict["cta_object"] = self.get_calls_to_action()
 
-        if (
-            # TODO why is this duplicated?
-            self.site_section_builders_config.get("expectations", "None")
-            and self.site_section_builders_config.get("expectations", "None")
-            not in FALSEY_YAML_STRINGS
-        ):
+        self._add_expectations_to_index_links(index_links_dict, skip_and_clean_missing)
+        validation_and_profiling_result_site_keys = (
+            self._build_validation_and_profiling_result_site_keys(
+                skip_and_clean_missing
+            )
+        )
+        self._add_profiling_to_index_links(
+            index_links_dict, validation_and_profiling_result_site_keys
+        )
+        self._add_validations_to_index_links(
+            index_links_dict, validation_and_profiling_result_site_keys
+        )
+
+        viewable_content = ""
+        try:
+            rendered_content = self.renderer_class.render(index_links_dict)
+            viewable_content = self.view_class.render(
+                rendered_content,
+                data_context_id=self.data_context_id,
+                show_how_to_buttons=self.show_how_to_buttons,
+            )
+        except Exception as e:
+            exception_message = """\
+An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
+not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+diagnose and repair the underlying issue.  Detailed information follows:
+            """
+            exception_traceback = traceback.format_exc()
+            exception_message += (
+                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            )
+            logger.error(exception_message)
+
+        return self.target_store.write_index_page(viewable_content), index_links_dict
+
+    def _add_expectations_to_index_links(
+        self, index_links_dict: OrderedDict, skip_and_clean_missing: bool
+    ) -> None:
+        expectations = self.site_section_builders_config.get("expectations", "None")
+        if expectations and expectations not in FALSEY_YAML_STRINGS:
             expectation_suite_source_keys = self.data_context.stores[
                 self.site_section_builders_config["expectations"].get(
                     "source_store_name"
@@ -773,22 +802,18 @@ class DefaultSiteIndexBuilder:
                     section_name="expectations",
                 )
 
+    def _build_validation_and_profiling_result_site_keys(
+        self, skip_and_clean_missing: bool
+    ) -> List[ValidationResultIdentifier]:
         validation_and_profiling_result_site_keys = []
-        if (
-            # TODO why is this duplicated?
-            self.site_section_builders_config.get("validations", "None")
-            and self.site_section_builders_config.get("validations", "None")
-            not in FALSEY_YAML_STRINGS
-            or self.site_section_builders_config.get("profiling", "None")
-            and self.site_section_builders_config.get("profiling", "None")
-            not in FALSEY_YAML_STRINGS
+        validations = self.site_section_builders_config.get("validations", "None")
+        profiling = self.site_section_builders_config.get("profiling", "None")
+        if (validations and validations not in FALSEY_YAML_STRINGS) or (
+            profiling and profiling not in FALSEY_YAML_STRINGS
         ):
             source_store = (
                 "validations"
-                # TODO why is this duplicated?
-                if self.site_section_builders_config.get("validations", "None")
-                and self.site_section_builders_config.get("validations", "None")
-                not in FALSEY_YAML_STRINGS
+                if (validations and validations not in FALSEY_YAML_STRINGS)
                 else "profiling"
             )
             validation_and_profiling_result_source_keys = self.data_context.stores[
@@ -816,12 +841,15 @@ class DefaultSiteIndexBuilder:
                         cleaned_keys.append(validation_result_site_key)
                 validation_and_profiling_result_site_keys = cleaned_keys
 
-        if (
-            # TODO why is this duplicated?
-            self.site_section_builders_config.get("profiling", "None")
-            and self.site_section_builders_config.get("profiling", "None")
-            not in FALSEY_YAML_STRINGS
-        ):
+        return validation_and_profiling_result_site_keys
+
+    def _add_profiling_to_index_links(
+        self,
+        index_links_dict: OrderedDict,
+        validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
+    ) -> None:
+        profiling = self.site_section_builders_config.get("profiling", "None")
+        if profiling and profiling not in FALSEY_YAML_STRINGS:
             profiling_run_name_filter = self.site_section_builders_config["profiling"][
                 "run_name_filter"
             ]
@@ -858,17 +886,16 @@ class DefaultSiteIndexBuilder:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = "Profiling result not found: {:s} - skipping".format(
-                        str(profiling_result_key.to_tuple())
-                    )
+                    error_msg = f"Profiling result not found: {str(profiling_result_key.to_tuple()):s} - skipping"
                     logger.warning(error_msg)
 
-        if (
-            # TODO why is this duplicated?
-            self.site_section_builders_config.get("validations", "None")
-            and self.site_section_builders_config.get("validations", "None")
-            not in FALSEY_YAML_STRINGS
-        ):
+    def _add_validations_to_index_links(
+        self,
+        index_links_dict: OrderedDict,
+        validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
+    ) -> None:
+        validations = self.site_section_builders_config.get("validations", "None")
+        if validations and validations not in FALSEY_YAML_STRINGS:
             validations_run_name_filter = self.site_section_builders_config[
                 "validations"
             ]["run_name_filter"]
@@ -916,31 +943,8 @@ class DefaultSiteIndexBuilder:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = "Validation result not found: {:s} - skipping".format(
-                        str(validation_result_key.to_tuple())
-                    )
+                    error_msg = f"Validation result not found: {str(validation_result_key.to_tuple()):s} - skipping"
                     logger.warning(error_msg)
-
-        try:
-            rendered_content = self.renderer_class.render(index_links_dict)
-            viewable_content = self.view_class.render(
-                rendered_content,
-                data_context_id=self.data_context_id,
-                show_how_to_buttons=self.show_how_to_buttons,
-            )
-        except Exception as e:
-            exception_message = f"""\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:
-            """
-            exception_traceback = traceback.format_exc()
-            exception_message += (
-                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
-            )
-            logger.error(exception_message)
-
-        return (self.target_store.write_index_page(viewable_content), index_links_dict)
 
 
 class CallToActionButton:

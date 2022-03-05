@@ -20,6 +20,7 @@ from great_expectations.datasource.data_connector.inferred_asset_s3_data_connect
     INVALID_S3_CHARS,
     _check_valid_s3_path,
 )
+from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAML()
 
@@ -48,6 +49,7 @@ def test_basic_instantiation():
     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": r"(.+)/(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "letter", "number"],
@@ -100,6 +102,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check():
     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": r"(.+)-(\d+)\.csv",
             "group_names": [
@@ -164,6 +167,7 @@ def test_complex_regex_example_with_implicit_data_asset_names():
     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
             "group_names": ["year_dir", "month_dir", "data_asset_name"],
@@ -276,6 +280,7 @@ def test_self_check():
     my_data_connector: InferredAssetS3DataConnector = InferredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": r"(.+)-(\d+)\.csv",
             "group_names": ["data_asset_name", "number"],
@@ -354,6 +359,9 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -453,6 +461,9 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -548,6 +559,9 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context):
             - number
         pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
         """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -619,6 +633,9 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
               pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
 
               """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -685,6 +702,9 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
                 - day
               pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
       """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
     assert report_object == {
@@ -750,6 +770,9 @@ def test_redundant_information_in_naming_convention_bucket(empty_data_context):
                   - day
               pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
               """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -826,8 +849,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "my_inferred_asset_filesystem_data_connector",
-            "datasource_name": "test_environment",
-            "execution_engine": "BASE_ENGINE",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -957,8 +979,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "my_inferred_asset_filesystem_data_connector",
-                "datasource_name": "test_environment",
-                "execution_engine": "BASE_ENGINE",
+                "execution_engine": PandasExecutionEngine(),
             },
             config_defaults={
                 "module_name": "great_expectations.datasource.data_connector"
@@ -1023,8 +1044,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "my_inferred_asset_filesystem_data_connector",
-                "datasource_name": "test_environment",
-                "execution_engine": "BASE_ENGINE",
+                "execution_engine": PandasExecutionEngine(),
             },
             config_defaults={
                 "module_name": "great_expectations.datasource.data_connector"

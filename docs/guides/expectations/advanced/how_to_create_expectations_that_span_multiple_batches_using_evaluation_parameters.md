@@ -4,15 +4,15 @@ title: How to create Expectations that span multiple Batches using Evaluation Pa
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 
-This guide will help you create [Expectations](../../../reference/expectations/expectations) that span multiple [Batches](../../../reference/dividing_data_assets_into_batches) of data using [Evaluation Parameters](../../../reference/evaluation_parameters) (see also [Evaluation Parameter stores](../../../reference/data_context#evaluation-parameter-stores)). This pattern is useful for things like verifying that row counts between tables stay consistent.
+This guide will help you create [Expectations](../../../reference/expectations/expectations.md) that span multiple [Batches](../../../reference/dividing_data_assets_into_batches.md) of data using [Evaluation Parameters](../../../reference/evaluation_parameters.md) (see also [Evaluation Parameter stores](../../../reference/data_context.md#evaluation-parameter-stores)). This pattern is useful for things like verifying that row counts between tables stay consistent.
 
 <Prerequisites>
 
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- Configured a [Datasource](../../../reference/datasources) (or several Datasources) with at least two **Data Assets** and understand the basics of **Batch Requests**.
+- Configured a [Datasource](../../../reference/datasources.md) (or several Datasources) with at least two **Data Assets** and understand the basics of **Batch Requests**.
 - Also created [Expectations Suites](../../../tutorials/getting_started/create_your_first_expectations.md) for those Data Assets.
-- Have a working [Evaluation Parameter store](../../../reference/data_context#evaluation-parameter-stores). (The default in-memory store from ``great_expectations init`` can work for this.)
-- Have a working [Validation Operator](../../../reference/checkpoints_and_actions) (see also [How to add a Validation Operator](../../../guides/validation/how_to_add_a_validation_operator)). (The default Validation Operator from ``great_expectations init`` can work for this.)
+- Have a working [Evaluation Parameter store](../../../reference/data_context.md#evaluation-parameter-stores). (The default in-memory store from ``great_expectations init`` can work for this.)
+- Have a working [Checkpoint](../../../guides/validation/how_to_validate_data_by_running_a_checkpoint.md)
 
 </Prerequisites>
 
@@ -31,7 +31,7 @@ In a notebook,
 
     We'll call one of these Validators the *upstream* Validator and the other the *downstream* Validator. Evaluation Parameters will allow us to use Validation Results from the upstream Validator as parameters passed into Expectations on the downstream.
 
-    It's common (but not required) for both Batch Requests to have the same [Datasource and Data Connector](../../../reference/datasources).
+    It's common (but not required) for both Batch Requests to have the same [Datasource and Data Connector](../../../reference/datasources.md).
 
     ```python
     batch_request_1 = BatchRequest(
@@ -67,11 +67,11 @@ In a notebook,
    )
    ```
 
-   The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an [Evaluation Parameter stores](../../../reference/data_context#evaluation-parameter-stores) or [Metrics Store](../../../reference/metrics) (see also [How to configure a MetricsStore](../../../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)).
+   The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an [Evaluation Parameter stores](../../../reference/data_context.md#evaluation-parameter-stores) or [Metrics Store](../../../reference/metrics.md) (see also [How to configure a MetricsStore](../../../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)).
 
    This declaration above includes two ``$PARAMETERS``. The first is the real parameter that will be used after the Expectation Suite is stored and deployed in a Validation Operator. The second parameter supports immediate evaluation in the notebook.
 
-   When executed in the notebook, this Expectation will generate an [Expectation Validation Result](../../../reference/validation). Most values will be missing, since interactive evaluation was disabled.
+   When executed in the notebook, this Expectation will generate an [Expectation Validation Result](../../../reference/validation.md). Most values will be missing, since interactive evaluation was disabled.
 
    ```python
    {
@@ -100,17 +100,13 @@ In a notebook,
 
     This step is necessary because your ``$PARAMETER`` will only function properly when invoked within a Validation operation with multiple Validators. The simplest way to execute such an operation is through a :ref:`Validation Operator <reference__core_concepts__validation__validation_operator>`, and Validation Operators are configured to load Expectation Suites from Expectation Stores, not memory.
 
-6. **Execute an existing Validation Operator on your upstream and downstream Validators.**
+6. **Execute an existing Checkpoint.**
 
-    You can do this within your notebook by running ``context.run_validation_operator``.
+    You can do this within your notebook by running ``context.run_checkpoint``.
 
     ```python
-    results = context.run_validation_operator(
-        "action_list_operator",
-        assets_to_validate=[
-            upstream_validator,
-            downstream_validator
-        ]
+    results = context.run_checkpoint(
+        checkpoint_name="my_checkpoint"
     )
     ```
 
@@ -137,12 +133,6 @@ In a notebook,
     If it encountered an error, you'll see something like this. The most common problem is a mis-specified URN name.
 
     ![image](../../../../docs/images/evaluation_parameter_error.png)
-
-   :::warning
-
-   In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the [Great Expectations discussion forum ](https://discuss.great_expectations.io) and [Slack channel](https://greatexpectations.io/slack).
-
-   :::
 
 Comments
 --------

@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
+from great_expectations import DataContext
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import SparkDFDataset
@@ -250,6 +251,11 @@ def test_create_sparkdf_datasource(
         assert "          header: false\n" in lines
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyarrow")
+    and not is_library_loadable(library_name="fastparquet"),
+    reason="pyarrow and fastparquet are not installed",
+)
 def test_standalone_spark_parquet_datasource(
     test_parquet_folder_connection_path, spark_session
 ):
@@ -422,8 +428,9 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
 
 
 def test_spark_datasource_processes_dataset_options(
-    test_folder_connection_path_csv, test_backends
+    test_folder_connection_path_csv, test_backends, empty_data_context
 ):
+    context: DataContext = empty_data_context
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     datasource = SparkDFDatasource(
@@ -440,7 +447,9 @@ def test_spark_datasource_processes_dataset_options(
     )
     batch_kwargs["dataset_options"] = {"caching": False, "persist": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(
+        batch, ExpectationSuite(expectation_suite_name="foo", data_context=context)
+    )
     dataset = validator.get_dataset()
     assert dataset.caching is False
     assert dataset._persist is False

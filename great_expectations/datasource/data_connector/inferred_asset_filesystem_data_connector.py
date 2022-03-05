@@ -34,7 +34,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         base_directory: str,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
-        glob_directive: Optional[str] = "*",
+        glob_directive: str = "*",
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -48,6 +48,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             base_directory(str): base_directory for DataConnector to begin reading files
             execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
             default_regex (dict): Optional dict the filter and organize the data_references.
+            glob_directive (str): glob for selecting files in directory (defaults to *) or nested directories (e.g. */*.csv)
             sorters (list): Optional list if you want to sort the data_references
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """

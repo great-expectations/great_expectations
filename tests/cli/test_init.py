@@ -84,6 +84,7 @@ def test_cli_init_on_new_project(
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -219,12 +220,13 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     # Test the second invocation of init (answer N to update broken init)
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        ["--v3-api", "init"],
-        input="N\n",
-        catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning):
+        result = runner.invoke(
+            cli,
+            ["--v3-api", "init"],
+            input="N\n",
+            catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0

@@ -9,6 +9,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.async_executor import AsyncExecutor
 from great_expectations.core.batch import Batch
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
@@ -20,8 +21,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
-
-from ..core.run_identifier import RunIdentifier
 
 logger = logging.getLogger(__name__)
 
@@ -842,6 +841,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 failure_run_result_obj = {"expectation_suite_severity_level": "failure"}
                 failure_validation_result = batch.validate(
                     failure_expectation_suite,
+                    run_id,
                     result_format=result_format
                     if result_format
                     else self.result_format,
@@ -888,6 +888,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 warning_run_result_obj = {"expectation_suite_severity_level": "warning"}
                 warning_validation_result = batch.validate(
                     warning_expectation_suite,
+                    run_id,
                     result_format=result_format
                     if result_format
                     else self.result_format,

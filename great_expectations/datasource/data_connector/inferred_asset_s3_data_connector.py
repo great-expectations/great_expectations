@@ -1,10 +1,10 @@
 import logging
-import os
 from typing import List, Optional
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.exceptions.exceptions import ParserError
+from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 
 try:
     import boto3
@@ -43,9 +43,9 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: Optional[str] = "",
-        delimiter: Optional[str] = "/",
-        max_keys: Optional[int] = 1000,
+        prefix: str = "",
+        delimiter: str = "/",
+        max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -77,7 +77,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._bucket = bucket
-        self._prefix = os.path.join(prefix, "")
+        self._prefix = ConfiguredAssetS3DataConnector.sanitize_prefix_for_s3(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 
@@ -140,19 +140,26 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
         _check_valid_s3_path(path)
-        return f"s3a://{os.path.join(self._bucket, path)}"
+        template_arguments: dict = {
+            "bucket": self._bucket,
+            "path": path,
+        }
+        return self.execution_engine.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            template_arguments=template_arguments,
+        )
 
 
 def _check_valid_s3_path(
     path: str,
 ) -> None:
     """Performs a basic check for validity of the S3 path"""
-    bad_chars = [c for c in INVALID_S3_CHARS if c in path]
+    bad_chars: list = [c for c in INVALID_S3_CHARS if c in path]
     if len(bad_chars) > 0:
-        msg = (
+        msg: str = (
             f"The parsed S3 path={path} contains the invalid characters {bad_chars}."
             "Please make sure your regex is correct and characters are escaped."
         )
         if "*" in bad_chars:
             msg += "Note: `*` is internally used to replace the regex for `.`."
-        raise ParserError(msg)
+        raise ge_exceptions.ParserError(msg)

@@ -49,7 +49,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             assets (dict): configured assets as a dictionary. These can each have their own regex and sorters
             execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
             default_regex (dict): Optional dict the filter and organize the data_references.
-            glob_directive (str): glob for selecting files in directory (defaults to *)
+            glob_directive (str): glob for selecting files in directory (defaults to **/*) or nested directories (e.g. */*/*.csv)
             sorters (list): Optional list if you want to sort the data_references
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
 

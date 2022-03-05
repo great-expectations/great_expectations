@@ -11,6 +11,7 @@ from great_expectations.cli.v012.datasource import get_batch_kwargs
 from great_expectations.cli.v012.mark import Mark as mark
 from great_expectations.cli.v012.util import cli_message, cli_message_dict
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.util import send_usage_message
 
 json_parse_exception = json.decoder.JSONDecodeError
 
@@ -61,12 +62,18 @@ def validation_operator_list(directory):
         for validation_operator in validation_operators:
             cli_message("")
             cli_message_dict(validation_operator)
-        toolkit.send_usage_message(
-            data_context=context, event="cli.validation_operator.list", success=True
+        send_usage_message(
+            data_context=context,
+            event="cli.validation_operator.list",
+            api_version="v2",
+            success=True,
         )
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.validation_operator.list", success=False
+        send_usage_message(
+            data_context=context,
+            event="cli.validation_operator.list",
+            api_version="v2",
+            success=False,
         )
         raise e
 
@@ -152,9 +159,10 @@ def validation_operator_run(name, run_name, validation_config_file, suite, direc
                 cli_message(
                     f"Failed to process the --validation_config_file argument: <red>{e}</red>"
                 )
-                toolkit.send_usage_message(
+                send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
+                    api_version="v2",
                     success=False,
                 )
                 sys.exit(1)
@@ -168,9 +176,10 @@ def validation_operator_run(name, run_name, validation_config_file, suite, direc
                         validation_config_file, validation_config_error_message
                     )
                 )
-                toolkit.send_usage_message(
+                send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
+                    api_version="v2",
                     success=False,
                 )
                 sys.exit(1)
@@ -183,9 +192,10 @@ Please use --suite argument to specify the name of the expectation suite.
 Call `great_expectation suite list` command to list the expectation suites in your project.
 """
                 )
-                toolkit.send_usage_message(
+                send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
+                    api_version="v2",
                     success=False,
                 )
                 sys.exit(0)
@@ -201,9 +211,10 @@ Please use --name argument to specify the name of the validation operator.
 Call `great_expectation validation-operator list` command to list the operators in your project.
 """
                 )
-                toolkit.send_usage_message(
+                send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
+                    api_version="v2",
                     success=False,
                 )
                 sys.exit(1)
@@ -215,9 +226,10 @@ Could not find a validation operator {name}.
 Call `great_expectation validation-operator list` command to list the operators in your project.
 """
                     )
-                    toolkit.send_usage_message(
+                    send_usage_message(
                         data_context=context,
                         event="cli.validation_operator.run",
+                        api_version="v2",
                         success=False,
                     )
                     sys.exit(1)
@@ -233,18 +245,20 @@ Let us help you specify the batch of data your want the validation operator to v
                 data_source = toolkit.select_datasource(context)
             except ValueError as ve:
                 cli_message(f"<red>{ve}</red>")
-                toolkit.send_usage_message(
+                send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
+                    api_version="v2",
                     success=False,
                 )
                 sys.exit(1)
 
             if not data_source:
                 cli_message("<red>No datasources found in the context.</red>")
-                toolkit.send_usage_message(
+                send_usage_message(
                     data_context=context,
                     event="cli.validation_operator.run",
+                    api_version="v2",
                     success=False,
                 )
                 sys.exit(1)
@@ -312,26 +326,38 @@ Let us help you specify the batch of data your want the validation operator to v
                     )
         except (ge_exceptions.DataContextError, OSError, SQLAlchemyError) as e:
             cli_message(f"<red>{e}</red>")
-            toolkit.send_usage_message(
-                data_context=context, event="cli.validation_operator.run", success=False
+            send_usage_message(
+                data_context=context,
+                event="cli.validation_operator.run",
+                api_version="v2",
+                success=False,
             )
             sys.exit(1)
 
         if not results["success"]:
             cli_message("Validation failed!")
-            toolkit.send_usage_message(
-                data_context=context, event="cli.validation_operator.run", success=True
+            send_usage_message(
+                data_context=context,
+                event="cli.validation_operator.run",
+                api_version="v2",
+                success=True,
             )
             sys.exit(1)
         else:
             cli_message("Validation succeeded!")
-            toolkit.send_usage_message(
-                data_context=context, event="cli.validation_operator.run", success=True
+            send_usage_message(
+                data_context=context,
+                event="cli.validation_operator.run",
+                api_version="v2",
+                success=True,
             )
             sys.exit(0)
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.validation_operator.run", success=False
+        send_usage_message(
+            data_context=context,
+            event="cli.validation_operator.run",
+            api_version="v2",
+            success=False,
         )
         raise e
 

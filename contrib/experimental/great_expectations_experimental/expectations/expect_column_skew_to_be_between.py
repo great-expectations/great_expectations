@@ -136,7 +136,7 @@ class ColumnSkew(ColumnMetricProvider):
             sqlalchemy_engine=sqlalchemy_engine,
         )
 
-        column_skew = column_third_moment / (column_std ** 3) / (column_count - 1)
+        column_skew = column_third_moment / (column_std**3) / (column_count - 1)
         if metric_value_kwargs["abs"]:
             return np.abs(column_skew)
         else:
@@ -491,6 +491,4 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnSkewToBeBetween().run_diagnostics()
-
-    print(json.dumps(self_check_report, indent=2))
+    ExpectColumnSkewToBeBetween().print_diagnostic_checklist()

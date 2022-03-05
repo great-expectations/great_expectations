@@ -5,12 +5,14 @@ title: Metrics
 
 Metrics are values derived from one or more Batches that can be used to evaluate Expectations or to summarize the result
 of Validation. A Metric could be a statistic, such as the minimum value of the column, or a more complex object, such as
-a histogram.
+a histogram. 
 
 Metrics are the core tool used to validate data. When an Expectation should be evaluated, Great Expectations collects
-all of the Metrics requested by the Expectation and provides them to the Expectation's validation logic. The Expectation
+all the Metrics requested by the Expectation and provides them to the Expectation's validation logic. The Expectation
 can also expose Metrics, such as the observed value of a useful statistic via an Expectation Validation Result, where
 Data Docs -- or other Expectations -- can use them.
+
+Put simply, a Metric answers a question about your data posed by an [**Expectation**](./expectations/expectations.md).
 
 Metrics are produced using ExecutionEngine-specific logic that is defined in a `MetricProvider`. When a MetricProvider
 class is first encountered, Great Expectations will register the metric and any methods that it defines as able to
@@ -72,4 +74,4 @@ res.get_metric(
 )
 ```
 
-See the [How to configure a MetricsStore](./) guide for more information.
+See the [How to configure a MetricsStore](../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md) guide for more information.

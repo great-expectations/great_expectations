@@ -39,8 +39,8 @@ def test_taxi_trips_benchmark(
     write_data_docs: bool,
     backend_api: str,
 ):
-    """Benchmark performance with a variety of expectations using NYC Taxi data (yellow_trip_data_sample_2019-01.csv)
-    found in the tests/test_sets/taxi_yellow_trip_data_samples directory, and used extensively in unittest and
+    """Benchmark performance with a variety of expectations using NYC Taxi data (yellow_tripdata_sample_2019-01.csv)
+    found in the tests/test_sets/taxi_yellow_tripdata_samples directory, and used extensively in unittest and
     integration tests for Great Expectations.
 
     To simulate a more realistic usage of Great Expectations with several tables, this benchmark is run with 1 or more

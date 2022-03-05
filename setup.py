@@ -22,13 +22,12 @@ config = {
     "install_requires": required,
     "extras_require": {
         "spark": ["pyspark>=2.3.2"],
-        "sqlalchemy": ["sqlalchemy>=1.3.16"],
+        "sqlalchemy": ["sqlalchemy>=1.3.18"],
         "airflow": ["apache-airflow[s3]>=1.9.0", "boto3>=1.7.3"],
         "gcp": [
-            "google-cloud>=0.34.0",
             "google-cloud-storage>=1.28.0",
             "google-cloud-secret-manager>=1.0.0",
-            "pybigquery==0.4.15",
+            "sqlalchemy-bigquery>=1.3.0",
         ],
         "redshift": ["psycopg2>=2.8"],
         "s3": ["boto3>=1.14"],

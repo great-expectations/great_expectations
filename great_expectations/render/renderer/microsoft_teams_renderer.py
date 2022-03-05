@@ -1,11 +1,11 @@
 import logging
 
-from ...core import RunIdentifier
-from ...data_context.types.resource_identifiers import BatchIdentifier
+from great_expectations.core import RunIdentifier
+from great_expectations.data_context.types.resource_identifiers import BatchIdentifier
 
 logger = logging.getLogger(__name__)
 
-from .renderer import Renderer
+from great_expectations.render.renderer.renderer import Renderer
 
 
 class MicrosoftTeamsRenderer(Renderer):
@@ -40,7 +40,7 @@ class MicrosoftTeamsRenderer(Renderer):
                             {
                                 "type": "Container",
                                 "height": "auto",
-                                "separator": True,
+                                "separator": "true",
                                 "items": [
                                     {
                                         "type": "ColumnSet",
@@ -54,7 +54,7 @@ class MicrosoftTeamsRenderer(Renderer):
                                                         "text": "Validation results",
                                                         "weight": "bolder",
                                                         "size": "large",
-                                                        "wrap": True,
+                                                        "wrap": "true",
                                                     },
                                                 ],
                                             }
@@ -65,7 +65,7 @@ class MicrosoftTeamsRenderer(Renderer):
                             {
                                 "type": "Container",
                                 "height": "auto",
-                                "separator": True,
+                                "separator": "true",
                                 "items": [
                                     {
                                         "type": "TextBlock",
@@ -139,8 +139,8 @@ class MicrosoftTeamsRenderer(Renderer):
                         "type": "TextBlock",
                         "spacing": "none",
                         "text": run_time.strftime("%b %d %Y %H:%M:%S"),
-                        "isSubtle": True,
-                        "wrap": True,
+                        "isSubtle": "true",
+                        "wrap": "true",
                     }
                 )
 

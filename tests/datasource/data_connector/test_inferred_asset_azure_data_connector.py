@@ -242,6 +242,7 @@ def test_instantiation_with_account_url_and_credential(
     my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": r"(alpha)-(.*)\.csv",
             "group_names": ["data_asset_name", "index"],
@@ -273,8 +274,9 @@ def test_instantiation_with_conn_str_and_credential(
     my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
-            "pattern": "(alpha)-(.*)\.csv",
+            "pattern": r"(alpha)-(.*)\.csv",
             "group_names": ["data_asset_name", "index"],
         },
         container="my_container",
@@ -299,6 +301,7 @@ def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_co
     my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
@@ -320,6 +323,7 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
     my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
@@ -345,6 +349,7 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
         InferredAssetAzureDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": "alpha-(.*)\\.csv",
                 "group_names": ["index"],
@@ -371,6 +376,7 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
         InferredAssetAzureDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": "alpha-(.*)\\.csv",
                 "group_names": ["index"],
@@ -386,6 +392,7 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
         InferredAssetAzureDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": "alpha-(.*)\\.csv",
                 "group_names": ["index"],
@@ -432,6 +439,9 @@ def test_instantiation_with_test_yaml_config(
             account_url: my_account_url.blob.core.windows.net
             credential: my_credential
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -470,6 +480,9 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
             account_url: my_account_url.blob.core.windows.net
             credential: my_credential
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
     assert mock_emit.call_count == 1
@@ -524,6 +537,9 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
             account_url: my_account_url.blob.core.windows.net
             credential: my_credential
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -557,6 +573,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
     my_data_connector = InferredAssetAzureDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
@@ -596,8 +613,6 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         f"""
            class_name: InferredAssetAzureDataConnector
            datasource_name: test_environment
-           execution_engine:
-               class_name: PandasExecutionEngine
            container: my_container
            name_starts_with: ""
            default_regex:
@@ -631,7 +646,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_azure_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -658,8 +673,6 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         f"""
            class_name: InferredAssetAzureDataConnector
            datasource_name: test_environment
-           execution_engine:
-               class_name: PandasExecutionEngine
            container: my_container
            name_starts_with: ""
            default_regex:
@@ -678,7 +691,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_azure_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -714,8 +727,6 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         f"""
            class_name: InferredAssetAzureDataConnector
            datasource_name: test_environment
-           execution_engine:
-               class_name: PandasExecutionEngine
            container: my_container
            name_starts_with: ""
            default_regex:
@@ -747,7 +758,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_azure_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -791,8 +802,6 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         f"""
            class_name: InferredAssetAzureDataConnector
            datasource_name: test_environment
-           execution_engine:
-               class_name: PandasExecutionEngine
            container: my_container
            name_starts_with: ""
            default_regex:
@@ -824,7 +833,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_azure_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -868,8 +877,6 @@ def test_return_all_batch_definitions_basic_sorted(
         f"""
        class_name: InferredAssetAzureDataConnector
        datasource_name: test_environment
-       execution_engine:
-           class_name: PandasExecutionEngine
        container: my_container
        name_starts_with: ""
        default_regex:
@@ -912,7 +919,7 @@ def test_return_all_batch_definitions_basic_sorted(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_azure_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -955,8 +962,6 @@ def test_return_all_batch_definitions_returns_specified_partition(
         f"""
        class_name: InferredAssetAzureDataConnector
        datasource_name: test_environment
-       execution_engine:
-           class_name: PandasExecutionEngine
        container: my_container
        name_starts_with: ""
        default_regex:
@@ -999,7 +1004,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_azure_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -1072,8 +1077,6 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         f"""
        class_name: InferredAssetAzureDataConnector
        datasource_name: test_environment
-       execution_engine:
-           class_name: PandasExecutionEngine
        container: my_container
        name_starts_with: ""
        default_regex:
@@ -1116,7 +1119,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_azure_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -1159,8 +1162,6 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
         f"""
        class_name: InferredAssetAzureDataConnector
        datasource_name: test_environment
-       execution_engine:
-           class_name: PandasExecutionEngine
        container: my_container
        default_regex:
            pattern: (.+)_.+_.+\\.csv
@@ -1203,7 +1204,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "general_azure_data_connector",
-                "datasource_name": "test_environment",
+                "execution_engine": PandasExecutionEngine(),
             },
             config_defaults={
                 "module_name": "great_expectations.datasource.data_connector"
@@ -1227,8 +1228,6 @@ def test_return_all_batch_definitions_too_many_sorters(
         f"""
        class_name: InferredAssetAzureDataConnector
        datasource_name: test_environment
-       execution_engine:
-           class_name: PandasExecutionEngine
        container: my_container
        name_starts_with: ""
        default_regex:
@@ -1272,7 +1271,7 @@ def test_return_all_batch_definitions_too_many_sorters(
             config=my_data_connector_yaml,
             runtime_environment={
                 "name": "general_azure_data_connector",
-                "datasource_name": "test_environment",
+                "execution_engine": PandasExecutionEngine(),
             },
             config_defaults={
                 "module_name": "great_expectations.datasource.data_connector"
@@ -1289,7 +1288,6 @@ def test_return_all_batch_definitions_too_many_sorters(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
 def test_get_full_file_path_pandas(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
@@ -1364,7 +1362,6 @@ azure_options:
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
 def test_get_full_file_path_spark(
     mock_azure_conn,
     mock_list_keys,
@@ -1443,7 +1440,6 @@ azure_options:
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
 def test_get_full_file_path_bad_execution_engine(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
@@ -1464,16 +1460,17 @@ azure_options:
     """
     config = yaml.load(yaml_string)
 
-    my_data_connector: InferredAssetAzureDataConnector = instantiate_class_from_config(
-        config,
-        runtime_environment={
-            "name": "my_data_connector",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-    )
-
-    # Raises error due to a non-existent/unknown ExecutionEngine instance.  (Per note above, this test is temporary.)
+    # Raises error due to a non-existent/unknown ExecutionEngine instance.
     with pytest.raises(ge_exceptions.DataConnectorError):
-        _ = my_data_connector._get_full_file_path(
-            path="some/path/to/file.csv", data_asset_name="some_asset_name"
+        # noinspection PyUnusedLocal
+        my_data_connector: InferredAssetAzureDataConnector = (
+            instantiate_class_from_config(
+                config,
+                runtime_environment={
+                    "name": "my_data_connector",
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )

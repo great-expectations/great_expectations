@@ -18,7 +18,7 @@ data_context_config = DataContextConfig(
 )
 context = BaseDataContext(project_config=data_context_config)
 
-datasource_yaml = fr"""
+datasource_yaml = rf"""
 name: my_filesystem_datasource
 class_name: Datasource
 execution_engine:
@@ -56,7 +56,7 @@ batch_request = RuntimeBatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
-batch_request.runtime_parameters["path"] = "data/yellow_trip_data_sample_2019-01.csv"
+batch_request.runtime_parameters["path"] = "data/yellow_tripdata_sample_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -78,7 +78,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "yellow_trip_data_sample_2019-01"
+batch_request.data_asset_name = "yellow_tripdata_sample_2019-01"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -92,7 +92,7 @@ print(validator.head())
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_filesystem_datasource"]
 assert (
-    "yellow_trip_data_sample_2019-01"
+    "yellow_tripdata_sample_2019-01"
     in context.get_available_data_asset_names()["my_filesystem_datasource"][
         "default_inferred_data_connector_name"
     ]

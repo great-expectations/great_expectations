@@ -59,6 +59,8 @@ Using this example configuration, add in your ABS container and path to a direct
 It is also important to note that ABS `DataConnector` for Spark supports the method of authentication called 
 Windows Azure Storage Blob Secure ("WASBS"), which requires the `AZURE_ACCESS_KEY` environment variable to be set.
 
+For more details regarding storing credentials for use with Great Expectations see: [How to configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials.md)
+
 For more details regarding authentication, please visit the following:
 * [WASB Tutorial](https://datacadamia.com/azure/wasb)
 * [Azure Authentication](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage)

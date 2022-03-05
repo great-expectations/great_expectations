@@ -1,5 +1,10 @@
+from copy import deepcopy
+from unittest import mock
+from uuid import UUID
+
 import pytest
 
+from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.exceptions import (
@@ -9,20 +14,24 @@ from great_expectations.exceptions import (
 
 
 @pytest.fixture
-def empty_suite():
+def empty_suite(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
-def baseline_suite(exp1, exp2):
+def baseline_suite(exp1, exp2, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp2],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
@@ -135,36 +144,71 @@ def column_pair_expectation():
 
 
 @pytest.fixture
-def single_expectation_suite(exp1):
+def single_expectation_suite(exp1, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
-def different_suite(exp1, exp4):
+def single_expectation_suite_with_expectation_ge_cloud_id(
+    exp1, empty_data_context_stats_enabled
+):
+    exp1_with_ge_cloud_id = deepcopy(exp1)
+    exp1_with_ge_cloud_id.ge_cloud_id = UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774")
+    context: DataContext = empty_data_context_stats_enabled
+
+    return ExpectationSuite(
+        expectation_suite_name="warning",
+        expectations=[exp1_with_ge_cloud_id],
+        meta={"notes": "This is an expectation suite."},
+        data_context=context,
+    )
+
+
+@pytest.fixture
+def different_suite(exp1, exp4, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
+
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp4],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
-def domain_success_runtime_suite(exp1, exp2, exp3, exp4, exp5):
+def domain_success_runtime_suite(
+    exp1, exp2, exp3, exp4, exp5, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
+
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp2, exp3, exp4, exp5],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
 def suite_with_table_and_column_expectations(
-    exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3
+    exp1,
+    exp2,
+    exp3,
+    exp4,
+    column_pair_expectation,
+    table_exp1,
+    table_exp2,
+    table_exp3,
+    empty_data_context_stats_enabled,
 ):
+    context: DataContext = empty_data_context_stats_enabled
     suite = ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[
@@ -178,6 +222,7 @@ def suite_with_table_and_column_expectations(
             table_exp3,
         ],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
     assert suite.expectations == [
         exp1,
@@ -194,8 +239,14 @@ def suite_with_table_and_column_expectations(
 
 @pytest.fixture
 def suite_with_column_pair_and_table_expectations(
-    table_exp1, table_exp2, table_exp3, column_pair_expectation
+    table_exp1,
+    table_exp2,
+    table_exp3,
+    column_pair_expectation,
+    empty_data_context_stats_enabled,
 ):
+    context: DataContext = empty_data_context_stats_enabled
+
     suite = ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[
@@ -205,6 +256,7 @@ def suite_with_column_pair_and_table_expectations(
             table_exp3,
         ],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
     assert suite.expectations == [
         column_pair_expectation,
@@ -222,7 +274,9 @@ def ge_cloud_id():
 
 
 @pytest.fixture
-def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3):
+def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
+
     for exp in (exp1, exp2, exp3):
         exp.ge_cloud_id = ge_cloud_id
     return ExpectationSuite(
@@ -230,6 +284,7 @@ def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3):
         expectations=[exp1, exp2, exp3],
         meta={"notes": "This is an expectation suite."},
         ge_cloud_id=ge_cloud_id,
+        data_context=context,
     )
 
 
@@ -435,7 +490,11 @@ def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_add_expectation(
+    mock_emit,
     exp1,
     exp2,
     exp4,
@@ -443,6 +502,7 @@ def test_add_expectation(
     baseline_suite,
     different_suite,
     domain_success_runtime_suite,
+    empty_data_context_stats_enabled,
 ):
     assert len(single_expectation_suite.expectations) == 1
     assert not single_expectation_suite.isEquivalentTo(baseline_suite)
@@ -477,6 +537,90 @@ def test_add_expectation(
     # Turn this on once we're ready to enforce strict typing.
     # with pytest.raises(TypeError):
     #     single_expectation_suite.append_expectation(exp1.to_json_dict())
+    assert mock_emit.call_count == 4
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": False,
+            }
+        ),
+    ]
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_expectation_with_ge_cloud_id(
+    mock_emit,
+    single_expectation_suite_with_expectation_ge_cloud_id,
+    empty_data_context_stats_enabled,
+):
+    """
+    This test ensures that expectation does not lose ge_cloud_id attribute when updated
+    """
+    expectation_ge_cloud_id = (
+        single_expectation_suite_with_expectation_ge_cloud_id.expectations[
+            0
+        ].ge_cloud_id
+    )
+    # updated expectation does not have ge_cloud_id
+    updated_expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "a",
+            "value_set": [11, 22, 33, 44, 55],
+            "result_format": "BASIC",
+        },
+        meta={"notes": "This is an expectation."},
+    )
+    single_expectation_suite_with_expectation_ge_cloud_id.add_expectation(
+        updated_expectation, overwrite_existing=True
+    )
+    assert (
+        single_expectation_suite_with_expectation_ge_cloud_id.expectations[
+            0
+        ].ge_cloud_id
+        == expectation_ge_cloud_id
+    )
+    # make sure expectation config was actually updated
+    assert single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].kwargs[
+        "value_set"
+    ] == [11, 22, 33, 44, 55]
+
+    # ensure usage statistics are being emitted correctly
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        )
+    ]
 
 
 def test_remove_all_expectations_of_type(

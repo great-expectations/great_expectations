@@ -7,6 +7,8 @@ import warnings
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
+from dateutil.parser import parse
+
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -16,37 +18,30 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import AzureUrl, get_or_create_spark_application
-from great_expectations.exceptions import exceptions as ge_exceptions
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.validator.metric_configuration import MetricConfiguration
-
-from ..exceptions import (
+from great_expectations.exceptions import (
     BatchSpecError,
     ExecutionEngineError,
     GreatExpectationsError,
     ValidationError,
 )
-from ..expectations.row_conditions import parse_condition_to_spark
-from .sparkdf_batch_data import SparkDFBatchData
+from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.expectations.row_conditions import parse_condition_to_spark
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
 try:
     import pyspark
     import pyspark.sql.functions as F
+
+    # noinspection SpellCheckingInspection
+    import pyspark.sql.types as sparktypes
     from pyspark import SparkContext
     from pyspark.sql import DataFrame, SparkSession
     from pyspark.sql.readwriter import DataFrameReader
-    from pyspark.sql.types import (
-        BooleanType,
-        DateType,
-        FloatType,
-        IntegerType,
-        StringType,
-        StructField,
-        StructType,
-    )
 except ImportError:
     pyspark = None
     SparkContext = None
@@ -54,17 +49,20 @@ except ImportError:
     DataFrame = None
     DataFrameReader = None
     F = None
-    StructType = (None,)
-    StructField = (None,)
-    IntegerType = (None,)
-    FloatType = (None,)
-    StringType = (None,)
-    DateType = (None,)
-    BooleanType = (None,)
+    # noinspection SpellCheckingInspection
+    sparktypes = None
 
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
+
+
+# noinspection SpellCheckingInspection
+def apply_dateutil_parse(column):
+    assert len(column.columns) == 1, "Expected DataFrame with 1 column"
+    col_name = column.columns[0]
+    _udf = F.udf(parse, sparktypes.TimestampType())
+    return column.withColumn(col_name, _udf(col_name))
 
 
 class SparkDFExecutionEngine(ExecutionEngine):
@@ -315,6 +313,7 @@ Please check your config."""
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
         return batch_data
 
+    # TODO: <Alex>Similar to Abe's note in PandasExecutionEngine: Any reason this shouldn't be a private method?</Alex>
     @staticmethod
     def guess_reader_method_from_path(path):
         """Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
@@ -592,15 +591,7 @@ Please check your config."""
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
-        if filter_nan is False:
-            return super().add_column_row_condition(
-                domain_kwargs=domain_kwargs,
-                column_name=column_name,
-                filter_null=filter_null,
-                filter_nan=filter_nan,
-            )
-
-        # We explicitly handle filter_nan for spark using a spark-native condition
+        # We explicitly handle filter_nan & filter_null for spark using a spark-native condition
         if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
             raise GreatExpectationsError(
                 "ExecutionEngine does not support updating existing row_conditions."
@@ -728,7 +719,8 @@ Please check your config."""
         matching_divisor = batch_identifiers[column_name]
         res = (
             df.withColumn(
-                "div_temp", (F.col(column_name) / divisor).cast(IntegerType())
+                "div_temp",
+                (F.col(column_name) / divisor).cast(sparktypes.IntegerType()),
             )
             .filter(F.col("div_temp") == matching_divisor)
             .drop("div_temp")
@@ -740,7 +732,9 @@ Please check your config."""
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_mod_value = batch_identifiers[column_name]
         res = (
-            df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
+            df.withColumn(
+                "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
+            )
             .filter(F.col("mod_temp") == matching_mod_value)
             .drop("mod_temp")
         )
@@ -771,7 +765,7 @@ Please check your config."""
         """Split on the hashed value of the named column"""
         try:
             getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
@@ -784,7 +778,7 @@ Please check your config."""
             hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits :]
             return hashed_value
 
-        encrypt_udf = F.udf(_encrypt_value, StringType())
+        encrypt_udf = F.udf(_encrypt_value, sparktypes.StringType())
         res = (
             df.withColumn("encrypted_value", encrypt_udf(column_name))
             .filter(F.col("encrypted_value") == batch_identifiers["hash_value"])
@@ -812,7 +806,9 @@ Please check your config."""
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
         res = (
-            df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
+            df.withColumn(
+                "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
+            )
             .filter(F.col("mod_temp") == value)
             .drop("mod_temp")
         )
@@ -837,7 +833,7 @@ Please check your config."""
     ):
         try:
             getattr(hashlib, str(hash_function_name))
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
@@ -853,7 +849,7 @@ Please check your config."""
             ]
             return hashed_value
 
-        encrypt_udf = F.udf(_encrypt_value, StringType())
+        encrypt_udf = F.udf(_encrypt_value, sparktypes.StringType())
         res = (
             df.withColumn("encrypted_value", encrypt_udf(column_name))
             .filter(F.col("encrypted_value") == hash_value)

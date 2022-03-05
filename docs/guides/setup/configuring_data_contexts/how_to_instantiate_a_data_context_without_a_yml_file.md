@@ -7,8 +7,6 @@ This guide will help you instantiate a Data Context without a yml file, aka conf
 
 <Prerequisites>
 
-- [Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration](../../../tutorials/getting_started/intro.md)
-
 </Prerequisites>
 
 :::note
@@ -21,11 +19,11 @@ Steps
 
 1. **Create a DataContextConfig**
 
-    The DataContextConfig holds all of the associated configuration parameters to build a DataContext. There are defaults set for you to minimize configuration in typical cases, but please note that every parameter is configurable and all defaults are overridable. Also note that DatasourceConfig also has defaults which can be overridden.
+    The `DataContextConfig` holds all of the associated configuration parameters to build a Data Context. There are defaults set for you to minimize configuration in typical cases, but please note that every parameter is configurable and all defaults are overridable. Also note that `DatasourceConfig` also has defaults which can be overridden.
 
-    Here we will show a few examples of common configurations, using the ``store_backend_defaults`` parameter. Note that you can continue with the existing API sans defaults by omitting this parameter, and you can override all of the parameters as shown in the last example. Note that a parameter set in ``DataContextConfig`` will override a parameter set in ``store_backend_defaults`` if both are used.
+    Here we will show a few examples of common configurations, using the ``store_backend_defaults`` parameter. Note that you can use the existing API without defaults by omitting that parameter, and you can override all of the parameters as shown in the last example. A parameter set in ``DataContextConfig`` will override a parameter set in ``store_backend_defaults`` if both are used.
 
-    The following ``store_backend_defaults`` are currently available: 
+    The following ``store_backend_defaults`` are currently available:
         - :py:class:`~great_expectations.data_context.types.base.S3StoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.GCSStoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.DatabaseStoreBackendDefaults`
@@ -33,164 +31,210 @@ Steps
 
     The following example shows a Data Context configuration with an SQLAlchemy datasource and an AWS S3 bucket for all metadata stores, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
 
-    ```python
-    from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig
-    from great_expectations.data_context import BaseDataContext
+```python
+from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, S3StoreBackendDefaults
 
-    data_context_config = DataContextConfig(
-        datasources={
-            "my_sqlalchemy_datasource": DatasourceConfig(
-                class_name="SqlAlchemyDatasource",
-                credentials={
-                    "drivername": "custom_drivername",
-                    "host": "custom_host",
-                    "port": "custom_port",
-                    "username": "${USERNAME_FROM_ENVIRONMENT_VARIABLE}",
-                    "password": "${PASSWORD_FROM_ENVIRONMENT_VARIABLE}",
-                    "database": "custom_database",
+data_context_config = DataContextConfig(
+    datasources={
+        "sql_warehouse": DatasourceConfig(
+            class_name="Datasource",
+            execution_engine={
+                "class_name": "SqlAlchemyExecutionEngine",
+                "credentials": {
+                    "drivername": "postgresql+psycopg2",
+                    "host": "localhost",
+                    "port": "5432",
+                    "username": "postgres",
+                    "password": "postgres",
+                    "database": "postgres",
                 },
-            )
-        },
-        store_backend_defaults=S3StoreBackendDefaults(default_bucket_name="my_default_bucket"),
+            },
+            data_connectors={
+                "default_runtime_data_connector_name": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": ["default_identifier_name"],
+                },
+                "default_inferred_data_connector_name": {
+                    "class_name": "InferredAssetSqlDataConnector",
+                    "name": "whole_table",
+                },
+            }
+        )
+    },
+    store_backend_defaults=S3StoreBackendDefaults(default_bucket_name="my_default_bucket"),
     )
-    ```
+```
 
     The following example shows a Data Context configuration with a Pandas datasource and local filesystem defaults for metadata stores. Note: imports are omitted in the following examples. Note: You may add an optional root_directory parameter to set the base location for the Store Backends.
 
-    ```python
-    data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "/path/to/data",
-                    }
-                },
-            )
-        },
-        store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="optional/absolute/path/for/stores"),
-    )
-    ```
+```python
+from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, FilesystemStoreBackendDefaults
 
-    The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. ``default_bucket_name``, ``default_project_name`` sets the default value for all stores that are not specified individually.
+data_context_config = DataContextConfig(
+    datasources={
+        "pandas": DatasourceConfig(
+            class_name="Datasource",
+            execution_engine={
+                "class_name": "PandasExecutionEngine"
+            },
+            data_connectors={
+                "tripdata_monthly_configured": {
+                    "class_name": "ConfiguredAssetFilesystemDataConnector",
+                    "base_directory": "/path/to/trip_data",
+                    "assets": {
+                        "yellow": {
+                            "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                            "group_names": ["year", "month"],
+                        }
+                    },
+                }
+            },
+        )
+    },
+    store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="/path/to/store/location"),
+)
+```
 
-    The resulting DataContextConfig from the following example creates an Expectations store and Data Docs using the ``my_default_bucket`` and ``my_default_project`` parameters since their bucket and project is not specified explicitly. The validations store is created using the explicitly specified ``my_validations_bucket`` and ``my_validations_project``. Further, the prefixes are set for the Expectations store and validations store, while Data Docs use the default ``data_docs`` prefix.
+    The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata Stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. `default_bucket_name`, `default_project_name` sets the default value for all stores that are not specified individually.
 
-    ```python
-    data_context_config = DataContextConfig(
-        datasources={
-            "my_sqlalchemy_datasource": DatasourceConfig(
-                class_name="SqlAlchemyDatasource",
-                credentials={
-                    "drivername": "custom_drivername",
-                    "host": "custom_host",
-                    "port": "custom_port",
-                    "username": "${USERNAME_FROM_ENVIRONMENT_VARIABLE}",
-                    "password": "${PASSWORD_FROM_ENVIRONMENT_VARIABLE}",
-                    "database": "custom_database",
-                },
-            )
-        },
-        store_backend_defaults=GCSStoreBackendDefaults(
-            default_bucket_name="my_default_bucket",
-            default_project_name="my_default_project",
-            validations_store_bucket_name="my_validations_bucket",
-            validations_store_project_name="my_validations_project",
-            validations_store_prefix="my_validations_store_prefix",
-            expectations_store_prefix="my_expectations_store_prefix",
-        ),
-    )
-    ```
+    The resulting `DataContextConfig` from the following example creates an Expectations Store and Data Docs using the `my_default_bucket` and `my_default_project` parameters since their bucket and project is not specified explicitly. The Validations Store is created using the explicitly specified `my_validations_bucket` and `my_validations_project`. Further, the prefixes are set for the Expectations Store and Validations Store, while Data Docs use the default `data_docs` prefix.
 
-    The following example sets overrides for many of the parameters available to you when creating a DataContextConfig and a Datasource.
-
-    ```python
-    project_config = DataContextConfig(
-        config_version=2,
-        plugins_directory=None,
-        config_variables_file_path=None,
-        datasources={
-            "my_spark_datasource": {
-                "data_asset_type": {
-                    "class_name": "SparkDFDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-                "class_name": "SparkDFDatasource",
-                "module_name": "great_expectations.datasource",
-                "batch_kwargs_generators": {},
-            }
-        },
-        stores={
-            "expectations_S3_store": {
-                "class_name": "ExpectationsStore",
-                "store_backend": {
-                    "class_name": "TupleS3StoreBackend",
-                    "bucket": "my_expectations_store_bucket",
-                    "prefix": "my_expectations_store_prefix",
+```python
+data_context_config = DataContextConfig(
+    datasources={
+        "sql_warehouse": DatasourceConfig(
+            class_name="Datasource",
+            execution_engine={
+                "class_name": "SqlAlchemyExecutionEngine",
+                "credentials": {
+                    "drivername": "postgresql+psycopg2",
+                    "host": "localhost",
+                    "port": "5432",
+                    "username": "postgres",
+                    "password": "postgres",
+                    "database": "postgres",
                 },
             },
-            "validations_S3_store": {
-                "class_name": "ValidationsStore",
-                "store_backend": {
-                    "class_name": "TupleS3StoreBackend",
-                    "bucket": "my_validations_store_bucket",
-                    "prefix": "my_validations_store_prefix",
+            data_connectors={
+                "default_runtime_data_connector_name": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": ["default_identifier_name"],
                 },
+                "default_inferred_data_connector_name": {
+                    "class_name": "InferredAssetSqlDataConnector",
+                    "name": "whole_table",
+                },
+            }
+        )
+    },
+    store_backend_defaults=GCSStoreBackendDefaults(
+        default_bucket_name="my_default_bucket",
+        default_project_name="my_default_project",
+        validations_store_bucket_name="my_validations_bucket",
+        validations_store_project_name="my_validations_project",
+        validations_store_prefix="my_validations_store_prefix",
+        expectations_store_prefix="my_expectations_store_prefix",
+    ),
+)
+```
+
+    The following example sets overrides for many of the parameters available to you when creating a `DataContextConfig` and a Datasource.
+
+```python
+data_context_config = DataContextConfig(
+    config_version=2,
+    plugins_directory=None,
+    config_variables_file_path=None,
+    datasources={
+        "my_spark_datasource": DatasourceConfig(
+            class_name="Datasource",
+            execution_engine={
+                "class_name": "SparkDFExecutionEngine"
             },
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-        },
-        expectations_store_name="expectations_S3_store",
-        validations_store_name="validations_S3_store",
-        evaluation_parameter_store_name="evaluation_parameter_store",
-        data_docs_sites={
-            "s3_site": {
-                "class_name": "SiteBuilder",
-                "store_backend": {
-                    "class_name": "TupleS3StoreBackend",
-                    "bucket":  "my_data_docs_bucket",
-                    "prefix":  "my_optional_data_docs_prefix",
-                },
-                "site_index_builder": {
-                    "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
-                },
-            }
-        },
-        validation_operators={
-            "action_list_operator": {
-                "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {"class_name": "StoreValidationResultAction"},
+            data_connectors={
+                "tripdata_monthly_configured": {
+                    "class_name": "ConfiguredAssetFilesystemDataConnector",
+                    "base_directory": "/path/to/trip_data",
+                    "assets": {
+                        "yellow": {
+                            "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+                            "group_names": ["year", "month"],
+                        }
                     },
-                    {
-                        "name": "store_evaluation_params",
-                        "action": {"class_name": "StoreEvaluationParametersAction"},
-                    },
-                    {
-                        "name": "update_data_docs",
-                        "action": {"class_name": "UpdateDataDocsAction"},
-                    },
-                ],
-            }
+                }
+            },
+        )
+    },
+    stores={
+        "expectations_S3_store": {
+            "class_name": "ExpectationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": "my_expectations_store_bucket",
+                "prefix": "my_expectations_store_prefix",
+            },
         },
-        anonymous_usage_statistics={
-          "enabled": True
+        "validations_S3_store": {
+            "class_name": "ValidationsStore",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": "my_validations_store_bucket",
+                "prefix": "my_validations_store_prefix",
+            },
+        },
+        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+    },
+    expectations_store_name="expectations_S3_store",
+    validations_store_name="validations_S3_store",
+    evaluation_parameter_store_name="evaluation_parameter_store",
+    data_docs_sites={
+        "s3_site": {
+            "class_name": "SiteBuilder",
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket":  "my_data_docs_bucket",
+                "prefix":  "my_optional_data_docs_prefix",
+            },
+            "site_index_builder": {
+                "class_name": "DefaultSiteIndexBuilder",
+                "show_cta_footer": True,
+            },
         }
-    )
-    ```
+    },
+    validation_operators={
+        "action_list_operator": {
+            "class_name": "ActionListValidationOperator",
+            "action_list": [
+                {
+                    "name": "store_validation_result",
+                    "action": {"class_name": "StoreValidationResultAction"},
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {"class_name": "StoreEvaluationParametersAction"},
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": {"class_name": "UpdateDataDocsAction"},
+                },
+            ],
+        }
+    },
+    anonymous_usage_statistics={
+      "enabled": True
+    }
+)
+```
 
 
-2. **Pass this DataContextConfig as a project_config to BaseDataContext**
+### 2. Pass this DataContextConfig as a project_config to BaseDataContext
 
-    ```python
-    context = BaseDataContext(project_config=data_context_config)
-    ```
+```python
+from great_expectations.data_context.types.base import BaseDataContext
+context = BaseDataContext(project_config=data_context_config)
+```
 
-3. **Use this BaseDataContext instance as your DataContext**
+### 3. Use this BaseDataContext instance as your DataContext
 
     If you are using Airflow, you may wish to pass this Data Context to your GreatExpectationsOperator as a parameter. See the following guide for more details:
 
@@ -201,5 +245,4 @@ Additional resources
 --------------------
 
 - [How to instantiate a Data Context on an EMR Spark cluster](../../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to instantiate a Data Context on Databricks Spark cluster](../../../deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster.md)
-
+- [How to use Great Expectations in Databricks](/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)

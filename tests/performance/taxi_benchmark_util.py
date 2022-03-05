@@ -1,6 +1,6 @@
 """
-Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow_trip_data_sample_2019-01.csv)
-    found in the tests/test_sets/taxi_yellow_trip_data_samples directory, and used extensively in unittest and
+Helper utilities for creating and testing benchmarks using NYC Taxi data (yellow_tripdata_sample_2019-01.csv)
+    found in the tests/test_sets/taxi_yellow_tripdata_samples directory, and used extensively in unittest and
     integration tests for Great Expectations.
 """
 import os
@@ -250,10 +250,16 @@ def _create_context(
         if html_dir
         else None
     )
-    bigquery_project = os.environ["GE_TEST_BIGQUERY_PROJECT"]
-    bigquery_dataset = os.environ.get(
-        "GE_TEST_BIGQUERY_PERFORMANCE_DATASET", "performance_ci"
-    )
+    bigquery_project = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not bigquery_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery performance tests"
+        )
+    bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_PERFORMANCE_DATASET")
+    if not bigquery_dataset:
+        raise ValueError(
+            "Environment Variable GE_TEST_BIGQUERY_PERFORMANCE_DATASET is required to run BigQuery performance tests"
+        )
 
     data_context_config = DataContextConfig(
         store_backend_defaults=InMemoryStoreBackendDefaults(),

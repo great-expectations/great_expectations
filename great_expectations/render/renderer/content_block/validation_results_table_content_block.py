@@ -42,10 +42,36 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     }
 
     @classmethod
-    def _process_content_block(cls, content_block, has_failed_evr):
+    def _get_custom_columns(cls, validation_results):
+        custom_columns = []
+        if (
+            len(validation_results) > 0
+            and "meta_properties_to_render"
+            in validation_results[0].expectation_config.kwargs
+            and validation_results[0].expectation_config.kwargs[
+                "meta_properties_to_render"
+            ]
+            is not None
+        ):
+            custom_columns = list(
+                validation_results[0]
+                .expectation_config.kwargs["meta_properties_to_render"]
+                .keys()
+            )
+        return sorted(custom_columns)
+
+    @classmethod
+    def _process_content_block(cls, content_block, has_failed_evr, render_object=None):
         super()._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}
+
+        # Add custom meta_properties_to_render header
+        if render_object is not None:
+            custom_columns = cls._get_custom_columns(render_object)
+            content_block.header_row += custom_columns
+            for column in custom_columns:
+                content_block.header_row_options[column] = {"sortable": True}
 
         if has_failed_evr is False:
             styling = deepcopy(content_block.styling) if content_block.styling else {}
@@ -106,7 +132,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_table = None
             observed_value = ["--"]
 
-            data_docs_exception_message = f"""\
+            data_docs_exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
@@ -174,9 +200,18 @@ diagnose and repair the underlying issue.  Detailed information follows:
             if unexpected_table:
                 expectation_string_cell.append(unexpected_table)
             if len(expectation_string_cell) > 1:
-                return [status_cell + [expectation_string_cell] + observed_value]
+                output_row = [status_cell + [expectation_string_cell] + observed_value]
             else:
-                return [status_cell + expectation_string_cell + observed_value]
+                output_row = [status_cell + expectation_string_cell + observed_value]
+
+            meta_properties_renderer = get_renderer_impl(
+                object_name=expectation_type,
+                renderer_type="renderer.diagnostic.meta_properties",
+            )
+            if meta_properties_renderer:
+                output_row[0] += meta_properties_renderer[1](result=result)
+
+            return output_row
 
         return row_generator_fn
 

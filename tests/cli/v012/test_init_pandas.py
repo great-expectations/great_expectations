@@ -19,6 +19,9 @@ except ImportError:
     from unittest import mock
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @freeze_time("09/26/2019 13:42:41")
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @mock.patch(
@@ -81,6 +84,9 @@ def test_cli_init_on_new_project(
         "class_name"
     ]
     assert data_source_class == "PandasDataset"
+
+    # Profilers are v014+ specific
+    os.rmdir(os.path.join(project_dir, "great_expectations", "profilers"))
 
     obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
 
@@ -166,6 +172,9 @@ def test_cli_init_on_new_project(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
     mock_webbrowser,
@@ -294,6 +303,9 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
     return project_dir
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     mock_webbrowser, caplog, initialized_project, filesystem_csv_2
@@ -334,6 +346,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
     mock_webbrowser,
@@ -367,6 +382,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
     mock_webbrowser,
@@ -406,6 +424,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     mock_browser,
@@ -516,6 +537,9 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @freeze_time("09/26/2019 13:42:41")
 def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file(
@@ -591,6 +615,9 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         "class_name"
     ]
     assert data_source_class == "PandasDataset"
+
+    # Profilers are v014+ specific
+    os.rmdir(os.path.join(project_dir, "great_expectations", "profilers"))
 
     obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
 

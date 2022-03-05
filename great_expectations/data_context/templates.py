@@ -100,6 +100,9 @@ CHECKPOINT_STORE_STRING = yaml.dump(
         ]
     }
 ).replace("\n", "\n  ")[:-2]
+PROFILER_STORE_STRING = yaml.dump(
+    {"profiler_store": DataContextConfigDefaults.DEFAULT_STORES.value["profiler_store"]}
+).replace("\n", "\n  ")[:-2]
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = (
     CONFIG_VARIABLES_INTRO
@@ -125,6 +128,7 @@ stores:
     # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
     {EVALUATION_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
+  {PROFILER_STORE_STRING}
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store
@@ -155,98 +159,6 @@ anonymous_usage_statistics:
 ANONYMIZED_USAGE_STATISTICS_DISABLED = """
 anonymous_usage_statistics:
   enabled: False
-"""
-
-DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG = """
-datasources:
-  default_spark_datasource:
-    execution_engine:
-      module_name: great_expectations.execution_engine
-      class_name: SparkDFExecutionEngine
-    module_name: great_expectations.datasource
-    class_name: Datasource
-    data_connectors:
-      default_runtime_data_connector:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-            - timestamp
-  default_pandas_datasource:
-      execution_engine:
-        module_name: great_expectations.execution_engine
-        class_name: PandasExecutionEngine
-      module_name: great_expectations.datasource
-      class_name: Datasource
-      data_connectors:
-        default_runtime_data_connector:
-          class_name: RuntimeDataConnector
-          batch_identifiers:
-            - timestamp
-
-plugins_directory: ${plugins_directory}
-
-stores:
-  default_evaluation_parameter_store:
-    class_name: EvaluationParameterStore
-
-  default_expectations_store:
-    class_name: ExpectationsStore
-    store_backend:
-      class_name: GeCloudStoreBackend
-      ge_cloud_base_url: ${base_url}
-      ge_cloud_resource_type: expectation_suite
-      ge_cloud_credentials:
-        access_token: ${access_token}
-        account_id: ${account_id}
-      suppress_store_backend_id: True
-
-  default_validations_store:
-    class_name: ValidationsStore
-    store_backend:
-      class_name: GeCloudStoreBackend
-      ge_cloud_base_url: ${base_url}
-      ge_cloud_resource_type: suite_validation_result
-      ge_cloud_credentials:
-        access_token: ${access_token}
-        account_id: ${account_id}
-      suppress_store_backend_id: True
-
-  default_checkpoint_store:
-    class_name: CheckpointStore
-    store_backend:
-      class_name: GeCloudStoreBackend
-      ge_cloud_base_url: ${base_url}
-      ge_cloud_resource_type: contract
-      ge_cloud_credentials:
-        access_token: ${access_token}
-        account_id: ${account_id}
-      suppress_store_backend_id: True
-
-evaluation_parameter_store_name: default_evaluation_parameter_store
-expectations_store_name: default_expectations_store
-validations_store_name: default_validations_store
-checkpoint_store_name: default_checkpoint_store
-
-data_docs_sites:
-  default_site:
-    class_name: SiteBuilder
-    show_how_to_buttons: true
-    store_backend:
-      class_name: GeCloudStoreBackend
-      ge_cloud_base_url: ${base_url}
-      ge_cloud_resource_type: rendered_data_doc
-      ge_cloud_credentials:
-        access_token: ${access_token}
-        account_id: ${account_id}
-      suppress_store_backend_id: True
-    site_index_builder:
-      class_name: DefaultSiteIndexBuilder
-    site_section_builders:
-      profiling: None
-
-anonymous_usage_statistics:
-  enabled: true
-  usage_statistics_url: ${usage_statistics_url}
-  data_context_id: ${account_id}
 """
 
 PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED = (

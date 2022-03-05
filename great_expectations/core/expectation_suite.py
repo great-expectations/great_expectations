@@ -3,7 +3,7 @@ import json
 import logging
 import uuid
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations as ge
 from great_expectations import __version__ as ge_version
@@ -30,7 +30,6 @@ from great_expectations.marshmallow__shade import (
     Schema,
     ValidationError,
     fields,
-    post_load,
     pre_dump,
 )
 from great_expectations.types import SerializableDictDot
@@ -50,6 +49,7 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name,
+        data_context=None,
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
@@ -59,6 +59,8 @@ class ExpectationSuite(SerializableDictDot):
     ):
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
+        self._data_context = data_context
+
         if expectations is None:
             expectations = []
         self.expectations = [
@@ -133,7 +135,10 @@ class ExpectationSuite(SerializableDictDot):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
-                    other = expectationSuiteSchema.load(other)
+                    other_dict: dict = expectationSuiteSchema.load(other)
+                    other: ExpectationSuite = ExpectationSuite(
+                        **other_dict, data_context=self._data_context
+                    )
                 except ValidationError:
                     logger.debug(
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
@@ -176,6 +181,20 @@ class ExpectationSuite(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
+    def __deepcopy__(self, memo: dict):
+        cls = self.__class__
+        result = cls.__new__(cls)
+
+        memo[id(self)] = result
+
+        attributes_to_copy = set(ExpectationSuiteSchema().fields.keys())
+        for key in attributes_to_copy:
+            setattr(result, key, deepcopy(getattr(self, key)))
+
+        setattr(result, "_data_context", self._data_context)
+
+        return result
+
     def to_json_dict(self):
         myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
@@ -201,10 +220,10 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_citations(
         self,
-        sort: Optional[bool] = True,
-        require_batch_kwargs: Optional[bool] = False,
-        require_batch_request: Optional[bool] = False,
-        require_profiler_config: Optional[bool] = False,
+        sort: bool = True,
+        require_batch_kwargs: bool = False,
+        require_batch_request: bool = False,
+        require_profiler_config: bool = False,
     ) -> List[Dict[str, Any]]:
         citations: List[Dict[str, Any]] = self.meta.get("citations", [])
         if require_batch_kwargs:
@@ -500,6 +519,85 @@ class ExpectationSuite(SerializableDictDot):
         self.expectations[found_expectation_indexes[0]].patch(op, path, value)
         return self.expectations[found_expectation_indexes[0]]
 
+    def _add_expectation(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        send_usage_event: bool,
+        match_type: str = "domain",
+        overwrite_existing: bool = True,
+    ) -> ExpectationConfiguration:
+        """
+        This is a private method for adding expectations that allows for usage_events to be suppressed when
+        Expectations are added through internal processing (ie. while building profilers, rendering or validation). It
+        takes in send_usage_event boolean.
+
+        Args:
+            expectation_configuration: The ExpectationConfiguration to add or update
+            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
+                public add_expectation() method, this is set to `True`.
+            match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
+                and so whether we should add or replace.
+            overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
+                False.
+        Returns:
+            The ExpectationConfiguration to add or replace.
+        Raises:
+            More than one match
+            One match if overwrite_existing = False
+        """
+
+        found_expectation_indexes = self.find_expectation_indexes(
+            expectation_configuration, match_type
+        )
+
+        if len(found_expectation_indexes) > 1:
+            if send_usage_event:
+                self.send_usage_event(success=False)
+            raise ValueError(
+                "More than one matching expectation was found. Please be more specific with your search "
+                "criteria"
+            )
+        elif len(found_expectation_indexes) == 1:
+            # Currently, we completely replace the expectation_configuration, but we could potentially use patch_expectation
+            # to update instead. We need to consider how to handle meta in that situation.
+            # patch_expectation = jsonpatch.make_patch(self.expectations[found_expectation_index] \
+            #   .kwargs, expectation_configuration.kwargs)
+            # patch_expectation.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
+            if overwrite_existing:
+                # if existing Expectation has a ge_cloud_id, add it back to the new Expectation Configuration
+                existing_expectation_ge_cloud_id = self.expectations[
+                    found_expectation_indexes[0]
+                ].ge_cloud_id
+                if existing_expectation_ge_cloud_id is not None:
+                    expectation_configuration.ge_cloud_id = (
+                        existing_expectation_ge_cloud_id
+                    )
+                self.expectations[
+                    found_expectation_indexes[0]
+                ] = expectation_configuration
+            else:
+                if send_usage_event:
+                    self.send_usage_event(success=False)
+                raise DataContextError(
+                    "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
+                    "ExpectationConfiguration, set overwrite_existing=True"
+                )
+        else:
+            self.append_expectation(expectation_configuration)
+        if send_usage_event:
+            self.send_usage_event(success=True)
+        return expectation_configuration
+
+    def send_usage_event(self, success: bool):
+        usage_stats_event_name: str = "expectation_suite.add_expectation"
+        usage_stats_event_payload: dict = {}
+        if self._data_context is not None:
+            self._data_context.send_usage_message(
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=success,
+            )
+
     def add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
@@ -507,7 +605,6 @@ class ExpectationSuite(SerializableDictDot):
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
         """
-
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
@@ -520,34 +617,51 @@ class ExpectationSuite(SerializableDictDot):
             More than one match
             One match if overwrite_existing = False
         """
-        found_expectation_indexes = self.find_expectation_indexes(
-            expectation_configuration, match_type
+        return self._add_expectation(
+            expectation_configuration=expectation_configuration,
+            send_usage_event=True,
+            match_type=match_type,
+            overwrite_existing=overwrite_existing,
         )
 
-        if len(found_expectation_indexes) > 1:
-            raise ValueError(
-                "More than one matching expectation was found. Please be more specific with your search "
-                "criteria"
-            )
-        elif len(found_expectation_indexes) == 1:
-            # Currently, we completely replace the expectation_configuration, but we could potentially use patch_expectation
-            # to update instead. We need to consider how to handle meta in that situation.
-            # patch_expectation = jsonpatch.make_patch(self.expectations[found_expectation_index] \
-            #   .kwargs, expectation_configuration.kwargs)
-            # patch_expectation.apply(self.expectations[found_expectation_index].kwargs, in_place=True)
-            if overwrite_existing:
-                self.expectations[
-                    found_expectation_indexes[0]
-                ] = expectation_configuration
-            else:
-                raise DataContextError(
-                    "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
-                    "ExpectationConfiguration, set overwrite_existing=True"
-                )
-        else:
-            self.append_expectation(expectation_configuration)
+    def get_grouped_and_ordered_expectations_by_column(
+        self, expectation_type_filter: Optional[str] = None
+    ) -> Tuple[Dict[str, List[ExpectationConfiguration]], List[str]]:
+        expectations_by_column = {}
+        ordered_columns = []
 
-        return expectation_configuration
+        for expectation in self.expectations:
+            if "column" in expectation.kwargs:
+                column = expectation.kwargs["column"]
+            else:
+                column = "_nocolumn"
+            if column not in expectations_by_column:
+                expectations_by_column[column] = []
+
+            if (
+                expectation_type_filter is None
+                or expectation.expectation_type == expectation_type_filter
+            ):
+                expectations_by_column[column].append(expectation)
+
+            # if possible, get the order of columns from expect_table_columns_to_match_ordered_list
+            if (
+                expectation.expectation_type
+                == "expect_table_columns_to_match_ordered_list"
+            ):
+                exp_column_list = expectation.kwargs["column_list"]
+                if exp_column_list and len(exp_column_list) > 0:
+                    ordered_columns = exp_column_list
+
+        # Group items by column
+        sorted_columns = sorted(list(expectations_by_column.keys()))
+
+        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column
+        # names from entire evr, else use alphabetic sort
+        if set(sorted_columns) == set(ordered_columns):
+            return expectations_by_column, ordered_columns
+        else:
+            return expectations_by_column, sorted_columns
 
 
 class ExpectationSuiteSchema(Schema):
@@ -597,11 +711,6 @@ class ExpectationSuiteSchema(Schema):
             data["meta"] = convert_to_json_serializable(data.get("meta"))
         data = self.clean_empty(data)
         return data
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_expectation_suite(self, data, **kwargs):
-        return ExpectationSuite(**data)
 
 
 expectationSuiteSchema = ExpectationSuiteSchema()

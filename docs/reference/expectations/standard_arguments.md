@@ -11,8 +11,11 @@ All Expectations return a JSON-serializable dictionary when evaluated, and share
   Instead, it will return success = False and provide an informative error message.
 * [meta](#meta): Allows user-supplied meta-data to be stored with an Expectation.
 
+All `ColumnMapExpectations` also have the following argument:
+* [mostly](#mostly): A special argument that allows for _fuzzy_ validation based on some percentage (available for all `column_map_expectations`)
+
 ## `result_format`
-See [Result format](./result_format) for more information.
+See [Result format](./result_format.md) for more information.
 
 ## `include_config`
 

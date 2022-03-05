@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 from great_expectations.core import IDDict
 from great_expectations.core.util import convert_to_json_serializable
@@ -11,7 +10,7 @@ class ExceptionInfo(SerializableDotDict):
         self,
         exception_traceback: str,
         exception_message: str,
-        raised_exception: Optional[bool] = True,
+        raised_exception: bool = True,
     ):
         super().__init__(
             exception_traceback=exception_traceback,

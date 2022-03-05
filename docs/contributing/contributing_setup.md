@@ -47,6 +47,32 @@ In order to contribute to Great Expectations, you will need the following:
 
 ### Install Python dependencies
 
+#### (Easy version of steps 5-7 below for Mac/Linux users)
+
+Create a virtual environment in your locally cloned repo, use the same version of `pip` that we use in our CI/CD pipelines (for Python 3.6 - 3.9), and install the fewest dependencies needed for a dev environment (to minimize potential setup headaches).
+
+```
+python3 -m venv ge_dev
+
+source ge_dev/bin/activate
+
+pip install --upgrade pip==21.3.1
+
+pip install -r requirements-dev-lite.txt -c constraints-dev.txt -e .
+```
+
+Confirm that tests are passing (only against pandas and sqlalchemy with sqlite), without the need for running any Docker containers.
+
+```
+ulimit -n 4096
+
+pytest -v --no-spark --no-postgresql
+```
+
+> In your `~/.zshrc` or `~/.bashrc` file, you will want to add `ulimit -n 4096` so that it is already set for future runs. **You WILL eventually see many tests failing with `OSError: [Errno 24] Too many open files`** if you do not set it!
+
+Later on, try setting up the full dev environment (as mentioned in step 6) when you are ready for more robust testing of your custom Expectations!
+
 #### 5. Create a new virtual environment
 
 * Make a new virtual environment (e.g. using virtualenv or conda), name it “great_expectations_dev” or similar.
@@ -75,7 +101,7 @@ This is not required, but highly recommended.
 
 * ` pip install -e .`
 
-	*`-e` will install Great Expectations in “editable” mode. This is not required, but is often very convenient as a developer.
+	* `-e` will install Great Expectations in “editable” mode. This is not required, but is often very convenient as a developer.
 
 ### (Optional) Configure resources for testing and documentation
 Depending on which features of Great Expectations you want to work on, you may want to configure different backends for local testing, such as PostgreSQL and Spark. Also, there are a couple of extra steps if you want to build documentation locally.
@@ -131,6 +157,8 @@ Depending on which features of Great Expectations you want to work on, you may w
 * Once you’re done testing, you can shut down your mysql container by running `docker-compose down` from the same directory.
 
 * Caution: If another service is using port 3306, Docker may start the container but silently fail to set up the port.
+
+> If you have a Silicon Mac (M1) this Docker image does not work
 
 #### If you want to develop against local Spark:
 

@@ -1,10 +1,12 @@
 import logging
 from typing import List
+from unittest import mock
 
 import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
@@ -12,6 +14,9 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+)
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
@@ -100,9 +105,16 @@ def test_spark_df(test_pandas_df, spark_session):
     return df
 
 
-def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_catch_exceptions_no_exceptions(
+    mock_emit, in_memory_runtime_context, test_spark_df
+):
     catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: str = "SUMMARY"
+    result_format: dict = {
+        "result_format": "SUMMARY",
+    }
     runtime_environment_arguments = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -203,12 +215,20 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
     result = validator.expect_table_row_count_to_equal(**expectation_parameters)
     assert result.success
 
+    # In-Memory DataContext does not have UsageStatisticsHandler configured
+    assert mock_emit.call_count == 0
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_catch_exceptions_exception_occurred_catch_exceptions_false(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: str = "SUMMARY"
+    result_format: dict = {
+        "result_format": "SUMMARY",
+    }
     runtime_environment_arguments = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -312,12 +332,20 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     )
     assert result.success
 
+    # In-Memory DataContext does not have UsageStatisticsHandler configured
+    assert mock_emit.call_count == 0
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_catch_exceptions_exception_occurred_catch_exceptions_true(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = True  # expect exceptions to be caught
-    result_format: str = "SUMMARY"
+    result_format: dict = {
+        "result_format": "SUMMARY",
+    }
     runtime_environment_arguments = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
@@ -453,18 +481,30 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         "exception_message" not in result.exception_info
     ) or not result.exception_info["exception_message"]
 
+    # In-Memory DataContext does not have UsageStatisticsHandler configured
+    assert mock_emit.call_count == 0
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_result_format_configured_no_set_default_override(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: str = "SUMMARY"
-    runtime_environment_arguments = {
+    result_format: dict
+
+    result_format = {
+        "result_format": "SUMMARY",
+    }
+    runtime_environment_arguments: dict = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+    suite: ExpectationSuite
+
+    suite = in_memory_runtime_context.create_expectation_suite(
         "test_suite", overwrite_existing=True
     )
 
@@ -499,23 +539,138 @@ def test_result_format_configured_no_set_default_override(
         },
     )
 
-    validator: Validator = in_memory_runtime_context.get_validator(
+    validator: Validator
+
+    validator = in_memory_runtime_context.get_validator(
         batch_request=runtime_batch_request,
         expectation_suite=suite,
     )
 
     # Test calling "validator.validate()" explicitly.
 
-    validator_validation: ExpectationSuiteValidationResult = validator.validate(
-        **runtime_environment_arguments
-    )
-    results: List[ExpectationValidationResult] = validator_validation.results
+    validator_validation: ExpectationSuiteValidationResult
+
+    validator_validation = validator.validate(**runtime_environment_arguments)
+
+    results: List[ExpectationValidationResult]
+
+    results = validator_validation.results
     assert len(results) == 1
 
     result: ExpectationValidationResult
 
     result = results[0]
+    assert result.success
     assert len(result.result.keys()) > 0
+    assert result.result == {
+        "element_count": 4,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "partial_unexpected_index_list": None,
+        "partial_unexpected_counts": [],
+    }
+
+    result_format = {
+        "result_format": "BASIC",
+    }
+    runtime_environment_arguments: dict = {
+        "catch_exceptions": catch_exceptions,
+        "result_format": result_format,
+    }
+
+    suite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
+    )
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
+    )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
+
+    validator = in_memory_runtime_context.get_validator(
+        batch_request=runtime_batch_request,
+        expectation_suite=suite,
+    )
+
+    validator_validation = validator.validate(**runtime_environment_arguments)
+
+    results = validator_validation.results
+    assert len(results) == 1
+
+    result = results[0]
+    assert result.success
+    assert len(result.result.keys()) > 0
+    assert result.result == {
+        "element_count": 4,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+    }
+
+    result_format = {
+        "result_format": "BOOLEAN_ONLY",
+    }
+    runtime_environment_arguments: dict = {
+        "catch_exceptions": catch_exceptions,
+        "result_format": result_format,
+    }
+
+    suite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
+    )
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
+    )
+
+    suite.add_expectation(expectation_configuration=expectation_configuration)
+
+    validator = in_memory_runtime_context.get_validator(
+        batch_request=runtime_batch_request,
+        expectation_suite=suite,
+    )
+
+    validator_validation = validator.validate(**runtime_environment_arguments)
+
+    results = validator_validation.results
+    assert len(results) == 1
+
+    result = results[0]
+    assert result.success
+    assert result.to_json_dict() == {
+        "expectation_config": {
+            "kwargs": {
+                "catch_exceptions": False,
+                "result_format": {"result_format": "BOOLEAN_ONLY"},
+                "include_config": True,
+                "column": "Name",
+                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+            },
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "meta": {"Notes": "Some notes"},
+        },
+        "meta": {},
+        "exception_info": {
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        "result": {},
+        "success": True,
+    }
+    assert len(result.result.keys()) == 0
+    assert result.result == {}
 
     # Test calling "validator.expect_*" through "validator.validate_expectation()".
 
@@ -525,20 +680,60 @@ def test_result_format_configured_no_set_default_override(
         **expectation_arguments_without_meta, **expectation_meta
     )
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
-    assert len(result.result.keys()) > 0
+    assert result.success
+    assert result.to_json_dict() == {
+        "success": True,
+        "meta": {},
+        "expectation_config": {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "meta": {},
+            "kwargs": {
+                "catch_exceptions": False,
+                "result_format": {
+                    "result_format": "BOOLEAN_ONLY",
+                    "include_unexpected_rows": False,
+                    "partial_unexpected_count": 20,
+                },
+                "include_config": True,
+                "column": "Name",
+                "Notes": "Some notes",
+                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+            },
+        },
+        "result": {},
+        "exception_info": {
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+    }
+    assert len(result.result.keys()) == 0
+    assert result.result == {}
+
+    # In-Memory DataContext does not have UsageStatisticsHandler configured
+    assert mock_emit.call_count == 0
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_result_format_configured_with_set_default_override(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
-    result_format: str = "SUMMARY"
-    runtime_environment_arguments = {
+    result_format: dict
+
+    result_format = {
+        "result_format": "SUMMARY",
+    }
+    runtime_environment_arguments: dict = {
         "catch_exceptions": catch_exceptions,
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+    suite: ExpectationSuite
+
+    suite = in_memory_runtime_context.create_expectation_suite(
         "test_suite", overwrite_existing=True
     )
 
@@ -573,7 +768,9 @@ def test_result_format_configured_with_set_default_override(
         },
     )
 
-    validator: Validator = in_memory_runtime_context.get_validator(
+    validator: Validator
+
+    validator = in_memory_runtime_context.get_validator(
         batch_request=runtime_batch_request,
         expectation_suite=suite,
     )
@@ -582,11 +779,76 @@ def test_result_format_configured_with_set_default_override(
 
     # Test calling "validator.validate()" explicitly.
 
-    validator_validation: ExpectationSuiteValidationResult = validator.validate()
-    results: List[ExpectationValidationResult] = validator_validation.results
+    validator_validation: ExpectationSuiteValidationResult
+
+    validator_validation = validator.validate()
+
+    results: List[ExpectationValidationResult]
+
+    results = validator_validation.results
     assert len(results) == 1
 
     result: ExpectationValidationResult
+
+    result = results[0]
+    assert result.success
+    assert result.to_json_dict() == {
+        "result": {},
+        "expectation_config": {
+            "kwargs": {
+                "catch_exceptions": False,
+                "result_format": {"result_format": "SUMMARY"},
+                "include_config": True,
+                "column": "Name",
+                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+            },
+            "meta": {"Notes": "Some notes"},
+            "expectation_type": "expect_column_values_to_not_be_null",
+        },
+        "success": True,
+        "meta": {},
+        "exception_info": {
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+    }
+    assert len(result.result.keys()) == 0
+    assert result.result == {}
+
+    result_format = {
+        "result_format": "BASIC",
+    }
+    runtime_environment_arguments: dict = {
+        "catch_exceptions": catch_exceptions,
+        "result_format": result_format,
+    }
+
+    suite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
+    )
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
+    )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
+
+    validator = in_memory_runtime_context.get_validator(
+        batch_request=runtime_batch_request,
+        expectation_suite=suite,
+    )
+
+    validator.set_default_expectation_argument("result_format", "BOOLEAN_ONLY")
+
+    validator_validation = validator.validate()
+
+    results = validator_validation.results
+    assert len(results) == 1
 
     result = results[0]
     assert len(result.result.keys()) == 0
@@ -597,4 +859,90 @@ def test_result_format_configured_with_set_default_override(
 
     expectation_parameters = dict(**expectation_arguments_column, **expectation_meta)
     result = validator.expect_column_values_to_not_be_null(**expectation_parameters)
+    assert result.success
+    assert result.to_json_dict() == {
+        "result": {},
+        "expectation_config": {
+            "kwargs": {
+                "include_config": True,
+                "column": "Name",
+                "Notes": "Some notes",
+                "batch_id": "bd7b9290f981fde37aabd403e8a507ea",
+            },
+            "meta": {},
+            "expectation_type": "expect_column_values_to_not_be_null",
+        },
+        "success": True,
+        "meta": {},
+        "exception_info": {
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+    }
     assert len(result.result.keys()) == 0
+    assert result.result == {}
+
+    # In-Memory DataContext does not have UsageStatisticsHandler configured
+    assert mock_emit.call_count == 0
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_in_memory_runtime_context_configured_with_usage_stats_handler(
+    mock_emit, in_memory_runtime_context, test_pandas_df
+):
+    context: DataContext = in_memory_runtime_context
+
+    # manually set usage statistics handler
+    context._usage_statistics_handler = UsageStatisticsHandler(
+        data_context=context,
+        data_context_id=context._data_context_id,
+        usage_statistics_url="http://fakeendpoint.com",
+    )
+
+    catch_exceptions: bool = False  # expect exceptions to be raised
+    result_format: dict = {
+        "result_format": "SUMMARY",
+    }
+    runtime_environment_arguments = {
+        "catch_exceptions": catch_exceptions,
+        "result_format": result_format,
+    }
+
+    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
+        "test_suite", overwrite_existing=True
+    )
+
+    expectation_configuration: ExpectationConfiguration
+
+    expectation_meta: dict = {"Notes": "Some notes"}
+
+    expectation_arguments_without_meta: dict
+
+    expectation_arguments_column: dict = {
+        "include_config": True,
+        "column": "Name",  # use correct column to avoid error
+    }
+    expectation_arguments_without_meta = dict(
+        **runtime_environment_arguments, **expectation_arguments_column
+    )
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_not_be_null",
+        kwargs=expectation_arguments_without_meta,
+        meta=expectation_meta,
+    )
+    suite.add_expectation(expectation_configuration=expectation_configuration)
+
+    # emit 1 from add_expectation
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        )
+    ]

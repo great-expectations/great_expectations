@@ -93,6 +93,15 @@
           "b": "BIT",
           "s": "VARCHAR",
           "s1": "VARCHAR"
+        },
+        "bigquery": {
+          "x": "INTEGER",
+          "y": "NUMERIC",
+          "z": "STRING",
+          "n": "STRING",
+          "b": "BOOL",
+          "s": "STRING",
+          "s1": "STRING"
         }
       },
       "tests": [
@@ -211,6 +220,7 @@
         {
           "title": "positive_test_float_values",
           "exact_match_out": false,
+          "suppress_test_for": ["bigquery"],
           "in": {
             "column": "y",
             "type_list": [
@@ -223,6 +233,24 @@
           },
           "only_for": [
             "sqlalchemy"
+          ]
+        },
+                {
+          "title": "positive_test_float_values_bigquery",
+          "exact_match_out": false,
+          "in": {
+            "column": "y",
+            "type_list": [
+              "NUMERIC",
+              "DECIMAL",
+              "FLOAT64"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "bigquery"
           ]
         },
         {
@@ -262,6 +290,7 @@
         {
           "title": "positive_test_text_values",
           "exact_match_out": false,
+          "suppress_test_for": ["bigquery"],
           "in": {
             "column": "z",
             "type_list": [
@@ -274,6 +303,22 @@
           },
           "only_for": [
             "sqlalchemy"
+          ]
+        },
+        {
+          "title": "positive_test_text_values_bigquery",
+          "exact_match_out": false,
+          "in": {
+            "column": "z",
+            "type_list": [
+              "STRING"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "bigquery"
           ]
         },
         {
@@ -395,6 +440,7 @@
         {
           "title": "positive_test_text_and_integer_values",
           "exact_match_out": false,
+          "suppress_test_for": ["bigquery"],
           "in": {
             "column": "s",
             "type_list": [
@@ -408,6 +454,24 @@
           },
           "only_for": [
             "sqlalchemy"
+          ]
+        },
+        {
+          "title": "positive_test_text_and_integer_values_bigquery",
+          "exact_match_out": false,
+          "suppress_test_for": ["bigquery"],
+          "in": {
+            "column": "s",
+            "type_list": [
+              "STRING",
+              "INTEGER"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "bigquery"
           ]
         },
         {

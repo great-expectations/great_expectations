@@ -6,7 +6,8 @@ import jsonschema
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.profile.base import Profiler, ProfilerTypeMapping
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
+from great_expectations.profile.base import Profiler
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,9 @@ class JsonSchemaProfiler(Profiler):
         JsonSchemaTypes.BOOLEAN.value: ProfilerTypeMapping.BOOLEAN_TYPE_NAMES,
     }
 
+    def __init__(self, configuration: dict = None):
+        super().__init__(configuration)
+
     def validate(self, schema: dict) -> bool:
         if not isinstance(schema, dict):
             raise TypeError(
@@ -52,11 +56,11 @@ class JsonSchemaProfiler(Profiler):
             )
         if "type" not in schema.keys():
             raise KeyError(
-                f"This profiler requires a json schema with a top level `type` key"
+                "This profiler requires a json schema with a top level `type` key"
             )
         if schema["type"] != JsonSchemaTypes.OBJECT.value:
             raise TypeError(
-                f"This profiler requires a json schema with a top level `type` of `object`"
+                "This profiler requires a json schema with a top level `type` of `object`"
             )
         validator = jsonschema.validators.validator_for(schema)
         validator.check_schema(schema)
@@ -107,7 +111,9 @@ class JsonSchemaProfiler(Profiler):
                     "content": [f"### Description:\n{description}"],
                 }
             }
-        suite = ExpectationSuite(suite_name, expectations=expectations, meta=meta)
+        suite = ExpectationSuite(
+            suite_name, expectations=expectations, meta=meta, data_context=None
+        )
         suite.add_citation(
             comment=f"This suite was built by the {self.__class__.__name__}",
         )
