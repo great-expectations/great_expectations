@@ -32,6 +32,8 @@ def _generate_distribution_parameters(
     bimodal_stdev_1: int = 500
     bimodal_mean_2: int = 6000
     bimodal_stdev_2: int = 500
+
+    #
     bimodal_approximation = np.concatenate(
         [
             stats.norm.rvs(

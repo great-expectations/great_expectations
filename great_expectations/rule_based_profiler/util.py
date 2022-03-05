@@ -258,6 +258,18 @@ def compute_bootstrap_quantiles_point_estimate(
     false_positive_rate: np.float64,
     n_resamples: int,
 ) -> Tuple[Number, Number]:
+    return _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
+        metric_values=metric_values,
+        false_positive_rate=false_positive_rate,
+        n_resamples=n_resamples,
+    )
+
+
+def _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+) -> Tuple[Number, Number]:
     """
     An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
     parameter of interest (lower and upper quantiles in this case). See
@@ -286,7 +298,7 @@ def compute_bootstrap_quantiles_point_estimate(
     return lower_quantile_point_estimate, upper_quantile_point_estimate
 
 
-def _compute_bootstrap_quantiles_point_estimate_bias_corrected(
+def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
@@ -381,7 +393,7 @@ def _compute_bootstrap_quantiles_point_estimate_bias_corrected(
     )
 
 
-def _compute_bootstrap_quantiles_point_estimate_scipy(
+def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,

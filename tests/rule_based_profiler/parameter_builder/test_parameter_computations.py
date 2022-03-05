@@ -1,6 +1,6 @@
 import math
 from numbers import Number
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -11,12 +11,15 @@ from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_ran
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
 from great_expectations.rule_based_profiler.util import (
-    _compute_bootstrap_quantiles_point_estimate_bias_corrected,
-    _compute_bootstrap_quantiles_point_estimate_scipy,
-    compute_bootstrap_quantiles_point_estimate,
+    _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method,
+    _compute_bootstrap_quantiles_point_estimate_custom_mean_method,
+    _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method,
 )
 from great_expectations.util import probabilistic_test
 from tests.conftest import skip_if_python_below_minimum_version
+
+# Allowable tolerance for how closely a bootstrap method approximates the sample
+EFFICACY_TOLERANCE: float = 1.0e-2
 
 # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
 # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
@@ -29,7 +32,26 @@ def _compute_quantile_root_mean_squared_error_of_bootstrap(
     false_positive_rate: np.float64,
     distribution_parameters: Dict[str, Dict[str, Number]],
     distribution_samples: pd.DataFrame,
-):
+) -> Tuple[Number, Number]:
+    """
+    Computes the root mean squared error (RMSE) for how closely the lower and upper quantile point estimates from the
+    sample, approximate the lower and upper quantile parameters in the population.
+
+    Root mean squared error was selected as a performance metric, due to its abilities to evaluate prediction accuracy
+    among different models, but there are other options.
+
+    Performance metrics for continuous values:
+        - Mean absolute error (MAE)
+        - Mean squred error (MSE)
+        - Root mean squared error (RMSE)
+        - R squared
+        - Adjusted R squared
+
+    For a detailed comparison see:
+    https://medium.com/analytics-vidhya/mae-mse-rmse-coefficient-of-determination-adjusted-r-squared-which-metric-is-better-cd0326a5697e
+
+    sklearn and statsmodels both have built-in methods for computing RMSE, but neither are GE dependencies as of 3/4/22.
+    """
     distribution_types: pd.Index = distribution_samples.columns
     distribution: str
 
@@ -86,6 +108,9 @@ def _compute_quantile_root_mean_squared_error_of_bootstrap(
 def test_bootstrap_point_estimate_efficacy(
     bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
 ):
+    """
+    Efficacy means the custom bootstrap mean method approximates the sample +/- efficacy tolerance
+    """
     false_positive_rate: np.float64 = (
         bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
             "false_positive_rate"
@@ -106,7 +131,7 @@ def test_bootstrap_point_estimate_efficacy(
         (
             lower_quantile_point_estimate,
             upper_quantile_point_estimate,
-        ) = compute_bootstrap_quantiles_point_estimate(
+        ) = _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
             metric_values=distribution_samples[distribution],
             false_positive_rate=false_positive_rate,
             n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
@@ -122,15 +147,18 @@ def test_bootstrap_point_estimate_efficacy(
         )
         # Actual false-positives must be within 1% of desired (configured) false_positive_rate parameter value.
         assert (
-            false_positive_rate - 0.01
+            false_positive_rate - EFFICACY_TOLERANCE
             <= actual_false_positive_rates[distribution]
-            <= false_positive_rate + 0.01
+            <= false_positive_rate + EFFICACY_TOLERANCE
         )
 
 
 def test_bootstrap_point_estimate_bias_corrected_efficacy(
     bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
 ):
+    """
+    Efficacy means the custom bootstrap bias corrected method approximates the sample +/- efficacy tolerance
+    """
     false_positive_rate: np.float64 = (
         bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
             "false_positive_rate"
@@ -151,7 +179,7 @@ def test_bootstrap_point_estimate_bias_corrected_efficacy(
         (
             lower_quantile_point_estimate_bias_corrected,
             upper_quantile_point_estimate_bias_corrected,
-        ) = _compute_bootstrap_quantiles_point_estimate_bias_corrected(
+        ) = _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
             metric_values=distribution_samples[distribution],
             false_positive_rate=false_positive_rate,
             n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
@@ -168,15 +196,19 @@ def test_bootstrap_point_estimate_bias_corrected_efficacy(
         )
         # Actual false-positives must be within 1% of desired (configured) false_positive_rate parameter value.
         assert (
-            false_positive_rate - 0.01
+            false_positive_rate - EFFICACY_TOLERANCE
             <= actual_false_positive_rates[distribution]
-            <= false_positive_rate + 0.01
+            <= false_positive_rate + EFFICACY_TOLERANCE
         )
 
 
 def test_bootstrap_point_estimate_scipy_efficacy(
     bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
 ):
+    """
+    Efficacy means the scipy.stats.bootstrap confidence interval midpoint method
+    approximates the sample +/- efficacy tolerance
+    """
     skip_if_python_below_minimum_version()
 
     false_positive_rate: np.float64 = (
@@ -199,7 +231,7 @@ def test_bootstrap_point_estimate_scipy_efficacy(
         (
             lower_quantile_point_estimate_scipy,
             upper_quantile_point_estimate_scipy,
-        ) = _compute_bootstrap_quantiles_point_estimate_scipy(
+        ) = _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method(
             metric_values=distribution_samples[distribution],
             false_positive_rate=false_positive_rate,
             n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
@@ -216,9 +248,9 @@ def test_bootstrap_point_estimate_scipy_efficacy(
         )
         # Actual false-positives must be within 1% of desired (configured) false_positive_rate parameter value.
         assert (
-            false_positive_rate - 0.01
+            false_positive_rate - EFFICACY_TOLERANCE
             <= actual_false_positive_rates[distribution]
-            <= false_positive_rate + 0.01
+            <= false_positive_rate + EFFICACY_TOLERANCE
         )
 
 
@@ -293,4 +325,78 @@ def test_compare_bootstrap_large_sample_point_estimate_performance(
         assert (
             upper_quantile_root_mean_squared_error_scipy
             > upper_quantile_root_mean_squared_error
+        )
+
+
+@probabilistic_test
+def test_compare_bootstrap_small_sample_point_estimate_performance(
+    bootstrap_distribution_parameters_and_5_samples_with_01_false_positive,
+):
+    false_positive_rate: np.float64 = (
+        bootstrap_distribution_parameters_and_5_samples_with_01_false_positive[
+            "false_positive_rate"
+        ]
+    )
+    distribution_parameters: Dict[
+        str, Dict[str, Number]
+    ] = bootstrap_distribution_parameters_and_5_samples_with_01_false_positive[
+        "distribution_parameters"
+    ]
+    distribution_samples: pd.DataFrame = (
+        bootstrap_distribution_parameters_and_5_samples_with_01_false_positive[
+            "distribution_samples"
+        ]
+    )
+
+    (
+        lower_quantile_root_mean_squared_error,
+        upper_quantile_root_mean_squared_error,
+    ) = _compute_quantile_root_mean_squared_error_of_bootstrap(
+        method=compute_bootstrap_quantiles_point_estimate,
+        false_positive_rate=false_positive_rate,
+        distribution_parameters=distribution_parameters,
+        distribution_samples=distribution_samples,
+    )
+
+    (
+        lower_quantile_root_mean_squared_error_bias_corrected,
+        upper_quantile_root_mean_squared_error_bias_corrected,
+    ) = _compute_quantile_root_mean_squared_error_of_bootstrap(
+        method=_compute_bootstrap_quantiles_point_estimate_bias_corrected,
+        false_positive_rate=false_positive_rate,
+        distribution_parameters=distribution_parameters,
+        distribution_samples=distribution_samples,
+    )
+
+    # Custom bias corrected point estimate consistently underperforms custom biased estimator implementation
+    assert (
+        lower_quantile_root_mean_squared_error_bias_corrected
+        > lower_quantile_root_mean_squared_error
+    )
+    assert (
+        upper_quantile_root_mean_squared_error_bias_corrected
+        > upper_quantile_root_mean_squared_error
+    )
+
+    # scipy.stats.bootstrap wasn't implemented until scipy 1.6
+    if version.parse(scipy.__version__) >= version.parse("1.6"):
+        (
+            lower_quantile_root_mean_squared_error_scipy,
+            upper_quantile_root_mean_squared_error_scipy,
+        ) = _compute_quantile_root_mean_squared_error_of_bootstrap(
+            method=_compute_bootstrap_quantiles_point_estimate_scipy,
+            false_positive_rate=false_positive_rate,
+            distribution_parameters=distribution_parameters,
+            distribution_samples=distribution_samples,
+        )
+
+        # SciPy with "BCa" bias correction and "Mean of the Confidence Interval" point estimate consistently outperforms
+        # custom implementation
+        assert (
+            lower_quantile_root_mean_squared_error_scipy
+            < lower_quantile_root_mean_squared_error
+        )
+        assert (
+            upper_quantile_root_mean_squared_error_scipy
+            < upper_quantile_root_mean_squared_error
         )
