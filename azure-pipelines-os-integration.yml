@@ -70,7 +70,7 @@ stages:
     variables:
       python.version: '3.x'
       GE_pytest_pip_opts: '--requirement requirements-dev-base.txt'
-      GE_pytest_opts: ''
+      GE_pytest_opts: '--no-sqlalchemy'
 
     jobs:
 
