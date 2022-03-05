@@ -26,7 +26,7 @@ rules:
   column_quantiles_rule:
     domain_builder:
       class_name: SimpleColumnSuffixDomainBuilder
-      # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
+      # BatchRequest yielding exactly one batch (November, 2020 trip data)
       batch_request:
         datasource_name: taxi_pandas
         data_connector_name: monthly
