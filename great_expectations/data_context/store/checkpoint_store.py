@@ -1,7 +1,7 @@
 import logging
 import random
 import uuid
-from typing import Dict
+from typing import Dict, List, Union
 
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -73,3 +73,9 @@ class CheckpointStore(ConfigurationStore):
         if pretty_print:
             print("\tTest key and value successfully removed from Checkpoint store.")
             print()
+
+    def list_checkpoints(self, ge_cloud_mode: bool) -> List[str]:
+        keys: Union[List[str], List[ConfigurationIdentifier]] = self.list_keys()
+        if ge_cloud_mode:
+            return keys
+        return [k.configuration_key for k in keys]

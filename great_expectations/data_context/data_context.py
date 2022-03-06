@@ -21,6 +21,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -886,7 +887,7 @@ class BaseDataContext(ConfigPeer):
             raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
     @property
-    def checkpoint_store(self):
+    def checkpoint_store(self) -> CheckpointStore:
         checkpoint_store_name: str = self.checkpoint_store_name
         try:
             return self.stores[checkpoint_store_name]
@@ -3123,10 +3124,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiling_results
 
     def list_checkpoints(self) -> List[str]:
-        return checkpoint_toolkit.list_checkpoints(
-            checkpoint_store=self.checkpoint_store,
-            ge_cloud_mode=self.ge_cloud_mode,
-        )
+        return self.checkpoint_store.list_checkpoints(ge_cloud_mode=self.ge_cloud_mode)
 
     def add_checkpoint(
         self,
