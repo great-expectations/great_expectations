@@ -2,8 +2,9 @@ import logging
 import os
 import random
 import uuid
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -94,3 +95,25 @@ class CheckpointStore(ConfigurationStore):
         if ge_cloud_mode:
             return keys
         return [k.configuration_key for k in keys]
+
+    def delete_checkpoint(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        assert bool(name) ^ bool(
+            ge_cloud_id
+        ), "Must provide either name or ge_cloud_id."
+
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id:
+            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        else:
+            key = ConfigurationIdentifier(configuration_key=name)
+
+        try:
+            self.remove_key(key=key)
+        except ge_exceptions.InvalidKeyError as exc_ik:
+            raise ge_exceptions.CheckpointNotFoundError(
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+            )

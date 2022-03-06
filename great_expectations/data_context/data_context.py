@@ -3205,11 +3205,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ):
-        checkpoint_toolkit.delete_checkpoint(
-            checkpoint_store=self.checkpoint_store,
-            name=name,
-            ge_cloud_id=ge_cloud_id,
+    ) -> None:
+        return self.checkpoint_store.delete_checkpoint(
+            name=name, ge_cloud_id=ge_cloud_id
         )
 
     @usage_statistics_enabled_method(

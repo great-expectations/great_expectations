@@ -209,28 +209,6 @@ def get_checkpoint(
     return checkpoint
 
 
-def delete_checkpoint(
-    checkpoint_store: CheckpointStore,
-    name: Optional[str] = None,
-    ge_cloud_id: Optional[str] = None,
-):
-    assert bool(name) ^ bool(ge_cloud_id), "Must provide either name or ge_cloud_id."
-
-    if ge_cloud_id:
-        key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type="contract", ge_cloud_id=ge_cloud_id
-        )
-    else:
-        key: ConfigurationIdentifier = ConfigurationIdentifier(configuration_key=name)
-
-    try:
-        checkpoint_store.remove_key(key=key)
-    except ge_exceptions.InvalidKeyError as exc_ik:
-        raise ge_exceptions.CheckpointNotFoundError(
-            message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
-        )
-
-
 def run_checkpoint(
     data_context: "DataContext",  # noqa: F821
     checkpoint_store: CheckpointStore,
