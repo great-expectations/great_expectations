@@ -33,7 +33,11 @@ from great_expectations.core.util import get_datetime_string_from_strftime_forma
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
-from great_expectations.data_context.util import substitute_all_config_variables
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+    substitute_all_config_variables,
+)
+from great_expectations.util import filter_properties_dict
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -539,6 +543,29 @@ constructor arguments.
             checkpoint_config=checkpoint_config,
             data_context=data_context,
         )
+
+    @staticmethod
+    def instantiate_from_config(
+        checkpoint_config: CheckpointConfig,
+        name: Optional[str],
+        data_context: "DataContext",
+    ) -> "Checkpoint":
+        config: dict = checkpoint_config.to_json_dict()
+        if name:
+            config.update({"name": name})
+        config = filter_properties_dict(properties=config, clean_falsy=True)
+
+        checkpoint: Checkpoint = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                "data_context": data_context,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
+        )
+
+        return checkpoint
 
 
 class LegacyCheckpoint(Checkpoint):

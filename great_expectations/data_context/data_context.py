@@ -3197,20 +3197,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
             name=name, ge_cloud_id=ge_cloud_id
         )
-
-        config: dict = checkpoint_config.to_json_dict()
-        if name:
-            config.update({"name": name})
-        config = filter_properties_dict(properties=config, clean_falsy=True)
-
-        checkpoint: Checkpoint = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": self,
-            },
-            config_defaults={
-                "module_name": "great_expectations.checkpoint",
-            },
+        checkpoint: Checkpoint = Checkpoint.instantiate_from_config(
+            checkpoint_config=checkpoint_config, name=name, data_context=self
         )
 
         return checkpoint

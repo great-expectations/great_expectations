@@ -1,5 +1,4 @@
 import datetime
-import itertools
 import uuid
 from typing import List, Optional, Union
 
@@ -24,7 +23,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
@@ -186,9 +184,7 @@ def run_checkpoint(
     Returns:
         CheckpointResult
     """
-    checkpoint: Union[Checkpoint, SimpleCheckpoint, LegacyCheckpoint] = get_checkpoint(
-        data_context=data_context,
-        checkpoint_store=checkpoint_store,
+    checkpoint: Checkpoint = data_context.get_checkpoint(
         name=checkpoint_name,
         ge_cloud_id=ge_cloud_id,
     )
