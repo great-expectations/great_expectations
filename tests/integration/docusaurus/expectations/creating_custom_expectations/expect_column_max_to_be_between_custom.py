@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -117,6 +117,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
             "test_backends": [
                 {
                     "backend": "pandas",
+                    "dialects": None,
                 },
                 {
                     "backend": "sqlalchemy",
@@ -124,6 +125,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
                 },
                 {
                     "backend": "spark",
+                    "dialects": None,
                 },
             ],
         }

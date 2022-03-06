@@ -26,7 +26,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Set, Union
+from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse
 from packaging import version
@@ -71,7 +71,7 @@ except ImportError:
     Table = None
     Select = None
 
-SINGULAR_TO_PLURAL_LOOKUP_DICT = {
+SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "batch": "batches",
     "checkpoint": "checkpoints",
     "data_asset": "data_assets",
@@ -83,7 +83,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "rendered_data_doc": "rendered_data_docs",
 }
 
-PLURAL_TO_SINGULAR_LOOKUP_DICT = {
+PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "batches": "batch",
     "checkpoints": "checkpoint",
     "data_assets": "data_asset",
@@ -94,6 +94,8 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
 }
+
+MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES: int = 3
 
 
 def pluralize(singular_ge_noun):
@@ -1184,6 +1186,21 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        keys_to_delete: List[str] = list(
+            filter(
+                lambda k: _is_to_be_removed_from_deep_filter_properties_iterable(
+                    value=properties[k],
+                    clean_nulls=clean_nulls,
+                    clean_falsy=clean_falsy,
+                    keep_falsy_numerics=keep_falsy_numerics,
+                ),
+                properties.keys(),
+            )
+        )
+        for key in keys_to_delete:
+            properties.pop(key)
+
     elif isinstance(properties, (list, set, tuple)):
         if not inplace:
             properties = copy.deepcopy(properties)
@@ -1200,10 +1217,34 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        properties = list(
+            filter(
+                lambda v: not _is_to_be_removed_from_deep_filter_properties_iterable(
+                    value=v,
+                    clean_nulls=clean_nulls,
+                    clean_falsy=clean_falsy,
+                    keep_falsy_numerics=keep_falsy_numerics,
+                ),
+                properties,
+            )
+        )
+
     if inplace:
         return None
 
     return properties
+
+
+def _is_to_be_removed_from_deep_filter_properties_iterable(
+    value: Any, clean_nulls: bool, clean_falsy: bool, keep_falsy_numerics: bool
+) -> bool:
+    conditions: Tuple[bool, ...] = (
+        clean_nulls and value is None,
+        not keep_falsy_numerics and is_numeric(value) and value == 0,
+        clean_falsy and not is_numeric(value) and not value,
+    )
+    return any(condition for condition in conditions)
 
 
 def is_truthy(value: Any) -> bool:
@@ -1358,3 +1399,43 @@ def import_make_url():
     else:
         from sqlalchemy.engine import make_url
     return make_url
+
+
+def probabilistic_test(
+    func: Callable = None,
+    max_num_retries: int = MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES,
+) -> Callable:
+    @wraps(func)
+    def run_pytest_method(*args, **kwargs) -> None:
+        assertion_error: Optional[AssertionError] = None
+        error_message: Optional[str] = None
+
+        all_assertions_passed: bool = False
+
+        idx: int = 0
+        while idx < max_num_retries:
+            try:
+                func(*args, **kwargs)
+                all_assertions_passed = True
+            except AssertionError as e:
+                error_message = re.sub(r"\W+", " ", str(e)).strip()
+                logger.warning(
+                    f"""Attempt {idx + 1} to execute "{func}" failed with error "{error_message}".  Retrying."""
+                )
+                all_assertions_passed = False
+                assertion_error = e
+
+            if all_assertions_passed:
+                break
+
+            idx += 1
+
+        if not all_assertions_passed:
+            logger.error(
+                f"""Aborting trying to execute "{func}" (exceeded maximum allowed \
+{MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES} attempts).  Error "{error_message}" is being raised.
+"""
+            )
+            raise assertion_error
+
+    return run_pytest_method

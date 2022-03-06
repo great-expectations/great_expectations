@@ -17,6 +17,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.util import is_library_loadable
 from great_expectations.validation_operators import (
     CloudNotificationAction,
     EmailAction,
@@ -228,6 +229,10 @@ def test_SlackNotificationAction(
     ) == {"slack_notification_result": "none required"}
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pypd"),
+    reason="pypd is not installed",
+)
 @mock.patch("pypd.EventV2")
 def test_PagerdutyAlertAction(
     data_context_parameterized_expectation_suite,

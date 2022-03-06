@@ -20,7 +20,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: DataContext,
-        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, dict]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
@@ -29,7 +29,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     ):
         super().__init__(
             data_context=data_context,
-            batch=batch,
+            batch_list=batch_list,
             batch_request=batch_request,
         )
 

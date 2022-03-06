@@ -385,7 +385,7 @@ def get_dataset(
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "sqlite":
-        if not create_engine:
+        if not create_engine or not SQLITE_TYPES:
             return None
 
         engine = create_engine(get_sqlite_connection_url(sqlite_db_path=sqlite_db_path))
@@ -445,7 +445,7 @@ def get_dataset(
         )
 
     elif dataset_type == "postgresql":
-        if not create_engine:
+        if not create_engine or not POSTGRESQL_TYPES:
             return None
 
         # Create a new database
@@ -508,7 +508,7 @@ def get_dataset(
         )
 
     elif dataset_type == "mysql":
-        if not create_engine:
+        if not create_engine or not MYSQL_TYPES:
             return None
 
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
@@ -596,7 +596,7 @@ def get_dataset(
         )
 
     elif dataset_type == "mssql":
-        if not create_engine:
+        if not create_engine or not MSSQL_TYPES:
             return None
 
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
@@ -967,20 +967,34 @@ def build_sa_validator_with_data(
     sqlite_db_path=None,
     batch_definition: Optional[BatchDefinition] = None,
 ):
-    dialect_classes = {
-        "sqlite": sqlitetypes.dialect,
-        "postgresql": postgresqltypes.dialect,
-        "mysql": mysqltypes.dialect,
-        "mssql": mssqltypes.dialect,
-        "bigquery": sqla_bigquery.BigQueryDialect,
-    }
-    dialect_types = {
-        "sqlite": SQLITE_TYPES,
-        "postgresql": POSTGRESQL_TYPES,
-        "mysql": MYSQL_TYPES,
-        "mssql": MSSQL_TYPES,
-        "bigquery": BIGQUERY_TYPES,
-    }
+    dialect_classes = {}
+    dialect_types = {}
+    try:
+        dialect_classes["sqlite"] = sqlitetypes.dialect
+        dialect_types["sqlite"] = SQLITE_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["postgresql"] = postgresqltypes.dialect
+        dialect_types["postgresql"] = POSTGRESQL_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["mysql"] = mysqltypes.dialect
+        dialect_types["mysql"] = MYSQL_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["mssql"] = mssqltypes.dialect
+        dialect_types["mssql"] = MSSQL_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["bigquery"] = sqla_bigquery.BigQueryDialect
+        dialect_types["bigquery"] = BIGQUERY_TYPES
+    except AttributeError:
+        pass
+
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         engine = create_engine(get_sqlite_connection_url(sqlite_db_path))
@@ -1516,16 +1530,27 @@ def generate_expectation_tests(
     for d in test_data_cases:
         d = copy.deepcopy(d)
         dialects_to_include = {}
+        engines_to_include = {}
 
         # Some Expectations (mostly contrib) explicitly list test_backends/dialects to test with
         if d.test_backends:
             for tb in d.test_backends:
-                if tb["backend"] == "sqlalchemy":
-                    for dialect in tb["dialects"]:
+                engines_to_include[tb.backend] = True
+                if tb.backend == "sqlalchemy":
+                    for dialect in tb.dialects:
                         dialects_to_include[dialect] = True
         else:
+            engines_to_include[
+                "pandas"
+            ] = execution_engine_diagnostics.PandasExecutionEngine
+            engines_to_include[
+                "spark"
+            ] = execution_engine_diagnostics.SparkDFExecutionEngine
+            engines_to_include[
+                "sqlalchemy"
+            ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
             if (
-                execution_engine_diagnostics.SqlAlchemyExecutionEngine is True
+                engines_to_include.get("sqlalchemy") is True
                 and raise_exceptions_for_backends is False
             ):
                 dialects_to_include = {
@@ -1535,16 +1560,13 @@ def generate_expectation_tests(
                 }
 
         # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
-        if (
-            execution_engine_diagnostics.SqlAlchemyExecutionEngine is True
-            and not dialects_to_include
-        ):
+        if engines_to_include.get("sqlalchemy") is True and not dialects_to_include:
             dialects_to_include["sqlite"] = True
 
         backends = build_test_backends_list(
-            include_pandas=execution_engine_diagnostics.PandasExecutionEngine,
-            include_spark=execution_engine_diagnostics.SparkDFExecutionEngine,
-            include_sqlalchemy=execution_engine_diagnostics.SqlAlchemyExecutionEngine,
+            include_pandas=engines_to_include.get("pandas", False),
+            include_spark=engines_to_include.get("spark", False),
+            include_sqlalchemy=engines_to_include.get("sqlalchemy", False),
             include_sqlite=dialects_to_include.get("sqlite", False),
             include_postgresql=dialects_to_include.get("postgresql", False),
             include_mysql=dialects_to_include.get("mysql", False),
