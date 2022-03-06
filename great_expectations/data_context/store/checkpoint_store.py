@@ -132,21 +132,16 @@ class CheckpointStore(ConfigurationStore):
             )
 
         if checkpoint_config.config_version is None:
+            config_dict: dict = checkpoint_config.to_json_dict()
+            batches: Optional[dict] = config_dict.get("batches")
             if not (
-                "batches" in checkpoint_config.to_json_dict()
+                batches is not None
                 and (
-                    len(checkpoint_config.to_json_dict()["batches"]) == 0
+                    len(batches) == 0
                     or {"batch_kwargs", "expectation_suite_names",}.issubset(
                         set(
-                            list(
-                                itertools.chain.from_iterable(
-                                    [
-                                        item.keys()
-                                        for item in checkpoint_config.to_json_dict()[
-                                            "batches"
-                                        ]
-                                    ]
-                                )
+                            itertools.chain.from_iterable(
+                                item.keys() for item in batches
                             )
                         )
                     )
