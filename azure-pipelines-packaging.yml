@@ -36,7 +36,7 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-      - job: pip (standard)
+      - job: pip_std
         dependsOn: []
         strategy:
           matrix:
@@ -66,7 +66,7 @@ stages:
               great_expectations -y init --no-usage-stats
             displayName: 'Confirm installation'
 
-      - job: pip (no binary)
+      - job: pip_no_bin
         dependsOn: []
         strategy:
           matrix:
