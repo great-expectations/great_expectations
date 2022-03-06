@@ -32,9 +32,8 @@ except ImportError:
     # Fallback for python < 3.8
     from typing_extensions import Literal
 
-import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import (
     Batch,
@@ -3159,10 +3158,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Checkpoint:
-        batch_request = get_batch_request_as_dict(batch_request=batch_request)
-        validations = get_validations_with_batch_request_as_dict(
-            validations=validations
-        )
 
         checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
             data_context=self,
@@ -3224,6 +3219,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def run_checkpoint(
         self,
         checkpoint_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -3237,7 +3233,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         run_name: Optional[str] = None,
         run_time: Optional[datetime.datetime] = None,
         result_format: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
@@ -3269,12 +3264,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             name=checkpoint_name,
             ge_cloud_id=ge_cloud_id,
         )
-        result: CheckpointResult = Checkpoint.run_checkpoint(checkpoint)
-
-        return checkpoint_toolkit.run_checkpoint(
-            data_context=self,
-            checkpoint_store=self.checkpoint_store,
-            checkpoint_name=checkpoint_name,
+        result: CheckpointResult = checkpoint.run_with_runtime_args(
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
@@ -3288,10 +3278,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
-            ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
             **kwargs,
         )
+        return result
 
     def add_profiler(
         self,
