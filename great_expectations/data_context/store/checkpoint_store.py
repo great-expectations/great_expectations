@@ -105,7 +105,7 @@ class CheckpointStore(ConfigurationStore):
         ge_cloud_id: Optional[str] = None,
     ) -> None:
         key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
-            name, ge_cloud_id
+            name=name, ge_cloud_id=ge_cloud_id
         )
         try:
             self.remove_key(key=key)
@@ -118,7 +118,7 @@ class CheckpointStore(ConfigurationStore):
         self, name: Optional[str], ge_cloud_id: Optional[str]
     ) -> CheckpointConfig:
         key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
-            name, ge_cloud_id
+            name=name, ge_cloud_id=ge_cloud_id
         )
         try:
             checkpoint_config: CheckpointConfig = self.get(key=key)
@@ -157,7 +157,7 @@ class CheckpointStore(ConfigurationStore):
         self, checkpoint: "Checkpoint", name: Optional[str], ge_cloud_id: Optional[str]
     ) -> None:
         key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
-            name, ge_cloud_id
+            name=name, ge_cloud_id=ge_cloud_id
         )
         checkpoint_config: CheckpointConfig = checkpoint.get_config()
         checkpoint_ref = self.set(key=key, value=checkpoint_config)
