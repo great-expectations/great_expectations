@@ -106,9 +106,7 @@ def add_checkpoint(
         clean_falsy=True,
     )
 
-    new_checkpoint: Union[
-        Checkpoint, SimpleCheckpoint, LegacyCheckpoint
-    ] = instantiate_class_from_config(
+    new_checkpoint: Checkpoint = instantiate_class_from_config(
         config=checkpoint_config,
         runtime_environment={
             "data_context": data_context,
@@ -118,21 +116,7 @@ def add_checkpoint(
         },
     )
 
-    if ge_cloud_mode:
-        key: GeCloudIdentifier = GeCloudIdentifier(
-            resource_type="contract", ge_cloud_id=ge_cloud_id
-        )
-    else:
-        key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=name,
-        )
-
-    checkpoint_config = new_checkpoint.get_config()
-
-    checkpoint_ref = checkpoint_store.set(key=key, value=checkpoint_config)
-    if isinstance(checkpoint_ref, GeCloudIdAwareRef):
-        ge_cloud_id = checkpoint_ref.ge_cloud_id
-        new_checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)
+    data_context.checkpoint_store.add_checkpoint(new_checkpoint, name, ge_cloud_id)
 
     return new_checkpoint
 

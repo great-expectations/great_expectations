@@ -11,6 +11,7 @@ from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfigDefaults,
 )
+from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -157,6 +158,18 @@ class CheckpointStore(ConfigurationStore):
                 )
 
         return checkpoint_config
+
+    def add_checkpoint(
+        self, checkpoint: "Checkpoint", name: Optional[str], ge_cloud_id: Optional[str]
+    ) -> None:
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
+            name, ge_cloud_id
+        )
+        checkpoint_config: CheckpointConfig = checkpoint.get_config()
+        checkpoint_ref = self.set(key=key, value=checkpoint_config)
+        if isinstance(checkpoint_ref, GeCloudIdAwareRef):
+            ge_cloud_id = checkpoint_ref.ge_cloud_id
+            checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)
 
     def _determine_key(
         self, name: Optional[str], ge_cloud_id: Optional[str]
