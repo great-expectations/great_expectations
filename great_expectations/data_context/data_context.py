@@ -3198,8 +3198,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
             name=name, ge_cloud_id=ge_cloud_id
         )
-        checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_name(
-            checkpoint_config=checkpoint_config, name=name, data_context=self
+        checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
+            checkpoint_config=checkpoint_config,
+            data_context=self,
+            name=name,
         )
 
         return checkpoint

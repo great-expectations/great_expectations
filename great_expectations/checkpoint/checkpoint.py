@@ -711,14 +711,13 @@ constructor arguments.
         return new_checkpoint
 
     @staticmethod
-    def instantiate_from_config_with_runtime_name(
+    def instantiate_from_config_with_runtime_args(
         checkpoint_config: CheckpointConfig,
-        name: Optional[str],
         data_context: "DataContext",
+        **runtime_kwargs,
     ) -> "Checkpoint":
         config: dict = checkpoint_config.to_json_dict()
-        if name:
-            config.update({"name": name})
+        config.update(runtime_kwargs)
         config = filter_properties_dict(properties=config, clean_falsy=True)
 
         checkpoint: Checkpoint = instantiate_class_from_config(
