@@ -36,7 +36,7 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-      - job: pip
+      - job: pip (standard)
         dependsOn: []
         strategy:
           matrix:
@@ -58,6 +58,36 @@ stages:
           - script: |
               python -m pip install --upgrade pip==21.3.1
               pip install great_expectations
+            displayName: 'Install Great Expectations'
+
+          - script: |
+              great_expectations --version
+              mkdir "tmp" && cd $_
+              great_expectations -y init --no-usage-stats
+            displayName: 'Confirm installation'
+
+      - job: pip (no binary)
+        dependsOn: []
+        strategy:
+          matrix:
+            py3.7:
+              pythonVersion: '3.7'
+            py3.8:
+              pythonVersion: '3.8'
+            py3.9:
+              pythonVersion: '3.9'
+            py3.10:
+              pythonVersion: '3.10'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(pythonVersion)'
+            displayName: 'Use Python $(pythonVersion)'
+
+          - script: |
+              python -m pip install --upgrade pip==21.3.1
+              pip install --no-binary :all: --no-use-pep517 great_expectations
             displayName: 'Install Great Expectations'
 
           - script: |
@@ -106,351 +136,6 @@ stages:
 
   - stage: linux_dev_install
     dependsOn: [linux_user_install]
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-      - job: lightweight
-        dependsOn: []
-        strategy:
-          matrix:
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
-
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
-
-          - script: |
-              pip install  --requirement requirements-dev.txt --constraint constraints-dev.txt
-              pip install  .
-            displayName: 'Install dependencies'
-
-          - script: |
-              echo "Tests go here!"
-              # pip install pytest pytest-cov pytest-azurepipelines
-              # pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            displayName: 'pytest'
-
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: 'Publish test results for Python $(python.version)'
-
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
-
-      - job: full
-        dependsOn: []
-        strategy:
-          matrix:
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
-
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
-
-          - script: |
-              pip install  --requirement requirements-dev.txt --constraint constraints-dev.txt
-              pip install  .
-            displayName: 'Install dependencies'
-
-          - script: |
-              echo "Tests go here!"
-              # pip install pytest pytest-cov pytest-azurepipelines
-              # pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            displayName: 'pytest'
-
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: 'Publish test results for Python $(python.version)'
-
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
-
-  - stage: macOS_user_install
-    dependsOn: []
-    pool:
-      vmImage: 'macOS-latest'
-
-    jobs:
-      - job: pip
-        dependsOn: []
-        strategy:
-          matrix:
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
-
-          - script: |
-              python -m pip install --upgrade pip==21.3.1
-              pip install great_expectations
-            displayName: 'Install Great Expectations'
-
-          - script: |
-              great_expectations --version
-              mkdir "tmp" && cd $_
-              great_expectations -y init --no-usage-stats
-            displayName: 'Confirm installation'
-
-      - job: conda
-        dependsOn: []
-        strategy:
-          matrix:
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
-
-          - bash: echo "##vso[task.prependpath]$CONDA/bin"
-            displayName: Add conda to PATH
-
-           # On Hosted macOS, the agent user doesn't have ownership of Miniconda's installation directory/
-           # We need to take ownership if we want to update conda or install packages globally
-          - bash: sudo chown -R $USER $CONDA
-            displayName: Take ownership of conda installation
-
-          - script: |
-              conda create --yes --name ge_dev
-            displayName: Create Anaconda environment
-
-          - script: |
-              source activate ge_dev
-              conda install --yes --name ge_dev -c conda-forge great-expectations
-            displayName: 'Install Great Expectations'
-
-          - script: |
-              source activate ge_dev
-              great_expectations --version
-              mkdir "tmp" && cd $_
-              great_expectations -y init --no-usage-stats
-            displayName: 'Confirm installation'
-
-  - stage: macOS_dev_install
-    dependsOn: [macOS_user_install]
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-      - job: lightweight
-        dependsOn: []
-        strategy:
-          matrix:
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
-
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
-
-          - script: |
-              pip install  --requirement requirements-dev.txt --constraint constraints-dev.txt
-              pip install  .
-            displayName: 'Install dependencies'
-
-          - script: |
-              echo "Tests go here!"
-              # pip install pytest pytest-cov pytest-azurepipelines
-              # pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            displayName: 'pytest'
-
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: 'Publish test results for Python $(python.version)'
-
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
-
-      - job: full
-        dependsOn: []
-        strategy:
-          matrix:
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
-
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
-
-          - script: |
-              pip install  --requirement requirements-dev.txt --constraint constraints-dev.txt
-              pip install  .
-            displayName: 'Install dependencies'
-
-          - script: |
-              echo "Tests go here!"
-              # pip install pytest pytest-cov pytest-azurepipelines
-              # pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            displayName: 'pytest'
-
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: 'Publish test results for Python $(python.version)'
-
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
-
-  - stage: windows_user_install
-    dependsOn: []
-    pool:
-      vmImage: 'windows-latest'
-
-    jobs:
-      - job: pip
-        dependsOn: []
-        strategy:
-          matrix:
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
-
-          - script: |
-              python -m pip install --upgrade pip==21.3.1
-              pip install great_expectations
-            displayName: 'Install Great Expectations'
-
-          - powershell: |
-              great_expectations --version
-              mkdir "tmp" && cd $_
-              great_expectations -y init --no-usage-stats
-            displayName: 'Confirm installation'
-
-      - job: conda
-        dependsOn: []
-        strategy:
-          matrix:
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
-
-          - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
-            displayName: Add conda to PATH
-
-          - script: |
-              conda create --yes --name ge_dev
-            displayName: Create Anaconda environment
-
-          - script: |
-              source activate ge_dev
-              conda install --yes --name ge_dev -c conda-forge great-expectations
-            displayName: 'Install Great Expectations'
-
-          - powershell: |
-              source activate ge_dev
-              great_expectations --version
-              mkdir "tmp" && cd $_
-              great_expectations -y init --no-usage-stats
-            displayName: 'Confirm installation'
-
-  - stage: windows_dev_install
-    dependsOn: [windows_user_install]
     pool:
       vmImage: 'ubuntu-latest'
 
