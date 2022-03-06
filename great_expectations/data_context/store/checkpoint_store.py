@@ -1,10 +1,14 @@
 import logging
+import os
 import random
 import uuid
 from typing import Dict, List, Union
 
 from great_expectations.data_context.store import ConfigurationStore
-from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    DataContextConfigDefaults,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -73,6 +77,17 @@ class CheckpointStore(ConfigurationStore):
         if pretty_print:
             print("\tTest key and value successfully removed from Checkpoint store.")
             print()
+
+    @staticmethod
+    def default_checkpoints_exist(directory_path: str) -> bool:
+        if not directory_path:
+            return False
+
+        checkpoints_directory_path: str = os.path.join(
+            directory_path,
+            DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
+        )
+        return os.path.isdir(checkpoints_directory_path)
 
     def list_checkpoints(self, ge_cloud_mode: bool) -> List[str]:
         keys: Union[List[str], List[ConfigurationIdentifier]] = self.list_keys()

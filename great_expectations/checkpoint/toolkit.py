@@ -1,6 +1,5 @@
 import datetime
 import itertools
-import os
 import uuid
 from typing import List, Optional, Union
 
@@ -18,10 +17,7 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.data_context.store import CheckpointStore
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    DataContextConfigDefaults,
-)
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -338,14 +334,3 @@ def run_checkpoint(
     )
 
     return checkpoint.run(**checkpoint_run_arguments)
-
-
-def default_checkpoints_exist(directory_path: str) -> bool:
-    if not directory_path:
-        return False
-
-    checkpoints_directory_path: str = os.path.join(
-        directory_path,
-        DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
-    )
-    return os.path.isdir(checkpoints_directory_path)
