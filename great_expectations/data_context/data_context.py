@@ -3158,12 +3158,15 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
-    ) -> Union[Checkpoint, LegacyCheckpoint]:
-        return checkpoint_toolkit.add_checkpoint(
+    ) -> Checkpoint:
+        batch_request = get_batch_request_as_dict(batch_request=batch_request)
+        validations = get_validations_with_batch_request_as_dict(
+            validations=validations
+        )
+
+        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
             data_context=self,
-            checkpoint_store=self.checkpoint_store,
             checkpoint_store_name=self.checkpoint_store_name,
-            ge_cloud_mode=self.ge_cloud_mode,
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -3189,6 +3192,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
 
+        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
+        return checkpoint
+
     def get_checkpoint(
         self,
         name: Optional[str] = None,
@@ -3197,7 +3203,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
             name=name, ge_cloud_id=ge_cloud_id
         )
-        checkpoint: Checkpoint = Checkpoint.instantiate_from_config(
+        checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_name(
             checkpoint_config=checkpoint_config, name=name, data_context=self
         )
 
@@ -3259,6 +3265,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         Returns:
             CheckpointResult
         """
+        checkpoint: Checkpoint = self.get_checkpoint(
+            name=checkpoint_name,
+            ge_cloud_id=ge_cloud_id,
+        )
+        result: CheckpointResult = Checkpoint.run_checkpoint(checkpoint)
+
         return checkpoint_toolkit.run_checkpoint(
             data_context=self,
             checkpoint_store=self.checkpoint_store,
