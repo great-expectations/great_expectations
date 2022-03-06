@@ -2,15 +2,15 @@ import itertools
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.types.parameter_container import (
     ParameterNode,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
 )
 
 
@@ -90,21 +90,19 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         # Retrieve and replace the list of unique values for each batch with
         # the set of unique values for all batches in the given domain.
-        parameter_value_node: ParameterNode = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.fully_qualified_parameter_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.fully_qualified_parameter_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
 
         return (
             _get_unique_values_from_nested_collection_of_sets(
-                collection=parameter_value_node.value
+                collection=parameter_node.value
             ),
-            parameter_value_node.details,
+            parameter_node.details,
         )
 
 

@@ -1,16 +1,16 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import numpy as np
-
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
-    MetricComputationDetails,
-    MetricComputationResult,
-    ParameterBuilder,
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
+
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (  # isort:skip
+    MetricComputationResult,
+    MetricValues,
+    MetricComputationDetails,
+    ParameterBuilder,
 )
 
 
@@ -124,7 +124,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: np.ndarray = metric_computation_result.metric_values
+        metric_values: MetricValues = metric_computation_result.metric_values
         details: MetricComputationDetails = metric_computation_result.details
 
         # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
