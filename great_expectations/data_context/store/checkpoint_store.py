@@ -132,7 +132,6 @@ class CheckpointStore(ConfigurationStore):
             )
 
         if checkpoint_config.config_version is None:
-            checkpoint_config.batches
             if not (
                 "batches" in checkpoint_config.to_json_dict()
                 and (
