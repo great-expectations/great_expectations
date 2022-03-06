@@ -3193,13 +3193,27 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ) -> Union[Checkpoint, LegacyCheckpoint]:
-        return checkpoint_toolkit.get_checkpoint(
-            data_context=self,
-            checkpoint_store=self.checkpoint_store,
-            name=name,
-            ge_cloud_id=ge_cloud_id,
+    ) -> Checkpoint:
+        checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
+            name=name, ge_cloud_id=ge_cloud_id
         )
+
+        config: dict = checkpoint_config.to_json_dict()
+        if name:
+            config.update({"name": name})
+        config = filter_properties_dict(properties=config, clean_falsy=True)
+
+        checkpoint: Checkpoint = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                "data_context": self,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
+        )
+
+        return checkpoint
 
     def delete_checkpoint(
         self,

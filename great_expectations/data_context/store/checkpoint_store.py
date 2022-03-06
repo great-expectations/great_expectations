@@ -1,3 +1,4 @@
+import itertools
 import logging
 import os
 import random
@@ -14,6 +15,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
+from great_expectations.marshmallow__shade import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +103,64 @@ class CheckpointStore(ConfigurationStore):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
+            name, ge_cloud_id
+        )
+        try:
+            self.remove_key(key=key)
+        except ge_exceptions.InvalidKeyError as exc_ik:
+            raise ge_exceptions.CheckpointNotFoundError(
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+            )
+
+    def get_checkpoint(
+        self, name: Optional[str], ge_cloud_id: Optional[str]
+    ) -> CheckpointConfig:
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
+            name, ge_cloud_id
+        )
+        try:
+            checkpoint_config: CheckpointConfig = self.get(key=key)
+        except ge_exceptions.InvalidKeyError as exc_ik:
+            raise ge_exceptions.CheckpointNotFoundError(
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+            )
+        except ValidationError as exc_ve:
+            raise ge_exceptions.InvalidCheckpointConfigError(
+                message="Invalid Checkpoint configuration", validation_error=exc_ve
+            )
+
+        if checkpoint_config.config_version is None:
+            checkpoint_config.batches
+            if not (
+                "batches" in checkpoint_config.to_json_dict()
+                and (
+                    len(checkpoint_config.to_json_dict()["batches"]) == 0
+                    or {"batch_kwargs", "expectation_suite_names",}.issubset(
+                        set(
+                            list(
+                                itertools.chain.from_iterable(
+                                    [
+                                        item.keys()
+                                        for item in checkpoint_config.to_json_dict()[
+                                            "batches"
+                                        ]
+                                    ]
+                                )
+                            )
+                        )
+                    )
+                )
+            ):
+                raise ge_exceptions.CheckpointError(
+                    message="Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments."
+                )
+
+        return checkpoint_config
+
+    def _determine_key(
+        self, name: Optional[str], ge_cloud_id: Optional[str]
+    ) -> Union[GeCloudIdentifier, ConfigurationIdentifier]:
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id."
@@ -111,9 +171,4 @@ class CheckpointStore(ConfigurationStore):
         else:
             key = ConfigurationIdentifier(configuration_key=name)
 
-        try:
-            self.remove_key(key=key)
-        except ge_exceptions.InvalidKeyError as exc_ik:
-            raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
-            )
+        return key
