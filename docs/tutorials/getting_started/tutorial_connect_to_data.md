@@ -12,12 +12,12 @@ import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
 :::
 
-In Step 1: Setup, we created a <TechnicalTag relative="../" tag="data_context" text="Data Context" />.  Now that we have that Data Context, you'll want to connect to your actual data.  In Great Expectations, <TechnicalTag relative="../" tag="datasource" text="Datasources" /> simplify these connections by managing and providing a consistent, cross-platform API for referencing data.
+In Step 1: Setup, we created a <TechnicalTag relative="../../" tag="data_context" text="Data Context" />.  Now that we have that Data Context, you'll want to connect to your actual data.  In Great Expectations, <TechnicalTag relative="../../" tag="datasource" text="Datasources" /> simplify these connections by managing and providing a consistent, cross-platform API for referencing data.
 
 ### Create a Datasource with the CLI
 Let's create and configure your first Datasource: a connection to the data directory we've provided in the repo.  This could also be a database connection, but because our tutorial data consists of .CSV files we're just using a simple file store.
 
-Start by using the <TechnicalTag relative="../" tag="cli" text="CLI" /> to run the following command from your `ge_tutorials` directory:
+Start by using the <TechnicalTag relative="../../" tag="cli" text="CLI" /> to run the following command from your `ge_tutorials` directory:
 
 ````console
 great_expectations datasource new
@@ -91,12 +91,12 @@ Please note that due to how data is serialized, the entry in your ```great_expec
   <div>
     <p>
 
-**ExecutionEngine** : The <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" /> provides backend-specific computing resources that are used to read-in and perform validation on data.  For more information on <code>ExecutionEngines</code>, please refer to the following <a href="/docs/reference/execution_engine">Core Concepts document on ExecutionEngines</a>
+**ExecutionEngine** : The <TechnicalTag relative="../../" tag="execution_engine" text="Execution Engine" /> provides backend-specific computing resources that are used to read-in and perform validation on data.  For more information on <code>ExecutionEngines</code>, please refer to the following <a href="/docs/reference/execution_engine">Core Concepts document on ExecutionEngines</a>
 
 </p>
     <p>
 
-**DataConnectors** :  <TechnicalTag relative="../" tag="data_connector" text="Data Connectors" /> facilitate access to external data stores, such as filesystems, databases, and cloud storage. The current configuration contains both an <code>InferredAssetFilesystemDataConnector</code>, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case), and a <code>RuntimeDataConnector</code>, which allows you to retrieve a batch of data by defining a filepath.  In this tutorial we will only be using the <code>InferredAssetFilesystemDataConnector</code>.  For more information on <code>DataConnectors</code>, please refer to the <a href="/docs/reference/datasources">Core Concepts document on Datasources</a>.
+**DataConnectors** :  <TechnicalTag relative="../../" tag="data_connector" text="Data Connectors" /> facilitate access to external data stores, such as filesystems, databases, and cloud storage. The current configuration contains both an <code>InferredAssetFilesystemDataConnector</code>, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case), and a <code>RuntimeDataConnector</code>, which allows you to retrieve a batch of data by defining a filepath.  In this tutorial we will only be using the <code>InferredAssetFilesystemDataConnector</code>.  For more information on <code>DataConnectors</code>, please refer to the <a href="/docs/reference/datasources">Core Concepts document on Datasources</a>.
 
 </p>
     <p>
