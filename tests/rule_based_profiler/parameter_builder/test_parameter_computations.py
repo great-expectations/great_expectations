@@ -7,13 +7,13 @@ import pandas as pd
 import scipy
 from packaging import version
 
-from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
-    DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
-)
-from great_expectations.rule_based_profiler.util import (
+from great_expectations.rule_based_profiler.helpers.util import (
     _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method,
     _compute_bootstrap_quantiles_point_estimate_custom_mean_method,
     _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method,
+)
+from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
+    DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
 from great_expectations.util import probabilistic_test
 from tests.conftest import skip_if_python_below_minimum_version
