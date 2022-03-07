@@ -13,13 +13,13 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.types.parameter_container import (
     VARIABLES_KEY,
     ParameterContainer,
     build_parameter_container_for_variables,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.util import (
@@ -347,8 +347,10 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self.name = name
         self.config_version = config_version
         self.rules = rules
-        self.class_name = class_name
-        self.module_name = module_name
+        if class_name is not None:
+            self.class_name = class_name
+        if module_name is not None:
+            self.module_name = module_name
         self.variables = variables
 
         super().__init__(commented_map=commented_map)
@@ -433,8 +435,8 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
             runtime_rules[name] = rule_with_substituted_vars
 
         return cls(
-            class_name=runtime_config.class_name,
-            module_name=runtime_config.module_name,
+            class_name=profiler.__class__.__name__,
+            module_name=profiler.__clas__.__module__,
             name=runtime_config.name,
             config_version=runtime_config.config_version,
             variables=runtime_variables,

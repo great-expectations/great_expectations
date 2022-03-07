@@ -2626,48 +2626,6 @@ valid_usage_statistics_messages = {
             "ge_version": "0.14.7.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
-        {
-            "event": "profiler.run",
-            "event_payload": {
-                "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
-                "anonymized_rules": [
-                    {
-                        "anonymized_domain_builder": {
-                            "anonymized_class": "d2972bccf7a2a0ff91ba9369a86dcbe1",
-                            "parent_class": "TableDomainBuilder",
-                            "anonymized_batch_request": "ds89f23f389vas89f2398sdv0z98xvbh",
-                        },
-                        "anonymized_expectation_configuration_builders": [
-                            {
-                                "anonymized_class": "0d70a2037f19cf1764afad97c7395167",
-                                "anonymized_expectation_type": "c7c23fbf56041786bf024a2407031b27",
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                            }
-                        ],
-                        "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
-                        "anonymized_parameter_builders": [
-                            {
-                                "anonymized_class": "c73849d7016ce7ab68e24465361a717a",
-                                "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
-                                "parent_class": "RegexPatternStringParameterBuilder",
-                                "anonymized_batch_request": "f8asd9f823rjwef0a9f23hfa0fe920fd",
-                            }
-                        ],
-                    },
-                ],
-                "config_version": 1.0,
-                "rule_count": 1,
-                "variable_count": 1,
-            },
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-06-25T16:08:28.070Z",
-            "event_duration": 123,
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.14.7.manual_testing",
-            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
-        },
     ],
 }
 
