@@ -121,12 +121,16 @@ def test_reconcile_profiler_rules_new_rule_override(
         },
     }
 
-    expected_rules: List[dict] = [
-        {
-            "name": "rule_0",
-            "domain_builder": {},
+    expected_rules: Dict[str, dict] = {
+        "rule_0": {
+            "domain_builder": {
+                "class_name": "ColumnDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+            },
             "parameter_builders": [
                 {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
@@ -134,6 +138,8 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "reduce_scalar_metric": True,
                 },
                 {
+                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "sampling_method": "bootstrap",
@@ -146,6 +152,8 @@ def test_reconcile_profiler_rules_new_rule_override(
             ],
             "expectation_configuration_builders": [
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -158,6 +166,8 @@ def test_reconcile_profiler_rules_new_rule_override(
                     },
                 },
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -170,11 +180,15 @@ def test_reconcile_profiler_rules_new_rule_override(
                 },
             ],
         },
-        {
-            "name": "rule_1",
-            "domain_builder": {},
+        "rule_1": {
+            "domain_builder": {
+                "class_name": "TableDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+            },
             "parameter_builders": [
                 {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
@@ -184,6 +198,8 @@ def test_reconcile_profiler_rules_new_rule_override(
             ],
             "expectation_configuration_builders": [
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -198,24 +214,19 @@ def test_reconcile_profiler_rules_new_rule_override(
                 },
             ],
         },
-    ]
+    }
 
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
     rule: Rule
-    effective_rule_configs_actual: dict = {
+    effective_rule_configs_actual: Dict[str, dict] = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule_config: dict
-    effective_rule_configs_expected: dict = {
-        rule_config["name"]: rule_config for rule_config in expected_rules
-    }
-
-    assert effective_rule_configs_actual == effective_rule_configs_expected
+    assert effective_rule_configs_actual == expected_rules
 
 
 def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
@@ -233,16 +244,19 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
         },
     }
 
-    expected_rules: List[dict] = [
-        {
-            "name": "rule_1",
+    expected_rules: Dict[str, dict] = {
+        "rule_1": {
             "domain_builder": {
+                "class_name": "SimpleColumnSuffixDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder",
                 "column_name_suffixes": [
                     "_ts",
                 ],
             },
             "parameter_builders": [
                 {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
@@ -252,6 +266,8 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
             ],
             "expectation_configuration_builders": [
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -266,24 +282,19 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
                 },
             ],
         },
-    ]
+    }
 
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
     rule: Rule
-    effective_rule_configs_actual: dict = {
+    effective_rule_configs_actual: Dict[str, dict] = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule_config: dict
-    effective_rule_configs_expected: dict = {
-        rule_config["name"]: rule_config for rule_config in expected_rules
-    }
-
-    assert effective_rule_configs_actual == effective_rule_configs_expected
+    assert effective_rule_configs_actual == expected_rules
 
 
 def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
@@ -315,12 +326,16 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
         },
     }
 
-    expected_rules: List[dict] = [
-        {
-            "name": "rule_1",
-            "domain_builder": {},
+    expected_rules: Dict[str, dict] = {
+        "rule_1": {
+            "domain_builder": {
+                "class_name": "TableDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+            },
             "parameter_builders": [
                 {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_special_metric",
                     "enforce_numeric_metric": True,
@@ -328,6 +343,8 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "reduce_scalar_metric": True,
                 },
                 {
+                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "sampling_method": "bootstrap",
@@ -340,6 +357,8 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
             ],
             "expectation_configuration_builders": [
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -354,24 +373,19 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                 },
             ],
         },
-    ]
+    }
 
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
     rule: Rule
-    effective_rule_configs_actual: dict = {
+    effective_rule_configs_actual: Dict[str, dict] = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule_config: dict
-    effective_rule_configs_expected: dict = {
-        rule_config["name"]: rule_config for rule_config in expected_rules
-    }
-
-    assert effective_rule_configs_actual == effective_rule_configs_expected
+    assert effective_rule_configs_actual == expected_rules
 
 
 def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builder_overrides(
@@ -411,12 +425,16 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
         },
     }
 
-    expected_rules: List[dict] = [
-        {
-            "name": "rule_1",
-            "domain_builder": {},
+    expected_rules: Dict[str, dict] = {
+        "rule_1": {
+            "domain_builder": {
+                "class_name": "TableDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+            },
             "parameter_builders": [
                 {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
@@ -426,6 +444,8 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
             ],
             "expectation_configuration_builders": [
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -438,6 +458,8 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     },
                 },
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -450,24 +472,19 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                 },
             ],
         },
-    ]
+    }
 
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
     rule: Rule
-    effective_rule_configs_actual: dict = {
+    effective_rule_configs_actual: Dict[str, dict] = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule_config: dict
-    effective_rule_configs_expected: dict = {
-        rule_config["name"]: rule_config for rule_config in expected_rules
-    }
-
-    assert effective_rule_configs_actual == effective_rule_configs_expected
+    assert effective_rule_configs_actual == expected_rules
 
 
 def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update(
@@ -525,12 +542,16 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
         },
     }
 
-    expected_rules: List[dict] = [
-        {
-            "name": "rule_1",
-            "domain_builder": {},
+    expected_rules: Dict[str, dict] = {
+        "rule_1": {
+            "domain_builder": {
+                "class_name": "ColumnDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+            },
             "parameter_builders": [
                 {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
@@ -538,6 +559,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "reduce_scalar_metric": True,
                 },
                 {
+                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "sampling_method": "bootstrap",
@@ -550,6 +573,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
             ],
             "expectation_configuration_builders": [
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -564,6 +589,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     },
                 },
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -576,7 +603,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                 },
             ],
         },
-    ]
+    }
 
     effective_rules: List[
         Rule
@@ -590,17 +617,12 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
     )
 
     rule: Rule
-    effective_rule_configs_actual: dict = {
+    effective_rule_configs_actual: Dict[str, dict] = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule_config: dict
-    effective_rule_configs_expected: dict = {
-        rule_config["name"]: rule_config for rule_config in expected_rules
-    }
-
-    assert effective_rule_configs_actual == effective_rule_configs_expected
+    assert effective_rule_configs_actual == expected_rules
 
 
 def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
@@ -638,12 +660,16 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
         },
     }
 
-    expected_rules: List[dict] = [
-        {
-            "name": "rule_1",
-            "domain_builder": {},
+    expected_rules: Dict[str, Dict] = {
+        "rule_1": {
+            "domain_builder": {
+                "class_name": "ColumnDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+            },
             "parameter_builders": [
                 {
+                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "sampling_method": "bootstrap",
@@ -656,6 +682,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
             ],
             "expectation_configuration_builders": [
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -668,7 +696,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                 },
             ],
         },
-    ]
+    }
 
     effective_rules: List[
         Rule
@@ -682,17 +710,12 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
     )
 
     rule: Rule
-    effective_rule_configs_actual: dict = {
+    effective_rule_configs_actual: Dict[str, dict] = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule_config: dict
-    effective_rule_configs_expected: dict = {
-        rule_config["name"]: rule_config for rule_config in expected_rules
-    }
-
-    assert effective_rule_configs_actual == effective_rule_configs_expected
+    assert effective_rule_configs_actual == expected_rules
 
 
 def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
@@ -750,12 +773,16 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
         },
     }
 
-    expected_rules: List[dict] = [
-        {
-            "name": "rule_1",
-            "domain_builder": {},
+    expected_rules: Dict[str, dict] = {
+        "rule_1": {
+            "domain_builder": {
+                "class_name": "ColumnDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+            },
             "parameter_builders": [
                 {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
@@ -763,6 +790,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "reduce_scalar_metric": True,
                 },
                 {
+                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
                     "sampling_method": "bootstrap",
@@ -775,6 +804,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
             ],
             "expectation_configuration_builders": [
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
@@ -787,6 +818,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     },
                 },
                 {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                     "expectation_type": "expect_column_min_to_be_between",
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
@@ -799,24 +832,19 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                 },
             ],
         },
-    ]
+    }
 
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
     rule: Rule
-    effective_rule_configs_actual: dict = {
+    effective_rule_configs_actual: Dict[str, dict] = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
     deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule_config: dict
-    effective_rule_configs_expected: dict = {
-        rule_config["name"]: rule_config for rule_config in expected_rules
-    }
-
-    assert effective_rule_configs_actual == effective_rule_configs_expected
+    assert effective_rule_configs_actual == expected_rules
 
 
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")

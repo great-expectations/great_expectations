@@ -2,28 +2,31 @@ import copy
 import itertools
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, make_dataclass
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.rule_based_profiler.helpers.util import (
+    build_metric_domain_kwargs,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_validator as get_validator_using_batch_list_or_batch_request,
+)
 from great_expectations.rule_based_profiler.types import (
     Attributes,
     Builder,
     Domain,
     ParameterContainer,
-)
-from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
-from great_expectations.rule_based_profiler.util import (
-    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_validator as get_validator_using_batch_list_or_batch_request,
+    build_parameter_container,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -84,11 +87,6 @@ class ParameterBuilder(Builder, ABC):
         ```
     """
 
-    exclude_field_names: Set[str] = {
-        "data_context",
-        "batch_list",
-    }
-
     def __init__(
         self,
         name: str,
@@ -107,12 +105,13 @@ class ParameterBuilder(Builder, ABC):
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
         """
+        super().__init__(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            data_context=data_context,
+        )
 
         self._name = name
-        self._batch_request = batch_request
-        self._data_context = data_context
-
-        self._batch_list = batch_list
 
     def build_parameters(
         self,
@@ -120,13 +119,39 @@ class ParameterBuilder(Builder, ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
-        self._build_parameters(
+        parameter_computation_impl: Optional[Callable] = None,
+    ) -> None:
+        computed_parameter_value: Any
+        parameter_computation_details: dict
+
+        if parameter_computation_impl is None:
+            parameter_computation_impl = self._build_parameters
+
+        (
+            computed_parameter_value,
+            parameter_computation_details,
+        ) = parameter_computation_impl(
             parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
+
+        parameter_values: Dict[str, Any] = {
+            self.fully_qualified_parameter_name: {
+                "value": convert_to_json_serializable(data=computed_parameter_value),
+                "details": parameter_computation_details,
+            },
+        }
+
+        build_parameter_container(
+            parameter_container=parameter_container, parameter_values=parameter_values
+        )
+
+    @property
+    @abstractmethod
+    def fully_qualified_parameter_name(self) -> str:
+        pass
 
     @property
     def name(self) -> str:
@@ -165,7 +190,13 @@ class ParameterBuilder(Builder, ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> Tuple[Any, dict]:
+        """
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
+        details.
+
+        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        """
         pass
 
     def get_validator(
@@ -231,8 +262,6 @@ class ParameterBuilder(Builder, ABC):
         significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
-        # IDs of Batch objects used to compute the metric -- commonly obtained via the "get_batch_ids()"
-        # method in this module, although it can readily accept the list of Batch IDs generated through any other means.
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
             variables=variables,
