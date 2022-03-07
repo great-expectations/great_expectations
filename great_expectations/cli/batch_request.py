@@ -80,7 +80,7 @@ def get_batch_request(
         "data_connector_name": data_connector_name,
     }
 
-    data_asset_name: str
+    data_asset_name: Optional[str]
 
     if isinstance(datasource, Datasource):
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'
@@ -100,9 +100,7 @@ def get_batch_request(
         )
     else:
         raise ge_exceptions.DataContextError(
-            "Datasource {:s} of unsupported type {:s} was encountered.".format(
-                datasource.name, str(type(datasource))
-            )
+            f"Datasource '{datasource.name}' of unsupported type {type(datasource)} was encountered."
         )
 
     batch_request.update(
@@ -137,14 +135,14 @@ def select_data_connector_name(
 ) -> Optional[str]:
     msg_prompt_select_data_connector_name = "Select data_connector"
 
+    if not available_data_asset_names_by_data_connector_dict:
+        available_data_asset_names_by_data_connector_dict = {}
+
     num_available_data_asset_names_by_data_connector = len(
         available_data_asset_names_by_data_connector_dict
     )
 
-    if (
-        available_data_asset_names_by_data_connector_dict is None
-        or num_available_data_asset_names_by_data_connector == 0
-    ):
+    if num_available_data_asset_names_by_data_connector == 0:
         return None
 
     if num_available_data_asset_names_by_data_connector == 1:
@@ -211,6 +209,9 @@ def _get_data_asset_name_from_data_connector(
     data_asset_name: Optional[str] = None
     num_data_assets = len(available_data_asset_names)
 
+    if num_data_assets == 0:
+        return None
+
     # If we have a large number of assets, give the user the ability to paginate or search
     if num_data_assets > 100:
         prompt = f"You have a list of {num_data_assets:,} data assets. Would you like to list them [l] or search [s]?\n"
@@ -251,8 +252,12 @@ def _list_available_data_asset_names(
         for i in range(0, len(available_data_asset_names_str), PAGE_SIZE)
     ]
 
+    if len(data_asset_pages) == 0:
+        return None
+
     display_idx = 0  # Used to traverse between pages
     data_asset_name: Optional[str] = None
+
     while data_asset_name is None:
         current_page = data_asset_pages[display_idx]
         choices: str = "\n".join(
