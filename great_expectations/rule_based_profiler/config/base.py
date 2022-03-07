@@ -13,6 +13,14 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
+from great_expectations.rule_based_profiler.types.parameter_container import (
+    VARIABLES_KEY,
+    ParameterContainer,
+    build_parameter_container_for_variables,
+)
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -408,13 +416,21 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         runtime_variables: dict = profiler.reconcile_profiler_variables_as_dict(
             variables=variables
         )
+        variables_container: ParameterContainer = (
+            build_parameter_container_for_variables(variables_configs=runtime_variables)
+        )
 
         effective_rules: Dict[
             str, "Rule"  # noqa: F821
         ] = profiler.reconcile_profiler_rules_as_dict(rules=rules)
-        runtime_rules: Dict[str, dict] = {
-            name: rule.to_json_dict() for name, rule in effective_rules.items()
-        }
+        runtime_rules: Dict[str, dict] = {}
+        for name, rule in effective_rules.items():
+            rule_with_substituted_vars: dict = (
+                RuleBasedProfilerConfig._interpolate_variables_in_config(
+                    rule=rule, variables_container=variables_container
+                )
+            )
+            runtime_rules[name] = rule_with_substituted_vars
 
         return cls(
             class_name=runtime_config.class_name,
@@ -424,6 +440,30 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
             variables=runtime_variables,
             rules=runtime_rules,
         )
+
+    @staticmethod
+    def _interpolate_variables_in_config(
+        rule: "Rule", variables_container: ParameterContainer
+    ) -> dict:
+        def _traverse_and_interpolate(node: Any) -> None:
+            if isinstance(node, dict):
+                for key, val in node.copy().items():
+                    if isinstance(val, str) and val.startswith(VARIABLES_KEY):
+                        node[key] = get_parameter_value_and_validate_return_type(
+                            domain=None,
+                            parameter_reference=val,
+                            variables=variables_container,
+                            parameters=None,
+                        )
+                    _traverse_and_interpolate(val)
+            elif isinstance(node, list):
+                for val in node:
+                    _traverse_and_interpolate(val)
+
+        rule_dict: dict = rule.to_json_dict()
+        _traverse_and_interpolate(rule_dict)
+
+        return rule_dict
 
 
 class RuleBasedProfilerConfigSchema(Schema):
