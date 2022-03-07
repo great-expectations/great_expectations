@@ -258,128 +258,25 @@ def test_bootstrap_point_estimate_scipy_efficacy(
 
 
 @probabilistic_test
-def test_compare_bootstrap_large_sample_point_estimate_performance(
-    bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
-):
-    test_count = 5
-    lower_test_result: list[list] = []
-    upper_test_result: list[list] = []
-    for i in range(test_count):
-        false_positive_rate: np.float64 = (
-            bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-                "false_positive_rate"
-            ]
-        )
-        distribution_parameters: Dict[
-            str, Dict[str, Number]
-        ] = bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "distribution_parameters"
-        ]
-        distribution_samples: pd.DataFrame = (
-            bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-                "distribution_samples"
-            ]
-        )
-
-        (
-            lower_quantile_root_mean_squared_error_mean,
-            upper_quantile_root_mean_squared_error_mean,
-        ) = _compute_quantile_root_mean_squared_error_of_bootstrap(
-            method=_compute_bootstrap_quantiles_point_estimate_custom_mean_method,
-            false_positive_rate=false_positive_rate,
-            distribution_parameters=distribution_parameters,
-            distribution_samples=distribution_samples,
-        )
-
-        (
-            lower_quantile_root_mean_squared_error_bias_corrected,
-            upper_quantile_root_mean_squared_error_bias_corrected,
-        ) = _compute_quantile_root_mean_squared_error_of_bootstrap(
-            method=_compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method,
-            false_positive_rate=false_positive_rate,
-            distribution_parameters=distribution_parameters,
-            distribution_samples=distribution_samples,
-        )
-
-        # Custom bias corrected point estimate consistently underperforms custom biased estimator implementation
-        # assert (
-        #     lower_quantile_root_mean_squared_error_bias_corrected
-        #     > lower_quantile_root_mean_squared_error_mean
-        # )
-        # assert (
-        #     upper_quantile_root_mean_squared_error_bias_corrected
-        #     > upper_quantile_root_mean_squared_error_mean
-        # )
-
-        # scipy.stats.bootstrap wasn't implemented until scipy 1.6
-        if version.parse(scipy.__version__) >= version.parse("1.6"):
-            (
-                lower_quantile_root_mean_squared_error_scipy,
-                upper_quantile_root_mean_squared_error_scipy,
-            ) = _compute_quantile_root_mean_squared_error_of_bootstrap(
-                method=_compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method,
-                false_positive_rate=false_positive_rate,
-                distribution_parameters=distribution_parameters,
-                distribution_samples=distribution_samples,
-            )
-
-            # SciPy with "BCa" bias correction and "Mean of the Confidence Interval" point estimate consistently underperforms
-            # both custom implementations
-            assert (
-                lower_quantile_root_mean_squared_error_scipy
-                > lower_quantile_root_mean_squared_error_mean
-            )
-            assert (
-                upper_quantile_root_mean_squared_error_scipy
-                > upper_quantile_root_mean_squared_error_mean
-            )
-
-            assert (
-                lower_quantile_root_mean_squared_error_scipy
-                > lower_quantile_root_mean_squared_error_bias_corrected
-            )
-            assert (
-                upper_quantile_root_mean_squared_error_scipy
-                > upper_quantile_root_mean_squared_error_bias_corrected
-            )
-
-        lower_test_result.append(
-            [
-                lower_quantile_root_mean_squared_error_mean,
-                lower_quantile_root_mean_squared_error_bias_corrected,
-                lower_quantile_root_mean_squared_error_scipy,
-            ]
-        )
-        upper_test_result.append(
-            [
-                upper_quantile_root_mean_squared_error_mean,
-                upper_quantile_root_mean_squared_error_bias_corrected,
-                upper_quantile_root_mean_squared_error_scipy,
-            ]
-        )
-
-    lower_test_result_ndarray = np.ndarray(lower_test_result)
-    upper_test_result_ndarray = np.ndarray(upper_test_result)
-
-    assert False
-
-
-@probabilistic_test
 def test_compare_bootstrap_small_sample_point_estimate_performance(
-    bootstrap_distribution_parameters_and_5_samples_with_01_false_positive,
+    bootstrap_distribution_parameters_and_20_samples_with_01_false_positive,
 ):
+    # We measure performance on a small metric value sample size. As metric value sample size gets large,
+    # the relative performance of each method becomes chaotic and the decision to use the bootstrap method
+    # in the first place becomes questionable.
+
     false_positive_rate: np.float64 = (
-        bootstrap_distribution_parameters_and_5_samples_with_01_false_positive[
+        bootstrap_distribution_parameters_and_20_samples_with_01_false_positive[
             "false_positive_rate"
         ]
     )
     distribution_parameters: Dict[
         str, Dict[str, Number]
-    ] = bootstrap_distribution_parameters_and_5_samples_with_01_false_positive[
+    ] = bootstrap_distribution_parameters_and_20_samples_with_01_false_positive[
         "distribution_parameters"
     ]
     distribution_samples: pd.DataFrame = (
-        bootstrap_distribution_parameters_and_5_samples_with_01_false_positive[
+        bootstrap_distribution_parameters_and_20_samples_with_01_false_positive[
             "distribution_samples"
         ]
     )
@@ -404,14 +301,19 @@ def test_compare_bootstrap_small_sample_point_estimate_performance(
         distribution_samples=distribution_samples,
     )
 
-    # Custom bias corrected point estimate consistently underperforms custom biased estimator implementation
-    assert (
+    # Custom bias corrected point estimate consistently outperforms custom biased estimator implementation when
+    # metric value sample size is large
+    total_root_mean_squared_error_bias_corrected: Number = (
         lower_quantile_root_mean_squared_error_bias_corrected
-        > lower_quantile_root_mean_squared_error_mean
+        + upper_quantile_root_mean_squared_error_bias_corrected
+    )
+    total_root_mean_squared_error_mean: Number = (
+        lower_quantile_root_mean_squared_error_mean
+        + upper_quantile_root_mean_squared_error_mean
     )
     assert (
-        upper_quantile_root_mean_squared_error_bias_corrected
-        > upper_quantile_root_mean_squared_error_mean
+        total_root_mean_squared_error_bias_corrected
+        < total_root_mean_squared_error_mean
     )
 
     # scipy.stats.bootstrap wasn't implemented until scipy 1.6
@@ -426,13 +328,14 @@ def test_compare_bootstrap_small_sample_point_estimate_performance(
             distribution_samples=distribution_samples,
         )
 
-        # SciPy with "BCa" bias correction and "Mean of the Confidence Interval" point estimate consistently outperforms
-        # custom implementation
-        assert (
+        # SciPy with "BCa" bias correction and "Mean of the Confidence Interval" point estimate consistently
+        # underperforms both custom implementations
+        total_root_mean_squared_error_scipy = (
             lower_quantile_root_mean_squared_error_scipy
-            < lower_quantile_root_mean_squared_error_mean
+            + upper_quantile_root_mean_squared_error_scipy
         )
+        assert total_root_mean_squared_error_scipy > total_root_mean_squared_error_mean
         assert (
-            upper_quantile_root_mean_squared_error_scipy
-            < upper_quantile_root_mean_squared_error_mean
+            total_root_mean_squared_error_scipy
+            > total_root_mean_squared_error_bias_corrected
         )

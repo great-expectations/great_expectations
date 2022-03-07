@@ -258,7 +258,8 @@ def compute_bootstrap_quantiles_point_estimate(
     false_positive_rate: np.float64,
     n_resamples: int,
 ) -> Tuple[Number, Number]:
-    return _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
+    # This method is the winner of our performance testing
+    return _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
         metric_values=metric_values,
         false_positive_rate=false_positive_rate,
         n_resamples=n_resamples,
@@ -275,10 +276,10 @@ def _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
     parameter of interest (lower and upper quantiles in this case). See
     https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
 
-    This implementation has been replaced by "compute_bootstrap_quantiles_bias_corrected_point_estimate" and only
-    remains to demonstrate the performance improvement achieved by correcting for bias. Upon the implementation of a
-    Machine Learning Lifecycle framework, the performance improvement can be documented and this legacy method can be
-    removed from the codebase.
+    This implementation has been replaced by "_compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method"
+    and only remains to demonstrate the performance improvement achieved by correcting for bias. Upon the implementation
+    of a Machine Learning Lifecycle framework, the performance improvement can be documented and this legacy method can
+    be removed from the codebase.
     """
     bootstraps: np.ndarray = np.random.choice(
         metric_values, size=(n_resamples, metric_values.size)
@@ -354,38 +355,57 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
     computing the stopping criterion, expressed as the optimal number of bootstrap samples, needed to achieve a maximum
     probability that the value of the statistic of interest will be minimally deviating from its actual (ideal) value.
     """
+    lower_quantile_pct: float = false_positive_rate / 2
+    upper_quantile_pct: float = 1.0 - false_positive_rate / 2
+
+    sample_lower_quantile: Number = np.quantile(metric_values, q=lower_quantile_pct)
+    sample_upper_quantile: Number = np.quantile(metric_values, q=upper_quantile_pct)
+
     bootstraps: np.ndarray = np.random.choice(
         metric_values, size=(n_resamples, metric_values.size)
     )
-    lower_quantiles: Union[np.ndarray, Number] = np.quantile(
+
+    bootstrap_lower_quantiles: Union[np.ndarray, Number] = np.quantile(
         bootstraps,
-        q=false_positive_rate / 2,
+        q=lower_quantile_pct,
         axis=1,
     )
-    lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
-
-    lower_quantile_residuals: Union[np.ndarray, Number] = (
-        lower_quantiles - lower_quantile_point_estimate
-    )
-    lower_quantile_bias: Number = sum(lower_quantile_residuals) / len(lower_quantiles)
-    lower_quantile_bias_corrected_point_estimate: Number = (
-        lower_quantile_point_estimate + lower_quantile_bias
+    bootstrap_lower_quantile_point_estimate: Number = np.mean(bootstrap_lower_quantiles)
+    bootstrap_lower_quantile_standard_error: Number = np.std(bootstrap_lower_quantiles)
+    bootstrap_lower_quantile_bias: Number = (
+        bootstrap_lower_quantile_point_estimate - sample_lower_quantile
     )
 
-    upper_quantiles: Union[np.ndarray, Number] = np.quantile(
+    lower_quantile_bias_corrected_point_estimate: Number
+    if bootstrap_lower_quantile_bias / bootstrap_lower_quantile_standard_error <= 0.25:
+        lower_quantile_bias_corrected_point_estimate = (
+            bootstrap_lower_quantile_point_estimate
+        )
+    else:
+        lower_quantile_bias_corrected_point_estimate = (
+            bootstrap_lower_quantile_point_estimate - bootstrap_lower_quantile_bias
+        )
+
+    bootstrap_upper_quantiles: Union[np.ndarray, Number] = np.quantile(
         bootstraps,
-        q=1.0 - (false_positive_rate / 2),
+        q=upper_quantile_pct,
         axis=1,
     )
-    upper_quantile_point_estimate: Number = np.mean(upper_quantiles)
+    bootstrap_upper_quantile_point_estimate: Number = np.mean(bootstrap_upper_quantiles)
+    bootstrap_upper_quantile_standard_error: Number = np.std(bootstrap_upper_quantiles)
+    bootstrap_upper_quantile_bias: Number = (
+        bootstrap_upper_quantile_point_estimate - sample_upper_quantile
+    )
 
-    upper_quantile_residuals: Union[np.ndarray, Number] = (
-        upper_quantiles - upper_quantile_point_estimate
-    )
-    upper_quantile_bias: Number = sum(upper_quantile_residuals) / len(upper_quantiles)
-    upper_quantile_bias_corrected_point_estimate: Number = (
-        upper_quantile_point_estimate + upper_quantile_bias
-    )
+    upper_quantile_bias_corrected_point_estimate: Number
+    if bootstrap_upper_quantile_bias / bootstrap_upper_quantile_standard_error <= 0.25:
+        upper_quantile_bias_corrected_point_estimate = (
+            bootstrap_upper_quantile_point_estimate
+        )
+    else:
+        upper_quantile_bias_corrected_point_estimate = (
+            bootstrap_upper_quantile_point_estimate - bootstrap_upper_quantile_bias
+        )
 
     return (
         lower_quantile_bias_corrected_point_estimate,

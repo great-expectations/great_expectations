@@ -74,7 +74,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     assert actual_value_dict == expected_value_dict
 
-    expected_value = np.array([7824, 8811])
+    expected_value = np.array([7510, 8806])
 
     # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
     # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
