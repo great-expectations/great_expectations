@@ -310,6 +310,7 @@ module.exports = {
       type: 'category',
       label: 'Contributing',
       items: [
+        { type: 'doc', id: 'guides/setup/setup_overview', label: 'Overview' },
         {
           type: 'category',
           label: 'Contributing basics',
@@ -346,6 +347,80 @@ module.exports = {
             { type: 'doc', id: 'contributing/style_guides/docs_style' },
             { type: 'doc', id: 'contributing/style_guides/code_style' },
             { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' }
+          ]
+        },
+        'contributing/index'
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Reference',
+      items: [
+        { type: 'doc', id: 'guides/setup/setup_overview', label: 'Overview' },
+        {
+          type: 'category',
+          label: 'Supplemental documentation',
+          items: [
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+            { type: 'doc', id: 'reference/data_discovery' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
+          ]
+        },
+        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
+        'glossary',
+        {
+          type: 'category',
+          label: 'Technical Terms',
+          items: [
+            'terms/action',
+            'terms/batch',
+            'terms/batch_request',
+            'terms/custom_expectation',
+            'terms/checkpoint',
+            'terms/cli',
+            'terms/datasource',
+            'terms/data_context',
+            'terms/data_asset',
+            'terms/data_connector',
+            'terms/data_docs',
+            'terms/evaluation_parameter',
+            'terms/execution_engine',
+            {
+              type: 'category',
+              label: 'Expectations',
+              collapsed: true,
+              items: [
+                { type: 'doc', id: 'terms/expectation', label: 'Expectations: Overview' },
+                { type: 'doc', id: 'reference/expectations/conditional_expectations' },
+                { type: 'doc', id: 'reference/expectations/distributional_expectations' },
+                { type: 'doc', id: 'reference/expectations/implemented_expectations' },
+                { type: 'doc', id: 'reference/expectation_suite_operations' },
+                { type: 'doc', id: 'reference/expectations/result_format' },
+                { type: 'doc', id: 'reference/expectations/standard_arguments' }
+              ]
+            },
+            'terms/expectation_suite',
+            'terms/metric',
+            'terms/plugin',
+            'terms/profiler',
+            {
+              type: 'category',
+              label: 'Stores',
+              items: [
+                { type: 'doc', id: 'terms/store', label: 'Stores: Overview' },
+                'terms/checkpoint_store',
+                'terms/data_docs_store',
+                'terms/evaluation_parameter_store',
+                'terms/expectation_store',
+                'terms/metric_store',
+                'terms/validation_result_store'
+              ]
+            },
+            'terms/renderer',
+            'terms/supporting_resource',
+            'terms/validator',
+            'terms/validation_result'
           ]
         },
         'contributing/index'
@@ -402,6 +477,81 @@ module.exports = {
             'terms/metric',
             'terms/plugin',
             'terms/profiler',
+            'terms/plugin',
+            {
+              type: 'category',
+              label: 'Stores',
+              items: [
+                { type: 'doc', id: 'terms/store', label: 'Stores: Overview' },
+                'terms/checkpoint_store',
+                'terms/data_docs_store',
+                'terms/evaluation_parameter_store',
+                'terms/expectation_store',
+                'terms/metric_store',
+                'terms/validation_result_store'
+              ]
+            },
+            'terms/renderer',
+            'terms/supporting_resource',
+            'terms/validator',
+            'terms/validation_result'
+          ]
+        },
+        'contributing/index'
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Reference',
+      items: [
+        {
+          type: 'category',
+          label: 'Supplemental documentation',
+          items: [
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+            { type: 'doc', id: 'reference/data_discovery' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
+          ]
+        },
+        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
+        'glossary',
+        {
+          type: 'category',
+          label: 'Technical Terms',
+          items: [
+            'terms/action',
+            'terms/batch',
+            'terms/batch_request',
+            'terms/custom_expectation',
+            'terms/checkpoint',
+            'terms/cli',
+            'terms/datasource',
+            'terms/data_context',
+            'terms/data_asset',
+            'terms/data_connector',
+            'terms/data_docs',
+            'terms/evaluation_parameter',
+            'terms/execution_engine',
+            {
+              type: 'category',
+              label: 'Expectations',
+              collapsed: true,
+              items: [
+                { type: 'doc', id: 'terms/expectation', label: 'Expectations: Overview' },
+                { type: 'doc', id: 'reference/expectations/conditional_expectations' },
+                { type: 'doc', id: 'reference/expectations/distributional_expectations' },
+                { type: 'doc', id: 'reference/expectations/implemented_expectations' },
+                { type: 'doc', id: 'reference/expectation_suite_operations' },
+                { type: 'doc', id: 'reference/expectations/result_format' },
+                { type: 'doc', id: 'reference/expectations/standard_arguments' }
+              ]
+            },
+            'terms/expectation_suite',
+            'terms/metric',
+            'terms/plugin',
+            'terms/profiler',
+            'terms/plugin',
             {
               type: 'category',
               label: 'Stores',
