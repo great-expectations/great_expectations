@@ -413,6 +413,20 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         variables: Optional[dict] = None,
         rules: Optional[Dict[str, dict]] = None,
     ) -> "RuleBasedProfilerConfig":  # noqa: F821
+        """Reconciles variables/rules by taking into account runtime overrides and variable substitution.
+
+        Utilized in usage statistics to interact with the args provided in `RuleBasedProfiler.run()`.
+        NOTE: This is a lightweight version of the RBP's true reconiliation logic - see
+        `reconcile_profiler_variables` and `reconcile_profiler_rules`.
+
+        Args:
+            profiler: The profiler used to invoke `run()`.
+            variables: Any runtime override variables.
+            rules: Any runtime override rules.
+
+        Returns:
+            An instance of RuleBasedProfilerConfig that represents the reconciled profiler.
+        """
         runtime_config: RuleBasedProfilerConfig = profiler.config
 
         runtime_variables: dict = profiler.reconcile_profiler_variables_as_dict(
@@ -428,7 +442,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         runtime_rules: Dict[str, dict] = {}
         for name, rule in effective_rules.items():
             rule_with_substituted_vars: dict = (
-                RuleBasedProfilerConfig._interpolate_variables_in_config(
+                RuleBasedProfilerConfig._substitute_variables_in_config(
                     rule=rule, variables_container=variables_container
                 )
             )
@@ -444,10 +458,20 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         )
 
     @staticmethod
-    def _interpolate_variables_in_config(
+    def _substitute_variables_in_config(
         rule: "Rule", variables_container: ParameterContainer
     ) -> dict:
-        def _traverse_and_interpolate(node: Any) -> None:
+        """Recursively updates a given rule to substitute $variable references.
+
+        Args:
+            rule: The Rule object to update.
+            variables_container: Keeps track of $variable values to be substituted.
+
+        Returns:
+            The dictionary representation of the rule with all $variable references substituted.
+        """
+
+        def _traverse_and_substitute(node: Any) -> None:
             if isinstance(node, dict):
                 for key, val in node.copy().items():
                     if isinstance(val, str) and val.startswith(VARIABLES_KEY):
@@ -457,13 +481,13 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
                             variables=variables_container,
                             parameters=None,
                         )
-                    _traverse_and_interpolate(val)
+                    _traverse_and_substitute(node=val)
             elif isinstance(node, list):
                 for val in node:
-                    _traverse_and_interpolate(val)
+                    _traverse_and_substitute(node=val)
 
         rule_dict: dict = rule.to_json_dict()
-        _traverse_and_interpolate(rule_dict)
+        _traverse_and_substitute(node=rule_dict)
 
         return rule_dict
 

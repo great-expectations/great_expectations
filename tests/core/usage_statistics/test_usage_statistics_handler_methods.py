@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Dict
 from unittest import mock
 
 import pytest
@@ -413,32 +413,4 @@ def test_get_profiler_run_usage_statistics_without_handler():
         config_version=1.0,
     )
     payload: dict = get_profiler_run_usage_statistics(profiler=profiler)
-    assert payload == {}
-
-
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch(
-    "great_expectations.rule_based_profiler.config.base.RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments"
-)
-def test_get_profiler_run_usage_statistics_logs_exception(
-    mock_resolve_config: mock.MagicMock,
-    mock_data_context: mock.MagicMock,
-    caplog: Any,
-):
-    # Ensure that the ProfilerRunAnonymizer on the mocked UsageStatisticsHandler will throw an Exception
-    mock_resolve_config.side_effect = Exception("mocked error")
-
-    handler: UsageStatisticsHandler = UsageStatisticsHandler(
-        mock_data_context, "my_id", "my_url"
-    )
-    mock_data_context.usage_statistics_handler = handler
-
-    profiler = RuleBasedProfiler(
-        name="my_profiler", config_version=1.0, data_context=mock_data_context
-    )
-    with caplog.at_level(logging.DEBUG):
-        payload = get_profiler_run_usage_statistics(profiler=profiler)
-
-    assert "Unable to create anonymized_profiler_run payload" in caplog.text
-    assert "mocked error" in caplog.text
     assert payload == {}

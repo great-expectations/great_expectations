@@ -615,7 +615,7 @@ def get_profiler_run_usage_statistics(
             )
 
             payload: dict = profiler_run_anonymizer.anonymize_profiler_run(
-                resolved_runtime_config
+                profiler_config=resolved_runtime_config
             )
         except Exception as e:
             logger.debug(
