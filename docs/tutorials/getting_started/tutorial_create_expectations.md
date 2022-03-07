@@ -12,13 +12,13 @@ import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
 :::
 
-Expectations are the workhorse abstraction in Great Expectations. Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with dozens of built-in Expectations, and it’s possible to develop your own custom Expectations, too.
+<TechnicalTag relative="../../" tag="expectation" text="Expectations" /> are the workhorse abstraction in Great Expectations. Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with dozens of built-in Expectations, and it’s possible to develop your own custom Expectations, too.
 
-The CLI will help you create your first Expectation Suite. Suites are simply collections of Expectations. In order to create a new suite, we will use the built-in Profiler to automatically create an Expectation Suite called `getting_started_expectation_suite_taxi.demo`.
+The <TechnicalTag relative="../../" tag="cli" text="CLI" /> will help you create your first <TechnicalTag relative="../../" tag="expectation_suite" text="Expectation Suite" />. Suites are simply collections of Expectations. In order to create a new suite, we will use the built-in <TechnicalTag relative="../../" tag="profiler" text="Profiler" /> to automatically create an Expectation Suite called `getting_started_expectation_suite_taxi.demo`.
 
 ### Create an Expectation Suite using the CLI
 
-Since we are using the CLI, you will want to return to your console and the `ge_tutorials` folder.  Remember: This is where we initialized our Data Context, and the Data Context is our access point to everything else in Great Expectations!
+Since we are using the CLI, you will want to return to your console and the `ge_tutorials` folder.  Remember: This is where we initialized our <TechnicalTag relative="../../" tag="data_context" text="Data Context" />, and the Data Context is our access point to everything else in Great Expectations!
 
 From the `ge_tutorials` folder, type the following into your terminal:
 
@@ -47,7 +47,7 @@ Which data asset (accessible by data connector "default_inferred_data_connector_
     2. yellow_tripdata_sample_2019-02.csv
 : 1
 ```
-The Profiler will require a batch of data to analyze.  This prompt is asking us which data to use for that.  As you can see, the prompt it is giving corresponds to the .CSV files in our `data` folder.  These are the very same ones we configured our Datasource to connect to back in Step 2: Connect to Data.
+The Profiler will require a <TechnicalTag relative="../../" tag="batch" text="Batch" /> to analyze.  This prompt is asking us which data to use for that.  As you can see, the prompt it is giving corresponds to the .CSV files in our `data` folder.  These are the very same ones we configured our <TechnicalTag relative="../../" tag="datasource" text="Datasource" /> to connect to back in Step 2: Connect to Data.
 
 We're going to choose the first file.  If you're wondering why, here's an explanation: Recall that our data directory contains two CSV files: `yellow_tripdata_sample_2019-01` and `yellow_tripdata_sample_2019-02`.
 
@@ -90,7 +90,7 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 **Cell 1**
 ![Cell1](../../images/getting_started_tutorial/tutorial_create_expectations_cell1.png)
 
-1. The first cell does several things: It imports all the relevant libraries, loads a Data Context, and creates a `Validator`, which combines a Batch Request to define your batch of data, and an Expectation Suite.
+1. The first cell does several things: It imports all the relevant libraries, loads a Data Context, and creates a `Validator`, which combines a <TechnicalTag relative="../../" tag="batch_request" text="Batch Request" /> to define your batch of data, and an Expectation Suite.
 
 **Cell 2**
 ![Cell2](../../images/getting_started_tutorial/tutorial_create_expectations_cell2.png)
@@ -108,7 +108,7 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 **Cell 4**
 ![Cell4](../../images/getting_started_tutorial/tutorial_create_expectations_cell4.png)
 
-4. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the Validation Results. *We will explain the validation step later in the next step, [Step 4: Validate Data](./tutorial_validate_data.md).*
+4. The last cell does several things again: It saves the Expectation Suite to disk, runs the <TechnicalTag relative="../../" tag="validation" text="Validation" /> against the loaded data batch, and then builds and opens Data Docs, so you can look at the Validation Results. *We will explain the validation step later in the next step, [Step 4: Validate Data](./tutorial_validate_data.md).*
 
 For purposes of this tutorial, the default values in all of these cells (except for the second one, which we changed to include the `passenger_count` field) provide the configurations and execute the steps that we need them to.  So as long as you've made that one change, you're ready to continue.
 
@@ -116,9 +116,9 @@ For purposes of this tutorial, the default values in all of these cells (except 
 
 ### Viewing your Expectations in Data Docs
 
-Once the Profiler is done executing it will open up Data Docs in your browser automatically.
+Once the Profiler is done executing it will open up <TechnicalTag relative="../../" tag="data_docs" text="Data Docs" /> in your browser automatically.
 
-Data Docs translate Expectations, Validation Results, and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.  Feel free to take a moment to browse through the Expectations that the Profiler put together from the data that we provided it.
+Data Docs translate Expectations, <TechnicalTag relative="../../" tag="validation_result" text="Validation Results" />, and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.  Feel free to take a moment to browse through the Expectations that the Profiler put together from the data that we provided it.
 
 In particular, take a look at the Expectations that were created for the `passenger_count` field.  These are the rules that we will be comparing the February data against when we validate it in step four of this tutorial.
 
