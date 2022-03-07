@@ -8,7 +8,7 @@
 #  from `dependency_graph`. Additionally, it is responsible for deployment during the weekly release cut.
 
 schedules:
-- cron: 0 */4 * * *
+- cron: 0 */3 * * *
   displayName: Scheduled Runs
   branches:
     include:
