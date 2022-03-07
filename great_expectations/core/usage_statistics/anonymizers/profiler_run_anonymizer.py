@@ -54,6 +54,14 @@ from great_expectations.rule_based_profiler.parameter_builder.simple_date_format
 from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (
     ValueSetMultiBatchParameterBuilder,
 )
+from great_expectations.rule_based_profiler.types.parameter_container import (
+    VARIABLES_KEY,
+    ParameterContainer,
+    build_parameter_container_for_variables,
+)
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.util import deep_filter_properties_iterable
 
 logger = logging.getLogger(__name__)
@@ -101,12 +109,17 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         config_version: float = profiler_config.config_version
 
-        rules: Dict[str, dict] = profiler_config.rules
-        anonymized_rules: List[dict] = self._anonymize_rules(rules)
-        rule_count: int = len(rules)
-
         variables: dict = profiler_config.variables or {}
         variable_count: int = len(variables)
+        variables_container: ParameterContainer = (
+            build_parameter_container_for_variables(variables_configs=variables)
+        )
+
+        rules: Dict[str, dict] = profiler_config.rules
+        anonymized_rules: List[dict] = self._anonymize_rules(
+            rules=rules, variables_container=variables_container
+        )
+        rule_count: int = len(rules)
 
         anonymized_profiler_run_properties_dict: dict = {
             "anonymized_name": anonymized_name,
@@ -124,17 +137,23 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         return anonymized_profiler_run_properties_dict
 
-    def _anonymize_rules(self, rules: Dict[str, dict]) -> List[dict]:
+    def _anonymize_rules(
+        self, rules: Dict[str, dict], variables_container: ParameterContainer
+    ) -> List[dict]:
         anonymized_rules: List[dict] = []
 
         for name, rule in rules.items():
-            anonymized_rule: dict = self._anonymize_rule(name, rule)
+            anonymized_rule: dict = self._anonymize_rule(
+                name, rule, variables_container
+            )
             anonymized_rules.append(anonymized_rule)
             logger.debug("Anonymized rule %s", name)
 
         return anonymized_rules
 
-    def _anonymize_rule(self, name: str, rule: dict) -> dict:
+    def _anonymize_rule(
+        self, name: str, rule: dict, variables_container: ParameterContainer
+    ) -> dict:
         anonymized_rule: dict = {}
         anonymized_rule["anonymized_name"] = self.anonymize(name)
 
@@ -142,12 +161,12 @@ class ProfilerRunAnonymizer(Anonymizer):
         if domain_builder is not None:
             anonymized_rule[
                 "anonymized_domain_builder"
-            ] = self._anonymize_domain_builder(domain_builder)
+            ] = self._anonymize_domain_builder(domain_builder, variables_container)
 
         parameter_builders: List[dict] = rule.get("parameter_builders", [])
         anonymized_rule[
             "anonymized_parameter_builders"
-        ] = self._anonymize_parameter_builders(parameter_builders)
+        ] = self._anonymize_parameter_builders(parameter_builders, variables_container)
 
         expectation_configuration_builders: List[dict] = rule.get(
             "expectation_configuration_builders", []
@@ -160,7 +179,9 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         return anonymized_rule
 
-    def _anonymize_domain_builder(self, domain_builder: dict) -> dict:
+    def _anonymize_domain_builder(
+        self, domain_builder: dict, variables_container: ParameterContainer
+    ) -> dict:
         anonymized_domain_builder: dict = self.anonymize_object_info(
             object_config=domain_builder,
             anonymized_info_dict={},
@@ -170,17 +191,21 @@ class ProfilerRunAnonymizer(Anonymizer):
             },
         )
 
-        batch_request: Optional[dict] = domain_builder.get("batch_request")
+        batch_request: Optional[Union[dict, str]] = domain_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[Union[str, dict]]
-            if isinstance(batch_request, str):
-                anonymized_batch_request = self.anonymize(batch_request)
-            else:
-                anonymized_batch_request = (
-                    self._batch_request_anonymizer.anonymize_batch_request(
-                        **batch_request
-                    )
+            if isinstance(batch_request, str) and batch_request.startswith(
+                VARIABLES_KEY
+            ):
+                batch_request = get_parameter_value_and_validate_return_type(
+                    domain=None,
+                    parameter_reference=batch_request,
+                    expected_return_type=(dict),
+                    variables=variables_container,
+                    parameters=None,
                 )
+            anonymized_batch_request: Optional[
+                dict
+            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
             anonymized_domain_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
@@ -189,19 +214,21 @@ class ProfilerRunAnonymizer(Anonymizer):
         return anonymized_domain_builder
 
     def _anonymize_parameter_builders(
-        self, parameter_builders: List[dict]
+        self, parameter_builders: List[dict], variables_container: ParameterContainer
     ) -> List[dict]:
         anonymized_parameter_builders: List[dict] = []
 
         for parameter_builder in parameter_builders:
             anonymized_parameter_builder: dict = self._anonymize_parameter_builder(
-                parameter_builder
+                parameter_builder, variables_container
             )
             anonymized_parameter_builders.append(anonymized_parameter_builder)
 
         return anonymized_parameter_builders
 
-    def _anonymize_parameter_builder(self, parameter_builder: dict) -> dict:
+    def _anonymize_parameter_builder(
+        self, parameter_builder: dict, variables_container: ParameterContainer
+    ) -> dict:
         anonymized_parameter_builder: dict = self.anonymize_object_info(
             object_config=parameter_builder,
             anonymized_info_dict={},
@@ -217,15 +244,19 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         batch_request: Optional[dict] = parameter_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[Union[str, dict]]
-            if isinstance(batch_request, str):
-                anonymized_batch_request = self.anonymize(batch_request)
-            else:
-                anonymized_batch_request = (
-                    self._batch_request_anonymizer.anonymize_batch_request(
-                        **batch_request
-                    )
+            if isinstance(batch_request, str) and batch_request.startswith(
+                VARIABLES_KEY
+            ):
+                batch_request = get_parameter_value_and_validate_return_type(
+                    domain=None,
+                    parameter_reference=batch_request,
+                    expected_return_type=(dict),
+                    variables=variables_container,
+                    parameters=None,
                 )
+            anonymized_batch_request: Optional[
+                dict
+            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
             anonymized_parameter_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request

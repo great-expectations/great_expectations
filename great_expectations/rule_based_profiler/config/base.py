@@ -13,7 +13,6 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.util import (
     deep_filter_properties_iterable,
