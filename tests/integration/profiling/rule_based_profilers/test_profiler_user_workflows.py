@@ -1241,8 +1241,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
 
     value_ranges_expected = [
         [5.8, 6.5],
-        [8.5, 9.7],
-        [13.3, 15.8],
+        [8.5, 9.6],
+        [13.3, 15.6],
     ]
     value_ranges_computed = result.expectation_config["kwargs"]["quantile_ranges"][
         "value_ranges"
@@ -1353,11 +1353,11 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         ],
         [
             8.675167517,
-            9.661311131,
+            9.570000000,
         ],
         [
             13.344354435,
-            15.815389039,
+            15.650000000,
         ],
     ]
 

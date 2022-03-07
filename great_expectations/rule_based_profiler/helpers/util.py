@@ -376,6 +376,10 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
         bootstrap_lower_quantile_point_estimate - sample_lower_quantile
     )
 
+    # Bias / Standard Error > 0.25 is a rule of thumb for when to apply bias correction.
+    # See:
+    # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
+    #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
     lower_quantile_bias_corrected_point_estimate: Number
     if bootstrap_lower_quantile_bias / bootstrap_lower_quantile_standard_error <= 0.25:
         lower_quantile_bias_corrected_point_estimate = (
@@ -397,6 +401,10 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
         bootstrap_upper_quantile_point_estimate - sample_upper_quantile
     )
 
+    # Bias / Standard Error > 0.25 is a rule of thumb for when to apply bias correction.
+    # See:
+    # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
+    #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
     upper_quantile_bias_corrected_point_estimate: Number
     if bootstrap_upper_quantile_bias / bootstrap_upper_quantile_standard_error <= 0.25:
         upper_quantile_bias_corrected_point_estimate = (
