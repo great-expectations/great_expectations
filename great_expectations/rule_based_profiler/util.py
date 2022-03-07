@@ -424,6 +424,22 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
         method=method,
     )
 
+    # The idea that we can take the midpoint of the confidence interval is based on the fact that we think the
+    # confidence interval was built from a symmetrical distribution. We think the distribution is normal due to
+    # the implications of the Central Limit Theorem (CLT) (https://en.wikipedia.org/wiki/Central_limit_theorem) on
+    # the bootstrap samples.
+    # Unfortunately, the assumption that the CLT applies, does not hold in all cases. The bias-corrected and accelerated
+    # (BCa) confidence interval computed using scipy.stats.bootstrap attempts to compute the "acceleration" as a
+    # correction, because the standard normal approximation (CLT) assumes that the standard error of the bootstrap
+    # quantiles (theta-hat) is the same for all parameters (theta). The acceleration (which is the rate of change of
+    # the standard error of the quantile point estimate) is not a perfect correction, and therefore the assumption that
+    # this interval is built from a normal distribution does not always hold.
+    # See:
+    #
+    # Efron, B., & Tibshirani, R. J. (1993). The BCa method. An Introduction to the Bootstrap (pp. 184-188).
+    #     Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
+    #
+    # For an in-depth look at how the BCa interval is constructed and you will find the points made above on page 186.
     lower_quantile_confidence_interval: stats.bootstrap.BootstrapResult.ConfidenceInterval = (
         lower_quantile_bootstrap_result.confidence_interval
     )
