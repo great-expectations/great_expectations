@@ -1,53 +1,10 @@
 ---
 title: 'Tutorial, Step 2: Connect to data'
 ---
+import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-<table class="borderless center">
-<tr>
-    <td>
-        <img
-          src={require('../../images/universal_map/Gear-inactive.png').default}
-          alt="Setup"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Outlet-active.png').default}
-          alt="Connect to Data"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Flask-inactive.png').default}
-          alt="Create Expectations"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Checkmark-inactive.png').default}
-          alt="Validate Data"
-        />
-    </td>
-</tr>
-</table>
+<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/> 
 
 :::note Prerequisites
 
@@ -55,12 +12,12 @@ title: 'Tutorial, Step 2: Connect to data'
 
 :::
 
-In Step 1: Setup, we created a Data Context.  Now that we have that Data Context, you'll want to connect to your actual data.  In Great Expectations, Datasources simplify these connections by managing and providing a consistent, cross-platform API for referencing data.
+In Step 1: Setup, we created a <TechnicalTag relative="../" tag="data_context" text="Data Context" />.  Now that we have that Data Context, you'll want to connect to your actual data.  In Great Expectations, <TechnicalTag relative="../" tag="datasource" text="Datasources" /> simplify these connections by managing and providing a consistent, cross-platform API for referencing data.
 
 ### Create a Datasource with the CLI
 Let's create and configure your first Datasource: a connection to the data directory we've provided in the repo.  This could also be a database connection, but because our tutorial data consists of .CSV files we're just using a simple file store.
 
-Start by running the following command from your `ge_tutorials` directory:
+Start by using the <TechnicalTag relative="../" tag="cli" text="CLI" /> to run the following command from your `ge_tutorials` directory:
 
 ````console
 great_expectations datasource new
@@ -122,7 +79,7 @@ When you completed those last few steps, you told Great Expectations that:
 + You want to create a new Datasource called `getting_started_datasource`.
 + You want to use Pandas to read the data from CSV.
 
-Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the datasources header:
+Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the `datasources` header:
 
 ```yaml file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L23-L40
 ```
@@ -133,11 +90,15 @@ Please note that due to how data is serialized, the entry in your ```great_expec
   <summary>What does the configuration contain?</summary>
   <div>
     <p>
-        <b>ExecutionEngine</b> : The <code>ExecutionEngine</code> provides backend-specific computing resources that are used to read-in and perform validation on data.  For more information on <code>ExecutionEngines</code>, please refer to the following <a href="/docs/reference/execution_engine">Core Concepts document on ExecutionEngines</a>
-    </p>
+
+**ExecutionEngine** : The <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" /> provides backend-specific computing resources that are used to read-in and perform validation on data.  For more information on <code>ExecutionEngines</code>, please refer to the following <a href="/docs/reference/execution_engine">Core Concepts document on ExecutionEngines</a>
+
+</p>
     <p>
-        <b>DataConnectors</b> :  <code>DataConnectors</code> facilitate access to external data stores, such as filesystems, databases, and cloud storage. The current configuration contains both an <code>InferredAssetFilesystemDataConnector</code>, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case), and a <code>RuntimeDataConnector</code>, which allows you to retrieve a batch of data by defining a filepath.  In this tutorial we will only be using the <code>InferredAssetFilesystemDataConnector</code>.  For more information on <code>DataConnectors</code>, please refer to the <a href="/docs/reference/datasources">Core Concepts document on Datasources</a>.
-    </p>
+
+**DataConnectors** :  <TechnicalTag relative="../" tag="data_connector" text="Data Connectors" /> facilitate access to external data stores, such as filesystems, databases, and cloud storage. The current configuration contains both an <code>InferredAssetFilesystemDataConnector</code>, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case), and a <code>RuntimeDataConnector</code>, which allows you to retrieve a batch of data by defining a filepath.  In this tutorial we will only be using the <code>InferredAssetFilesystemDataConnector</code>.  For more information on <code>DataConnectors</code>, please refer to the <a href="/docs/reference/datasources">Core Concepts document on Datasources</a>.
+
+</p>
     <p>
         This Datasource does not require any credentials. However, if you were to connect to a database that requires connection credentials, those would be stored in <code>great_expectations/uncommitted/config_variables.yml</code>.
     </p>
