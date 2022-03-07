@@ -33,7 +33,9 @@ from great_expectations.execution_engine.execution_engine import (
 )
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
+    storage,
 )
+from great_expectations.util import is_library_loadable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
@@ -211,6 +213,14 @@ def test_reader_fn():
     # Testing that can recognize basic excel file
     fn = engine._get_reader_fn(path="myfile.xlsx")
     assert "<function read_excel" in str(fn)
+
+    # Testing that can recognize basic sas7bdat file
+    fn_read_sas7bdat = engine._get_reader_fn(path="myfile.sas7bdat")
+    assert "<function read_sas" in str(fn_read_sas7bdat)
+
+    # Testing that can recognize basic SAS xpt file
+    fn_read_xpt = engine._get_reader_fn(path="myfile.xpt")
+    assert "<function read_sas" in str(fn_read_xpt)
 
     # Ensuring that other way around works as well - reader_method should always override path
     fn_new = engine._get_reader_fn(reader_method="read_csv")
@@ -710,6 +720,11 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     assert df.dataframe.shape == test_df_small.shape
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyarrow")
+    and not is_library_loadable(library_name="fastparquet"),
+    reason="pyarrow and fastparquet are not installed",
+)
 def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     bucket, keys = test_s3_files_parquet
     path = [key for key in keys if key.endswith(".parquet")][0]
@@ -1023,6 +1038,10 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
         execution_engine_no_azure.get_batch_data(batch_spec=azure_batch_spec)
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
+)
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.service_account",
 )
@@ -1043,6 +1062,10 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     assert "filename" in engine.config.get("gcs_options")
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
+)
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
 )
@@ -1077,6 +1100,10 @@ def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monke
         PandasExecutionEngine().get_batch_data(batch_spec=gcs_batch_spec)
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
+)
 def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):
     # gcs_batchspec point to data that the ExecutionEngine does not have access to
     execution_engine_no_gcs = PandasExecutionEngine()

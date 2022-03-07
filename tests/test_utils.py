@@ -1,26 +1,13 @@
 import logging
 import os
 import uuid
-from typing import List, Union, cast
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Generator, List, Union, cast
 
 import numpy as np
 import pandas as pd
 import pytest
-
-logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.exc import SQLAlchemyError
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
 
 from great_expectations.data_context.store import (
     CheckpointStore,
@@ -42,9 +29,26 @@ from great_expectations.data_context.util import build_store_from_config
 
 logger = logging.getLogger(__name__)
 
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.exc import SQLAlchemyError
+
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sa = None
+    reflection = None
+    Table = None
+    Select = None
+    SQLAlchemyError = None
+
+logger = logging.getLogger(__name__)
+
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
+# noinspection PyPep8Naming
 def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
     """
     Assert that two complex structures have almost equal contents.
@@ -448,6 +452,8 @@ def load_data_into_test_database(
     """
     import pandas as pd
 
+    connection = None
+
     if sa:
         engine = sa.create_engine(connection_string)
     else:
@@ -471,6 +477,80 @@ def load_data_into_test_database(
             f"""Docs integration tests encountered an error while loading test-data into test-database."""
         )
         raise
+    finally:
+        connection.close()
+        engine.dispose()
+
+
+@contextmanager
+def set_directory(path: str) -> Generator:
+    """Sets the cwd within the context
+
+    Args:
+        path: The string representation of the desired path to cd into
+
+    Yields:
+        None
+    """
+    origin = Path().absolute()
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(origin)
+
+
+def check_athena_table_count(
+    connection_string: str, db_name: str, expected_table_count: int
+) -> bool:
+    """
+    Helper function used by awsathena integration test. Checks whether expected number of tables exist in database
+    """
+    if sa:
+        engine = sa.create_engine(connection_string)
+    else:
+        logger.debug(
+            "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "
+            "install optional sqlalchemy dependency for support."
+        )
+        return False
+
+    connection = None
+    try:
+        connection = engine.connect()
+        result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
+        return len(result) == expected_table_count
+    except SQLAlchemyError as e:
+        logger.error(
+            f"""Docs integration tests encountered an error while loading test-data into test-database."""
+        )
+        raise
+    finally:
+        connection.close()
+        engine.dispose()
+
+
+def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) -> None:
+    """
+    Helper function used by awsathena integration test. Cleans up "temp" tables that were created.
+    """
+    if sa:
+        engine = sa.create_engine(connection_string)
+    else:
+        logger.debug(
+            "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "
+            "install optional sqlalchemy dependency for support."
+        )
+        return
+
+    connection = None
+    try:
+        connection = engine.connect()
+        result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
+        for table_tuple in result:
+            table = table_tuple[0]
+            if table != table_to_keep:
+                connection.execute(sa.text(f"DROP TABLE `{table}`;"))
     finally:
         connection.close()
         engine.dispose()

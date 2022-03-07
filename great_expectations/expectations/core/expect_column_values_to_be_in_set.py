@@ -1,19 +1,22 @@
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
-from ...render.renderer.renderer import renderer
-from ...render.types import (
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    InvalidExpectationConfigurationError,
+)
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import (
     RenderedBulletListContent,
     RenderedStringTemplateContent,
     ValueListContent,
 )
-from ...render.util import (
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 try:
     import sqlalchemy as sa
@@ -102,16 +105,65 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     }
 
     map_metric = "column_values.in_set"
-    success_keys = (
-        "value_set",
-        "mostly",
-        "parse_strings_as_datetimes",
-    )
-    default_kwarg_values = {"value_set": None, "parse_strings_as_datetimes": False}
+
     args_keys = (
         "column",
         "value_set",
     )
+
+    success_keys = (
+        "value_set",
+        "mostly",
+        "parse_strings_as_datetimes",
+        "auto",
+        "profiler_config",
+    )
+
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_values_to_be_in_set",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        class_name="RuleBasedProfilerConfig",
+        module_name="great_expectations.rule_based_profiler",
+        variables={
+            "mostly": 1.0,
+        },
+        rules={
+            "default_column_values_between_rule": {
+                "domain_builder": {
+                    "class_name": "ColumnDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "parameter_builders": [
+                    {
+                        "name": "value_set",
+                        "class_name": "ValueSetMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "column": "$domain.domain_kwargs.column",
+                        "value_set": "$parameter.value_set.value",
+                        "mostly": "$variables.mostly",
+                        "meta": {
+                            "profiler_details": "$parameter.value_set.details",
+                        },
+                    },
+                ],
+            },
+        },
+    )
+
+    default_kwarg_values = {
+        "value_set": None,
+        "parse_strings_as_datetimes": False,
+        "auto": False,
+        "profiler_config": default_profiler_config,
+    }
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -353,9 +405,10 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         return new_block
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        if not super().validate_configuration(configuration):
-            return False
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
+        super().validate_configuration(configuration)
         try:
             assert "value_set" in configuration.kwargs, "value_set is required"
             assert (

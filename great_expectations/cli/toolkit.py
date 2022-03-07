@@ -1,10 +1,11 @@
 import json
+import logging
 import os
 import subprocess
 import sys
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import click
 
@@ -26,6 +27,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.datasource import BaseDatasource
 from great_expectations.validator.validator import Validator
 
+logger = logging.getLogger(__name__)
+
 EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "\nOk, exiting now. To upgrade at a later time, use the following command: "
     "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
@@ -38,7 +41,7 @@ EXIT_UPGRADE_CONTINUATION_MESSAGE = (
 def prompt_profile_to_create_a_suite(
     data_context: DataContext,
     expectation_suite_name: str,
-):
+) -> None:
 
     cli_message(
         string="""
@@ -135,7 +138,7 @@ def tell_user_suite_exists(
     expectation_suite_name: str,
     usage_event: str,
     suppress_usage_message: bool = False,
-):
+) -> None:
     exit_with_failure_message_and_stats(
         data_context=data_context,
         usage_event=usage_event,
@@ -145,8 +148,8 @@ def tell_user_suite_exists(
     )
 
 
-def launch_jupyter_notebook(notebook_path: str):
-    jupyter_command_override: str = os.getenv("GE_JUPYTER_CMD", None)
+def launch_jupyter_notebook(notebook_path: str) -> None:
+    jupyter_command_override: Optional[str] = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
         subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
     else:
@@ -218,7 +221,6 @@ def load_expectation_suite(
                 message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check "
                 "the name by running `great_expectations suite list` and try again.",
             )
-    return suite
 
 
 def exit_with_failure_message_and_stats(
@@ -226,7 +228,7 @@ def exit_with_failure_message_and_stats(
     usage_event: str,
     suppress_usage_message: bool = False,
     message: Optional[str] = None,
-):
+) -> None:
     if message:
         cli_message(string=message)
     if not suppress_usage_message:
@@ -243,7 +245,7 @@ def delete_checkpoint(
     checkpoint_name: str,
     usage_event: str,
     assume_yes: bool,
-):
+) -> None:
     """Delete a Checkpoint or raise helpful errors."""
     validate_checkpoint(
         context=context,
@@ -297,7 +299,7 @@ def validate_checkpoint(
     checkpoint_name: str,
     usage_event: str,
     failure_message: Optional[str] = None,
-):
+) -> None:
     try:
         # noinspection PyUnusedLocal
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = load_checkpoint(
@@ -484,7 +486,7 @@ def upgrade_project(
     context_root_dir: str,
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
-):
+) -> None:
     if from_cli_upgrade_command:
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
@@ -730,7 +732,7 @@ def upgrade_project_up_to_one_version_increment(
     continuation_message: str,
     update_version: bool,
     from_cli_upgrade_command: bool = False,
-) -> [bool, bool]:  # Returns increment_version, exception_occurred
+) -> Tuple[bool, bool]:  # Returns increment_version, exception_occurred
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
     if not upgrade_helper_class:
         return False, False
@@ -810,7 +812,7 @@ def confirm_proceed_or_exit(
     exit_code: int = 0,
     data_context: Optional[DataContext] = None,
     usage_stats_event: Optional[str] = None,
-) -> Optional[bool]:
+) -> bool:
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
     or modifies some resources (e.g., edits the config file, adds objects
@@ -839,8 +841,9 @@ def confirm_proceed_or_exit(
                         event_payload={"cancelled": True},
                         success=True,
                     )
-                except Exception:
+                except Exception as e:
                     # Don't fail on usage stats
+                    logger.debug(f"Something went wrong when sending usage stats: {e}")
                     pass
             sys.exit(exit_code)
         else:
@@ -871,8 +874,8 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         filename: Optional[str]
         directory: Optional[str]
         if config_file_location_path.is_file():
-            filename = fr"{str(config_file_location_path.name)}"
-            directory = fr"{str(config_file_location_path.parent)}"
+            filename = rf"{str(config_file_location_path.name)}"
+            directory = rf"{str(config_file_location_path.parent)}"
         elif config_file_location_path.is_dir():
             filename = None
             directory = config_file_location
@@ -930,7 +933,7 @@ def load_json_file_into_dict(
     error_message: str
 
     if not filepath:
-        error_message = f"The path to a JSON file was not specified."
+        error_message = "The path to a JSON file was not specified."
         exit_with_failure_message_and_stats(
             data_context=data_context,
             usage_event=usage_event,
@@ -1008,7 +1011,7 @@ def add_citation_with_batch_request(
     data_context: DataContext,
     expectation_suite: ExpectationSuite,
     batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None,
-):
+) -> None:
     if (
         expectation_suite is not None
         and batch_request

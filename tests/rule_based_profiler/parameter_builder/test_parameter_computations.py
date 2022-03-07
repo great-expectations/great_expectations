@@ -4,10 +4,12 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 
+from great_expectations.rule_based_profiler.helpers.util import (
+    compute_bootstrap_quantiles,
+)
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
-from great_expectations.rule_based_profiler.util import compute_bootstrap_quantiles
 
 
 def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:

@@ -1,11 +1,34 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
+from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 
 
 class TableDomainBuilder(DomainBuilder):
+    def __init__(
+        self,
+        data_context: "DataContext",  # noqa: F821
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+    ):
+        """
+        Args:
+            data_context: DataContext
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
+            batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+        """
+        super().__init__(
+            data_context=data_context,
+            batch_list=batch_list,
+            batch_request=batch_request,
+        )
+
+    @property
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.TABLE
+
     """
     The interface method of TableDomainBuilder emits a single Domain object, corresponding to the implied Batch (table).
 
@@ -19,7 +42,7 @@ class TableDomainBuilder(DomainBuilder):
     ) -> List[Domain]:
         domains: List[Domain] = [
             Domain(
-                domain_type=MetricDomainTypes.TABLE,
+                domain_type=self.domain_type,
             )
         ]
 

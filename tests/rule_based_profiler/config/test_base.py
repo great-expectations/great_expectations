@@ -1,6 +1,9 @@
+from typing import Dict
+
 import pytest
 from ruamel.yaml.comments import CommentedMap
 
+from great_expectations.core.batch import BatchRequest
 from great_expectations.marshmallow__shade.exceptions import ValidationError
 from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
@@ -15,6 +18,10 @@ from great_expectations.rule_based_profiler.config import (
     RuleConfig,
     RuleConfigSchema,
 )
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 
 def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
@@ -64,16 +71,6 @@ def test_domain_builder_config_successfully_loads_with_optional_args():
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
-def test_domain_builder_config_unsuccessfully_loads_with_missing_required_fields():
-    data = {}
-    schema = DomainBuilderConfigSchema()
-
-    with pytest.raises(ValidationError) as e:
-        schema.load(data)
-
-    assert "'class_name': ['Missing data for required field.']" in str(e.value)
-
-
 def test_parameter_builder_config_successfully_loads_with_required_args():
     data = {"class_name": "ParameterBuilder", "name": "my_parameter_builder"}
     schema = ParameterBuilderConfigSchema()
@@ -105,10 +102,7 @@ def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fie
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert all(
-        f"'{attr}': ['Missing data for required field.']" in str(e.value)
-        for attr in ("class_name", "name")
-    )
+    assert "'name': ['Missing data for required field.']" in str(e.value)
 
 
 def test_expectation_configuration_builder_config_successfully_loads_with_required_args():
@@ -147,15 +141,14 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert all(
-        f"'{attr}': ['Missing data for required field.']" in str(e.value)
-        for attr in ("class_name", "expectation_type")
+    assert (
+        "'expectation_type': ['expectation_type missing in expectation configuration builder']"
+        in str(e.value)
     )
 
 
 def test_rule_config_successfully_loads_with_required_args():
     data = {
-        "name": "rule_1",
         "domain_builder": {"class_name": "DomainBuilder"},
         "parameter_builders": [
             {"class_name": "ParameterBuilder", "name": "my_parameter"}
@@ -188,13 +181,9 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert all(
-        f"'{attr}': ['Missing data for required field.']" in str(e.value)
-        for attr in (
-            "name",
-            "domain_builder",
-            "expectation_configuration_builders",
-        )
+    assert (
+        "'expectation_configuration_builders': ['Missing data for required field.']"
+        in str(e.value)
     )
 
 
@@ -206,7 +195,6 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
         "config_version": 1.0,
         "rules": {
             "rule_1": {
-                "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
                     {"class_name": "ParameterBuilder", "name": "my_parameter"}
@@ -222,8 +210,10 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
     }
     schema = RuleBasedProfilerConfigSchema()
     config = schema.load(data)
-    assert isinstance(config, RuleBasedProfilerConfig)
-    assert len(config.rules) == 1 and isinstance(config.rules["rule_1"], RuleConfig)
+    assert isinstance(config, dict)
+    assert len(config["rules"]) == 1 and isinstance(
+        config["rules"]["rule_1"], RuleConfig
+    )
 
 
 def test_rule_based_profiler_config_successfully_loads_with_optional_args():
@@ -235,7 +225,6 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
         "variables": {"foo": "bar"},
         "rules": {
             "rule_1": {
-                "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
                     {"class_name": "ParameterBuilder", "name": "my_parameter"}
@@ -251,8 +240,8 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
     }
     schema = RuleBasedProfilerConfigSchema()
     config = schema.load(data)
-    assert isinstance(config, RuleBasedProfilerConfig)
-    assert data["variables"] == config.variables
+    assert isinstance(config, dict)
+    assert data["variables"] == config["variables"]
 
 
 def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_fields():
@@ -281,7 +270,6 @@ def test_rule_based_profiler_from_commented_map():
         "variables": {"foo": "bar"},
         "rules": {
             "rule_1": {
-                "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
                     {"class_name": "ParameterBuilder", "name": "my_parameter"}
@@ -298,3 +286,145 @@ def test_rule_based_profiler_from_commented_map():
     commented_map = CommentedMap(data)
     config = RuleBasedProfilerConfig.from_commented_map(commented_map)
     assert all(hasattr(config, k) for k in data)
+
+
+def test_resolve_config_using_acceptable_arguments(
+    profiler_with_placeholder_args: RuleBasedProfiler,
+) -> None:
+    old_config: RuleBasedProfilerConfig = profiler_with_placeholder_args.config
+    old_config.module_name = profiler_with_placeholder_args.__class__.__module__
+
+    # Roundtrip through schema validation to add/or restore any missing fields.
+    old_deserialized_config: dict = ruleBasedProfilerConfigSchema.load(
+        old_config.to_json_dict()
+    )
+    old_config = RuleBasedProfilerConfig(**old_deserialized_config)
+
+    # Brand new config is created but existing attributes are unchanged
+    new_config: RuleBasedProfilerConfig = (
+        RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+            profiler=profiler_with_placeholder_args,
+        )
+    )
+
+    # Roundtrip through schema validation to add/or restore any missing fields.
+    # new_deserialized_config: dict = ruleBasedProfilerConfigSchema.load(new_config.to_json_dict())
+    new_deserialized_config: dict = new_config.to_json_dict()
+    new_config = RuleBasedProfilerConfig(**new_deserialized_config)
+
+    assert id(old_config) != id(new_config)
+    assert all(
+        old_config[attr] == new_config[attr]
+        for attr in ("class_name", "config_version", "module_name", "name")
+    )
+
+
+def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
+    profiler_with_placeholder_args: RuleBasedProfiler,
+) -> None:
+    runtime_override_rule_name: str = "my_runtime_override_rule"
+    assert all(
+        rule.name != runtime_override_rule_name
+        for rule in profiler_with_placeholder_args.rules
+    )
+
+    runtime_override_rule: dict = {
+        "domain_builder": {
+            "class_name": "TableDomainBuilder",
+            "module_name": "great_expectations.rule_based_profiler.domain_builder",
+        },
+        "parameter_builders": [
+            {
+                "class_name": "MetricMultiBatchParameterBuilder",
+                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                "metric_name": "my_other_metric",
+                "name": "my_additional_parameter",
+            },
+        ],
+        "expectation_configuration_builders": [
+            {
+                "class_name": "DefaultExpectationConfigurationBuilder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                "expectation_type": "expect_column_values_to_be_between",
+                "meta": {
+                    "details": {
+                        "note": "Here's another rule",
+                    },
+                },
+            },
+        ],
+    }
+
+    runtime_override_rules: Dict[str, dict] = {
+        runtime_override_rule_name: runtime_override_rule,
+    }
+
+    config: RuleBasedProfilerConfig = (
+        RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+            profiler=profiler_with_placeholder_args,
+            rules=runtime_override_rules,
+        )
+    )
+
+    assert len(config.rules) == 2 and runtime_override_rule_name in config.rules
+
+
+def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
+    profiler_with_placeholder_args: RuleBasedProfiler,
+) -> None:
+    datasource_name: str = "my_datasource"
+    data_connector_name: str = "my_basic_data_connector"
+    data_asset_name: str = "my_data_asset"
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name=datasource_name,
+        data_connector_name=data_connector_name,
+        data_asset_name=data_asset_name,
+    )
+
+    runtime_override_rule: dict = {
+        "domain_builder": {
+            "class_name": "TableDomainBuilder",
+            "module_name": "great_expectations.rule_based_profiler.domain_builder",
+            "batch_request": batch_request,
+        },
+        "parameter_builders": [
+            {
+                "class_name": "MetricMultiBatchParameterBuilder",
+                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                "metric_name": "my_other_metric",
+                "name": "my_additional_parameter",
+            },
+        ],
+        "expectation_configuration_builders": [
+            {
+                "class_name": "DefaultExpectationConfigurationBuilder",
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                "expectation_type": "expect_column_values_to_be_between",
+                "meta": {
+                    "details": {
+                        "note": "Here's another rule",
+                    },
+                },
+            },
+        ],
+    }
+
+    runtime_override_rule_name: str = "rule_with_batch_request"
+    runtime_override_rules: Dict[str, dict] = {
+        runtime_override_rule_name: runtime_override_rule
+    }
+
+    config: RuleBasedProfilerConfig = (
+        RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+            profiler=profiler_with_placeholder_args,
+            rules=runtime_override_rules,
+        )
+    )
+
+    domain_builder: dict = config.rules[runtime_override_rule_name]["domain_builder"]
+    converted_batch_request: dict = domain_builder["batch_request"]
+
+    assert converted_batch_request["datasource_name"] == datasource_name
+    assert converted_batch_request["data_connector_name"] == data_connector_name
+    assert converted_batch_request["data_asset_name"] == data_asset_name

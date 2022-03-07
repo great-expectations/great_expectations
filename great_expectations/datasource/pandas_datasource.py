@@ -9,13 +9,14 @@ from io import BytesIO
 import pandas as pd
 
 from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.util import S3Url
+from great_expectations.datasource.datasource import LegacyDatasource
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.execution_engine.pandas_execution_engine import (
+    hash_pandas_dataframe,
+)
 from great_expectations.types import ClassConfig
-
-from ..core.util import S3Url
-from ..execution_engine.pandas_execution_engine import hash_pandas_dataframe
-from ..types.configurations import classConfigSchema
-from .datasource import LegacyDatasource
+from great_expectations.types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
 
@@ -282,6 +283,8 @@ class PandasDatasource(LegacyDatasource):
                 "reader_method": "read_csv",
                 "reader_options": {"compression": "gzip"},
             }
+        elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
+            return {"reader_method": "read_sas"}
 
         raise BatchKwargsError(
             "Unable to determine reader method from path: %s" % path, {"path": path}

@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 import pandas as pd
 import pytest
@@ -66,9 +67,6 @@ def test_checkpoint_config_repr(checkpoint):
     assert (
         checkpoint_config_repr
         == """{
-  "name": "my_checkpoint",
-  "config_version": 1.0,
-  "batch_request": {},
   "action_list": [
     {
       "name": "store_validation_result",
@@ -90,9 +88,14 @@ def test_checkpoint_config_repr(checkpoint):
       }
     }
   ],
+  "batch_request": {},
+  "class_name": "Checkpoint",
+  "config_version": 1.0,
   "evaluation_parameters": {},
-  "runtime_configuration": {},
+  "module_name": "great_expectations.checkpoint",
+  "name": "my_checkpoint",
   "profilers": [],
+  "runtime_configuration": {},
   "validations": [
     {
       "batch_request": {
@@ -137,33 +140,19 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
     json_dict: dict = convert_to_json_serializable(data=resolved_runtime_kwargs)
     deep_filter_properties_iterable(
         properties=json_dict,
-        keep_falsy_numerics=True,
         inplace=True,
     )
-    checkpoint_config_repr: str = json.dumps(json_dict, indent=2)
+
+    keys: List[str] = sorted(list(json_dict.keys()))
+
+    key: str
+    sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+    checkpoint_config_repr: str = json.dumps(sorted_json_dict, indent=2)
 
     assert (
         checkpoint_config_repr
         == """{
-  "name": "my_checkpoint",
-  "config_version": 1.0,
-  "batch_request": {
-    "runtime_parameters": {
-      "batch_data": [
-        {
-          "a": 1,
-          "b": 3
-        },
-        {
-          "a": 2,
-          "b": 4
-        }
-      ]
-    },
-    "batch_identifiers": {
-      "default_identifier_name": "my_simple_df"
-    }
-  },
   "action_list": [
     {
       "name": "store_validation_result",
@@ -185,9 +174,30 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
       }
     }
   ],
+  "batch_request": {
+    "runtime_parameters": {
+      "batch_data": [
+        {
+          "a": 1,
+          "b": 3
+        },
+        {
+          "a": 2,
+          "b": 4
+        }
+      ]
+    },
+    "batch_identifiers": {
+      "default_identifier_name": "my_simple_df"
+    }
+  },
+  "class_name": "Checkpoint",
+  "config_version": 1.0,
   "evaluation_parameters": {},
-  "runtime_configuration": {},
+  "module_name": "great_expectations.checkpoint",
+  "name": "my_checkpoint",
   "profilers": [],
+  "runtime_configuration": {},
   "validations": [
     {
       "batch_request": {

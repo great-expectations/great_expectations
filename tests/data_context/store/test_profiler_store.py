@@ -24,27 +24,31 @@ def test_profiler_store_raises_error_with_invalid_value(
 
 def test_profiler_store_set_adds_valid_key(
     empty_profiler_store: ProfilerStore,
-    profiler_config: RuleBasedProfilerConfig,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
     profiler_key: ConfigurationIdentifier,
 ):
     assert len(empty_profiler_store.list_keys()) == 0
-    empty_profiler_store.set(key=profiler_key, value=profiler_config)
+    empty_profiler_store.set(
+        key=profiler_key, value=profiler_config_with_placeholder_args
+    )
     assert len(empty_profiler_store.list_keys()) == 1
 
 
 def test_profiler_store_integration(
     empty_data_context: DataContext,
-    store_name: str,
+    profiler_store_name: str,
     profiler_name: str,
-    profiler_config: RuleBasedProfilerConfig,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     base_directory: str = str(Path(empty_data_context.root_directory) / "profilers")
 
-    profiler_store = build_profiler_store_using_filesystem(
-        store_name=store_name,
+    profiler_store: ProfilerStore = build_profiler_store_using_filesystem(
+        store_name=profiler_store_name,
         base_directory=base_directory,
         overwrite_existing=True,
     )
+
+    dir_tree: str
 
     dir_tree = gen_directory_tree_str(startpath=base_directory)
     assert (
@@ -54,8 +58,10 @@ def test_profiler_store_integration(
 """
     )
 
-    key = ConfigurationIdentifier(configuration_key=profiler_name)
-    profiler_store.set(key=key, value=profiler_config)
+    key: ConfigurationIdentifier = ConfigurationIdentifier(
+        configuration_key=profiler_name
+    )
+    profiler_store.set(key=key, value=profiler_config_with_placeholder_args)
 
     dir_tree = gen_directory_tree_str(startpath=base_directory)
     assert (
@@ -70,8 +76,8 @@ def test_profiler_store_integration(
     profiler_store.remove_key(key=key)
     assert len(profiler_store.list_keys()) == 0
 
-    data = profiler_store.self_check()
-    self_check_report = convert_to_json_serializable(data=data)
+    data: dict = profiler_store.self_check()
+    self_check_report: dict = convert_to_json_serializable(data=data)
 
     # Drop dynamic value to ensure appropriate assert
     self_check_report["config"]["store_backend"].pop("base_directory")

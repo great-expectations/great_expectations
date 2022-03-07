@@ -320,9 +320,6 @@ def test_rule_based_profiler_emits_valid_usage_stats(
       min_timestamp: 2004-10-19 10:23:54
     rules:
       my_rule_for_user_ids:
-        name: my_rule_for_user_ids
-        class_name: Rule
-        module_name: great_expectations.rule_based_profiler.rule
         domain_builder:
           class_name: TableDomainBuilder
         expectation_configuration_builders:

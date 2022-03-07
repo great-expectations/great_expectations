@@ -4,7 +4,7 @@ import itertools
 import json
 import logging
 import uuid
-from typing import Any, Dict, List, MutableMapping, Optional, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
 from ruamel.yaml import YAML
@@ -12,7 +12,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -24,8 +24,7 @@ from great_expectations.marshmallow__shade import (
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
-from great_expectations.types import DictDot, SerializableDictDot
-from great_expectations.types.base import SerializableDotDict
+from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -33,6 +32,7 @@ yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 CURRENT_GE_CONFIG_VERSION = 3
 FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
@@ -53,6 +53,10 @@ def object_to_yaml_str(obj):
 
 class BaseYamlConfig(SerializableDictDot):
     _config_schema_class = None
+
+    exclude_field_names: Set[str] = {
+        "commented_map",
+    }
 
     def __init__(self, commented_map: Optional[CommentedMap] = None):
         if commented_map is None:
@@ -83,8 +87,9 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def from_commented_map(cls, commented_map: CommentedMap):
         try:
-            config: Union[dict, BaseYamlConfig]
-            config = cls._get_schema_instance().load(commented_map)
+            config: Union[dict, BaseYamlConfig] = cls._get_schema_instance().load(
+                commented_map
+            )
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
             return config
@@ -110,15 +115,6 @@ class BaseYamlConfig(SerializableDictDot):
         :returns a YAML string containing the project configuration
         """
         return object_to_yaml_str(obj=self.commented_map)
-
-    def to_raw_dict(self) -> dict:
-        """
-        :returns a raw dict containing the project configuration
-        """
-        key: str
-        commented_map: CommentedMap = self.commented_map
-        # return {key: commented_map[key] for key in commented_map}
-        return {key: self[key] for key in commented_map}
 
     def to_json_dict(self) -> dict:
         """
@@ -187,7 +183,11 @@ class AssetConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=False, allow_none=True)
-    class_name = fields.String(required=False, allow_none=True, missing="Asset")
+    class_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="Asset",
+    )
     module_name = fields.String(
         required=False,
         all_none=True,
@@ -274,17 +274,33 @@ class SorterConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=True)
-    class_name = fields.String(required=True)
-    module_name = fields.String(
-        missing="great_expectations.datasource.data_connector.sorter"
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
     )
-    orderby = fields.String(required=False, missing="asc", allow_none=False)
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.datasource.data_connector.sorter",
+    )
+    orderby = fields.String(
+        required=False,
+        allow_none=True,
+        missing="asc",
+    )
 
     # allow_none = True because it is only used by some Sorters
     reference_list = fields.List(
-        cls_or_instance=fields.Str(), required=False, missing=None, allow_none=True
+        cls_or_instance=fields.Str(),
+        required=False,
+        missing=None,
+        allow_none=True,
     )
-    datetime_format = fields.String(required=False, missing=None, allow_none=True)
+    datetime_format = fields.String(
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -391,8 +407,15 @@ class DataConnectorConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.datasource.data_connector")
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
+    )
+    module_name = fields.String(
+        required=False,
+        allow_nonw=True,
+        missing="great_expectations.datasource.data_connector",
+    )
 
     assets = fields.Dict(
         keys=fields.Str(),
@@ -564,7 +587,7 @@ continue.
             azure_options = data["azure_options"]
             if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
+                    """Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
                     You must only select one between `conn_str` or `account_url`. Please update your configuration to continue.
                     """
                 )
@@ -590,7 +613,7 @@ continue.
             gcs_options = data["gcs_options"]
             if "filename" in gcs_options and "info" in gcs_options:
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your current configuration can only use a single method of authentication for the GCS type of data connector.
+                    """Your current configuration can only use a single method of authentication for the GCS type of data connector.
                     You must only select one between `filename` (from_service_account_file) and `info` (from_service_account_info). Please update your configuration to continue.
                     """
                 )
@@ -681,8 +704,15 @@ class ExecutionEngineConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(required=True)
-    module_name = fields.String(missing="great_expectations.execution_engine")
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
+    )
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.execution_engine",
+    )
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
     spark_config = fields.Raw(required=False, allow_none=True)
@@ -822,8 +852,16 @@ class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    class_name = fields.String(missing="Datasource")
-    module_name = fields.String(missing="great_expectations.datasource")
+    class_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="Datasource",
+    )
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.datasource",
+    )
     force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
     spark_config = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
@@ -905,6 +943,7 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
 class AnonymizedUsageStatisticsConfig(DictDot):
     def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None):
         self._enabled = enabled
+
         if data_context_id is None:
             data_context_id = str(uuid.uuid4())
             self._explicit_id = False
@@ -912,48 +951,56 @@ class AnonymizedUsageStatisticsConfig(DictDot):
             self._explicit_id = True
 
         self._data_context_id = data_context_id
+
         if usage_statistics_url is None:
             usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
             self._explicit_url = False
         else:
             self._explicit_url = True
+
         self._usage_statistics_url = usage_statistics_url
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return self._enabled
 
     @enabled.setter
-    def enabled(self, enabled):
+    def enabled(self, enabled) -> None:
         if not isinstance(enabled, bool):
             raise ValueError("usage statistics enabled property must be boolean")
+
         self._enabled = enabled
 
     @property
-    def data_context_id(self):
+    def data_context_id(self) -> str:
         return self._data_context_id
 
     @data_context_id.setter
-    def data_context_id(self, data_context_id):
+    def data_context_id(self, data_context_id) -> None:
         try:
             uuid.UUID(data_context_id)
         except ValueError:
             raise ge_exceptions.InvalidConfigError(
                 "data_context_id must be a valid uuid"
             )
+
         self._data_context_id = data_context_id
         self._explicit_id = True
 
     @property
-    def explicit_id(self):
+    def explicit_id(self) -> bool:
         return self._explicit_id
 
     @property
-    def usage_statistics_url(self):
+    def explicit_url(self) -> bool:
+        return self._explicit_url
+
+    @property
+    def usage_statistics_url(self) -> str:
         return self._usage_statistics_url
 
     @usage_statistics_url.setter
-    def usage_statistics_url(self, usage_statistics_url):
+    def usage_statistics_url(self, usage_statistics_url) -> None:
         self._usage_statistics_url = usage_statistics_url
         self._explicit_url = True
 
@@ -1007,7 +1054,7 @@ class NotebookConfig(DictDot):
         self,
         class_name,
         module_name,
-        custom_templates_module,
+        custom_templates_module=None,
         header_markdown=None,
         footer_markdown=None,
         table_expectations_header_markdown=None,
@@ -1049,7 +1096,7 @@ class NotebookConfigSchema(Schema):
     module_name = fields.String(
         missing="great_expectations.render.renderer.suite_edit_notebook_renderer"
     )
-    custom_templates_module = fields.String()
+    custom_templates_module = fields.String(allow_none=True)
 
     header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     footer_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
@@ -1173,16 +1220,47 @@ class ConcurrencyConfigSchema(Schema):
 
 
 class GeCloudConfig(DictDot):
-    def __init__(self, base_url: str, account_id: str, access_token: str):
+    # TODO: deprecate account_id arg
+    def __init__(
+        self,
+        base_url: str,
+        account_id: str = None,
+        access_token: str = None,
+        organization_id: str = None,
+    ):
+        # access_token was given a default value to maintain arg position of account_id
+        if access_token is None:
+            raise ValueError("Access token cannot be None.")
+        # exclusive or
+        if not (bool(account_id) ^ bool(organization_id)):
+            raise ValueError(
+                "Must provide either (and only) account_id or organization_id."
+            )
+        if account_id is not None:
+            logger.warning(
+                'The "account_id" argument has been renamed "organization_id" and will be deprecated in '
+                "the next major release."
+            )
+
         self.base_url = base_url
-        self.account_id = account_id
+        self.organization_id = organization_id or account_id
         self.access_token = access_token
+
+    # TODO: remove property when account_id is deprecated
+    @property
+    def account_id(self):
+        logger.warning(
+            'The "account_id" attribute has been renamed to "organization_id" and will be deprecated in '
+            "the next major release."
+        )
+        return self.organization_id
 
     def to_json_dict(self):
         return {
             "base_url": self.base_url,
-            "account_id": self.account_id,
+            "organization_id": self.organization_id,
             "access_token": self.access_token,
+            "account_id": self.account_id,  # TODO: remove when account_id is deprecated
         }
 
 
@@ -1464,11 +1542,13 @@ class BaseStoreBackendDefaults(DictDot):
         self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
+
         self.stores = stores
         if data_docs_sites is None:
             data_docs_sites = copy.deepcopy(
                 DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
             )
+
         self.data_docs_sites = data_docs_sites
         self.data_docs_site_name = data_docs_site_name
 
@@ -1993,6 +2073,49 @@ class DataContextConfig(BaseYamlConfig):
     def config_version(self):
         return self._config_version
 
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
+
 
 class CheckpointConfigSchema(Schema):
     class Meta:
@@ -2043,10 +2166,15 @@ class CheckpointConfigSchema(Schema):
         allow_none=True,
     )
     template_name = fields.String(required=False, allow_none=True)
-    module_name = fields.String(
-        required=False, allow_none=True, missing="great_expectations.checkpoint"
+    class_name = fields.Str(
+        required=False,
+        allow_none=True,
     )
-    class_name = fields.Str(required=False, allow_none=True)
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.checkpoint",
+    )
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
     expectation_suite_ge_cloud_id = fields.UUID(required=False, allow_none=True)
@@ -2088,7 +2216,7 @@ class CheckpointConfigSchema(Schema):
             "name" in data or "validation_operator_name" in data or "batches" in data
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
+                """Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
                 continue.
                 """
             )
@@ -2096,7 +2224,7 @@ class CheckpointConfigSchema(Schema):
         if data.get("config_version"):
             if "name" not in data:
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
+                    """Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
                     configuration to continue.
                     """
                 )
@@ -2117,12 +2245,8 @@ class CheckpointConfigSchema(Schema):
         for key in self.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
                 data.pop(key)
+
         return data
-
-
-class Attributes(SerializableDotDict):
-    def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=dict(self))
 
 
 class CheckpointConfig(BaseYamlConfig):
@@ -2159,9 +2283,9 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = config_version
         if self.config_version is None:
             class_name = class_name or "LegacyCheckpoint"
-            self.validation_operator_name = validation_operator_name
+            self._validation_operator_name = validation_operator_name
             if batches is not None and isinstance(batches, list):
-                self.batches = batches
+                self._batches = batches
         else:
             class_name = class_name or "Checkpoint"
             self._template_name = template_name
@@ -2194,6 +2318,22 @@ class CheckpointConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls):
         return CheckpointConfigSchema
+
+    @property
+    def validation_operator_name(self) -> str:
+        return self._validation_operator_name
+
+    @validation_operator_name.setter
+    def validation_operator_name(self, value: str):
+        self._validation_operator_name = value
+
+    @property
+    def batches(self) -> List[dict]:
+        return self._batches
+
+    @batches.setter
+    def batches(self, value: List[dict]):
+        self._batches = value
 
     @property
     def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
@@ -2303,17 +2443,33 @@ class CheckpointConfig(BaseYamlConfig):
     def site_names(self) -> List[str]:
         return self._site_names
 
+    @site_names.setter
+    def site_names(self, value: List[str]):
+        self._site_names = value
+
     @property
     def slack_webhook(self) -> str:
         return self._slack_webhook
+
+    @slack_webhook.setter
+    def slack_webhook(self, value: str):
+        self._slack_webhook = value
 
     @property
     def notify_on(self) -> str:
         return self._notify_on
 
+    @notify_on.setter
+    def notify_on(self, value: str):
+        self._notify_on = value
+
     @property
     def notify_with(self) -> str:
         return self._notify_with
+
+    @notify_with.setter
+    def notify_with(self, value: str):
+        self._notify_with = value
 
     @property
     def evaluation_parameters(self) -> dict:
@@ -2336,20 +2492,60 @@ class CheckpointConfig(BaseYamlConfig):
         result = cls.__new__(cls)
 
         memo[id(self)] = result
-        for key, value in self.to_dict().items():
-            value_copy = safe_deep_copy(data=value, memo=memo)
-            setattr(result, key, value_copy)
+
+        attributes_to_copy = set(CheckpointConfigSchema().fields.keys())
+        for key in attributes_to_copy:
+            try:
+                value = self[key]
+                value_copy = safe_deep_copy(data=value, memo=memo)
+                setattr(result, key, value_copy)
+            except AttributeError:
+                pass
 
         return result
 
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
     def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
-            keep_falsy_numerics=True,
             inplace=True,
         )
-        return json.dumps(json_dict, indent=2)
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class CheckpointValidationConfig(DictDot):

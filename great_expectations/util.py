@@ -26,7 +26,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Set, Union
+from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse
 from packaging import version
@@ -71,7 +71,7 @@ except ImportError:
     Table = None
     Select = None
 
-SINGULAR_TO_PLURAL_LOOKUP_DICT = {
+SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "batch": "batches",
     "checkpoint": "checkpoints",
     "data_asset": "data_assets",
@@ -83,7 +83,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "rendered_data_doc": "rendered_data_docs",
 }
 
-PLURAL_TO_SINGULAR_LOOKUP_DICT = {
+PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "batches": "batch",
     "checkpoints": "checkpoint",
     "data_assets": "data_asset",
@@ -94,6 +94,8 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
 }
+
+MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES: int = 3
 
 
 def pluralize(singular_ge_noun):
@@ -166,7 +168,9 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(pretty_print: bool = False) -> Callable:
+def measure_execution_time(
+    pretty_print: bool = False,
+) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
         func.execution_duration_milliseconds = 0
 
@@ -179,10 +183,10 @@ def measure_execution_time(pretty_print: bool = False) -> Callable:
                 time_end: int = int(round(time.time() * 1000))
                 delta_t: int = time_end - time_begin
                 func.execution_duration_milliseconds = delta_t
-                bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-                call_args: OrderedDict = bound_args.arguments
 
                 if pretty_print:
+                    bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
+                    call_args: OrderedDict = bound_args.arguments
                     print(
                         f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
                     )
@@ -775,6 +779,50 @@ def read_pickle(
         )
 
 
+def read_sas(
+    filename,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
+    dataset_class=None,
+    expectation_suite=None,
+    profiler=None,
+    *args,
+    **kwargs,
+):
+    """Read a file using Pandas read_sas and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
+        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
+            if not specified, try to load the class named via the class_name and module_name parameters
+        expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
+
+    Returns:
+        great_expectations dataset
+    """
+    import pandas as pd
+
+    df = pd.read_sas(filename, *args, **kwargs)
+    if dataset_class is not None:
+        return _convert_to_dataset_class(
+            df=df,
+            dataset_class=dataset_class,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+    else:
+        return _load_and_convert_to_dataset_class(
+            df=df,
+            class_name=class_name,
+            module_name=module_name,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+
+
 def validate(
     data_asset,
     expectation_suite=None,
@@ -1011,9 +1059,15 @@ def filter_properties_dict(
     Returns:
         The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
     """
-    if keep_fields and delete_fields:
+    if keep_fields is None:
+        keep_fields = set()
+
+    if delete_fields is None:
+        delete_fields = set()
+
+    if keep_fields & delete_fields:
         raise ValueError(
-            "Only one of keep_fields and delete_fields filtering directives can be specified."
+            "Common keys between sets of keep_fields and delete_fields filtering directives are illegal."
         )
 
     if clean_falsy:
@@ -1132,6 +1186,21 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        keys_to_delete: List[str] = list(
+            filter(
+                lambda k: _is_to_be_removed_from_deep_filter_properties_iterable(
+                    value=properties[k],
+                    clean_nulls=clean_nulls,
+                    clean_falsy=clean_falsy,
+                    keep_falsy_numerics=keep_falsy_numerics,
+                ),
+                properties.keys(),
+            )
+        )
+        for key in keys_to_delete:
+            properties.pop(key)
+
     elif isinstance(properties, (list, set, tuple)):
         if not inplace:
             properties = copy.deepcopy(properties)
@@ -1148,10 +1217,34 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        properties = list(
+            filter(
+                lambda v: not _is_to_be_removed_from_deep_filter_properties_iterable(
+                    value=v,
+                    clean_nulls=clean_nulls,
+                    clean_falsy=clean_falsy,
+                    keep_falsy_numerics=keep_falsy_numerics,
+                ),
+                properties,
+            )
+        )
+
     if inplace:
         return None
 
     return properties
+
+
+def _is_to_be_removed_from_deep_filter_properties_iterable(
+    value: Any, clean_nulls: bool, clean_falsy: bool, keep_falsy_numerics: bool
+) -> bool:
+    conditions: Tuple[bool, ...] = (
+        clean_nulls and value is None,
+        not keep_falsy_numerics and is_numeric(value) and value == 0,
+        clean_falsy and not is_numeric(value) and not value,
+    )
+    return any(condition for condition in conditions)
 
 
 def is_truthy(value: Any) -> bool:
@@ -1306,3 +1399,43 @@ def import_make_url():
     else:
         from sqlalchemy.engine import make_url
     return make_url
+
+
+def probabilistic_test(
+    func: Callable = None,
+    max_num_retries: int = MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES,
+) -> Callable:
+    @wraps(func)
+    def run_pytest_method(*args, **kwargs) -> None:
+        assertion_error: Optional[AssertionError] = None
+        error_message: Optional[str] = None
+
+        all_assertions_passed: bool = False
+
+        idx: int = 0
+        while idx < max_num_retries:
+            try:
+                func(*args, **kwargs)
+                all_assertions_passed = True
+            except AssertionError as e:
+                error_message = re.sub(r"\W+", " ", str(e)).strip()
+                logger.warning(
+                    f"""Attempt {idx + 1} to execute "{func}" failed with error "{error_message}".  Retrying."""
+                )
+                all_assertions_passed = False
+                assertion_error = e
+
+            if all_assertions_passed:
+                break
+
+            idx += 1
+
+        if not all_assertions_passed:
+            logger.error(
+                f"""Aborting trying to execute "{func}" (exceeded maximum allowed \
+{MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES} attempts).  Error "{error_message}" is being raised.
+"""
+            )
+            raise assertion_error
+
+    return run_pytest_method
