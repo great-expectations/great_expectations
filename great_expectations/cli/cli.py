@@ -70,6 +70,7 @@ class CLI(click.MultiCommand):
             "project",
             "store",
             "suite",
+            "docker"
         ]
 
         return commands
