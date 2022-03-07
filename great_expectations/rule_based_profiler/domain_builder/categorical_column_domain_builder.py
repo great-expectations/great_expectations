@@ -174,7 +174,9 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             column_names: List of column names used to create metric configurations.
 
         Returns:
-            List of dicts of the form [{column_name: List[MetricConfiguration]},...]
+            Dictionary of the form {
+                column_name: List[MetricConfiguration],
+            }
         """
 
         limit_mode: Union[
