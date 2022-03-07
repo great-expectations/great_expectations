@@ -598,26 +598,14 @@ Please check your config."""
         # If given table (this is default), get all unexpected accessor_keys (an optional parameters allowing us to
         # modify domain access)
         if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(list(accessor_keys)) > 0:
-                for key in accessor_keys:
-                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
-            if len(compute_domain_kwargs.keys()) > 0:
-                # Warn user if kwarg not "normal".
-                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
-                    {
-                        "batch_id",
-                        "table",
-                        "row_condition",
-                        "condition_parser",
-                    }
-                )
-                if len(unexpected_keys) > 0:
-                    unexpected_keys_str: str = ", ".join(
-                        map(lambda element: f'"{element}"', unexpected_keys)
-                    )
-                    logger.warning(
-                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
-                    )
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_table_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+                accessor_keys=accessor_keys,
+            )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
         elif domain_type == MetricDomainTypes.COLUMN:
