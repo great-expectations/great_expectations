@@ -186,8 +186,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
             if path is None:
                 raise BatchKwargsError(
-                    "Unable to build batch kwargs from for asset '%s'"
-                    % data_asset_name,
+                    f"Unable to build batch kwargs from for asset '{data_asset_name}'",
                     batch_parameters,
                 )
             return self._build_batch_kwargs_from_path(path, **batch_parameters)
@@ -291,7 +290,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             limit=limit,
         )
         if "s3a://" not in path:
-            path = "s3a://" + path
+            path = f"s3a://{path}"
         batch_kwargs["s3"] = path
         batch_kwargs["datasource"] = self._datasource.name
 

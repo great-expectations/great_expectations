@@ -116,7 +116,7 @@ def delete_datasource(ctx, datasource):
     try:
         context.get_datasource(datasource)
     except ValueError:
-        cli_message("<green>{}</green>".format("Datasource deleted successfully."))
+        cli_message("<green>Datasource deleted successfully.</green>")
         send_usage_message(
             data_context=context,
             event=usage_event_end,
@@ -319,7 +319,7 @@ data_connectors:
     class_name: InferredAssetFilesystemDataConnector
     base_directory: {self.base_path}
     default_regex:
-      group_names: 
+      group_names:
         - data_asset_name
       pattern: (.*)
   default_runtime_data_connector_name:
@@ -551,12 +551,7 @@ class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
         return redshift_success or postgresql_success
 
     def _yaml_innards(self) -> str:
-        return (
-            super()._yaml_innards()
-            + """
-    query:
-      sslmode: prefer"""
-        )
+        return f"{super()._yaml_innards()}\n    query:\n      sslmode: prefer"
 
 
 class SnowflakeAuthMethod(enum.IntEnum):
@@ -805,7 +800,7 @@ def sanitize_yaml_and_save_datasource(
         return
     if "credentials" in config.keys():
         credentials = config["credentials"]
-        config["credentials"] = "${" + datasource_name + "}"
+        config["credentials"] = f"${{{datasource_name}}}"
         context.save_config_variable(datasource_name, credentials)
     context.add_datasource(name=datasource_name, **config)
 

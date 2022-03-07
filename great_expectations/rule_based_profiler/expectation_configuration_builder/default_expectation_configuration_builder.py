@@ -27,7 +27,7 @@ from great_expectations.rule_based_profiler.types import Domain, ParameterContai
 
 text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))
-var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[" + integer + "]"))
+var = Combine(Word(f"${alphas}", f"{alphanums}_.") + ppOptional(f"[{integer}]"))
 comparison_operator = oneOf(">= <= != > < ==")
 binary_operator = oneOf("~ & |")
 operand = text | integer | var

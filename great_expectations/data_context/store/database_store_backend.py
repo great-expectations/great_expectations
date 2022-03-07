@@ -248,7 +248,7 @@ class DatabaseStoreBackend(StoreBackend):
             return self.engine.execute(sel).fetchone()[0]
         except (IndexError, SQLAlchemyError) as e:
             logger.debug("Error fetching value: " + str(e))
-            raise ge_exceptions.StoreError("Unable to fetch value for key: " + str(key))
+            raise ge_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
     def _set(self, key, value, allow_update=True, **kwargs):
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
@@ -295,7 +295,7 @@ class DatabaseStoreBackend(StoreBackend):
         full_url = str(self.engine.url)
         engine_name = full_url.split("://")[0]
         db_name = full_url.split("/")[-1]
-        return engine_name + "://" + db_name + "/" + str(key[0])
+        return f"{engine_name}://{db_name}/{str(key[0])}"
 
     def _has_key(self, key):
         sel = (

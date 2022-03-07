@@ -2067,7 +2067,7 @@ class BaseDataContext(ConfigPeer):
             keys = self.expectations_store.list_keys()
         except KeyError as e:
             raise ge_exceptions.InvalidConfigError(
-                "Unable to find configured store: %s" % str(e)
+                f"Unable to find configured store: {str(e)}"
             )
         return keys
 
@@ -2279,7 +2279,7 @@ class BaseDataContext(ConfigPeer):
 
         else:
             raise ge_exceptions.DataContextError(
-                "expectation_suite %s not found" % expectation_suite_name
+                f"expectation_suite {expectation_suite_name} not found"
             )
 
     def list_expectation_suite_names(self) -> List[str]:
@@ -3964,10 +3964,8 @@ class DataContext(BaseDataContext):
         cls.scaffold_directories(ge_dir)
 
         if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
-            message = """Warning. An existing `{}` was found here: {}.
-    - No action was taken.""".format(
-                cls.GE_YML, ge_dir
-            )
+            message = f"""Warning. An existing `{cls.GE_YML}` was found here: {ge_dir}.
+    - No action was taken."""
             warnings.warn(message)
         else:
             cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
@@ -4409,9 +4407,7 @@ class DataContext(BaseDataContext):
 
         for i in range(4):
             logger.debug(
-                "Searching for config file {} ({} layer deep)".format(
-                    search_start_dir, i
-                )
+                f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
             potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)

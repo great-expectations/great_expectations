@@ -95,7 +95,7 @@ class MetaSparkDFDataset(Dataset):
             """
 
             # Rename column so we only have to handle dot notation here
-            eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
+            eval_col = f"__eval_col_{column.replace('.', '__').replace('`', '_')}"
             self.spark_df = self.spark_df.withColumn(eval_col, col(column))
 
             if result_format is None:
@@ -230,8 +230,8 @@ class MetaSparkDFDataset(Dataset):
             **kwargs,
         ):
             # Rename column so we only have to handle dot notation here
-            eval_col_A = "__eval_col_A_" + column_A.replace(".", "__").replace("`", "_")
-            eval_col_B = "__eval_col_B_" + column_B.replace(".", "__").replace("`", "_")
+            eval_col_A = f"__eval_col_A_{column_A.replace('.', '__').replace('`', '_')}"
+            eval_col_B = f"__eval_col_B_{column_B.replace('.', '__').replace('`', '_')}"
 
             self.spark_df = self.spark_df.withColumn(
                 eval_col_A, col(column_A)
@@ -272,9 +272,7 @@ class MetaSparkDFDataset(Dataset):
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
                     "`{0}` AS `B_{0}`".format(eval_col_B),
-                    "ISNULL(`{}`) OR ISNULL(`{}`) AS `__null_val`".format(
-                        eval_col_A, eval_col_B
-                    ),
+                    f"ISNULL(`{eval_col_A}`) OR ISNULL(`{eval_col_B}`) AS `__null_val`",
                 )
             # elif ignore_row_if == "neither":
             elif ignore_row_if == "never":
@@ -407,7 +405,7 @@ class MetaSparkDFDataset(Dataset):
             # Rename column so we only have to handle dot notation here
             eval_cols = []
             for col_name in column_list:
-                eval_col = "__eval_col_" + col_name.replace(".", "__").replace("`", "_")
+                eval_col = f"__eval_col_{col_name.replace('.', '__').replace('`', '_')}"
                 eval_cols.append(eval_col)
                 self.spark_df = self.spark_df.withColumn(eval_col, col(col_name))
             if result_format is None:
@@ -1067,7 +1065,7 @@ class SparkDFDataset(MetaSparkDFDataset):
                 datetime.strftime(datetime.now(), strftime_format), strftime_format
             )
         except ValueError as e:
-            raise ValueError("Unable to use provided strftime_format. " + e.message)
+            raise ValueError(f"Unable to use provided strftime_format. {e.message}")
 
         def is_parseable_by_format(val):
             try:
@@ -1174,7 +1172,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         # Rename column so we only have to handle dot notation here
-        eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
+        eval_col = f"__eval_col_{column.replace('.', '__').replace('`', '_')}"
         self.spark_df = self.spark_df.withColumn(eval_col, col(column))
         if mostly is not None:
             raise ValueError(
@@ -1186,9 +1184,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             col_data = [f for f in col_df.schema.fields if f.name == eval_col][0]
             col_type = type(col_data.dataType)
         except IndexError:
-            raise ValueError("Unrecognized column: %s" % column)
+            raise ValueError(f"Unrecognized column: {column}")
         except KeyError:
-            raise ValueError("No type data available for column: %s" % column)
+            raise ValueError(f"No type data available for column: {column}")
 
         try:
             if type_ is None:
@@ -1200,7 +1198,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             return {"success": success, "result": {"observed_value": col_type.__name__}}
 
         except AttributeError:
-            raise ValueError("Unrecognized spark type: %s" % type_)
+            raise ValueError(f"Unrecognized spark type: {type_}")
 
     @DocInherit
     @DataAsset.expectation(["column", "type_list", "mostly"])
@@ -1215,7 +1213,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         # Rename column so we only have to handle dot notation here
-        eval_col = "__eval_col_" + column.replace(".", "__").replace("`", "_")
+        eval_col = f"__eval_col_{column.replace('.', '__').replace('`', '_')}"
         self.spark_df = self.spark_df.withColumn(eval_col, col(column))
 
         if mostly is not None:
@@ -1228,9 +1226,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             col_data = [f for f in col_df.schema.fields if f.name == eval_col][0]
             col_type = type(col_data.dataType)
         except IndexError:
-            raise ValueError("Unrecognized column: %s" % column)
+            raise ValueError(f"Unrecognized column: {column}")
         except KeyError:
-            raise ValueError("No database type data available for column: %s" % column)
+            raise ValueError(f"No database type data available for column: {column}")
 
         if type_list is None:
             success = True

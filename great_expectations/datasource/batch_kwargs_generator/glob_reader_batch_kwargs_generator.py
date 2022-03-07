@@ -196,7 +196,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 "data_asset_name": data_asset_name,
             }
             raise BatchKwargsError(
-                "Unknown asset_name %s" % data_asset_name, batch_kwargs
+                f"Unknown asset_name {data_asset_name}", batch_kwargs
             )
 
     def _get_iterator(

@@ -141,7 +141,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 "limit": limit,
             }
             raise BatchKwargsError(
-                "Unknown asset_name %s" % data_asset_name, batch_kwargs
+                f"Unknown asset_name {data_asset_name}", batch_kwargs
             )
 
         if data_asset_name not in self._iterators:
@@ -180,7 +180,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 asset_config = self._assets[data_asset_name]
             except KeyError:
                 raise GreatExpectationsError(
-                    "No asset config found for asset %s" % data_asset_name
+                    f"No asset config found for asset {data_asset_name}"
                 )
             if data_asset_name not in self._iterators:
                 self._iterators[data_asset_name] = {}
@@ -225,7 +225,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         limit=None,
     ):
         batch_kwargs = {
-            "s3": "s3a://" + self.bucket + "/" + key,
+            "s3": f"s3a://{self.bucket}/{key}",
             "reader_options": self.reader_options,
         }
         if asset_config.get("reader_options"):

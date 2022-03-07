@@ -494,11 +494,11 @@ def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
     Returns:
         string of variable name e.g. SOME_VAR or None if not parsable. If there are multiple substitution variables this currently returns the first e.g. $SOME_$TRING -> $SOME_
     """
-    substitution_variable_name = pp.Word(pp.alphanums + "_").setResultsName(
+    substitution_variable_name = pp.Word(f"{pp.alphanums}_").setResultsName(
         "substitution_variable_name"
     )
-    curly_brace_parser = "${" + substitution_variable_name + "}"
-    non_curly_brace_parser = "$" + substitution_variable_name
+    curly_brace_parser = f"${{{substitution_variable_name}}}"
+    non_curly_brace_parser = f"${substitution_variable_name}"
     both_parser = curly_brace_parser | non_curly_brace_parser
     try:
         parsed_substitution_variable = both_parser.parseString(substitution_variable)

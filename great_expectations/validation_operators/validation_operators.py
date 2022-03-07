@@ -723,9 +723,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Failed Batches:* {}".format(
-                        failed_data_assets_msg_strings
-                    ),
+                    "text": f"*Failed Batches:* {failed_data_assets_msg_strings}",
                 },
             }
             query["blocks"].append(failed_data_assets_element)
