@@ -188,8 +188,8 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
                     MetricConfiguration(
                         metric_name=limit_mode.metric_name_defining_limit,
                         metric_domain_kwargs={
-                            "batch_id": batch_id,
                             "column": column_name,
+                            "batch_id": batch_id,
                         },
                         metric_value_kwargs=None,
                         metric_dependencies=None,
