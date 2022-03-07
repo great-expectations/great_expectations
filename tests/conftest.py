@@ -197,12 +197,12 @@ def build_test_backends_list_cfe(metafunc):
     # adding deprecation warnings
     if metafunc.config.getoption("--no-postgresql"):
         warnings.warn(
-            "--no-sqlalchemy is being deprecated in favor of the --postgresql flag. Please adjust your tests accordingly",
+            "--no-sqlalchemy is deprecated as of v0.14 in favor of the --postgresql flag. Please adjust your tests accordingly",
             DeprecationWarning,
         )
     if metafunc.config.getoption("--no-spark"):
         warnings.warn(
-            "--no-spark is being deprecated in favor of the --spark flag. Please adjust your tests accordingly.",
+            "--no-spark is deprecated as of v0.14 in favor of the --spark flag. Please adjust your tests accordingly.",
             DeprecationWarning,
         )
     include_pandas: bool = True
