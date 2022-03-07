@@ -4,7 +4,7 @@
 # Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
 
 psycopg2-binary>=2.7.6  # sqlalchemy_tests
-pyathena>=1.11
+pyathena>=1.11,<2.5.0
 PyMySQL>=0.9.3,<0.10  # sqlalchemy_tests
 pyodbc>=4.0.30  # sqlalchemy_tests
 
