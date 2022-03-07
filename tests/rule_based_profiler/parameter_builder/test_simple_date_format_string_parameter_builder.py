@@ -5,6 +5,9 @@ import pytest
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     SimpleDateFormatStringParameterBuilder,
 )
@@ -12,9 +15,6 @@ from great_expectations.rule_based_profiler.parameter_builder.simple_date_format
     DEFAULT_CANDIDATE_STRINGS,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
-)
 
 DEFAULT_CANDIDATE_STRINGS: Set[str] = {
     "%H:%M:%S",
