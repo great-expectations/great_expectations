@@ -418,20 +418,20 @@ def test_get_profiler_run_usage_statistics_without_handler():
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 @mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler"
-)
-@mock.patch(
     "great_expectations.rule_based_profiler.config.base.RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments"
 )
 def test_get_profiler_run_usage_statistics_logs_exception(
     mock_resolve_config: mock.MagicMock,
-    mock_usage_stats_handler: mock.MagicMock,
     mock_data_context: mock.MagicMock,
     caplog: Any,
 ):
     # Ensure that the ProfilerRunAnonymizer on the mocked UsageStatisticsHandler will throw an Exception
     mock_resolve_config.side_effect = Exception("mocked error")
-    mock_data_context._usage_statistics_handler = mock_usage_stats_handler
+
+    handler: UsageStatisticsHandler = UsageStatisticsHandler(
+        mock_data_context, "my_id", "my_url"
+    )
+    mock_data_context.usage_statistics_handler = handler
 
     profiler = RuleBasedProfiler(
         name="my_profiler", config_version=1.0, data_context=mock_data_context
