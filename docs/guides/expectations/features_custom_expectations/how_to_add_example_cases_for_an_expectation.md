@@ -109,7 +109,7 @@ Sometimes you need to specify the precise type of the columns for each backend. 
 While Pandas is fairly flexible in typing, Spark and many SQL dialects are much more strict. 
 
 You may find you wish to use data that is incompatible with a given backend, or write different individual tests for different backends. 
-To do this, you can use the `only_for` attribute, which can accept `pandas`, `spark`, `sqlite`, a SQL dialect, or a list combining any of the above:
+To do this, you can use the `only_for` attribute, which accepts a list containing `pandas`, `spark`, `sqlite`, a SQL dialect, or a combination of any of the above:
 
 ```console
 "only_for": ["spark", "pandas"]
@@ -134,7 +134,7 @@ You will need to:
 
 If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publically displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L130
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L132
 ```
 
 :::note

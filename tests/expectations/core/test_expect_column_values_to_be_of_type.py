@@ -1,11 +1,17 @@
 import pandas as pd
+import pytest
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.self_check.util import build_sa_validator_with_data
+from great_expectations.util import is_library_loadable
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyathena"),
+    reason="pyathena is not installed",
+)
 def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
     from pyathena import sqlalchemy_athena
 
