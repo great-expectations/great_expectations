@@ -258,7 +258,10 @@ def compute_bootstrap_quantiles_point_estimate(
     false_positive_rate: np.float64,
     n_resamples: int,
 ) -> Tuple[Number, Number]:
-    # This method is the winner of our performance testing
+    """The winner of our performance testing is selected from the possible candidates:
+    - _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method
+    - _compute_bootstrap_quantiles_point_estimate_custom_mean_method
+    - _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method"""
     return _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
         metric_values=metric_values,
         false_positive_rate=false_positive_rate,

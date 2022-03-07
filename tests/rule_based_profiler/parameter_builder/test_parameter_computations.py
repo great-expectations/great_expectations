@@ -302,7 +302,7 @@ def test_compare_bootstrap_small_sample_point_estimate_performance(
     )
 
     # Custom bias corrected point estimate consistently outperforms custom biased estimator implementation when
-    # metric value sample size is large
+    # metric value sample size is small
     total_root_mean_squared_error_bias_corrected: Number = (
         lower_quantile_root_mean_squared_error_bias_corrected
         + upper_quantile_root_mean_squared_error_bias_corrected
