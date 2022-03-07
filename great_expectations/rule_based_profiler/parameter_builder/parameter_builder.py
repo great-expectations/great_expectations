@@ -173,7 +173,7 @@ class ParameterBuilder(Builder, ABC):
         return self._name
 
     @property
-    def json_serialize(self) -> bool:
+    def json_serialize(self) -> Union[str, bool]:
         return self._json_serialize
 
     @property
