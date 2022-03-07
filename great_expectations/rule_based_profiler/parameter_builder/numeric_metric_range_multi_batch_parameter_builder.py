@@ -70,6 +70,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         ] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -96,12 +97,14 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
             name=name,
             batch_list=batch_list,
             batch_request=batch_request,
+            json_serialize=json_serialize,
             data_context=data_context,
         )
 

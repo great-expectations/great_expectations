@@ -31,6 +31,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         reduce_scalar_metric: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -47,13 +48,15 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
             name=name,
-            data_context=data_context,
             batch_list=batch_list,
             batch_request=batch_request,
+            json_serialize=json_serialize,
+            data_context=data_context,
         )
 
         self._metric_name = metric_name
