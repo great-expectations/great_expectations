@@ -310,15 +310,15 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
     https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
 
     The methods implemented here can be found in:
-    Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 124-139).
+    Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 124-130).
         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
 
     This implementation is sub-par compared to the one available from the "SciPy" standard library
-    ("https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"), because it does not handle
+    ("https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"), in that it does not handle
     multi-dimensional statistics. "scipy.stats.bootstrap" is vectorized, thus having the ability to accept a
     multi-dimensional statistic function and process all dimensions.
 
-    Unfortunately, as of February 28th, 2022, the SciPy implementation has two issues: 1) it only returns a confidence
+    Unfortunately, as of March 4th, 2022, the SciPy implementation has two issues: 1) it only returns a confidence
     interval and not a point estimate for the population parameter of interest, which is what we require for our use
     cases. 2) It can not handle multi-dimensional statistics and correct for bias simultaneously. You must either use
     one feature or the other.
@@ -419,6 +419,21 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
     n_resamples: int,
     method: Optional[str] = "BCa",
 ):
+    """
+    SciPy implementation of the BCa confidence interval for the population quantile. Unfortunately, as of
+    March 4th, 2022, this implementation has two issues:
+        1) it only returns a confidence interval and not a point estimate for the population parameter of interest,
+           which is what we require for our use cases (the attempt below tries to "back out" the statistic from the
+           confidece interval by taking the midpoint of the interval).
+        2) It can not handle multi-dimensional statistics and correct for bias simultaneously. You must either use
+           one feature or the other.
+
+    This implementation could only be used if Great Expectations drops support for Python 3.6, thereby enabling us
+    to use a more up-to-date version of the "scipy" Python package (the currently used version does not have
+    "bootstrap"). Also, as discussed above, two contributions would need to be made to the SciPy package to enable
+    1) bias correction for multi-dimensional statistics and 2) a return value of a point estimate for the population
+    parameter of interest (lower and upper quantiles in this case).
+    """
     bootstraps: tuple = (metric_values,)  # bootstrap samples must be in a sequence
 
     lower_quantile_bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
