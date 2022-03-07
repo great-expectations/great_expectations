@@ -429,9 +429,7 @@ class ActionListValidationOperator(ValidationOperator):
         batch_actions_results = {}
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
-            logger.debug(
-                "Processing validation action with name {}".format(action["name"])
-            )
+            logger.debug(f"Processing validation action with name {action['name']}")
 
             if hasattr(batch, "active_batch_id"):
                 batch_identifier = batch.active_batch_id
@@ -463,9 +461,7 @@ class ActionListValidationOperator(ValidationOperator):
                 ]
 
             except Exception as e:
-                logger.exception(
-                    "Error running action with name {}".format(action["name"])
-                )
+                logger.exception(f"Error running action with name {action['name']}")
                 raise e
 
         return batch_actions_results

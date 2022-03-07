@@ -1239,7 +1239,7 @@ class SparkDFDataset(MetaSparkDFDataset):
                     type_class = getattr(sparktypes, type_)
                     types.append(type_class)
                 except AttributeError:
-                    logger.debug("Unrecognized type: %s" % type_)
+                    logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
                 raise ValueError("No recognized spark types in type_list")
             types = tuple(types)

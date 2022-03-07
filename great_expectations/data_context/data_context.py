@@ -1902,7 +1902,7 @@ class BaseDataContext(ConfigPeer):
         Returns:
             datasource (Datasource)
         """
-        logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
+        logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
 
         module_name = kwargs.get("module_name", "great_expectations.datasource")
         verify_dynamic_loading_support(module_name=module_name)
@@ -2607,7 +2607,7 @@ class BaseDataContext(ConfigPeer):
 
             for site_name, site_config in sites.items():
                 logger.debug(
-                    "Building Data Docs Site %s" % site_name,
+                    f"Building Data Docs Site {site_name}",
                 )
 
                 if (site_names and (site_name in site_names)) or not site_names:
@@ -2873,7 +2873,7 @@ class BaseDataContext(ConfigPeer):
             total_start_time = datetime.datetime.now()
 
             for name in data_asset_names_to_profiled:
-                logger.info("\tProfiling '%s'..." % name)
+                logger.info(f"\tProfiling '{name}'...")
                 try:
                     profiling_results["results"].append(
                         self.profile_data_asset(
@@ -2900,7 +2900,7 @@ class BaseDataContext(ConfigPeer):
                     skipped_data_assets += 1
                 except SQLAlchemyError as e:
                     logger.warning(
-                        "SqlAlchemyError while profiling %s. Skipping." % name[1]
+                        f"SqlAlchemyError while profiling {name[1]}. Skipping."
                     )
                     logger.debug(str(e))
                     skipped_data_assets += 1
@@ -4304,7 +4304,7 @@ class DataContext(BaseDataContext):
             self.config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
-        logger.debug("Starting DataContext.add_store for store %s" % store_name)
+        logger.debug(f"Starting DataContext.add_store for store {store_name}")
 
         new_store = super().add_store(store_name, store_config)
         self._save_project_config()
@@ -4313,7 +4313,7 @@ class DataContext(BaseDataContext):
     def add_datasource(
         self, name, **kwargs
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
+        logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
@@ -4416,7 +4416,7 @@ class DataContext(BaseDataContext):
                 potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
                 if os.path.isfile(potential_yml):
                     yml_path = potential_yml
-                    logger.debug("Found config file at " + str(yml_path))
+                    logger.debug(f"Found config file at {str(yml_path)}")
                     break
             # move up one directory
             search_start_dir = os.path.dirname(search_start_dir)

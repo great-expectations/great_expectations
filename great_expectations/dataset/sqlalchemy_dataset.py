@@ -650,17 +650,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
             if self.generated_table_name is not None:
                 if self.engine.dialect.name.lower() == "bigquery":
-                    logger.warning(
-                        "Created permanent table {table_name}".format(
-                            table_name=table_name
-                        )
-                    )
+                    logger.warning(f"Created permanent table {table_name}")
                 if self.engine.dialect.name.lower() == "awsathena":
-                    logger.warning(
-                        "Created permanent table default.{table_name}".format(
-                            table_name=table_name
-                        )
-                    )
+                    logger.warning(f"Created permanent table default.{table_name}")
 
         try:
             insp = get_sqlalchemy_inspector(self.engine)
@@ -1406,31 +1398,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             engine_dialect = str(engine_dialect, "utf-8")
 
         if engine_dialect == "bigquery":
-            stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
-            )
+            stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "databricks":
-            stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
-            )
+            stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "dremio":
-            stmt = "CREATE OR REPLACE VDS {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
-            )
+            stmt = f"CREATE OR REPLACE VDS {table_name} AS {custom_sql}"
         elif engine_dialect == "snowflake":
             table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
 
-            logger.info("Creating temporary table %s" % table_name)
+            logger.info(f"Creating temporary table {table_name}")
             if schema_name is not None:
-                table_name = schema_name + "." + table_name
-            stmt = "CREATE OR REPLACE {table_type} TABLE {table_name} AS {custom_sql}".format(
-                table_type=table_type, table_name=table_name, custom_sql=custom_sql
-            )
+                table_name = f"{schema_name}.{table_name}"
+            stmt = f"CREATE OR REPLACE {table_type} TABLE {table_name} AS {custom_sql}"
         elif self.sql_engine_dialect.name == "mysql":
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the generic case.
-            stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
-            )
+            stmt = f"CREATE TEMPORARY TABLE {table_name} AS {custom_sql}"
         elif self.sql_engine_dialect.name == "mssql":
             # Insert "into #{table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
@@ -1825,7 +1807,7 @@ WHERE
                         type_class = potential_type
                     types.append(type_class)
                 except AttributeError:
-                    logger.debug("Unrecognized type: %s" % type_)
+                    logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
                 logger.warning(
                     "No recognized sqlalchemy types in type_list for current dialect."
@@ -2183,7 +2165,7 @@ WHERE
         regex_expression = self._get_dialect_regex_expression(column, regex)
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+                f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 
@@ -2205,7 +2187,7 @@ WHERE
         )
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+                f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 
@@ -2233,7 +2215,7 @@ WHERE
         regex_expression = self._get_dialect_regex_expression(column, regex_list[0])
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+                f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 
@@ -2272,7 +2254,7 @@ WHERE
         )
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+                f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 

@@ -247,7 +247,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             return self.engine.execute(sel).fetchone()[0]
         except (IndexError, SQLAlchemyError) as e:
-            logger.debug("Error fetching value: " + str(e))
+            logger.debug(f"Error fetching value: {str(e)}")
             raise ge_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
     def _set(self, key, value, allow_update=True, **kwargs):
@@ -313,7 +313,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             return self.engine.execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
-            logger.debug("Error checking for value: " + str(e))
+            logger.debug(f"Error checking for value: {str(e)}")
             return False
 
     def list_keys(self, prefix=()):

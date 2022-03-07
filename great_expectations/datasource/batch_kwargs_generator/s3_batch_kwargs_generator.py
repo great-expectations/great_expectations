@@ -260,7 +260,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             )
 
         logger.debug(
-            "Fetching objects from S3 with query options: %s" % str(query_options)
+            f"Fetching objects from S3 with query options: {str(query_options)}"
         )
         asset_options = self._s3.list_objects_v2(**query_options)
         if directory_assets:
@@ -358,7 +358,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
             # So, we'll add a *sortable* id
             if matches is None:
-                logger.warning("No match found for key: %s" % key)
+                logger.warning(f"No match found for key: {key}")
                 return (
                     datetime.datetime.now(datetime.timezone.utc).strftime(
                         "%Y%m%dT%H%M%S.%fZ"

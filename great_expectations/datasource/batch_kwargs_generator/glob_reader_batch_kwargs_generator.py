@@ -252,7 +252,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
             # So, we'll add a *sortable* id
             if matches is None:
-                logger.warning("No match found for path: %s" % path)
+                logger.warning(f"No match found for path: {path}")
                 return (
                     datetime.datetime.now(datetime.timezone.utc).strftime(
                         "%Y%m%dT%H%M%S.%fZ"

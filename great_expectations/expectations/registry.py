@@ -81,14 +81,14 @@ def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F82
     if expectation_type in _registered_expectations:
         if _registered_expectations[expectation_type] == expectation:
             logger.info(
-                "Multiple declarations of expectation " + expectation_type + " found."
+                f"Multiple declarations of expectation {expectation_type} found."
             )
             return
         else:
             logger.warning(
-                "Overwriting declaration of expectation " + expectation_type + "."
+                f"Overwriting declaration of expectation {expectation_type}."
             )
-    logger.debug("Registering expectation: " + expectation_type)
+    logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
 
 

@@ -396,7 +396,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     type_class = potential_type
                 types.append(type_class)
             except AttributeError:
-                logger.debug("Unrecognized type: %s" % expected_type)
+                logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
                 logger.warning(
                     "No recognized sqlalchemy types in type_list for current dialect."
@@ -422,7 +422,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 type_class = getattr(sparktypes, expected_type)
                 types.append(type_class)
             except AttributeError:
-                logger.debug("Unrecognized type: %s" % expected_type)
+                logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
                 raise ValueError("No recognized spark types in expected_types_list")
             types = tuple(types)
