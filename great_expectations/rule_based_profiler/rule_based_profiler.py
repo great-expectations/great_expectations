@@ -17,6 +17,7 @@ from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
     get_profiler_run_usage_statistics,
     usage_statistics_enabled_method,
 )
@@ -124,6 +125,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
     ):
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
@@ -149,10 +151,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if variables is None:
             variables = {}
 
-        if data_context:
-            self._usage_statistics_handler = data_context.usage_statistics_handler
-        else:
-            self._usage_statistics_handler = None
+        self._usage_statistics_handler = usage_statistics_handler
 
         # Necessary to annotate ExpectationSuite during `run()`
         self._citation = {
@@ -952,9 +951,14 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             rules=rules,
         )
 
+        usage_statistics_handler: Optional[UsageStatisticsHandler] = None
+        if data_context:
+            usage_statistics_handler = data_context.usage_statistics_handler
+
         super().__init__(
             profiler_config=profiler_config,
             data_context=data_context,
+            usage_statistics_handler=usage_statistics_handler,
         )
 
     @staticmethod
