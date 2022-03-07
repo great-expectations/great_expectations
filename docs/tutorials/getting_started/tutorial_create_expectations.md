@@ -1,53 +1,10 @@
 ---
 title: 'Tutorial, Step 3: Create Expectations'
 ---
+import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-<table class="borderless center">
-<tr>
-    <td>
-        <img
-          src={require('../../images/universal_map/Gear-inactive.png').default}
-          alt="Setup"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Outlet-inactive.png').default}
-          alt="Connect to Data"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Flask-active.png').default}
-          alt="Create Expectations"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Checkmark-inactive.png').default}
-          alt="Validate Data"
-        />
-    </td>
-</tr>
-</table>
+<UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/> 
 
 :::note Prerequisites
 

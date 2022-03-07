@@ -1,53 +1,10 @@
 ---
 title: 'Review and next steps'
 ---
+import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-<table class="borderless center">
-<tr>
-    <td>
-        <img
-          src={require('../../images/universal_map/Gear-active.png').default}
-          alt="Setup"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Outlet-active.png').default}
-          alt="Connect to Data"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Flask-active.png').default}
-          alt="Create Expectations"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Checkmark-active.png').default}
-          alt="Validate Data"
-        />
-    </td>
-</tr>
-</table>
+<UniversalMap setup='active' connect='active' create='active' validate='active'/> 
 
 :::note Prerequisites
 

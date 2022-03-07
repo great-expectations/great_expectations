@@ -4,7 +4,7 @@ title: 'Tutorial, Step 1: Setup'
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/> 
+<UniversalMap setup='active' connect='inactive' create='inactive' validate='inactive'/> 
 
 :::note Prerequisites
 In order to work with Great Expectations, you will need:
