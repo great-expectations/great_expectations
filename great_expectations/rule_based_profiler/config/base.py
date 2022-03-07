@@ -436,7 +436,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
 
         return cls(
             class_name=profiler.__class__.__name__,
-            module_name=profiler.__clas__.__module__,
+            module_name=profiler.__class__.__module__,
             name=runtime_config.name,
             config_version=runtime_config.config_version,
             variables=runtime_variables,
