@@ -66,7 +66,7 @@ Confirm that tests are passing (only against pandas and sqlalchemy with sqlite),
 ```
 ulimit -n 4096
 
-pytest -v --no-spark --no-postgresql
+pytest -v
 ```
 
 > In your `~/.zshrc` or `~/.bashrc` file, you will want to add `ulimit -n 4096` so that it is already set for future runs. **You WILL eventually see many tests failing with `OSError: [Errno 24] Too many open files`** if you do not set it!
@@ -120,7 +120,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 	postgresql_travis_db_1   docker-entrypoint.sh postgres   Up      0.0.0.0:5432->5432/tcp
 	````
 
-* Once you’re done testing, you can shut down your postgesql container by running `docker-compose down` from the same directory.
+* Once you’re done testing, you can shut down your PostgreSQL container by running `docker-compose down` from the same directory.
 
 * Caution: If another service is using port 5432, Docker may start the container but silently fail to set up the port. In that case, you will probably see errors like this:
 
@@ -140,6 +140,11 @@ Depending on which features of Great Expectations you want to work on, you may w
 	(Background on this error at: http://sqlalche.me/e/e3q8)
 	````
 
+* Once the local PostgreSQL container is working, the tests against the PostgreSQL backend can be run using the `--postgresql` flag. 
+
+  ````console
+  pytest -v --postgresql tests/
+  ````
 #### If you want to develop against local mysql:
 
 * To simplify setup, the repository includes a `docker-compose` file that can stand up a local mysqldb container. To use it, you’ll need to have [Docker installed](https://docs.docker.com/install/).
@@ -153,6 +158,12 @@ Depending on which features of Great Expectations you want to work on, you may w
 	------------------------------------------------------------------------------------------
 	mysql_mysql_db_1   docker-entrypoint.sh mysqld   Up      0.0.0.0:3306->3306/tcp, 33060/tcp
 	````
+
+* Once the local mysql container is working, the tests against the mysql backend can be run using the `--mysql` flag. 
+
+  ````console
+  pytest -v --mysql tests/
+  ````
 
 * Once you’re done testing, you can shut down your mysql container by running `docker-compose down` from the same directory.
 
