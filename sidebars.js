@@ -402,7 +402,6 @@ module.exports = {
             'terms/metric',
             'terms/plugin',
             'terms/profiler',
-            'terms/plugin',
             {
               type: 'category',
               label: 'Stores',
