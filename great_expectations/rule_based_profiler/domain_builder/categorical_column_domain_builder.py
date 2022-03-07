@@ -1,4 +1,5 @@
-from typing import Dict, List, Optional, Set, Union
+import itertools
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -111,15 +112,14 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             batch_id=batch_ids[-1],  # active_batch_id
         )
 
-        metrics_for_cardinality_check: List[
-            Dict[str, List[MetricConfiguration]]
+        metrics_for_cardinality_check: Dict[
+            str, List[MetricConfiguration]
         ] = self._generate_metric_configurations_to_check_cardinality(
             batch_ids=batch_ids, column_names=table_column_names
         )
 
         candidate_column_names: List[str] = self._columns_meeting_cardinality_limit(
             validator=validator,
-            table_column_names=table_column_names,
             metrics_for_cardinality_check=metrics_for_cardinality_check,
         )
 
@@ -166,7 +166,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         self,
         batch_ids: List[str],
         column_names: List[str],
-    ) -> List[Dict[str, List[MetricConfiguration]]]:
+    ) -> Dict[str, List[MetricConfiguration]]:
         """Generate metric configurations used to compute metrics for checking cardinality.
 
         Args:
@@ -182,67 +182,100 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         ] = self.cardinality_checker.limit_mode
 
         column_name: str
-        metric_configurations: List[Dict[str, List[MetricConfiguration]]] = [
-            {
-                column_name: [
-                    MetricConfiguration(
-                        metric_name=limit_mode.metric_name_defining_limit,
-                        metric_domain_kwargs={
-                            "column": column_name,
-                            "batch_id": batch_id,
-                        },
-                        metric_value_kwargs=None,
-                        metric_dependencies=None,
-                    )
-                    for batch_id in batch_ids
-                ]
-            }
+        metric_configurations: Dict[str, List[MetricConfiguration]] = {
+            column_name: [
+                MetricConfiguration(
+                    metric_name=limit_mode.metric_name_defining_limit,
+                    metric_domain_kwargs={
+                        "column": column_name,
+                        "batch_id": batch_id,
+                    },
+                    metric_value_kwargs=None,
+                    metric_dependencies=None,
+                )
+                for batch_id in batch_ids
+            ]
             for column_name in column_names
-        ]
+        }
 
         return metric_configurations
 
     def _columns_meeting_cardinality_limit(
         self,
         validator: "Validator",  # noqa: F821
-        table_column_names: List[str],
-        metrics_for_cardinality_check: List[Dict[str, List[MetricConfiguration]]],
+        metrics_for_cardinality_check: Dict[str, List[MetricConfiguration]],
     ) -> List[str]:
         """Compute cardinality and return column names meeting cardinality limit.
 
         Args:
             validator: Validator used to compute column cardinality.
-            table_column_names: column names to verify cardinality.
-            metrics_for_cardinality_check: metric configurations used to
-                compute cardinality.
+            metrics_for_cardinality_check: metric configurations used to compute cardinality.
 
         Returns:
             List of column names meeting cardinality.
         """
-        candidate_column_names: List[str] = table_column_names.copy()
+        column_name: str
+        metric_configuration: MetricConfiguration
+        metric_configurations_for_column_name: List[MetricConfiguration]
 
-        # TODO AJB 20220218: Remove loops and refactor into single call to validator.get_metrics()
-        #  by first building up MetricConfigurations to compute. See GREAT-584
-        for metric_for_cardinality_check in metrics_for_cardinality_check:
-            for (
-                column_name,
-                metric_config_batch_list,
-            ) in metric_for_cardinality_check.items():
-                if column_name not in candidate_column_names:
-                    continue
-                else:
-                    for metric_config in metric_config_batch_list:
+        # Step 1: Gather "MetricConfiguration" objects corresponding to all possible column_name/batch_id combinations.
+        # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
+            metric_configurations=[
+                metric_configuration
+                for column_name, metric_configurations_for_column_name in metrics_for_cardinality_check.items()
+                for metric_configuration in metric_configurations_for_column_name
+            ]
+        )
 
-                        metric_value = validator.get_metric(metric=metric_config)
+        # Step 2: Gather "MetricConfiguration" ID values for each column_name (one element per batch_id in every list).
+        metric_configuration_ids_by_column_name: Dict[
+            str, List[Tuple[str, str, str]]
+        ] = {
+            column_name: [metric_configuration.id]
+            for column_name, metric_configurations_for_column_name in metrics_for_cardinality_check.items()
+            for metric_configuration in metric_configurations_for_column_name
+        }
 
-                        batch_cardinality_within_limit: bool = (
-                            self.cardinality_checker.cardinality_within_limit(
-                                metric_value=metric_value
-                            )
-                        )
+        metric_configuration_ids: List[Tuple[str, str, str]]
+        # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all column_name/batch_id combinations.
+        metric_configuration_ids_all_column_names: List[Tuple[str, str, str]] = list(
+            itertools.chain(
+                *[
+                    metric_configuration_ids
+                    for metric_configuration_ids in metric_configuration_ids_by_column_name.values()
+                ]
+            )
+        )
 
-                        if batch_cardinality_within_limit is False:
-                            candidate_column_names.remove(column_name)
-                            break
+        # Step 4: Retain only those metric computation results that both, correspond to "MetricConfiguration" objects of
+        # interest (reflecting specified column_name/batch_id combinations) and pass "CardinalityChecker" limit test.
+        metric_configuration_id: Tuple[str, str, str]
+        metric_value: Any
+        resolved_metrics = {
+            metric_configuration_id: metric_value
+            for metric_configuration_id, metric_value in resolved_metrics.items()
+            if metric_configuration_id in metric_configuration_ids_all_column_names
+            and self.cardinality_checker.cardinality_within_limit(
+                metric_value=metric_value
+            )
+        }
+
+        # Step 5: Gather "MetricConfiguration" ID values for effective collection of resolved metrics.
+        metric_configuration_ids_resolved_metrics: List[Tuple[str, str, str]] = list(
+            resolved_metrics.keys()
+        )
+
+        # Step 6: Produce "column_name" list, corresponding to effective "MetricConfiguration" ID values.
+        candidate_column_names: List[str] = [
+            column_name
+            for column_name, metric_configuration_ids in metric_configuration_ids_by_column_name.items()
+            if all(
+                [
+                    metric_configuration_id in metric_configuration_ids_resolved_metrics
+                    for metric_configuration_id in metric_configuration_ids
+                ]
+            )
+        ]
 
         return candidate_column_names
