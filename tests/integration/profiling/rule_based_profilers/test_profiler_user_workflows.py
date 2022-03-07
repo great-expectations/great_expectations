@@ -151,18 +151,36 @@ def test_alice_profiler_user_workflow_single_batch(
                         "anonymized_domain_builder": {
                             "parent_class": "DomainBuilder",
                             "anonymized_class": "9c8f42e45ec72197d6fb4d0d5194c89d",
-                            "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
+                                    "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
+                                    "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
+                                }
+                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
                                 "anonymized_name": "2b4df3c7cf39207db3e08477e1ea8f79",
-                                "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
+                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
+                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
+                                    }
+                                },
                             },
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
                                 "anonymized_name": "bea5e4c3943006d008899cdb1ebc3fb4",
-                                "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
+                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
+                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
+                                    }
+                                },
                             },
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -194,28 +212,58 @@ def test_alice_profiler_user_workflow_single_batch(
                         "anonymized_name": "116c25bb5cf9b84958846024fe1c2b7b",
                         "anonymized_domain_builder": {
                             "parent_class": "SimpleColumnSuffixDomainBuilder",
-                            "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
+                                    "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
+                                    "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
+                                }
+                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
                                 "anonymized_name": "fa3ce9b81f1acc2f2730005e05737ea7",
-                                "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
+                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
+                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
+                                    }
+                                },
                             },
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
                                 "anonymized_name": "0bb947e516b26696a66787dc936570b7",
-                                "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
+                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
+                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
+                                    }
+                                },
                             },
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
                                 "anonymized_name": "66093b34c0c2e4ff275edf1752bcd27e",
-                                "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
+                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
+                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
+                                    }
+                                },
                             },
                             {
                                 "parent_class": "SimpleDateFormatStringParameterBuilder",
                                 "anonymized_name": "c5caa53c1ee64365b96ec96a285a6b3a",
-                                "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
+                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
+                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
+                                    }
+                                },
                             },
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -249,13 +297,25 @@ def test_alice_profiler_user_workflow_single_batch(
                         "anonymized_name": "83a71ec7b61bbdb8eb728ebc428f8aea",
                         "anonymized_domain_builder": {
                             "parent_class": "CategoricalColumnDomainBuilder",
-                            "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
+                                    "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
+                                    "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
+                                }
+                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "ValueSetMultiBatchParameterBuilder",
                                 "anonymized_name": "46d405b0294a06e1335c04bf1441dabf",
-                                "anonymized_batch_request": "69d336a1ffa7728383cb9572ede4b407",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
+                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
+                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
+                                    }
+                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -424,7 +484,17 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                             {
                                 "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
                                 "anonymized_name": "dc1bc513697628c3a7f5b73494234a01",
-                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                    },
+                                    "batch_request_optional_top_level_keys": [
+                                        "data_connector_query"
+                                    ],
+                                    "data_connector_query_keys": ["index"],
+                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -454,12 +524,32 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                             {
                                 "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
                                 "anonymized_name": "ace31374d026e07ec630c7459915e628",
-                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                    },
+                                    "batch_request_optional_top_level_keys": [
+                                        "data_connector_query"
+                                    ],
+                                    "data_connector_query_keys": ["index"],
+                                },
                             },
                             {
                                 "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
                                 "anonymized_name": "f2dcb0a322c3ab161d0fd33e6bac3d7f",
-                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                    },
+                                    "batch_request_optional_top_level_keys": [
+                                        "data_connector_query"
+                                    ],
+                                    "data_connector_query_keys": ["index"],
+                                },
                             },
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -493,7 +583,17 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                             {
                                 "parent_class": "SimpleDateFormatStringParameterBuilder",
                                 "anonymized_name": "49526fea6686e5f87be493967a5ba6b7",
-                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                    },
+                                    "batch_request_optional_top_level_keys": [
+                                        "data_connector_query"
+                                    ],
+                                    "data_connector_query_keys": ["index"],
+                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -523,7 +623,17 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                             {
                                 "parent_class": "RegexPatternStringParameterBuilder",
                                 "anonymized_name": "2a791a71865e26a98b3f9f89ef83556b",
-                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                    },
+                                    "batch_request_optional_top_level_keys": [
+                                        "data_connector_query"
+                                    ],
+                                    "data_connector_query_keys": ["index"],
+                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -537,13 +647,33 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                         "anonymized_name": "57a6fe0ec12e12107fc275b42855ab1c",
                         "anonymized_domain_builder": {
                             "parent_class": "CategoricalColumnDomainBuilder",
-                            "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                    "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                    "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                                "data_connector_query_keys": ["index"],
+                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "ValueSetMultiBatchParameterBuilder",
                                 "anonymized_name": "73b050124a17a420f2fb3e605f7111b2",
-                                "anonymized_batch_request": "61595d03920aa981ad576285b5103e3b",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                    },
+                                    "batch_request_optional_top_level_keys": [
+                                        "data_connector_query"
+                                    ],
+                                    "data_connector_query_keys": ["index"],
+                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -1362,7 +1492,17 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
                             {
                                 "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
                                 "anonymized_name": "dc1bc513697628c3a7f5b73494234a01",
-                                "anonymized_batch_request": "f541f435b3e4a9d550ab56c22b5def8d",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                    },
+                                    "batch_request_optional_top_level_keys": [
+                                        "data_connector_query"
+                                    ],
+                                    "data_connector_query_keys": ["index"],
+                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -1586,7 +1726,17 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                             {
                                 "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
                                 "anonymized_name": "71243c854c0c04e9e014d02a793abe55",
-                                "anonymized_batch_request": "f541f435b3e4a9d550ab56c22b5def8d",
+                                "anonymized_batch_request": {
+                                    "anonymized_batch_request_required_top_level_properties": {
+                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
+                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
+                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
+                                    },
+                                    "batch_request_optional_top_level_keys": [
+                                        "data_connector_query"
+                                    ],
+                                    "data_connector_query_keys": ["index"],
+                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
