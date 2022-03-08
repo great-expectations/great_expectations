@@ -29,16 +29,6 @@ schedules:
 #     exclude:
 #     - develop
 
-resources:
-  containers:
-  - container: postgres
-    image: postgres:11
-    ports:
-    - 5432:5432
-    env:
-      POSTGRES_DB: "test_ci"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
-
 stages:
   - stage: user_install_linux
     dependsOn: []
@@ -53,7 +43,6 @@ stages:
       - template: azure/dev-install-matrix.yml
         parameters:
           vmImage: "ubuntu-latest"
-          db: ${{ resources.containers.postgres }}
 
   # - stage: user_install_macOS
   #   dependsOn: []

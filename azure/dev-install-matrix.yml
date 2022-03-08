@@ -1,13 +1,10 @@
 parameters:
   vmImage: '' # Must be specified in primary YAML
-  db: '' # Must be specified in primary YAML
   pythonVersion: ["3.7", "3.8", "3.9", "3.10"]
 
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
-      services:
-        postgres: ${{ parameters.db }}
       displayName: full${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
@@ -25,7 +22,7 @@ jobs:
 
         - script: |
             pip install pytest pytest-cov pytest-azurepipelines
-            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
           displayName: 'pytest'
 
         - task: PublishTestResults@2
