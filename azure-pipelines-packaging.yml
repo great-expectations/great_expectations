@@ -29,11 +29,13 @@ schedules:
 #     exclude:
 #     - develop
 
-jobs:
-  - job: user_install
-    steps:
-    - template: azure/matrix-user-install.yml
-  - job: dev_install
-    dependsOn: user_install
-    steps:
-    - template: azure/matrix-dev-install.yml
+stages:
+  - stage: Build
+    jobs:
+      - job: user_install
+        steps:
+          - template: azure/matrix-user-install.yml
+      - job: dev_install
+        dependsOn: user_install
+        steps:
+          - template: azure/matrix-dev-install.yml
