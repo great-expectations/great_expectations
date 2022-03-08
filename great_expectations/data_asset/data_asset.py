@@ -277,9 +277,7 @@ class DataAsset:
                         if catch_exceptions:
                             raised_exception = True
                             exception_traceback = traceback.format_exc()
-                            exception_message = "{}: {}".format(
-                                type(err).__name__, str(err)
-                            )
+                            exception_message = f"{type(err).__name__}: {str(err)}"
 
                             return_obj = ExpectationValidationResult(success=False)
 
@@ -490,7 +488,7 @@ class DataAsset:
                     expectation_configuration=item.expectation_config,
                     match_type="runtime",
                 )
-            warnings.warn("Removed %s expectations that were 'False'" % len(res))
+            warnings.warn(f"Removed {len(res)} expectations that were 'False'")
 
     def get_default_expectation_arguments(self):
         """Fetch default expectation arguments for this data_asset
@@ -602,9 +600,7 @@ class DataAsset:
 
             expectations = new_expectations
 
-        message = "\t%d expectation(s) included in expectation_suite." % len(
-            expectations
-        )
+        message = f"\t{len(expectations)} expectation(s) included in expectation_suite."
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (
@@ -951,7 +947,7 @@ class DataAsset:
                     result = expectation_method(
                         catch_exceptions=catch_exceptions,
                         include_config=True,
-                        **evaluation_args
+                        **evaluation_args,
                     )
 
                 except Exception as err:
@@ -1213,9 +1209,7 @@ class DataAsset:
         if result_format["result_format"] == "COMPLETE":
             return return_obj
 
-        raise ValueError(
-            "Unknown result_format {}.".format(result_format["result_format"])
-        )
+        raise ValueError(f"Unknown result_format {result_format['result_format']}.")
 
     def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
         """Calculate success and percent_success for column_map_expectations

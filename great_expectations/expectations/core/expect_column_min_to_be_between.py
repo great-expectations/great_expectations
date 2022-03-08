@@ -208,7 +208,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -217,7 +217,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -271,14 +271,14 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -313,7 +313,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                     "tooltip": {"content": "expect_column_min_to_be_between"},
                 },
             },
-            "{:.2f}".format(result.result["observed_value"]),
+            f"{result.result['observed_value']:.2f}",
         ]
 
     def _validate(
