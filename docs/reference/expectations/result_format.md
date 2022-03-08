@@ -18,6 +18,44 @@ The `result_format` parameter may be either a string or a dictionary which speci
   unwieldy amount of data.
   :::
 
+## Configure Result Format
+Result Format can be applied to either a single Expectation or a complete Checkpoint.
+### Expectation Level Config
+To apply `result_format` to an Expectation, pass it into the Expectation's configuration:
+```python
+# first obtain a validator object, for instance by running the `$ great_expectations suite new` notebook.
+validation_result = validator.expect_column_values_to_be_between(
+    column="pickup_location_id",
+    min_value=0,
+    max_value=100,
+    result_format="COMPLETE",
+    include_unexpected_rows=True
+)
+unexpected_index_list = validation_result["result"]["unexpected_index_list"]
+unexpected_list = validation_result["result"]["unexpected_list"]
+```
+When configured at the Expectation level, the `unexpected_index_list` and `unexpected_list` won't be passed through to the final Expectation Suite Validation Result object.
+In order to see those values at the Suite level, configure `result_format` in your Checkpoint configuration.
+### Checkpoint Level Config
+To apply `result_format` to every Expectation in a Suite, define it in your Checkpoint configuration under the `runtime_configuration` key.
+```python
+checkpoint_config = {
+    "class_name": "SimpleCheckpoint", # or Checkpoint
+    "validations": [
+        # omitted for brevity
+    ],
+    "runtime_configuration": {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "include_unexpected_rows": True
+        }
+    }
+}
+```
+The results will then be stored in the Validation result after running the Checkpoint.
+:::note
+Regardless of where Result Format is configured, `unexpected_list` and `unexpected_index_list` are never rendered in Data Docs, as they are expected to be used for debugging purposes only.
+:::
 
 ## result_format values
 
@@ -32,7 +70,7 @@ cases for working with Great Expectations, including interactive exploratory wor
 |    missing_count                      |no              |yes             |yes             |yes             |
 |    missing_percent                    |no              |yes             |yes             |yes             |
 |    details (dictionary)               |Defined on a per-expectation basis                                 |
-| Fields defined for `column_map_expectation` type expectations:                                            |
+### Fields defined for `column_map_expectation` type expectations:                                            |
 |    unexpected_count                   |no              |yes             |yes             |yes             |
 |    unexpected_percent                 |no              |yes             |yes             |yes             |
 |    unexpected_percent_nonmissing      |no              |yes             |yes             |yes             |
@@ -41,7 +79,7 @@ cases for working with Great Expectations, including interactive exploratory wor
 |    partial_unexpected_counts          |no              |no              |yes             |yes             |
 |    unexpected_index_list              |no              |no              |no              |yes             |
 |    unexpected_list                    |no              |no              |no              |yes             |
-| Fields defined for `column_aggregate_expectation` type expectations:                                      |
+### Fields defined for `column_aggregate_expectation` type expectations:                                      |
 |    observed_value                     |no              |yes             |yes             |yes             |
 |    details (e.g. statistical details) |no              |no              |yes             |yes             |
 
