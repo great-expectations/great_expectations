@@ -21,8 +21,8 @@ from great_expectations.rule_based_profiler.domain_builder.column_domain_builder
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
-from great_expectations.rule_based_profiler.domain_builder.map_metric_domain_builder import (
-    MapMetricDomainBuilder,
+from great_expectations.rule_based_profiler.domain_builder.map_metric_column_domain_builder import (
+    MapMetricColumnDomainBuilder,
 )
 from great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder import (
     SimpleColumnSuffixDomainBuilder,
@@ -71,7 +71,7 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         # ordered bottom up in terms of inheritance order
         self._ge_domain_builders = [
-            MapMetricDomainBuilder,
+            MapMetricColumnDomainBuilder,
             CategoricalColumnDomainBuilder,
             SimpleColumnSuffixDomainBuilder,
             SimpleSemanticTypeColumnDomainBuilder,

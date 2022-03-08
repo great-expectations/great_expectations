@@ -12,7 +12,7 @@ from great_expectations.rule_based_profiler.types import Domain, ParameterContai
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class MapMetricDomainBuilder(ColumnDomainBuilder):
+class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
     """
     This DomainBuilder uses relative tolerance of specified map metric to identify domains.
     """
@@ -24,8 +24,8 @@ class MapMetricDomainBuilder(ColumnDomainBuilder):
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
         column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        max_unexpected_values: Optional[Union[str, int]] = None,
-        min_max_unexpected_values_proportion: Optional[Union[str, float]] = None,
+        max_unexpected_values: Union[str, int] = 0,
+        min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
     ):
         """
         Create column domains using tolerance for inter-Batch proportion of adherence to intra-Batch "unexpected_count"
@@ -214,7 +214,7 @@ class MapMetricDomainBuilder(ColumnDomainBuilder):
 
         intra_batch_adherence_by_column_name: Dict[str, List[bool]] = {
             column_name: [
-                metric_value < max_unexpected_values
+                metric_value <= max_unexpected_values
                 for metric_value in list(resolved_metrics.values())
             ]
             for column_name, resolved_metrics in resolved_metrics_by_column_name.items()
@@ -232,7 +232,7 @@ class MapMetricDomainBuilder(ColumnDomainBuilder):
             column_name
             for column_name, inter_batch_unexpected_values_proportion in inter_batch_adherence_by_column_name.items()
             if inter_batch_unexpected_values_proportion
-            > min_max_unexpected_values_proportion
+            >= min_max_unexpected_values_proportion
         ]
 
         return candidate_column_names
