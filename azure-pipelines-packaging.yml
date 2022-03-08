@@ -30,4 +30,5 @@ schedules:
 #     - develop
 
 jobs:
-  - template: azure/matrix.yml
+  - template: azure/matrix-user-install.yml
+  - template: azure/matrix-dev-install.yml

@@ -1,0 +1,48 @@
+parameters:
+  vmImage: ["ubuntu-latest", "macOS-latest", "windows-latest"]
+  pythonVersion: ["3.7", "3.8", "3.9", "3.10"]
+
+jobs:
+  - ${{ each vmImage in parameters.vmImage }}:
+    - ${{ each pythonVersion in parameters.pythonVersion }}:
+      - job:
+        displayName: pip_user_install_${{ vmImage }}_${{ pythonVersion }}
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: ${{ pythonVersion }}
+            displayName: Use Python ${{ pythonVersion }}
+
+          - script: |
+              python -m pip install --upgrade pip==21.3.1
+              pip install great_expectations
+            displayName: 'Install Great Expectations'
+
+          - script: |
+              great_expectations --version
+              great_expectations -y init --no-usage-stats
+            displayName: 'Confirm installation'
+
+      - job:
+        displayName: conda_user_install_${{ vmImage }}_${{ pythonVersion }}
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: ${{ pythonVersion }}
+            displayName: Use Python ${{ pythonVersion }}
+
+          - bash: echo "##vso[task.prependpath]$CONDA/bin"
+            displayName: Add conda to PATH
+
+          - script: |
+              conda create --yes --name ge_dev
+            displayName: Create Anaconda environment
+          - script: |
+              source activate ge_dev
+              conda install --yes --name ge_dev -c conda-forge great-expectations
+            displayName: 'Install Great Expectations'
+          - script: |
+              source activate ge_dev
+              great_expectations --version
+              great_expectations -y init --no-usage-stats
+            displayName: 'Confirm installation'
