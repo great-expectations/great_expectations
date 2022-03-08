@@ -1,4 +1,3 @@
-
 parameters:
   vmImage: '' # Must be specified in primary YAML
   pythonVersion: ["3.7", "3.8", "3.9", "3.10"]
@@ -31,7 +30,7 @@ parameters:
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
-      displayName: lightweight${{ pythonVersion }}
+      displayName: full${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
           inputs:
@@ -48,7 +47,7 @@ jobs:
 
         - script: |
             pip install pytest pytest-cov pytest-azurepipelines
-            pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
           displayName: 'pytest'
 
         - task: PublishTestResults@2
@@ -64,7 +63,7 @@ jobs:
             reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
     - job:
-      displayName: full${{ pythonVersion }}
+      displayName: lightweight${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
           inputs:
