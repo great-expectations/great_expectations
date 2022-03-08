@@ -102,7 +102,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         config_version: float = profiler_config.config_version
 
         rules: Dict[str, dict] = profiler_config.rules
-        anonymized_rules: List[dict] = self._anonymize_rules(rules)
+        anonymized_rules: List[dict] = self._anonymize_rules(rules=rules)
         rule_count: int = len(rules)
 
         variables: dict = profiler_config.variables or {}
@@ -172,9 +172,12 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         batch_request: Optional[dict] = domain_builder.get("batch_request")
         if batch_request:
+            anonymized_batch_request: Optional[
+                dict
+            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
             anonymized_domain_builder[
                 "anonymized_batch_request"
-            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
+            ] = anonymized_batch_request
             logger.debug("Anonymized batch request in DomainBuilder")
 
         return anonymized_domain_builder
@@ -208,9 +211,12 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         batch_request: Optional[dict] = parameter_builder.get("batch_request")
         if batch_request:
+            anonymized_batch_request: Optional[
+                dict
+            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
             anonymized_parameter_builder[
                 "anonymized_batch_request"
-            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
+            ] = anonymized_batch_request
             logger.debug("Anonymized batch request in ParameterBuilder")
 
         return anonymized_parameter_builder

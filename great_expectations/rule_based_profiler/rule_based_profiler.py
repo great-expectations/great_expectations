@@ -16,6 +16,11 @@ from great_expectations.core.batch import (
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+    get_profiler_run_usage_statistics,
+    usage_statistics_enabled_method,
+)
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -120,6 +125,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
     ):
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
@@ -144,6 +150,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         if variables is None:
             variables = {}
+
+        self._usage_statistics_handler = usage_statistics_handler
 
         # Necessary to annotate ExpectationSuite during `run()`
         self._citation = {
@@ -306,6 +314,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
         return expectation_configuration_builder
 
+    @usage_statistics_enabled_method(
+        event_name="profiler.run",
+        args_payload_fn=get_profiler_run_usage_statistics,
+    )
     def run(
         self,
         variables: Optional[Dict[str, Any]] = None,
@@ -401,9 +413,14 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if variables is None:
             variables = {}
 
-        variables_configs: dict = (
-            self.variables.to_dict()["parameter_nodes"]["variables"]["variables"] or {}
-        )
+        variables_configs: dict
+        try:
+            variables_configs = self.variables.to_dict()["parameter_nodes"][
+                "variables"
+            ]["variables"]
+        except (TypeError, KeyError) as e:
+            variables_configs = {}
+            logger.warning("Could not convert existing variables to dict: %s", e)
 
         if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
             variables_configs = nested_update(
@@ -934,9 +951,14 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             rules=rules,
         )
 
+        usage_statistics_handler: Optional[UsageStatisticsHandler] = None
+        if data_context:
+            usage_statistics_handler = data_context.usage_statistics_handler
+
         super().__init__(
             profiler_config=profiler_config,
             data_context=data_context,
+            usage_statistics_handler=usage_statistics_handler,
         )
 
     @staticmethod
