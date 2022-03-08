@@ -5,7 +5,7 @@ parameters:
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
-      displayName: pip_${{ pythonVersion }}
+      displayName: pip${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
           inputs:
@@ -23,7 +23,7 @@ jobs:
           displayName: 'Confirm installation'
 
     - job:
-      displayName: conda_${{ pythonVersion }}
+      displayName: conda${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
           inputs:
