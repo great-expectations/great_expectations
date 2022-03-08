@@ -62,7 +62,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
             return self.assets[data_asset_name]
 
         raise InvalidBatchKwargsError(
-            "No asset definition for requested asset %s" % data_asset_name
+            f"No asset definition for requested asset {data_asset_name}"
         )
 
     def _get_iterator(self, data_asset_name, **kwargs):

@@ -176,20 +176,18 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         else:
 
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
             if include_column_name:
                 template_str = (
-                    "$column distinct values must belong to this set: "
-                    + values_string
-                    + "."
+                    f"$column distinct values must belong to this set: {values_string}."
                 )
             else:
                 template_str = (
-                    "distinct values must belong to this set: " + values_string + "."
+                    f"distinct values must belong to this set: {values_string}."
                 )
 
         if params["row_condition"] is not None:
@@ -199,7 +197,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
@@ -243,20 +241,18 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         else:
 
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
             if include_column_name:
                 template_str = (
-                    "$column distinct values must belong to this set: "
-                    + values_string
-                    + "."
+                    f"$column distinct values must belong to this set: {values_string}."
                 )
             else:
                 template_str = (
-                    "distinct values must belong to this set: " + values_string + "."
+                    f"distinct values must belong to this set: {values_string}."
                 )
 
         if params["row_condition"] is not None:
@@ -264,7 +260,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -354,7 +350,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 ),
                 "graph": chart,
                 "styling": {
-                    "classes": ["col-" + str(chart_container_col_width), "mt-1"],
+                    "classes": [f"col-{str(chart_container_col_width)}", "mt-1"],
                 },
             }
         )

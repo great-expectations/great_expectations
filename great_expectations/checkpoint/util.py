@@ -37,8 +37,7 @@ def send_slack_notification(
         response = session.post(url=url, headers=headers, json=query)
     except requests.ConnectionError:
         logger.warning(
-            "Failed to connect to Slack webhook at {url} "
-            "after {max_retries} retries.".format(url=slack_webhook, max_retries=10)
+            f"Failed to connect to Slack webhook at {slack_webhook} after {10} retries."
         )
     except Exception as e:
         logger.error(str(e))
@@ -67,13 +66,9 @@ def send_opsgenie_alert(query, suite_name, settings):
     else:
         url = "https://api.opsgenie.com/v2/alerts"
 
-    headers = {
-        "Authorization": "GenieKey {api_key}".format(api_key=settings["api_key"])
-    }
+    headers = {"Authorization": f"GenieKey {settings['api_key']}"}
     payload = {
-        "message": "Great Expectations suite {suite_name} failed".format(
-            suite_name=suite_name
-        ),
+        "message": f"Great Expectations suite {suite_name} failed",
         "description": query,
         "priority": settings["priority"],  # allow this to be modified in settings
     }
@@ -156,9 +151,7 @@ def send_webhook_notifications(query, webhook, target_platform):
                 )
             )
         else:
-            return "{target_platform} notification succeeded.".format(
-                target_platform=target_platform
-            )
+            return f"{target_platform} notification succeeded."
 
 
 # noinspection SpellCheckingInspection
