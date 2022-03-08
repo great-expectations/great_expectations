@@ -116,7 +116,7 @@ def delete_datasource(ctx, datasource):
     try:
         context.get_datasource(datasource)
     except ValueError:
-        cli_message("<green>Datasource deleted successfully.</green>")
+        cli_message("<green>{}</green>".format("Datasource deleted successfully."))
         send_usage_message(
             data_context=context,
             event=usage_event_end,
