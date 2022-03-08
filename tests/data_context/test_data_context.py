@@ -9,9 +9,10 @@ from freezegun import freeze_time
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
@@ -2705,3 +2706,48 @@ def test_add_datasource_from_yaml_with_substitution_variables(
         ]
     )
     assert mock_emit.call_args_list == expected_call_args_list
+
+
+def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_store):
+    """End to end test demonstrating usage of Stores evaluation parameters"""
+    context = data_context_with_query_store
+    suite_name = "eval_param_suite"
+    context.create_expectation_suite(expectation_suite_name=suite_name)
+    batch_request = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "default_runtime_data_connector_name",
+        "data_asset_name": "DEFAULT_ASSET_NAME",
+        "batch_identifiers": {
+            "default_identifier_name": "test123"
+        },
+        "runtime_parameters": {
+            "query": "select * from titanic"
+        }
+    }
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(**batch_request),
+        expectation_suite_name=suite_name
+    )
+    validator.expect_table_row_count_to_equal(
+        value={
+            # unnecessarily complex URN which should resolve to the actual row count.
+            "$PARAMETER": "abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count) + 4"
+        }
+    )
+
+    checkpoint_config = {
+        "class_name": "SimpleCheckpoint",
+        "validations": [
+            {
+                "batch_request": batch_request,
+                "expectation_suite_name": suite_name
+            }
+        ]
+    }
+    checkpoint = SimpleCheckpoint(
+        f"_tmp_checkpoint_{suite_name}",
+        context,
+        **checkpoint_config
+    )
+    checkpoint_result = checkpoint.run()
+    assert checkpoint_result.get('success') is True

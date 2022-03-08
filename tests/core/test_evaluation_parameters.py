@@ -122,45 +122,53 @@ def test_query_store_results_in_evaluation_parameters(data_context_with_query_st
     TITANIC_ROW_COUNT = 1313  # taken from the titanic db conftest
     DISTINCT_TITANIC_ROW_COUNT = 4
 
-    test_cases = [
-        {
-            "context": "parse_evaluation_parameters correctly resolves a stores URN",
-            "parameter_expression": "urn:great_expectations:stores:my_query_store:col_count",
-            "res_func": lambda x: x == TITANIC_ROW_COUNT,
-        },
-        {
-            "context": "and can handle an operator",
-            "parameter_expression": "urn:great_expectations:stores:my_query_store:col_count * 2",
-            "res_func": lambda x: x == TITANIC_ROW_COUNT * 2,
-        },
-        {
-            "context": "can even handle multiple operators",
-            "parameter_expression": "urn:great_expectations:stores:my_query_store:col_count * 0 + 100",
-            "res_func": lambda x: x == 100,
-        },
-        {
-            "context": "allows stores URNs with functions",
-            "parameter_expression": "cos(urn:great_expectations:stores:my_query_store:col_count)",
-            "res_func": lambda x: math.isclose(math.cos(TITANIC_ROW_COUNT), x),
-        },
-        {
-            "context": "multiple stores URNs can be used",
-            "parameter_expression": "urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count",
-            "res_func": lambda x: x == TITANIC_ROW_COUNT - DISTINCT_TITANIC_ROW_COUNT,
-        },
-        {
-            "context": "complex expressions can combine operators, urns, and functions",
-            "parameter_expression": "abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count)",
-            "res_func": lambda x: x == TITANIC_ROW_COUNT + DISTINCT_TITANIC_ROW_COUNT,
-        },
-    ]
-    for case in test_cases:
-        res = parse_evaluation_parameter(
-            parameter_expression=case["parameter_expression"],
-            evaluation_parameters=None,
-            data_context=data_context_with_query_store,
-        )
-        assert case["res_func"](res) is True, f"{case['context']}"
+    # parse_evaluation_parameters correctly resolves a stores URN
+    res1 = parse_evaluation_parameter(
+        parameter_expression="urn:great_expectations:stores:my_query_store:col_count",
+        evaluation_parameters=None,
+        data_context=data_context_with_query_store,
+    )
+    assert res1 == TITANIC_ROW_COUNT
+
+    # and can handle an operator
+    res2 = parse_evaluation_parameter(
+        parameter_expression="urn:great_expectations:stores:my_query_store:col_count * 2",
+        evaluation_parameters=None,
+        data_context=data_context_with_query_store,
+    )
+    assert res2 == TITANIC_ROW_COUNT * 2
+
+    # can even handle multiple operators
+    res3 = parse_evaluation_parameter(
+        parameter_expression="urn:great_expectations:stores:my_query_store:col_count * 0 + 100",
+        evaluation_parameters=None,
+        data_context=data_context_with_query_store,
+    )
+    assert res3 == 100
+
+    # allows stores URNs with functions
+    res4 = parse_evaluation_parameter(
+        parameter_expression="cos(urn:great_expectations:stores:my_query_store:col_count)",
+        evaluation_parameters=None,
+        data_context=data_context_with_query_store,
+    )
+    assert math.isclose(math.cos(TITANIC_ROW_COUNT), res4)
+
+    # multiple stores URNs can be used
+    res5 = parse_evaluation_parameter(
+        parameter_expression="urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count",
+        evaluation_parameters=None,
+        data_context=data_context_with_query_store,
+    )
+    assert res5 == TITANIC_ROW_COUNT - DISTINCT_TITANIC_ROW_COUNT
+
+    # complex expressions can combine operators, urns, and functions
+    res6 = parse_evaluation_parameter(
+        parameter_expression="abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count)",
+        evaluation_parameters=None,
+        data_context=data_context_with_query_store,
+    )
+    assert res6 == TITANIC_ROW_COUNT + DISTINCT_TITANIC_ROW_COUNT
 
 
 def test_parser_timing():
