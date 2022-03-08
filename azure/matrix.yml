@@ -5,7 +5,7 @@ parameters:
 jobs:
   - ${{ each vmImage in parameters.vmImage }}:
     - ${{ each pythonVersion in parameters.pythonVersion }}:
-      - job:
+      - job: pip
         displayName: pip_${{ vmImage }}_${{ pythonVersion }}
         steps:
           - task: UsePythonVersion@0
@@ -23,8 +23,9 @@ jobs:
               great_expectations -y init --no-usage-stats
             displayName: 'Confirm installation'
 
-      - job:
+      - job: conda
         displayName: conda_${{ vmImage }}_${{ pythonVersion }}
+        dependsOn: [pip]
         steps:
           - task: UsePythonVersion@0
             inputs:
