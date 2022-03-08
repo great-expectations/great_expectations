@@ -29,10 +29,8 @@ schedules:
 #     exclude:
 #     - develop
 
-jobs:
-  - job: Foo
-    steps:
-    - template: azure/matrix-user-install.yml
-  - job: Bar
-    steps:
-    - template: azure/matrix-dev-install.yml
+stages:
+  - stage: Build
+    jobs:
+      - template: azure/matrix-user-install.yml
+      - template: azure/matrix-dev-install.yml
