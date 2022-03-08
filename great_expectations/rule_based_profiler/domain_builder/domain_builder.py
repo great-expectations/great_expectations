@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -15,6 +14,7 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class DomainBuilder(Builder, ABC):
@@ -92,6 +92,85 @@ class DomainBuilder(Builder, ABC):
 
         pass
 
+    def get_table_row_counts(
+        self,
+        validator: Optional["Validator"] = None,  # noqa: F821
+        batch_ids: Optional[List[str]] = None,
+        variables: Optional[ParameterContainer] = None,
+    ) -> Dict[str, int]:
+        if validator is None:
+            validator = self.get_validator(variables=variables)
+
+        if batch_ids is None:
+            batch_ids = self.get_batch_ids(variables=variables)
+
+        batch_id: str
+
+        # Step 1: Gather "MetricConfiguration" objects corresponding to all possible batch_id values.
+        # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
+        metric_configurations_by_batch_id: Dict[str, MetricConfiguration] = {
+            batch_id: MetricConfiguration(
+                metric_name="table.row_count",
+                metric_domain_kwargs={
+                    "batch_id": batch_id,
+                },
+                metric_value_kwargs={
+                    "include_nested": True,
+                },
+                metric_dependencies=None,
+            )
+            for batch_id in batch_ids
+        }
+
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
+            metric_configurations=list(metric_configurations_by_batch_id.values())
+        )
+
+        # Step 2: Gather "MetricConfiguration" ID values for each batch_id (one entry per batch_id).
+        metric_configuration: MetricConfiguration
+        metric_configuration_ids_by_batch_id: Dict[str, Tuple[str, str, str]] = {
+            batch_id: metric_configuration.id
+            for batch_id, metric_configuration in metric_configurations_by_batch_id.items()
+        }
+
+        # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all batch_id values.
+        metric_configuration_ids_all_batch_ids: List[Tuple[str, str, str]] = list(
+            metric_configuration_ids_by_batch_id.values()
+        )
+
+        # Step 4: Retain only those metric computation results that both, correspond to "MetricConfiguration" objects of
+        # interest (reflecting specified batch_id values).
+        metric_configuration_id: Tuple[str, str, str]
+        metric_value: Any
+        resolved_metrics = {
+            metric_configuration_id: metric_value
+            for metric_configuration_id, metric_value in resolved_metrics.items()
+            if metric_configuration_id in metric_configuration_ids_all_batch_ids
+        }
+
+        # Step 5: Gather "MetricConfiguration" ID values for effective collection of resolved metrics.
+        metric_configuration_ids_resolved_metrics: List[Tuple[str, str, str]] = list(
+            resolved_metrics.keys()
+        )
+
+        # Step 6: Produce "batch_id" list, corresponding to effective "MetricConfiguration" ID values.
+        candidate_batch_ids: List[str] = [
+            batch_id
+            for batch_id, metric_configuration_id in metric_configuration_ids_by_batch_id.items()
+            if metric_configuration_id in metric_configuration_ids_resolved_metrics
+        ]
+
+        resolved_metrics_by_batch_id: Dict[str, Dict[Tuple[str, str, str], Any]] = {
+            batch_id: resolved_metrics[metric_configurations_by_batch_id[batch_id].id]
+            for batch_id in candidate_batch_ids
+        }
+
+        table_row_counts: Dict[str, int] = {
+            batch_id: resolved_metrics_by_batch_id[batch_id] for batch_id in batch_ids
+        }
+
+        return table_row_counts
+
     def get_validator(
         self,
         variables: Optional[ParameterContainer] = None,
@@ -118,23 +197,6 @@ class DomainBuilder(Builder, ABC):
             variables=variables,
             parameters=None,
         )
-
-    def get_batch_id(
-        self,
-        variables: Optional[ParameterContainer] = None,
-    ) -> str:
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            variables=variables,
-        )
-        num_batch_ids: int = len(batch_ids)
-        if num_batch_ids != 1:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""{self.__class__.__name__}.get_batch_id() must return exactly one batch_id ({num_batch_ids} \
-were retrieved).
-"""
-            )
-
-        return batch_ids[0]
 
 
 def build_simple_domains_from_column_names(

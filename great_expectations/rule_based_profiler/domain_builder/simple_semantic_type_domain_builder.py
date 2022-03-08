@@ -92,14 +92,14 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             SemanticDomainTypes
         ] = _parse_semantic_domain_type_argument(semantic_types=semantic_types)
 
-        batch_id: str = self.get_batch_id(variables=variables)
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)
         column_types_dict_list: List[Dict[str, Any]] = self.get_validator(
             variables=variables
         ).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.column_types",
                 metric_domain_kwargs={
-                    "batch_id": batch_id,
+                    "batch_id": batch_ids[-1],  # active_batch_id
                 },
                 metric_value_kwargs={
                     "include_nested": True,

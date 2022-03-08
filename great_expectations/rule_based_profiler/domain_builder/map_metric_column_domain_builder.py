@@ -25,6 +25,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         data_context: Optional["DataContext"] = None,  # noqa: F821
         column_names: Optional[Union[str, Optional[List[str]]]] = None,
         max_unexpected_values: Union[str, int] = 0,
+        max_unexpected_ratio: Optional[Union[str, float]] = None,
         min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
     ):
         """
@@ -39,7 +40,34 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             data_context: DataContext associated with this profiler.
             column_names: Explicitly specified column_names list desired (if None, it is computed based on active Batch)
             max_unexpected_values: maximum "unexpected_count" value of "map_metric_name" (intra-Batch)
+            max_unexpected_ratio: maximum "unexpected_count" value of "map_metric_name" divided by number of records
+            (intra-Batch); if both "max_unexpected_values" and "max_unexpected_ratio" are specified, then
+            "max_unexpected_ratio" is used (and "max_unexpected_values" is ignored).
             min_max_unexpected_values_proportion: minimum fraction of Batch objects adhering to "max_unexpected_values"
+
+        For example (using default values of "max_unexpected_values" and "min_max_unexpected_values_proportion"):
+        Suppose that "map_metric_name" is "column_values.nonnull" and consider the following three Batches of data:
+
+        Batch-0        Batch-1        Barch-2
+        A B C          A B C          A B C
+        1 1 2          1 1 2          1 1 2
+        1 2 3          1 2 3          1 2 3
+        1 1 2            1 2          1 1 2
+        2 2 2          2 2 2          2 2 2
+        3 2 3          3 2 3          3 2 3
+
+        and consider adherence to this map metric for column "A".
+
+        The intra-Batch adherence to "max_unexpected_values" being 0 gives the following result (1 is True, 0 is False):
+
+        Batch-0        Batch-1        Barch-2
+        1              0              1
+
+        That gives the inter-Batch adherence fraction of 2/3 (0.67).  Since 1/3 >= min_max_unexpected_values_proportion
+        evaluates to False, column "A" does not pass the tolerance test, and thus Domain for it will not be emitted.
+
+        However, if "max_unexpected_ratio" is eased to above 0.2, then the tolerances will be met and Domain emitted.
+        Alternatively, if "min_max_unexpected_values_proportion" is lowered to 0.66, Domain will also be emitted.
         """
         super().__init__(
             batch_list=batch_list,
@@ -50,6 +78,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
 
         self._map_metric_name = map_metric_name
         self._max_unexpected_values = max_unexpected_values
+        self._max_unexpected_ratio = max_unexpected_ratio
         self._min_max_unexpected_values_proportion = (
             min_max_unexpected_values_proportion
         )
@@ -59,8 +88,12 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         return self._map_metric_name
 
     @property
-    def max_unexpected_values(self) -> Optional[Union[str, int]]:
+    def max_unexpected_values(self) -> Union[str, int]:
         return self._max_unexpected_values
+
+    @property
+    def max_unexpected_ratio(self) -> Optional[Union[str, float]]:
+        return self._max_unexpected_ratio
 
     @property
     def min_max_unexpected_values_proportion(self) -> Optional[Union[str, float]]:
@@ -96,6 +129,17 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             parameters=None,
         )
 
+        # Obtain max_unexpected_ratio from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        max_unexpected_ratio: Optional[
+            float
+        ] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.max_unexpected_ratio,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
+
         # Obtain min_max_unexpected_values_proportion from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         min_max_unexpected_values_proportion: float = (
             get_parameter_value_and_validate_return_type(
@@ -113,7 +157,23 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
         )
 
+        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
+
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
+        num_batch_ids: int = len(batch_ids)
+
+        table_row_counts: Dict[str, int] = self.get_table_row_counts(
+            validator=validator,
+            batch_ids=batch_ids,
+            variables=variables,
+        )
+        mean_table_row_count_as_float: float = (
+            1.0 * sum(table_row_counts.values()) / num_batch_ids
+        )
+
+        # If no "max_unexpected_ratio" is given, compute it based on average number of records across all Batch objects.
+        if max_unexpected_ratio is None:
+            max_unexpected_ratio = max_unexpected_values / mean_table_row_count_as_float
 
         metric_configurations_by_column_name: Dict[
             str, List[MetricConfiguration]
@@ -123,15 +183,14 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             column_names=table_column_names,
         )
 
-        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
-
         candidate_column_names: List[
             str
         ] = self._get_column_names_satisfying_tolerance_limits(
             validator=validator,
-            num_batch_ids=len(batch_ids),
+            num_batch_ids=num_batch_ids,
             metric_configurations_by_column_name=metric_configurations_by_column_name,
-            max_unexpected_values=max_unexpected_values,
+            mean_table_row_count_as_float=mean_table_row_count_as_float,
+            max_unexpected_ratio=max_unexpected_ratio,
             min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
         )
 
@@ -185,7 +244,8 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         validator: "Validator",  # noqa: F821
         num_batch_ids: int,
         metric_configurations_by_column_name: Dict[str, List[MetricConfiguration]],
-        max_unexpected_values: int,
+        mean_table_row_count_as_float: float,
+        max_unexpected_ratio: float,
         min_max_unexpected_values_proportion: float,
     ) -> List[str]:
         """
@@ -193,17 +253,16 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
 
         Args:
             validator: Validator used to compute column cardinality.
-            num_batch_ids: number of Batch objects available.
             metric_configurations_by_column_name: metric configurations used to compute figures of merit.
-            max_unexpected_values: maximum "unexpected_count" value of "map_metric_name" (intra-Batch)
-            min_max_unexpected_values_proportion: minimum fraction of Batch objects adhering to "max_unexpected_values"
+            mean_table_row_count_as_float: average number of records over available Batch objects.
+            max_unexpected_ratio: maximum "unexpected_count" value of "map_metric_name" averaged over numbers of records
+            min_max_unexpected_values_proportion: minimum fraction of Batch objects adhering to "max_unexpected_ratio"
 
         Returns:
             List of column names satisfying tolerance limits.
         """
         column_name: str
         resolved_metrics: Dict[Tuple[str, str, str], Any]
-        metric_value: Any
 
         resolved_metrics_by_column_name: Dict[
             str, Dict[Tuple[str, str, str], Any]
@@ -212,12 +271,24 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             metric_configurations_by_column_name=metric_configurations_by_column_name,
         )
 
-        intra_batch_adherence_by_column_name: Dict[str, List[bool]] = {
+        metric_value: Any
+        intra_batch_unexpected_ratios_by_column_name: Dict[str, List[float]] = {
             column_name: [
-                metric_value <= max_unexpected_values
-                for metric_value in list(resolved_metrics.values())
+                metric_value / mean_table_row_count_as_float
+                for metric_value in resolved_metrics.values()
             ]
             for column_name, resolved_metrics in resolved_metrics_by_column_name.items()
+        }
+
+        metric_value_ratio: float
+        intra_batch_adherence_by_column_name: Dict[str, List[bool]] = {
+            column_name: [
+                metric_value_ratio <= max_unexpected_ratio
+                for metric_value_ratio in intra_batch_unexpected_ratios_by_column_name[
+                    column_name
+                ]
+            ]
+            for column_name in intra_batch_unexpected_ratios_by_column_name.keys()
         }
 
         inter_batch_adherence_by_column_name: Dict[str, float] = {
