@@ -23,6 +23,7 @@ jobs:
           displayName: 'Confirm installation'
 
     - job:
+      timeoutInMinutes: 180
       displayName: pip_nobin${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0

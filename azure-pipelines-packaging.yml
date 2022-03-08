@@ -34,7 +34,6 @@ stages:
     dependsOn: []
     jobs:
       - template: azure/user-install-matrix.yml
-        timeoutInMinutes: 150
         parameters:
           vmImage: "ubuntu-latest"
 
