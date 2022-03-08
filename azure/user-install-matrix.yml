@@ -5,7 +5,7 @@ parameters:
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
-      displayName: pip_std${{ pythonVersion }}
+      displayName: pip${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
           inputs:
@@ -15,25 +15,6 @@ jobs:
         - script: |
             python -m pip install --upgrade pip==21.3.1
             pip install great_expectations
-          displayName: 'Install Great Expectations'
-
-        - script: |
-            great_expectations --version
-            great_expectations -y init --no-usage-stats
-          displayName: 'Confirm installation'
-
-    - job:
-      timeoutInMinutes: 180
-      displayName: pip_nobin${{ pythonVersion }}
-      steps:
-        - task: UsePythonVersion@0
-          inputs:
-            versionSpec: ${{ pythonVersion }}
-          displayName: Use Python ${{ pythonVersion }}
-
-        - script: |
-            python -m pip install --upgrade pip==21.3.1
-            pip install --no-binary :all: great_expectations
           displayName: 'Install Great Expectations'
 
         - script: |
