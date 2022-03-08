@@ -99,6 +99,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
+        class_name="RuleBasedProfilerConfig",
+        module_name="great_expectations.rule_based_profiler",
         variables={
             "mostly": 1.0,
             "strict_min": False,
@@ -114,6 +116,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                     {
                         "name": "min_estimator",
                         "class_name": "MetricMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                         "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "enforce_numeric_metric": True,
@@ -122,6 +125,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                     {
                         "name": "max_estimator",
                         "class_name": "MetricMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                         "metric_name": "column.max",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "enforce_numeric_metric": True,
@@ -132,6 +136,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                     {
                         "expectation_type": "expect_column_values_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "column": "$domain.domain_kwargs.column",
                         "min_value": "$parameter.min_estimator.value[-1]",
                         "max_value": "$parameter.max_estimator.value[-1]",
@@ -290,7 +295,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 template_str += f"values must be {at_least_str} $min_value{mostly_str}."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -299,7 +304,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -360,14 +365,14 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 template_str += f"values must be {at_least_str} $min_value{mostly_str}."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [

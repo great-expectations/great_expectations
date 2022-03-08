@@ -56,7 +56,7 @@ class DataContextKey(metaclass=ABCMeta):
         return hash(self.to_tuple())
 
     def __repr__(self):
-        return self.__class__.__name__ + "::" + "/".join(self.to_tuple())
+        return f"{self.__class__.__name__}::{'/'.join(self.to_tuple())}"
 
 
 class StringKey(DataContextKey):

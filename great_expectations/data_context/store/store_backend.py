@@ -83,7 +83,7 @@ class StoreBackend(metaclass=ABCMeta):
                     key=self.STORE_BACKEND_ID_KEY
                 )
                 store_backend_id_file_parser = self.STORE_BACKEND_ID_PREFIX + pp.Word(
-                    pp.hexnums + "-"
+                    f"{pp.hexnums}-"
                 )
                 parsed_store_backend_id = store_backend_id_file_parser.parseString(
                     ge_store_backend_id_file_contents

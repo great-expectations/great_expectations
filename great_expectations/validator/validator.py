@@ -507,14 +507,6 @@ class Validator:
 
         domain_type: MetricDomainTypes
 
-        self._validate_rule_and_update_rule_properties(
-            rule=rule,
-            expectation_type=expectation_type,
-            expectation_kwargs=expectation_kwargs,
-            success_keys=success_keys,
-            ignore_batch_request=True,
-        )
-
         if override_profiler_config is None:
             override_profiler_config = {}
 
@@ -560,12 +552,12 @@ class Validator:
 
             rule = profiler.rules[0]
 
-            self._validate_rule_and_update_rule_properties(
-                rule=rule,
-                expectation_type=expectation_type,
-                expectation_kwargs=expectation_kwargs,
-                success_keys=success_keys,
-            )
+        self._validate_rule_and_update_rule_properties(
+            rule=rule,
+            expectation_type=expectation_type,
+            expectation_kwargs=expectation_kwargs,
+            success_keys=success_keys,
+        )
 
         return profiler
 
@@ -575,7 +567,6 @@ class Validator:
         expectation_type: str,
         expectation_kwargs: dict,
         success_keys: Tuple[str],
-        ignore_batch_request: bool = False,
     ) -> None:
         assert (
             rule.expectation_configuration_builders[0].expectation_type
@@ -587,7 +578,7 @@ class Validator:
         if domain_type == MetricDomainTypes.COLUMN:
             column_name = expectation_kwargs["column"]
             rule.domain_builder.column_names = [column_name]
-            if ignore_batch_request or rule.domain_builder.batch_request is None:
+            if rule.domain_builder.batch_request is None:
                 # A DomainBuilder that emits MetricDomainTypes.COLUMN type Domain object needs exactly 1 Batch of data.
                 rule.domain_builder.batch_list = [self.active_batch]
         elif domain_type == MetricDomainTypes.TABLE:
@@ -605,7 +596,7 @@ class Validator:
             and key not in BaseRuleBasedProfiler.EXPECTATION_SUCCESS_KEYS
         }
         for parameter_builder in rule.parameter_builders:
-            if ignore_batch_request or parameter_builder.batch_request is None:
+            if parameter_builder.batch_request is None:
                 """
                 Despite potentially having access to all loaded Batch objects, in general, a ParameterBuilder should
                 exclude using active Batch (in order to avoid estimation bias).  However, when ParameterBuilder is part
@@ -1324,7 +1315,7 @@ set as active.
                     expectation_configuration=item.expectation_config,
                     match_type="runtime",
                 )
-            warnings.warn("Removed %s expectations that were 'False'" % len(res))
+            warnings.warn(f"Removed {len(res)} expectations that were 'False'")
 
     def get_default_expectation_arguments(self) -> dict:
         """Fetch default expectation arguments for this data_asset
@@ -1454,9 +1445,7 @@ set as active.
 
             expectations = new_expectations
 
-        message = "\t%d expectation(s) included in expectation_suite." % len(
-            expectations
-        )
+        message = f"\t{len(expectations)} expectation(s) included in expectation_suite."
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (

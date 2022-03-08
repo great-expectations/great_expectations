@@ -122,4 +122,4 @@ For those who only need to know the basics in order to make Great Expectations w
 
 For those who prefer working from examples, we have "How to" guides which show working examples of how to configure objects from Great Expectations according to specific use cases.
 
-Finally, we have Deployment Patterns.  These show you how to perform all four steps for implementing Great Expectations with a specific environment and data type.
+Finally, we have [Reference Architectures](../../deployment_patterns/index.md).  These show you how to perform all four steps for implementing Great Expectations with a specific environment and data type.
