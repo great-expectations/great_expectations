@@ -2,15 +2,15 @@ import itertools
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.types.parameter_container import (
     ParameterNode,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
 )
 
 
@@ -40,6 +40,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -51,6 +52,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             metric_value_kwargs: used in MetricConfiguration
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -63,6 +65,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             reduce_scalar_metric=False,
             batch_list=batch_list,
             batch_request=batch_request,
+            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -90,21 +93,19 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         # Retrieve and replace the list of unique values for each batch with
         # the set of unique values for all batches in the given domain.
-        parameter_value_node: ParameterNode = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.fully_qualified_parameter_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.fully_qualified_parameter_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
 
         return (
             _get_unique_values_from_nested_collection_of_sets(
-                collection=parameter_value_node.value
+                collection=parameter_node.value
             ),
-            parameter_value_node.details,
+            parameter_node.details,
         )
 
 

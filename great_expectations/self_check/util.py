@@ -566,7 +566,7 @@ def get_dataset(
         # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
         # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
         # rather than referring the table by name.
-        custom_sql = "SELECT * FROM " + table_name
+        custom_sql = f"SELECT * FROM {table_name}"
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
@@ -768,7 +768,7 @@ def get_dataset(
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
     else:
-        raise ValueError("Unknown dataset_type " + str(dataset_type))
+        raise ValueError(f"Unknown dataset_type {str(dataset_type)}")
 
 
 def get_test_validator_with_data(
@@ -942,7 +942,7 @@ def get_test_validator_with_data(
         return build_spark_validator_with_data(df=spark_df, spark=spark)
 
     else:
-        raise ValueError("Unknown dataset_type " + str(execution_engine))
+        raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
 
 
 def build_pandas_validator_with_data(
@@ -1948,7 +1948,7 @@ def check_json_test_result(test, result, data_asset=None):
                         )
                 else:
                     raise ValueError(
-                        "Invalid test specification: unknown key " + key + " in 'out'"
+                        f"Invalid test specification: unknown key {key} in 'out'"
                     )
 
             elif key == "traceback_substring":
@@ -1996,7 +1996,7 @@ def check_json_test_result(test, result, data_asset=None):
 
             else:
                 raise ValueError(
-                    "Invalid test specification: unknown key " + key + " in 'out'"
+                    f"Invalid test specification: unknown key {key} in 'out'"
                 )
 
 

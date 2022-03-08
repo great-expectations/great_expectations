@@ -155,9 +155,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     **{
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": "Type: {column_type}".format(
-                                column_type=column_type
-                            ),
+                            "template": f"Type: {column_type}",
                             "tooltip": {
                                 "content": "expect_column_values_to_be_of_type <br>expect_column_values_to_be_in_type_list",
                             },

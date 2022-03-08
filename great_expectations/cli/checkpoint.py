@@ -296,7 +296,7 @@ def print_validation_operator_results_details(
         suite_name: str = str(vr.meta["expectation_suite_name"])
         if len(suite_name) > max_suite_display_width:
             suite_name = suite_name[0:max_suite_display_width]
-            suite_name = suite_name[:-1] + "…"
+            suite_name = f"{suite_name[:-1]}…"
         status_line: str = f"- {suite_name.ljust(max_suite_display_width)}   {status_slug}   {stats_slug}"
         cli_message(status_line)
 
