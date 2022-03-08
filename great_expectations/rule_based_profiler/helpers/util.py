@@ -447,7 +447,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
     """
     bootstraps: tuple = (metric_values,)  # bootstrap samples must be in a sequence
 
-    lower_quantile_bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
+    lower_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
         bootstraps,
         lambda data: np.quantile(
             data,
@@ -458,7 +458,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
         n_resamples=n_resamples,
         method=method,
     )
-    upper_quantile_bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
+    upper_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
         bootstraps,
         lambda data: np.quantile(
             data,
@@ -486,7 +486,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
     #     Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
     #
     # For an in-depth look at how the BCa interval is constructed and you will find the points made above on page 186.
-    lower_quantile_confidence_interval: stats.bootstrap.BootstrapResult.ConfidenceInterval = (
+    lower_quantile_confidence_interval: stats._bootstrap.BootstrapResult.ConfidenceInterval = (
         lower_quantile_bootstrap_result.confidence_interval
     )
     lower_quantile_point_estimate: np.float64 = np.mean(
@@ -495,7 +495,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
             lower_quantile_confidence_interval.high,
         ]
     )
-    upper_quantile_confidence_interal: stats.bootstrap.BootstrapResult.ConfidenceInterval = (
+    upper_quantile_confidence_interal: stats._bootstrap.BootstrapResult.ConfidenceInterval = (
         upper_quantile_bootstrap_result.confidence_interval
     )
     upper_quantile_point_estimate: np.float64 = np.mean(
