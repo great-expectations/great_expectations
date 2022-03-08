@@ -717,7 +717,11 @@ constructor arguments.
         **runtime_kwargs,
     ) -> "Checkpoint":
         config: dict = checkpoint_config.to_json_dict()
-        config.update(runtime_kwargs)
+
+        for k, v in runtime_kwargs.items():
+            if v is not None:
+                config[k] = v
+
         config = filter_properties_dict(properties=config, clean_falsy=True)
 
         checkpoint: Checkpoint = instantiate_class_from_config(
