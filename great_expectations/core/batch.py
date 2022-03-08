@@ -270,22 +270,19 @@ class BatchRequestBase(SerializableDictDot):
         due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
         make this refactoring infeasible at the present time.
         """
-        dict_obj: dict = self.to_dict()
 
-        # if a Pandas or Spark DF appears in BatchRequest, temporarily replace it with
+        # if batch_data appears in BatchRequest, temporarily replace it with
         # str placeholder before calling convert_to_json_serializable so that
-        # DF is not serialized
-        batch_data = dict_obj.get("runtime_parameters", {}).get("batch_data")
-        if isinstance(batch_data, pd.DataFrame):
-            dict_obj["runtime_parameters"]["batch_data"] = "PandasDataFrame"
-        # pyspark is an optional dependency, hence the check
-        if pyspark and isinstance(batch_data, pyspark.sql.DataFrame):
-            dict_obj["runtime_parameters"]["batch_data"] = "SparkDataFrame"
-
-        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
-
-        # after getting serializable_dict, restore original batch_data
-        dict_obj["runtime_parameters"]["batch_data"] = batch_data
+        # batch_data is not serialized
+        if batch_request_contains_batch_data(batch_request=self):
+            batch_data: Union[BatchRequest, RuntimeBatchRequest, dict] = self.runtime_parameters["batch_data"]
+            self.runtime_parameters["batch_data"] = str(type(batch_data))
+            serializeable_dict: dict = convert_to_json_serializable(
+                data=self.to_dict())
+            # after getting serializable_dict, restore original batch_data
+            self.runtime_parameters["batch_data"] = batch_data
+        else:
+            serializeable_dict: dict = convert_to_json_serializable(data=self.to_dict())
 
         return serializeable_dict
 
