@@ -286,7 +286,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         header_template_str = "quantiles must be within the following value ranges."
 
         if include_column_name:
-            header_template_str = "$column " + header_template_str
+            header_template_str = f"$column {header_template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -425,7 +425,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         template_str = "quantiles must be within the following value ranges."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (

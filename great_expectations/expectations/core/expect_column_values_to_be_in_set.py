@@ -220,13 +220,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
 
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-        template_str = "values must belong to this set: " + values_string
+        template_str = f"values must belong to this set: {values_string}"
 
         if params["mostly"] is not None:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
@@ -241,7 +241,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -250,7 +250,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
@@ -294,13 +294,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
 
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-        template_str = "values must belong to this set: " + values_string
+        template_str = f"values must belong to this set: {values_string}"
 
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
@@ -315,14 +315,14 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
