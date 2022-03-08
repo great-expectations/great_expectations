@@ -32,10 +32,5 @@ schedules:
 stages:
   - stage: Build
     jobs:
-      - job: user_install
-        steps:
-          - template: azure/matrix-user-install.yml
-      - job: dev_install
-        dependsOn: user_install
-        steps:
-          - template: azure/matrix-dev-install.yml
+      - template: azure/matrix-user-install.yml
+      - template: azure/matrix-dev-install.yml
