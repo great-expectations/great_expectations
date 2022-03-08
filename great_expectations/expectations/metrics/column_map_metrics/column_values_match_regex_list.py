@@ -51,7 +51,7 @@ class ColumnValuesMatchRegexList(ColumnMapMetricProvider):
 
         regex_expression = get_dialect_regex_expression(column, regex_list[0], _dialect)
         if regex_expression is None:
-            logger.warning("Regex is not supported for dialect %s" % str(_dialect))
+            logger.warning(f"Regex is not supported for dialect {str(_dialect)}")
             raise NotImplementedError
 
         if match_on == "any":

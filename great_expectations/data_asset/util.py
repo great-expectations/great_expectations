@@ -69,7 +69,7 @@ class DocInherit:
             if self.name not in parent.__dict__:
                 continue
             if parent.__dict__[self.name].__doc__ is not None:
-                doc = doc + "\n" + parent.__dict__[self.name].__doc__
+                doc = f"{doc}\n{parent.__dict__[self.name].__doc__}"
 
         @wraps(self.mthd, assigned=("__name__", "__module__"))
         def f(*args, **kwargs):
