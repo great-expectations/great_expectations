@@ -3,8 +3,6 @@ import json
 import logging
 from typing import Any, Callable, Dict, Optional, Set, Union
 
-import pandas as pd
-
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
