@@ -131,9 +131,9 @@ Checkpoints are mini-applications that can be configured to implement these scen
 
 Read [Checkpoints and Actions](./checkpoints_and_actions.md) to learn more.
 
-## Deployment patterns
+## Reference Architectures
 
-Useful deployment patterns for validation include:
+Useful Reference Architectures for validation include:
 
 * Include validation at the end of a complex data transformation, to verify that no cases were lost, duplicated, or
   improperly merged.
@@ -145,5 +145,5 @@ Useful deployment patterns for validation include:
 * Validate as part of an Airflow task: if Expectations are violated, raise an error and stop DAG propagation until the
   problem is resolved. Alternatively, you can implement Expectations that raise warnings without halting the DAG.
 
-For certain deployment patterns, it may be useful to parameterize Expectations, and supply Evaluation Parameters at
+For certain Reference Architectures, it may be useful to parameterize Expectations, and supply Evaluation Parameters at
 validation time. See [Evaluation Parameters](./evaluation_parameters.md) for more information.
