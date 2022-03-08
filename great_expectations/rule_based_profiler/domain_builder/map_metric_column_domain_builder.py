@@ -266,9 +266,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
 
         resolved_metrics_by_column_name: Dict[
             str, Dict[Tuple[str, str, str], Any]
-        ] = self.get_resolved_metrics_by_column_name(
+        ] = self.get_resolved_metrics_by_key(
             validator=validator,
-            metric_configurations_by_column_name=metric_configurations_by_column_name,
+            metric_configurations_by_key=metric_configurations_by_column_name,
         )
 
         metric_value: Any

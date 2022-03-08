@@ -1,3 +1,4 @@
+import itertools
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -92,6 +93,97 @@ class DomainBuilder(Builder, ABC):
 
         pass
 
+    @staticmethod
+    def get_resolved_metrics_by_key(
+        validator: "Validator",  # noqa: F821
+        metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
+    ) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
+        """
+        Compute (resolve) metrics for every column name supplied on input.
+
+        Args:
+            validator: Validator used to compute column cardinality.
+            metric_configurations_by_key: metric configurations used to compute figures of merit.
+            Dictionary of the form {
+                "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
+            }
+
+        Returns:
+            Dictionary of the form {
+                "my_key": Dict[Tuple[str, str, str], Any],
+            }
+        """
+        key: str
+        metric_configuration: MetricConfiguration
+        metric_configurations_for_key: List[MetricConfiguration]
+
+        # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
+        # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
+            metric_configurations=[
+                metric_configuration
+                for key, metric_configurations_for_key in metric_configurations_by_key.items()
+                for metric_configuration in metric_configurations_for_key
+            ]
+        )
+
+        # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
+        metric_configuration_ids_by_key: Dict[str, List[Tuple[str, str, str]]] = {
+            key: [
+                metric_configuration.id
+                for metric_configuration in metric_configurations_for_key
+            ]
+            for key, metric_configurations_for_key in metric_configurations_by_key.items()
+        }
+
+        metric_configuration_ids: List[Tuple[str, str, str]]
+        # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all key values/combinations.
+        metric_configuration_ids_all_keys: List[Tuple[str, str, str]] = list(
+            itertools.chain(
+                *[
+                    metric_configuration_ids
+                    for metric_configuration_ids in metric_configuration_ids_by_key.values()
+                ]
+            )
+        )
+
+        # Step 4: Retain only those metric computation results that both, correspond to "MetricConfiguration" objects of
+        # interest (reflecting specified key values/combinations).
+        metric_configuration_id: Tuple[str, str, str]
+        metric_value: Any
+        resolved_metrics = {
+            metric_configuration_id: metric_value
+            for metric_configuration_id, metric_value in resolved_metrics.items()
+            if metric_configuration_id in metric_configuration_ids_all_keys
+        }
+
+        # Step 5: Gather "MetricConfiguration" ID values for effective collection of resolved metrics.
+        metric_configuration_ids_resolved_metrics: List[Tuple[str, str, str]] = list(
+            resolved_metrics.keys()
+        )
+
+        # Step 6: Produce "key" list, corresponding to effective "MetricConfiguration" ID values.
+        candidate_keys: List[str] = [
+            key
+            for key, metric_configuration_ids in metric_configuration_ids_by_key.items()
+            if all(
+                [
+                    metric_configuration_id in metric_configuration_ids_resolved_metrics
+                    for metric_configuration_id in metric_configuration_ids
+                ]
+            )
+        ]
+
+        resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], Any]] = {
+            key: {
+                metric_configuration.id: resolved_metrics[metric_configuration.id]
+                for metric_configuration in metric_configurations_by_key[key]
+            }
+            for key in candidate_keys
+        }
+
+        return resolved_metrics_by_key
+
     def get_table_row_counts(
         self,
         validator: Optional["Validator"] = None,  # noqa: F821
@@ -106,70 +198,42 @@ class DomainBuilder(Builder, ABC):
 
         batch_id: str
 
-        # Step 1: Gather "MetricConfiguration" objects corresponding to all possible batch_id values.
-        # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
-        metric_configurations_by_batch_id: Dict[str, MetricConfiguration] = {
-            batch_id: MetricConfiguration(
-                metric_name="table.row_count",
-                metric_domain_kwargs={
-                    "batch_id": batch_id,
-                },
-                metric_value_kwargs={
-                    "include_nested": True,
-                },
-                metric_dependencies=None,
-            )
+        metric_configurations_by_batch_id: Dict[str, List[MetricConfiguration]] = {
+            batch_id: [
+                MetricConfiguration(
+                    metric_name="table.row_count",
+                    metric_domain_kwargs={
+                        "batch_id": batch_id,
+                    },
+                    metric_value_kwargs={
+                        "include_nested": True,
+                    },
+                    metric_dependencies=None,
+                )
+            ]
             for batch_id in batch_ids
         }
 
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
-            metric_configurations=list(metric_configurations_by_batch_id.values())
+        resolved_metrics_by_batch_id: Dict[
+            str, Dict[Tuple[str, str, str], Any]
+        ] = self.get_resolved_metrics_by_key(
+            validator=validator,
+            metric_configurations_by_key=metric_configurations_by_batch_id,
         )
 
-        # Step 2: Gather "MetricConfiguration" ID values for each batch_id (one entry per batch_id).
-        metric_configuration: MetricConfiguration
-        metric_configuration_ids_by_batch_id: Dict[str, Tuple[str, str, str]] = {
-            batch_id: metric_configuration.id
-            for batch_id, metric_configuration in metric_configurations_by_batch_id.items()
-        }
-
-        # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all batch_id values.
-        metric_configuration_ids_all_batch_ids: List[Tuple[str, str, str]] = list(
-            metric_configuration_ids_by_batch_id.values()
-        )
-
-        # Step 4: Retain only those metric computation results that both, correspond to "MetricConfiguration" objects of
-        # interest (reflecting specified batch_id values).
-        metric_configuration_id: Tuple[str, str, str]
+        batch_id: str
+        resolved_metrics: Dict[Tuple[str, str, str], Any]
         metric_value: Any
-        resolved_metrics = {
-            metric_configuration_id: metric_value
-            for metric_configuration_id, metric_value in resolved_metrics.items()
-            if metric_configuration_id in metric_configuration_ids_all_batch_ids
+        table_row_count_lists_by_batch_id: Dict[str, List[int]] = {
+            batch_id: [metric_value for metric_value in resolved_metrics.values()]
+            for batch_id, resolved_metrics in resolved_metrics_by_batch_id.items()
+        }
+        table_row_counts_by_batch_id: Dict[str, int] = {
+            batch_id: metric_value[0]
+            for batch_id, metric_value in table_row_count_lists_by_batch_id.items()
         }
 
-        # Step 5: Gather "MetricConfiguration" ID values for effective collection of resolved metrics.
-        metric_configuration_ids_resolved_metrics: List[Tuple[str, str, str]] = list(
-            resolved_metrics.keys()
-        )
-
-        # Step 6: Produce "batch_id" list, corresponding to effective "MetricConfiguration" ID values.
-        candidate_batch_ids: List[str] = [
-            batch_id
-            for batch_id, metric_configuration_id in metric_configuration_ids_by_batch_id.items()
-            if metric_configuration_id in metric_configuration_ids_resolved_metrics
-        ]
-
-        resolved_metrics_by_batch_id: Dict[str, Dict[Tuple[str, str, str], Any]] = {
-            batch_id: resolved_metrics[metric_configurations_by_batch_id[batch_id].id]
-            for batch_id in candidate_batch_ids
-        }
-
-        table_row_counts: Dict[str, int] = {
-            batch_id: resolved_metrics_by_batch_id[batch_id] for batch_id in batch_ids
-        }
-
-        return table_row_counts
+        return table_row_counts_by_batch_id
 
     def get_validator(
         self,

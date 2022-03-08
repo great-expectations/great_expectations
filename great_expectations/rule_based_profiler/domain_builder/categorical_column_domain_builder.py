@@ -191,9 +191,9 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         resolved_metrics_by_column_name: Dict[
             str, Dict[Tuple[str, str, str], Any]
-        ] = self.get_resolved_metrics_by_column_name(
+        ] = self.get_resolved_metrics_by_key(
             validator=validator,
-            metric_configurations_by_column_name=metrics_for_cardinality_check,
+            metric_configurations_by_key=metrics_for_cardinality_check,
         )
 
         candidate_column_names: List[str] = [

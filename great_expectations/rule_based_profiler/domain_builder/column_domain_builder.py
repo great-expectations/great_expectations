@@ -1,5 +1,4 @@
-import itertools
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
@@ -115,101 +114,6 @@ class ColumnDomainBuilder(DomainBuilder):
                 )
 
         return effective_column_names
-
-    @staticmethod
-    def get_resolved_metrics_by_column_name(
-        validator: "Validator",  # noqa: F821
-        metric_configurations_by_column_name: Dict[str, List[MetricConfiguration]],
-    ) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
-        """
-        Compute (resolve) metrics for every column name supplied on input.
-
-        Args:
-            validator: Validator used to compute column cardinality.
-            metric_configurations_by_column_name: metric configurations used to compute figures of merit.
-            Dictionary of the form {
-                "my_column_name": List[MetricConfiguration],
-            }
-
-        Returns:
-            Dictionary of the form {
-                "my_column_name": Dict[Tuple[str, str, str], Any],
-            }
-        """
-        column_name: str
-        metric_configuration: MetricConfiguration
-        metric_configurations_for_column_name: List[MetricConfiguration]
-
-        # Step 1: Gather "MetricConfiguration" objects corresponding to all possible column_name/batch_id combinations.
-        # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
-            metric_configurations=[
-                metric_configuration
-                for column_name, metric_configurations_for_column_name in metric_configurations_by_column_name.items()
-                for metric_configuration in metric_configurations_for_column_name
-            ]
-        )
-
-        # Step 2: Gather "MetricConfiguration" ID values for each column_name (one element per batch_id in every list).
-        metric_configuration_ids_by_column_name: Dict[
-            str, List[Tuple[str, str, str]]
-        ] = {
-            column_name: [
-                metric_configuration.id
-                for metric_configuration in metric_configurations_for_column_name
-            ]
-            for column_name, metric_configurations_for_column_name in metric_configurations_by_column_name.items()
-        }
-
-        metric_configuration_ids: List[Tuple[str, str, str]]
-        # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all column_name/batch_id combinations.
-        metric_configuration_ids_all_column_names: List[Tuple[str, str, str]] = list(
-            itertools.chain(
-                *[
-                    metric_configuration_ids
-                    for metric_configuration_ids in metric_configuration_ids_by_column_name.values()
-                ]
-            )
-        )
-
-        # Step 4: Retain only those metric computation results that both, correspond to "MetricConfiguration" objects of
-        # interest (reflecting specified column_name/batch_id combinations).
-        metric_configuration_id: Tuple[str, str, str]
-        metric_value: Any
-        resolved_metrics = {
-            metric_configuration_id: metric_value
-            for metric_configuration_id, metric_value in resolved_metrics.items()
-            if metric_configuration_id in metric_configuration_ids_all_column_names
-        }
-
-        # Step 5: Gather "MetricConfiguration" ID values for effective collection of resolved metrics.
-        metric_configuration_ids_resolved_metrics: List[Tuple[str, str, str]] = list(
-            resolved_metrics.keys()
-        )
-
-        # Step 6: Produce "column_name" list, corresponding to effective "MetricConfiguration" ID values.
-        candidate_column_names: List[str] = [
-            column_name
-            for column_name, metric_configuration_ids in metric_configuration_ids_by_column_name.items()
-            if all(
-                [
-                    metric_configuration_id in metric_configuration_ids_resolved_metrics
-                    for metric_configuration_id in metric_configuration_ids
-                ]
-            )
-        ]
-
-        resolved_metrics_by_column_name: Dict[str, Dict[Tuple[str, str, str], Any]] = {
-            column_name: {
-                metric_configuration.id: resolved_metrics[metric_configuration.id]
-                for metric_configuration in metric_configurations_by_column_name[
-                    column_name
-                ]
-            }
-            for column_name in candidate_column_names
-        }
-
-        return resolved_metrics_by_column_name
 
     def _get_domains(
         self,
