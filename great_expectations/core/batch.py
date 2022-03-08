@@ -271,17 +271,20 @@ class BatchRequestBase(SerializableDictDot):
         make this refactoring infeasible at the present time.
         """
         dict_obj: dict = self.to_dict()
-        batch_data = dict_obj.get("runtime_parameters", {}).get("batch_data")
 
+        # if a Pandas or Spark DF appears in BatchRequest, temporarily replace it with
+        # str placeholder before calling convert_to_json_serializable so that
+        # DF is not serialized
+        batch_data = dict_obj.get("runtime_parameters", {}).get("batch_data")
         if isinstance(batch_data, pd.DataFrame):
             dict_obj["runtime_parameters"]["batch_data"] = "PandasDataFrame"
-
         # pyspark is an optional dependency, hence the check
         if pyspark and isinstance(batch_data, pyspark.sql.DataFrame):
             dict_obj["runtime_parameters"]["batch_data"] = "SparkDataFrame"
 
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
 
+        # after getting serializable_dict, restore original batch_data
         dict_obj["runtime_parameters"]["batch_data"] = batch_data
 
         return serializeable_dict
