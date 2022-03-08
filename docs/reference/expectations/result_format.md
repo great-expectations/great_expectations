@@ -63,14 +63,14 @@ Great Expectations supports four values for `result_format`: `BOOLEAN_ONLY`, `BA
 out-of-the-box default is `BASIC`. Each successive value includes more detail and so can support different use 
 cases for working with Great Expectations, including interactive exploratory work and automatic validation.
 
-
+## Fields defined for all Expectations
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
 |    element_count                      |no              |yes             |yes             |yes             |
 |    missing_count                      |no              |yes             |yes             |yes             |
 |    missing_percent                    |no              |yes             |yes             |yes             |
 |    details (dictionary)               |Defined on a per-expectation basis                                 |
-### Fields defined for `column_map_expectation` type expectations:  
+### Fields defined for `column_map_expectation` type Expectations
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
 |    unexpected_count                   |no              |yes             |yes             |yes             |
@@ -81,7 +81,7 @@ cases for working with Great Expectations, including interactive exploratory wor
 |    partial_unexpected_counts          |no              |no              |yes             |yes             |
 |    unexpected_index_list              |no              |no              |no              |yes             |
 |    unexpected_list                    |no              |no              |no              |yes             |
-### Fields defined for `column_aggregate_expectation` type expectations:           
+### Fields defined for `column_aggregate_expectation` type Expectations
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
 |    observed_value                     |no              |yes             |yes             |yes             |
