@@ -24,9 +24,13 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+)
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     GeCloudConfig,
@@ -5459,12 +5463,16 @@ def alice_columnar_table_single_batch(empty_data_context):
 @pytest.fixture
 def alice_columnar_table_single_batch_context(
     monkeypatch,
-    empty_data_context,
+    empty_data_context_stats_enabled,
     alice_columnar_table_single_batch,
 ):
     skip_if_python_below_minimum_version()
 
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
+    # We need our salt to be consistent between runs to ensure idempotent anonymized values
+    context._usage_statistics_handler = UsageStatisticsHandler(
+        context, "00000000-0000-0000-0000-00000000a004", "N/A"
+    )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
     data_path: str = os.path.join(context.root_directory, data_relative_path)
@@ -6453,6 +6461,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -6623,6 +6632,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -6730,8 +6740,8 @@ def quentin_columnar_table_multi_batch():
                 "tolls_amount": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
                 "fare_amount": [
                     [5.842754275, 6.5],
-                    [8.675167517, 9.661311131],
-                    [13.344354435, 15.815389039],
+                    [8.675167517, 9.5750000000],
+                    [13.344354435, 15.650000000],
                 ],
                 "tip_amount": [
                     [0.0, 0.0],
@@ -6740,7 +6750,7 @@ def quentin_columnar_table_multi_batch():
                 ],
                 "total_amount": [
                     [8.2740033, 11.422183043],
-                    [11.358555106, 14.959993149],
+                    [11.2955000, 14.875000000],
                     [16.746263451, 21.327684643],
                 ],
             },
@@ -6761,6 +6771,7 @@ def quentin_columnar_table_multi_batch_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
