@@ -2717,16 +2717,12 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
         "datasource_name": "my_datasource",
         "data_connector_name": "default_runtime_data_connector_name",
         "data_asset_name": "DEFAULT_ASSET_NAME",
-        "batch_identifiers": {
-            "default_identifier_name": "test123"
-        },
-        "runtime_parameters": {
-            "query": "select * from titanic"
-        }
+        "batch_identifiers": {"default_identifier_name": "test123"},
+        "runtime_parameters": {"query": "select * from titanic"},
     }
     validator = context.get_validator(
         batch_request=RuntimeBatchRequest(**batch_request),
-        expectation_suite_name=suite_name
+        expectation_suite_name=suite_name,
     )
     validator.expect_table_row_count_to_equal(
         value={
@@ -2738,16 +2734,11 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     checkpoint_config = {
         "class_name": "SimpleCheckpoint",
         "validations": [
-            {
-                "batch_request": batch_request,
-                "expectation_suite_name": suite_name
-            }
-        ]
+            {"batch_request": batch_request, "expectation_suite_name": suite_name}
+        ],
     }
     checkpoint = SimpleCheckpoint(
-        f"_tmp_checkpoint_{suite_name}",
-        context,
-        **checkpoint_config
+        f"_tmp_checkpoint_{suite_name}", context, **checkpoint_config
     )
     checkpoint_result = checkpoint.run()
-    assert checkpoint_result.get('success') is True
+    assert checkpoint_result.get("success") is True
