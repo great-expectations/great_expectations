@@ -280,6 +280,9 @@ class BatchRequestBase(SerializableDictDot):
             dict_obj["runtime_parameters"]["batch_data"] = "SparkDataFrame"
 
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+
+        dict_obj["runtime_parameters"]["batch_data"] = batch_data
+
         return serializeable_dict
 
     def __deepcopy__(self, memo):
