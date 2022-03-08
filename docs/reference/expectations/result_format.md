@@ -70,7 +70,7 @@ cases for working with Great Expectations, including interactive exploratory wor
 |    missing_count                      |no              |yes             |yes             |yes             |
 |    missing_percent                    |no              |yes             |yes             |yes             |
 |    details (dictionary)               |Defined on a per-expectation basis                                 |
-### Fields defined for `column_map_expectation` type expectations:                                            |
+### Fields defined for `column_map_expectation` type expectations:                                            
 |    unexpected_count                   |no              |yes             |yes             |yes             |
 |    unexpected_percent                 |no              |yes             |yes             |yes             |
 |    unexpected_percent_nonmissing      |no              |yes             |yes             |yes             |
@@ -79,7 +79,7 @@ cases for working with Great Expectations, including interactive exploratory wor
 |    partial_unexpected_counts          |no              |no              |yes             |yes             |
 |    unexpected_index_list              |no              |no              |no              |yes             |
 |    unexpected_list                    |no              |no              |no              |yes             |
-### Fields defined for `column_aggregate_expectation` type expectations:                                      |
+### Fields defined for `column_aggregate_expectation` type expectations:                                     
 |    observed_value                     |no              |yes             |yes             |yes             |
 |    details (e.g. statistical details) |no              |no              |yes             |yes             |
 
