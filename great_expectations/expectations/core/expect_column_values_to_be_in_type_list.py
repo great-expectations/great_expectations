@@ -426,7 +426,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         types.append(real_type)
                     else:
                         potential_type = getattr(type_module, type_)
-                        types.append(real_type)
+                        types.append(potential_type)
                 except AttributeError:
                     logger.debug(f"Unrecognized type: {type_}")
 

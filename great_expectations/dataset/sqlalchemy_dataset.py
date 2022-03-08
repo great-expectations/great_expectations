@@ -1753,7 +1753,7 @@ WHERE
                     else:
                         real_type = potential_type
                 else:
-                    potential_type = getattr(type_module, type_)
+                    real_type = getattr(type_module, type_)
                 success = issubclass(col_type, real_type)
 
             return {"success": success, "result": {"observed_value": col_type.__name__}}
@@ -1813,7 +1813,7 @@ WHERE
                         types.append(real_type)
                     else:
                         potential_type = getattr(type_module, type_)
-                        types.append(real_type)
+                        types.append(potential_type)
                 except AttributeError:
                     logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
