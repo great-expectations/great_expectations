@@ -47,7 +47,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         For example (using default values of "max_unexpected_values" and "min_max_unexpected_values_proportion"):
         Suppose that "map_metric_name" is "column_values.nonnull" and consider the following three Batches of data:
 
-        Batch-0        Batch-1        Barch-2
+        Batch-0        Batch-1        Batch-2
         A B C          A B C          A B C
         1 1 2          1 1 2          1 1 2
         1 2 3          1 2 3          1 2 3
@@ -59,7 +59,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
 
         The intra-Batch adherence to "max_unexpected_values" being 0 gives the following result (1 is True, 0 is False):
 
-        Batch-0        Batch-1        Barch-2
+        Batch-0        Batch-1        Batch-2
         1              0              1
 
         That gives the inter-Batch adherence fraction of 2/3 (0.67).  Since 1/3 >= min_max_unexpected_values_proportion
