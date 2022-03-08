@@ -68,7 +68,7 @@ def add_values_with_json_schema_from_list_in_params(
     target_list = params.get(param_key_with_list)
     if target_list is not None and len(target_list) > 0:
         for i, v in enumerate(target_list):
-            params_with_json_schema["v__" + str(i)] = {
+            params_with_json_schema[f"v__{str(i)}"] = {
                 "schema": {"type": list_values_type},
                 "value": v,
             }

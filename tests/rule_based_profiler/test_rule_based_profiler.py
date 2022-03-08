@@ -81,12 +81,14 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -136,6 +138,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
+                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -148,6 +151,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "truncate_values": {},
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -194,6 +198,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -262,6 +267,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -311,6 +317,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
+                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -321,6 +328,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
+                    "json_serialize": True,
                 },
             ],
         },
@@ -341,6 +349,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
+                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -353,6 +362,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
                     "truncate_values": {},
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -440,6 +450,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -502,12 +513,14 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -557,6 +570,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
+                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -569,6 +583,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "truncate_values": {},
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -640,6 +655,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -678,6 +694,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "truncate_values": {},
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -733,12 +750,14 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_parameter",
                     "metric_name": "my_metric",
+                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -788,6 +807,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
+                    "json_serialize": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -800,6 +820,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "truncate_values": {},
+                    "json_serialize": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -1068,6 +1089,7 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
                         "class_name": "MetricMultiBatchParameterBuilder",
                         "name": "my_parameter",
                         "metric_name": "my_metric",
+                        "json_serialize": True,
                     },
                 ],
                 "expectation_configuration_builders": [

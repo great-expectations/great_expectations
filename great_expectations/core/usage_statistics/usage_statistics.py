@@ -27,6 +27,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 STOP_SIGNAL = object()
 
@@ -83,6 +84,9 @@ class UsageStatisticsHandler:
         from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
             ExpectationSuiteAnonymizer,
         )
+        from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
+            ProfilerRunAnonymizer,
+        )
         from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
             StoreAnonymizer,
         )
@@ -101,6 +105,7 @@ class UsageStatisticsHandler:
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
+        self._profiler_run_anonymizer = ProfilerRunAnonymizer(data_context_id)
 
         try:
             self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
@@ -566,7 +571,55 @@ def get_checkpoint_run_usage_statistics(
             )
         except Exception as e:
             logger.debug(
-                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_checkpoint_run_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+            )
+
+    return payload
+
+
+def get_profiler_run_usage_statistics(
+    profiler: "RuleBasedProfiler",  # noqa: F821
+    variables: Optional[dict] = None,
+    rules: Optional[dict] = None,
+    *args,
+    **kwargs,
+) -> dict:
+    usage_statistics_handler: Optional[
+        UsageStatisticsHandler
+    ] = profiler._usage_statistics_handler
+
+    data_context_id: Optional[str] = None
+    if usage_statistics_handler:
+        data_context_id = usage_statistics_handler._data_context_id
+
+    anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+
+    payload: dict = {}
+
+    if usage_statistics_handler:
+        # noinspection PyBroadException
+        try:
+            profiler_run_anonymizer: "ProfilerRunAnonymizer" = (  # noqa: F821
+                usage_statistics_handler._profiler_run_anonymizer
+            )
+
+            resolved_runtime_config: "RuleBasedProfilerConfig" = (  # noqa: F821
+                RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+                    profiler=profiler,
+                    variables=variables,
+                    rules=rules,
+                )
+            )
+
+            payload: dict = profiler_run_anonymizer.anonymize_profiler_run(
+                profiler_config=resolved_runtime_config
+            )
+        except Exception as e:
+            logger.debug(
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_profiler_run_usage_statistics: Unable to create anonymized_profiler_run payload field"
             )
 
     return payload

@@ -4,6 +4,7 @@ from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from scipy import stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -243,36 +244,96 @@ def compute_quantiles(
         metric_values,
         q=(false_positive_rate / 2),
         axis=0,
-        interpolation="linear",  # can be omitted ("linear" is default)
     )
     upper_quantile = np.quantile(
         metric_values,
         q=1.0 - (false_positive_rate / 2),
         axis=0,
-        interpolation="linear",  # can be omitted ("linear" is default)
     )
     return lower_quantile, upper_quantile
 
 
-def compute_bootstrap_quantiles(
+def compute_bootstrap_quantiles_point_estimate(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+) -> Tuple[Number, Number]:
+    """The winner of our performance testing is selected from the possible candidates:
+    - _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method
+    - _compute_bootstrap_quantiles_point_estimate_custom_mean_method
+    - _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method"""
+    return _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
+        metric_values=metric_values,
+        false_positive_rate=false_positive_rate,
+        n_resamples=n_resamples,
+    )
+
+
+def _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
 ) -> Tuple[Number, Number]:
     """
-    Internal implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
-    See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+    An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
+    parameter of interest (lower and upper quantiles in this case). See
+    https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+
+    This implementation has been replaced by "_compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method"
+    and only remains to demonstrate the performance improvement achieved by correcting for bias. Upon the implementation
+    of a Machine Learning Lifecycle framework, the performance improvement can be documented and this legacy method can
+    be removed from the codebase.
+    """
+    bootstraps: np.ndarray = np.random.choice(
+        metric_values, size=(n_resamples, metric_values.size)
+    )
+    lower_quantiles: Union[np.ndarray, Number] = np.quantile(
+        bootstraps,
+        q=false_positive_rate / 2,
+        axis=1,
+    )
+    lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
+    upper_quantiles: Union[np.ndarray, Number] = np.quantile(
+        bootstraps,
+        q=1.0 - (false_positive_rate / 2),
+        axis=1,
+    )
+    upper_quantile_point_estimate: Number = np.mean(upper_quantiles)
+    return lower_quantile_point_estimate, upper_quantile_point_estimate
+
+
+def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+) -> Tuple[Number, Number]:
+    """
+    An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
+    parameter of interest (lower and upper quantiles in this case). See
+    https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+
+    The methods implemented here can be found in:
+    Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 124-130).
+        Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
 
     This implementation is sub-par compared to the one available from the "SciPy" standard library
-    ("https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"), because it introduces bias and
-    does not handle multi-dimensional statistics (unlike "scipy.stats.bootstrap", which corrects for bias and is
-    vectorized, thus having the ability to accept a multi-dimensional statistic function and process all dimensions).
+    ("https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"), in that it does not handle
+    multi-dimensional statistics. "scipy.stats.bootstrap" is vectorized, thus having the ability to accept a
+    multi-dimensional statistic function and process all dimensions.
 
-    This implementation will be replaced by "scipy.stats.bootstrap" when Great Expectations can be upgraded to use a
-    more up-to-date version of the "scipy" Python package (the currently used version does not have "bootstrap").
+    Unfortunately, as of March 4th, 2022, the SciPy implementation has two issues: 1) it only returns a confidence
+    interval and not a point estimate for the population parameter of interest, which is what we require for our use
+    cases. 2) It can not handle multi-dimensional statistics and correct for bias simultaneously. You must either use
+    one feature or the other.
 
-    Additional future direction (potentially as a contribution submission to the "SciPy" community) include developing
-    enhancements to bootstrapped estimator based on theory presented in "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf":
+    This implementation could only be replaced by "scipy.stats.bootstrap" if Great Expectations drops support for
+    Python 3.6, thereby enabling us to use a more up-to-date version of the "scipy" Python package (the currently used
+    version does not have "bootstrap"). Also, as discussed above, two contributions would need to be made to the SciPy
+    package to enable 1) bias correction for multi-dimensional statistics and 2) a return value of a point estimate for
+    the population parameter of interest (lower and upper quantiles in this case).
+
+    Additional future direction could include developing enhancements to bootstrapped estimator based on theory
+    presented in "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf":
     @article{Andrews2000a,
         added-at = {2008-04-25T10:38:44.000+0200},
         author = {Andrews, Donald W. K. and Buchinsky, Moshe},
@@ -297,23 +358,148 @@ def compute_bootstrap_quantiles(
     computing the stopping criterion, expressed as the optimal number of bootstrap samples, needed to achieve a maximum
     probability that the value of the statistic of interest will be minimally deviating from its actual (ideal) value.
     """
+    lower_quantile_pct: float = false_positive_rate / 2
+    upper_quantile_pct: float = 1.0 - false_positive_rate / 2
+
+    sample_lower_quantile: Number = np.quantile(metric_values, q=lower_quantile_pct)
+    sample_upper_quantile: Number = np.quantile(metric_values, q=upper_quantile_pct)
+
     bootstraps: np.ndarray = np.random.choice(
         metric_values, size=(n_resamples, metric_values.size)
     )
-    lower_quantile = np.mean(
-        np.quantile(
-            bootstraps,
+
+    bootstrap_lower_quantiles: Union[np.ndarray, Number] = np.quantile(
+        bootstraps,
+        q=lower_quantile_pct,
+        axis=1,
+    )
+    bootstrap_lower_quantile_point_estimate: Number = np.mean(bootstrap_lower_quantiles)
+    bootstrap_lower_quantile_standard_error: Number = np.std(bootstrap_lower_quantiles)
+    bootstrap_lower_quantile_bias: Number = (
+        bootstrap_lower_quantile_point_estimate - sample_lower_quantile
+    )
+
+    # Bias / Standard Error > 0.25 is a rule of thumb for when to apply bias correction.
+    # See:
+    # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
+    #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
+    lower_quantile_bias_corrected_point_estimate: Number
+    if bootstrap_lower_quantile_bias / bootstrap_lower_quantile_standard_error <= 0.25:
+        lower_quantile_bias_corrected_point_estimate = (
+            bootstrap_lower_quantile_point_estimate
+        )
+    else:
+        lower_quantile_bias_corrected_point_estimate = (
+            bootstrap_lower_quantile_point_estimate - bootstrap_lower_quantile_bias
+        )
+
+    bootstrap_upper_quantiles: Union[np.ndarray, Number] = np.quantile(
+        bootstraps,
+        q=upper_quantile_pct,
+        axis=1,
+    )
+    bootstrap_upper_quantile_point_estimate: Number = np.mean(bootstrap_upper_quantiles)
+    bootstrap_upper_quantile_standard_error: Number = np.std(bootstrap_upper_quantiles)
+    bootstrap_upper_quantile_bias: Number = (
+        bootstrap_upper_quantile_point_estimate - sample_upper_quantile
+    )
+
+    # Bias / Standard Error > 0.25 is a rule of thumb for when to apply bias correction.
+    # See:
+    # Efron, B., & Tibshirani, R. J. (1993). Estimates of bias. An Introduction to the Bootstrap (pp. 128).
+    #         Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
+    upper_quantile_bias_corrected_point_estimate: Number
+    if bootstrap_upper_quantile_bias / bootstrap_upper_quantile_standard_error <= 0.25:
+        upper_quantile_bias_corrected_point_estimate = (
+            bootstrap_upper_quantile_point_estimate
+        )
+    else:
+        upper_quantile_bias_corrected_point_estimate = (
+            bootstrap_upper_quantile_point_estimate - bootstrap_upper_quantile_bias
+        )
+
+    return (
+        lower_quantile_bias_corrected_point_estimate,
+        upper_quantile_bias_corrected_point_estimate,
+    )
+
+
+def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+    method: Optional[str] = "BCa",
+):
+    """
+    SciPy implementation of the BCa confidence interval for the population quantile. Unfortunately, as of
+    March 4th, 2022, this implementation has two issues:
+        1) it only returns a confidence interval and not a point estimate for the population parameter of interest,
+           which is what we require for our use cases (the attempt below tries to "back out" the statistic from the
+           confidece interval by taking the midpoint of the interval).
+        2) It can not handle multi-dimensional statistics and correct for bias simultaneously. You must either use
+           one feature or the other.
+
+    This implementation could only be used if Great Expectations drops support for Python 3.6, thereby enabling us
+    to use a more up-to-date version of the "scipy" Python package (the currently used version does not have
+    "bootstrap"). Also, as discussed above, two contributions would need to be made to the SciPy package to enable
+    1) bias correction for multi-dimensional statistics and 2) a return value of a point estimate for the population
+    parameter of interest (lower and upper quantiles in this case).
+    """
+    bootstraps: tuple = (metric_values,)  # bootstrap samples must be in a sequence
+
+    lower_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
+        bootstraps,
+        lambda data: np.quantile(
+            data,
             q=false_positive_rate / 2,
-            axis=1,
-            interpolation="linear",  # can be omitted ("linear" is default)
-        )
+        ),
+        vectorized=False,
+        confidence_level=1.0 - false_positive_rate,
+        n_resamples=n_resamples,
+        method=method,
     )
-    upper_quantile = np.mean(
-        np.quantile(
-            bootstraps,
+    upper_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
+        bootstraps,
+        lambda data: np.quantile(
+            data,
             q=1.0 - (false_positive_rate / 2),
-            axis=1,
-            interpolation="linear",  # can be omitted ("linear" is default)
-        )
+        ),
+        vectorized=False,
+        confidence_level=1.0 - false_positive_rate,
+        n_resamples=n_resamples,
+        method=method,
     )
-    return lower_quantile, upper_quantile
+
+    # The idea that we can take the midpoint of the confidence interval is based on the fact that we think the
+    # confidence interval was built from a symmetrical distribution. We think the distribution is normal due to
+    # the implications of the Central Limit Theorem (CLT) (https://en.wikipedia.org/wiki/Central_limit_theorem) on
+    # the bootstrap samples.
+    # Unfortunately, the assumption that the CLT applies, does not hold in all cases. The bias-corrected and accelerated
+    # (BCa) confidence interval computed using scipy.stats.bootstrap attempts to compute the "acceleration" as a
+    # correction, because the standard normal approximation (CLT) assumes that the standard error of the bootstrap
+    # quantiles (theta-hat) is the same for all parameters (theta). The acceleration (which is the rate of change of
+    # the standard error of the quantile point estimate) is not a perfect correction, and therefore the assumption that
+    # this interval is built from a normal distribution does not always hold.
+    # See:
+    #
+    # Efron, B., & Tibshirani, R. J. (1993). The BCa method. An Introduction to the Bootstrap (pp. 184-188).
+    #     Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
+    #
+    # For an in-depth look at how the BCa interval is constructed and you will find the points made above on page 186.
+    lower_quantile_confidence_interval: stats._bootstrap.BootstrapResult.ConfidenceInterval = (
+        lower_quantile_bootstrap_result.confidence_interval
+    )
+    lower_quantile_point_estimate: np.float64 = np.mean(
+        [
+            lower_quantile_confidence_interval.low,
+            lower_quantile_confidence_interval.high,
+        ]
+    )
+    upper_quantile_confidence_interal: stats._bootstrap.BootstrapResult.ConfidenceInterval = (
+        upper_quantile_bootstrap_result.confidence_interval
+    )
+    upper_quantile_point_estimate: np.float64 = np.mean(
+        [upper_quantile_confidence_interal.low, upper_quantile_confidence_interal.high]
+    )
+
+    return lower_quantile_point_estimate, upper_quantile_point_estimate

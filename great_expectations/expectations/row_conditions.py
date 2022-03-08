@@ -29,7 +29,7 @@ def _set_notnull(s, l, t):
 
 column_name = Combine(
     Suppress(Literal('col("'))
-    + Word(alphas, alphanums + "_.").setResultsName("column")
+    + Word(alphas, f"{alphanums}_.").setResultsName("column")
     + Suppress(Literal('")'))
 )
 gt = Literal(">")
@@ -39,9 +39,9 @@ le = Literal("<=")
 eq = Literal("==")
 ops = (gt ^ lt ^ ge ^ le ^ eq).setResultsName("op")
 fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?").setResultsName("fnumber")
-condition_value = Suppress('"') + Word(alphanums + ".").setResultsName(
+condition_value = Suppress('"') + Word(f"{alphanums}.").setResultsName(
     "condition_value"
-) + Suppress('"') ^ Suppress("'") + Word(alphanums + ".").setResultsName(
+) + Suppress('"') ^ Suppress("'") + Word(f"{alphanums}.").setResultsName(
     "condition_value"
 ) + Suppress(
     "'"

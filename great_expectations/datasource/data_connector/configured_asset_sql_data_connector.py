@@ -298,7 +298,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         if "schema_name" in data_asset_dict:
             schema_name_str: str = data_asset_dict["schema_name"]
             if schema_name_str in table_name:
-                table_name = table_name.split(schema_name_str + ".")[1]
+                table_name = table_name.split(f"{schema_name_str}.")[1]
 
         return table_name
 

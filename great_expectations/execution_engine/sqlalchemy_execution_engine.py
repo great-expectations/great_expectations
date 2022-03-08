@@ -281,7 +281,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect_module = import_library_module(
-                module_name="sqlalchemy.dialects." + self.engine.dialect.name
+                module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
         elif self.engine.dialect.name.lower() == "snowflake":
