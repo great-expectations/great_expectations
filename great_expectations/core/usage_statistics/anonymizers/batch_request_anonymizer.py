@@ -2,8 +2,6 @@ import copy
 import logging
 from typing import Any, Dict, List, Optional, Set, Union
 
-import pandas as pd
-
 from great_expectations.core.batch import (
     BatchRequest,
     get_batch_request_from_acceptable_arguments,
@@ -25,14 +23,6 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (  #
 
 logger = logging.getLogger(__name__)
 
-try:
-    import pyspark
-except ImportError:
-    pyspark = None
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
-
 
 class BatchRequestAnonymizer(Anonymizer):
     def __init__(self, salt=None):
@@ -48,14 +38,6 @@ class BatchRequestAnonymizer(Anonymizer):
             batch_request: Union[
                 BatchRequest
             ] = get_batch_request_from_acceptable_arguments(*args, **kwargs)
-            # batch_data = batch_request.runtime_parameters.get("batch_data")
-            #
-            # if isinstance(batch_data, pd.DataFrame):
-            #     batch_request.runtime_parameters["batch_data"] = "PandasDataFrame"
-            #
-            # if pyspark and isinstance(batch_data, pyspark.sql.DataFrame):
-            #     batch_request.runtime_parameters["batch_data"] = "SparkDataFrame"
-
             batch_request_dict: dict = batch_request.to_json_dict()
 
             anonymized_batch_request_dict: Optional[
