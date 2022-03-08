@@ -108,7 +108,9 @@ class ExpectColumnSumToBe(ColumnExpectation):
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "tags": [],  # Tags for this Expectation in the Gallery
+        "tags": [
+            "column aggregate expectation",
+        ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@joshua-stauffer",  # Don't forget to add your github handle here!
         ],
