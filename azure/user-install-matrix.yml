@@ -32,7 +32,7 @@ jobs:
 
         - script: |
             python -m pip install --upgrade pip==21.3.1
-            pip install --no-binary :all: --no-use-pep517 great_expectations
+            pip install --no-binary :all: great_expectations
           displayName: 'Install Great Expectations'
 
         - script: |
