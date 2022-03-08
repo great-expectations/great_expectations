@@ -494,6 +494,58 @@ class ExecutionEngine(ABC):
             template_arguments=template_arguments,
         )
 
+    @staticmethod
+    def _split_table_metric_domain_kwargs(
+        domain_kwargs: Dict,
+        domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
+    ) -> Tuple[Dict, Dict]:
+        """Split domain_kwargs for table domain types into compute and accessor domain kwargs.
+
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys: keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+        assert (
+            domain_type == MetricDomainTypes.TABLE
+        ), "This method only supports MetricDomainTypes.TABLE"
+
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
+
+        if accessor_keys is not None and len(list(accessor_keys)) > 0:
+            for key in accessor_keys:
+                accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+        if len(domain_kwargs.keys()) > 0:
+            # Warn user if kwarg not "normal".
+            unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
+                {
+                    "batch_id",
+                    "table",
+                    "row_condition",
+                    "condition_parser",
+                }
+            )
+            if len(unexpected_keys) > 0:
+                unexpected_keys_str: str = ", ".join(
+                    map(lambda element: f'"{element}"', unexpected_keys)
+                )
+                logger.warning(
+                    f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
+                )
+        return compute_domain_kwargs, accessor_domain_kwargs
+
 
 class MetricPartialFunctionTypes(Enum):
     MAP_FN = "map_fn"

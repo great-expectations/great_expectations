@@ -95,7 +95,7 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "rendered_data_docs": "rendered_data_doc",
 }
 
-MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES: int = 3
+MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES: int = 2
 
 
 def pluralize(singular_ge_noun):
