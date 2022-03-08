@@ -65,9 +65,9 @@ The Data Context makes it easy to manage configuration of its own top-level comp
 
 The Data Context doesn't just give you convenient ways to access and configure components.  It also provides the ability to *create* top-level components such as Datasources, Checkpoints, and Expectation Suites and manage where the information about those components is stored.  
 
-In the Getting Started Tutorial, everything was created locally and stored.  This is a simple way to get started with Great Expectations.  For production deployments, however, you'll probably want to swap out some of the components that were used in the Getting Started Tutorial for others that correspond to your source data systems and production environment.  This may include storing information about those components in something other than your local environment.  You can see several soup-to-nuts examples of how to do this for specific environments and source data systems in the [Deployment Patterns guides](../deployment_patterns/index.md).
+In the Getting Started Tutorial, everything was created locally and stored.  This is a simple way to get started with Great Expectations.  For production deployments, however, you'll probably want to swap out some of the components that were used in the Getting Started Tutorial for others that correspond to your source data systems and production environment.  This may include storing information about those components in something other than your local environment.  You can see several soup-to-nuts examples of how to do this for specific environments and source data systems in the [Reference Architecture guides](../deployment_patterns/index.md).
 
-If the exact deployment pattern you want to follow isn't documented in a Deployment Pattern, you can see details for configuring specific components that component's related how-to guides.
+If the exact deployment pattern you want to follow isn't documented in a Reference Architecture, you can see details for configuring specific components that component's related how-to guides.
 
 ### Great Expectations Cloud compatability
 
