@@ -276,6 +276,7 @@ class BatchRequestBase(SerializableDictDot):
         if isinstance(batch_data, pd.DataFrame):
             dict_obj["runtime_parameters"]["batch_data"] = "PandasDataFrame"
 
+        # pyspark is an optional dependency, hence the check
         if pyspark and isinstance(batch_data, pyspark.sql.DataFrame):
             dict_obj["runtime_parameters"]["batch_data"] = "SparkDataFrame"
 
