@@ -36,10 +36,12 @@ jobs:
         - script: |
             conda create --yes --name ge_dev
           displayName: Create Anaconda environment
+
         - script: |
             source activate ge_dev
             conda install --yes --name ge_dev -c conda-forge great-expectations
           displayName: 'Install Great Expectations'
+
         - script: |
             source activate ge_dev
             great_expectations --version
