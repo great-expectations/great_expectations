@@ -1,40 +1,39 @@
 parameters:
-  vmImage: ["ubuntu-latest", "macOS-latest", "windows-latest"]
+  vmImage: vmImage
   pythonVersion: ["3.7", "3.8", "3.9", "3.10"]
 
 jobs:
-  - ${{ each vmImage in parameters.vmImage }}:
-    - ${{ each pythonVersion in parameters.pythonVersion }}:
-      - job:
-        displayName: pip_dev_install_${{ vmImage }}_${{ pythonVersion }}
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: ${{ pythonVersion }}
-            displayName: Use Python ${{ pythonVersion }}
+  - ${{ each pythonVersion in parameters.pythonVersion }}:
+    - job:
+      displayName: pip_dev_install_${{ vmImage }}_${{ pythonVersion }}
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: ${{ pythonVersion }}
+          displayName: Use Python ${{ pythonVersion }}
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+        - bash: python -m pip install --upgrade pip==21.3.1
+          displayName: 'Update pip'
 
-          - script: |
-              pip install  --requirement requirements-dev.txt --constraint constraints-dev.txt
-              pip install  .
-            displayName: 'Install dependencies'
+        - script: |
+            pip install  --requirement requirements-dev.txt --constraint constraints-dev.txt
+            pip install  .
+          displayName: 'Install dependencies'
 
-          - script: |
-              echo "Tests go here!"
-              # pip install pytest pytest-cov pytest-azurepipelines
-              # pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-            displayName: 'pytest'
+        - script: |
+            echo "Tests go here!"
+            # pip install pytest pytest-cov pytest-azurepipelines
+            # pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+          displayName: 'pytest'
 
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: Publish test results for Python ${{ pythonVersion }}
+        - task: PublishTestResults@2
+          condition: succeededOrFailed()
+          inputs:
+            testResultsFiles: '**/test-*.xml'
+            testRunTitle: Publish test results for Python ${{ pythonVersion }}
 
-          - task: PublishCodeCoverageResults@1
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+        - task: PublishCodeCoverageResults@1
+          inputs:
+            codeCoverageTool: Cobertura
+            summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+            reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'

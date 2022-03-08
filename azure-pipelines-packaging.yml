@@ -30,10 +30,14 @@ schedules:
 #     - develop
 
 stages:
-  - stage: Foo
+  - stage: user_install_linux
     jobs:
       - template: azure/matrix-user-install.yml
+        parameters:
+          vmImage: "ubuntu-latest"
 
-  - stage: Bar
+  - stage: dev_install_linux
     jobs:
       - template: azure/matrix-dev-install.yml
+        parameters:
+          vmImage: "ubuntu-latest"
