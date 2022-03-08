@@ -53,7 +53,7 @@ stages:
       - template: azure/dev-install-matrix.yml
         parameters:
           vmImage: "ubuntu-latest"
-          db: $(resources.containers.postgres)
+          db: ${{ resources.containers.postgres }}
 
   # - stage: user_install_macOS
   #   dependsOn: []
