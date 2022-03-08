@@ -49,6 +49,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         candidate_regexes: Optional[Union[Iterable[str], str]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -61,13 +62,15 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             candidate_regexes: a list of candidate regex strings that will REPLACE the default
             batch_list: Optional[List[Batch]] = None,
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
             name=name,
             batch_list=batch_list,
-            data_context=data_context,
             batch_request=batch_request,
+            json_serialize=json_serialize,
+            data_context=data_context,
         )
 
         self._metric_domain_kwargs = metric_domain_kwargs

@@ -244,9 +244,7 @@ Please check your config."""
                     f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
                 )
             logger.debug(
-                "Fetching s3 object. Bucket: {} Key: {}".format(
-                    s3_url.bucket, s3_url.key
-                )
+                f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}"
             )
             reader_fn = self._get_reader_fn(reader_method, s3_url.key)
             buf = BytesIO(s3_object["Body"].read())

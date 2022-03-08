@@ -92,6 +92,7 @@ class ParameterBuilder(Builder, ABC):
         name: str,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -103,6 +104,7 @@ class ParameterBuilder(Builder, ABC):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -112,6 +114,8 @@ class ParameterBuilder(Builder, ABC):
         )
 
         self._name = name
+
+        self._json_serialize = json_serialize
 
     def build_parameters(
         self,
@@ -137,9 +141,20 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
+        # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        json_serialize: bool = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.json_serialize,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=parameters,
+        )
+
         parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
-                "value": convert_to_json_serializable(data=computed_parameter_value),
+                "value": convert_to_json_serializable(data=computed_parameter_value)
+                if json_serialize
+                else computed_parameter_value,
                 "details": parameter_computation_details,
             },
         }
@@ -156,6 +171,14 @@ class ParameterBuilder(Builder, ABC):
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def json_serialize(self) -> Union[str, bool]:
+        return self._json_serialize
+
+    @property
+    def data_context(self) -> "DataContext":  # noqa: F821
+        return self._data_context
 
     """
     Full getter/setter accessors for "batch_request" and "batch_list" are for configuring ParameterBuilder dynamically.
@@ -178,10 +201,6 @@ class ParameterBuilder(Builder, ABC):
     @batch_list.setter
     def batch_list(self, value: List[Batch]) -> None:
         self._batch_list = value
-
-    @property
-    def data_context(self) -> "DataContext":  # noqa: F821
-        return self._data_context
 
     @abstractmethod
     def _build_parameters(

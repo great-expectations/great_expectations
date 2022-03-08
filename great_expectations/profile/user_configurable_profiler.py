@@ -634,9 +634,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             )
         except KeyError:  # if observed_value value is not set
             logger.error(
-                "Failed to get cardinality of column {:s} - continuing...".format(
-                    column
-                )
+                f"Failed to get cardinality of column {column:s} - continuing..."
             )
         # Previously, if we had 25 possible categories out of 1000 rows, this would comes up as many, because of its
         #  percentage, so it was tweaked here, but is still experimental.
