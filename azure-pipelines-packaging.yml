@@ -30,4 +30,4 @@ schedules:
 #     - develop
 
 jobs:
-  - template: matrix.yml
+  - template: azure/matrix.yml
