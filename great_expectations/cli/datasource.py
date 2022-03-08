@@ -319,7 +319,7 @@ data_connectors:
     class_name: InferredAssetFilesystemDataConnector
     base_directory: {self.base_path}
     default_regex:
-      group_names:
+      group_names: 
         - data_asset_name
       pattern: (.*)
   default_runtime_data_connector_name:
