@@ -3,7 +3,7 @@ parameters:
   pythonVersion: ["3.7", "3.8", "3.9", "3.10"]
 
 jobs:
-  - ${{ each vm in parameters.vmImage }}:
+  - ${{ each vmImage in parameters.vmImage }}:
     - ${{ each pythonVersion in parameters.pythonVersion }}:
       - job:
         displayName: pip_${{ vmImage }}_${{ pythonVersion }}
