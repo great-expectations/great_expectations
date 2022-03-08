@@ -172,8 +172,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
             if path is None:
                 raise BatchKwargsError(
-                    "Unable to build batch kwargs from for asset '%s'"
-                    % data_asset_name,
+                    f"Unable to build batch kwargs from for asset '{data_asset_name}'",
                     batch_parameters,
                 )
             return self._build_batch_kwargs_from_path(path, **batch_parameters)

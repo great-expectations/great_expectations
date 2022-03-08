@@ -167,7 +167,7 @@ def select_data_connector_name(
     )
     choices += "\n"  # Necessary for consistent spacing between prompts
     option_selection: str = click.prompt(
-        msg_prompt_select_data_connector_name + "\n" + choices,
+        f"{msg_prompt_select_data_connector_name}\n{choices}",
         type=click.Choice(
             [str(i) for i, data_connector_name in enumerate(data_connector_names, 1)]
         ),
@@ -391,7 +391,7 @@ Would you like to continue?"""
         # bigquery table needs to contain the project id if it differs from the credentials project
         if len(data_asset_name.split(".")) < 3:
             project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
-            data_asset_name = "{}.{}".format(project_id, data_asset_name)
+            data_asset_name = f"{project_id}.{data_asset_name}"
 
     return data_asset_name
 
@@ -433,7 +433,7 @@ def _get_batch_spec_passthrough(
             bigquery_temp_table: str = click.prompt(
                 "Great Expectations will create a table to use for "
                 "validation." + os.linesep + "Please enter a name for this table: ",
-                default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8],
+                default=f"SOME_PROJECT.SOME_DATASET.ge_tmp_{str(uuid.uuid4())[:8]}",
             )
             if bigquery_temp_table:
                 batch_spec_passthrough.update(
