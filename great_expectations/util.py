@@ -1439,3 +1439,12 @@ def probabilistic_test(
             raise assertion_error
 
     return run_pytest_method
+
+
+def get_pyathena_potential_type(type_module, type_):
+    if version.parse(type_module.pyathena.__version__) >= version.parse("2.5.0"):
+        # Types are now nested in type_module.types
+        potential_type = getattr(type_module.types, type_)
+    else:
+        potential_type = getattr(type_module, type_)
+    return potential_type

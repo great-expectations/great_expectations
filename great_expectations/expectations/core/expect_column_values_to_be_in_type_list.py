@@ -31,6 +31,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.util import get_pyathena_potential_type
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -427,7 +428,17 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         real_type = potential_type
                     types.append(real_type)
                 except AttributeError:
-                    logger.debug("Unrecognized type: %s" % type_)
+                    if type_module.__name__ == "pyathena.sqlalchemy_athena":
+                        potential_type = get_pyathena_potential_type(type_module, type_)
+                        # In the case of the PyAthena dialect we need to verify that
+                        # the type returned is indeed a type and not an instance.
+                        if not inspect.isclass(potential_type):
+                            real_type = type(potential_type)
+                        else:
+                            real_type = potential_type
+                        types.append(real_type)
+                    else:
+                        logger.debug("Unrecognized type: %s" % type_)
             if len(types) == 0:
                 logger.warning(
                     "No recognized sqlalchemy types in type_list for current dialect."
