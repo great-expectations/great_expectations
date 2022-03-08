@@ -143,7 +143,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 * Once the local PostgreSQL container is working, the tests against the PostgreSQL backend can be run using the `--postgresql` flag. 
 
   ````console
-  pytest -v --postgresql tests/
+  pytest -v --postgresql
   ````
 #### If you want to develop against local mysql:
 
@@ -162,7 +162,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 * Once the local mysql container is working, the tests against the mysql backend can be run using the `--mysql` flag. 
 
   ````console
-  pytest -v --mysql tests/
+  pytest -v --mysql
   ````
 
 * Once you’re done testing, you can shut down your mysql container by running `docker-compose down` from the same directory.
