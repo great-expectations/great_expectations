@@ -31,6 +31,8 @@ parameters:
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
+      services:
+        postgres: postgres
       displayName: lightweight${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
@@ -42,8 +44,8 @@ jobs:
           displayName: 'Update pip'
 
         - script: |
-            pip install  --requirement requirements-dev.txt --constraint constraints-dev.txt
-            pip install  .
+            pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
+            pip install .
           displayName: 'Install dependencies'
 
         - script: |
@@ -80,7 +82,7 @@ jobs:
 
         - script: |
             pip install pytest pytest-cov pytest-azurepipelines
-            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
           displayName: 'pytest'
 
         - task: PublishTestResults@2
