@@ -5,8 +5,43 @@ Changelog
 #########
 
 
-develop
+0.14.9
 -----------------
+* [FEATURE] Enable Simultaneous Execution of all Metric Computations for ParameterBuilder implementations in Rule-Based Profiler (#4282)
+* [FEATURE] Update print_diagnostic_checklist with an option to show any failed tests (#4288)
+* [FEATURE] Self-Initializing Expectations (implemented for three example expectations). (#4258)
+* [FEATURE] ValueSetMultiBatchParameterBuilder and CategoricalColumnDomainBuilder (#4269)
+* [FEATURE] Remove changelog-bot GitHub Action (#4297)
+* [FEATURE] Add requirements-dev-lite.txt and update tests/docs (#4273)
+* [FEATURE] Enable All ParameterBuilder and DomainBuilder classes to accept batch_list generically (#4302)
+* [FEATURE] Enable Probabilistic Tests To Retry upon Assertion Failure (#4308)
+* [FEATURE] Update usage stats schema to account for RBP's run() payload (#4266)
+* [FEATURE] ProfilerRunAnonymizer (#4264)
+* [FEATURE] Enable Expectation "expect_column_values_to_be_in_set" to be Self-Initializing (#4318)
+* [BUGFIX] Add redirect for removed Spark EMR page (#4280)
+* [BUGFIX] `ConfiguredAssetSqlDataConnector` now correctly handles `schema` and `prefix`/`suffix` (#4268)
+* [BUGFIX] Fixes Expectation Diagnostics failing on multi-line docstrings with leading linebreaks (#4286)
+* [BUGFIX] Respect test backends (#4287)
+* [BUGFIX] Skip test__generate_expectations_tests__xxx tests when sqlalchemy isn't there (#4300)
+* [BUGFIX] test_backends integration test fix and supporting docs code ref fixes (#4306)
+* [BUGFIX] Update `deep_filter_properties_iterable` to ensure that empty values are cleaned (#4298)
+* [BUGFIX] Fixes validate_configuration checking in diagnostics (#4307)
+* [BUGFIX] Update test output that should be returned from generate_diagnostic_checklist (#4317)
+* [BUGFIX] Standardizes imports in expectation templates and examples (#4320)
+* [BUGFIX] Only validate row_condition if not None (#4329)
+* [BUGFIX] Fix PEP273 Windows issue (#4328)
+* [DOCS] Fixes misc. verbiage & typos in new Custom Expectation docs (#4283)
+* [DOCS] fix formatting in configuration details block of Getting Started (#4289) (thanks @afeld)
+* [DOCS] Fixes imports and code refs to expectation templates (#4314)
+* [DOCS] Update creating_custom_expectations/overview.md (#4278) (thanks @binarytom)
+* [CONTRIB] CapitalOne Dataprofiler expectations (#4174) (thanks @taylorfturner)
+* [CONTRIB] ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint (#4284)
+* [CONTRIB] ExpectColumnValuesToBeValidDegreeDecimalCoordinates (#4319)
+* [MAINTENANCE] Refactor parameter setting for simpler ParameterBuilder interface (#4299)
+* [MAINTENANCE] SimpleDateTimeFormatStringParameterBuilder and general RBP example config updates (#4304)
+* [MAINTENANCE] Make adherence to Marshmallow Schema more robust (#4325)
+* [MAINTENANCE] Refactor rule based profiler to keep objects/utilities within intended scope (#4331)
+* [MAINTENANCE] Dependabot version upgrades (#4253, #4231, #4058, #4041, #3916, #3886, #3583, #2856, #3370, #3216, #2935, #2855, #3302, #4008, #4252)
 
 0.14.8
 -----------------

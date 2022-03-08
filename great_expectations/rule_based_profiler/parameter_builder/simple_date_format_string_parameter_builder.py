@@ -2,6 +2,9 @@ import logging
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     AttributedResolvedMetrics,
     MetricComputationResult,
@@ -9,9 +12,6 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +94,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        json_serialize: bool = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -108,13 +109,15 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             candidate_strings: a list of candidate date format strings that will replace the default
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
             name=name,
-            data_context=data_context,
             batch_list=batch_list,
             batch_request=batch_request,
+            json_serialize=json_serialize,
+            data_context=data_context,
         )
 
         self._metric_domain_kwargs = metric_domain_kwargs
