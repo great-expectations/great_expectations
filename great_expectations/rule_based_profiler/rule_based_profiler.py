@@ -154,12 +154,20 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self._usage_statistics_handler = usage_statistics_handler
 
         # Necessary to annotate ExpectationSuite during `run()`
-        self._citation = {
-            "name": name,
-            "config_version": config_version,
-            "variables": variables,
-            "rules": rules,
-        }
+        if isinstance(rules, dict) or rules is None:
+            self._citation = {
+                "name": name,
+                "config_version": config_version,
+                "variables": variables,
+                "rules": rules,
+            }
+        elif isinstance(rules, Rule):
+            self._citation = {
+                "name": name,
+                "config_version": config_version,
+                "variables": variables,
+                "rules": rules.to_json_dict(),
+            }
 
         # Convert variables argument to ParameterContainer
         _variables: ParameterContainer = build_parameter_container_for_variables(
@@ -829,13 +837,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def to_json_dict(self) -> dict:
         rule: Rule
+
+        variables_dict: dict = self.variables.to_dict()
+        if variables_dict["parameter_nodes"] is not None:
+            variables_dict = variables_dict["parameter_nodes"]["variables"]["variables"]
         serializeable_dict: dict = {
             "class_name": self.__class__.__name__,
             "module_name": self.__class__.__module__,
             "name": self.name,
-            "variables": self.variables.to_dict()["parameter_nodes"]["variables"][
-                "variables"
-            ],
+            "variables": variables_dict,
             "rules": [rule.to_json_dict() for rule in self.rules],
         }
         return serializeable_dict
@@ -961,6 +971,25 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             usage_statistics_handler=usage_statistics_handler,
         )
 
+    def save_config(self) -> None:
+        """
+        Saves config by bringing configuration in current RuleBasedProfiler object (such as additional Rules and variables) with the profiler_config in self._profiler_config.
+        """
+        rules: List[Rule] = self.rules
+        resulting_rules: Dict[str, Dict[str, Any]] = {}
+        rule: Rule
+        for rule in rules:
+            resulting_rules[rule.name] = rule.to_dict()
+
+        # TODO: This Config passes the variables directly without updating. This will be updated in subsequent PR.
+        profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+            name=self.name,
+            config_version=self._config_version,
+            variables=self.variables,
+            rules=resulting_rules,
+        )
+        self._profiler_config = profiler_config
+
     @staticmethod
     def run_profiler(
         data_context: "DataContext",  # noqa: F821
@@ -1018,6 +1047,16 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             include_citation=include_citation,
         )
         return result
+
+    def add_rule(self, rule: Rule) -> None:
+        """
+        Add Rule object to existing profiler object by appending to self._rules. In cases where a Rule with the same name exists, it is updated.
+        """
+        for index in range(len(self._rules)):
+            existing_rule: Rule = self.rules[index]
+            if existing_rule.name == rule.name:
+                self._rules.pop(index)
+        self._rules.append(rule)
 
     def _generate_rule_overrides_from_batch_request(
         self,
