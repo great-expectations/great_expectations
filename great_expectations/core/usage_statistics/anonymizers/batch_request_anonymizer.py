@@ -9,6 +9,7 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.util import deep_filter_properties_iterable
+
 from great_expectations.core.usage_statistics.anonymizers.types.base import (  # isort:skip
     GETTING_STARTED_DATASOURCE_NAME,
     GETTING_STARTED_EXPECTATION_SUITE_NAME,
