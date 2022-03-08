@@ -7,7 +7,7 @@ import pytest
 import scipy.stats as stats
 
 
-def _generate_distribution_parameters(
+def generate_distribution_parameters(
     false_positive_rate: np.float64,
 ) -> Dict[str, Dict[str, Number]]:
     normal_mean: int = 5000
@@ -106,7 +106,7 @@ def _generate_distribution_parameters(
     }
 
 
-def _generate_distribution_samples(
+def generate_distribution_samples(
     distribution_parameters: Dict[str, Dict[str, Number]], size: Optional[int] = 36
 ) -> pd.DataFrame:
     data: Dict[str, np.ndarray] = {
@@ -157,8 +157,8 @@ def bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive():
     false_positive_rate: np.float64 = np.float64(0.01)
     distribution_parameters: Dict[
         str, Dict[str, Number]
-    ] = _generate_distribution_parameters(false_positive_rate=false_positive_rate)
-    distribution_samples: pd.DataFrame = _generate_distribution_samples(
+    ] = generate_distribution_parameters(false_positive_rate=false_positive_rate)
+    distribution_samples: pd.DataFrame = generate_distribution_samples(
         distribution_parameters=distribution_parameters, size=1000
     )
     return {
@@ -173,8 +173,8 @@ def bootstrap_distribution_parameters_and_20_samples_with_01_false_positive():
     false_positive_rate: np.float64 = np.float64(0.01)
     distribution_parameters: Dict[
         str, Dict[str, Number]
-    ] = _generate_distribution_parameters(false_positive_rate=false_positive_rate)
-    distribution_samples: pd.DataFrame = _generate_distribution_samples(
+    ] = generate_distribution_parameters(false_positive_rate=false_positive_rate)
+    distribution_samples: pd.DataFrame = generate_distribution_samples(
         distribution_parameters=distribution_parameters, size=20
     )
     return {

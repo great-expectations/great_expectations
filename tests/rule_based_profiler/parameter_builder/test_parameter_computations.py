@@ -27,7 +27,7 @@ RTOL: float = 1.0e-7
 ATOL: float = 1.0e-2
 
 
-def _compute_quantile_root_mean_squared_error_of_bootstrap(
+def compute_quantile_root_mean_squared_error_of_bootstrap(
     method: Callable,
     false_positive_rate: np.float64,
     distribution_parameters: Dict[str, Dict[str, Number]],
@@ -284,7 +284,7 @@ def test_compare_bootstrap_small_sample_point_estimate_performance(
     (
         lower_quantile_root_mean_squared_error_mean,
         upper_quantile_root_mean_squared_error_mean,
-    ) = _compute_quantile_root_mean_squared_error_of_bootstrap(
+    ) = compute_quantile_root_mean_squared_error_of_bootstrap(
         method=_compute_bootstrap_quantiles_point_estimate_custom_mean_method,
         false_positive_rate=false_positive_rate,
         distribution_parameters=distribution_parameters,
@@ -294,7 +294,7 @@ def test_compare_bootstrap_small_sample_point_estimate_performance(
     (
         lower_quantile_root_mean_squared_error_bias_corrected,
         upper_quantile_root_mean_squared_error_bias_corrected,
-    ) = _compute_quantile_root_mean_squared_error_of_bootstrap(
+    ) = compute_quantile_root_mean_squared_error_of_bootstrap(
         method=_compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method,
         false_positive_rate=false_positive_rate,
         distribution_parameters=distribution_parameters,
@@ -321,7 +321,7 @@ def test_compare_bootstrap_small_sample_point_estimate_performance(
         (
             lower_quantile_root_mean_squared_error_scipy,
             upper_quantile_root_mean_squared_error_scipy,
-        ) = _compute_quantile_root_mean_squared_error_of_bootstrap(
+        ) = compute_quantile_root_mean_squared_error_of_bootstrap(
             method=_compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method,
             false_positive_rate=false_positive_rate,
             distribution_parameters=distribution_parameters,
