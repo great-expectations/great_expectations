@@ -52,7 +52,7 @@ jobs:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(pythonVersion)'
+              versionSpec: ${{ pythonVersion }}
             displayName: Use Python ${{ pythonVersion }}
 
           - bash: python -m pip install --upgrade pip==21.3.1
