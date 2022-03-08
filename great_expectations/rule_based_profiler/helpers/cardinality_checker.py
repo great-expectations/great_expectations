@@ -1,7 +1,7 @@
 import abc
 import enum
 from dataclasses import dataclass
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from great_expectations.exceptions import ProfilerConfigurationError
 
@@ -106,7 +106,7 @@ class CardinalityChecker:
         )
 
     @property
-    def limit_mode(self) -> CardinalityLimitMode:
+    def limit_mode(self) -> Union[AbsoluteCardinalityLimit, RelativeCardinalityLimit]:
         return self._limit_mode
 
     def cardinality_within_limit(self, metric_value: float) -> bool:
@@ -145,7 +145,6 @@ class CardinalityChecker:
         max_unique_values: Optional[int] = None,
         max_proportion_unique: Optional[float] = None,
     ) -> Union[AbsoluteCardinalityLimit, RelativeCardinalityLimit]:
-
         self._validate_input_parameters(
             limit_mode=limit_mode,
             max_unique_values=max_unique_values,
