@@ -3,6 +3,8 @@ import json
 import logging
 from typing import Any, Callable, Dict, Optional, Set, Union
 
+import pandas as pd
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
@@ -12,6 +14,14 @@ from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
+
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
+    )
 
 
 class BatchDefinition(SerializableDictDot):
@@ -261,6 +271,14 @@ class BatchRequestBase(SerializableDictDot):
         make this refactoring infeasible at the present time.
         """
         dict_obj: dict = self.to_dict()
+        batch_data = dict_obj.get("runtime_parameters", {}).get("batch_data")
+
+        if isinstance(batch_data, pd.DataFrame):
+            dict_obj["runtime_parameters"]["batch_data"] = "PandasDataFrame"
+
+        if pyspark and isinstance(batch_data, pyspark.sql.DataFrame):
+            dict_obj["runtime_parameters"]["batch_data"] = "SparkDataFrame"
+
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 

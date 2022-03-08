@@ -48,13 +48,13 @@ class BatchRequestAnonymizer(Anonymizer):
             batch_request: Union[
                 BatchRequest
             ] = get_batch_request_from_acceptable_arguments(*args, **kwargs)
-            batch_data = batch_request.runtime_parameters.get("batch_data")
-
-            if isinstance(batch_data, pd.DataFrame):
-                batch_request.runtime_parameters["batch_data"] = "PandasDataFrame"
-
-            if pyspark and isinstance(batch_data, pyspark.sql.DataFrame):
-                batch_request.runtime_parameters["batch_data"] = "SparkDataFrame"
+            # batch_data = batch_request.runtime_parameters.get("batch_data")
+            #
+            # if isinstance(batch_data, pd.DataFrame):
+            #     batch_request.runtime_parameters["batch_data"] = "PandasDataFrame"
+            #
+            # if pyspark and isinstance(batch_data, pyspark.sql.DataFrame):
+            #     batch_request.runtime_parameters["batch_data"] = "SparkDataFrame"
 
             batch_request_dict: dict = batch_request.to_json_dict()
 
