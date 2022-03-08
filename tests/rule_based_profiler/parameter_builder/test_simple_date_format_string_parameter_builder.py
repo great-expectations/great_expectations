@@ -5,17 +5,16 @@ import pytest
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     SimpleDateFormatStringParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
     DEFAULT_CANDIDATE_STRINGS,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    get_parameter_value_by_fully_qualified_parameter_name,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 
 DEFAULT_CANDIDATE_STRINGS: Set[str] = {
     "%H:%M:%S",
@@ -169,14 +168,14 @@ def test_simple_date_format_parameter_builder_alice(
         },
     }
 
-    assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_value
+    actual_value: dict = get_parameter_value_and_validate_return_type(
+        parameter_reference=fully_qualified_parameter_name_for_value,
+        expected_return_type=dict,
+        domain=domain,
+        parameters={domain.id: parameter_container},
     )
+
+    assert actual_value == expected_value
 
 
 def test_simple_date_format_parameter_builder_bobby(
@@ -239,11 +238,11 @@ def test_simple_date_format_parameter_builder_bobby(
         },
     }
 
-    assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_value
+    actual_value: dict = get_parameter_value_and_validate_return_type(
+        parameter_reference=fully_qualified_parameter_name_for_value,
+        expected_return_type=dict,
+        domain=domain,
+        parameters={domain.id: parameter_container},
     )
+
+    assert actual_value == expected_value
