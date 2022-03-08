@@ -25,13 +25,9 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 from great_expectations.util import probabilistic_test
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from tests.rule_based_profiler.conftest import ATOL, RTOL
 
 yaml = YAML()
-
-# Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
-# (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
-RTOL: float = 1.0e-7
-ATOL: float = 5.0e-2
 
 
 def test_alice_columnar_table_single_batch_batches_are_accessible(
@@ -242,6 +238,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
 
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -382,6 +379,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -630,6 +628,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
+@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -828,7 +827,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
         "data_connector_query": {
-            "index": -1,
+            "index": 1,
         },
     }
 
@@ -838,7 +837,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
         "data_connector_query": {
-            "index": ":-1",
+            "index": "1",
         },
     }
 
@@ -1440,3 +1439,73 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         profiler_config=custom_profiler_config,
     )
     assert result.success
+
+
+@probabilistic_test
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time("09/26/2019 13:42:41")
+def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    result: ExpectationValidationResult
+
+    custom_profiler_config: RuleBasedProfilerConfig
+
+    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
+    try:
+        # noinspection PyUnusedLocal
+        suite = context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+    except ge_exceptions.DataContextError:
+        suite = context.create_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite_name=expectation_suite_name,
+    )
+    assert len(validator.batches) == 36
+
+    # Use all batches, loaded by Validator, for estimating Expectation argument values.
+    result = validator.expect_column_values_to_be_in_set(
+        column="passenger_count",
+        result_format="SUMMARY",
+        include_config=True,
+        auto=True,
+    )
+    assert result.success
+
+    key: str
+    value: Any
+    expectation_config_kwargs: dict = {
+        key: value
+        for key, value in result.expectation_config["kwargs"].items()
+        if key != "value_set"
+    }
+    assert expectation_config_kwargs == {
+        "column": "passenger_count",
+        "mostly": 1.0,
+        "result_format": "SUMMARY",
+        "include_config": True,
+        "auto": True,
+        "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+    }
+
+    value_set_expected: List[int] = [0, 1, 2, 3, 4, 5, 6, 7]
+    value_set_computed: List[int] = result.expectation_config["kwargs"]["value_set"]
+
+    assert value_set_computed == value_set_expected

@@ -1,19 +1,19 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_validator as get_validator_using_batch_list_or_batch_request,
+)
 from great_expectations.rule_based_profiler.types import (
     Builder,
     Domain,
     ParameterContainer,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_validator as get_validator_using_batch_list_or_batch_request,
 )
 
 
@@ -97,7 +97,7 @@ class DomainBuilder(Builder, ABC):
         variables: Optional[ParameterContainer] = None,
     ) -> Optional["Validator"]:  # noqa: F821
         return get_validator_using_batch_list_or_batch_request(
-            purpose="parameter_builder",
+            purpose="domain_builder",
             data_context=self.data_context,
             batch_list=self.batch_list,
             batch_request=self.batch_request,
@@ -135,3 +135,28 @@ were retrieved).
             )
 
         return batch_ids[0]
+
+
+def build_simple_domains_from_column_names(
+    column_names: List[str],
+    domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN,
+) -> List[Domain]:
+    """
+    This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
+
+    :param column_names: list of column names to serve as values for "column" keys in "domain_kwargs" dictionary
+    :param domain_type: type of Domain objects (same "domain_type" must be applicable to all Domain objects returned)
+    :return: list of resulting Domain objects
+    """
+    column_name: str
+    domains: List[Domain] = [
+        Domain(
+            domain_type=domain_type,
+            domain_kwargs={
+                "column": column_name,
+            },
+        )
+        for column_name in column_names
+    ]
+
+    return domains
