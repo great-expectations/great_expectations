@@ -10,8 +10,8 @@ jobs:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
+              versionSpec: ${{ pythonVersion }}
+            displayName: Use Python ${{ pythonVersion }}
 
           - script: |
               python -m pip install --upgrade pip==21.3.1
