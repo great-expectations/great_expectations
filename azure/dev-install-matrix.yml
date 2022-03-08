@@ -1,31 +1,32 @@
 parameters:
   vmImage: '' # Must be specified in primary YAML
   pythonVersion: ["3.7", "3.8", "3.9", "3.10"]
-  resources:
-    containers:
-    - container: postgres
-      image: postgres:11
-      ports:
-      - 5432:5432
-      env:
-        POSTGRES_DB: "test_ci"
-        POSTGRES_HOST_AUTH_METHOD: "trust"
-    - container: mysql
-      image: mysql:8.0.20
-      ports:
-        - 3306:3306
-      env:
-        MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-        MYSQL_DATABASE: test_ci
-    - container: mssql
-      image: mcr.microsoft.com/mssql/server:2019-latest
-      env:
-        ACCEPT_EULA: Y
-        MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
-        MSSQL_DB: test_ci
-        MSSQL_PID: Developer
-      ports:
-        - 1433:1433
+
+resources:
+  containers:
+  - container: postgres
+    image: postgres:11
+    ports:
+    - 5432:5432
+    env:
+      POSTGRES_DB: "test_ci"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+  - container: mysql
+    image: mysql:8.0.20
+    ports:
+      - 3306:3306
+    env:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: test_ci
+  - container: mssql
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    env:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+      MSSQL_DB: test_ci
+      MSSQL_PID: Developer
+    ports:
+      - 1433:1433
 
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
