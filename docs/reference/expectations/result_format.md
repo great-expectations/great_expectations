@@ -19,7 +19,7 @@ The `result_format` parameter may be either a string or a dictionary which speci
   :::
 
 ## Configure Result Format
-Result Format can be applied to either a single Expectation or a complete Checkpoint.
+Result Format can be applied to either a single Expectation or an entire Checkpoint.
 ### Expectation Level Config
 To apply `result_format` to an Expectation, pass it into the Expectation's configuration:
 ```python
@@ -34,7 +34,7 @@ validation_result = validator.expect_column_values_to_be_between(
 unexpected_index_list = validation_result["result"]["unexpected_index_list"]
 unexpected_list = validation_result["result"]["unexpected_list"]
 ```
-When configured at the Expectation level, the `unexpected_index_list` and `unexpected_list` won't be passed through to the final Expectation Suite Validation Result object.
+When configured at the Expectation level, the `unexpected_index_list` and `unexpected_list` won't be passed through to the final Validation Result object.
 In order to see those values at the Suite level, configure `result_format` in your Checkpoint configuration.
 ### Checkpoint Level Config
 To apply `result_format` to every Expectation in a Suite, define it in your Checkpoint configuration under the `runtime_configuration` key.
@@ -52,9 +52,9 @@ checkpoint_config = {
     }
 }
 ```
-The results will then be stored in the Validation result after running the Checkpoint.
+The results will then be stored in the Validation Result after running the Checkpoint.
 :::note
-Regardless of where Result Format is configured, `unexpected_list` and `unexpected_index_list` are never rendered in Data Docs, as they are expected to be used for debugging purposes only.
+Regardless of where Result Format is configured, `unexpected_list` and `unexpected_index_list` are never rendered in Data Docs.
 :::
 
 ## result_format values
