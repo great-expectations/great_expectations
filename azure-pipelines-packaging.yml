@@ -31,13 +31,43 @@ schedules:
 
 stages:
   - stage: user_install_linux
+    dependsOn: []
     jobs:
-      - template: azure/matrix-user-install.yml
+      - template: azure/user-install-matrix.yml
         parameters:
           vmImage: "ubuntu-latest"
 
   - stage: dev_install_linux
+    dependsOn: user_install_linux
     jobs:
-      - template: azure/matrix-dev-install.yml
+      - template: azure/dev-install-matrix.yml
         parameters:
           vmImage: "ubuntu-latest"
+
+  - stage: user_install_macOS
+    dependsOn: []
+    jobs:
+      - template: azure/user-install-matrix.yml
+        parameters:
+          vmImage: "macOS-latest"
+
+  - stage: dev_install_macOS
+    dependsOn: user_install_macOS
+    jobs:
+      - template: azure/dev-install-matrix.yml
+        parameters:
+          vmImage: "macOS-latest"
+
+  - stage: user_install_windows
+    dependsOn: []
+    jobs:
+      - template: azure/user-install-matrix.yml
+        parameters:
+          vmImage: "windows-latest"
+
+  - stage: dev_install_windows
+    dependsOn: user_install_windows
+    jobs:
+      - template: azure/dev-install-matrix.yml
+        parameters:
+          vmImage: "windows-latest"

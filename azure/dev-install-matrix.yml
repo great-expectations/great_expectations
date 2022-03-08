@@ -1,11 +1,11 @@
 parameters:
-  vmImage: ''
+  vmImage: '' # Must be specified in primary YAML
   pythonVersion: ["3.7", "3.8", "3.9", "3.10"]
 
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
-      displayName: pip_dev_install_${{ parameters.vmImage }}_${{ pythonVersion }}
+      displayName: pip_${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
           inputs:
