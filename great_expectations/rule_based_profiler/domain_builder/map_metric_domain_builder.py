@@ -23,7 +23,7 @@ class MapMetricDomainBuilder(ColumnDomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-        column_names: Optional[List[str]] = None,
+        column_names: Optional[Union[str, Optional[List[str]]]] = None,
         max_unexpected_values: Optional[Union[str, int]] = None,
         min_max_unexpected_values_proportion: Optional[Union[str, float]] = None,
     ):

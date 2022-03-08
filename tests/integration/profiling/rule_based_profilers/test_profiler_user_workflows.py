@@ -459,7 +459,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         ]["expected_expectation_suite"]
     )
 
-    assert mock_emit.call_count == 102
+    assert mock_emit.call_count == 103
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"

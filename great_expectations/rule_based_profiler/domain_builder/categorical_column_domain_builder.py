@@ -33,7 +33,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[int] = None,
         max_proportion_unique: Optional[int] = None,
-        exclude_columns: Optional[List[str]] = None,
+        exclude_columns: Optional[Union[str, Optional[List[str]]]] = None,
     ):
         """Create column domains where cardinality is within the specified limit.
 

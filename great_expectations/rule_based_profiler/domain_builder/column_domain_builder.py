@@ -21,7 +21,7 @@ class ColumnDomainBuilder(DomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-        column_names: Optional[List[str]] = None,
+        column_names: Optional[Union[str, Optional[List[str]]]] = None,
     ):
         """
         Args:
@@ -48,17 +48,17 @@ class ColumnDomainBuilder(DomainBuilder):
     """
 
     @property
-    def column_names(self) -> Optional[List[str]]:
+    def column_names(self) -> Optional[Union[str, Optional[List[str]]]]:
         return self._column_names
 
     @column_names.setter
-    def column_names(self, value: Optional[List[str]]) -> None:
+    def column_names(self, value: Optional[Union[str, Optional[List[str]]]]) -> None:
         self._column_names = value
 
     def get_effective_column_names(
         self,
-        include_columns: Optional[List[str]] = None,
-        exclude_columns: Optional[List[str]] = None,
+        include_columns: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_columns: Optional[Union[str, Optional[List[str]]]] = None,
         variables: Optional[ParameterContainer] = None,
     ) -> List[str]:
         # Obtain include_columns from "rule state" (i.e., variables and parameters); from instance variable otherwise.
