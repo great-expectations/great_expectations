@@ -31,10 +31,10 @@ schedules:
 
 stages:
   - stage: user_install_linux
-    timeoutInMinutes: 150 # Each stage runs in about 60 min and 30 min respectively.
     dependsOn: []
     jobs:
       - template: azure/user-install-matrix.yml
+        timeoutInMinutes: 150
         parameters:
           vmImage: "ubuntu-latest"
 
