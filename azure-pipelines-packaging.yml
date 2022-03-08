@@ -30,7 +30,10 @@ schedules:
 #     - develop
 
 stages:
-  - stage: Build
+  - stage: Foo
     jobs:
       - template: azure/matrix-user-install.yml
+
+  - stage: Bar
+    jobs:
       - template: azure/matrix-dev-install.yml
