@@ -86,39 +86,3 @@ def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
         },
         meta={},
     )
-
-
-def test_expect_column_values_to_be_of_type_string_dialect_postgresql(sa):
-
-    df = pd.DataFrame({"col": ["test_val1", "test_val2"]})
-    validator = build_sa_validator_with_data(df, "postgresql")
-
-    result = validator.expect_column_values_to_be_of_type("col", type_="TEXT")
-
-    assert result == ExpectationValidationResult(
-        success=True,
-        expectation_config={
-            "expectation_type": "expect_column_values_to_be_of_type",
-            "kwargs": {
-                "column": "col",
-                "type_": "TEXT",
-            },
-            "meta": {},
-        },
-        result={
-            "element_count": 2,
-            "unexpected_count": 0,
-            "unexpected_percent": 0.0,
-            "partial_unexpected_list": [],
-            "missing_count": 0,
-            "missing_percent": 0.0,
-            "unexpected_percent_total": 0.0,
-            "unexpected_percent_nonmissing": 0.0,
-        },
-        exception_info={
-            "raised_exception": False,
-            "exception_traceback": None,
-            "exception_message": None,
-        },
-        meta={},
-    )
