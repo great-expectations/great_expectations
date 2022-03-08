@@ -2,11 +2,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
-from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
-    build_simple_domains_from_column_names,
-)
 from great_expectations.rule_based_profiler.helpers.util import (
+    build_simple_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
+    get_resolved_metrics_by_key,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -239,8 +238,8 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
 
         return metric_configurations
 
+    @staticmethod
     def _get_column_names_satisfying_tolerance_limits(
-        self,
         validator: "Validator",  # noqa: F821
         num_batch_ids: int,
         metric_configurations_by_column_name: Dict[str, List[MetricConfiguration]],
@@ -266,7 +265,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
 
         resolved_metrics_by_column_name: Dict[
             str, Dict[Tuple[str, str, str], Any]
-        ] = self.get_resolved_metrics_by_key(
+        ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metric_configurations_by_column_name,
         )

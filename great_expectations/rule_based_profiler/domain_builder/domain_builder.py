@@ -1,4 +1,3 @@
-import itertools
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -6,6 +5,9 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_resolved_metrics_by_key,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
@@ -93,97 +95,6 @@ class DomainBuilder(Builder, ABC):
 
         pass
 
-    @staticmethod
-    def get_resolved_metrics_by_key(
-        validator: "Validator",  # noqa: F821
-        metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
-    ) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
-        """
-        Compute (resolve) metrics for every column name supplied on input.
-
-        Args:
-            validator: Validator used to compute column cardinality.
-            metric_configurations_by_key: metric configurations used to compute figures of merit.
-            Dictionary of the form {
-                "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
-            }
-
-        Returns:
-            Dictionary of the form {
-                "my_key": Dict[Tuple[str, str, str], Any],
-            }
-        """
-        key: str
-        metric_configuration: MetricConfiguration
-        metric_configurations_for_key: List[MetricConfiguration]
-
-        # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
-        # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
-            metric_configurations=[
-                metric_configuration
-                for key, metric_configurations_for_key in metric_configurations_by_key.items()
-                for metric_configuration in metric_configurations_for_key
-            ]
-        )
-
-        # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
-        metric_configuration_ids_by_key: Dict[str, List[Tuple[str, str, str]]] = {
-            key: [
-                metric_configuration.id
-                for metric_configuration in metric_configurations_for_key
-            ]
-            for key, metric_configurations_for_key in metric_configurations_by_key.items()
-        }
-
-        metric_configuration_ids: List[Tuple[str, str, str]]
-        # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all key values/combinations.
-        metric_configuration_ids_all_keys: List[Tuple[str, str, str]] = list(
-            itertools.chain(
-                *[
-                    metric_configuration_ids
-                    for metric_configuration_ids in metric_configuration_ids_by_key.values()
-                ]
-            )
-        )
-
-        # Step 4: Retain only those metric computation results that both, correspond to "MetricConfiguration" objects of
-        # interest (reflecting specified key values/combinations).
-        metric_configuration_id: Tuple[str, str, str]
-        metric_value: Any
-        resolved_metrics = {
-            metric_configuration_id: metric_value
-            for metric_configuration_id, metric_value in resolved_metrics.items()
-            if metric_configuration_id in metric_configuration_ids_all_keys
-        }
-
-        # Step 5: Gather "MetricConfiguration" ID values for effective collection of resolved metrics.
-        metric_configuration_ids_resolved_metrics: List[Tuple[str, str, str]] = list(
-            resolved_metrics.keys()
-        )
-
-        # Step 6: Produce "key" list, corresponding to effective "MetricConfiguration" ID values.
-        candidate_keys: List[str] = [
-            key
-            for key, metric_configuration_ids in metric_configuration_ids_by_key.items()
-            if all(
-                [
-                    metric_configuration_id in metric_configuration_ids_resolved_metrics
-                    for metric_configuration_id in metric_configuration_ids
-                ]
-            )
-        ]
-
-        resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], Any]] = {
-            key: {
-                metric_configuration.id: resolved_metrics[metric_configuration.id]
-                for metric_configuration in metric_configurations_by_key[key]
-            }
-            for key in candidate_keys
-        }
-
-        return resolved_metrics_by_key
-
     def get_table_row_counts(
         self,
         validator: Optional["Validator"] = None,  # noqa: F821
@@ -216,7 +127,7 @@ class DomainBuilder(Builder, ABC):
 
         resolved_metrics_by_batch_id: Dict[
             str, Dict[Tuple[str, str, str], Any]
-        ] = self.get_resolved_metrics_by_key(
+        ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metric_configurations_by_batch_id,
         )
@@ -261,28 +172,3 @@ class DomainBuilder(Builder, ABC):
             variables=variables,
             parameters=None,
         )
-
-
-def build_simple_domains_from_column_names(
-    column_names: List[str],
-    domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN,
-) -> List[Domain]:
-    """
-    This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
-
-    :param column_names: list of column names to serve as values for "column" keys in "domain_kwargs" dictionary
-    :param domain_type: type of Domain objects (same "domain_type" must be applicable to all Domain objects returned)
-    :return: list of resulting Domain objects
-    """
-    column_name: str
-    domains: List[Domain] = [
-        Domain(
-            domain_type=domain_type,
-            domain_kwargs={
-                "column": column_name,
-            },
-        )
-        for column_name in column_names
-    ]
-
-    return domains

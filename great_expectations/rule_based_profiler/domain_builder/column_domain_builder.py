@@ -4,10 +4,8 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
-    build_simple_domains_from_column_names,
-)
 from great_expectations.rule_based_profiler.helpers.util import (
+    build_simple_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer

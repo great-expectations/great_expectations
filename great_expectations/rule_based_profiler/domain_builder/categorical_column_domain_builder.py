@@ -3,14 +3,15 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
-from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
-    build_simple_domains_from_column_names,
-)
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     AbsoluteCardinalityLimit,
     CardinalityChecker,
     CardinalityLimitMode,
     RelativeCardinalityLimit,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    build_simple_domains_from_column_names,
+    get_resolved_metrics_by_key,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -191,7 +192,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         resolved_metrics_by_column_name: Dict[
             str, Dict[Tuple[str, str, str], Any]
-        ] = self.get_resolved_metrics_by_key(
+        ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metrics_for_cardinality_check,
         )
