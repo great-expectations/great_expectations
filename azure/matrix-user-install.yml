@@ -5,7 +5,7 @@ parameters:
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
-      displayName: pip_user_install_${{ vmImage }}_${{ pythonVersion }}
+      displayName: pip_user_install_${{ parameters.vmImage }}_${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
           inputs:
@@ -23,8 +23,7 @@ jobs:
           displayName: 'Confirm installation'
 
     - job:
-      displayName: conda_user_install_${{ vmImage }}_${{ pythonVersion }}
-      condition: succeeded()
+      displayName: conda_user_install_${{ parameters.vmImage }}_${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
           inputs:

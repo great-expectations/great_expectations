@@ -5,7 +5,7 @@ parameters:
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
-      displayName: pip_dev_install_${{ vmImage }}_${{ pythonVersion }}
+      displayName: pip_dev_install_${{ parameters.vmImage }}_${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
           inputs:
