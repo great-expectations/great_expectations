@@ -1,0 +1,1044 @@
+[
+    {
+        "package_name": "CapitalOne DataProfiler Expectations",
+        "icon": null,
+        "description": "Expectations using CapitalOne's DataProfiler library",
+        "expectations": [
+            {
+                "examples": [
+                    {
+                        "data": {
+                            "OPEID6": [
+                                "1002",
+                                "1052",
+                                "25034",
+                                "McRoomyRoom"
+                            ],
+                            "INSTNM": [
+                                "Alabama A & M University",
+                                "University of Alabama at Birmingham",
+                                "Amridge University",
+                                "McRoomyRoom"
+                            ],
+                            "ZIP": [
+                                "35762",
+                                "35294-0110",
+                                "36117-3553",
+                                "McRoomyRoom"
+                            ],
+                            "ACCREDAGENCY": [
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "McRoomyRoom"
+                            ],
+                            "INSTURL": [
+                                "www.aamu.edu/",
+                                "https://www.uab.edu",
+                                "www.amridgeuniversity.edu",
+                                "McRoomyRoom"
+                            ],
+                            "NPCURL": [
+                                "www.aamu.edu/admissions-aid/tuition-fees/net-price-calculator.html",
+                                "https://uab.studentaidcalculator.com/survey.aspx",
+                                "www2.amridgeuniversity.edu:9091/",
+                                "McRoomyRoom"
+                            ],
+                            "LATITUDE": [
+                                "34.783368",
+                                "33.505697",
+                                "32.362609",
+                                "McRoomyRoom"
+                            ],
+                            "LONGITUDE": [
+                                "-86.568502",
+                                "-86.799345",
+                                "-86.17401",
+                                "McRoomyRoom"
+                            ],
+                            "RELAFFIL": [
+                                "NULL",
+                                "NULL",
+                                "74",
+                                "McRoomyRoom"
+                            ],
+                            "DEATH_YR2_RT": [
+                                "PrivacySuppressed",
+                                "PrivacySuppressed",
+                                "PrivacySuppressed",
+                                "McRoomyRoom"
+                            ],
+                            "SEARCH_STRING": [
+                                "Alabama A & M University AAMU",
+                                "University of Alabama at Birmingham ",
+                                "Amridge University Southern Christian University  Regions University",
+                                "McRoomyRoom"
+                            ]
+                        },
+                        "tests": [
+                            {
+                                "title": "positive_test_with_column_one",
+                                "input": {
+                                    "column": "OPEID6",
+                                    "threshold": 0.0
+                                },
+                                "output": {
+                                    "success": true,
+                                    "unexpected_index_list": [],
+                                    "unexpected_list": []
+                                },
+                                "exact_match_out": false,
+                                "suppress_test_for": [],
+                                "include_in_gallery": false,
+                                "only_for": null
+                            },
+                            {
+                                "title": "error_test_threshold",
+                                "input": {
+                                    "column": "ZIP",
+                                    "threshold": 0.61
+                                },
+                                "output": {
+                                    "success": false
+                                },
+                                "exact_match_out": false,
+                                "suppress_test_for": [],
+                                "include_in_gallery": false,
+                                "only_for": null
+                            }
+                        ],
+                        "schemas": {},
+                        "test_backends": null
+                    }
+                ],
+                "gallery_examples": [
+                    {
+                        "data": {
+                            "OPEID6": [
+                                "1002",
+                                "1052",
+                                "25034",
+                                "McRoomyRoom"
+                            ],
+                            "INSTNM": [
+                                "Alabama A & M University",
+                                "University of Alabama at Birmingham",
+                                "Amridge University",
+                                "McRoomyRoom"
+                            ],
+                            "ZIP": [
+                                "35762",
+                                "35294-0110",
+                                "36117-3553",
+                                "McRoomyRoom"
+                            ],
+                            "ACCREDAGENCY": [
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "McRoomyRoom"
+                            ],
+                            "INSTURL": [
+                                "www.aamu.edu/",
+                                "https://www.uab.edu",
+                                "www.amridgeuniversity.edu",
+                                "McRoomyRoom"
+                            ],
+                            "NPCURL": [
+                                "www.aamu.edu/admissions-aid/tuition-fees/net-price-calculator.html",
+                                "https://uab.studentaidcalculator.com/survey.aspx",
+                                "www2.amridgeuniversity.edu:9091/",
+                                "McRoomyRoom"
+                            ],
+                            "LATITUDE": [
+                                "34.783368",
+                                "33.505697",
+                                "32.362609",
+                                "McRoomyRoom"
+                            ],
+                            "LONGITUDE": [
+                                "-86.568502",
+                                "-86.799345",
+                                "-86.17401",
+                                "McRoomyRoom"
+                            ],
+                            "RELAFFIL": [
+                                "NULL",
+                                "NULL",
+                                "74",
+                                "McRoomyRoom"
+                            ],
+                            "DEATH_YR2_RT": [
+                                "PrivacySuppressed",
+                                "PrivacySuppressed",
+                                "PrivacySuppressed",
+                                "McRoomyRoom"
+                            ],
+                            "SEARCH_STRING": [
+                                "Alabama A & M University AAMU",
+                                "University of Alabama at Birmingham ",
+                                "Amridge University Southern Christian University  Regions University",
+                                "McRoomyRoom"
+                            ]
+                        },
+                        "tests": [
+                            {
+                                "title": "positive_test_with_column_one",
+                                "input": {
+                                    "column": "OPEID6",
+                                    "threshold": 0.0
+                                },
+                                "output": {
+                                    "success": true,
+                                    "unexpected_index_list": [],
+                                    "unexpected_list": []
+                                },
+                                "exact_match_out": false,
+                                "suppress_test_for": [],
+                                "include_in_gallery": false,
+                                "only_for": null
+                            },
+                            {
+                                "title": "error_test_threshold",
+                                "input": {
+                                    "column": "ZIP",
+                                    "threshold": 0.61
+                                },
+                                "output": {
+                                    "success": false
+                                },
+                                "exact_match_out": false,
+                                "suppress_test_for": [],
+                                "include_in_gallery": false,
+                                "only_for": null
+                            }
+                        ],
+                        "schemas": {},
+                        "test_backends": null
+                    }
+                ],
+                "library_metadata": {
+                    "maturity": "EXPERIMENTAL",
+                    "tags": [
+                        "dataprofiler"
+                    ],
+                    "contributors": [
+                        "@taylorfturner"
+                    ],
+                    "requirements": [
+                        "dataprofiler",
+                        "tensorflow",
+                        "scikit-learn",
+                        "numpy"
+                    ],
+                    "library_metadata_passed_checks": true,
+                    "has_full_test_suite": false,
+                    "manually_reviewed_code": false,
+                    "package": null
+                },
+                "description": {
+                    "camel_name": "ExpectColumnValuesToBeGreaterThanOrEqualToThreshold",
+                    "snake_name": "expect_column_values_to_be_greater_than_or_equal_to_threshold",
+                    "short_description": "    This function builds upon the custom column map expectations of Great Expectations. This function asks a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.",
+                    "docstring": "\n    This function builds upon the custom column map expectations of Great Expectations. This function asks a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.\n\n    Args:\n        column (str): The column name that you want to check.\n        threshold (float): The value, usually as a decimal (e.g. .32), you want to use to flag low confidence predictions\n\n    df.expect_column_values_to_probabilistically_match_data_label(\n        column,\n        threshold=float(0<=1)\n    )\n    "
+                },
+                "execution_engines": {
+                    "PandasExecutionEngine": true,
+                    "SqlAlchemyExecutionEngine": false,
+                    "SparkDFExecutionEngine": false
+                },
+                "renderers": [
+                    {
+                        "name": "atomic.diagnostic.observed_value",
+                        "is_supported": true,
+                        "is_standard": false,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "(RenderedAtomicContent) {'name': 'atomic.diagnostic.observed_value', 'value': {'template': '--', 'params': {}, 'schema': {'type': 'com.superconductive.rendered.string'}, 'header': None, 'header_row': None, 'table': None, 'graph': None}, 'value_type': 'StringValueType'}",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "atomic.prescriptive.summary",
+                        "is_supported": true,
+                        "is_standard": false,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "(RenderedAtomicContent) {'name': 'atomic.prescriptive.summary', 'value': {'template': '$expectation_type(**$kwargs)', 'params': {'expectation_type': {'schema': {'type': 'string'}, 'value': 'expect_column_values_to_be_greater_than_or_equal_to_threshold'}, 'kwargs': {'schema': {'type': 'string'}, 'value': {'column': 'OPEID6', 'threshold': 0.0}}}, 'schema': {'type': 'com.superconductive.rendered.string'}, 'header': None, 'header_row': None, 'table': None, 'graph': None}, 'value_type': 'StringValueType'}",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.answer",
+                        "is_supported": false,
+                        "is_standard": true,
+                        "samples": []
+                    },
+                    {
+                        "name": "renderer.diagnostic.meta_properties",
+                        "is_supported": true,
+                        "is_standard": false,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.diagnostic.observed_value",
+                        "is_supported": true,
+                        "is_standard": true,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "--",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.diagnostic.status_icon",
+                        "is_supported": true,
+                        "is_standard": true,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.diagnostic.unexpected_statement",
+                        "is_supported": true,
+                        "is_standard": true,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "\n\nexpect_column_values_to_be_greater_than_or_equal_to_threshold raised an exception:\nNo module named 'sklearn'\n<great_expectations.render.types.CollapseContent object at 0x15de298b0>",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.diagnostic.unexpected_table",
+                        "is_supported": true,
+                        "is_standard": true,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.prescriptive",
+                        "is_supported": true,
+                        "is_standard": true,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "expect_column_values_to_be_greater_than_or_equal_to_threshold(**{'column': 'OPEID6', 'threshold': 0.0})",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.question",
+                        "is_supported": false,
+                        "is_standard": true,
+                        "samples": []
+                    }
+                ],
+                "metrics": [
+                    {
+                        "name": "column_values.nonnull.unexpected_count",
+                        "has_question_renderer": false
+                    },
+                    {
+                        "name": "column_values.prediction_confidence_greater_than_or_equal_to_threshold.unexpected_count",
+                        "has_question_renderer": false
+                    },
+                    {
+                        "name": "table.row_count",
+                        "has_question_renderer": false
+                    },
+                    {
+                        "name": "column_values.prediction_confidence_greater_than_or_equal_to_threshold.unexpected_values",
+                        "has_question_renderer": false
+                    }
+                ],
+                "tests": [
+                    {
+                        "test_title": "positive_test_with_column_one",
+                        "backend": "pandas",
+                        "test_passed": false,
+                        "error_message": "No module named 'sklearn'",
+                        "stack_trace": "Traceback (most recent call last):\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/execution_engine/execution_engine.py\", line 367, in resolve_metrics\n    resolved_metrics[metric_to_resolve.id] = metric_fn(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/metrics/metric_provider.py\", line 55, in inner_func\n    return metric_fn(*args, **kwargs)\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/metrics/map_metric_provider.py\", line 333, in inner_func\n    meets_expectation_series = metric_fn(\n  File \"/Users/cdkini/Code/great_expectations/contrib/capitalone_dataprofiler_expectations/capitalone_dataprofiler_expectations/expectations/expect_column_values_are_probabilistically_greater_than_or_equal_to_threshold.py\", line 47, in _pandas\n    labeler = dp.DataLabeler(labeler_type=\"structured\")\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/data_labelers.py\", line 94, in __new__\n    return data_labeler(dirpath, load_options)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 47, in __init__\n    self._load_data_labeler(dirpath, load_options)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 539, in _load_data_labeler\n    self._load_model(model_params.get('class'), dirpath)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 473, in _load_model\n    model_class = BaseModel.get_class(model_class)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_model.py\", line 123, in get_class\n    from .character_level_cnn_model import CharacterLevelCnnModel\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/character_level_cnn_model.py\", line 11, in <module>\n    from sklearn import decomposition\nModuleNotFoundError: No module named 'sklearn'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/expectation.py\", line 1252, in _get_test_results\n    result = evaluate_json_test_cfe(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/self_check/util.py\", line 1807, in evaluate_json_test_cfe\n    result = getattr(validator, expectation_type)(**runtime_kwargs)\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 370, in inst_expectation\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 329, in inst_expectation\n    validation_result = expectation.validate(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/expectation.py\", line 863, in validate\n    evr = validator.graph_validate(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 795, in graph_validate\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 774, in graph_validate\n    ) = self._resolve_suite_level_graph_and_process_metric_evaluation_errors(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 920, in _resolve_suite_level_graph_and_process_metric_evaluation_errors\n    ] = self.resolve_validation_graph(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 1150, in resolve_validation_graph\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 1118, in resolve_validation_graph\n    self._resolve_metrics(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 2021, in _resolve_metrics\n    return execution_engine.resolve_metrics(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/execution_engine/execution_engine.py\", line 371, in resolve_metrics\n    raise ge_exceptions.MetricResolutionError(\ngreat_expectations.exceptions.exceptions.MetricResolutionError: No module named 'sklearn'\n"
+                    },
+                    {
+                        "test_title": "error_test_threshold",
+                        "backend": "pandas",
+                        "test_passed": false,
+                        "error_message": "No module named 'sklearn'",
+                        "stack_trace": "Traceback (most recent call last):\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/execution_engine/execution_engine.py\", line 367, in resolve_metrics\n    resolved_metrics[metric_to_resolve.id] = metric_fn(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/metrics/metric_provider.py\", line 55, in inner_func\n    return metric_fn(*args, **kwargs)\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/metrics/map_metric_provider.py\", line 333, in inner_func\n    meets_expectation_series = metric_fn(\n  File \"/Users/cdkini/Code/great_expectations/contrib/capitalone_dataprofiler_expectations/capitalone_dataprofiler_expectations/expectations/expect_column_values_are_probabilistically_greater_than_or_equal_to_threshold.py\", line 47, in _pandas\n    labeler = dp.DataLabeler(labeler_type=\"structured\")\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/data_labelers.py\", line 94, in __new__\n    return data_labeler(dirpath, load_options)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 47, in __init__\n    self._load_data_labeler(dirpath, load_options)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 539, in _load_data_labeler\n    self._load_model(model_params.get('class'), dirpath)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 473, in _load_model\n    model_class = BaseModel.get_class(model_class)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_model.py\", line 123, in get_class\n    from .character_level_cnn_model import CharacterLevelCnnModel\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/character_level_cnn_model.py\", line 11, in <module>\n    from sklearn import decomposition\nModuleNotFoundError: No module named 'sklearn'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/expectation.py\", line 1252, in _get_test_results\n    result = evaluate_json_test_cfe(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/self_check/util.py\", line 1807, in evaluate_json_test_cfe\n    result = getattr(validator, expectation_type)(**runtime_kwargs)\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 370, in inst_expectation\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 329, in inst_expectation\n    validation_result = expectation.validate(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/expectation.py\", line 863, in validate\n    evr = validator.graph_validate(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 795, in graph_validate\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 774, in graph_validate\n    ) = self._resolve_suite_level_graph_and_process_metric_evaluation_errors(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 920, in _resolve_suite_level_graph_and_process_metric_evaluation_errors\n    ] = self.resolve_validation_graph(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 1150, in resolve_validation_graph\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 1118, in resolve_validation_graph\n    self._resolve_metrics(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 2021, in _resolve_metrics\n    return execution_engine.resolve_metrics(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/execution_engine/execution_engine.py\", line 371, in resolve_metrics\n    raise ge_exceptions.MetricResolutionError(\ngreat_expectations.exceptions.exceptions.MetricResolutionError: No module named 'sklearn'\n"
+                    }
+                ],
+                "errors": [],
+                "maturity_checklist": {
+                    "experimental": [
+                        {
+                            "message": "Has a library_metadata object",
+                            "passed": true,
+                            "doc_url": null,
+                            "sub_messages": []
+                        },
+                        {
+                            "message": "Has a docstring, including a one-line short description",
+                            "passed": true,
+                            "doc_url": null,
+                            "sub_messages": [
+                                {
+                                    "message": "\"    This function builds upon the custom column map expectations of Great Expectations. This function asks a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.\"",
+                                    "passed": true
+                                }
+                            ]
+                        },
+                        {
+                            "message": "Has at least one positive and negative example case, and all test cases pass",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": []
+                        },
+                        {
+                            "message": "Has core logic and passes tests on at least one Execution Engine",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": []
+                        }
+                    ],
+                    "beta": [
+                        {
+                            "message": "Has basic input validation and type checking",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": [
+                                {
+                                    "message": "No validate_configuration method defined",
+                                    "passed": false
+                                }
+                            ]
+                        },
+                        {
+                            "message": "Has both statement Renderers: prescriptive and diagnostic",
+                            "passed": true,
+                            "doc_url": null,
+                            "sub_messages": []
+                        },
+                        {
+                            "message": "Has core logic that passes tests for all applicable Execution Engines and SQL dialects",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": [
+                                {
+                                    "message": "Only 0 / 2 tests for pandas are passing",
+                                    "passed": false
+                                },
+                                {
+                                    "message": "Failing: positive_test_with_column_one, error_test_threshold",
+                                    "passed": false
+                                }
+                            ]
+                        }
+                    ],
+                    "production": [
+                        {
+                            "message": "Passes all linting checks",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": []
+                        },
+                        {
+                            "message": "Has a full suite of tests, as determined by a code owner",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": []
+                        },
+                        {
+                            "message": "Has passed a manual review by a code owner for code standards and style guides",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": []
+                        }
+                    ]
+                }
+            },
+            {
+                "examples": [
+                    {
+                        "data": {
+                            "OPEID6": [
+                                "1002",
+                                "1052",
+                                "25034",
+                                "McRoomyRoom"
+                            ],
+                            "INSTNM": [
+                                "Alabama A & M University",
+                                "University of Alabama at Birmingham",
+                                "Amridge University",
+                                "McRoomyRoom"
+                            ],
+                            "ZIP": [
+                                "35762",
+                                "35294-0110",
+                                "36117-3553",
+                                "McRoomyRoom"
+                            ],
+                            "ACCREDAGENCY": [
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "McRoomyRoom"
+                            ],
+                            "INSTURL": [
+                                "www.aamu.edu/",
+                                "https://www.uab.edu",
+                                "www.amridgeuniversity.edu",
+                                "McRoomyRoom"
+                            ],
+                            "NPCURL": [
+                                "www.aamu.edu/admissions-aid/tuition-fees/net-price-calculator.html",
+                                "https://uab.studentaidcalculator.com/survey.aspx",
+                                "www2.amridgeuniversity.edu:9091/",
+                                "McRoomyRoom"
+                            ],
+                            "LATITUDE": [
+                                "34.783368",
+                                "33.505697",
+                                "32.362609",
+                                "McRoomyRoom"
+                            ],
+                            "LONGITUDE": [
+                                "-86.568502",
+                                "-86.799345",
+                                "-86.17401",
+                                "McRoomyRoom"
+                            ],
+                            "RELAFFIL": [
+                                "NULL",
+                                "NULL",
+                                "74",
+                                "McRoomyRoom"
+                            ],
+                            "DEATH_YR2_RT": [
+                                "PrivacySuppressed",
+                                "PrivacySuppressed",
+                                "PrivacySuppressed",
+                                "McRoomyRoom"
+                            ],
+                            "SEARCH_STRING": [
+                                "Alabama A & M University AAMU",
+                                "University of Alabama at Birmingham ",
+                                "Amridge University Southern Christian University  Regions University",
+                                "McRoomyRoom"
+                            ]
+                        },
+                        "tests": [
+                            {
+                                "title": "positive_test_with_column_one",
+                                "input": {
+                                    "column": "ZIP",
+                                    "data_label": "ADDRESS",
+                                    "threshold": 0.0
+                                },
+                                "output": {
+                                    "success": true
+                                },
+                                "exact_match_out": false,
+                                "suppress_test_for": [],
+                                "include_in_gallery": false,
+                                "only_for": null
+                            },
+                            {
+                                "title": "failing_test_with_column_one",
+                                "input": {
+                                    "column": "ZIP",
+                                    "data_label": "ADDRESS",
+                                    "threshold": 1.0
+                                },
+                                "output": {
+                                    "success": false
+                                },
+                                "exact_match_out": false,
+                                "suppress_test_for": [],
+                                "include_in_gallery": false,
+                                "only_for": null
+                            }
+                        ],
+                        "schemas": {},
+                        "test_backends": null
+                    }
+                ],
+                "gallery_examples": [
+                    {
+                        "data": {
+                            "OPEID6": [
+                                "1002",
+                                "1052",
+                                "25034",
+                                "McRoomyRoom"
+                            ],
+                            "INSTNM": [
+                                "Alabama A & M University",
+                                "University of Alabama at Birmingham",
+                                "Amridge University",
+                                "McRoomyRoom"
+                            ],
+                            "ZIP": [
+                                "35762",
+                                "35294-0110",
+                                "36117-3553",
+                                "McRoomyRoom"
+                            ],
+                            "ACCREDAGENCY": [
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "Southern Association of Colleges and Schools Commission on Colleges",
+                                "McRoomyRoom"
+                            ],
+                            "INSTURL": [
+                                "www.aamu.edu/",
+                                "https://www.uab.edu",
+                                "www.amridgeuniversity.edu",
+                                "McRoomyRoom"
+                            ],
+                            "NPCURL": [
+                                "www.aamu.edu/admissions-aid/tuition-fees/net-price-calculator.html",
+                                "https://uab.studentaidcalculator.com/survey.aspx",
+                                "www2.amridgeuniversity.edu:9091/",
+                                "McRoomyRoom"
+                            ],
+                            "LATITUDE": [
+                                "34.783368",
+                                "33.505697",
+                                "32.362609",
+                                "McRoomyRoom"
+                            ],
+                            "LONGITUDE": [
+                                "-86.568502",
+                                "-86.799345",
+                                "-86.17401",
+                                "McRoomyRoom"
+                            ],
+                            "RELAFFIL": [
+                                "NULL",
+                                "NULL",
+                                "74",
+                                "McRoomyRoom"
+                            ],
+                            "DEATH_YR2_RT": [
+                                "PrivacySuppressed",
+                                "PrivacySuppressed",
+                                "PrivacySuppressed",
+                                "McRoomyRoom"
+                            ],
+                            "SEARCH_STRING": [
+                                "Alabama A & M University AAMU",
+                                "University of Alabama at Birmingham ",
+                                "Amridge University Southern Christian University  Regions University",
+                                "McRoomyRoom"
+                            ]
+                        },
+                        "tests": [
+                            {
+                                "title": "positive_test_with_column_one",
+                                "input": {
+                                    "column": "ZIP",
+                                    "data_label": "ADDRESS",
+                                    "threshold": 0.0
+                                },
+                                "output": {
+                                    "success": true
+                                },
+                                "exact_match_out": false,
+                                "suppress_test_for": [],
+                                "include_in_gallery": false,
+                                "only_for": null
+                            },
+                            {
+                                "title": "failing_test_with_column_one",
+                                "input": {
+                                    "column": "ZIP",
+                                    "data_label": "ADDRESS",
+                                    "threshold": 1.0
+                                },
+                                "output": {
+                                    "success": false
+                                },
+                                "exact_match_out": false,
+                                "suppress_test_for": [],
+                                "include_in_gallery": false,
+                                "only_for": null
+                            }
+                        ],
+                        "schemas": {},
+                        "test_backends": null
+                    }
+                ],
+                "library_metadata": {
+                    "maturity": "EXPERIMENTAL",
+                    "tags": [
+                        "dataprofiler"
+                    ],
+                    "contributors": [
+                        "@taylorfturner"
+                    ],
+                    "requirements": [
+                        "dataprofiler",
+                        "tensorflow",
+                        "scikit-learn",
+                        "numpy"
+                    ],
+                    "library_metadata_passed_checks": true,
+                    "has_full_test_suite": false,
+                    "manually_reviewed_code": false,
+                    "package": null
+                },
+                "description": {
+                    "camel_name": "ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold",
+                    "snake_name": "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold",
+                    "short_description": "    This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.",
+                    "docstring": "\n    This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.\n\n    Args:\n        column (str): The column name that you want to check.\n        data_label(str): The data label for which you want to check confidences against the threshold value\n        threshold (float): The value, usually as a decimal (e.g. .32), you want to use to flag low confidence predictions\n\n    df.expect_column_values_to_probabilistically_match_data_label(\n        column,\n        data_label=<>,\n        threshold=float(0<=1)\n    )\n    "
+                },
+                "execution_engines": {
+                    "PandasExecutionEngine": true,
+                    "SqlAlchemyExecutionEngine": false,
+                    "SparkDFExecutionEngine": false
+                },
+                "renderers": [
+                    {
+                        "name": "atomic.diagnostic.observed_value",
+                        "is_supported": true,
+                        "is_standard": false,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "(RenderedAtomicContent) {'name': 'atomic.diagnostic.observed_value', 'value': {'template': '--', 'params': {}, 'schema': {'type': 'com.superconductive.rendered.string'}, 'header': None, 'header_row': None, 'table': None, 'graph': None}, 'value_type': 'StringValueType'}",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "atomic.prescriptive.summary",
+                        "is_supported": true,
+                        "is_standard": false,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "(RenderedAtomicContent) {'name': 'atomic.prescriptive.summary', 'value': {'template': '$expectation_type(**$kwargs)', 'params': {'expectation_type': {'schema': {'type': 'string'}, 'value': 'expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold'}, 'kwargs': {'schema': {'type': 'string'}, 'value': {'column': 'ZIP', 'data_label': 'ADDRESS', 'threshold': 0.0}}}, 'schema': {'type': 'com.superconductive.rendered.string'}, 'header': None, 'header_row': None, 'table': None, 'graph': None}, 'value_type': 'StringValueType'}",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.answer",
+                        "is_supported": false,
+                        "is_standard": true,
+                        "samples": []
+                    },
+                    {
+                        "name": "renderer.diagnostic.meta_properties",
+                        "is_supported": true,
+                        "is_standard": false,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.diagnostic.observed_value",
+                        "is_supported": true,
+                        "is_standard": true,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "--",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.diagnostic.status_icon",
+                        "is_supported": true,
+                        "is_standard": true,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.diagnostic.unexpected_statement",
+                        "is_supported": true,
+                        "is_standard": true,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "\n\nexpect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold raised an exception:\nNo module named 'sklearn'\n<great_expectations.render.types.CollapseContent object at 0x15df55fd0>",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.diagnostic.unexpected_table",
+                        "is_supported": true,
+                        "is_standard": true,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.prescriptive",
+                        "is_supported": true,
+                        "is_standard": true,
+                        "samples": [
+                            {
+                                "test_title": "positive_test_with_column_one",
+                                "rendered_successfully": true,
+                                "renderered_str": "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold(**{'column': 'ZIP', 'data_label': 'ADDRESS', 'threshold': 0.0})",
+                                "error_message": null,
+                                "stack_trace": null
+                            }
+                        ]
+                    },
+                    {
+                        "name": "renderer.question",
+                        "is_supported": false,
+                        "is_standard": true,
+                        "samples": []
+                    }
+                ],
+                "metrics": [
+                    {
+                        "name": "column_values.nonnull.unexpected_count",
+                        "has_question_renderer": false
+                    },
+                    {
+                        "name": "column_values.prediction_confidence_for_data_label_greater_than_or_equal_to_threshold.unexpected_count",
+                        "has_question_renderer": false
+                    },
+                    {
+                        "name": "table.row_count",
+                        "has_question_renderer": false
+                    },
+                    {
+                        "name": "column_values.prediction_confidence_for_data_label_greater_than_or_equal_to_threshold.unexpected_values",
+                        "has_question_renderer": false
+                    }
+                ],
+                "tests": [
+                    {
+                        "test_title": "positive_test_with_column_one",
+                        "backend": "pandas",
+                        "test_passed": false,
+                        "error_message": "No module named 'sklearn'",
+                        "stack_trace": "Traceback (most recent call last):\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/execution_engine/execution_engine.py\", line 367, in resolve_metrics\n    resolved_metrics[metric_to_resolve.id] = metric_fn(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/metrics/metric_provider.py\", line 55, in inner_func\n    return metric_fn(*args, **kwargs)\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/metrics/map_metric_provider.py\", line 333, in inner_func\n    meets_expectation_series = metric_fn(\n  File \"/Users/cdkini/Code/great_expectations/contrib/capitalone_dataprofiler_expectations/capitalone_dataprofiler_expectations/expectations/expect_column_values_confidence_to_be_greater_than_or_equal_to_threshold_for_data_label.py\", line 52, in _pandas\n    labeler = dp.DataLabeler(labeler_type=\"structured\")\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/data_labelers.py\", line 94, in __new__\n    return data_labeler(dirpath, load_options)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 47, in __init__\n    self._load_data_labeler(dirpath, load_options)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 539, in _load_data_labeler\n    self._load_model(model_params.get('class'), dirpath)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 473, in _load_model\n    model_class = BaseModel.get_class(model_class)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_model.py\", line 123, in get_class\n    from .character_level_cnn_model import CharacterLevelCnnModel\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/character_level_cnn_model.py\", line 11, in <module>\n    from sklearn import decomposition\nModuleNotFoundError: No module named 'sklearn'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/expectation.py\", line 1252, in _get_test_results\n    result = evaluate_json_test_cfe(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/self_check/util.py\", line 1807, in evaluate_json_test_cfe\n    result = getattr(validator, expectation_type)(**runtime_kwargs)\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 370, in inst_expectation\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 329, in inst_expectation\n    validation_result = expectation.validate(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/expectation.py\", line 863, in validate\n    evr = validator.graph_validate(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 795, in graph_validate\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 774, in graph_validate\n    ) = self._resolve_suite_level_graph_and_process_metric_evaluation_errors(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 920, in _resolve_suite_level_graph_and_process_metric_evaluation_errors\n    ] = self.resolve_validation_graph(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 1150, in resolve_validation_graph\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 1118, in resolve_validation_graph\n    self._resolve_metrics(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 2021, in _resolve_metrics\n    return execution_engine.resolve_metrics(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/execution_engine/execution_engine.py\", line 371, in resolve_metrics\n    raise ge_exceptions.MetricResolutionError(\ngreat_expectations.exceptions.exceptions.MetricResolutionError: No module named 'sklearn'\n"
+                    },
+                    {
+                        "test_title": "failing_test_with_column_one",
+                        "backend": "pandas",
+                        "test_passed": false,
+                        "error_message": "No module named 'sklearn'",
+                        "stack_trace": "Traceback (most recent call last):\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/execution_engine/execution_engine.py\", line 367, in resolve_metrics\n    resolved_metrics[metric_to_resolve.id] = metric_fn(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/metrics/metric_provider.py\", line 55, in inner_func\n    return metric_fn(*args, **kwargs)\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/metrics/map_metric_provider.py\", line 333, in inner_func\n    meets_expectation_series = metric_fn(\n  File \"/Users/cdkini/Code/great_expectations/contrib/capitalone_dataprofiler_expectations/capitalone_dataprofiler_expectations/expectations/expect_column_values_confidence_to_be_greater_than_or_equal_to_threshold_for_data_label.py\", line 52, in _pandas\n    labeler = dp.DataLabeler(labeler_type=\"structured\")\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/data_labelers.py\", line 94, in __new__\n    return data_labeler(dirpath, load_options)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 47, in __init__\n    self._load_data_labeler(dirpath, load_options)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 539, in _load_data_labeler\n    self._load_model(model_params.get('class'), dirpath)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_data_labeler.py\", line 473, in _load_model\n    model_class = BaseModel.get_class(model_class)\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/base_model.py\", line 123, in get_class\n    from .character_level_cnn_model import CharacterLevelCnnModel\n  File \"/Users/cdkini/.pyenv/versions/great_expectations_dev/lib/python3.8/site-packages/dataprofiler/labelers/character_level_cnn_model.py\", line 11, in <module>\n    from sklearn import decomposition\nModuleNotFoundError: No module named 'sklearn'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/expectation.py\", line 1252, in _get_test_results\n    result = evaluate_json_test_cfe(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/self_check/util.py\", line 1807, in evaluate_json_test_cfe\n    result = getattr(validator, expectation_type)(**runtime_kwargs)\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 370, in inst_expectation\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 329, in inst_expectation\n    validation_result = expectation.validate(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/expectations/expectation.py\", line 863, in validate\n    evr = validator.graph_validate(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 795, in graph_validate\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 774, in graph_validate\n    ) = self._resolve_suite_level_graph_and_process_metric_evaluation_errors(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 920, in _resolve_suite_level_graph_and_process_metric_evaluation_errors\n    ] = self.resolve_validation_graph(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 1150, in resolve_validation_graph\n    raise err\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 1118, in resolve_validation_graph\n    self._resolve_metrics(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/validator/validator.py\", line 2021, in _resolve_metrics\n    return execution_engine.resolve_metrics(\n  File \"/Users/cdkini/Code/great_expectations/great_expectations/execution_engine/execution_engine.py\", line 371, in resolve_metrics\n    raise ge_exceptions.MetricResolutionError(\ngreat_expectations.exceptions.exceptions.MetricResolutionError: No module named 'sklearn'\n"
+                    }
+                ],
+                "errors": [],
+                "maturity_checklist": {
+                    "experimental": [
+                        {
+                            "message": "Has a library_metadata object",
+                            "passed": true,
+                            "doc_url": null,
+                            "sub_messages": []
+                        },
+                        {
+                            "message": "Has a docstring, including a one-line short description",
+                            "passed": true,
+                            "doc_url": null,
+                            "sub_messages": [
+                                {
+                                    "message": "\"    This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.\"",
+                                    "passed": true
+                                }
+                            ]
+                        },
+                        {
+                            "message": "Has at least one positive and negative example case, and all test cases pass",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": []
+                        },
+                        {
+                            "message": "Has core logic and passes tests on at least one Execution Engine",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": []
+                        }
+                    ],
+                    "beta": [
+                        {
+                            "message": "Has basic input validation and type checking",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": [
+                                {
+                                    "message": "No validate_configuration method defined",
+                                    "passed": false
+                                }
+                            ]
+                        },
+                        {
+                            "message": "Has both statement Renderers: prescriptive and diagnostic",
+                            "passed": true,
+                            "doc_url": null,
+                            "sub_messages": []
+                        },
+                        {
+                            "message": "Has core logic that passes tests for all applicable Execution Engines and SQL dialects",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": [
+                                {
+                                    "message": "Only 0 / 2 tests for pandas are passing",
+                                    "passed": false
+                                },
+                                {
+                                    "message": "Failing: positive_test_with_column_one, failing_test_with_column_one",
+                                    "passed": false
+                                }
+                            ]
+                        }
+                    ],
+                    "production": [
+                        {
+                            "message": "Passes all linting checks",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": []
+                        },
+                        {
+                            "message": "Has a full suite of tests, as determined by a code owner",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": []
+                        },
+                        {
+                            "message": "Has passed a manual review by a code owner for code standards and style guides",
+                            "passed": false,
+                            "doc_url": null,
+                            "sub_messages": []
+                        }
+                    ]
+                }
+            }
+        ],
+        "expectation_count": 2,
+        "dependencies": [
+            {
+                "text": "dataprofiler",
+                "link": "https://pypi.org/project/dataprofiler",
+                "version": null
+            },
+            {
+                "text": "great-expectations",
+                "link": "https://pypi.org/project/great-expectations",
+                "version": null
+            },
+            {
+                "text": "numpy",
+                "link": "https://pypi.org/project/numpy",
+                "version": null
+            },
+            {
+                "text": "tensorflow",
+                "link": "https://pypi.org/project/tensorflow",
+                "version": null
+            }
+        ],
+        "maturity": "EXPERIMENTAL",
+        "status": {
+            "concept_only": 0,
+            "experimental": 2,
+            "beta": 0,
+            "production": 0,
+            "total": 2
+        },
+        "owners": null,
+        "contributors": [
+            {
+                "username": "@taylorfturner",
+                "full_name": null
+            }
+        ],
+        "domain_experts": [
+            {
+                "full_name": "Jeremy Goodsitt",
+                "social_links": null,
+                "picture": null
+            },
+            {
+                "full_name": "Austin Walters",
+                "social_links": null,
+                "picture": null
+            }
+        ],
+        "version": null
+    }
+]

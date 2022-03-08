@@ -56,7 +56,7 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
         try:
             # Go to package, install deps, read manifest, and sync it
             os.chdir(path)
-            _pip_install("-r", "requirements.txt")
+            _run_pip("install -r requirements.txt")
             package_path: str = ".great_expectations_package.json"
 
             package: GreatExpectationsContribPackageManifest = read_package_from_file(
@@ -71,7 +71,7 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
                 f"Successfully serialized {package.package_name} to dict and appended to manifest list"
             )
         except Exception as e:
-            logger.warning(
+            logger.error(
                 f"Something went wrong when syncing {path} and serializing to dict: {e}"
             )
         finally:
@@ -81,12 +81,12 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
     return payload
 
 
-def _pip_install(*args: str) -> None:
-    args_list: List[str] = list(args)
+def _run_pip(stmt: str) -> None:
+    args: List[str] = stmt.split(" ")
     if hasattr(pip, "main"):
-        pip.main(args_list)
+        pip.main(args)
     else:
-        pip._internal.main(args_list)
+        pip._internal.main(args)
 
 
 def write_results_to_disk(path: str, package_manifests: List[dict]) -> None:
