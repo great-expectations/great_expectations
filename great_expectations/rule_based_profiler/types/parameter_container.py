@@ -28,22 +28,22 @@ VARIABLES_KEY: str = f"$variables{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARA
 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "value"
 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "details"
 
-attribute_name = Word(alphas, f"{alphanums}_.") + ZeroOrMore(
+attribute_name = Word(alphas, alphanums + "_.") + ZeroOrMore(
     (
         (
             Suppress(Literal('["'))
-            + Word(alphas, f"{alphanums}_.")
+            + Word(alphas, alphanums + "_.")
             + Suppress(Literal('"]'))
         )
         ^ (
             Suppress(Literal("['"))
-            + Word(alphas, f"{alphanums}_.")
+            + Word(alphas, alphanums + "_.")
             + Suppress(Literal("']"))
         )
     )
     ^ (
         Suppress(Literal("["))
-        + Word(f"{nums}-").setParseAction(lambda s, l, t: [int(t[0])])
+        + Word(nums + "-").setParseAction(lambda s, l, t: [int(t[0])])
         + Suppress(Literal("]"))
     )
 )
