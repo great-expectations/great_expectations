@@ -591,7 +591,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
-                module_name="sqlalchemy.dialects." + self.engine.dialect.name
+                module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
         elif dialect_name == "snowflake":
@@ -651,17 +651,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
             if self.generated_table_name is not None:
                 if self.engine.dialect.name.lower() == "bigquery":
-                    logger.warning(
-                        "Created permanent table {table_name}".format(
-                            table_name=table_name
-                        )
-                    )
+                    logger.warning(f"Created permanent table {table_name}")
                 if self.engine.dialect.name.lower() == "awsathena":
-                    logger.warning(
-                        "Created permanent table default.{table_name}".format(
-                            table_name=table_name
-                        )
-                    )
+                    logger.warning(f"Created permanent table default.{table_name}")
 
         try:
             insp = get_sqlalchemy_inspector(self.engine)
@@ -715,30 +707,24 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # If it fails, we are trying to get the data using read_sql
             head_sql_str = "select * from "
             if self._table.schema and self.engine.dialect.name.lower() != "bigquery":
-                head_sql_str += self._table.schema + "." + self._table.name
+                head_sql_str += f"{self._table.schema}.{self._table.name}"
             elif self.engine.dialect.name.lower() == "bigquery":
-                head_sql_str += "`" + self._table.name + "`"
+                head_sql_str += f"`{self._table.name}`"
             else:
                 head_sql_str += self._table.name
             head_sql_str += f" limit {n:d}"
 
             # Limit is unknown in mssql! Use top instead!
             if self.engine.dialect.name.lower() == "mssql":
-                head_sql_str = "select top({n}) * from {table}".format(
-                    n=n, table=self._table.name
-                )
+                head_sql_str = f"select top({n}) * from {self._table.name}"
 
             # Limit doesn't work in oracle either
             if self.engine.dialect.name.lower() == "oracle":
-                head_sql_str = "select * from {table} WHERE ROWNUM <= {n}".format(
-                    table=self._table.name, n=n
-                )
+                head_sql_str = f"select * from {self._table.name} WHERE ROWNUM <= {n}"
 
             # Limit is unknown in teradatasql! Use sample instead!
             if self.engine.dialect.name.lower() == "teradatasql":
-                head_sql_str = "select * from {table} sample {n}".format(
-                    table=self._table.name, n=n
-                )
+                head_sql_str = f"select * from {self._table.name} sample {n}"
 
             df = pd.read_sql(head_sql_str, con=self.engine)
         except StopIteration:
@@ -1209,7 +1195,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             case_conditions.append(
                 sa.func.sum(
                     sa.case([(sa.column(column) < bins[idx + 1], 1)], else_=0)
-                ).label("bin_" + str(idx))
+                ).label(f"bin_{str(idx)}")
             )
             idx += 1
 
@@ -1228,7 +1214,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         ],
                         else_=0,
                     )
-                ).label("bin_" + str(idx))
+                ).label(f"bin_{str(idx)}")
             )
 
         if (
@@ -1245,7 +1231,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             case_conditions.append(
                 sa.func.sum(
                     sa.case([(sa.column(column) >= bins[-2], 1)], else_=0)
-                ).label("bin_" + str(len(bins) - 1))
+                ).label(f"bin_{str(len(bins) - 1)}")
             )
         else:
             case_conditions.append(
@@ -1262,7 +1248,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         ],
                         else_=0,
                     )
-                ).label("bin_" + str(len(bins) - 1))
+                ).label(f"bin_{str(len(bins) - 1)}")
             )
 
         query = (
@@ -1413,31 +1399,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             engine_dialect = str(engine_dialect, "utf-8")
 
         if engine_dialect == "bigquery":
-            stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
-            )
+            stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "databricks":
-            stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
-            )
+            stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
         elif engine_dialect == "dremio":
-            stmt = "CREATE OR REPLACE VDS {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
-            )
+            stmt = f"CREATE OR REPLACE VDS {table_name} AS {custom_sql}"
         elif engine_dialect == "snowflake":
             table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
 
-            logger.info("Creating temporary table %s" % table_name)
+            logger.info(f"Creating temporary table {table_name}")
             if schema_name is not None:
-                table_name = schema_name + "." + table_name
-            stmt = "CREATE OR REPLACE {table_type} TABLE {table_name} AS {custom_sql}".format(
-                table_type=table_type, table_name=table_name, custom_sql=custom_sql
-            )
+                table_name = f"{schema_name}.{table_name}"
+            stmt = f"CREATE OR REPLACE {table_type} TABLE {table_name} AS {custom_sql}"
         elif self.sql_engine_dialect.name == "mysql":
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the generic case.
-            stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
-            )
+            stmt = f"CREATE TEMPORARY TABLE {table_name} AS {custom_sql}"
         elif self.sql_engine_dialect.name == "mssql":
             # Insert "into #{table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
@@ -1448,12 +1424,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 strsep = "FROM"
             custom_sqlmod = custom_sql.split(strsep, maxsplit=1)
             stmt = (
-                custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]
+                f"{custom_sqlmod[0]}into {{table_name}} from{custom_sqlmod[1]}"
             ).format(table_name=table_name)
         elif engine_dialect == "awsathena":
-            stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
-            )
+            stmt = f"CREATE TABLE {table_name} AS {custom_sql}"
         elif engine_dialect == "oracle":
             # oracle 18c introduced PRIVATE temp tables which are transient objects
             stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {table_name} ON COMMIT PRESERVE DEFINITION AS {custom_sql}".format(
@@ -1475,9 +1449,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 custom_sql=custom_sql,
             )
         else:
-            stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
-                table_name=table_name, custom_sql=custom_sql
-            )
+            stmt = f'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'
 
         if engine_dialect == "oracle":
             try:
@@ -1627,7 +1599,7 @@ WHERE
             pass
         else:
             raise ValueError(
-                "ignore_row_if was set to an unexpected value: %s" % ignore_row_if
+                f"ignore_row_if was set to an unexpected value: {ignore_row_if}"
             )
 
         unexpected_count = self.engine.execute(query).fetchone()
@@ -1753,9 +1725,9 @@ WHERE
             col_data = [col for col in self.columns if col["name"] == column][0]
             col_type = type(col_data["type"])
         except IndexError:
-            raise ValueError("Unrecognized column: %s" % column)
+            raise ValueError(f"Unrecognized column: {column}")
         except KeyError:
-            raise ValueError("No database type data available for column: %s" % column)
+            raise ValueError(f"No database type data available for column: {column}")
 
         try:
             # Our goal is to be as explicit as possible. We will match the dialect
@@ -1787,7 +1759,7 @@ WHERE
             return {"success": success, "result": {"observed_value": col_type.__name__}}
 
         except AttributeError:
-            raise ValueError("Type not recognized by current driver: %s" % type_)
+            raise ValueError(f"Type not recognized by current driver: {type_}")
 
     @DocInherit
     @DataAsset.expectation(["column", "type_list", "mostly"])
@@ -1810,9 +1782,9 @@ WHERE
             col_data = [col for col in self.columns if col["name"] == column][0]
             col_type = type(col_data["type"])
         except IndexError:
-            raise ValueError("Unrecognized column: %s" % column)
+            raise ValueError(f"Unrecognized column: {column}")
         except KeyError:
-            raise ValueError("No database type data available for column: %s" % column)
+            raise ValueError(f"No database type data available for column: {column}")
 
         # Our goal is to be as explicit as possible. We will match the dialect
         # if that is possible. If there is no dialect available, we *will*
@@ -1843,7 +1815,7 @@ WHERE
                         potential_type = getattr(type_module, type_)
                         types.append(real_type)
                 except AttributeError:
-                    logger.debug("Unrecognized type: %s" % type_)
+                    logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
                 logger.warning(
                     "No recognized sqlalchemy types in type_list for current dialect."
@@ -2201,7 +2173,7 @@ WHERE
         regex_expression = self._get_dialect_regex_expression(column, regex)
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+                f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 
@@ -2223,7 +2195,7 @@ WHERE
         )
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+                f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 
@@ -2251,7 +2223,7 @@ WHERE
         regex_expression = self._get_dialect_regex_expression(column, regex_list[0])
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+                f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 
@@ -2290,7 +2262,7 @@ WHERE
         )
         if regex_expression is None:
             logger.warning(
-                "Regex is not supported for dialect %s" % str(self.sql_engine_dialect)
+                f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
 

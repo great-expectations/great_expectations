@@ -584,8 +584,8 @@ class DefaultSiteIndexBuilder:
     ):
         import os
 
-        if section_name + "_links" not in index_links_dict:
-            index_links_dict[section_name + "_links"] = []
+        if f"{section_name}_links" not in index_links_dict:
+            index_links_dict[f"{section_name}_links"] = []
 
         if run_id:
             filepath = (
@@ -608,7 +608,7 @@ class DefaultSiteIndexBuilder:
         )
         expectation_suite_filepath += ".html"
 
-        index_links_dict[section_name + "_links"].append(
+        index_links_dict[f"{section_name}_links"].append(
             {
                 "expectation_suite_name": expectation_suite_name,
                 "filepath": filepath,

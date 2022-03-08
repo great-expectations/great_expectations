@@ -1315,7 +1315,7 @@ set as active.
                     expectation_configuration=item.expectation_config,
                     match_type="runtime",
                 )
-            warnings.warn("Removed %s expectations that were 'False'" % len(res))
+            warnings.warn(f"Removed {len(res)} expectations that were 'False'")
 
     def get_default_expectation_arguments(self) -> dict:
         """Fetch default expectation arguments for this data_asset
@@ -1445,9 +1445,7 @@ set as active.
 
             expectations = new_expectations
 
-        message = "\t%d expectation(s) included in expectation_suite." % len(
-            expectations
-        )
+        message = f"\t{len(expectations)} expectation(s) included in expectation_suite."
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (
