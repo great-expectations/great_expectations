@@ -129,13 +129,14 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"]
     )
 
-    assert mock_emit.call_count == 43
+    assert mock_emit.call_count == 45
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
     )
 
+    # noinspection PyUnresolvedReferences
     expected_profiler_run_event: mock._Call = mock.call(
         {
             "event_payload": {
@@ -458,13 +459,14 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         ]["expected_expectation_suite"]
     )
 
-    assert mock_emit.call_count == 100
+    assert mock_emit.call_count == 102
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
     )
 
+    # noinspection PyUnresolvedReferences
     expected_profiler_run_event: mock._Call = mock.call(
         {
             "event_payload": {
@@ -1473,6 +1475,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         for payload in mock_emit.call_args_list[:-1]
     )
 
+    # noinspection PyUnresolvedReferences
     expected_profiler_run_event: mock._Call = mock.call(
         {
             "event_payload": {
@@ -1696,6 +1699,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         for payload in mock_emit.call_args_list[:-1]
     )
 
+    # noinspection PyUnresolvedReferences
     expected_profiler_run_event: mock._Call = mock.call(
         {
             "event_payload": {

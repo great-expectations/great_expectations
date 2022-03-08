@@ -39,6 +39,9 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder.de
 from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_builder.mean_unexpected_map_metric_multi_batch_parameter_builder import (
+    MeanUnexpectedMapMetricMultiBatchParameterBuilder,
+)
 from great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
@@ -77,6 +80,7 @@ class ProfilerRunAnonymizer(Anonymizer):
             DomainBuilder,
         ]
         self._ge_parameter_builders = [
+            MeanUnexpectedMapMetricMultiBatchParameterBuilder,
             ValueSetMultiBatchParameterBuilder,
             NumericMetricRangeMultiBatchParameterBuilder,
             MetricMultiBatchParameterBuilder,
