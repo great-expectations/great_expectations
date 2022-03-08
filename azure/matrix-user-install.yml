@@ -25,6 +25,7 @@ jobs:
 
       - job:
         displayName: conda_user_install_${{ vmImage }}_${{ pythonVersion }}
+        condition: succeeded()
         steps:
           - task: UsePythonVersion@0
             inputs:
