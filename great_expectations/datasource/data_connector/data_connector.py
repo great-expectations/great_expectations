@@ -238,7 +238,7 @@ class DataConnector:
             self._refresh_data_references_cache()
 
         if pretty_print:
-            print("\t" + self.name, ":", self.__class__.__name__)
+            print(f"	{self.name}", ":", self.__class__.__name__)
             print()
 
         asset_names = self.get_available_data_asset_names()

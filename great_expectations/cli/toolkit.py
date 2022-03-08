@@ -370,7 +370,7 @@ def select_datasource(
                 ]
             )
             option_selection: str = click.prompt(
-                "Select a datasource" + "\n" + choices + "\n",
+                f"Select a datasource\n{choices}\n",
                 type=click.Choice(
                     [str(i) for i, data_source in enumerate(data_sources, 1)]
                 ),
