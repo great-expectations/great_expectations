@@ -275,10 +275,11 @@ class BatchRequestBase(SerializableDictDot):
         # str placeholder before calling convert_to_json_serializable so that
         # batch_data is not serialized
         if batch_request_contains_batch_data(batch_request=self):
-            batch_data: Union[BatchRequest, RuntimeBatchRequest, dict] = self.runtime_parameters["batch_data"]
+            batch_data: Union[
+                BatchRequest, RuntimeBatchRequest, dict
+            ] = self.runtime_parameters["batch_data"]
             self.runtime_parameters["batch_data"] = str(type(batch_data))
-            serializeable_dict: dict = convert_to_json_serializable(
-                data=self.to_dict())
+            serializeable_dict: dict = convert_to_json_serializable(data=self.to_dict())
             # after getting serializable_dict, restore original batch_data
             self.runtime_parameters["batch_data"] = batch_data
         else:
