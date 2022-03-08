@@ -1439,3 +1439,16 @@ def probabilistic_test(
             raise assertion_error
 
     return run_pytest_method
+
+
+def get_pyathena_potential_type(type_module, type_):
+    if version.parse(type_module.pyathena.__version__) >= version.parse("2.5.0"):
+        # introduction of new column type mapping in 2.5
+        potential_type = type_module.AthenaDialect()._get_column_type(type_)
+    else:
+        if type_ == "string":
+            type_ = "varchar"
+        # < 2.5 column type mapping
+        potential_type = type_module._TYPE_MAPPINGS.get(type_)
+
+    return potential_type
