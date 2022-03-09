@@ -25,6 +25,7 @@ from great_expectations.dataset.util import (
 )
 from great_expectations.util import (
     generate_temporary_table_name,
+    get_pyathena_potential_type,
     get_sqlalchemy_inspector,
     import_library_module,
 )
@@ -1743,13 +1744,16 @@ WHERE
                 success = True
             else:
                 type_module = self._get_dialect_type_module()
-                potential_type = getattr(type_module, type_)
-                # In the case of the PyAthena dialect we need to verify that
-                # the type returned is indeed a type and not an instance.
-                if not inspect.isclass(potential_type):
-                    real_type = type(potential_type)
+                if type_module.__name__ == "pyathena.sqlalchemy_athena":
+                    potential_type = get_pyathena_potential_type(type_module, type_)
+                    # In the case of the PyAthena dialect we need to verify that
+                    # the type returned is indeed a type and not an instance.
+                    if not inspect.isclass(potential_type):
+                        real_type = type(potential_type)
+                    else:
+                        real_type = potential_type
                 else:
-                    real_type = potential_type
+                    real_type = getattr(type_module, type_)
                 success = issubclass(col_type, real_type)
 
             return {"success": success, "result": {"observed_value": col_type.__name__}}
@@ -1798,14 +1802,18 @@ WHERE
             type_module = self._get_dialect_type_module()
             for type_ in type_list:
                 try:
-                    potential_type = getattr(type_module, type_)
-                    # In the case of the PyAthena dialect we need to verify that
-                    # the type returned is indeed a type and not an instance.
-                    if not inspect.isclass(potential_type):
-                        type_class = type(potential_type)
+                    if type_module.__name__ == "pyathena.sqlalchemy_athena":
+                        potential_type = get_pyathena_potential_type(type_module, type_)
+                        # In the case of the PyAthena dialect we need to verify that
+                        # the type returned is indeed a type and not an instance.
+                        if not inspect.isclass(potential_type):
+                            real_type = type(potential_type)
+                        else:
+                            real_type = potential_type
+                        types.append(real_type)
                     else:
-                        type_class = potential_type
-                    types.append(type_class)
+                        potential_type = getattr(type_module, type_)
+                        types.append(potential_type)
                 except AttributeError:
                     logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
