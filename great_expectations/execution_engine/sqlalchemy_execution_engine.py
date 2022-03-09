@@ -27,6 +27,7 @@ from great_expectations.exceptions import (
     InvalidBatchSpecError,
     InvalidConfigError,
 )
+from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -701,29 +702,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            if not (
-                "column_A" in compute_domain_kwargs
-                and "column_B" in compute_domain_kwargs
-            ):
-                raise GreatExpectationsError(
-                    "column_A or column_B not found within compute_domain_kwargs"
-                )
-
-            # Checking if case-sensitive and using appropriate name
-            if self.active_batch_data.use_quoted_name:
-                accessor_domain_kwargs["column_A"] = quoted_name(
-                    compute_domain_kwargs.pop("column_A"), quote=True
-                )
-                accessor_domain_kwargs["column_B"] = quoted_name(
-                    compute_domain_kwargs.pop("column_B"), quote=True
-                )
-            else:
-                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
-                    "column_A"
-                )
-                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
-                    "column_B"
-                )
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_column_pair_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+                accessor_keys=accessor_keys,
+            )
 
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
@@ -788,7 +774,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
 
         if "column" not in compute_domain_kwargs:
-            raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
+            raise ge_exceptions.GreatExpectationsError(
+                "Column not provided in compute_domain_kwargs"
+            )
 
         # Checking if case-sensitive and using appropriate name
         if self.active_batch_data.use_quoted_name:
@@ -797,6 +785,61 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         else:
             accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+
+        return compute_domain_kwargs, accessor_domain_kwargs
+
+    def _split_column_pair_metric_domain_kwargs(
+        self,
+        domain_kwargs: Dict,
+        domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
+    ) -> Tuple[Dict, Dict]:
+        """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
+
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys: keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+        assert (
+            domain_type == MetricDomainTypes.COLUMN_PAIR
+        ), "This method only supports MetricDomainTypes.COLUMN_PAIR"
+
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
+
+        if accessor_keys is not None and len(list(accessor_keys)) > 0:
+            for key in accessor_keys:
+                accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+
+        if not (
+            "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs
+        ):
+            raise ge_exceptions.GreatExpectationsError(
+                "column_A or column_B not found within compute_domain_kwargs"
+            )
+
+        # Checking if case-sensitive and using appropriate name
+        if self.active_batch_data.use_quoted_name:
+            accessor_domain_kwargs["column_A"] = quoted_name(
+                compute_domain_kwargs.pop("column_A"), quote=True
+            )
+            accessor_domain_kwargs["column_B"] = quoted_name(
+                compute_domain_kwargs.pop("column_B"), quote=True
+            )
+        else:
+            accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+            accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
 
         return compute_domain_kwargs, accessor_domain_kwargs
 

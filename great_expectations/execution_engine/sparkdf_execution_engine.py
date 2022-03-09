@@ -550,16 +550,14 @@ Please check your config."""
             )
 
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            if not (
-                "column_A" in compute_domain_kwargs
-                and "column_B" in compute_domain_kwargs
-            ):
-                raise GreatExpectationsError(
-                    "column_A or column_B not found within compute_domain_kwargs"
-                )
-
-            accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
-            accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_column_pair_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+                accessor_keys=accessor_keys,
+            )
 
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
             if "column_list" not in domain_kwargs:
