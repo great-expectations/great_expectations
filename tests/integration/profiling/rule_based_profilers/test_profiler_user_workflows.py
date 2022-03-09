@@ -452,11 +452,10 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         include_citation=True,
     )
 
-    assert (
-        expectation_suite
-        == bobby_columnar_table_multi_batch[
-            "test_configuration_oneshot_sampling_method"
-        ]["expected_expectation_suite"]
+    assert sorted(expectation_suite) == sorted(
+        bobby_columnar_table_multi_batch["test_configuration_oneshot_sampling_method"][
+            "expected_expectation_suite"
+        ]
     )
 
     assert mock_emit.call_count == 103
@@ -707,6 +706,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
+    suite: ExpectationSuite
+
     expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
     try:
         # noinspection PyUnusedLocal
@@ -847,6 +848,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    suite: ExpectationSuite
 
     expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
     try:
@@ -1108,6 +1111,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert "profiler_config" not in expectation_impl.default_kwarg_values
 
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    suite: ExpectationSuite
 
     expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
     try:
@@ -1542,6 +1547,8 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
 
     result: ExpectationValidationResult
 
+    suite: ExpectationSuite
+
     expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
     try:
         # noinspection PyUnusedLocal
@@ -1775,6 +1782,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
     result: ExpectationValidationResult
 
     custom_profiler_config: RuleBasedProfilerConfig
+
+    suite: ExpectationSuite
 
     expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
     try:
@@ -2049,6 +2058,8 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
 
     custom_profiler_config: RuleBasedProfilerConfig
 
+    suite: ExpectationSuite
+
     expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
     try:
         # noinspection PyUnusedLocal
@@ -2102,3 +2113,195 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
     value_set_computed: List[int] = result.expectation_config["kwargs"]["value_set"]
 
     assert value_set_computed == value_set_expected
+
+
+@probabilistic_test
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time("09/26/2019 13:42:41")
+def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    result: ExpectationValidationResult
+
+    custom_profiler_config: RuleBasedProfilerConfig
+
+    suite: ExpectationSuite
+
+    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
+    try:
+        # noinspection PyUnusedLocal
+        suite = context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+    except ge_exceptions.DataContextError:
+        suite = context.create_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite_name=expectation_suite_name,
+    )
+    assert len(validator.batches) == 36
+
+    # Use all batches, loaded by Validator, for estimating Expectation argument values.
+    result = validator.expect_column_min_to_be_between(
+        column="fare_amount",
+        result_format="SUMMARY",
+        include_config=True,
+        auto=True,
+    )
+    assert result.success
+
+    key: str
+    value: Any
+    expectation_config_kwargs: dict = {
+        key: value
+        for key, value in result.expectation_config["kwargs"].items()
+        if key
+        not in [
+            "min_value",
+            "max_value",
+        ]
+    }
+    assert expectation_config_kwargs == {
+        "column": "fare_amount",
+        "strict_min": False,
+        "strict_max": False,
+        "result_format": "SUMMARY",
+        "include_config": True,
+        "auto": True,
+        "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+    }
+
+    rtol: float = 2.0e1 * RTOL
+    atol: float = 2.0e1 * ATOL
+
+    min_value_actual: float = result.expectation_config["kwargs"]["min_value"]
+    min_value_expected: float = -1.8796e2
+
+    np.testing.assert_allclose(
+        actual=min_value_actual,
+        desired=min_value_expected,
+        rtol=rtol,
+        atol=atol,
+        err_msg=f"Actual value of {min_value_actual} differs from expected value of {min_value_expected} by more than {atol + rtol * abs(min_value_expected)} tolerance.",
+    )
+
+    max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
+    max_value_expected: float = -5.79
+    np.testing.assert_allclose(
+        actual=max_value_actual,
+        desired=max_value_expected,
+        rtol=rtol,
+        atol=atol,
+        err_msg=f"Actual value of {max_value_actual} differs from expected value of {max_value_expected} by more than {atol + rtol * abs(max_value_expected)} tolerance.",
+    )
+
+
+@probabilistic_test
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time("09/26/2019 13:42:41")
+def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    result: ExpectationValidationResult
+
+    custom_profiler_config: RuleBasedProfilerConfig
+
+    suite: ExpectationSuite
+
+    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
+    try:
+        # noinspection PyUnusedLocal
+        suite = context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+    except ge_exceptions.DataContextError:
+        suite = context.create_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite_name=expectation_suite_name,
+    )
+    assert len(validator.batches) == 36
+
+    # Use all batches, loaded by Validator, for estimating Expectation argument values.
+    result = validator.expect_column_max_to_be_between(
+        column="fare_amount",
+        result_format="SUMMARY",
+        include_config=True,
+        auto=True,
+    )
+    assert result.success
+
+    key: str
+    value: Any
+    expectation_config_kwargs: dict = {
+        key: value
+        for key, value in result.expectation_config["kwargs"].items()
+        if key
+        not in [
+            "min_value",
+            "max_value",
+        ]
+    }
+    assert expectation_config_kwargs == {
+        "column": "fare_amount",
+        "strict_min": False,
+        "strict_max": False,
+        "result_format": "SUMMARY",
+        "include_config": True,
+        "auto": True,
+        "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+    }
+
+    rtol: float = 2.0e1 * RTOL
+    atol: float = 2.0e1 * ATOL
+
+    min_value_actual: float = result.expectation_config["kwargs"]["min_value"]
+    min_value_expected: float = 1.5438e2
+
+    np.testing.assert_allclose(
+        actual=min_value_actual,
+        desired=min_value_expected,
+        rtol=rtol,
+        atol=atol,
+        err_msg=f"Actual value of {min_value_actual} differs from expected value of {min_value_expected} by more than {atol + rtol * abs(min_value_expected)} tolerance.",
+    )
+
+    max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
+    max_value_expected: float = 5.6314775e4
+    np.testing.assert_allclose(
+        actual=max_value_actual,
+        desired=max_value_expected,
+        rtol=rtol,
+        atol=atol,
+        err_msg=f"Actual value of {max_value_actual} differs from expected value of {max_value_expected} by more than {atol + rtol * abs(max_value_expected)} tolerance.",
+    )
