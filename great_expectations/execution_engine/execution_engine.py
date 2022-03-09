@@ -494,6 +494,81 @@ class ExecutionEngine(ABC):
             template_arguments=template_arguments,
         )
 
+    def _split_domain_kwargs(
+        self,
+        domain_kwargs: Dict,
+        domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
+    ) -> Tuple[Dict, Dict]:
+        """Split domain_kwargs for all domain types into compute and accessor domain kwargs.
+
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys: keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+
+        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        if (
+            domain_type != MetricDomainTypes.TABLE
+            and accessor_keys is not None
+            and len(list(accessor_keys)) > 0
+        ):
+            logger.warning(
+                'Accessor keys ignored since Metric Domain Type is not "table"'
+            )
+
+        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs = {}
+        if domain_type == MetricDomainTypes.TABLE:
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_table_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+                accessor_keys=accessor_keys,
+            )
+
+        elif domain_type == MetricDomainTypes.COLUMN:
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_column_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+            )
+
+        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_column_pair_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+            )
+
+        elif domain_type == MetricDomainTypes.MULTICOLUMN:
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_multi_column_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+            )
+
+        return compute_domain_kwargs, accessor_domain_kwargs
+
     @staticmethod
     def _split_table_metric_domain_kwargs(
         domain_kwargs: Dict,

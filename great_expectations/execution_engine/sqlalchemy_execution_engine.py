@@ -663,66 +663,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         selectable = self.get_domain_records(
             domain_kwargs=domain_kwargs,
         )
-        # Extracting value from enum if it is given for future computation
-        domain_type = MetricDomainTypes(domain_type)
 
-        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
-        if (
-            domain_type != MetricDomainTypes.TABLE
-            and accessor_keys is not None
-            and len(list(accessor_keys)) > 0
-        ):
-            logger.warning(
-                'Accessor keys ignored since Metric Domain Type is not "table"'
-            )
+        (compute_domain_kwargs, accessor_domain_kwargs,) = self._split_domain_kwargs(
+            domain_kwargs=domain_kwargs,
+            domain_type=domain_type,
+            accessor_keys=accessor_keys,
+        )
 
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = {}
-        if domain_type == MetricDomainTypes.TABLE:
-            (
-                compute_domain_kwargs,
-                accessor_domain_kwargs,
-            ) = self._split_table_metric_domain_kwargs(
-                domain_kwargs=domain_kwargs,
-                domain_type=domain_type,
-                accessor_keys=accessor_keys,
-            )
-            return selectable, compute_domain_kwargs, accessor_domain_kwargs
-
-        elif domain_type == MetricDomainTypes.COLUMN:
-            (
-                compute_domain_kwargs,
-                accessor_domain_kwargs,
-            ) = self._split_column_metric_domain_kwargs(
-                domain_kwargs=domain_kwargs,
-                domain_type=domain_type,
-            )
-
-            return selectable, compute_domain_kwargs, accessor_domain_kwargs
-
-        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            (
-                compute_domain_kwargs,
-                accessor_domain_kwargs,
-            ) = self._split_column_pair_metric_domain_kwargs(
-                domain_kwargs=domain_kwargs,
-                domain_type=domain_type,
-            )
-
-            return selectable, compute_domain_kwargs, accessor_domain_kwargs
-
-        elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            (
-                compute_domain_kwargs,
-                accessor_domain_kwargs,
-            ) = self._split_multi_column_metric_domain_kwargs(
-                domain_kwargs=domain_kwargs,
-                domain_type=domain_type,
-            )
-
-            return selectable, compute_domain_kwargs, accessor_domain_kwargs
-
-        # Letting selectable fall through
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
     def _split_column_metric_domain_kwargs(
