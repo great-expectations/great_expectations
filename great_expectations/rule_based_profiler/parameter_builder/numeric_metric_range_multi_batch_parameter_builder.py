@@ -540,7 +540,7 @@ positive integer, or must be omitted (or set to None).
         else:
             n_resamples = num_bootstrap_samples
 
-        # Obtain bootstrap_random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=kwargs.get("bootstrap_random_seed"),

@@ -231,15 +231,6 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_docs_integration)
 
 
-@pytest.fixture
-def always_failing_test():
-    @probabilistic_test
-    def failing_test_func():
-        assert False, "Executing 'test_method()' failed."
-
-    return failing_test_func
-
-
 @pytest.fixture(autouse=True)
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
