@@ -53,7 +53,8 @@ jobs:
           displayName: 'Install dependencies'
 
         - script: |
-            pip install pytest pytest-cov pytest-azurepipelines
+            pip install -I pytest
+            pip install pytest-cov pytest-azurepipelines
             pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
           displayName: 'pytest'
 
