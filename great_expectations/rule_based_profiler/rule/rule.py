@@ -64,7 +64,7 @@ class Rule(SerializableDictDot):
             )
             self._parameters[domain.id] = parameter_container
             parameter_builder: ParameterBuilder
-            if self._parameter_builders is not None:
+            if self._parameter_builders:
                 for parameter_builder in self._parameter_builders:
                     parameter_builder.build_parameters(
                         parameter_container=parameter_container,

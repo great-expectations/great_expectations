@@ -153,12 +153,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         self._usage_statistics_handler = usage_statistics_handler
 
-        # Necessary to annotation ExpectationSuite during `run()`
+        # Necessary to annotate ExpectationSuite during `run()`
         rule_to_load_into_citation: dict = {}
-        if isinstance(rules, Rule):
-            rule_to_load_into_citation = rules.to_json_dict()
-        elif isinstance(rules, dict):
-            rule_to_load_into_citation = rules
+        rule_to_load_into_citation = rules
+        # if isinstance(rules, Rule):
+        #    rule_to_load_into_citation = rules.to_json_dict()
+        # elif isinstance(rules, dict):
+        #    rule_to_load_into_citation = rules
         self._citation = {
             "name": name,
             "config_version": config_version,
@@ -526,9 +527,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         effective_rule_config: Dict[str, Any]
         if rule_name in existing_rules:
             rule: Rule = existing_rules[rule_name]
-            domain_builder_config: dict = RuleBasedProfiler._get_domain_builder_configs(
-                rule_config=rule_config
-            )
+            domain_builder_config: dict = rule_config.get("domain_builder", {})
             effective_domain_builder_config: dict = (
                 RuleBasedProfiler._reconcile_rule_domain_builder_config(
                     domain_builder=rule.domain_builder,
@@ -536,13 +535,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     reconciliation_strategy=reconciliation_directives.domain_builder,
                 )
             )
-
-            parameter_builder_configs: List[
-                dict
-            ] = RuleBasedProfiler._get_parameter_builder_configs(
-                rule_config=rule_config
+            parameter_builder_configs: List[dict] = rule_config.get(
+                "parameter_builders", []
             )
-
             effective_parameter_builder_configs: Optional[
                 List[dict]
             ] = RuleBasedProfiler._reconcile_rule_parameter_builder_configs(
@@ -550,12 +545,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 parameter_builder_configs=parameter_builder_configs,
                 reconciliation_strategy=reconciliation_directives.parameter_builder,
             )
-
-            expectation_configuration_builder_configs: List[
-                dict
-            ] = RuleBasedProfiler._get_expectation_configuration_builder_configs(
-                rule_config=rule_config
+            expectation_configuration_builder_configs: List[dict] = rule_config.get(
+                "expectation_configuration_builders", []
             )
+
             effective_expectation_configuration_builder_configs: List[
                 dict
             ] = RuleBasedProfiler._reconcile_rule_expectation_configuration_builder_configs(
@@ -885,10 +878,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         variables_dict: dict = {}
         if self.variables and isinstance(self.variables, ParameterContainer):
             variables_dict = self.variables.to_dict()
-            if variables_dict.get("parameter_nodes"):
-                variables_dict = variables_dict["parameter_nodes"]["variables"][
-                    "variables"
-                ]
+        if variables_dict.get("parameter_nodes"):
+            variables_dict = variables_dict["parameter_nodes"]["variables"]["variables"]
         serializeable_dict: dict = {
             "class_name": self.__class__.__name__,
             "module_name": self.__class__.__module__,
