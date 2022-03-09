@@ -3,7 +3,7 @@ import datetime
 import json
 import logging
 import os
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
@@ -717,7 +717,13 @@ constructor arguments.
         **runtime_kwargs,
     ) -> "Checkpoint":
         config: dict = checkpoint_config.to_json_dict()
-        config.update(runtime_kwargs)
+
+        key: str
+        value: Any
+        for key, value in runtime_kwargs.items():
+            if value is not None:
+                config[key] = value
+
         config = filter_properties_dict(properties=config, clean_falsy=True)
 
         checkpoint: Checkpoint = instantiate_class_from_config(

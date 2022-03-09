@@ -13,6 +13,14 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 logger = logging.getLogger(__name__)
 
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
+    )
+
 
 class BatchDefinition(SerializableDictDot):
     def __init__(
@@ -260,8 +268,23 @@ class BatchRequestBase(SerializableDictDot):
         due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
         make this refactoring infeasible at the present time.
         """
-        dict_obj: dict = self.to_dict()
-        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+
+        # if batch_data appears in BatchRequest, temporarily replace it with
+        # str placeholder before calling convert_to_json_serializable so that
+        # batch_data is not serialized
+        if batch_request_contains_batch_data(batch_request=self):
+            batch_data: Union[
+                BatchRequest, RuntimeBatchRequest, dict
+            ] = self.runtime_parameters["batch_data"]
+            self.runtime_parameters["batch_data"]: str = str(type(batch_data))
+            serializeable_dict: dict = convert_to_json_serializable(data=self.to_dict())
+            # after getting serializable_dict, restore original batch_data
+            self.runtime_parameters["batch_data"]: Union[
+                BatchRequest, RuntimeBatchRequest, dict
+            ] = batch_data
+        else:
+            serializeable_dict: dict = convert_to_json_serializable(data=self.to_dict())
+
         return serializeable_dict
 
     def __deepcopy__(self, memo):
