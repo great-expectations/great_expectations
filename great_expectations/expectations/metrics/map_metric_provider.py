@@ -2043,6 +2043,11 @@ def _sqlalchemy_column_map_condition_values(
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
+    elif (
+        result_format["result_format"] == "COMPLETE"
+        and "bigquery" in execution_engine.dialect.name
+    ):
+        query = query.limit(10000)  # BigQuery upper bound on query parameters
 
     return [
         val.unexpected_values
