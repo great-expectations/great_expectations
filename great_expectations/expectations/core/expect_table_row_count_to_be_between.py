@@ -91,7 +91,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "round_decimals": 0,
         },
         rules={
-            "default_:w"
             "default_expect_table_row_count_to_be_between_rule": {
                 "domain_builder": {
                     "class_name": "TableDomainBuilder",
