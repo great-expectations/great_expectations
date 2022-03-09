@@ -11,14 +11,14 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.mean_unexpected_metric_multi_batch_parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder.mean_unexpected_map_metric_multi_batch_parameter_builder import (
     MeanUnexpectedMapMetricMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from tests.rule_based_profiler.conftest import ATOL, RTOL
 
 
-def test_instantiation_mean_unexpected_metric_multi_batch_parameter_builder(
+def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
@@ -35,7 +35,7 @@ def test_instantiation_mean_unexpected_metric_multi_batch_parameter_builder(
     )
 
 
-def test_instantiation_mean_unexpected_metric_multi_batch_parameter_builder_required_arguments_absent(
+def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_required_arguments_absent(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
@@ -71,7 +71,7 @@ def test_instantiation_mean_unexpected_metric_multi_batch_parameter_builder_requ
     )
 
 
-def test_mean_unexpected_metric_multi_batch_parameter_builder_bobby_numeric(
+def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
@@ -107,8 +107,8 @@ def test_mean_unexpected_metric_multi_batch_parameter_builder_bobby_numeric(
         data_context=data_context,
     )
 
-    mean_unexpected_metric_multi_batch_parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
-        name="my_passenger_count_values_not_null_mean_unexpected_metric",
+    mean_unexpected_map_metric_multi_batch_parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
+        name="my_passenger_count_values_not_null_mean_unexpected_map_metric",
         map_metric_name="column_values.nonnull",
         total_count_parameter_builder_name="my_total_count",
         null_count_parameter_builder_name="my_null_count",
@@ -145,7 +145,7 @@ def test_mean_unexpected_metric_multi_batch_parameter_builder_bobby_numeric(
         parameters=parameters,
     )
 
-    mean_unexpected_metric_multi_batch_parameter_builder.build_parameters(
+    mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
         variables=variables,
@@ -158,7 +158,7 @@ def test_mean_unexpected_metric_multi_batch_parameter_builder_bobby_numeric(
         Any
     ] = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=mean_unexpected_metric_multi_batch_parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=mean_unexpected_map_metric_multi_batch_parameter_builder.fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,
@@ -175,7 +175,7 @@ def test_mean_unexpected_metric_multi_batch_parameter_builder_bobby_numeric(
     )
 
 
-def test_mean_unexpected_metric_multi_batch_parameter_builder_bobby_datetime(
+def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
@@ -211,8 +211,8 @@ def test_mean_unexpected_metric_multi_batch_parameter_builder_bobby_datetime(
         data_context=data_context,
     )
 
-    mean_unexpected_metric_multi_batch_parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
-        name="my_pickup_datetime_count_values_unique_mean_unexpected_metric",
+    mean_unexpected_map_metric_multi_batch_parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
+        name="my_pickup_datetime_count_values_unique_mean_unexpected_map_metric",
         map_metric_name="column_values.unique",
         total_count_parameter_builder_name="my_total_count",
         null_count_parameter_builder_name="my_null_count",
@@ -249,7 +249,7 @@ def test_mean_unexpected_metric_multi_batch_parameter_builder_bobby_datetime(
         parameters=parameters,
     )
 
-    mean_unexpected_metric_multi_batch_parameter_builder.build_parameters(
+    mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
         parameter_container=parameter_container,
         domain=domain,
         variables=variables,
@@ -262,7 +262,7 @@ def test_mean_unexpected_metric_multi_batch_parameter_builder_bobby_datetime(
         Any
     ] = get_parameter_value_and_validate_return_type(
         domain=domain,
-        parameter_reference=mean_unexpected_metric_multi_batch_parameter_builder.fully_qualified_parameter_name,
+        parameter_reference=mean_unexpected_map_metric_multi_batch_parameter_builder.fully_qualified_parameter_name,
         expected_return_type=None,
         variables=variables,
         parameters=parameters,

@@ -21,6 +21,9 @@ from great_expectations.rule_based_profiler.domain_builder.column_domain_builder
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
+from great_expectations.rule_based_profiler.domain_builder.map_metric_column_domain_builder import (
+    MapMetricColumnDomainBuilder,
+)
 from great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder import (
     SimpleColumnSuffixDomainBuilder,
 )
@@ -35,6 +38,9 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder.de
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder.mean_unexpected_map_metric_multi_batch_parameter_builder import (
+    MeanUnexpectedMapMetricMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder import (
     MetricMultiBatchParameterBuilder,
@@ -65,6 +71,7 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         # ordered bottom up in terms of inheritance order
         self._ge_domain_builders = [
+            MapMetricColumnDomainBuilder,
             CategoricalColumnDomainBuilder,
             SimpleColumnSuffixDomainBuilder,
             SimpleSemanticTypeColumnDomainBuilder,
@@ -73,6 +80,7 @@ class ProfilerRunAnonymizer(Anonymizer):
             DomainBuilder,
         ]
         self._ge_parameter_builders = [
+            MeanUnexpectedMapMetricMultiBatchParameterBuilder,
             ValueSetMultiBatchParameterBuilder,
             NumericMetricRangeMultiBatchParameterBuilder,
             MetricMultiBatchParameterBuilder,
