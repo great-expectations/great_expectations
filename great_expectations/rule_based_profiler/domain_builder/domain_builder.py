@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_resolved_metrics_by_key,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
@@ -15,6 +17,7 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class DomainBuilder(Builder, ABC):
@@ -92,6 +95,57 @@ class DomainBuilder(Builder, ABC):
 
         pass
 
+    def get_table_row_counts(
+        self,
+        validator: Optional["Validator"] = None,  # noqa: F821
+        batch_ids: Optional[List[str]] = None,
+        variables: Optional[ParameterContainer] = None,
+    ) -> Dict[str, int]:
+        if validator is None:
+            validator = self.get_validator(variables=variables)
+
+        if batch_ids is None:
+            batch_ids = self.get_batch_ids(variables=variables)
+
+        batch_id: str
+
+        metric_configurations_by_batch_id: Dict[str, List[MetricConfiguration]] = {
+            batch_id: [
+                MetricConfiguration(
+                    metric_name="table.row_count",
+                    metric_domain_kwargs={
+                        "batch_id": batch_id,
+                    },
+                    metric_value_kwargs={
+                        "include_nested": True,
+                    },
+                    metric_dependencies=None,
+                )
+            ]
+            for batch_id in batch_ids
+        }
+
+        resolved_metrics_by_batch_id: Dict[
+            str, Dict[Tuple[str, str, str], Any]
+        ] = get_resolved_metrics_by_key(
+            validator=validator,
+            metric_configurations_by_key=metric_configurations_by_batch_id,
+        )
+
+        batch_id: str
+        resolved_metrics: Dict[Tuple[str, str, str], Any]
+        metric_value: Any
+        table_row_count_lists_by_batch_id: Dict[str, List[int]] = {
+            batch_id: [metric_value for metric_value in resolved_metrics.values()]
+            for batch_id, resolved_metrics in resolved_metrics_by_batch_id.items()
+        }
+        table_row_counts_by_batch_id: Dict[str, int] = {
+            batch_id: metric_value[0]
+            for batch_id, metric_value in table_row_count_lists_by_batch_id.items()
+        }
+
+        return table_row_counts_by_batch_id
+
     def get_validator(
         self,
         variables: Optional[ParameterContainer] = None,
@@ -118,45 +172,3 @@ class DomainBuilder(Builder, ABC):
             variables=variables,
             parameters=None,
         )
-
-    def get_batch_id(
-        self,
-        variables: Optional[ParameterContainer] = None,
-    ) -> str:
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            variables=variables,
-        )
-        num_batch_ids: int = len(batch_ids)
-        if num_batch_ids != 1:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""{self.__class__.__name__}.get_batch_id() must return exactly one batch_id ({num_batch_ids} \
-were retrieved).
-"""
-            )
-
-        return batch_ids[0]
-
-
-def build_simple_domains_from_column_names(
-    column_names: List[str],
-    domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN,
-) -> List[Domain]:
-    """
-    This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
-
-    :param column_names: list of column names to serve as values for "column" keys in "domain_kwargs" dictionary
-    :param domain_type: type of Domain objects (same "domain_type" must be applicable to all Domain objects returned)
-    :return: list of resulting Domain objects
-    """
-    column_name: str
-    domains: List[Domain] = [
-        Domain(
-            domain_type=domain_type,
-            domain_kwargs={
-                "column": column_name,
-            },
-        )
-        for column_name in column_names
-    ]
-
-    return domains
