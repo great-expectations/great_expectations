@@ -15,10 +15,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
-from tests.conftest import (
-    skip_if_probabilistic_test,
-    skip_if_python_below_minimum_version,
-)
+from tests.conftest import skip_if_python_below_minimum_version
 
 # Allowable tolerance for how closely a bootstrap method approximates the sample
 EFFICACY_TOLERANCE: float = 1.0e-2
@@ -262,8 +259,6 @@ def test_bootstrap_point_estimate_scipy_efficacy(
 def test_compare_bootstrap_small_sample_point_estimate_performance(
     bootstrap_distribution_parameters_and_20_samples_with_01_false_positive,
 ):
-    skip_if_probabilistic_test()
-
     # We measure performance on a small metric value sample size. As metric value sample size gets large,
     # the relative performance of each method becomes chaotic and the decision to use the bootstrap method
     # in the first place becomes questionable.

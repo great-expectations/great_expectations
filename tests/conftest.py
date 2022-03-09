@@ -102,12 +102,6 @@ def skip_if_python_below_minimum_version():
         )
 
 
-def skip_if_probabilistic_test():
-    pytest.skip(
-        "We are skipping probabilistic tests until they can be refactored to become deterministic or migrated to ML Flow"
-    )
-
-
 def pytest_configure(config):
     config.addinivalue_line(
         "markers",

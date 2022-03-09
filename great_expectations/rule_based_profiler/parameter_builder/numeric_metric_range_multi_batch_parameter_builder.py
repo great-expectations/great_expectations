@@ -64,6 +64,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         reduce_scalar_metric: Union[str, bool] = True,
         false_positive_rate: Union[str, float] = 5.0e-2,
         num_bootstrap_samples: Optional[Union[str, int]] = None,
+        bootstrap_random_seed: Optional[int] = None,
         round_decimals: Optional[Union[str, int]] = None,
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
@@ -122,6 +123,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self._false_positive_rate = false_positive_rate
 
         self._num_bootstrap_samples = num_bootstrap_samples
+
+        self._bootstrap_random_seed = bootstrap_random_seed
 
         self._round_decimals = round_decimals
 
@@ -193,6 +196,10 @@ detected.
     @property
     def num_bootstrap_samples(self) -> Optional[Union[str, int]]:
         return self._num_bootstrap_samples
+
+    @property
+    def bootstrap_random_seed(self) -> Optional[Union[str, int]]:
+        return self._bootstrap_random_seed
 
     @property
     def round_decimals(self) -> Optional[Union[str, int]]:
@@ -533,10 +540,20 @@ positive integer, or must be omitted (or set to None).
         else:
             n_resamples = num_bootstrap_samples
 
+        # Obtain bootstrap_random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=kwargs.get("bootstrap_random_seed"),
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
         return compute_bootstrap_quantiles_point_estimate(
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
             n_resamples=n_resamples,
+            random_seed=random_seed,
         )
 
     def _get_deterministic_estimate(
