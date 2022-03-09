@@ -22,7 +22,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.core.util import convert_to_json_serializable, nested_update
-from great_expectations.data_context.store import ProfilerStore
+from great_expectations.data_context.store import ConfigurationStore, ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -1010,6 +1010,18 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             usage_statistics_handler=usage_statistics_handler,
         )
 
+    def update_profiler_config(self, name: str, ge_cloud_id: Optional[str] = None):
+        effective_rules: dict = self._get_rules_as_dict()
+        # TODO: update with variables
+        updated_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+            name=name,
+            config_version=self.config.config_version,
+            rules=effective_rules,
+            variables=self.variables,
+        )
+        self._profiler_config = updated_profiler_config
+        return updated_profiler_config
+
     def save_profiler(
         self,
         profiler_store: ProfilerStore,
@@ -1019,7 +1031,9 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         Saves config by bringing configuration in current RuleBasedProfiler object (such as additional Rules and variables) with the profiler_config in self._profiler_config.
         """
         effective_rules: dict = self._get_rules_as_dict()
-
+        # either enriching
+        # big fan.. of config.. and then
+        # create a new profilerConfig
         updated_profiler_config: RuleBasedProfilerConfig = (
             RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
                 profiler=self,
@@ -1103,14 +1117,11 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         if not isinstance(rule, Rule):
             raise TypeError("add_rule method requires a Rule to be passed in.")
 
-        index_to_delete: Optional[int] = None
-        for index in range(len(self._rules)):
-            existing_rule: Rule = self.rules[index]
+        # replace existing rule and return or append
+        for idx, existing_rule in enumerate(self._rules):
             if existing_rule.name == rule.name:
-                index_to_delete = index
-        if index_to_delete:
-            self._rules.pop(index_to_delete)
-
+                self._rules[idx] = rule
+                return
         self._rules.append(rule)
 
     def _generate_rule_overrides_from_batch_request(
@@ -1191,14 +1202,9 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             },
         )
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
-        else:
-            key = ConfigurationIdentifier(
-                configuration_key=config.name,
-            )
-
+        key: Union[
+            GeCloudIdentifier, ConfigurationIdentifier
+        ] = ConfigurationStore.determine_key(name="contract", ge_cloud_id=ge_cloud_id)
         profiler_store.set(key=key, value=config)
 
         return new_profiler

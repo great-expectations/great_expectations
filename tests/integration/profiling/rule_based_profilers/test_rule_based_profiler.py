@@ -3,12 +3,14 @@ from unittest import mock
 
 from ruamel.yaml import YAML
 
+import great_expectations.rule_based_profiler.domain_builder
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -124,6 +126,43 @@ def test_batches_are_accessible(
             )
         )
         assert metric_value_set == {"category0", "category1", "category2"}
+
+
+# unittest for save_profiler
+def test_save_profiler():
+    pass
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch(
+    "great_expectations.rule_based_profiler.domain_builder.SimpleColumnSuffixDomainBuilder"
+)
+@mock.patch(
+    "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
+)
+def test_add_rule(
+    mock_data_context: mock.MagicMock,
+    mock_domain_builder: mock.MagicMock,
+    mock_expectation_configuration_builder: mock.MagicMock,
+):
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_mocked_rbp", data_context=mock_data_context, config_version=1.0
+    )
+    first_rule: Rule = Rule(
+        name="first_rule",
+        domain_builder=mock_domain_builder,
+        expectation_configuration_builders=mock_expectation_configuration_builder,
+    )
+    profiler.add_rule(first_rule)
+    assert len(profiler.rules) == 1
+
+    second_rule: Rule = Rule(
+        name="second_rule",
+        domain_builder=mock_domain_builder,
+        expectation_configuration_builders=mock_expectation_configuration_builder,
+    )
+    profiler.add_rule(second_rule)
+    assert len(profiler.rules) == 2
 
 
 @mock.patch(

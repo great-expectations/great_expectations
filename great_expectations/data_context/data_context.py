@@ -3320,11 +3320,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
+        name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ):
-        return profiler.save_profiler(
-            profiler_store=self.profiler_store, ge_cloud_id=ge_cloud_id
+        profiler_config = profiler.update_profiler_config(
+            name=name, ge_cloud_id=ge_cloud_id
         )
+        key = self.profiler_store.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+        # print(profiler_config)
+        self.profiler_store.set(key, profiler_config)
+        return profiler
 
     def get_profiler(
         self,
