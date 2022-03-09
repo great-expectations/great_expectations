@@ -31,6 +31,7 @@ def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     with pytest.raises(TypeError) as excinfo:
+        # noinspection PyArgumentList
         _: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder(
             data_context=data_context,
         )
@@ -92,6 +93,8 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
             "metric_configuration": {
                 "domain_kwargs": {"column": "event_type"},
                 "metric_name": "column.distinct_values",
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
             },
             "num_batches": 1,
         },
@@ -171,6 +174,8 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
             "metric_configuration": {
                 "domain_kwargs": {"column": "user_agent"},
                 "metric_name": "column.distinct_values",
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
             },
             "num_batches": 1,
         },
@@ -246,6 +251,8 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
             "metric_configuration": {
                 "metric_name": "column.distinct_values",
                 "domain_kwargs": {"column": "passenger_count"},
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -323,6 +330,8 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
             "metric_configuration": {
                 "metric_name": "column.distinct_values",
                 "domain_kwargs": {"column": "store_and_fwd_flag"},
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
