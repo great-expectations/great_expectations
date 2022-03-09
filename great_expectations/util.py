@@ -28,7 +28,6 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
-import pytest
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
@@ -95,8 +94,6 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
 }
-
-MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES: int = 2
 
 
 def pluralize(singular_ge_noun):
