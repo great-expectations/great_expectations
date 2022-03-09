@@ -546,7 +546,6 @@ Please check your config."""
             ) = self._split_column_metric_domain_kwargs(
                 domain_kwargs=domain_kwargs,
                 domain_type=domain_type,
-                accessor_keys=accessor_keys,
             )
 
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
@@ -556,7 +555,6 @@ Please check your config."""
             ) = self._split_column_pair_metric_domain_kwargs(
                 domain_kwargs=domain_kwargs,
                 domain_type=domain_type,
-                accessor_keys=accessor_keys,
             )
 
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
@@ -566,7 +564,6 @@ Please check your config."""
             ) = self._split_multi_column_metric_domain_kwargs(
                 domain_kwargs=domain_kwargs,
                 domain_type=domain_type,
-                accessor_keys=accessor_keys,
             )
 
         return data, compute_domain_kwargs, accessor_domain_kwargs

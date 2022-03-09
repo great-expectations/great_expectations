@@ -550,7 +550,6 @@ class ExecutionEngine(ABC):
     def _split_column_metric_domain_kwargs(
         domain_kwargs: Dict,
         domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[Dict, Dict]:
         """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
 
@@ -560,8 +559,6 @@ class ExecutionEngine(ABC):
             like to be using, or a corresponding string value representing it. String types include "identity",
             "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
             class MetricDomainTypes.
-            accessor_keys: keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
@@ -576,10 +573,6 @@ class ExecutionEngine(ABC):
         compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs: Dict = {}
 
-        if accessor_keys is not None and len(list(accessor_keys)) > 0:
-            for key in accessor_keys:
-                accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
-
         if "column" not in compute_domain_kwargs:
             raise ge_exceptions.GreatExpectationsError(
                 "Column not provided in compute_domain_kwargs"
@@ -593,7 +586,6 @@ class ExecutionEngine(ABC):
     def _split_column_pair_metric_domain_kwargs(
         domain_kwargs: Dict,
         domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[Dict, Dict]:
         """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
 
@@ -603,8 +595,6 @@ class ExecutionEngine(ABC):
             like to be using, or a corresponding string value representing it. String types include "identity",
             "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
             class MetricDomainTypes.
-            accessor_keys: keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
@@ -618,10 +608,6 @@ class ExecutionEngine(ABC):
 
         compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs: Dict = {}
-
-        if accessor_keys is not None and len(list(accessor_keys)) > 0:
-            for key in accessor_keys:
-                accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
 
         if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
             raise ge_exceptions.GreatExpectationsError(
@@ -637,7 +623,6 @@ class ExecutionEngine(ABC):
     def _split_multi_column_metric_domain_kwargs(
         domain_kwargs: Dict,
         domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[Dict, Dict]:
         """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
 
@@ -647,8 +632,6 @@ class ExecutionEngine(ABC):
             like to be using, or a corresponding string value representing it. String types include "identity",
             "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
             class MetricDomainTypes.
-            accessor_keys: keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
@@ -662,10 +645,6 @@ class ExecutionEngine(ABC):
 
         compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs: Dict = {}
-
-        if accessor_keys is not None and len(list(accessor_keys)) > 0:
-            for key in accessor_keys:
-                accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
 
         if "column_list" not in domain_kwargs:
             raise ge_exceptions.GreatExpectationsError(
