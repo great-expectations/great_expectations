@@ -627,19 +627,14 @@ Please check your config."""
             )
 
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "column_list" not in domain_kwargs:
-                raise ge_exceptions.GreatExpectationsError(
-                    "column_list not found within domain_kwargs"
-                )
-
-            column_list = compute_domain_kwargs.pop("column_list")
-
-            if len(column_list) < 2:
-                raise ge_exceptions.GreatExpectationsError(
-                    "column_list must contain at least 2 columns"
-                )
-
-            accessor_domain_kwargs["column_list"] = column_list
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_multi_column_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+                accessor_keys=accessor_keys,
+            )
 
         return data, compute_domain_kwargs, accessor_domain_kwargs
 
