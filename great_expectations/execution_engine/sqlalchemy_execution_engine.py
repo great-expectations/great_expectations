@@ -675,23 +675,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _split_column_metric_domain_kwargs(
         self,
         domain_kwargs: Dict,
-        domain_type: Union[str, MetricDomainTypes],
+        domain_type: MetricDomainTypes,
     ) -> Tuple[Dict, Dict]:
         """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
             domain_type: an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
+            like to be using.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
         """
-        # Extracting value from enum if it is given for future computation
-        domain_type = MetricDomainTypes(domain_type)
         assert (
             domain_type == MetricDomainTypes.COLUMN
         ), "This method only supports MetricDomainTypes.COLUMN"
@@ -717,23 +713,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _split_column_pair_metric_domain_kwargs(
         self,
         domain_kwargs: Dict,
-        domain_type: Union[str, MetricDomainTypes],
+        domain_type: MetricDomainTypes,
     ) -> Tuple[Dict, Dict]:
         """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
             domain_type: an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
+            like to be using.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
         """
-        # Extracting value from enum if it is given for future computation
-        domain_type = MetricDomainTypes(domain_type)
         assert (
             domain_type == MetricDomainTypes.COLUMN_PAIR
         ), "This method only supports MetricDomainTypes.COLUMN_PAIR"
@@ -765,23 +757,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _split_multi_column_metric_domain_kwargs(
         self,
         domain_kwargs: Dict,
-        domain_type: Union[str, MetricDomainTypes],
+        domain_type: MetricDomainTypes,
     ) -> Tuple[Dict, Dict]:
         """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
 
         Args:
             domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
             domain_type: an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
+            like to be using.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
         """
-        # Extracting value from enum if it is given for future computation
-        domain_type = MetricDomainTypes(domain_type)
         assert (
             domain_type == MetricDomainTypes.MULTICOLUMN
         ), "This method only supports MetricDomainTypes.MULTICOLUMN"
