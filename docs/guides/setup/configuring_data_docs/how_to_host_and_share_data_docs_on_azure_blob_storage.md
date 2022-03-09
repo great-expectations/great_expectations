@@ -2,8 +2,9 @@
 title: How to host and share Data Docs on Azure Blob Storage
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-This guide will explain how to host and share <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> on Azure Blob Storage. 
+This guide will explain how to host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> on Azure Blob Storage. 
 Data Docs will be served using an Azure Blob Storage static website with restricted access.
 
 <Prerequisites>
@@ -67,14 +68,14 @@ Data Docs will be served using an Azure Blob Storage static website with restric
      We use an escape char ``\`` before the ``$`` so the [substitute_config_variable](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/util/index.html?highlight=substitute_config_variable#great_expectations.data_context.util.substitute_config_variable) method will allow us to reach the ``$web`` container.
   :::
   
-  You also may configure Great Expectations to store your <TechnicalTag relative="../" tag="expectation" text="Expectations" /> and <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> in this Azure Storage account.
+  You also may configure Great Expectations to store your <TechnicalTag relative="../../../" tag="expectation" text="Expectations" /> and <TechnicalTag relative="../../../" tag="validation_result" text="Validation Results" /> in this Azure Storage account.
   You can follow the documentation from the guides for [Expectations](../../setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md) and [Validation Results](../../setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage.md) but unsure you set ``container: \$web`` inplace of other container name.
 
 
 4. **Build the Azure Blob Data Docs site.**
 
   You can create or modify a suite and this will build the Data Docs website.
-  Or you can use the following <TechnicalTag relative="../" tag="cli" text="CLI" /> command: ``great_expectations docs build --site-name az_site``.
+  Or you can use the following <TechnicalTag relative="../../../" tag="cli" text="CLI" /> command: ``great_expectations docs build --site-name az_site``.
 
     ```bash
     > great_expectations docs build --site-name az_site

@@ -2,8 +2,9 @@
 title: How to instantiate a Data Context without a yml file
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-This guide will help you instantiate a Data Context without a yml file, aka configure a Data Context in code. If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.) you may wish to configure your Data Context in code, within your notebook or workflow tool (e.g. Airflow DAG node).
+This guide will help you instantiate a Data Context without a yml file, aka configure a <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> in code. If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.) you may wish to configure your Data Context in code, within your notebook or workflow tool (e.g. Airflow DAG node).
 
 <Prerequisites>
 
@@ -29,7 +30,7 @@ Steps
         - :py:class:`~great_expectations.data_context.types.base.DatabaseStoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.FilesystemStoreBackendDefaults`
 
-    The following example shows a Data Context configuration with an SQLAlchemy datasource and an AWS S3 bucket for all metadata stores, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
+    The following example shows a Data Context configuration with an SQLAlchemy <TechnicalTag relative="../../../" tag="datasource" text="Datasource" /> and an AWS S3 bucket for all metadata <TechnicalTag relative="../../../" tag="store" text="Stores" />, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
 
 ```python
 from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, S3StoreBackendDefaults
@@ -97,7 +98,7 @@ data_context_config = DataContextConfig(
 
     The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata Stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. `default_bucket_name`, `default_project_name` sets the default value for all stores that are not specified individually.
 
-    The resulting `DataContextConfig` from the following example creates an Expectations Store and Data Docs using the `my_default_bucket` and `my_default_project` parameters since their bucket and project is not specified explicitly. The Validations Store is created using the explicitly specified `my_validations_bucket` and `my_validations_project`. Further, the prefixes are set for the Expectations Store and Validations Store, while Data Docs use the default `data_docs` prefix.
+    The resulting `DataContextConfig` from the following example creates an Expectations Store and <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> using the `my_default_bucket` and `my_default_project` parameters since their bucket and project is not specified explicitly. The Validations Store is created using the explicitly specified `my_validations_bucket` and `my_validations_project`. Further, the prefixes are set for the Expectations Store and Validations Store, while Data Docs use the default `data_docs` prefix.
 
 ```python
 data_context_config = DataContextConfig(
