@@ -153,21 +153,18 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         self._usage_statistics_handler = usage_statistics_handler
 
-        # Necessary to annotate ExpectationSuite during `run()`
-        if isinstance(rules, dict) or rules is None:
-            self._citation = {
-                "name": name,
-                "config_version": config_version,
-                "variables": variables,
-                "rules": rules,
-            }
-        elif isinstance(rules, Rule):
-            self._citation = {
-                "name": name,
-                "config_version": config_version,
-                "variables": variables,
-                "rules": rules.to_json_dict(),
-            }
+        # Necessary to annotation ExpectationSuite during `run()`
+        rule_to_load_into_citation: dict = {}
+        if isinstance(rules, Rule):
+            rule_to_load_into_citation = rules.to_json_dict()
+        elif isinstance(rules, dict):
+            rule_to_load_into_citation = rules
+        self._citation = {
+            "name": name,
+            "config_version": config_version,
+            "variables": variables,
+            "rules": rule_to_load_into_citation,
+        }
 
         # Convert variables argument to ParameterContainer
         _variables: ParameterContainer = build_parameter_container_for_variables(
@@ -529,8 +526,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         effective_rule_config: Dict[str, Any]
         if rule_name in existing_rules:
             rule: Rule = existing_rules[rule_name]
-
-            domain_builder_config: dict = rule_config.get("domain_builder", {})
+            domain_builder_config: dict = RuleBasedProfiler._get_domain_builder_configs(
+                rule_config=rule_config
+            )
             effective_domain_builder_config: dict = (
                 RuleBasedProfiler._reconcile_rule_domain_builder_config(
                     domain_builder=rule.domain_builder,
@@ -539,9 +537,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 )
             )
 
-            parameter_builder_configs: List[dict] = rule_config.get(
-                "parameter_builders", []
+            parameter_builder_configs: List[
+                dict
+            ] = RuleBasedProfiler._get_parameter_builder_configs(
+                rule_config=rule_config
             )
+
             effective_parameter_builder_configs: Optional[
                 List[dict]
             ] = RuleBasedProfiler._reconcile_rule_parameter_builder_configs(
@@ -550,8 +551,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 reconciliation_strategy=reconciliation_directives.parameter_builder,
             )
 
-            expectation_configuration_builder_configs: List[dict] = rule_config.get(
-                "expectation_configuration_builders", []
+            expectation_configuration_builder_configs: List[
+                dict
+            ] = RuleBasedProfiler._get_expectation_configuration_builder_configs(
+                rule_config=rule_config
             )
             effective_expectation_configuration_builder_configs: List[
                 dict
@@ -570,6 +573,48 @@ class BaseRuleBasedProfiler(ConfigPeer):
             effective_rule_config = rule_config
 
         return effective_rule_config
+
+    @staticmethod
+    def _get_domain_builder_configs(rule_config: Dict[str, Dict[str, Any]]) -> dict:
+        domain_builder_config: Union[dict, DomainBuilder] = rule_config.get(
+            "domain_builder", {}
+        )
+        if not isinstance(domain_builder_config, dict):
+            domain_builder_config = domain_builder_config.to_json_dict()
+        return domain_builder_config
+
+    @staticmethod
+    def _get_expectation_configuration_builder_configs(
+        rule_config: Dict[str, Dict[str, Any]]
+    ) -> List[dict]:
+        expectation_configuration_builder_configs: Union[
+            dict, ExpectationConfigurationBuilder
+        ] = rule_config.get("expectation_configuration_builders", [])
+        expectation_configuration_builders: List[dict] = []
+        if len(expectation_configuration_builder_configs) > 0 and isinstance(
+            expectation_configuration_builder_configs[0],
+            ExpectationConfigurationBuilder,
+        ):
+            for (
+                expectation_configuration_obj
+            ) in expectation_configuration_builder_configs:
+                expectation_configuration_builders.append(
+                    expectation_configuration_obj.to_json_dict()
+                )
+        return expectation_configuration_builders
+
+    @staticmethod
+    def _get_parameter_builder_configs(
+        rule_config: Dict[str, Dict[str, Any]]
+    ) -> List[dict]:
+        existing_parameter_builders: List = rule_config.get("parameter_builders", [])
+        parameter_builders: List[dict] = []
+        if len(existing_parameter_builders) > 0 and isinstance(
+            existing_parameter_builders[0], ParameterBuilder
+        ):
+            for param_builder_obj in existing_parameter_builders:
+                parameter_builders.append(param_builder_obj.to_json_dict())
+        return parameter_builders
 
     @staticmethod
     def _reconcile_rule_domain_builder_config(
@@ -837,10 +882,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def to_json_dict(self) -> dict:
         rule: Rule
-
-        variables_dict: dict = self.variables.to_dict()
-        if variables_dict["parameter_nodes"] is not None:
-            variables_dict = variables_dict["parameter_nodes"]["variables"]["variables"]
+        variables_dict: dict = {}
+        if self.variables and isinstance(self.variables, ParameterContainer):
+            variables_dict = self.variables.to_dict()
+            if variables_dict.get("parameter_nodes"):
+                variables_dict = variables_dict["parameter_nodes"]["variables"][
+                    "variables"
+                ]
         serializeable_dict: dict = {
             "class_name": self.__class__.__name__,
             "module_name": self.__class__.__module__,
@@ -971,24 +1019,33 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             usage_statistics_handler=usage_statistics_handler,
         )
 
-    def save_config(self) -> None:
+    def save_profiler(
+        self,
+        profiler_store: ProfilerStore,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
         """
         Saves config by bringing configuration in current RuleBasedProfiler object (such as additional Rules and variables) with the profiler_config in self._profiler_config.
         """
-        rules: List[Rule] = self.rules
-        resulting_rules: Dict[str, Dict[str, Any]] = {}
-        rule: Rule
-        for rule in rules:
-            resulting_rules[rule.name] = rule.to_dict()
+        effective_rules: dict = self._get_rules_as_dict()
 
-        # TODO: This Config passes the variables directly without updating. This will be updated in subsequent PR.
-        profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-            name=self.name,
-            config_version=self._config_version,
-            variables=self.variables,
-            rules=resulting_rules,
+        updated_profiler_config: RuleBasedProfilerConfig = (
+            RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+                profiler=self,
+                rules=effective_rules,
+                variables=self.variables,
+            )
         )
-        self._profiler_config = profiler_config
+        self._profiler_config = updated_profiler_config
+
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id:
+            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        else:
+            key = ConfigurationIdentifier(
+                configuration_key=updated_profiler_config.name,
+            )
+        profiler_store.set(key=key, value=updated_profiler_config)
 
     @staticmethod
     def run_profiler(
@@ -1052,10 +1109,17 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         """
         Add Rule object to existing profiler object by appending to self._rules. In cases where a Rule with the same name exists, it is updated.
         """
+        if not isinstance(rule, Rule):
+            raise TypeError("add_rule method requires a Rule to be passed in.")
+
+        index_to_delete: Optional[int] = None
         for index in range(len(self._rules)):
             existing_rule: Rule = self.rules[index]
             if existing_rule.name == rule.name:
-                self._rules.pop(index)
+                index_to_delete = index
+        if index_to_delete:
+            self._rules.pop(index_to_delete)
+
         self._rules.append(rule)
 
     def _generate_rule_overrides_from_batch_request(
