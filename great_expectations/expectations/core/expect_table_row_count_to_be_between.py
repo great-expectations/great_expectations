@@ -91,7 +91,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "round_decimals": 0,
         },
         rules={
-            "row_count_range_rule": {
+            "default_expect_table_row_count_to_be_between_rule": {
                 "domain_builder": {
                     "class_name": "TableDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
@@ -102,6 +102,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                         "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                         "metric_name": "table.row_count",
+                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "truncate_values": "$variables.truncate_values",
                         "round_decimals": "$variables.round_decimals",

@@ -44,8 +44,10 @@ For detailed installation instructions, see [How to install Great Expectations l
   <summary>Other deployment patterns</summary>
   <div>
     <p>
-      This tutorial deploys Great Expectations locally. Note that other options (e.g. running Great Expectations on an EMR Cluster) are also available. You can find more information in the the Deployment Patterns section of the documentation.
-    </p>
+
+This tutorial deploys Great Expectations locally. Note that other options (e.g. running Great Expectations on an EMR Cluster) are also available. You can find more information in the [Reference Architectures](../../deployment_patterns/index.md) section of the documentation.
+    
+</p>
   </div>
 </details>
 

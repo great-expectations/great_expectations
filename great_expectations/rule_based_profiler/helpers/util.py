@@ -1,4 +1,5 @@
 import copy
+import itertools
 import uuid
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -14,11 +15,13 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     materialize_batch_request,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
@@ -236,6 +239,122 @@ def get_parameter_value(
     return parameter_reference
 
 
+def get_resolved_metrics_by_key(
+    validator: "Validator",  # noqa: F821
+    metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
+) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
+    """
+    Compute (resolve) metrics for every column name supplied on input.
+
+    Args:
+        validator: Validator used to compute column cardinality.
+        metric_configurations_by_key: metric configurations used to compute figures of merit.
+        Dictionary of the form {
+            "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
+        }
+
+    Returns:
+        Dictionary of the form {
+            "my_key": Dict[Tuple[str, str, str], Any],
+        }
+    """
+    key: str
+    metric_configuration: MetricConfiguration
+    metric_configurations_for_key: List[MetricConfiguration]
+
+    # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
+    # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
+    resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
+        metric_configurations=[
+            metric_configuration
+            for key, metric_configurations_for_key in metric_configurations_by_key.items()
+            for metric_configuration in metric_configurations_for_key
+        ]
+    )
+
+    # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
+    metric_configuration_ids_by_key: Dict[str, List[Tuple[str, str, str]]] = {
+        key: [
+            metric_configuration.id
+            for metric_configuration in metric_configurations_for_key
+        ]
+        for key, metric_configurations_for_key in metric_configurations_by_key.items()
+    }
+
+    metric_configuration_ids: List[Tuple[str, str, str]]
+    # Step 3: Obtain flattened list of "MetricConfiguration" ID values across all key values/combinations.
+    metric_configuration_ids_all_keys: List[Tuple[str, str, str]] = list(
+        itertools.chain(
+            *[
+                metric_configuration_ids
+                for metric_configuration_ids in metric_configuration_ids_by_key.values()
+            ]
+        )
+    )
+
+    # Step 4: Retain only those metric computation results that both, correspond to "MetricConfiguration" objects of
+    # interest (reflecting specified key values/combinations).
+    metric_configuration_id: Tuple[str, str, str]
+    metric_value: Any
+    resolved_metrics = {
+        metric_configuration_id: metric_value
+        for metric_configuration_id, metric_value in resolved_metrics.items()
+        if metric_configuration_id in metric_configuration_ids_all_keys
+    }
+
+    # Step 5: Gather "MetricConfiguration" ID values for effective collection of resolved metrics.
+    metric_configuration_ids_resolved_metrics: List[Tuple[str, str, str]] = list(
+        resolved_metrics.keys()
+    )
+
+    # Step 6: Produce "key" list, corresponding to effective "MetricConfiguration" ID values.
+    candidate_keys: List[str] = [
+        key
+        for key, metric_configuration_ids in metric_configuration_ids_by_key.items()
+        if all(
+            [
+                metric_configuration_id in metric_configuration_ids_resolved_metrics
+                for metric_configuration_id in metric_configuration_ids
+            ]
+        )
+    ]
+
+    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], Any]] = {
+        key: {
+            metric_configuration.id: resolved_metrics[metric_configuration.id]
+            for metric_configuration in metric_configurations_by_key[key]
+        }
+        for key in candidate_keys
+    }
+
+    return resolved_metrics_by_key
+
+
+def build_simple_domains_from_column_names(
+    column_names: List[str],
+    domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN,
+) -> List[Domain]:
+    """
+    This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
+
+    :param column_names: list of column names to serve as values for "column" keys in "domain_kwargs" dictionary
+    :param domain_type: type of Domain objects (same "domain_type" must be applicable to all Domain objects returned)
+    :return: list of resulting Domain objects
+    """
+    column_name: str
+    domains: List[Domain] = [
+        Domain(
+            domain_type=domain_type,
+            domain_kwargs={
+                "column": column_name,
+            },
+        )
+        for column_name in column_names
+    ]
+
+    return domains
+
+
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
@@ -447,7 +566,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
     """
     bootstraps: tuple = (metric_values,)  # bootstrap samples must be in a sequence
 
-    lower_quantile_bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
+    lower_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
         bootstraps,
         lambda data: np.quantile(
             data,
@@ -458,7 +577,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
         n_resamples=n_resamples,
         method=method,
     )
-    upper_quantile_bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
+    upper_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
         bootstraps,
         lambda data: np.quantile(
             data,
@@ -486,7 +605,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
     #     Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
     #
     # For an in-depth look at how the BCa interval is constructed and you will find the points made above on page 186.
-    lower_quantile_confidence_interval: stats.bootstrap.BootstrapResult.ConfidenceInterval = (
+    lower_quantile_confidence_interval: stats._bootstrap.BootstrapResult.ConfidenceInterval = (
         lower_quantile_bootstrap_result.confidence_interval
     )
     lower_quantile_point_estimate: np.float64 = np.mean(
@@ -495,7 +614,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
             lower_quantile_confidence_interval.high,
         ]
     )
-    upper_quantile_confidence_interal: stats.bootstrap.BootstrapResult.ConfidenceInterval = (
+    upper_quantile_confidence_interal: stats._bootstrap.BootstrapResult.ConfidenceInterval = (
         upper_quantile_bootstrap_result.confidence_interval
     )
     upper_quantile_point_estimate: np.float64 = np.mean(
