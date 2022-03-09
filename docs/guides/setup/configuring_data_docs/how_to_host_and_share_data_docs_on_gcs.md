@@ -4,7 +4,7 @@ title: How to host and share Data Docs on GCS
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
 
-This guide will explain how to host and share Data Docs on Google Cloud Storage. We recommend using IP-based access, which is achieved by deploying a simple Google App Engine app. Data Docs can also be served on Google Cloud Storage if the contents of the bucket are set to be publicly readable, but this is strongly discouraged.
+This guide will explain how to host and share <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> on Google Cloud Storage. We recommend using IP-based access, which is achieved by deploying a simple Google App Engine app. Data Docs can also be served on Google Cloud Storage if the contents of the bucket are set to be publicly readable, but this is strongly discouraged.
 
 <Prerequisites>
 
@@ -53,7 +53,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
 4. **Deploy your Google App Engine app.**
 
-  Issue the following CLI command from within the app directory created above:
+  Issue the following <TechnicalTag relative="../" tag="cli" text="CLI" /> command from within the app directory created above:
 
     ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L129
     ```
@@ -88,7 +88,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
 **Additional notes**
 
-- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure a GCS site with the ``base_public_path`` set to www.mydns.com .  Data Docs will still be written to the configured location on GCS (for example https://storage.cloud.google.com/my_org_data_docs/index.html), but you will be able to access the pages from your DNS (http://www.mydns.com/index.html in our example).
+- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the <TechnicalTag relative="../" tag="data_docs_store" text="Data Docs Store" />.  The following example will configure a GCS site with the ``base_public_path`` set to www.mydns.com .  Data Docs will still be written to the configured location on GCS (for example https://storage.cloud.google.com/my_org_data_docs/index.html), but you will be able to access the pages from your DNS (http://www.mydns.com/index.html in our example).
 
   ```yaml
   data_docs_sites:

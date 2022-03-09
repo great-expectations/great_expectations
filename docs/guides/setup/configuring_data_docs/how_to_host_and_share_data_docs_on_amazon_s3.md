@@ -3,7 +3,7 @@ title: How to host and share Data Docs on Amazon S3
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
-This guide will explain how to host and share Data Docs on AWS S3.
+This guide will explain how to host and share <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> on AWS S3.
 
 <Prerequisites>
 
@@ -63,7 +63,7 @@ Steps
 
 3. **Apply the policy.**
 
-  Run the following CLI command to apply the policy:
+  Run the following <TechnicalTag relative="../" tag="cli" text="CLI" /> command to apply the policy:
 
   ```bash
   > aws s3api put-bucket-policy --bucket data-docs.my_org --policy file://ip-policy.json
@@ -127,7 +127,7 @@ index.html file or a custom error file:
 
 - If you wish to host a Data Docs site in a subfolder of an S3 bucket, add the ``prefix`` property to the configuration snippet in step 4, immediately after the ``bucket`` property.
 
-- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure a S3 site with the ``base_public_path`` set to ``www.mydns.com``.  Data Docs will still be written to the configured location on S3 (for example ``https://s3.amazonaws.com/data-docs.my_org/docs/index.html``), but you will be able to access the pages from your DNS (``http://www.mydns.com/index.html`` in our example)
+- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the <TechnicalTag relative="../" tag="data_docs_store" text="Data Docs Store" />.  The following example will configure a S3 site with the ``base_public_path`` set to ``www.mydns.com``.  Data Docs will still be written to the configured location on S3 (for example ``https://s3.amazonaws.com/data-docs.my_org/docs/index.html``), but you will be able to access the pages from your DNS (``http://www.mydns.com/index.html`` in our example)
 
     ```yaml
     data_docs_sites:

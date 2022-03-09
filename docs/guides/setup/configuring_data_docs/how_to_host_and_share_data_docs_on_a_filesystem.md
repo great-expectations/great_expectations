@@ -3,7 +3,7 @@ title: How to host and share Data Docs on a filesystem
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
-This guide will explain how to host and share Data Docs on a filesystem.
+This guide will explain how to host and share <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> on a filesystem.
 
 <Prerequisites>
 
@@ -31,7 +31,7 @@ Steps
 
 2. **Test that your configuration is correct by building the site.**
 
-    Use the following CLI command: ``great_expectations docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
+    Use the following <TechnicalTag relative="../" tag="cli" text="CLI" /> command: ``great_expectations docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
 
     ```bash
     > great_expectations docs build --site-name local_site
