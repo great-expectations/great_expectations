@@ -159,7 +159,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 	mysql_mysql_db_1   docker-entrypoint.sh mysqld   Up      0.0.0.0:3306->3306/tcp, 33060/tcp
 	````
 
-* Once the local mysql container is working, the tests against the mysql backend can be run using the `--mysql` flag. 
+* Once the local MySQL container is working, the tests against the MySQL backend can be run using the `--mysql` flag. 
 
   ````console
   pytest -v --mysql
