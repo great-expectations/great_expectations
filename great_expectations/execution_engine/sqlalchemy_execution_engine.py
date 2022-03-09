@@ -689,18 +689,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         elif domain_type == MetricDomainTypes.COLUMN:
-            if "column" not in compute_domain_kwargs:
-                raise GreatExpectationsError(
-                    "Column not provided in compute_domain_kwargs"
-                )
-
-            # Checking if case-sensitive and using appropriate name
-            if self.active_batch_data.use_quoted_name:
-                accessor_domain_kwargs["column"] = quoted_name(
-                    compute_domain_kwargs.pop("column"), quote=True
-                )
-            else:
-                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_column_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+                accessor_keys=accessor_keys,
+            )
 
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
@@ -756,6 +752,53 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # Letting selectable fall through
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
+
+    def _split_column_metric_domain_kwargs(
+        self,
+        domain_kwargs: Dict,
+        domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
+    ) -> Tuple[Dict, Dict]:
+        """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
+
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys: keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+        assert (
+            domain_type == MetricDomainTypes.COLUMN
+        ), "This method only supports MetricDomainTypes.COLUMN"
+
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
+
+        if accessor_keys is not None and len(list(accessor_keys)) > 0:
+            for key in accessor_keys:
+                accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+
+        if "column" not in compute_domain_kwargs:
+            raise GreatExpectationsError("Column not provided in compute_domain_kwargs")
+
+        # Checking if case-sensitive and using appropriate name
+        if self.active_batch_data.use_quoted_name:
+            accessor_domain_kwargs["column"] = quoted_name(
+                compute_domain_kwargs.pop("column"), quote=True
+            )
+        else:
+            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+
+        return compute_domain_kwargs, accessor_domain_kwargs
 
     def resolve_metric_bundle(
         self,

@@ -607,12 +607,14 @@ Please check your config."""
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
         elif domain_type == MetricDomainTypes.COLUMN:
-            if "column" not in compute_domain_kwargs:
-                raise ge_exceptions.GreatExpectationsError(
-                    "Column not provided in compute_domain_kwargs"
-                )
-
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_column_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+                accessor_keys=accessor_keys,
+            )
 
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
             if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
