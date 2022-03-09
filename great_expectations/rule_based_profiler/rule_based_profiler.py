@@ -1169,6 +1169,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         config: dict = profiler_config.to_json_dict()
         if name:
             config.update({"name": name})
+
         config = filter_properties_dict(properties=config, clean_falsy=True)
 
         profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
