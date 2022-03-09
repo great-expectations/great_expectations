@@ -23,9 +23,9 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.util import probabilistic_test
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from tests.conftest import skip_if_probabilistic_test
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -696,7 +696,6 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -705,6 +704,8 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
+    skip_if_probabilistic_test()
+
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
@@ -837,7 +838,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -846,6 +846,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
+    skip_if_probabilistic_test()
+
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
@@ -1086,7 +1088,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1095,6 +1096,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_no_custom_profiler_config_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
+    skip_if_probabilistic_test()
+
     # If Expectation already has default Rule-Based Profiler configured, delete it for this test.
     expectation_impl = get_expectation_impl(
         expectation_name="expect_column_values_to_be_between"
@@ -1387,7 +1390,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1401,6 +1403,8 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
 ):
+    skip_if_probabilistic_test()
+
     # Load data context
     data_context: DataContext = (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
@@ -1526,7 +1530,6 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1536,6 +1539,8 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
 ):
+    skip_if_probabilistic_test()
+
     context: DataContext = (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
     )
@@ -1594,7 +1599,6 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     )
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1608,6 +1612,8 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     quentin_columnar_table_multi_batch_data_context,
     quentin_columnar_table_multi_batch,
 ):
+    skip_if_probabilistic_test()
+
     # Load data context
     data_context: DataContext = quentin_columnar_table_multi_batch_data_context
 
@@ -1761,7 +1767,6 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1770,6 +1775,8 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
 def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes(
     quentin_columnar_table_multi_batch_data_context,
 ):
+    skip_if_probabilistic_test()
+
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
     result: ExpectationValidationResult
@@ -2034,7 +2041,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
     assert result.success
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -2043,6 +2049,8 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
 def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_columnar_table_multi_batch_data_context,
 ):
+    skip_if_probabilistic_test()
+
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
     result: ExpectationValidationResult

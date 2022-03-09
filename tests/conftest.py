@@ -70,7 +70,7 @@ from great_expectations.self_check.util import (
     get_dataset,
     get_sqlite_connection_url,
 )
-from great_expectations.util import is_library_loadable, probabilistic_test
+from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
 
 RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
@@ -100,6 +100,11 @@ def skip_if_python_below_minimum_version():
         pytest.skip(
             "skipping fixture because Python version 3.7 (or greater) is required"
         )
+
+
+def skip_if_probabilistic_test():
+    # We are skipping probabilistic tests and moving them into ML Flow
+    pytest.skip("Skipping probabilistic tests")
 
 
 def pytest_configure(config):
