@@ -249,7 +249,7 @@ Please check your config."""
                         "org.apache.hadoop.fs.azure.NativeAzureFileSystem",
                     )
                     self.spark.conf.set(
-                        "fs.azure.account.key." + storage_account_url, credential
+                        f"fs.azure.account.key.{storage_account_url}", credential
                     )
                 reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
@@ -332,7 +332,7 @@ Please check your config."""
             return "parquet"
 
         raise ExecutionEngineError(
-            "Unable to determine reader method from path: %s" % path
+            f"Unable to determine reader method from path: {path}"
         )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):
@@ -362,7 +362,7 @@ Please check your config."""
             return getattr(reader, reader_method_op)
         except AttributeError:
             raise ExecutionEngineError(
-                "Unable to find reader_method %s in spark." % reader_method,
+                f"Unable to find reader_method {reader_method} in spark.",
             )
 
     def get_domain_records(

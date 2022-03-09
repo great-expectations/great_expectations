@@ -431,7 +431,7 @@ def pyathena_dataset(sa):
 )
 def test_expect_column_values_to_be_of_type_string_dialect_pyathena(pyathena_dataset):
     assert pyathena_dataset.expect_column_values_to_be_of_type(
-        "col", type_="STRINGTYPE"
+        "col", type_="string"
     ).success
 
 
@@ -441,7 +441,7 @@ def test_expect_column_values_to_be_of_type_string_dialect_pyathena(pyathena_dat
 )
 def test_expect_column_values_to_be_in_type_list_pyathena(pyathena_dataset):
     assert pyathena_dataset.expect_column_values_to_be_in_type_list(
-        "col", type_list=["STRINGTYPE", "BOOLEAN"]
+        "col", type_list=["string", "boolean"]
     ).success
 
 

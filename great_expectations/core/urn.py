@@ -1,6 +1,6 @@
 from pyparsing import Combine, LineEnd, Literal, Optional, Suppress, Word, alphanums
 
-urn_word = Word(alphanums + "_$?=%.&,")
+urn_word = Word(f"{alphanums}_$?=%.&,")
 ge_metrics_urn = Combine(
     Suppress(Literal("urn:great_expectations:"))
     + Literal("metrics").setResultsName("urn_type")
