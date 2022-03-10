@@ -22,7 +22,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.core.util import convert_to_json_serializable, nested_update
-from great_expectations.data_context.store import ConfigurationStore, ProfilerStore
+from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -826,7 +826,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def to_json_dict(self) -> dict:
         rule: Rule
-        variables_dict: dict = convert_variables_to_dict(self.variables)
+        variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
+            self.variables
+        )
 
         serializeable_dict: dict = {
             "class_name": self.__class__.__name__,
