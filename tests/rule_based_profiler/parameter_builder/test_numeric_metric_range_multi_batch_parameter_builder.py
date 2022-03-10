@@ -13,10 +13,8 @@ from great_expectations.rule_based_profiler.types import (
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-from great_expectations.util import probabilistic_test
 
 
-@probabilistic_test
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -48,8 +46,15 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     numeric_metric_range_parameter_builder.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
