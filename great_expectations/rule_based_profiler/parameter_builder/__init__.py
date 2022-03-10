@@ -10,6 +10,9 @@ from great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (  # isort:skip
     NumericMetricRangeMultiBatchParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_builder.mean_unexpected_map_metric_multi_batch_parameter_builder import (  # isort:skip
+    MeanUnexpectedMapMetricMultiBatchParameterBuilder,
+)
 from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (  # isort:skip
     RegexPatternStringParameterBuilder,
 )
