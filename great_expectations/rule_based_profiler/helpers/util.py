@@ -1,5 +1,6 @@
 import copy
 import itertools
+import logging
 import uuid
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -22,6 +23,9 @@ from great_expectations.rule_based_profiler.types import (
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
@@ -355,6 +359,26 @@ def build_simple_domains_from_column_names(
     return domains
 
 
+def convert_variables_to_dict(
+    variables: Optional[ParameterContainer],
+) -> Optional[Dict[str, Any]]:
+    if variables is None:
+        return {}
+
+    variables_dict: Optional[Dict[str, Any]] = None
+    try:
+        variables_dict = variables.to_dict()["parameter_nodes"]["variables"][
+            "variables"
+        ]
+    except (TypeError, KeyError) as e:
+        logger.warning("Could not convert existing variables to dict: %s", e)
+
+    if variables_dict is None:
+        variables_dict = {}
+
+    return variables_dict
+
+
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
@@ -376,6 +400,7 @@ def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
+    random_seed: Optional[int] = None,
 ) -> Tuple[Number, Number]:
     """The winner of our performance testing is selected from the possible candidates:
     - _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method
@@ -385,6 +410,7 @@ def compute_bootstrap_quantiles_point_estimate(
         metric_values=metric_values,
         false_positive_rate=false_positive_rate,
         n_resamples=n_resamples,
+        random_seed=random_seed,
     )
 
 
@@ -392,6 +418,7 @@ def _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
+    random_seed: Optional[int] = None,
 ) -> Tuple[Number, Number]:
     """
     An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
@@ -403,9 +430,18 @@ def _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
     of a Machine Learning Lifecycle framework, the performance improvement can be documented and this legacy method can
     be removed from the codebase.
     """
-    bootstraps: np.ndarray = np.random.choice(
-        metric_values, size=(n_resamples, metric_values.size)
-    )
+    if random_seed:
+        random_state: np.random.Generator = np.random.Generator(
+            np.random.PCG64(random_seed)
+        )
+        bootstraps: np.ndarray = random_state.choice(
+            metric_values, size=(n_resamples, metric_values.size)
+        )
+    else:
+        bootstraps: np.ndarray = np.random.choice(
+            metric_values, size=(n_resamples, metric_values.size)
+        )
+
     lower_quantiles: Union[np.ndarray, Number] = np.quantile(
         bootstraps,
         q=false_positive_rate / 2,
@@ -425,6 +461,7 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
+    random_seed: Optional[int] = None,
 ) -> Tuple[Number, Number]:
     """
     An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
@@ -483,9 +520,17 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
     sample_lower_quantile: Number = np.quantile(metric_values, q=lower_quantile_pct)
     sample_upper_quantile: Number = np.quantile(metric_values, q=upper_quantile_pct)
 
-    bootstraps: np.ndarray = np.random.choice(
-        metric_values, size=(n_resamples, metric_values.size)
-    )
+    if random_seed:
+        random_state: np.random.Generator = np.random.Generator(
+            np.random.PCG64(random_seed)
+        )
+        bootstraps: np.ndarray = random_state.choice(
+            metric_values, size=(n_resamples, metric_values.size)
+        )
+    else:
+        bootstraps: np.ndarray = np.random.choice(
+            metric_values, size=(n_resamples, metric_values.size)
+        )
 
     bootstrap_lower_quantiles: Union[np.ndarray, Number] = np.quantile(
         bootstraps,
@@ -548,6 +593,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
     false_positive_rate: np.float64,
     n_resamples: int,
     method: Optional[str] = "BCa",
+    random_seed: Optional[int] = None,
 ):
     """
     SciPy implementation of the BCa confidence interval for the population quantile. Unfortunately, as of
@@ -566,6 +612,11 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
     """
     bootstraps: tuple = (metric_values,)  # bootstrap samples must be in a sequence
 
+    if random_seed:
+        random_state = np.random.Generator(np.random.PCG64(random_seed))
+    else:
+        random_state = None
+
     lower_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
         bootstraps,
         lambda data: np.quantile(
@@ -576,6 +627,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
         confidence_level=1.0 - false_positive_rate,
         n_resamples=n_resamples,
         method=method,
+        random_state=random_state,
     )
     upper_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
         bootstraps,
@@ -587,6 +639,7 @@ def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoi
         confidence_level=1.0 - false_positive_rate,
         n_resamples=n_resamples,
         method=method,
+        random_state=random_state,
     )
 
     # The idea that we can take the midpoint of the confidence interval is based on the fact that we think the

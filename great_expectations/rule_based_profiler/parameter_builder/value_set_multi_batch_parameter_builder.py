@@ -82,7 +82,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
         """
-        # Build the list of unique values for each batch
+        # Build the list of unique values for each Batch object.
         super().build_parameters(
             parameter_container=parameter_container,
             domain=domain,
@@ -91,8 +91,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameter_computation_impl=super()._build_parameters,
         )
 
-        # Retrieve and replace the list of unique values for each batch with
-        # the set of unique values for all batches in the given domain.
+        # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.fully_qualified_parameter_name,
