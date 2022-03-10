@@ -104,9 +104,9 @@ class CheckpointStore(ConfigurationStore):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
-        key: Union[
-            GeCloudIdentifier, ConfigurationIdentifier
-        ] = CheckpointStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
+            name=name, ge_cloud_id=ge_cloud_id
+        )
         try:
             self.remove_key(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
@@ -156,9 +156,9 @@ class CheckpointStore(ConfigurationStore):
     def add_checkpoint(
         self, checkpoint: "Checkpoint", name: Optional[str], ge_cloud_id: Optional[str]
     ) -> None:
-        key: Union[
-            GeCloudIdentifier, ConfigurationIdentifier
-        ] = CheckpointStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
+            name=name, ge_cloud_id=ge_cloud_id
+        )
         checkpoint_config: CheckpointConfig = checkpoint.get_config()
         checkpoint_ref = self.set(key=key, value=checkpoint_config)
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):

@@ -151,7 +151,6 @@ class ConfigurationStore(Store):
     def serialization_self_check(self, pretty_print: bool):
         raise NotImplementedError
 
-    @staticmethod
     def determine_key(
         name: Optional[str], ge_cloud_id: Optional[str]
     ) -> Union[GeCloudIdentifier, ConfigurationIdentifier]:

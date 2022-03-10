@@ -1,17 +1,14 @@
 import os
 from unittest import mock
-from unittest.mock import MagicMock, patch
 
 from ruamel.yaml import YAML
 
-import great_expectations.rule_based_profiler.domain_builder
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
