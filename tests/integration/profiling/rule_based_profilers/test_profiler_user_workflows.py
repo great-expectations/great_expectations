@@ -1781,63 +1781,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
     )
     assert len(validator.batches) == 36
 
-    # Use all batches, loaded by Validator, for estimating Expectation argument values.
-    result = validator.expect_column_quantile_values_to_be_between(
-        column="fare_amount",
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-    )
-    assert result.success
-
-    key: str
-    value: Any
-    expectation_config_kwargs: dict = {
-        key: value
-        for key, value in result.expectation_config["kwargs"].items()
-        if key != "quantile_ranges"
-    }
-    assert expectation_config_kwargs == {
-        "column": "fare_amount",
-        "allow_relative_error": "linear",
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": True,
-        "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
-    }
-
-    value_ranges_expected: List[List[float]]
-    value_ranges_computed: List[List[float]]
-
-    value_ranges_expected = [
-        [5.8, 6.5],
-        [8.5, 9.6],
-        [13.3, 15.6],
-    ]
-    value_ranges_computed = result.expectation_config["kwargs"]["quantile_ranges"][
-        "value_ranges"
-    ]
-
-    assert len(value_ranges_computed) == len(value_ranges_expected)
-
-    paired_quantiles: zip
-    value_ranges: Tuple[List[float]]
-    idx: int
-
-    paired_quantiles = zip(
-        value_ranges_computed,
-        value_ranges_expected,
-    )
-    for value_ranges in list(paired_quantiles):
-        for idx in range(2):
-            np.testing.assert_allclose(
-                actual=value_ranges[0][idx],
-                desired=value_ranges[1][idx],
-                rtol=RTOL,
-                atol=ATOL,
-                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
-            )
-
     parameter_builder_batch_request: dict
 
     # Use one batch (at index "1"), loaded by Validator as active_batch, for DomainBuilder purposes.
