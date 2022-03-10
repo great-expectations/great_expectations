@@ -1164,6 +1164,36 @@ def test_get_profiler(
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_save_profiler(
+    mock_data_context: mock.MagicMock,
+    populated_profiler_store: ProfilerStore,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+):
+    with mock.patch(
+        "great_expectations.data_context.store.profiler_store.ProfilerStore.set",
+        return_value=profiler_config_with_placeholder_args,
+    ):
+        mock_data_context.save_profiler(
+            profiler=profiler_config_with_placeholder_args,
+            profiler_store=populated_profiler_store,
+            name="my_profiler",
+            ge_cloud_id=None,
+        )
+
+    with mock.patch(
+        "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
+        return_value=profiler_config_with_placeholder_args,
+    ):
+        profiler = RuleBasedProfiler.get_profiler(
+            data_context=mock_data_context,
+            profiler_store=populated_profiler_store,
+            name="my_profiler",
+            ge_cloud_id=None,
+        )
+    assert isinstance(profiler, RuleBasedProfiler)
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_get_profiler_non_existent_profiler_raises_error(
     mock_data_context: mock.MagicMock, empty_profiler_store: ProfilerStore
 ):
@@ -1278,11 +1308,3 @@ def test_add_rule(
     second_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
     profiler.add_rule(second_rule)
     assert len(profiler.rules) == 2
-
-
-def test_add_rule_after_removing_rule():
-    pass
-
-
-def test_safe_profiler():
-    pass
