@@ -6,8 +6,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
-from great_expectations.data_context.util import file_relative_path
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
@@ -34,7 +32,7 @@ class DocusaurusRef:
         end_line: int = int(end) if end else start_line
         line_numbers: Tuple[int, int] = start_line, end_line
 
-        relative_path: str = file_relative_path(file, path)
+        relative_path: str = os.path.join(os.path.dirname(file), path)
         cleaned_path: str = os.path.normpath(relative_path)
 
         return cls(docs_file=file, py_file=cleaned_path, line_numbers=line_numbers)
