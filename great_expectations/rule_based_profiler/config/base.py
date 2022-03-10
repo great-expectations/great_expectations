@@ -185,6 +185,11 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         allow_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
     )
+    json_serialize = fields.Boolean(
+        required=False,
+        allow_none=True,
+        missing=True,
+    )
     batch_request = fields.Raw(
         required=False,
         allow_none=True,
