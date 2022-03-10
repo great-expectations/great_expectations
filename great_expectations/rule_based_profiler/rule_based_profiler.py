@@ -396,6 +396,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
             rule.name: rule.to_json_dict() for rule in effective_rules
         }
+        self.rules = effective_rules
         self._profiler_config.rules = updated_rules
 
     def reconcile_profiler_variables(
