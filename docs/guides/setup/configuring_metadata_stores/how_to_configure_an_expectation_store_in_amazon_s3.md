@@ -4,7 +4,7 @@ title: How to configure an Expectation Store to use Amazon S3
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, newly profiled Expectations are stored as Expectation Suites in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  This guide will help you configure Great Expectations to store them in an Amazon S3 bucket.
+By default, newly profiled <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  This guide will help you configure Great Expectations to store them in an Amazon S3 bucket.
 
 <Prerequisites>
 
@@ -37,9 +37,9 @@ stores:
 ```
 
 
-### 3. Update your configuration file to include a new store for Expectations on S3
+### 3. Update your configuration file to include a new Store for Expectations on S3
 
-In our case, the name is set to ``expectations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder where Expectation files will be located.
+In our case, the <TechnicalTag tag="expectation_store" text="Expectations Store" /> name is set to ``expectations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder where Expectation files will be located.
 
 :::warning
 If you are also storing [Validations in S3](../configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3.md) or [DataDocs in S3](../configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md),  please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
@@ -72,7 +72,7 @@ upload: ./exp2.json to s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name
 
 ### 5. Confirm that the new Expectations Store has been added by running ``great_expectations store list``
 
-Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the S3 bucket as long as we set the ``expectations_store_name`` variable to ``expectations_S3_store``.
+Notice the output contains two Expectation Stores: the original ``expectations_store`` on the local filesystem and the ``expectations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the S3 bucket as long as we set the ``expectations_store_name`` variable to ``expectations_S3_store``.
 
 ```bash
 great_expectations store list
@@ -94,7 +94,7 @@ store_backend:
 
 ### 6. Confirm that Expectations can be accessed from Amazon S3 by running ``great_expectations suite list``
 
-If you followed Step 4, The output should include the 2 Expectations we copied to Amazon S3: ``exp1`` and ``exp2``.  If you did not copy Expectations to the new Store, you will see a message saying no Expectations were found.
+If you followed Step 4, The output should include the 2 Expectations we copied to Amazon S3: ``exp1`` and ``exp2``.  If you did not copy Expectations to the new <TechnicalTag tag="store" text="Store" />, you will see a message saying no Expectations were found.
 
 ```bash
 great_expectations suite list
