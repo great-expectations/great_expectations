@@ -14,6 +14,11 @@ except ImportError:
 
 import click
 
+try:
+    from pybigquery.parse_url import parse_url as parse_bigquery_url
+except (ImportError, ModuleNotFoundError):
+    parse_bigquery_url = None
+
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.datasource import (
     BaseDatasource,
@@ -75,7 +80,7 @@ def get_batch_request(
         "data_connector_name": data_connector_name,
     }
 
-    data_asset_name: str
+    data_asset_name: Optional[str]
 
     if isinstance(datasource, Datasource):
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'
@@ -95,9 +100,7 @@ def get_batch_request(
         )
     else:
         raise ge_exceptions.DataContextError(
-            "Datasource {:s} of unsupported type {:s} was encountered.".format(
-                datasource.name, str(type(datasource))
-            )
+            f"Datasource '{datasource.name}' of unsupported type {type(datasource)} was encountered."
         )
 
     batch_request.update(
@@ -132,14 +135,14 @@ def select_data_connector_name(
 ) -> Optional[str]:
     msg_prompt_select_data_connector_name = "Select data_connector"
 
+    if not available_data_asset_names_by_data_connector_dict:
+        available_data_asset_names_by_data_connector_dict = {}
+
     num_available_data_asset_names_by_data_connector = len(
         available_data_asset_names_by_data_connector_dict
     )
 
-    if (
-        available_data_asset_names_by_data_connector_dict is None
-        or num_available_data_asset_names_by_data_connector == 0
-    ):
+    if num_available_data_asset_names_by_data_connector == 0:
         return None
 
     if num_available_data_asset_names_by_data_connector == 1:
@@ -164,7 +167,7 @@ def select_data_connector_name(
     )
     choices += "\n"  # Necessary for consistent spacing between prompts
     option_selection: str = click.prompt(
-        msg_prompt_select_data_connector_name + "\n" + choices,
+        f"{msg_prompt_select_data_connector_name}\n{choices}",
         type=click.Choice(
             [str(i) for i, data_connector_name in enumerate(data_connector_names, 1)]
         ),
@@ -206,6 +209,9 @@ def _get_data_asset_name_from_data_connector(
     data_asset_name: Optional[str] = None
     num_data_assets = len(available_data_asset_names)
 
+    if num_data_assets == 0:
+        return None
+
     # If we have a large number of assets, give the user the ability to paginate or search
     if num_data_assets > 100:
         prompt = f"You have a list of {num_data_assets:,} data assets. Would you like to list them [l] or search [s]?\n"
@@ -246,8 +252,12 @@ def _list_available_data_asset_names(
         for i in range(0, len(available_data_asset_names_str), PAGE_SIZE)
     ]
 
+    if len(data_asset_pages) == 0:
+        return None
+
     display_idx = 0  # Used to traverse between pages
     data_asset_name: Optional[str] = None
+
     while data_asset_name is None:
         current_page = data_asset_pages[display_idx]
         choices: str = "\n".join(
@@ -374,6 +384,15 @@ Would you like to continue?"""
                     msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
                 )
 
+    if (
+        datasource.execution_engine.engine.dialect.name.lower() == "bigquery"
+        and parse_bigquery_url is not None
+    ):
+        # bigquery table needs to contain the project id if it differs from the credentials project
+        if len(data_asset_name.split(".")) < 3:
+            project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
+            data_asset_name = f"{project_id}.{data_asset_name}"
+
     return data_asset_name
 
 
@@ -414,7 +433,7 @@ def _get_batch_spec_passthrough(
             bigquery_temp_table: str = click.prompt(
                 "Great Expectations will create a table to use for "
                 "validation." + os.linesep + "Please enter a name for this table: ",
-                default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8],
+                default=f"SOME_PROJECT.SOME_DATASET.ge_tmp_{str(uuid.uuid4())[:8]}",
             )
             if bigquery_temp_table:
                 batch_spec_passthrough.update(

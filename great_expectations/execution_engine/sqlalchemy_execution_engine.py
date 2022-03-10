@@ -93,41 +93,48 @@ try:
 except (ImportError, KeyError, AttributeError):
     snowflake = None
 
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import pybigquery.sqlalchemy_bigquery
+    import sqlalchemy_bigquery as sqla_bigquery
 
-    ###
-    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-    # to define an attribute "dialect". A PR has been submitted to fix this upstream
-    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-    # fix isn't present, add this "dialect" attribute here:
-    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
-        pybigquery.sqlalchemy_bigquery.dialect = (
-            pybigquery.sqlalchemy_bigquery.BigQueryDialect
-        )
-
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sa.dialects.registry.register(
-        "bigquery", "pybigquery.sqlalchemy_bigquery", "dialect"
-    )
-    try:
-        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
-        bigquery_types_tuple = None
-    except AttributeError:
-        # In older versions of the pybigquery driver, types were not exported, so we use a hack
-        logger.warning(
-            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-        )
-        from collections import namedtuple
-
-        BigQueryTypes = namedtuple(
-            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
-        )
-        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except (ImportError, AttributeError):
+    sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     bigquery_types_tuple = None
-    pybigquery = None
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+
+        warnings.warn(
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning,
+        )
+        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
+        ###
+        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+        # to define an attribute "dialect". A PR has been submitted to fix this upstream
+        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+        # fix isn't present, add this "dialect" attribute here:
+        if not hasattr(sqla_bigquery, "dialect"):
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
+
+        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        try:
+            getattr(sqla_bigquery, "INTEGER")
+            bigquery_types_tuple = None
+        except AttributeError:
+            # In older versions of the pybigquery driver, types were not exported, so we use a hack
+            logger.warning(
+                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+            )
+            from collections import namedtuple
+
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+    except (ImportError, AttributeError):
+        sqla_bigquery = None
+        bigquery_types_tuple = None
+        pybigquery = None
 
 try:
     import teradatasqlalchemy.dialect
@@ -156,7 +163,7 @@ def _get_dialect_type_module(dialect):
         if (
             isinstance(
                 dialect,
-                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+                sqla_bigquery.BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):
@@ -274,7 +281,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect_module = import_library_module(
-                module_name="sqlalchemy.dialects." + self.engine.dialect.name
+                module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
         elif self.engine.dialect.name.lower() == "snowflake":
@@ -292,7 +299,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         elif self.engine.dialect.name.lower() == "bigquery":
             self.dialect_module = import_library_module(
-                module_name="pybigquery.sqlalchemy_bigquery"
+                module_name=_BIGQUERY_MODULE_NAME
             )
         elif self.engine.dialect.name.lower() == "teradatasql":
             # WARNING: Teradata Support is experimental, functionality is not fully under test
@@ -671,26 +678,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = {}
         if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(list(accessor_keys)) > 0:
-                for key in accessor_keys:
-                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
-            if len(domain_kwargs.keys()) > 0:
-                # Warn user if kwarg not "normal".
-                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
-                    {
-                        "batch_id",
-                        "table",
-                        "row_condition",
-                        "condition_parser",
-                    }
-                )
-                if len(unexpected_keys) > 0:
-                    unexpected_keys_str: str = ", ".join(
-                        map(lambda element: f'"{element}"', unexpected_keys)
-                    )
-                    logger.warning(
-                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
-                    )
+            (
+                compute_domain_kwargs,
+                accessor_domain_kwargs,
+            ) = self._split_table_metric_domain_kwargs(
+                domain_kwargs=domain_kwargs,
+                domain_type=domain_type,
+                accessor_keys=accessor_keys,
+            )
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         elif domain_type == MetricDomainTypes.COLUMN:

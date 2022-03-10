@@ -16,13 +16,12 @@ from scipy import stats
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.dataset import Dataset
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
-
-from .dataset import Dataset
 
 logger = logging.getLogger(__name__)
 
@@ -906,7 +905,7 @@ Notes:
             comp_types.extend(native_type)
 
         if len(comp_types) < 1:
-            raise ValueError("Unrecognized numpy/python type: %s" % type_)
+            raise ValueError(f"Unrecognized numpy/python type: {type_}")
 
         return column.map(lambda x: isinstance(x, tuple(comp_types)))
 
@@ -1110,7 +1109,7 @@ Notes:
                 comp_types.extend(native_type)
 
         if len(comp_types) < 1:
-            raise ValueError("No recognized numpy/python type in list: %s" % type_list)
+            raise ValueError(f"No recognized numpy/python type in list: {type_list}")
 
         return column.map(lambda x: isinstance(x, tuple(comp_types)))
 
@@ -1477,7 +1476,7 @@ Notes:
                 datetime.strftime(datetime.now(), strftime_format), strftime_format
             )
         except ValueError as e:
-            raise ValueError("Unable to use provided strftime_format. " + str(e))
+            raise ValueError(f"Unable to use provided strftime_format. {str(e)}")
 
         def is_parseable_by_format(val):
             try:

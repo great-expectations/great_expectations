@@ -21,6 +21,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
@@ -31,13 +32,12 @@ except ImportError:
     # Fallback for python < 3.8
     from typing_extensions import Literal
 
-import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
-import great_expectations.rule_based_profiler.toolkit as profiler_toolkit
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import (
     Batch,
+    BatchDefinition,
     BatchRequest,
     IDDict,
     RuntimeBatchRequest,
@@ -840,6 +840,10 @@ class BaseDataContext(ConfigPeer):
         )
 
     @property
+    def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
+        return self._usage_statistics_handler
+
+    @property
     def project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
 
@@ -874,7 +878,11 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.project_config_with_variables_substituted.checkpoint_store_name
         except AttributeError:
-            if checkpoint_toolkit.default_checkpoints_exist(
+            from great_expectations.data_context.store.checkpoint_store import (
+                CheckpointStore,
+            )
+
+            if CheckpointStore.default_checkpoints_exist(
                 directory_path=self.root_directory
             ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
@@ -885,12 +893,16 @@ class BaseDataContext(ConfigPeer):
             raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
     @property
-    def checkpoint_store(self):
+    def checkpoint_store(self) -> "CheckpointStore":
         checkpoint_store_name: str = self.checkpoint_store_name
         try:
             return self.stores[checkpoint_store_name]
         except KeyError:
-            if checkpoint_toolkit.default_checkpoints_exist(
+            from great_expectations.data_context.store.checkpoint_store import (
+                CheckpointStore,
+            )
+
+            if CheckpointStore.default_checkpoints_exist(
                 directory_path=self.root_directory
             ):
                 logger.warning(
@@ -911,9 +923,7 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.project_config_with_variables_substituted.profiler_store_name
         except AttributeError:
-            if profiler_toolkit.default_profilers_exist(
-                directory_path=self.root_directory
-            ):
+            if DataContext._default_profilers_exist(directory_path=self.root_directory):
                 return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
             if self.root_directory:
                 error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
@@ -927,9 +937,7 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.stores[profiler_store_name]
         except KeyError:
-            if profiler_toolkit.default_profilers_exist(
-                directory_path=self.root_directory
-            ):
+            if DataContext._default_profilers_exist(directory_path=self.root_directory):
                 logger.warning(
                     f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
@@ -940,6 +948,17 @@ class BaseDataContext(ConfigPeer):
             raise ge_exceptions.StoreConfigurationError(
                 f'Attempted to access the Profiler store named "{profiler_store_name}", which is not a configured store.'
             )
+
+    @staticmethod
+    def _default_profilers_exist(directory_path: Optional[str]) -> bool:
+        if not directory_path:
+            return False
+
+        profiler_directory_path: str = os.path.join(
+            directory_path,
+            DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
+        )
+        return os.path.isdir(profiler_directory_path)
 
     @property
     def expectations_store_name(self) -> Optional[str]:
@@ -1334,6 +1353,7 @@ class BaseDataContext(ConfigPeer):
         )
         if data_asset_type is None:
             data_asset_type = datasource.config.get("data_asset_type")
+
         validator = BridgeValidator(
             batch=batch,
             expectation_suite=expectation_suite,
@@ -1845,13 +1865,22 @@ class BaseDataContext(ConfigPeer):
                 )
             )
 
+        return self.get_validator_using_batch_list(
+            expectation_suite=expectation_suite,
+            batch_list=batch_list,
+        )
+
+    def get_validator_using_batch_list(
+        self,
+        expectation_suite: ExpectationSuite,
+        batch_list: List[Batch],
+    ) -> Validator:
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        batch_definition = batch_list[-1].batch_definition
-        execution_engine = self.datasources[
+        batch_definition: BatchDefinition = batch_list[-1].batch_definition
+        execution_engine: ExecutionEngine = self.datasources[
             batch_definition.datasource_name
         ].execution_engine
-
         validator: Validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
@@ -1859,12 +1888,12 @@ class BaseDataContext(ConfigPeer):
             data_context=self,
             batches=batch_list,
         )
-
         return validator
 
     def list_validation_operator_names(self):
         if not self.validation_operators:
             return []
+
         return list(self.validation_operators.keys())
 
     @usage_statistics_enabled_method(
@@ -1884,7 +1913,7 @@ class BaseDataContext(ConfigPeer):
         Returns:
             datasource (Datasource)
         """
-        logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
+        logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
 
         module_name = kwargs.get("module_name", "great_expectations.datasource")
         verify_dynamic_loading_support(module_name=module_name)
@@ -2049,7 +2078,7 @@ class BaseDataContext(ConfigPeer):
             keys = self.expectations_store.list_keys()
         except KeyError as e:
             raise ge_exceptions.InvalidConfigError(
-                "Unable to find configured store: %s" % str(e)
+                f"Unable to find configured store: {str(e)}"
             )
         return keys
 
@@ -2250,7 +2279,7 @@ class BaseDataContext(ConfigPeer):
                 resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
             )
         else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
 
@@ -2261,7 +2290,7 @@ class BaseDataContext(ConfigPeer):
 
         else:
             raise ge_exceptions.DataContextError(
-                "expectation_suite %s not found" % expectation_suite_name
+                f"expectation_suite {expectation_suite_name} not found"
             )
 
     def list_expectation_suite_names(self) -> List[str]:
@@ -2589,7 +2618,7 @@ class BaseDataContext(ConfigPeer):
 
             for site_name, site_config in sites.items():
                 logger.debug(
-                    "Building Data Docs Site %s" % site_name,
+                    f"Building Data Docs Site {site_name}",
                 )
 
                 if (site_names and (site_name in site_names)) or not site_names:
@@ -2855,7 +2884,7 @@ class BaseDataContext(ConfigPeer):
             total_start_time = datetime.datetime.now()
 
             for name in data_asset_names_to_profiled:
-                logger.info("\tProfiling '%s'..." % name)
+                logger.info(f"\tProfiling '{name}'...")
                 try:
                     profiling_results["results"].append(
                         self.profile_data_asset(
@@ -2882,7 +2911,7 @@ class BaseDataContext(ConfigPeer):
                     skipped_data_assets += 1
                 except SQLAlchemyError as e:
                     logger.warning(
-                        "SqlAlchemyError while profiling %s. Skipping." % name[1]
+                        f"SqlAlchemyError while profiling {name[1]}. Skipping."
                     )
                     logger.debug(str(e))
                     skipped_data_assets += 1
@@ -3105,10 +3134,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiling_results
 
     def list_checkpoints(self) -> List[str]:
-        return checkpoint_toolkit.list_checkpoints(
-            checkpoint_store=self.checkpoint_store,
-            ge_cloud_mode=self.ge_cloud_mode,
-        )
+        return self.checkpoint_store.list_checkpoints(ge_cloud_mode=self.ge_cloud_mode)
 
     def add_checkpoint(
         self,
@@ -3135,12 +3161,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         notify_with: Optional[Union[str, List[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
-    ) -> Union[Checkpoint, LegacyCheckpoint]:
-        return checkpoint_toolkit.add_checkpoint(
+    ) -> Checkpoint:
+
+        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
             data_context=self,
-            checkpoint_store=self.checkpoint_store,
             checkpoint_store_name=self.checkpoint_store_name,
-            ge_cloud_mode=self.ge_cloud_mode,
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -3166,27 +3191,32 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
 
+        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
+        return checkpoint
+
     def get_checkpoint(
         self,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ) -> Union[Checkpoint, LegacyCheckpoint]:
-        return checkpoint_toolkit.get_checkpoint(
-            data_context=self,
-            checkpoint_store=self.checkpoint_store,
-            name=name,
-            ge_cloud_id=ge_cloud_id,
+    ) -> Checkpoint:
+        checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
+            name=name, ge_cloud_id=ge_cloud_id
         )
+        checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
+            checkpoint_config=checkpoint_config,
+            data_context=self,
+            name=name,
+        )
+
+        return checkpoint
 
     def delete_checkpoint(
         self,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ):
-        checkpoint_toolkit.delete_checkpoint(
-            checkpoint_store=self.checkpoint_store,
-            name=name,
-            ge_cloud_id=ge_cloud_id,
+    ) -> None:
+        return self.checkpoint_store.delete_checkpoint(
+            name=name, ge_cloud_id=ge_cloud_id
         )
 
     @usage_statistics_enabled_method(
@@ -3195,6 +3225,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def run_checkpoint(
         self,
         checkpoint_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -3208,7 +3239,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         run_name: Optional[str] = None,
         run_time: Optional[datetime.datetime] = None,
         result_format: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
@@ -3236,10 +3266,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         Returns:
             CheckpointResult
         """
-        return checkpoint_toolkit.run_checkpoint(
-            data_context=self,
-            checkpoint_store=self.checkpoint_store,
-            checkpoint_name=checkpoint_name,
+        checkpoint: Checkpoint = self.get_checkpoint(
+            name=checkpoint_name,
+            ge_cloud_id=ge_cloud_id,
+        )
+        result: CheckpointResult = checkpoint.run_with_runtime_args(
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
@@ -3253,10 +3284,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
-            ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
             **kwargs,
         )
+        return result
 
     def add_profiler(
         self,
@@ -3279,8 +3310,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
 
-        # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
-        return profiler_toolkit.add_profiler(
+        return RuleBasedProfiler.add_profiler(
             config=config,
             data_context=self,
             profiler_store=self.profiler_store,
@@ -3292,7 +3322,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
-        return profiler_toolkit.get_profiler(
+        return RuleBasedProfiler.get_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
             name=name,
@@ -3304,7 +3334,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
-        profiler_toolkit.delete_profiler(
+        RuleBasedProfiler.delete_profiler(
             profiler_store=self.profiler_store,
             name=name,
             ge_cloud_id=ge_cloud_id,
@@ -3315,7 +3345,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             raise ge_exceptions.StoreConfigurationError(
                 "Attempted to list profilers from a Profiler Store, which is not a configured store."
             )
-        return profiler_toolkit.list_profilers(
+        return RuleBasedProfiler.list_profilers(
             profiler_store=self.profiler_store,
             ge_cloud_mode=self.ge_cloud_mode,
         )
@@ -3332,13 +3362,34 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
-        return profiler_toolkit.run_profiler(
+        return RuleBasedProfiler.run_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
             name=name,
             ge_cloud_id=ge_cloud_id,
             variables=variables,
             rules=rules,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_profiler_on_data",
+    )
+    def run_profiler_on_data(
+        self,
+        batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> ExpectationSuite:
+        return RuleBasedProfiler.run_profiler_on_data(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            batch_request=batch_request,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
         )
@@ -3926,10 +3977,8 @@ class DataContext(BaseDataContext):
         cls.scaffold_directories(ge_dir)
 
         if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
-            message = """Warning. An existing `{}` was found here: {}.
-    - No action was taken.""".format(
-                cls.GE_YML, ge_dir
-            )
+            message = f"""Warning. An existing `{cls.GE_YML}` was found here: {ge_dir}.
+    - No action was taken."""
             warnings.warn(message)
         else:
             cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
@@ -4268,7 +4317,7 @@ class DataContext(BaseDataContext):
             self.config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
-        logger.debug("Starting DataContext.add_store for store %s" % store_name)
+        logger.debug(f"Starting DataContext.add_store for store {store_name}")
 
         new_store = super().add_store(store_name, store_config)
         self._save_project_config()
@@ -4277,7 +4326,7 @@ class DataContext(BaseDataContext):
     def add_datasource(
         self, name, **kwargs
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
+        logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
@@ -4371,9 +4420,7 @@ class DataContext(BaseDataContext):
 
         for i in range(4):
             logger.debug(
-                "Searching for config file {} ({} layer deep)".format(
-                    search_start_dir, i
-                )
+                f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
             potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
@@ -4382,7 +4429,7 @@ class DataContext(BaseDataContext):
                 potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
                 if os.path.isfile(potential_yml):
                     yml_path = potential_yml
-                    logger.debug("Found config file at " + str(yml_path))
+                    logger.debug(f"Found config file at {str(yml_path)}")
                     break
             # move up one directory
             search_start_dir = os.path.dirname(search_start_dir)

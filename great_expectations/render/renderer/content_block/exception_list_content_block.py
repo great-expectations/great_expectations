@@ -1,9 +1,10 @@
+from great_expectations.render.renderer.content_block.content_block import (
+    ContentBlockRenderer,
+)
 from great_expectations.render.types import (
     RenderedBulletListContent,
     RenderedStringTemplateContent,
 )
-
-from .content_block import ContentBlockRenderer
 
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
@@ -71,7 +72,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
         if result.exception_info["raised_exception"] is True:
             template_str = "$expectation_type raised an exception: $exception_message"
             if include_column_name:
-                template_str = "$column: " + template_str
+                template_str = f"$column: {template_str}"
 
             try:
                 column = result.expectation_config.kwargs["column"]

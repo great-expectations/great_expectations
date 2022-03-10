@@ -5,6 +5,11 @@ import tempfile
 from mimetypes import guess_type
 from zipfile import ZipFile, is_zipfile
 
+from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudStoreBackend,
+)
+from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     SiteSectionIdentifier,
@@ -20,10 +25,6 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
-
-from ...core.data_context_key import DataContextKey
-from .ge_cloud_store_backend import GeCloudStoreBackend
-from .tuple_store_backend import TupleStoreBackend
 
 logger = logging.getLogger(__name__)
 
@@ -319,10 +320,7 @@ class HtmlSiteStore:
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
             raise TypeError(
-                "key: {!r} must be a SiteSectionIdentifier, not {!r}".format(
-                    key,
-                    type(key),
-                )
+                f"key: {key!r} must be a SiteSectionIdentifier, not {type(key)!r}"
             )
 
         for key_class in self.store_backends.keys():

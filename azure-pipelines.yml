@@ -8,7 +8,7 @@
 #  from `dependency_graph`. Additionally, it is responsible for deployment during the weekly release cut.
 
 schedules:
-- cron: 0 */4 * * *
+- cron: 0 */3 * * *
   displayName: Scheduled Runs
   branches:
     include:
@@ -89,7 +89,7 @@ stages:
       - job: compatibility_matrix
         condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         variables:
-          GE_pytest_opts: '--no-sqlalchemy --no-spark'
+          GE_pytest_opts: '--no-sqlalchemy'
         strategy:
           matrix:
             Python36-Pandas023:
@@ -220,7 +220,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest $(GE_pytest_opts) --postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -263,7 +263,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
   - stage: db_integration
@@ -313,7 +313,7 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
       - job: mssql
@@ -345,7 +345,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
   - stage: cli_integration
@@ -385,21 +385,26 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest --aws-integration -v tests/cli
+              pytest --postgresql --spark --aws-integration -v tests/cli
             displayName: 'pytest'
 
   - stage: deploy_gallery
     condition: and(succeeded(), eq(variables.isMain, true))
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-18.04'
     dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
       - job: build_gallery
         variables:
           python.version: '3.7'
-          GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+          GE_pytest_pip_opts: '"pyspark<3.0.0" "cookiecutter==1.7.3" "google-cloud-bigquery-storage" --requirement requirements-dev.txt --constraint constraints-dev.txt'
           GE_pytest_opts: ''
+
+        services:
+          postgres: postgres
+          mysql: mysql
+          mssql: mssql
 
         steps:
           - task: UsePythonVersion@0
@@ -418,12 +423,45 @@ stages:
           - script: |
               pip install $(GE_pytest_pip_opts)
               pip install --requirement requirements.txt
-              pip install  .
+              pip install  --editable .
             displayName: 'Install dependencies'
+
+          - script: |
+              printf 'Waiting for MySQL database to accept connections'
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+            displayName: 'Wait for MySQL database to initialise'
+
+          - script: |
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+            displayName: 'Configure mysql'
+
+          - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+            displayName: 'Configure mssql'
+
+#         - task: DownloadSecureFile@1
+#           name: gcp_authkey
+#           displayName: 'Download Google Service Account'
+#           inputs:
+#             secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+#             retryCount: '2'
 
           - bash: python ./build_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
+#           env:
+#             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+#             GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+#             GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+#             GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
+
+          - bash: python ./build_package_gallery.py
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Build Package Gallery'
 
           - task: S3Upload@1
             inputs:

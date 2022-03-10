@@ -288,3 +288,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
             ],
         }
     ]
+
+
+if __name__ == "__main__":
+    ExpectColumnValuesToBeSecurePasswords().print_diagnostic_checklist()

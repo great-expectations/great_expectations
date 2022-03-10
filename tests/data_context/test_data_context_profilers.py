@@ -79,3 +79,39 @@ def test_run_profiler_with_dynamic_arguments_emits_proper_usage_stats(
             }
         )
     ]
+
+
+@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_run_profiler_on_data_emits_proper_usage_stats(
+    mock_emit: mock.MagicMock,
+    mock_profiler_run: mock.MagicMock,
+    empty_data_context_stats_enabled: DataContext,
+    populated_profiler_store: ProfilerStore,
+    profiler_name: str,
+):
+    with mock.patch(
+        "great_expectations.data_context.DataContext.profiler_store"
+    ) as mock_profiler_store:
+        mock_profiler_store.__get__ = mock.Mock(return_value=populated_profiler_store)
+        empty_data_context_stats_enabled.run_profiler_on_data(
+            name=profiler_name,
+            batch_request={
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_data_connector",
+                "data_asset_name": "my_data_asset",
+            },
+        )
+
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.run_profiler_on_data",
+                "success": True,
+            }
+        )
+    ]

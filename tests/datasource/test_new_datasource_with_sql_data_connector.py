@@ -29,6 +29,14 @@ try:
 except ImportError:
     sqlalchemy = None
 
+try:
+    import sqlalchemy_bigquery as sqla_bigquery
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+    except ImportError:
+        sqla_bigquery = None
+
 yaml = YAML()
 
 
@@ -502,6 +510,10 @@ tables:
     # Here we should test getting another batch
 
 
+@pytest.mark.skipif(
+    sqla_bigquery is None,
+    reason="sqlalchemy_bigquery/pybigquery is not installed",
+)
 def test_basic_instantiation_with_bigquery_creds(sa, empty_data_context):
     context = empty_data_context
     my_data_source = instantiate_class_from_config(
@@ -1050,7 +1062,7 @@ def test_batch_request_sql_with_schema(
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",
-        "data_asset_name": "my_second_data_asset",
+        "data_asset_name": "main.my_second_data_asset",
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
@@ -1080,7 +1092,7 @@ def test_batch_request_sql_with_schema(
     batch_request = {
         "datasource_name": "test_sqlite_db_datasource",
         "data_connector_name": "my_configured_data_connector",
-        "data_asset_name": "table_2",
+        "data_asset_name": "main.table_2",
     }
     validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
