@@ -374,9 +374,30 @@ def parse_evaluation_parameter(
         return evaluation_parameters[L[0]]
 
     elif len(L) == 0 or L[0] != "Parse Failure":
+        # we have a stack to evaluate and there was no parse failure.
+        # iterate through values and look for URNs pointing to a store:
         for i, ob in enumerate(expr.exprStack):
             if isinstance(ob, str) and ob in evaluation_parameters:
                 expr.exprStack[i] = str(evaluation_parameters[ob])
+            elif isinstance(ob, str) and ob not in evaluation_parameters:
+                # try to retrieve this value from a store
+                try:
+                    res = ge_urn.parseString(ob)
+                    if res["urn_type"] == "stores":
+                        store = data_context.stores.get(res["store_name"])
+                        expr.exprStack[i] = str(
+                            store.get_query_result(
+                                res["metric_name"], res.get("metric_kwargs", {})
+                            )
+                        )  # value placed back in stack must be a string
+                    else:
+                        # handle other urn_types here, but note that validations URNs are being resolved elsewhere.
+                        pass
+                # graceful error handling for cases where the value in the stack isn't a URN:
+                except ParseException:
+                    pass
+                except AttributeError:
+                    pass
 
     else:
         err_str, err_line, err_col = L[-1]
