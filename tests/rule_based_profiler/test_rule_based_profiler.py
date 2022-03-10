@@ -1300,6 +1300,15 @@ def test_add_rule(
     profiler.add_rule(first_rule)
     assert len(profiler.rules) == 1
 
+    duplicate_of_first_rule: Rule = Rule(
+        name="first_rule",
+        domain_builder=mock_domain_builder,
+        expectation_configuration_builders=mock_expectation_configuration_builder,
+    )
+    duplicate_of_first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    profiler.add_rule(duplicate_of_first_rule)
+    assert len(profiler.rules) == 1
+
     second_rule: Rule = Rule(
         name="second_rule",
         domain_builder=mock_domain_builder,

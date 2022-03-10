@@ -129,11 +129,6 @@ def test_batches_are_accessible(
         assert metric_value_set == {"category0", "category1", "category2"}
 
 
-# unittest for save_profiler
-def test_save_profiler():
-    pass
-
-
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
