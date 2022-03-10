@@ -1167,11 +1167,13 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             },
         )
 
-        key: Union[
-            GeCloudIdentifier, ConfigurationIdentifier
-        ] = ConfigurationStore.determine_key(
-            name=new_profiler.name, ge_cloud_id=ge_cloud_id
-        )
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id:
+            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        else:
+            key = ConfigurationIdentifier(
+                configuration_key=config.name,
+            )
         profiler_store.set(key=key, value=config)
 
         return new_profiler

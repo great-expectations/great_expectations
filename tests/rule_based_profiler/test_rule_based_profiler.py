@@ -1282,3 +1282,7 @@ def test_add_rule(
 
 def test_add_rule_after_removing_rule():
     pass
+
+
+def test_safe_profiler():
+    pass
