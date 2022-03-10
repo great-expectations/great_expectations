@@ -30,11 +30,17 @@ trigger:
     exclude:
     - develop
 
+# The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
+variables:
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
+
 stages:
   - stage: user_install_linux
     dependsOn: []
     jobs:
       - template: azure/user-install-matrix.yml
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "ubuntu-latest"
 
@@ -42,6 +48,7 @@ stages:
     dependsOn: user_install_linux
     jobs:
       - template: azure/dev-install-matrix.yml
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "ubuntu-latest"
 
@@ -49,6 +56,7 @@ stages:
     dependsOn: []
     jobs:
       - template: azure/user-install-matrix.yml
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "macOS-latest"
 
@@ -56,6 +64,7 @@ stages:
     dependsOn: user_install_macOS
     jobs:
       - template: azure/dev-install-matrix.yml
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "macOS-latest"
 
@@ -63,6 +72,7 @@ stages:
     dependsOn: []
     jobs:
       - template: azure/user-install-matrix.yml
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "windows-latest"
 
@@ -70,5 +80,6 @@ stages:
     dependsOn: user_install_windows
     jobs:
       - template: azure/dev-install-matrix.yml
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "windows-latest"
