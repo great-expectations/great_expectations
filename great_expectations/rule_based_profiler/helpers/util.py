@@ -1,5 +1,6 @@
 import copy
 import itertools
+import logging
 import uuid
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -22,6 +23,9 @@ from great_expectations.rule_based_profiler.types import (
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
@@ -353,6 +357,26 @@ def build_simple_domains_from_column_names(
     ]
 
     return domains
+
+
+def convert_variables_to_dict(
+    variables: Optional[ParameterContainer],
+) -> Optional[Dict[str, Any]]:
+    if variables is None:
+        return {}
+
+    variables_dict: Optional[Dict[str, Any]] = None
+    try:
+        variables_dict = variables.to_dict()["parameter_nodes"]["variables"][
+            "variables"
+        ]
+    except (TypeError, KeyError) as e:
+        logger.warning("Could not convert existing variables to dict: %s", e)
+
+    if variables_dict is None:
+        variables_dict = {}
+
+    return variables_dict
 
 
 def compute_quantiles(
