@@ -1903,6 +1903,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                             "allow_relative_error": "$variables.allow_relative_error",
                         },
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": 43792,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "round_decimals": 2,
                     }
@@ -2001,6 +2002,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                             "allow_relative_error": "$variables.allow_relative_error",
                         },
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": 43792,
                         "false_positive_rate": "$variables.false_positive_rate",
                         "round_decimals": "$variables.round_decimals",
                     }

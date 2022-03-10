@@ -83,6 +83,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         module_name="great_expectations.rule_based_profiler",
         variables={
             "num_bootstrap_samples": 9999,
+            "bootstrap_random_seed": None,
             "false_positive_rate": 0.05,
             "truncate_values": {
                 "lower_bound": 0,
@@ -103,6 +104,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                         "metric_name": "table.row_count",
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "truncate_values": "$variables.truncate_values",
                         "round_decimals": "$variables.round_decimals",
