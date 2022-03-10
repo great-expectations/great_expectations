@@ -123,6 +123,7 @@ a.pagination-nav__link:hover {
 table.borderless {
     border-collapse: collapse;
     border: none;
+    overflow:visible;
 }
 
 table.borderless tr {
