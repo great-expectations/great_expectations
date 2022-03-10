@@ -2,7 +2,7 @@ import copy
 import itertools
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, make_dataclass
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -124,6 +124,7 @@ class ParameterBuilder(Builder, ABC):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         parameter_computation_impl: Optional[Callable] = None,
+        json_serialize: Optional[bool] = None,
     ) -> None:
         computed_parameter_value: Any
         parameter_computation_details: dict
@@ -141,14 +142,15 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
-        # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        json_serialize: bool = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.json_serialize,
-            expected_return_type=bool,
-            variables=variables,
-            parameters=parameters,
-        )
+        if json_serialize is None:
+            # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            json_serialize = get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.json_serialize,
+                expected_return_type=bool,
+                variables=variables,
+                parameters=parameters,
+            )
 
         parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {

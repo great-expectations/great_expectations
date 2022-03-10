@@ -125,7 +125,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         """
         metric_computation_result: MetricComputationResult
 
-        metric_computation_result: MetricComputationResult = self.get_metrics(
+        metric_computation_result = self.get_metrics(
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=self.metric_value_kwargs,
