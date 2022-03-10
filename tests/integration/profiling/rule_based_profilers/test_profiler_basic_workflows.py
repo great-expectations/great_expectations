@@ -243,7 +243,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         "variables": None,
     }
     my_rbp.add_rule(rule=simple_variables_rule)
-    context.save_profiler(name=my_rbp.name, profiler=my_rbp)
+    context.save_profiler(name="my_rbp", profiler=my_rbp)
 
     # load profiler from store
     my_loaded_profiler: RuleBasedProfiler = context.get_profiler(name="my_rbp")

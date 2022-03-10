@@ -383,6 +383,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rules_dict: Dict[str, Dict[str, Any]] = {rule.name: rule.to_json_dict()}
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
             rules=rules_dict,
+            reconciliation_directives=ReconciliationDirectives(
+                domain_builder=ReconciliationStrategy.UPDATE,
+                parameter_builder=ReconciliationStrategy.UPDATE,
+                expectation_configuration_builder=ReconciliationStrategy.UPDATE,
+            ),
         )
         updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
             rule.name: rule.to_json_dict() for rule in effective_rules
