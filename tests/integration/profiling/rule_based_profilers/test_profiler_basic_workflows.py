@@ -177,7 +177,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
         )
     )
     simple_rule: Rule = Rule(
-        name="rule_with_no_variables_no_parameters",
+        name="rule_with_variables_and_parameters",
         domain_builder=domain_builder,
         parameter_builders=[numeric_range_parameter_builder],
         expectation_configuration_builders=[config_builder],
@@ -250,7 +250,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
 
     res = my_loaded_profiler.config.to_json_dict()
     assert res == {
-        "variables": {"parameter_nodes": None},
+        "variables": None,
         "rules": {
             "rule_with_no_variables_no_parameters": {
                 "domain_builder": {

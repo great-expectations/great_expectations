@@ -382,6 +382,22 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return expectation_suite
 
+    def add_rule(self, rule: Rule) -> None:
+        """
+        Add Rule object to existing profiler object by appending to self._rules. In cases where a Rule with the same name exists, it is updated.
+        """
+        if not isinstance(rule, Rule):
+            raise TypeError("add_rule method requires a Rule to be passed in.")
+        rules_dict: dict = {rule.name: rule.to_json_dict()}
+        effective_rules: List[Rule] = self.reconcile_profiler_rules(
+            rules=rules_dict,
+        )
+        rule: Rule
+        updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
+            rule.name: rule.to_json_dict() for rule in effective_rules
+        }
+        self._profiler_config.rules = updated_rules
+
     def reconcile_profiler_variables(
         self,
         variables: Optional[Dict[str, Any]] = None,
@@ -1012,15 +1028,24 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
 
     def update_profiler_config(self, name: str, ge_cloud_id: Optional[str] = None):
         effective_rules: dict = self._get_rules_as_dict()
-        # TODO: update with variables
+        try:
+            effective_variables: dict = self.variables.to_dict()["parameter_nodes"][
+                "variables"
+            ]["variables"]
+        except (TypeError, KeyError) as e:
+            effective_variables: dict = {}
+
         updated_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-            name=name,
+            name=self.name,
             config_version=self.config.config_version,
             rules=effective_rules,
-            variables=self.variables,
+            variables=effective_variables,
+        )
+        updated_profiler_config_json_dict: dict = updated_profiler_config.to_json_dict()
+        updated_profiler_config = RuleBasedProfilerConfig(
+            **updated_profiler_config_json_dict
         )
         self._profiler_config = updated_profiler_config
-        return updated_profiler_config
 
     def save_profiler(
         self,
@@ -1109,20 +1134,6 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             include_citation=include_citation,
         )
         return result
-
-    def add_rule(self, rule: Rule) -> None:
-        """
-        Add Rule object to existing profiler object by appending to self._rules. In cases where a Rule with the same name exists, it is updated.
-        """
-        if not isinstance(rule, Rule):
-            raise TypeError("add_rule method requires a Rule to be passed in.")
-
-        # replace existing rule and return or append
-        for idx, existing_rule in enumerate(self._rules):
-            if existing_rule.name == rule.name:
-                self._rules[idx] = rule
-                return
-        self._rules.append(rule)
 
     def _generate_rule_overrides_from_batch_request(
         self,
