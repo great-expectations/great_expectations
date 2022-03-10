@@ -2078,7 +2078,6 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
         include_config=True,
         auto=True,
     )
-    assert result.success
 
     key: str
     value: Any
@@ -2100,30 +2099,6 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
         "auto": True,
         "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
     }
-
-    rtol: float = 2.0e1 * RTOL
-    atol: float = 2.0e1 * ATOL
-
-    min_value_actual: float = result.expectation_config["kwargs"]["min_value"]
-    min_value_expected: float = -1.8796e2
-
-    np.testing.assert_allclose(
-        actual=min_value_actual,
-        desired=min_value_expected,
-        rtol=rtol,
-        atol=atol,
-        err_msg=f"Actual value of {min_value_actual} differs from expected value of {min_value_expected} by more than {atol + rtol * abs(min_value_expected)} tolerance.",
-    )
-
-    max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
-    max_value_expected: float = -5.79
-    np.testing.assert_allclose(
-        actual=max_value_actual,
-        desired=max_value_expected,
-        rtol=rtol,
-        atol=atol,
-        err_msg=f"Actual value of {max_value_actual} differs from expected value of {max_value_expected} by more than {atol + rtol * abs(max_value_expected)} tolerance.",
-    )
 
 
 @pytest.mark.skipif(
