@@ -205,7 +205,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
                     self.cardinality_checker.cardinality_within_limit(
                         metric_value=metric_value
                     )
-                    for metric_value in list(resolved_metrics.values())
+                    for metric_value in resolved_metrics.values()
                 ]
             )
         ]
