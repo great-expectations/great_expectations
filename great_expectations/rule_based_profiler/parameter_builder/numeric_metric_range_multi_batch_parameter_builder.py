@@ -12,22 +12,22 @@ from great_expectations.rule_based_profiler.helpers.util import (
     compute_quantiles,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.util import is_numeric
-
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (  # isort:skip
-    MetricComputationResult,
-    MetricValues,
-    MetricComputationDetails,
-    ParameterBuilder,
+from great_expectations.rule_based_profiler.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
 )
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
+    ParameterNode,
+)
+from great_expectations.util import is_numeric
 
 MAX_DECIMALS: int = 9
 
 DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
 
 
-class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
+class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
     A Multi-Batch implementation for obtaining the range estimation bounds for a resolved (evaluated) numeric metric,
     using domain_kwargs, value_kwargs, metric_name, and false_positive_rate (tolerance) as arguments.
@@ -103,22 +103,19 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         """
         super().__init__(
             name=name,
+            metric_name=metric_name,
+            metric_domain_kwargs=metric_domain_kwargs,
+            metric_value_kwargs=metric_value_kwargs,
+            enforce_numeric_metric=enforce_numeric_metric,
+            replace_nan_with_zero=replace_nan_with_zero,
+            reduce_scalar_metric=reduce_scalar_metric,
             batch_list=batch_list,
             batch_request=batch_request,
             json_serialize=json_serialize,
             data_context=data_context,
         )
 
-        self._metric_name = metric_name
-        self._metric_domain_kwargs = metric_domain_kwargs
-        self._metric_value_kwargs = metric_value_kwargs
-
         self._sampling_method = sampling_method
-
-        self._enforce_numeric_metric = enforce_numeric_metric
-        self._replace_nan_with_zero = replace_nan_with_zero
-
-        self._reduce_scalar_metric = reduce_scalar_metric
 
         self._false_positive_rate = false_positive_rate
 
@@ -149,45 +146,13 @@ detected.
 
         self._truncate_values = truncate_values
 
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"$parameter.{self.name}"
-
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
     """
 
     @property
-    def metric_name(self) -> str:
-        return self._metric_name
-
-    @property
-    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
-        return self._metric_domain_kwargs
-
-    @property
-    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
-        return self._metric_value_kwargs
-
-    @metric_value_kwargs.setter
-    def metric_value_kwargs(self, value: Optional[Union[str, dict]]) -> None:
-        self._metric_value_kwargs = value
-
-    @property
     def sampling_method(self) -> str:
         return self._sampling_method
-
-    @property
-    def enforce_numeric_metric(self) -> Union[str, bool]:
-        return self._enforce_numeric_metric
-
-    @property
-    def replace_nan_with_zero(self) -> Union[str, bool]:
-        return self._replace_nan_with_zero
-
-    @property
-    def reduce_scalar_metric(self) -> Union[str, bool]:
-        return self._reduce_scalar_metric
 
     @property
     def false_positive_rate(self) -> Union[str, float]:
@@ -244,19 +209,6 @@ detected.
         11. Return [low, high] for the desired metric as estimated by the specified sampling method.
         12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
-        metric_computation_result: MetricComputationResult = self.get_metrics(
-            metric_name=self.metric_name,
-            metric_domain_kwargs=self.metric_domain_kwargs,
-            metric_value_kwargs=self.metric_value_kwargs,
-            enforce_numeric_metric=self.enforce_numeric_metric,
-            replace_nan_with_zero=self.replace_nan_with_zero,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        metric_values: MetricValues = metric_computation_result.metric_values
-        details: MetricComputationDetails = metric_computation_result.details
-
         # Obtain sampling_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         sampling_method: str = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -289,8 +241,27 @@ detected.
                 "false_positive_rate": self.false_positive_rate,
             }
 
+        # Compute metric value for each Batch object.
+        super().build_parameters(
+            parameter_container=parameter_container,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+            parameter_computation_impl=super()._build_parameters,
+            json_serialize=False,
+        )
+
+        # Retrieve metric values for all Batch objects.
+        parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.fully_qualified_parameter_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
         metric_value_range: np.ndarray = self._estimate_metric_value_range(
-            metric_values=cast(np.ndarray, metric_values),
+            metric_values=cast(np.ndarray, parameter_node.value),
             estimator=estimator,
             domain=domain,
             variables=variables,
@@ -302,7 +273,7 @@ detected.
             {
                 "value_range": metric_value_range,
             },
-            details,
+            parameter_node.details,
         )
 
     def _estimate_metric_value_range(
