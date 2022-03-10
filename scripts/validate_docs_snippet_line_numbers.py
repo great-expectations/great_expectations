@@ -2,7 +2,6 @@ import glob
 import logging
 import os
 import re
-import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
@@ -10,6 +9,8 @@ from typing import Dict, List, Tuple
 from great_expectations.data_context.util import file_relative_path
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.INFO)
 
 
 OPENING_TAG: str = "<snippet>"
@@ -50,6 +51,7 @@ def collect_docusaurus_refs(directory: str) -> Dict[str, List[DocusaurusRef]]:
     """
     docusaurus_refs: Dict[str, List[DocusaurusRef]] = defaultdict(list)
     for file in glob.glob(f"{directory}/**/*.md", recursive=True):
+        logger.debug("Checking %s for Docusaurus links", file)
         _collect_docusaurus_refs(file=file, reference_map=docusaurus_refs)
 
     return docusaurus_refs
@@ -68,6 +70,10 @@ def _collect_docusaurus_refs(
             file=file, values=reference
         )
         reference_map[docusaurus_ref.py_file].append(docusaurus_ref)
+        logger.debug(
+            "Create association between %s and the docs that use it",
+            docusaurus_ref.py_file,
+        )
 
 
 def evaluate_snippet_validity(
@@ -94,6 +100,10 @@ def evaluate_snippet_validity(
     """
     all_broken_refs: List[DocusaurusRef] = []
     for docs_file, ref_list in docusaurus_refs.items():
+        logger.debug(
+            "Checking %s for snippet validity",
+            docs_file,
+        )
         file_broken_refs: List[DocusaurusRef] = _evaluate_snippet_validity(
             docs_file, ref_list
         )
@@ -102,7 +112,9 @@ def evaluate_snippet_validity(
     return all_broken_refs
 
 
-def _evaluate_snippet_validity(file: str, ref_list: List[DocusaurusRef]):
+def _evaluate_snippet_validity(
+    file: str, ref_list: List[DocusaurusRef]
+) -> List[DocusaurusRef]:
     with open(file) as f:
         file_contents: List[str] = f.readlines()
 
@@ -114,9 +126,14 @@ def _evaluate_snippet_validity(file: str, ref_list: List[DocusaurusRef]):
     return broken_refs
 
 
-def _validate_docusaurus_ref(docusaurus_ref: DocusaurusRef, file_contents: List[str]):
+def _validate_docusaurus_ref(
+    docusaurus_ref: DocusaurusRef, file_contents: List[str]
+) -> bool:
     start_line, end_line = docusaurus_ref.line_numbers
     if start_line > len(file_contents) or end_line > len(file_contents):
+        logger.warning(
+            "Invalid snippet due to out-of-bounds reference: %s", docusaurus_ref
+        )
         return False
 
     return _validate_opening_tag(start_line, file_contents) and _validate_closing_tag(
@@ -129,7 +146,7 @@ def _validate_opening_tag(start_line: int, file_contents: List[str]) -> bool:
 
     line: str
     while ptr >= 0:
-        line = file_contents[ptr]
+        line = file_contents[ptr - 1]
         if OPENING_TAG in line:
             return True
         elif not line.isspace():
@@ -144,7 +161,7 @@ def _validate_closing_tag(end_line: int, file_contents: List[str]) -> bool:
 
     line: str
     while ptr < len(file_contents):
-        line = file_contents[ptr]
+        line = file_contents[ptr - 1]
         if CLOSING_TAG in line:
             return True
         elif not line.isspace():
@@ -165,14 +182,13 @@ def print_diagnostic_report(broken_refs: List[DocusaurusRef]) -> None:
         refs_by_source_doc[ref.docs_file].append(ref)
 
     for docs_file, refs in refs_by_source_doc.items():
-        print(f"{docs_file}:")
+        print(f"\n{docs_file}:")
         for ref in refs:
             start, end = ref.line_numbers
             print(f"  {ref.py_file}: L{start}-L{end}")
-        print()
 
     print(
-        f"[ERROR] {len(broken_refs)} snippet issue(s) found in {len(refs_by_source_doc)} docs file(s)!"
+        f"\n[ERROR] {len(broken_refs)} snippet issue(s) found in {len(refs_by_source_doc)} docs file(s)!"
     )
 
 
