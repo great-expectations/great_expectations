@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 OPENING_TAG: str = "<snippet>"
 CLOSING_TAG: str = "</snippet>"
 DOCUSAURUS_REGEX: re.Pattern = re.compile(r"```python file=(.+)#L(\d*)(?:-L)?(\d*)")
-SNIPPET_TAG_DISTANCE_THRESHOLD: int = 3
+SNIPPET_TAG_DISTANCE_THRESHOLD: int = 1
 
 
 @dataclass
@@ -57,8 +57,6 @@ def _collect_docusaurus_refs(
     references: List[Tuple[str, str, str]] = DOCUSAURUS_REGEX.findall(contents)
 
     for reference in references:
-        if len(reference) != 3:
-            continue
         docusaurus_ref = DocusaurusRef.from_regex_parsed_values(
             file=file, values=reference
         )
@@ -72,7 +70,6 @@ def evaluate_snippet_validity(docusaurus_refs: Dict[str, List[DocusaurusRef]]):
             docs_file, ref_list
         )
         all_broken_refs.extend(file_broken_refs)
-        break
 
     return all_broken_refs
 
@@ -100,29 +97,15 @@ def _validate_docusaurus_ref(docusaurus_ref: DocusaurusRef, file_contents: List[
 
 
 def _validate_opening_tag(start_line: int, file_contents: List[str]) -> bool:
-    bound: int = start_line - SNIPPET_TAG_DISTANCE_THRESHOLD
-    bound = max(bound, 0)
-    bound = min(bound, len(file_contents))
-
-    for i in range(start_line, bound, -1):
-        line: str = file_contents[i - 1]
-        if OPENING_TAG in line:
-            return True
-
-    return False
+    idx: int = max(start_line - 1, 1)
+    line: str = file_contents[idx - 1]
+    return OPENING_TAG in line
 
 
 def _validate_closing_tag(end_line: int, file_contents: List[str]) -> bool:
-    bound: int = end_line + SNIPPET_TAG_DISTANCE_THRESHOLD
-    bound = max(bound, 0)
-    bound = min(bound, len(file_contents))
-
-    for i in range(end_line, bound):
-        line: str = file_contents[i - 1]
-        if CLOSING_TAG in line:
-            return True
-
-    return False
+    idx: int = min(end_line + 1, len(file_contents))
+    line: str = file_contents[idx - 1]
+    return CLOSING_TAG in line
 
 
 def print_diagnostic_report(broken_refs: List[DocusaurusRef]) -> None:
