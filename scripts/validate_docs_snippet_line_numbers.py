@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 OPENING_TAG: str = "<snippet>"
 CLOSING_TAG: str = "</snippet>"
 DOCUSAURUS_REGEX: re.Pattern = re.compile(r"```python file=(.+)#L(\d*)(?:-L)?(\d*)")
-SNIPPET_TAG_DISTANCE_THRESHOLD: int = 2
 
 
 @dataclass
@@ -40,7 +39,15 @@ class DocusaurusRef:
         return cls(docs_file=file, py_file=cleaned_path, line_numbers=line_numbers)
 
 
-def collect_docusaurus_refs(directory: str):
+def collect_docusaurus_refs(directory: str) -> Dict[str, List[DocusaurusRef]]:
+    """Iterate through a directory and parses all embedded Docusaurus refs to Python files.
+
+    Args:
+        directory: The dir to recursively search through.
+
+    Returns:
+        A map between Python files and the docs that reference them.
+    """
     docusaurus_refs: Dict[str, List[DocusaurusRef]] = defaultdict(list)
     for file in glob.glob(f"{directory}/**/*.md", recursive=True):
         _collect_docusaurus_refs(file=file, reference_map=docusaurus_refs)
@@ -63,7 +70,28 @@ def _collect_docusaurus_refs(
         reference_map[docusaurus_ref.py_file].append(docusaurus_ref)
 
 
-def evaluate_snippet_validity(docusaurus_refs: Dict[str, List[DocusaurusRef]]):
+def evaluate_snippet_validity(
+    docusaurus_refs: Dict[str, List[DocusaurusRef]]
+) -> List[DocusaurusRef]:
+    """Given a series of references, reviews the referenced files and ensures that
+    opening and closing tags directly surround the snippet.
+
+    Ex: ```python file=...#L2
+
+        1 <snippet>
+        2
+        3 context = DataContext()
+        4 </snippet>
+
+    Note that the tags do not need to be immediately before and after the content - as long
+    as the lines in between are whitespace, the algorithm will not flag it as an issue.
+
+    Args:
+        docusaurus_refs: A map between Python files and the docs that reference them.
+
+    Returns:
+        A list of broken references.
+    """
     all_broken_refs: List[DocusaurusRef] = []
     for docs_file, ref_list in docusaurus_refs.items():
         file_broken_refs: List[DocusaurusRef] = _evaluate_snippet_validity(
@@ -97,32 +125,41 @@ def _validate_docusaurus_ref(docusaurus_ref: DocusaurusRef, file_contents: List[
 
 
 def _validate_opening_tag(start_line: int, file_contents: List[str]) -> bool:
-    bound: int = start_line - SNIPPET_TAG_DISTANCE_THRESHOLD
-    bound = max(bound, 0)
-    bound = min(bound, len(file_contents))
+    ptr: int = start_line - 1
 
-    for i in range(start_line, bound, -1):
-        line: str = file_contents[i - 1]
+    line: str
+    while ptr >= 0:
+        line = file_contents[ptr]
         if OPENING_TAG in line:
             return True
+        elif not line.isspace():
+            return False
+        ptr -= 1
 
     return False
 
 
 def _validate_closing_tag(end_line: int, file_contents: List[str]) -> bool:
-    bound: int = end_line + SNIPPET_TAG_DISTANCE_THRESHOLD
-    bound = max(bound, 0)
-    bound = min(bound, len(file_contents))
+    ptr: int = end_line + 1
 
-    for i in range(end_line, bound):
-        line: str = file_contents[i - 1]
+    line: str
+    while ptr < len(file_contents):
+        line = file_contents[ptr]
         if CLOSING_TAG in line:
             return True
+        elif not line.isspace():
+            return False
+        ptr += 1
 
     return False
 
 
 def print_diagnostic_report(broken_refs: List[DocusaurusRef]) -> None:
+    """Prints results to console for the user to review.
+
+    Args:
+        broken_refs: A list of broken refernces (as parsed and determined by prior stages).
+    """
     refs_by_source_doc: Dict[str, List[DocusaurusRef]] = defaultdict(list)
     for ref in broken_refs:
         refs_by_source_doc[ref.docs_file].append(ref)
@@ -145,6 +182,5 @@ if __name__ == "__main__":
     if broken_refs:
         print_diagnostic_report(broken_refs)
         sys.exit(1)
-
-    print("[SUCCESS] All snippets are valid and referenced properly!")
-    sys.exit(0)
+    else:
+        print("[SUCCESS] All snippets are valid and referenced properly!")
