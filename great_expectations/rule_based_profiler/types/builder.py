@@ -40,6 +40,32 @@ class Builder(SerializableDictDot):
 
         self._batch_list = batch_list
 
+    """
+    Full getter/setter accessors for "batch_request" and "batch_list" are for configuring Builder dynamically.
+    """
+
+    @property
+    def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
+        return self._batch_request
+
+    @batch_request.setter
+    def batch_request(
+        self, value: Union[BatchRequest, RuntimeBatchRequest, dict]
+    ) -> None:
+        self._batch_request = value
+
+    @property
+    def batch_list(self) -> Optional[List[Batch]]:
+        return self._batch_list
+
+    @batch_list.setter
+    def batch_list(self, value: List[Batch]) -> None:
+        self._batch_list = value
+
+    @property
+    def data_context(self) -> "DataContext":  # noqa: F821
+        return self._data_context
+
     def to_dict(self) -> dict:
         dict_obj: dict = super().to_dict()
         dict_obj["class_name"] = self.__class__.__name__

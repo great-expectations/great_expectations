@@ -44,6 +44,9 @@ from great_expectations.rule_based_profiler.domain_builder.domain_builder import
 from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
+from great_expectations.rule_based_profiler.helpers.util import (
+    convert_variables_to_dict,
+)
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
@@ -57,26 +60,6 @@ from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-
-def _validate_builder_override_config(builder_config: dict):
-    """
-    In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
-    candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.
-
-    :param builder_config: candidate builder override configuration
-    :raises: ProfilerConfigurationError
-    """
-    if not all(
-        [
-            isinstance(builder_config, dict),
-            "class_name" in builder_config,
-            "module_name" in builder_config,
-        ]
-    ):
-        raise ge_exceptions.ProfilerConfigurationError(
-            'Both "class_name" and "module_name" must be specified.'
-        )
 
 
 class ReconciliationStrategy(Enum):
@@ -413,7 +396,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         effective_variables: ParameterContainer
         if variables and isinstance(variables, dict):
-            variables_configs: dict = self.reconcile_profiler_variables_as_dict(
+            variables_configs: dict = self._reconcile_profiler_variables_as_dict(
                 variables=variables, reconciliation_strategy=reconciliation_strategy
             )
             effective_variables = build_parameter_container_for_variables(
@@ -424,7 +407,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return effective_variables
 
-    def reconcile_profiler_variables_as_dict(
+    def _reconcile_profiler_variables_as_dict(
         self,
         variables: Optional[Dict[str, Any]],
         reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.variables,
@@ -432,14 +415,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if variables is None:
             variables = {}
 
-        variables_configs: dict
-        try:
-            variables_configs = self.variables.to_dict()["parameter_nodes"][
-                "variables"
-            ]["variables"]
-        except (TypeError, KeyError) as e:
-            variables_configs = {}
-            logger.warning("Could not convert existing variables to dict: %s", e)
+        variables_configs: Optional[Dict[str, Any]] = convert_variables_to_dict(
+            variables=self.variables
+        )
 
         if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
             variables_configs = nested_update(
@@ -470,12 +448,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param reconciliation_directives directives for how each rule component should be overwritten
         :return: reconciled rules in their canonical List[Rule] object form
         """
-        effective_rules: Dict[str, Rule] = self.reconcile_profiler_rules_as_dict(
+        effective_rules: Dict[str, Rule] = self._reconcile_profiler_rules_as_dict(
             rules, reconciliation_directives
         )
         return list(effective_rules.values())
 
-    def reconcile_profiler_rules_as_dict(
+    def _reconcile_profiler_rules_as_dict(
         self,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
@@ -1246,3 +1224,23 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         if ge_cloud_mode:
             return profiler_store.list_keys()
         return [x.configuration_key for x in profiler_store.list_keys()]
+
+
+def _validate_builder_override_config(builder_config: dict):
+    """
+    In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
+    candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.
+
+    :param builder_config: candidate builder override configuration
+    :raises: ProfilerConfigurationError
+    """
+    if not all(
+        (
+            isinstance(builder_config, dict),
+            "class_name" in builder_config,
+            "module_name" in builder_config,
+        )
+    ):
+        raise ge_exceptions.ProfilerConfigurationError(
+            'Both "class_name" and "module_name" must be specified.'
+        )

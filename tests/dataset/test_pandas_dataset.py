@@ -951,3 +951,21 @@ def test_expect_values_quantiles_to_be_between():
             },
         )
         assert validation.success is success
+
+
+def test_pandas_datetime_column_expectation_arguments():
+    """
+    Datetime objects are converted to strings prior to being used to validate a column,
+    This test checks that they still correctly validate a datetime column.
+    """
+    df = ge.dataset.PandasDataset(
+        {"date": pd.date_range("2021-01-01", "2021-03-01", freq="d")}
+    )
+    min_value = pd.to_datetime("2020-01-01")
+    max_value = pd.to_datetime("2021-03-02")
+    validation = df.expect_column_values_to_be_between(
+        "date",
+        min_value=min_value,
+        max_value=max_value,
+    )
+    assert validation.success is True

@@ -10,7 +10,7 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 <UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
 :::note Prerequisites
-- Completing [Step 3: Create Expectations](/docs/tutorials/getting_started/create_your_first_expectations) of the Getting Started tutorial is recommended.
+- Completing [Step 3: Create Expectations](../../tutorials/getting_started/tutorial_create_expectations.md) of the Getting Started tutorial is recommended.
 :::
 
 Creating Expectations is an integral part of Great Expectations.  By the end of this step, you will have created an Expectation Suite containing one or more Expectations which you will use when you Validate data.
