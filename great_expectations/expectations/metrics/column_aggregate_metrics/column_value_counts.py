@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import pandas as pd
 
@@ -27,7 +27,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
@@ -67,7 +67,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
@@ -125,7 +125,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])

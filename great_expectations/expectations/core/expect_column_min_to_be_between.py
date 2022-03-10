@@ -1,21 +1,17 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnExpectation
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 
 class ExpectColumnMinToBeBetween(ColumnExpectation):
@@ -90,7 +86,69 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.min",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+    success_keys = (
+        "min_value",
+        "strict_min",
+        "max_value",
+        "strict_max",
+        "parse_strings_as_datetimes",
+        "auto",
+        "profiler_config",
+    )
+
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_min_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        class_name="RuleBasedProfilerConfig",
+        module_name="great_expectations.rule_based_profiler",
+        variables={
+            "strict_min": False,
+            "strict_max": False,
+            "num_bootstrap_samples": 9999,
+            "false_positive_rate": 0.05,
+            "truncate_values": {
+                "lower_bound": None,
+                "upper_bound": None,
+            },
+            "round_decimals": None,
+        },
+        rules={
+            "default_expect_column_min_to_be_between_rule": {
+                "domain_builder": {
+                    "class_name": "ColumnDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "parameter_builders": [
+                    {
+                        "name": "min_range_estimator",
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_name": "column.min",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "truncate_values": "$variables.truncate_values",
+                        "round_decimals": "$variables.round_decimals",
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_min_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "column": "$domain.domain_kwargs.column",
+                        "min_value": "$parameter.min_range_estimator.value.value_range[0]",
+                        "max_value": "$parameter.min_range_estimator.value.value_range[1]",
+                        "strict_min": "$variables.strict_min",
+                        "strict_max": "$variables.strict_max",
+                        "meta": {
+                            "profiler_details": "$parameter.min_range_estimator.details",
+                        },
+                    },
+                ],
+            },
+        },
+    )
 
     # Default values
     default_kwarg_values = {
@@ -101,9 +159,21 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "parse_strings_as_datetimes": False,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
+    args_keys = (
+        "column",
+        "min_value",
+        "max_value",
+        "strict_min",
+        "strict_max",
+    )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -116,6 +186,100 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         """
         super().validate_configuration(configuration=configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
+
+        return True
+
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "parse_strings_as_datetimes",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "min_value": {
+                "schema": {"type": "number"},
+                "value": params.get("min_value"),
+            },
+            "max_value": {
+                "schema": {"type": "number"},
+                "value": params.get("max_value"),
+            },
+            "parse_strings_as_datetimes": {
+                "schema": {"type": "boolean"},
+                "value": params.get("parse_strings_as_datetimes"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+            "strict_min": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strict_min"),
+            },
+            "strict_max": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strict_max"),
+            },
+        }
+
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "minimum value may have any numerical value."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"minimum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+            elif params["min_value"] is None:
+                template_str = f"minimum value must be {at_most_str} $max_value."
+            elif params["max_value"] is None:
+                template_str = f"minimum value must be {at_least_str} $min_value."
+            else:
+                template_str = ""
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if include_column_name:
+            template_str = f"$column {template_str}"
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = f"{conditional_template_str}, then {template_str}"
+            params_with_json_schema.update(conditional_params)
+
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -159,19 +323,21 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                 template_str = f"minimum value must be {at_most_str} $max_value."
             elif params["max_value"] is None:
                 template_str = f"minimum value must be {at_least_str} $min_value."
+            else:
+                template_str = ""
 
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -206,7 +372,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                     "tooltip": {"content": "expect_column_min_to_be_between"},
                 },
             },
-            "{:.2f}".format(result.result["observed_value"]),
+            f"{result.result['observed_value']:.2f}",
         ]
 
     def _validate(

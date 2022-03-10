@@ -24,7 +24,7 @@ from great_expectations.expectations.metrics.metric_provider import (
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ def column_aggregate_value(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -147,7 +147,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -208,7 +208,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -258,8 +258,22 @@ class ColumnAggregateMetricProvider(TableMetricProvider):
         table_domain_kwargs: dict = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
+        dependencies["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+            metric_dependencies=None,
+        )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
             metric_dependencies=None,

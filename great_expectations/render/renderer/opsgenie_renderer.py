@@ -1,11 +1,9 @@
 import logging
 
-from great_expectations.exceptions import InvalidKeyError
-
 logger = logging.getLogger(__name__)
 
-from ...core.id_dict import BatchKwargs
-from .renderer import Renderer
+from great_expectations.core.id_dict import BatchKwargs
+from great_expectations.render.renderer.renderer import Renderer
 
 
 class OpsgenieRenderer(Renderer):
@@ -33,6 +31,12 @@ class OpsgenieRenderer(Renderer):
                 data_asset_name = validation_result.meta["batch_kwargs"].get(
                     "data_asset_name", "__no_data_asset_name__"
                 )
+            elif "active_batch_definition" in validation_result.meta:
+                data_asset_name = (
+                    validation_result.meta["active_batch_definition"].data_asset_name
+                    if validation_result.meta["active_batch_definition"].data_asset_name
+                    else "__no_data_asset_name__"
+                )
             else:
                 data_asset_name = "__no_data_asset_name__"
 
@@ -49,19 +53,12 @@ class OpsgenieRenderer(Renderer):
             if validation_result.success:
                 status = "Success 🎉"
 
-            summary_text = """Batch Validation Status: {}
-Expectation suite name: {}
-Data asset name: {}
-Run ID: {}
-Batch ID: {}
-Summary: {}""".format(
-                status,
-                expectation_suite_name,
-                data_asset_name,
-                run_id,
-                batch_id,
-                check_details_text,
-            )
+            summary_text = f"""Batch Validation Status: {status}
+Expectation suite name: {expectation_suite_name}
+Data asset name: {data_asset_name}
+Run ID: {run_id}
+Batch ID: {batch_id}
+Summary: {check_details_text}"""
 
         return summary_text
 

@@ -1,21 +1,16 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnExpectation
 
 
 class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
@@ -103,10 +98,19 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "min_value",
+        "max_value",
+        "strict_min",
+        "strict_max",
+    )
 
     """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -119,6 +123,98 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
+
+        return True
+
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "min_value": {
+                "schema": {"type": "number"},
+                "value": params.get("min_value"),
+            },
+            "max_value": {
+                "schema": {"type": "number"},
+                "value": params.get("max_value"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+            "strict_min": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strict_min"),
+            },
+            "strict_max": {
+                "schema": {"type": "boolean"},
+                "value": params.get("strict_max"),
+            },
+        }
+
+        if params["min_value"] is None and params["max_value"] is None:
+            template_str = "may have any fraction of unique values."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+            if params["min_value"] is None:
+                template_str = (
+                    f"fraction of unique values must be {at_most_str} $max_value."
+                )
+            elif params["max_value"] is None:
+                template_str = (
+                    f"fraction of unique values must be {at_least_str} $min_value."
+                )
+            else:
+                if params["min_value"] != params["max_value"]:
+                    template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
+                else:
+                    template_str = (
+                        "fraction of unique values must be exactly $min_value."
+                    )
+
+        if include_column_name:
+            template_str = f"$column {template_str}"
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = f"{conditional_template_str}, then {template_str}"
+            params_with_json_schema.update(conditional_params)
+
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -171,14 +267,14 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                     )
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -222,7 +318,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         if not observed_value:
             return [template_string_object, "--"]
         else:
-            return [template_string_object, "%.1f%%" % (100 * observed_value)]
+            return [template_string_object, f"{100 * observed_value:.1f}%"]
 
     def _validate(
         self,

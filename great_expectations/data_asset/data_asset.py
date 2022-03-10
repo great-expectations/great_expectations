@@ -76,11 +76,11 @@ class DataAsset:
             )
         super().__init__(*args, **kwargs)
         self._config = {"interactive_evaluation": interactive_evaluation}
+        self._data_context = data_context
         self._initialize_expectations(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
-        self._data_context = data_context
         self._batch_kwargs = BatchKwargs(batch_kwargs)
         self._batch_markers = batch_markers
         self._batch_parameters = batch_parameters
@@ -277,9 +277,7 @@ class DataAsset:
                         if catch_exceptions:
                             raised_exception = True
                             exception_traceback = traceback.format_exc()
-                            exception_message = "{}: {}".format(
-                                type(err).__name__, str(err)
-                            )
+                            exception_message = f"{type(err).__name__}: {str(err)}"
 
                             return_obj = ExpectationValidationResult(success=False)
 
@@ -297,8 +295,9 @@ class DataAsset:
                     stored_config = expectation_config
                 else:
                     # Append the expectation to the config.
-                    stored_config = self._expectation_suite.add_expectation(
-                        expectation_config
+                    stored_config = self._expectation_suite._add_expectation(
+                        expectation_configuration=expectation_config,
+                        send_usage_event=False,
                     )
 
                 if include_config:
@@ -363,9 +362,15 @@ class DataAsset:
         """
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
-                expectation_suite = expectationSuiteSchema.load(expectation_suite)
+                expectation_suite_dict: dict = expectationSuiteSchema.load(
+                    expectation_suite
+                )
+                expectation_suite: ExpectationSuite = ExpectationSuite(
+                    **expectation_suite_dict, data_context=self._data_context
+                )
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
+
             self._expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:
@@ -385,7 +390,8 @@ class DataAsset:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name
+                expectation_suite_name=expectation_suite_name,
+                data_context=self._data_context,
             )
 
         self._expectation_suite.data_asset_type = self._data_asset_type
@@ -482,7 +488,7 @@ class DataAsset:
                     expectation_configuration=item.expectation_config,
                     match_type="runtime",
                 )
-            warnings.warn("Removed %s expectations that were 'False'" % len(res))
+            warnings.warn(f"Removed {len(res)} expectations that were 'False'")
 
     def get_default_expectation_arguments(self):
         """Fetch default expectation arguments for this data_asset
@@ -594,9 +600,7 @@ class DataAsset:
 
             expectations = new_expectations
 
-        message = "\t%d expectation(s) included in expectation_suite." % len(
-            expectations
-        )
+        message = f"\t{len(expectations)} expectation(s) included in expectation_suite."
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (
@@ -829,7 +833,12 @@ class DataAsset:
             elif isinstance(expectation_suite, str):
                 try:
                     with open(expectation_suite) as infile:
-                        expectation_suite = expectationSuiteSchema.loads(infile.read())
+                        expectation_suite_dict: dict = expectationSuiteSchema.loads(
+                            infile.read()
+                        )
+                        expectation_suite: ExpectationSuite = ExpectationSuite(
+                            **expectation_suite_dict, data_context=self._data_context
+                        )
                 except ValidationError:
                     raise
                 except OSError:
@@ -837,6 +846,11 @@ class DataAsset:
                         "Unable to load expectation suite: IO error while reading %s"
                         % expectation_suite
                     )
+            elif isinstance(expectation_suite, dict):
+                expectation_suite_dict: dict = expectation_suite
+                expectation_suite: ExpectationSuite = ExpectationSuite(
+                    **expectation_suite_dict, data_context=None
+                )
             elif not isinstance(expectation_suite, ExpectationSuite):
                 logger.error(
                     "Unable to validate using the provided value for expectation suite; does it need to be "
@@ -933,7 +947,7 @@ class DataAsset:
                     result = expectation_method(
                         catch_exceptions=catch_exceptions,
                         include_config=True,
-                        **evaluation_args
+                        **evaluation_args,
                     )
 
                 except Exception as err:
@@ -1195,9 +1209,7 @@ class DataAsset:
         if result_format["result_format"] == "COMPLETE":
             return return_obj
 
-        raise ValueError(
-            "Unknown result_format {}.".format(result_format["result_format"])
-        )
+        raise ValueError(f"Unknown result_format {result_format['result_format']}.")
 
     def _calc_map_expectation_success(self, success_count, nonnull_count, mostly):
         """Calculate success and percent_success for column_map_expectations

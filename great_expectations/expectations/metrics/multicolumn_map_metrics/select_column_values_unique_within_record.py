@@ -1,10 +1,12 @@
 import logging
+from functools import reduce
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
+    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
@@ -24,7 +26,6 @@ class SelectColumnValuesUniqueWithinRecord(MulticolumnMapMetricProvider):
         "ignore_row_if",
     )
 
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQL Alchemy implementations are provided (Spark to follow).</Alex>
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
         num_columns = len(column_list.columns)
@@ -49,12 +50,34 @@ metric for wide tables using SQLAlchemy leads to long WHERE clauses for the unde
 """
             )
 
-        condition = sa.or_()
+        conditions = sa.or_(
+            *(
+                sa.or_(
+                    column_list[idx_src] == column_list[idx_dest],
+                    sa.and_(
+                        column_list[idx_src] == None, column_list[idx_dest] == None
+                    ),
+                )
+                for idx_src in range(num_columns - 1)
+                for idx_dest in range(idx_src + 1, num_columns)
+            )
+        )
+        row_wise_cond = sa.not_(conditions)
+        return row_wise_cond
+
+    @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column_list, **kwargs):
+        column_names = column_list.columns
+        num_columns = len(column_names)
+
+        conditions = []
         for idx_src in range(num_columns - 1):
             for idx_dest in range(idx_src + 1, num_columns):
-                condition = sa.or_(
-                    condition, (column_list[idx_src] == column_list[idx_dest])
+                conditions.append(
+                    F.col(column_names[idx_src]).eqNullSafe(
+                        F.col(column_names[idx_dest])
+                    )
                 )
 
-        condition = sa.not_(condition)
-        return sa.case((condition, True), else_=False)
+        row_wise_cond = ~reduce(lambda a, b: a | b, conditions)
+        return row_wise_cond

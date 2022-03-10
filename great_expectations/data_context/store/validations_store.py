@@ -1,4 +1,5 @@
 import random
+import uuid
 from typing import Dict
 
 from great_expectations.core.expectation_validation_result import (
@@ -12,6 +13,7 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
@@ -160,10 +162,17 @@ class ValidationsStore(Store):
         return suite_validation_result_dict
 
     def serialize(self, key, value):
-        return self._expectationSuiteValidationResultSchema.dumps(value)
+        if self.ge_cloud_mode:
+            return value.to_json_dict()
+        return self._expectationSuiteValidationResultSchema.dumps(
+            value, indent=2, sort_keys=True
+        )
 
     def deserialize(self, key, value):
-        return self._expectationSuiteValidationResultSchema.loads(value)
+        if isinstance(value, dict):
+            return self._expectationSuiteValidationResultSchema.load(value)
+        else:
+            return self._expectationSuiteValidationResultSchema.loads(value)
 
     def self_check(self, pretty_print):
         return_obj = {}
@@ -181,7 +190,7 @@ class ValidationsStore(Store):
             else:
                 print(f"\t{len_keys} keys found:")
                 for key in return_obj["keys"][:10]:
-                    print("\t\t" + str(key))
+                    print(f"		{str(key)}")
             if len_keys > 10:
                 print("\t\t...")
             print()
@@ -190,13 +199,19 @@ class ValidationsStore(Store):
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
 
-        test_key = self._key_class(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name="temporary_test_suite",
-            ),
-            run_id="temporary_test_run_id",
-            batch_identifier=test_key_name,
-        )
+        if self.ge_cloud_mode:
+            test_key: GeCloudIdentifier = self.key_class(
+                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+            )
+
+        else:
+            test_key: ValidationResultIdentifier = self.key_class(
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                    expectation_suite_name="temporary_test_suite",
+                ),
+                run_id="temporary_test_run_id",
+                batch_identifier=test_key_name,
+            )
         test_value = ExpectationSuiteValidationResult(success=True)
 
         if pretty_print:

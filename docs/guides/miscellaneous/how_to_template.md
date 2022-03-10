@@ -61,7 +61,7 @@ Next, do {concise description of what the user is going to do} using either {cho
   Run this command in the CLI.
 
 ```console
-great_expectations --v3-api suite new
+great_expectations suite new
 ```
 
   </TabItem>
@@ -75,7 +75,7 @@ Run this code in Python.
 </TabItem>
 </Tabs>
 
-🚀🚀 Congratulations! 🚀🚀
+Congratulations!
 You successfully {did the thing this guide is about}.
 
 ## Additional Notes

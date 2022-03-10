@@ -9,7 +9,53 @@ The `result_format` parameter may be either a string or a dictionary which speci
     * `result_format`: Sets the fields to return in result.
     * `partial_unexpected_count`: Sets the number of results to include in partial_unexpected_count, if applicable. If 
       set to 0, this will suppress the unexpected counts.
+    * `include_unexpected_rows`: When running validations, this will return the entire row for each unexpected value in
+      dictionary form. When using `include_unexpected_rows`, you must explicitly specify `result_format` as well, and
+      `result_format` must be more verbose than `BOOLEAN_ONLY`. *WARNING: *
 
+  :::warning
+  `include_unexpected_rows` returns EVERY row for each unexpected value; for large tables, this could return an 
+  unwieldy amount of data.
+  :::
+
+## Configure Result Format
+Result Format can be applied to either a single Expectation or an entire Checkpoint.
+### Expectation Level Config
+To apply `result_format` to an Expectation, pass it into the Expectation's configuration:
+```python
+# first obtain a validator object, for instance by running the `$ great_expectations suite new` notebook.
+validation_result = validator.expect_column_values_to_be_between(
+    column="pickup_location_id",
+    min_value=0,
+    max_value=100,
+    result_format="COMPLETE",
+    include_unexpected_rows=True
+)
+unexpected_index_list = validation_result["result"]["unexpected_index_list"]
+unexpected_list = validation_result["result"]["unexpected_list"]
+```
+When configured at the Expectation level, the `unexpected_index_list` and `unexpected_list` won't be passed through to the final Validation Result object.
+In order to see those values at the Suite level, configure `result_format` in your Checkpoint configuration.
+### Checkpoint Level Config
+To apply `result_format` to every Expectation in a Suite, define it in your Checkpoint configuration under the `runtime_configuration` key.
+```python
+checkpoint_config = {
+    "class_name": "SimpleCheckpoint", # or Checkpoint
+    "validations": [
+        # omitted for brevity
+    ],
+    "runtime_configuration": {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "include_unexpected_rows": True
+        }
+    }
+}
+```
+The results will then be stored in the Validation Result after running the Checkpoint.
+:::note
+Regardless of where Result Format is configured, `unexpected_list` and `unexpected_index_list` are never rendered in Data Docs.
+:::
 
 ## result_format values
 
@@ -17,14 +63,16 @@ Great Expectations supports four values for `result_format`: `BOOLEAN_ONLY`, `BA
 out-of-the-box default is `BASIC`. Each successive value includes more detail and so can support different use 
 cases for working with Great Expectations, including interactive exploratory work and automatic validation.
 
-
+## Fields defined for all Expectations
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
 |    element_count                      |no              |yes             |yes             |yes             |
 |    missing_count                      |no              |yes             |yes             |yes             |
 |    missing_percent                    |no              |yes             |yes             |yes             |
 |    details (dictionary)               |Defined on a per-expectation basis                                 |
-| Fields defined for `column_map_expectation` type expectations:                                            |
+### Fields defined for `column_map_expectation` type Expectations
+| Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
+----------------------------------------|----------------|----------------|----------------|-----------------
 |    unexpected_count                   |no              |yes             |yes             |yes             |
 |    unexpected_percent                 |no              |yes             |yes             |yes             |
 |    unexpected_percent_nonmissing      |no              |yes             |yes             |yes             |
@@ -33,7 +81,9 @@ cases for working with Great Expectations, including interactive exploratory wor
 |    partial_unexpected_counts          |no              |no              |yes             |yes             |
 |    unexpected_index_list              |no              |no              |no              |yes             |
 |    unexpected_list                    |no              |no              |no              |yes             |
-| Fields defined for `column_aggregate_expectation` type expectations:                                      |
+### Fields defined for `column_aggregate_expectation` type Expectations
+| Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
+----------------------------------------|----------------|----------------|----------------|-----------------
 |    observed_value                     |no              |yes             |yes             |yes             |
 |    details (e.g. statistical details) |no              |no              |yes             |yes             |
 
@@ -152,7 +202,7 @@ my_df.expect_column_values_to_be_in_set(
 ## Behavior for `BASIC`
 
 A `result` is generated with a basic justification for why an expectation was met or not. The format is intended 
-for quick, at-a-glance feedback. For example, it tends to work well in jupyter notebooks.
+for quick, at-a-glance feedback. For example, it tends to work well in Jupyter Notebooks.
 
 Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
 `column_aggregate_expectation` expectations.

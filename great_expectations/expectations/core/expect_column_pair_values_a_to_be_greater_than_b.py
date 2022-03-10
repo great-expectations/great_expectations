@@ -1,16 +1,18 @@
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation import (
+    ColumnPairMapExpectation,
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnPairMapExpectation, InvalidExpectationConfigurationError
 
 
 class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
@@ -66,7 +68,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "or_equal",
         "mostly",
     )
-
     default_kwarg_values = {
         "mostly": 1.0,
         "parse_strings_as_datetimes": False,
@@ -78,8 +79,15 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column_A",
+        "column_B",
+        "or_equal",
+    )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -93,6 +101,103 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         return True
 
     @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column_A",
+                "column_B",
+                "parse_strings_as_datetimes",
+                "ignore_row_if",
+                "mostly",
+                "or_equal",
+                "row_condition",
+                "condition_parser",
+            ],
+        )
+        params_with_json_schema = {
+            "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
+            "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
+            "parse_strings_as_datetimes": {
+                "schema": {"type": "boolean"},
+                "value": params.get("parse_strings_as_datetimes"),
+            },
+            "ignore_row_if": {
+                "schema": {"type": "string"},
+                "value": params.get("ignore_row_if"),
+            },
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
+            "or_equal": {
+                "schema": {"type": "boolean"},
+                "value": params.get("or_equal"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
+
+        if (params["column_A"] is None) or (params["column_B"] is None):
+            template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
+            params["row_condition"] = None
+
+        if params["mostly"] is None:
+            if params["or_equal"] in [None, False]:
+                template_str = "Values in $column_A must always be greater than those in $column_B."
+            else:
+                template_str = "Values in $column_A must always be greater than or equal to those in $column_B."
+        else:
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            if params["or_equal"] in [None, False]:
+                template_str = "Values in $column_A must be greater than those in $column_B, at least $mostly_pct % of the time."
+            else:
+                template_str = "Values in $column_A must be greater than or equal to those in $column_B, at least $mostly_pct % of the time."
+
+        if params.get("parse_strings_as_datetimes"):
+            template_str += " Values should be parsed as datetimes."
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params_with_json_schema.update(conditional_params)
+
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -101,7 +206,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)

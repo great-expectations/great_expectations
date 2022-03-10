@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import pandas as pd
 
@@ -13,7 +13,7 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 
@@ -28,7 +28,7 @@ class TableHead(TableMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         df, _, _ = execution_engine.get_compute_domain(
@@ -44,7 +44,7 @@ class TableHead(TableMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         selectable, _, _ = execution_engine.get_compute_domain(
@@ -52,7 +52,34 @@ class TableHead(TableMetricProvider):
         )
         df = None
         table_name = getattr(selectable, "name", None)
-        if table_name is not None:
+        if table_name is None:
+            # if a custom query was passed
+            try:
+                if metric_value_kwargs["fetch_all"]:
+                    df = pd.read_sql_query(
+                        sql=selectable,
+                        con=execution_engine.engine,
+                    )
+                else:
+                    df = next(
+                        pd.read_sql_query(
+                            sql=selectable,
+                            con=execution_engine.engine,
+                            chunksize=metric_value_kwargs["n_rows"],
+                        )
+                    )
+            except (ValueError, NotImplementedError):
+                # it looks like MetaData that is used by pd.read_sql_query
+                # cannot work on a temp table.
+                # If it fails, we are trying to get the data using read_sql
+                df = None
+            except StopIteration:
+                validator = Validator(execution_engine=execution_engine)
+                columns = validator.get_metric(
+                    MetricConfiguration("table.columns", metric_domain_kwargs)
+                )
+                df = pd.DataFrame(columns=columns)
+        else:
             try:
                 if metric_value_kwargs["fetch_all"]:
                     df = pd.read_sql_table(
@@ -80,17 +107,31 @@ class TableHead(TableMetricProvider):
                     MetricConfiguration("table.columns", metric_domain_kwargs)
                 )
                 df = pd.DataFrame(columns=columns)
+
         if df is None:
             # we want to compile our selectable
             stmt = sa.select(["*"]).select_from(selectable)
             if metric_value_kwargs["fetch_all"]:
-                pass
+                sql = stmt.compile(
+                    dialect=execution_engine.engine.dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
+            elif execution_engine.engine.dialect.name.lower() == "mssql":
+                # limit doesn't compile properly for mssql
+                sql = str(
+                    stmt.compile(
+                        dialect=execution_engine.engine.dialect,
+                        compile_kwargs={"literal_binds": True},
+                    )
+                )
+                sql = f"SELECT TOP {metric_value_kwargs['n_rows']}{sql[6:]}"
             else:
                 stmt = stmt.limit(metric_value_kwargs["n_rows"])
-            sql = stmt.compile(
-                dialect=execution_engine.engine.dialect,
-                compile_kwargs={"literal_binds": True},
-            )
+                sql = stmt.compile(
+                    dialect=execution_engine.engine.dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
+
             df = pd.read_sql(sql, con=execution_engine.engine)
 
         return df
@@ -101,7 +142,7 @@ class TableHead(TableMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         df, _, _ = execution_engine.get_compute_domain(

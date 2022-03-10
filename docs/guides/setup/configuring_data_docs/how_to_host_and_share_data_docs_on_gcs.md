@@ -4,11 +4,10 @@ title: How to host and share Data Docs on GCS
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
 
-This guide will explain how to host and share Data Docs on Google Cloud Storage.  We recommend using IP-based access, which is achieved by deploying a simple Google App Engine app.  Data Docs can also be served on Google Cloud Storage if the contents of the bucket are set to be publicly readable, but this is strongly discouraged.
+This guide will explain how to host and share Data Docs on Google Cloud Storage. We recommend using IP-based access, which is achieved by deploying a simple Google App Engine app. Data Docs can also be served on Google Cloud Storage if the contents of the bucket are set to be publicly readable, but this is strongly discouraged.
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - [Set up a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects)
 - [Installed and initialized the Google Cloud SDK (in order to use the gcloud CLI)](https://cloud.google.com/sdk/docs/quickstarts)
 - [Set up the gsutil command line tool](https://cloud.google.com/storage/docs/gsutil_install)
@@ -22,76 +21,42 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
   Make sure you modify the project name, bucket name, and region for your situation.
 
-  ```bash
-  gsutil mb -p my_org_project -l US-EAST1 -b on gs://my_org_data_docs/
-  Creating gs://my_org_data_docs/...
-  ```
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L37
+    ```
+
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L54
+    ```
 
 2. **Create a directory for your Google App Engine app and add the following files.**
 
   We recommend placing it in your project directory, for example ``great_expectations/team_gcs_app``.
 
-  ```yaml
-  # app.yaml (make sure to use your own bucket name)
+  **app.yaml:**
 
-  runtime: python37
-  env_variables:
-      CLOUD_STORAGE_BUCKET: my_org_data_docs
-  ```
+    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L63-L65
+    ```
 
-  ```yaml
-  # requirements.txt
+  **requirements.txt:**
 
-  flask>=1.1.0
-  google-cloud-storage
-  ```
+    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L79-L80
+    ```
 
-  ```python
-  # main.py
+  **main.py:**
 
-  import logging
-  import os
-  from flask import Flask, request
-  from google.cloud import storage
-  app = Flask(__name__)
-  # Configure this environment variable via app.yaml
-  CLOUD_STORAGE_BUCKET = os.environ['CLOUD_STORAGE_BUCKET']
-  @app.route('/', defaults={'path': 'index.html'})
-  @app.route('/<path:path>')
-  def index(path):
-      gcs = storage.Client()
-      bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
-      try:
-          blob = bucket.get_blob(path)
-          content = blob.download_as_string()
-          if blob.content_encoding:
-              resource = content.decode(blob.content_encoding)
-          else:
-              resource = content
-      except Exception as e:
-          logging.exception("couldn't get blob")
-          resource = "<p></p>"
-      return resource
-  @app.errorhandler(500)
-  def server_error(e):
-      logging.exception('An error occurred during a request.')
-      return """
-      An internal error occurred: <pre>{}</pre>
-      See logs for full stacktrace.
-      """.format(e), 500
-  ```
+    ```python file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L88-L117
+    ```
 
 3. **If you haven't done so already, authenticate the gcloud CLI and set the project.**
 
-  ```bash
-  # Insert the appropriate project name.
-
-  gcloud auth login && gcloud config set project <<project_name>>
-  ```
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L125
+    ```
 
 4. **Deploy your Google App Engine app.**
 
-  Issue the following CLI command from within the app directory created above: ``gcloud app deploy``.
+  Issue the following CLI command from within the app directory created above:
+
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L129
+    ```
 
 5. **Set up Google App Engine firewall for your app to control access.**
 
@@ -101,45 +66,20 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
   You may also replace the default ``local_site`` if you would only like to maintain a single GCS Data Docs site.
 
-  ```yaml
-  data_docs_sites:
-    local_site:
-      class_name: SiteBuilder
-      show_how_to_buttons: true
-      store_backend:
-        class_name: TupleFilesystemStoreBackend
-        base_directory: uncommitted/data_docs/local_site/
-      site_index_builder:
-        class_name: DefaultSiteIndexBuilder
-    gs_site:  # this is a user-selected name - you may select your own
-      class_name: SiteBuilder
-      store_backend:
-        class_name: TupleGCSStoreBackend
-        project: my_org_project # UPDATE the project name with your own
-        bucket: my_org_data_docs  # UPDATE the bucket name here to match the bucket you configured above
-      site_index_builder:
-        class_name: DefaultSiteIndexBuilder
-  ```
+    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L138-L154
+    ```
 
 7. **Build the GCS Data Docs site.**
 
-  Use the following CLI command: ``great_expectations --v3-api docs build --site-name gs_site``. If successful, the CLI will provide the object URL of the index page. Since the bucket is not public, this URL will be inaccessible. Rather, you will access the Data Docs site using the App Engine app configured above.
+  Use the following CLI command: 
+  
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L174
+    ```
 
-  ```bash
-  great_expectations --v3-api docs build --site-name gs_site
+  If successful, the CLI will provide the object URL of the index page. Since the bucket is not public, this URL will be inaccessible. Rather, you will access the Data Docs site using the App Engine app configured above.
 
-  The following Data Docs sites will be built:
-
-   - gs_site: https://storage.googleapis.com/my_org_data_docs/index.html
-
-  Would you like to proceed? [Y/n]: Y
-
-  Building Data Docs...
-
-  Done building Data Docs
-  ```
-
-
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L185-L192
+    ```
 
 8. **Test that everything was configured properly by launching your App Engine app.**
 
@@ -156,8 +96,8 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
       class_name: SiteBuilder
       store_backend:
         class_name: TupleGCSStoreBackend
-        project: my_org_project
-        bucket: my_org_data_docs
+        project: <YOUR GCP PROJECT NAME>
+        bucket: <YOUR GCS BUCKET NAME>
         base_public_path: http://www.mydns.com
       site_index_builder:
         class_name: DefaultSiteIndexBuilder
@@ -168,4 +108,5 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 - [Google App Engine](https://cloud.google.com/appengine/docs/standard/python3)
 - [Controlling App Access with Firewalls](https://cloud.google.com/appengine/docs/standard/python3/creating-firewalls)
 - [Core concepts: Data Docs](../../../reference/data_docs.md)
+- To view the full script used in this page, see it on GitHub: [how_to_host_and_share_data_docs_on_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py)
 

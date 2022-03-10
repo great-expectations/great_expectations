@@ -5,8 +5,6 @@ import pandas as pd
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.import_manager import sa
@@ -41,7 +39,7 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
             column, regex_list[0], _dialect, positive=False
         )
         if regex_expression is None:
-            logger.warning("Regex is not supported for dialect %s" % str(_dialect))
+            logger.warning(f"Regex is not supported for dialect {str(_dialect)}")
             raise NotImplementedError
 
         return sa.and_(

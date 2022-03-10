@@ -33,7 +33,7 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     if "metric_kwargs_id" in metric_kwargs:
         return metric_kwargs["metric_kwargs_id"]
     if "column" in metric_kwargs:
-        return "column=" + metric_kwargs.get("column")
+        return f"column={metric_kwargs.get('column')}"
     return None
 
 
@@ -155,7 +155,8 @@ class ExpectationValidationResult(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def validate_result_dict(self, result):
+    @staticmethod
+    def validate_result_dict(result):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
         if result.get("unexpected_percent") and (
@@ -233,7 +234,7 @@ class ExpectationValidationResult(SerializableDictDot):
                         "ExpectationValidationResult.".format(metric_name)
                     )
         raise ge_exceptions.UnavailableMetricError(
-            "Unrecognized metric name {}".format(metric_name)
+            f"Unrecognized metric name {metric_name}"
         )
 
 
@@ -248,7 +249,10 @@ class ExpectationValidationResultSchema(Schema):
     @pre_dump
     def convert_result_to_serializable(self, data, **kwargs):
         data = deepcopy(data)
-        data.result = convert_to_json_serializable(data.result)
+        if isinstance(data, ExpectationValidationResult):
+            data.result = convert_to_json_serializable(data.result)
+        elif isinstance(data, dict):
+            data["result"] = convert_to_json_serializable(data.get("result"))
         return data
 
     # # noinspection PyUnusedLocal
@@ -339,7 +343,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                 return self.statistics.get(metric_name_parts[1])
             else:
                 raise ge_exceptions.UnavailableMetricError(
-                    "Unrecognized metric {}".format(metric_name)
+                    f"Unrecognized metric {metric_name}"
                 )
 
         # Expose expectation-defined metrics
@@ -368,6 +372,33 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             )
         )
 
+    def get_failed_validation_results(self) -> "ExpectationSuiteValidationResult":
+        validation_results = [result for result in self.results if not result.success]
+
+        successful_expectations = sum(exp.success for exp in validation_results)
+        evaluated_expectations = len(validation_results)
+        unsuccessful_expectations = evaluated_expectations - successful_expectations
+        success = successful_expectations == evaluated_expectations
+        try:
+            success_percent = successful_expectations / evaluated_expectations * 100
+        except ZeroDivisionError:
+            success_percent = None
+        statistics = {
+            "successful_expectations": successful_expectations,
+            "evaluated_expectations": evaluated_expectations,
+            "unsuccessful_expectations": unsuccessful_expectations,
+            "success_percent": success_percent,
+            "success": success,
+        }
+
+        return ExpectationSuiteValidationResult(
+            success=success,
+            results=validation_results,
+            evaluation_parameters=self.evaluation_parameters,
+            statistics=statistics,
+            meta=self.meta,
+        )
+
 
 class ExpectationSuiteValidationResultSchema(Schema):
     success = fields.Bool()
@@ -381,7 +412,10 @@ class ExpectationSuiteValidationResultSchema(Schema):
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
-        data.meta = convert_to_json_serializable(data.meta)
+        if isinstance(data, ExpectationSuiteValidationResult):
+            data.meta = convert_to_json_serializable(data.meta)
+        elif isinstance(data, dict):
+            data["meta"] = convert_to_json_serializable(data.get("meta"))
         return data
 
     # noinspection PyUnusedLocal

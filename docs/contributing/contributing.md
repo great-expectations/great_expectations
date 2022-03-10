@@ -10,12 +10,16 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 * Go to [greatexpectations.io/slack](https://greatexpectations.io/slack) and introduce yourself in the `#contributors-contributing` channel.
 
-#### 2. Set up your development environment
+#### 2. Contribute small changes directly through GitHub 
+
+* For small changes that don’t need to be tested locally, such as documentation changes, you can [make changes directly through GitHub](https://docs.greatexpectations.io/docs/contributing/contributing_github).
+
+#### 3. Set up your development environment to contribute large changes
 * Follow these instructions to [set up your dev environment](/docs/contributing/contributing_setup).
 
-Alternatively, for small changes that don’t need to be tested locally (e.g. documentation changes), you can make changes directly through Github.
+Alternatively, for small changes that don’t need to be tested locally (e.g. documentation changes), you can [make changes directly through GitHub](https://docs.greatexpectations.io/docs/contributing/contributing_github).
 
-#### 3. Identify the type of contribution that you want to make
+#### 4. Identify the type of contribution that you want to make
 
 * [Issues in GitHub](https://github.com/great-expectations/great_expectations/issues) are a great place to start. Check out the help wanted and good first issue labels. Comment to let everyone know you’re working on it.
 
@@ -23,7 +27,12 @@ Alternatively, for small changes that don’t need to be tested locally (e.g. do
 
 * Our [Levels of maturity grid](/docs/contributing/contributing_maturity) provides guidelines for how the maintainers of Great Expectations evaluate levels of maturity of a feature.
 
-#### 4. Start developing
-* Make sure to reference the [Style Guide](/docs/contributing/contributing_style) and instructions on [Testing](/docs/contributing/contributing_test) when developing your code. When your changes are ready, run through our [Contribution checklist](/docs/contributing/contributing_checklist) for pull requests.
+#### 5. Start developing
+* Make sure to reference the style guides for [code](/docs/contributing/style_guides/code_style) and
+[docs](/docs/contributing/style_guides/docs_style) and instructions on [Testing](/docs/contributing/contributing_test)
+when developing your code.  When your changes are ready, run through our
+[Contribution checklist](/docs/contributing/contributing_checklist) for pull requests.
 
-Note that if it’s your first contribution, you will need to sign a there is a standard [Contributor license agreement](https://docs.greatexpectations.io/en/0.13.8/contributing/miscellaneous.html#contributing-cla)  (CLA).
+Note that if it’s your first contribution, there is a standard Contributor license agreement (CLA) you will need to sign :
+* [Individual Contributor License Agreement v1.0](https://docs.google.com/forms/d/e/1FAIpQLSdA-aWKQ15yBzp8wKcFPpuxIyGwohGU1Hx-6Pa4hfaEbbb3fg/viewform?usp=sf_link)
+* [Software Grant and Corporate Contributor License Agreement v1.0](https://docs.google.com/forms/d/e/1FAIpQLSf3RZ_ZRWOdymT8OnTxRh5FeIadfANLWUrhaSHadg_E20zBAQ/viewform?usp=sf_link)

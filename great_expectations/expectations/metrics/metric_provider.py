@@ -1,11 +1,9 @@
-import copy
 import logging
 from functools import wraps
 from typing import Callable, Optional, Type, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.util import nested_update
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
@@ -14,12 +12,11 @@ from great_expectations.execution_engine.execution_engine import (
 )
 from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.registry import (
-    get_metric_function_type,
     get_metric_provider,
     register_metric,
     register_renderer,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +202,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
         metric_name = metric.metric_name
         dependencies = {}
         for metric_fn_type in MetricPartialFunctionTypes:
-            metric_suffix = "." + metric_fn_type.metric_suffix
+            metric_suffix = f".{metric_fn_type.metric_suffix}"
             try:
                 _ = get_metric_provider(metric_name + metric_suffix, execution_engine)
                 has_aggregate_fn = True

@@ -1,8 +1,10 @@
+import inspect
 import logging
 from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
+from packaging import version
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -18,7 +20,10 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.util import (
+    add_values_with_json_schema_from_list_in_params,
+    render_evaluation_parameter_string,
+)
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -26,7 +31,8 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.util import get_pyathena_potential_type
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -114,8 +120,14 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "type_list",
+    )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert "type_list" in configuration.kwargs, "type_list is required"
@@ -132,6 +144,104 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         return True
 
     @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column", "type_list", "mostly", "row_condition", "condition_parser"],
+        )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "type_list": {
+                "schema": {"type": "array"},
+                "value": params.get("type_list"),
+            },
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
+
+        if params["type_list"] is not None:
+            for i, v in enumerate(params["type_list"]):
+                params[f"v__{str(i)}"] = v
+            values_string = " ".join(
+                [f"$v__{str(i)}" for i, v in enumerate(params["type_list"])]
+            )
+
+            if params["mostly"] is not None:
+                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                if include_column_name:
+                    template_str = (
+                        "$column value types must belong to this set: "
+                        + values_string
+                        + ", at least $mostly_pct % of the time."
+                    )
+                else:
+                    template_str = (
+                        "value types must belong to this set: "
+                        + values_string
+                        + ", at least $mostly_pct % of the time."
+                    )
+            else:
+                if include_column_name:
+                    template_str = (
+                        f"$column value types must belong to this set: {values_string}."
+                    )
+                else:
+                    template_str = (
+                        f"value types must belong to this set: {values_string}."
+                    )
+        else:
+            if include_column_name:
+                template_str = "$column value types may be any value, but observed value will be reported"
+            else:
+                template_str = (
+                    "value types may be any value, but observed value will be reported"
+                )
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = f"{conditional_template_str}, then {template_str}"
+            params_with_json_schema.update(conditional_params)
+
+        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
+            params=params,
+            params_with_json_schema=params_with_json_schema,
+            param_key_with_list="type_list",
+        )
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -140,7 +250,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -155,9 +265,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
         if params["type_list"] is not None:
             for i, v in enumerate(params["type_list"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["type_list"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["type_list"])]
             )
 
             if params["mostly"] is not None:
@@ -180,13 +290,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             else:
                 if include_column_name:
                     template_str = (
-                        "$column value types must belong to this set: "
-                        + values_string
-                        + "."
+                        f"$column value types must belong to this set: {values_string}."
                     )
                 else:
                     template_str = (
-                        "value types must belong to this set: " + values_string + "."
+                        f"value types must belong to this set: {values_string}."
                     )
         else:
             if include_column_name:
@@ -201,7 +309,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -233,11 +341,18 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 except TypeError:
                     try:
                         pd_type = getattr(pd, type_)
-                        if isinstance(pd_type, type):
-                            comp_types.append(pd_type)
                     except AttributeError:
                         pass
-
+                    else:
+                        if isinstance(pd_type, type):
+                            comp_types.append(pd_type)
+                            try:
+                                if isinstance(
+                                    pd_type(), pd.core.dtypes.base.ExtensionDtype
+                                ):
+                                    comp_types.append(pd_type())
+                            except TypeError:
+                                pass
                     try:
                         pd_type = getattr(pd.core.dtypes.dtypes, type_)
                         if isinstance(pd_type, type):
@@ -248,6 +363,31 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 native_type = _native_type_type_map(type_)
                 if native_type is not None:
                     comp_types.extend(native_type)
+
+            # TODO: Remove when Numpy >=1.21 is pinned as a dependency
+            _pandas_supports_extension_dtypes = version.parse(
+                pd.__version__
+            ) >= version.parse("0.24")
+            _numpy_doesnt_support_extensions_properly = version.parse(
+                np.__version__
+            ) < version.parse("1.21")
+            if (
+                _numpy_doesnt_support_extensions_properly
+                and _pandas_supports_extension_dtypes
+            ):
+                # This works around a bug where Pandas nullable int types aren't compatible with Numpy dtypes
+                # Note: Can't do set difference, the whole bugfix is because numpy types can't be compared to
+                # ExtensionDtypes
+                actual_type_is_ext_dtype = isinstance(
+                    actual_column_type, pd.core.dtypes.base.ExtensionDtype
+                )
+                comp_types = {
+                    dtype
+                    for dtype in comp_types
+                    if isinstance(dtype, pd.core.dtypes.base.ExtensionDtype)
+                    == actual_type_is_ext_dtype
+                }
+            ###
 
             success = actual_column_type in comp_types
 
@@ -275,10 +415,21 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             type_module = _get_dialect_type_module(execution_engine=execution_engine)
             for type_ in expected_types_list:
                 try:
-                    type_class = getattr(type_module, type_)
-                    types.append(type_class)
+                    if type_module.__name__ == "pyathena.sqlalchemy_athena":
+                        potential_type = get_pyathena_potential_type(type_module, type_)
+                        # In the case of the PyAthena dialect we need to verify that
+                        # the type returned is indeed a type and not an instance.
+                        if not inspect.isclass(potential_type):
+                            real_type = type(potential_type)
+                        else:
+                            real_type = potential_type
+                        types.append(real_type)
+                    else:
+                        potential_type = getattr(type_module, type_)
+                        types.append(potential_type)
                 except AttributeError:
-                    logger.debug("Unrecognized type: %s" % type_)
+                    logger.debug(f"Unrecognized type: {type_}")
+
             if len(types) == 0:
                 logger.warning(
                     "No recognized sqlalchemy types in type_list for current dialect."
@@ -305,7 +456,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     type_class = getattr(sparktypes, type_)
                     types.append(type_class)
                 except AttributeError:
-                    logger.debug("Unrecognized type: %s" % type_)
+                    logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
                 raise ValueError("No recognized spark types in expected_types_list")
             types = tuple(types)
@@ -350,15 +501,19 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             actual_column_types_list = execution_engine.resolve_metrics(
                 [table_column_types_configuration]
             )[table_column_types_configuration.id]
-            actual_column_type = [
-                type_dict["type"]
-                for type_dict in actual_column_types_list
-                if type_dict["name"] == column_name
-            ][0]
+            try:
+                actual_column_type = [
+                    type_dict["type"]
+                    for type_dict in actual_column_types_list
+                    if type_dict["name"] == column_name
+                ][0]
+            except IndexError:
+                actual_column_type = None
 
             # only use column map version if column dtype is object
             if (
-                actual_column_type.type.__name__ == "object_"
+                actual_column_type
+                and actual_column_type.type.__name__ == "object_"
                 and expected_types_list is not None
             ):
                 # this resets dependencies using  ColumnMapExpectation.get_validation_dependencies

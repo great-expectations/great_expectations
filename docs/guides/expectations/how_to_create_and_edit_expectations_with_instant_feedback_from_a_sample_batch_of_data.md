@@ -1,5 +1,5 @@
 ---
-title: ✳ How to create and edit Expectations with instant feedback from a sample Batch of data
+title: How to create and edit Expectations with instant feedback from a sample Batch of data
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
@@ -16,7 +16,7 @@ Steps
 1. The ``--interactive`` mode denotes the fact that you are interacting with your data.  In
     other words, you have access to a data source and can specify a Batch of data to be used to create Expectations
     against.  ``--manual`` mode
-    (please see [How to create and edit Expectations based on domain knowledge, without inspecting data directly](./how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly))
+    (please see [How to create and edit Expectations based on domain knowledge, without inspecting data directly](./how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md))
     still allows you to create expectations (e.g., if you already know enough about your data, such as the various columns
     in a database table), but you will not be able to run validations, until you specify a Batch of data,
     which can be done at a later point; in fact, you can switch back and forth between the interactive and
@@ -25,11 +25,11 @@ Steps
    Run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
 
    ```bash
-   great_expectations --v3-api suite new --interactive
+   great_expectations suite new --interactive
    ```
 
-   This command prompts you to select a datasource, a data connector, and a data asset so as to identify a sample
-   Batch of data the suite will eventually describe.  If there are unique choices (e.g., only one data connector in
+   This command prompts you to select a Datasource, a Data Connector, and a Data Asset so as to identify a sample
+   Batch of data the suite will eventually describe.  If there are unique choices (e.g., only one Data Connector in
    your datasource configuration), then Great Expectations will automatically select it for you (to speed up the process).
 
    Finally, unless you specify the name of the Expectation Suite on the command line (using the
@@ -38,26 +38,26 @@ Steps
 
    Then an empty suite is created and added to your project.
 
-   Then Great Expectations creates a jupyter notebook for you to start creating your new suite.  The command
-   concludes by opening the newly generated jupyter notebook.
+   Then Great Expectations creates a Jupyter Notebook for you to start creating your new suite.  The command
+   concludes by opening the newly generated Jupyter Notebook.
 
-2. If you wish to skip the automated opening of jupyter notebook, add the ``--no-jupyter`` flag:
+2. If you wish to skip the automated opening of Jupyter Notebook, add the ``--no-jupyter`` flag:
 
    ```bash
-   great_expectations --v3-api suite new --interactive --no-jupyter
+   great_expectations suite new --interactive --no-jupyter
    ```
 
 3. One of the easiest ways to get starting in the interactive mode is to take advantage of the `--profile` flag
    (please see [How to create and edit Expectations with a Profiler](./how_to_create_and_edit_expectations_with_a_profiler.md)).
 
    :::info
-   When in the interactive mode, the initialization cell of your jupyter notebook will contain the ``batch_request``
+   When in the interactive mode, the initialization cell of your Jupyter Notebook will contain the ``batch_request``
    dictionary.  You can convert it to JSON and save in a file for future use.  The contents of this file would look like this:
    :::
 
    ```bash
    {
-       "datasource_name": my_datasource",
+       "datasource_name": "my_datasource",
        "data_connector_name": "my_data_connector",
        "data_asset_name": "my_asset"
    }
@@ -67,7 +67,7 @@ Steps
    and skip the steps of selecting its components:
 
    ```bash
-   great_expectations --v3-api suite new --interactive --batch-request my_saved_batch_request_file.json
+   great_expectations suite new --interactive --batch-request my_saved_batch_request_file.json
    ```
 
    Unless you specify the name of the Expectation Suite on the command line (using the ``--expectation_suite MY_SUITE`` syntax),
@@ -76,7 +76,7 @@ Steps
    You can extend the previous example to specify the name of the Expectation Suite on the command line as follows:
 
    ```bash
-   great_expectations --v3-api suite new --expectation-suite my_suite --interactive --batch-request my_saved_batch_request.json
+   great_expectations suite new --expectation-suite my_suite --interactive --batch-request my_saved_batch_request.json
    ```
 
    :::info
@@ -84,5 +84,5 @@ Steps
    :::
 
    ```bash
-   great_expectations --v3-api suite new --help
+   great_expectations suite new --help
    ```

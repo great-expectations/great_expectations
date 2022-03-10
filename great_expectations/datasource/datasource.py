@@ -10,7 +10,6 @@ from great_expectations.data_context.util import (
     verify_dynamic_loading_support,
 )
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -257,7 +256,7 @@ class LegacyDatasource:
         return generator
 
     def get_batch_kwargs_generator(self, name):
-        """Get the (named) BatchKwargGenerator from a datasource)
+        """Get the (named) BatchKwargGenerator from a datasource
 
         Args:
             name (str): name of BatchKwargGenerator (default value is 'default')

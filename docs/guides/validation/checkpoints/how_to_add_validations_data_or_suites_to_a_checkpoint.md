@@ -12,7 +12,7 @@ This is useful if you want to aggregate individual validations (across suites or
 
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
-- Configured a [Checkpoint](./how_to_create_a_new_checkpoint)
+- Configured a [Checkpoint](./how_to_create_a_new_checkpoint.md)
 
 </Prerequisites>
 
@@ -170,7 +170,7 @@ Steps
 
     According to this configuration, the locally-specified Expectation Suite ``users.warning`` is run against the ``batch_request`` that employs ``my_data_connector`` with the results processed by the actions specified in the top-level ``action_list``. Similarly, the locally-specified Expectation Suite ``users.error`` is run against the ``batch_request`` that employs ``my_special_data_connector`` with the results also processed by the actions specified in the top-level ``action_list``. In addition, the top-level Expectation Suite ``users.delivery`` is run against the ``batch_request`` that employs ``my_other_data_connector`` with the results processed by the union of actions in the locally-specified ``action_list`` and in the top-level ``action_list``.
 
-Please see [How to configure a new Checkpoint using test_yaml_config](./how_to_add_validations_data_or_suites_to_a_checkpoint.md) for additional Checkpoint configuration examples (including the convenient templating mechanism).
+Please see [How to configure a new Checkpoint using test_yaml_config](./how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for additional Checkpoint configuration examples (including the convenient templating mechanism).
 
 
 Additional notes
@@ -179,6 +179,4 @@ Additional notes
 This is a good way to aggregate validations in a complex pipeline. You could use this feature to **validate multiple source files before and after their ingestion into your data lake**.
 :::
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
-
-If you want to be a real hero, we'd welcome a pull request. Please see our [Contributing guide](../../../contributing/contributing) and [How to write a how-to-guide](../../miscellaneous/how_to_write_a_how_to_guide) to get started.
+If you want to be a real hero, we'd welcome a pull request. Please see our [Contributing guide](../../../contributing/contributing.md) and [How to write a how-to-guide](../../miscellaneous/how_to_write_a_how_to_guide.md) to get started.

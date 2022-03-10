@@ -23,16 +23,17 @@ class ValidationOperatorAnonymizer(Anonymizer):
     def anonymize_validation_operator_info(
         self, validation_operator_name, validation_operator_obj
     ):
-        anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self.anonymize(
-            validation_operator_name
-        )
-        actions_dict = validation_operator_obj.actions
+        anonymized_info_dict: dict = {
+            "anonymized_name": self.anonymize(validation_operator_name)
+        }
+        actions_dict: dict = validation_operator_obj.actions
 
-        self.anonymize_object_info(
-            object_=validation_operator_obj,
-            anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
+        anonymized_info_dict.update(
+            self.anonymize_object_info(
+                object_=validation_operator_obj,
+                anonymized_info_dict=anonymized_info_dict,
+                ge_classes=self._ge_classes,
+            )
         )
 
         if actions_dict:

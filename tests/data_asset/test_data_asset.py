@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -8,13 +9,15 @@ from great_expectations.data_asset import DataAsset, FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
 
 
-def test_data_asset_expectation_suite():
+def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     asset = DataAsset()
     default_suite = ExpectationSuite(
         expectation_suite_name="default",
         data_asset_type="DataAsset",
         meta={"great_expectations_version": ge_version},
         expectations=[],
+        data_context=context,
     )
 
     # We should have a default-initialized suite stored internally and available for getting

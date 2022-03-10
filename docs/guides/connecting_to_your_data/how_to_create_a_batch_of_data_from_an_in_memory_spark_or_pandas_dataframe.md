@@ -1,13 +1,13 @@
 ---
-title: ✳ How to create a Batch of data from an in-memory Spark or Pandas dataframe
+title: How to create a Batch of data from an in-memory Spark or Pandas dataframe or path
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 
 This guide will help you load the following as Batches for use in creating Expectations:
-  1. **Pandas DataFrames**
-  2. **Spark DataFrames**
+1. **Pandas DataFrames**
+2. **Spark DataFrames**
 
 
 What used to be called a “Batch” in the old API was replaced with [Validator](../../reference/validation.md). A Validator knows how to validate a particular Batch of data on a particular [Execution Engine](../../reference/execution_engine.md) against a particular [Expectation Suite](../../reference/expectations/expectations.md). In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
@@ -16,13 +16,13 @@ You can read more about the core classes that make Great Expectations run in our
 
 
 <Tabs
-  groupId='spark-or-pandas'
-  defaultValue='spark'
-  values={[
-  {label: 'Spark DataFrame', value:'spark'},
-  {label: 'Pandas DataFrame', value:'pandas'},
-  ]}>
-  <TabItem value='spark'>
+     groupId='spark-or-pandas'
+     defaultValue='spark'
+     values={[
+     {label: 'Spark DataFrame', value:'spark'},
+     {label: 'Pandas DataFrame', value:'pandas'},
+     ]}>
+     <TabItem value='spark'>
 
 <Prerequisites>
 
@@ -34,166 +34,90 @@ You can read more about the core classes that make Great Expectations run in our
   
 </Prerequisites>
 
-  1. **Load or create a Data Context**
+1. **Load or create a Data Context**
 
-      The ``context`` referenced below can be loaded from disk or configured in code.
+     The ``context`` referenced below can be loaded from disk or configured in code.
 
-      Load an on-disk Data Context via:
+     First, import these necessary packages and modules.
 
-      ```python
-      import pyspark
+     ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L1-L9
+     ```
 
-      import great_expectations as ge
-      from great_expectations import DataContext
-      from great_expectations.core import ExpectationSuite
-      from great_expectations.core.batch import RuntimeBatchRequest
-      from great_expectations.core.util import get_or_create_spark_application
-      from great_expectations.validator.validator import Validator
+     Load an on-disk Data Context (ie. from a `great_expectations.yml` configuration) via the `get_context()` command:
 
-      context = ge.get_context()
-      ```
+     ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L11
+     ```
 
-      Create an in-code Data Context using these instructions: [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
+    If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.), load an in-code Data Context using these instructions: [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
 
-  2. **Obtain an Expectation Suite**
+2. **Obtain an Expectation Suite**
+   
+    If you have not already created an Expectation Suite, you can do so now.
 
-      ```python
-      suite: ExpectationSuite = context.get_expectation_suite("insert_your_expectation_suite_name_here")
-      ```
+     ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L20-L22
+     ```
 
-      Alternatively, you can simply use the name of the Expectation Suite.
+     The Expectation Suite can then be loaded into memory by using `get_expectation_suite()`.
 
-      ```python
-      suite_name: str = "insert_your_expectation_suite_name_here"
-      ```
+     ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L23-L25
+     ```
 
-      If you have not already created an Expectation Suite, you can do so now.
+3. **Construct a RuntimeBatchRequest**
 
-      ```python
-      suite: ExpectationSuite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
-      ```
+    We will create a ``RuntimeBatchRequest`` and pass it our Spark DataFrame or path via the ``runtime_parameters`` argument, under either the ``batch_data`` or ``path`` key. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration.
+    
+    If you are providing a filesystem path instead of a materialized DataFrame, you may use either an absolute or relative path (with respect to the current working directory). Under the hood, Great Expectations will instantiate a Spark Dataframe using the appropriate ``spark.read.*`` method, which will be inferred from the file extension. If your file names do not have extensions, you can specify the appropriate reader method explicitly via the ``batch_spec_passthrough`` argument. Any Spark reader options (i.e. ``delimiter`` or ``header``) that are required to properly read your data can also be specified with the ``batch_spec_passthrough`` argument, in a dictionary nested under a key named ``reader_options``.
 
-  3. **Construct a Runtime Batch Request**
+    Here is an example Datasource configuration in YAML.
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L27-L40
+    ```
+   
+    Save the configuration into your DataContext by using the `add_datasource()` function.
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L42
+    ```
+     
+    If you have a file in the following location:
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L45
+    ```
 
-      We will create a ``RuntimeBatchRequest`` and pass it our Spark DataFrame or path via the ``runtime_parameters`` argument, under either the ``batch_data`` or ``path`` key. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration.
+    Then the file can be read as a Spark Dataframe using:
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L50
+    ```
+   
+    Here is a Runtime Batch Request using an in-memory DataFrame:
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L48-L57
+    ```
 
-      If you are providing a filesystem path instead of a materialized DataFrame, you may use either an absolute or relative path (with respect to the current working directory). Under the hood, Great Expectations will instantiate a Spark Dataframe using the appropriate ``spark.read.*`` method, which will be inferred from the file extension. If your file names do not have extensions, you can specify the appropriate reader method explicitly via the ``batch_spec_passthrough`` argument. Any Spark reader options (i.e. ``delimiter`` or ``header``) that are required to properly read your data can also be specified with the ``batch_spec_passthrough`` argument, in a dictionary nested under a key named ``reader_options``.
+    Here is a Runtime Batch Request using a path:
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L63-L72
+    ```
 
-      Example ``great_expectations.yml`` Datasource configuration:
+    :::note Best Practice
+    Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through Data Docs and ensures your logical Data Assets are not confused with any particular view of them provided by an Execution Engine.
+    :::
 
-      ```yaml
-      my_spark_datasource:
-        execution_engine:
-          module_name: great_expectations.execution_engine
-          class_name: SparkDFExecutionEngine
-        module_name: great_expectations.datasource
-        class_name: Datasource
-        data_connectors:
-          my_runtime_data_connector:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-              - some_key_maybe_pipeline_stage
-              - some_other_key_maybe_airflow_run_id
-      ```
+4. **Construct a Validator**
 
-      Example Runtime Batch Request using an in-memory DataFrame:
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L78-L82
+    ```
 
-      ```python
-      spark_application: pyspark.sql.session.SparkSession = get_or_create_spark_application()
-      df: pyspark.sql.dataframe.DataFrame = spark_application.read.csv("some_path.csv")
-      runtime_batch_request = RuntimeBatchRequest(
-          datasource_name="my_spark_datasource",
-          data_connector_name="my_runtime_data_connector",
-          data_asset_name="insert_your_data_asset_name_here",
-          runtime_parameters={
-            "batch_data": df
-          },
-          batch_identifiers={
-              "some_key_maybe_pipeline_stage": "ingestion step 1",
-              "some_other_key_maybe_airflow_run_id": "run 18"
-          }
-      )
-      ```
+    Alternatively, you may skip step 2 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
 
-      Example Runtime Batch Request using a path:
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L86-L101
+    ```
 
-      ```python
-      path = "some_csv_file_with_no_file_extension"
-      runtime_batch_request = RuntimeBatchRequest(
-          datasource_name="my_spark_datasource",
-          data_connector_name="my_runtime_data_connector",
-          data_asset_name="insert_your_data_asset_name_here",
-          runtime_parameters={
-              "path": path
-          },
-          batch_identifiers={
-              "some_key_maybe_pipeline_stage": "ingestion step 1",
-              "some_other_key_maybe_airflow_run_id": "run 18"
-          },
-          batch_spec_passthrough={
-              "reader_method": "csv",
-              "reader_options": {
-                  "delimiter": ",",
-                  "header": True
-              }
-          }
-      )
-      ```
+5. **Check your data**
 
-      :::note Best Practice
-        Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through Data Docs and ensures your logical Data Assets are not confused with any particular view of them provided by an Execution Engine.
-      :::
+    You can check that the first few lines of your Batch are what you expect by running:
 
-  4. **Construct a Validator**
-
-      ```python
-      my_validator: Validator = context.get_validator(
-          batch_request=runtime_batch_request,
-          expectation_suite=suite,  # OR
-          # expectation_suite_name=suite_name
-      )
-      ```
-
-      Alternatively, you may skip step 2 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
-
-      ```python
-      my_validator: Validator = context.get_validator(
-         datasource_name="my_spark_datasource",
-         data_connector_name="my_runtime_data_connector",
-         data_asset_name="insert_your_data_asset_name_here",
-         runtime_parameters={
-             "path": path
-         },
-         batch_identifiers={
-             "some_key_maybe_pipeline_stage": "ingestion step 1",
-             "some_other_key_maybe_airflow_run_id": "run 18"
-         },
-         batch_spec_passthrough={
-             "reader_method": "csv",
-             "reader_options": {
-                 "delimiter": ",",
-                 "header": True
-             }
-         },
-         expectation_suite=suite,  # OR
-         # expectation_suite_name=suite_name
-       )
-      ```
-
-  5. **Check your data**
-
-      You can check that the first few lines of your Batch are what you expect by running:
-
-      ```python
-      my_validator.head()
-      ```
-
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L102
+    ```
+   
     Now that you have a Validator, you can use it to create Expectations or validate the data.
 
 
-  </TabItem>
-
-  <TabItem value='pandas'>
+</TabItem>
+<TabItem value='pandas'>
 
 <Prerequisites>
 
@@ -204,162 +128,91 @@ You can read more about the core classes that make Great Expectations run in our
   
 </Prerequisites>
 
-  1. **Load or create a Data Context**
+1. **Load or create a Data Context**
 
-      The ``context`` referenced below can be loaded from disk or configured in code.
+   The ``context`` referenced below can be loaded from disk or configured in code.
+   
+   First, import these necessary packages and modules.
+   ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L1-L8
+   ```
 
-      Load an on-disk Data Context via:
+   Load an on-disk Data Context (ie. from a `great_expectations.yml` configuration) via the `get_context()` command:
+   
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L10
+    ```
+   
+    If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.), load an in-code Data Context using these instructions: [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
 
-      ```python
-      import pandas as pd
+2. **Obtain an Expectation Suite**
+    If you have not already created an Expectation Suite, you can do so now.
 
-      import great_expectations as ge
-      from great_expectations import DataContext
-      from great_expectations.core import ExpectationSuite
-      from great_expectations.core.batch import RuntimeBatchRequest
-      from great_expectations.validator.validator import Validator
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L13-L15
+    ```
 
-      context: DataContext = ge.get_context()
-      ```
+     The Expectation Suite can then be loaded into memory by using `get_expectation_suite()`.
 
-      Create an in-code Data Context using these instructions: [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L16-L18
+    ```
 
-  2. **Obtain an Expectation Suite**
+3. **Construct a Runtime Batch Request**
 
-      ```python
-      suite: ExpectationSuite = context.get_expectation_suite("insert_your_expectation_suite_name_here")
-      ```
+   We will create a ``RuntimeBatchRequest`` and pass it our DataFrame or path via the ``runtime_parameters`` argument, under either the ``batch_data`` or ``path`` key. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration. 
+   
+   If you are providing a filesystem path instead of a materialized DataFrame, you may use either an absolute or relative path (with respect to the current working directory). Under the hood, Great Expectations will instantiate a Pandas Dataframe using the appropriate ``pandas.read_*`` method, which will be inferred from the file extension. If your file names do not have extensions, you can specify the appropriate reader method explicitly via the ``batch_spec_passthrough`` argument. Any Pandas reader options (i.e. ``sep`` or ``header``) that are required to properly read your data can also be specified with the ``batch_spec_passthrough`` argument, in a dictionary nested under a key named ``reader_options``.
+   
+   Here is an example Datasource configuration in YAML.
+   ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L20-L33
+   ```
+   
+   Save the configuration into your DataContext by using the `add_datasource()` function.
+   ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L35
+   ```
+   
+   If you have a file in the following location:
+   ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L38
+   ```
+   Then the file can be read as a Pandas Dataframe using
+   ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L43
+   ```
 
-      Alternatively, you can simply use the name of the Expectation Suite.
+    Here is a Runtime Batch Request using an in-memory DataFrame:
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L44-L53
+    ```
 
-      ```python
-      suite_name: str = "insert_your_expectation_suite_name_here"
-      ```
+    Here is a Runtime Batch Request using a path:
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L56-L69
+    ```
+   
+   :::note Best Practice 
+   Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through Data Docs and ensures your logical Data Assets are not confused with any particular view of them provided by an Execution Engine.
+   :::
 
-      If you have not already created an Expectation Suite, you can do so now.
+4. **Construct a Validator**
 
-      ```python
-      suite: ExpectationSuite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
-      ```
-
-  3. **Construct a Runtime Batch Request**
-
-      We will create a ``RuntimeBatchRequest`` and pass it our DataFrame or path via the ``runtime_parameters`` argument, under either the ``batch_data`` or ``path`` key. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration.
-
-      If you are providing a filesystem path instead of a materialized DataFrame, you may use either an absolute or relative path (with respect to the current working directory). Under the hood, Great Expectations will instantiate a Pandas Dataframe using the appropriate ``pandas.read_*`` method, which will be inferred from the file extension. If your file names do not have extensions, you can specify the appropriate reader method explicitly via the ``batch_spec_passthrough`` argument. Any Pandas reader options (i.e. ``sep`` or ``header``) that are required to properly read your data can also be specified with the ``batch_spec_passthrough`` argument, in a dictionary nested under a key named ``reader_options``.
-
-      Example ``great_expectations.yml`` Datsource configuration:
-
-      ```yaml
-      my_pandas_datasource:
-        execution_engine:
-          module_name: great_expectations.execution_engine
-          class_name: PandasExecutionEngine
-        module_name: great_expectations.datasource
-        class_name: Datasource
-        data_connectors:
-          my_runtime_data_connector:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-              - some_key_maybe_pipeline_stage
-                - some_other_key_maybe_airflow_run_id
-      ```
-
-      Example Runtime Batch Request using an in-memory DataFrame:
-
-      ```python
-      df: pd.DataFrame = pd.read_csv("some_path.csv")
-      runtime_batch_request = RuntimeBatchRequest(
-        datasource_name="my_pandas_datasource",
-        data_connector_name="my_runtime_data_connector",
-        data_asset_name="insert_your_data_asset_name_here",
-        runtime_parameters={
-          "batch_data": df
-        },
-        batch_identifiers={
-            "some_key_maybe_pipeline_stage": "ingestion step 1",
-            "some_other_key_maybe_airflow_run_id": "run 18"
-        }
-      )
-      ```
-
-      Example Runtime Batch Request using a path:
-
-      ```python
-      path = "some_csv_file_with_no_file_extension"
-      runtime_batch_request = RuntimeBatchRequest(
-          datasource_name="my_pandas_datasource",
-          data_connector_name="my_runtime_data_connector",
-          data_asset_name="insert_your_data_asset_name_here",
-          runtime_parameters={
-              "path": path
-          },
-          batch_identifiers={
-              "some_key_maybe_pipeline_stage": "ingestion step 1",
-              "some_other_key_maybe_airflow_run_id": "run 18"
-          },
-          batch_spec_passthrough={
-              "reader_method": "read_csv",
-              "reader_options": {
-                  "sep": ",",
-                  "header": 0
-              }
-          }
-        )
-      ```
-
-      :::note Best Practice
-
-        Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through Data Docs and ensures your logical Data Assets are not confused with any particular view of them provided by an Execution Engine.
-      :::
-
-  4. **Construct a Validator**
-
-      ```python
-      my_validator: Validator = context.get_validator(
-          batch_request=runtime_batch_request,
-          expectation_suite=suite,  # OR
-          # expectation_suite_name=suite_name
-        )
-      ```
-
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L72-L76
+    ```
       Alternatively, you may skip step 2 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
 
-      ```python
-      my_validator: Validator = context.get_validator(
-          datasource_name="my_pandas_datasource",
-          data_connector_name="my_runtime_data_connector",
-          data_asset_name="insert_your_data_asset_name_here",
-          runtime_parameters={
-              "path": path
-          },
-          batch_identifiers={
-              "some_key_maybe_pipeline_stage": "ingestion step 1",
-              "some_other_key_maybe_airflow_run_id": "run 18"
-          },
-          batch_spec_passthrough={
-              "reader_method": "read_csv",
-              "reader_options": {
-                  "sep": ",",
-                  "header": 0
-              }
-          },
-          expectation_suite=suite,  # OR
-          # expectation_suite_name=suite_name
-        )
-      ```
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L80-L95
+    ```
 
-  5. **Check your data**
+5. **Check your data**
 
-      You can check that the first few lines of your Batch are what you expect by running:
+    You can check that the first few lines of your Batch are what you expect by running:
 
-      ```python
-      my_validator.head()
-      ```
+    ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L96
+    ```
 
     Now that you have a Validator, you can use it to create Expectations or validate the data.
 
 
-  </TabItem>
+</TabItem>
 </Tabs>
 
+
+## Additional Notes
+
+To view the full scripts used in this page, see them on GitHub:
+
+- [in_memory_spark_dataframe_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py)
+- [in_memory_pandas_dataframe_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py)

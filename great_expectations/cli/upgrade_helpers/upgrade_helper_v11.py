@@ -23,7 +23,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 
 
 class UpgradeHelperV11(BaseUpgradeHelper):
-    def __init__(self, data_context=None, context_root_dir=None):
+    def __init__(self, data_context=None, context_root_dir=None, **kwargs):
         assert (
             data_context or context_root_dir
         ), "Please provide a data_context object or a context_root_dir."
@@ -432,6 +432,20 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             doc_sites_with_unsupported_backends,
         )
 
+    def manual_steps_required(self):
+        (
+            skip_with_database_backends,
+            skip_with_unsupported_backends,
+            skip_doc_sites_with_unsupported_backends,
+        ) = self._get_skipped_store_and_site_names()
+        return any(
+            [
+                skip_with_database_backends,
+                skip_with_unsupported_backends,
+                skip_doc_sites_with_unsupported_backends,
+            ]
+        )
+
     def get_upgrade_overview(self):
         (
             skip_with_database_backends,
@@ -451,7 +465,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             ].keys()
         ]
 
-        upgrade_overview = f"""\
+        upgrade_overview = """\
 <cyan>\
 ++====================================++
 || UpgradeHelperV11: Upgrade Overview ||
@@ -558,7 +572,7 @@ Upgrade Confirmation
 Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
 to learn more about the automated upgrade process:
 
-    <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1</cyan>
+    <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>
 
 Would you like to proceed with the project upgrade?\
 """
@@ -592,7 +606,7 @@ Would you like to proceed with the project upgrade?\
             increment_version = False
         else:
             increment_version = True
-        upgrade_report = f"""\
+        upgrade_report = """\
 <cyan>\
 ++================++
 || Upgrade Report ||
@@ -660,9 +674,8 @@ A log detailing the upgrade can be found here:
         except Exception:
             pass
 
-        # return a report of what happened, boolean indicating whether version should be incremented
-        # if the version should not be incremented, the report should include instructions for steps to
-        # be performed manually
+        # return a report of what happened, boolean indicating whether or not version should be incremented,
+        # the report should include instructions for steps to be performed manually
         (
             upgrade_report,
             increment_version,

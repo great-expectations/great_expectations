@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
@@ -10,8 +12,10 @@ from great_expectations.datasource.data_connector.util import (
     build_sorters_from_config,
     convert_batch_identifiers_to_data_reference_string_using_regex,
     convert_data_reference_string_to_batch_identifiers_using_regex,
+    list_gcs_keys,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
+    storage,
 )
 
 
@@ -228,6 +232,41 @@ def test_convert_data_reference_string_to_batch_identifiers_using_regex():
     )
 
 
+def test_convert_data_reference_string_to_batch_identifiers_using_regex_with_named_groups(
+    caplog,
+):
+    data_reference = "alex_20200809_1000.csv"
+    pattern = r"^(?P<name>.+)_(?P<timestamp>\d+)_(?P<price>\d+)\.csv$"
+
+    group_names = ["name", "timestamp", "price"]
+    assert convert_data_reference_string_to_batch_identifiers_using_regex(
+        data_reference=data_reference, regex_pattern=pattern, group_names=group_names
+    ) == (
+        "DEFAULT_ASSET_NAME",
+        IDDict(
+            {
+                "name": "alex",
+                "timestamp": "20200809",
+                "price": "1000",
+            }
+        ),
+    )
+
+    group_names = ["name", "timestamp", "cost"]  # Mismatch between "price" and "cost"!
+    assert convert_data_reference_string_to_batch_identifiers_using_regex(
+        data_reference=data_reference, regex_pattern=pattern, group_names=group_names
+    ) == (
+        "DEFAULT_ASSET_NAME",
+        IDDict(
+            {
+                "name": "alex",
+                "timestamp": "20200809",
+            }
+        ),
+    )
+    assert "The named group 'price' must explicitly be stated" in caplog.text
+
+
 def test_map_batch_definition_to_data_reference_string_using_regex():
     # not BatchDefinition
     my_batch_definition = "I_am_a_string"
@@ -253,6 +292,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
     group_names = ["i", "wont", "match"]
     regex_pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     with pytest.raises(KeyError):
+        # noinspection PyUnusedLocal
         my_data_reference = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=my_batch_definition,
             regex_pattern=regex_pattern,
@@ -369,7 +409,7 @@ def test__invert_regex_to_data_reference_template():
     returned = _invert_regex_to_data_reference_template(
         regex_pattern=r"(.*)-[A|B|C]\.csv", group_names=["name"]
     )
-    returned == "{name}-*.csv"
+    assert returned == "{name}-*.csv"
 
     # From https://github.com/madisonmay/CommonRegex/blob/master/commonregex.py
     date = r"(?:(?<!\:)(?<!\:\d)[0-3]?\d(?:st|nd|rd|th)?\s+(?:of\s+)?(?:jan\.?|january|feb\.?|february|mar\.?|march|apr\.?|april|may|jun\.?|june|jul\.?|july|aug\.?|august|sep\.?|september|oct\.?|october|nov\.?|november|dec\.?|december)|(?:jan\.?|january|feb\.?|february|mar\.?|march|apr\.?|april|may|jun\.?|june|jul\.?|july|aug\.?|august|sep\.?|september|oct\.?|october|nov\.?|november|dec\.?|december)\s+(?<!\:)(?<!\:\d)[0-3]?\d(?:st|nd|rd|th)?)(?:\,)?\s*(?:\d{4})?|[0-3]?\d[-\./][0-3]?\d[-\./]\d{2,4}"
@@ -435,7 +475,7 @@ def test_build_sorters_from_config_good_config():
     )
     # no sorters by name of i_dont_exist
     with pytest.raises(KeyError):
-        sorters["i_dont_exist"]
+        _ = sorters["i_dont_exist"]
 
 
 def test_build_sorters_from_config_bad_config():
@@ -460,3 +500,26 @@ def test_build_sorters_from_config_bad_config():
     ]
     with pytest.raises(ge_exceptions.SorterError):
         build_sorters_from_config(sorters_config)
+
+
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in datasource.data_connector.util",
+)
+@mock.patch("great_expectations.datasource.data_connector.util.storage.Client")
+def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
+    # Set defaults for ConfiguredAssetGCSDataConnector
+    query_options = {"delimiter": None}
+    with pytest.warns(
+        UserWarning
+    ):  # warning from /datasource/data_connector/util.py:383
+        list_gcs_keys(mock_gcs_conn, query_options, recursive=False)
+    assert query_options["delimiter"] == "/"
+
+    # Set defaults for InferredAssetGCSDataConnector
+    query_options = {"delimiter": "/"}
+    with pytest.warns(
+        UserWarning
+    ):  # warning from /datasource/data_connector/util.py:390
+        list_gcs_keys(mock_gcs_conn, query_options, recursive=True)
+    assert query_options["delimiter"] is None

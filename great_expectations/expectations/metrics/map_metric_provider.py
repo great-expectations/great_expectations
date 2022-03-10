@@ -1,5 +1,4 @@
 import logging
-import uuid
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
@@ -8,30 +7,36 @@ import numpy as np
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
-from great_expectations.execution_engine.sparkdf_execution_engine import (
-    F,
-    SparkDFExecutionEngine,
-)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
-    SqlAlchemyExecutionEngine,
-    sa,
 )
+from great_expectations.expectations.metrics import MetaMetricProvider
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
 )
+from great_expectations.expectations.metrics.util import Engine, Insert, Label, Select
 from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.util import (
+    generate_temporary_table_name,
+    get_sqlalchemy_selectable,
+)
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +101,7 @@ def column_function_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -161,7 +166,7 @@ def column_function_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -231,7 +236,7 @@ def column_function_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -318,7 +323,7 @@ def column_condition_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -350,7 +355,7 @@ def column_condition_partial(
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_condition_fn for column_condition_partial partial_fn_type"
+                "SqlAlchemyExecutionEngine only supports map_condition_fn and window_condition_fn for column_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -384,11 +389,11 @@ def column_condition_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                sqlalchemy_engine: Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
@@ -461,7 +466,7 @@ def column_condition_partial(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.ExecutionEngineError(
+                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -518,7 +523,6 @@ def column_pair_function_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.COLUMN_PAIR
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -562,7 +566,7 @@ def column_pair_function_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -605,7 +609,7 @@ def column_pair_function_partial(
                 runtime_configuration: Dict,
             ):
                 (
-                    df,
+                    selectable,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(
@@ -621,7 +625,7 @@ def column_pair_function_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -629,6 +633,69 @@ def column_pair_function_partial(
                     cls,
                     sa.column(column_A_name),
                     sa.column(column_B_name),
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return (
+                    column_pair_function,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
+    elif issubclass(engine, SparkDFExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
+            raise ValueError(
+                "SparkDFExecutionEngine only supports map_fn for column_pair_function_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SparkDFExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    data,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                column_list = [column_A_name, column_B_name]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                column_pair_function = metric_fn(
+                    cls,
+                    data[column_A_name],
+                    data[column_B_name],
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )
@@ -667,7 +734,6 @@ def column_pair_condition_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.COLUMN_PAIR
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -711,7 +777,7 @@ def column_pair_condition_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -741,7 +807,7 @@ def column_pair_condition_partial(
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_condition_fn for column_pair_condition_partial partial_fn_type"
+                "SqlAlchemyExecutionEngine only supports map_condition_fn and window_condition_fn for column_pair_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -765,7 +831,7 @@ def column_pair_condition_partial(
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 ) = execution_engine.get_compute_domain(
-                    metric_domain_kwargs, domain_type=domain_type
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
                 # noinspection PyPep8Naming
@@ -777,11 +843,11 @@ def column_pair_condition_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                sqlalchemy_engine: Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
@@ -798,6 +864,72 @@ def column_pair_condition_partial(
                 unexpected_condition = sa.not_(expected_condition)
                 return (
                     unexpected_condition,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
+    elif issubclass(engine, SparkDFExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [
+            MetricPartialFunctionTypes.MAP_CONDITION_FN,
+            MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+        ]:
+            raise ValueError(
+                "SparkDFExecutionEngine only supports map_condition_fn and window_condition_fn for column_pair_condition_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SparkDFExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    data,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                column_list = [column_A_name, column_B_name]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                expected_condition = metric_fn(
+                    cls,
+                    data[column_A_name],
+                    data[column_B_name],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return (
+                    ~expected_condition,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 )
@@ -827,7 +959,6 @@ def multicolumn_function_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -866,7 +997,7 @@ def multicolumn_function_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -917,23 +1048,93 @@ def multicolumn_function_partial(
 
                 column_list = accessor_domain_kwargs["column_list"]
 
+                table_columns = metrics["table.columns"]
+
                 for column_name in column_list:
-                    if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                    if column_name not in table_columns:
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
-                column_select = [sa.column(column_name) for column_name in column_list]
+                sqlalchemy_engine: Engine = execution_engine.engine
+
+                column_selector = [
+                    sa.column(column_name) for column_name in column_list
+                ]
                 dialect = execution_engine.dialect_module
-                column_function = metric_fn(
+                multicolumn_function = metric_fn(
                     cls,
-                    column_select,
+                    column_selector,
                     **metric_value_kwargs,
+                    _column_names=column_list,
+                    _table_columns=table_columns,
                     _dialect=dialect,
                     _table=selectable,
+                    _sqlalchemy_engine=sqlalchemy_engine,
                     _metrics=metrics,
                 )
-                return column_function, compute_domain_kwargs, accessor_domain_kwargs
+                return (
+                    multicolumn_function,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
+    elif issubclass(engine, SparkDFExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
+            raise ValueError(
+                "SparkDFExecutionEngine only supports map_fn for multicolumn_function_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SparkDFExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    data,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list = accessor_domain_kwargs["column_list"]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                multicolumn_function = metric_fn(
+                    cls,
+                    data[column_list],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return (
+                    multicolumn_function,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
 
             return inner_func
 
@@ -964,7 +1165,6 @@ def multicolumn_condition_partial(
         An annotated metric_function which will be called with a simplified signature.
 
     """
-    # TODO: <Alex>ALEX -- temporarily only Pandas and SQLAlchemy implementations are provided (Spark to follow).</Alex>
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
@@ -1003,7 +1203,7 @@ def multicolumn_condition_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
@@ -1027,9 +1227,12 @@ def multicolumn_condition_partial(
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
-        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_FN]:
+        if partial_fn_type not in [
+            MetricPartialFunctionTypes.MAP_CONDITION_FN,
+            MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+        ]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_condition_fn for multicolumn_condition_partial partial_fn_type"
+                "SqlAlchemyExecutionEngine only supports map_condition_fn and window_condition_fn for multicolumn_condition_partial partial_fn_type"
             )
 
         def wrapper(metric_fn: Callable):
@@ -1060,17 +1263,19 @@ def multicolumn_condition_partial(
 
                 for column_name in column_list:
                     if column_name not in metrics["table.columns"]:
-                        raise ge_exceptions.ExecutionEngineError(
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                             message=f'Error: The column "{column_name}" in BatchData does not exist.'
                         )
 
-                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                sqlalchemy_engine: Engine = execution_engine.engine
 
-                column_select = [sa.column(column_name) for column_name in column_list]
+                column_selector = [
+                    sa.column(column_name) for column_name in column_list
+                ]
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
                     cls,
-                    column_select,
+                    column_selector,
                     **metric_value_kwargs,
                     _dialect=dialect,
                     _table=selectable,
@@ -1081,6 +1286,66 @@ def multicolumn_condition_partial(
                 unexpected_condition = sa.not_(expected_condition)
                 return (
                     unexpected_condition,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
+    elif issubclass(engine, SparkDFExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [
+            MetricPartialFunctionTypes.MAP_CONDITION_FN,
+            MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+        ]:
+            raise ValueError(
+                "SparkDFExecutionEngine only supports map_condition_fn and window_condition_fn for multicolumn_condition_partial partial_fn_type"
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: SparkDFExecutionEngine,
+                metric_domain_kwargs: Dict,
+                metric_value_kwargs: Dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: Dict,
+            ):
+                (
+                    data,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list = accessor_domain_kwargs["column_list"]
+
+                for column_name in column_list:
+                    if column_name not in metrics["table.columns"]:
+                        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                            message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
+
+                expected_condition = metric_fn(
+                    cls,
+                    data[column_list],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return (
+                    ~expected_condition,
                     compute_domain_kwargs,
                     accessor_domain_kwargs,
                 )
@@ -1142,7 +1407,7 @@ def _pandas_column_map_condition_values(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -1200,7 +1465,7 @@ def _pandas_column_pair_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1230,7 +1495,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
@@ -1257,7 +1522,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1298,7 +1563,7 @@ def _pandas_multicolumn_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1324,7 +1589,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
@@ -1346,7 +1611,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1401,7 +1666,7 @@ def _pandas_column_map_series_and_domain_values(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -1462,7 +1727,7 @@ def _pandas_map_condition_index(
         column_name = accessor_domain_kwargs["column"]
 
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1474,7 +1739,7 @@ def _pandas_map_condition_index(
 
         for column_name in column_list:
             if column_name not in metrics["table.columns"]:
-                raise ge_exceptions.ExecutionEngineError(
+                raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 
@@ -1525,7 +1790,7 @@ def _pandas_column_map_condition_value_counts(
         )
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -1549,7 +1814,7 @@ def _pandas_column_map_condition_value_counts(
             pass
 
     if not value_counts:
-        raise ge_exceptions.MetricError("Unable to compute value counts")
+        raise ge_exceptions.MetricComputationError("Unable to compute value counts")
 
     if result_format["result_format"] == "COMPLETE":
         return value_counts
@@ -1593,7 +1858,7 @@ def _pandas_map_condition_rows(
         column_name = accessor_domain_kwargs["column"]
 
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1605,7 +1870,7 @@ def _pandas_map_condition_rows(
 
         for column_name in column_list:
             if column_name not in metrics["table.columns"]:
-                raise ge_exceptions.ExecutionEngineError(
+                raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 
@@ -1667,21 +1932,27 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         domain_kwargs=domain_kwargs,
     )
 
-    count_case_statement: List[sa.sql.elements.Label] = [
-        sa.case(
-            [
-                (
-                    unexpected_condition,
-                    1,
-                )
-            ],
-            else_=0,
-        ).label("condition")
-    ]
+    # The integral values are cast to SQL Numeric in order to avoid a bug in AWS Redshift (converted to integer later).
+    count_case_statement: List[Label] = sa.case(
+        [
+            (
+                unexpected_condition,
+                sa.sql.expression.cast(1, sa.Numeric),
+            )
+        ],
+        else_=sa.sql.expression.cast(0, sa.Numeric),
+    ).label("condition")
+
+    count_selectable: Select = sa.select([count_case_statement])
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        selectable = get_sqlalchemy_selectable(selectable)
+        count_selectable = count_selectable.select_from(selectable)
 
     try:
         if execution_engine.engine.dialect.name.lower() == "mssql":
-            temp_table_name: str = f"#ge_tmp_{str(uuid.uuid4())[:8]}"
+            temp_table_name: str = generate_temporary_table_name(
+                default_table_name_prefix="#ge_temp_"
+            )
 
             with execution_engine.engine.begin():
                 metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
@@ -1694,38 +1965,38 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 )
                 temp_table_obj.create(execution_engine.engine, checkfirst=True)
 
-                inner_case_query: sa.sql.dml.Insert = (
-                    temp_table_obj.insert().from_select(
-                        count_case_statement,
-                        sa.select(count_case_statement).select_from(selectable),
-                    )
+                inner_case_query: Insert = temp_table_obj.insert().from_select(
+                    [count_case_statement],
+                    count_selectable,
                 )
                 execution_engine.engine.execute(inner_case_query)
 
-                selectable_count = temp_table_obj
-        else:
-            selectable_count = sa.select(count_case_statement).select_from(selectable)
+                count_selectable = temp_table_obj
 
-        unexpected_count_query: sa.Select = (
+        count_selectable = get_sqlalchemy_selectable(count_selectable)
+        unexpected_count_query: Select = (
             sa.select(
                 [
                     sa.func.sum(sa.column("condition")).label("unexpected_count"),
                 ]
             )
-            .select_from(selectable_count)
+            .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
 
-        unexpected_count = execution_engine.engine.execute(
+        unexpected_count: Union[float, int] = execution_engine.engine.execute(
             sa.select(
                 [
                     unexpected_count_query.c.unexpected_count,
                 ]
             )
         ).scalar()
+        unexpected_count = int(unexpected_count)
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
-        raise ge_exceptions.ExecutionEngineError(message=exception_message)
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            message=exception_message
+        )
 
     return convert_to_json_serializable(unexpected_count)
 
@@ -1759,15 +2030,15 @@ def _sqlalchemy_column_map_condition_values(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    query = (
-        sa.select([sa.column(column_name).label("unexpected_values")])
-        .select_from(selectable)
-        .where(unexpected_condition)
+    query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
+        unexpected_condition
     )
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -1811,18 +2082,19 @@ def _sqlalchemy_column_pair_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    query = (
-        sa.select(
+    query = sa.select(
+        [
             sa.column(column_A_name).label("unexpected_values_A"),
             sa.column(column_B_name).label("unexpected_values_B"),
-        )
-        .select_from(selectable)
-        .where(boolean_mapped_unexpected_values)
-    )
+        ]
+    ).where(boolean_mapped_unexpected_values)
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        selectable = get_sqlalchemy_selectable(selectable)
+        query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -1843,10 +2115,15 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return value counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
 
     # noinspection PyPep8Naming
@@ -1858,13 +2135,13 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
     return execution_engine.engine.execute(
         sa.select([sa.func.count()]).select_from(selectable)
-    ).one()[0]
+    ).scalar()
 
 
 def _sqlalchemy_multicolumn_map_condition_values(
@@ -1901,16 +2178,15 @@ def _sqlalchemy_multicolumn_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    column_select = [sa.column(column_name) for column_name in column_list]
-    query = (
-        sa.select(column_select)
-        .select_from(selectable)
-        .where(boolean_mapped_unexpected_values)
-    )
+    column_selector = [sa.column(column_name) for column_name in column_list]
+    query = sa.select(column_selector).where(boolean_mapped_unexpected_values)
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        selectable = get_sqlalchemy_selectable(selectable)
+        query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
@@ -1927,10 +2203,15 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    """Return value counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
 
     if "column_list" not in accessor_domain_kwargs:
@@ -1944,13 +2225,13 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.ExecutionEngineError(
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
-
+    selectable = get_sqlalchemy_selectable(selectable)
     return execution_engine.engine.execute(
         sa.select([sa.func.count()]).select_from(selectable)
-    ).one()[0]
+    ).scalar()
 
 
 def _sqlalchemy_column_map_condition_value_counts(
@@ -1982,18 +2263,21 @@ def _sqlalchemy_column_map_condition_value_counts(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
     column: sa.Column = sa.column(column_name)
 
-    return execution_engine.engine.execute(
+    query = (
         sa.select([column, sa.func.count(column)])
-        .select_from(selectable)
         .where(unexpected_condition)
         .group_by(column)
-    ).fetchall()
+    )
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        query = query.select_from(selectable)
+
+    return execution_engine.engine.execute(query).fetchall()
 
 
 def _sqlalchemy_map_condition_rows(
@@ -2020,9 +2304,13 @@ def _sqlalchemy_map_condition_rows(
         domain_kwargs=domain_kwargs,
     )
 
-    query = (
-        sa.select([sa.text("*")]).select_from(selectable).where(unexpected_condition)
-    )
+    table_columns = metrics.get("table.columns")
+    column_selector = [sa.column(column_name) for column_name in table_columns]
+    query = sa.select(column_selector).where(unexpected_condition)
+    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+        selectable = get_sqlalchemy_selectable(selectable)
+        query = query.select_from(selectable)
+
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
@@ -2030,7 +2318,9 @@ def _sqlalchemy_map_condition_rows(
         return execution_engine.engine.execute(query).fetchall()
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
-        raise ge_exceptions.ExecutionEngineError(message=exception_message)
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            message=exception_message
+        )
 
 
 def _spark_map_condition_unexpected_count_aggregate_fn(
@@ -2063,15 +2353,23 @@ def _spark_map_condition_unexpected_count_value(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs,
+        domain_kwargs=domain_kwargs,
     )
+
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+
     return filtered.count()
 
 
-def spark_column_map_condition_values(
+def _spark_column_map_condition_values(
     cls,
     execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: Dict,
@@ -2079,35 +2377,42 @@ def spark_column_map_condition_values(
     metrics: Dict[str, Any],
     **kwargs,
 ):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
     df = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
-    data = df.withColumn("__unexpected", unexpected_condition)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
-(spark_column_map_condition_values).
+(_spark_column_map_condition_values).
 """
         )
 
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-    result_format = metric_value_kwargs["result_format"]
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+
+    result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
-        rows = filtered.select(F.col(column_name)).collect()
+        rows = filtered.select(
+            F.col(column_name).alias(column_name)
+        ).collect()  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
     else:
         rows = (
-            filtered.select(F.col(column_name))
+            filtered.select(
+                F.col(column_name).alias(column_name)
+            )  # note that without the explicit alias, spark will use only the final portion of a nested column as the column name
             .limit(result_format["partial_unexpected_count"])
             .collect()
         )
@@ -2128,7 +2433,6 @@ def _spark_column_map_condition_value_counts(
     df = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs,
     )
-    data = df.withColumn("__unexpected", unexpected_condition)
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -2140,14 +2444,17 @@ def _spark_column_map_condition_value_counts(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.ExecutionEngineError(
+        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+
     result_format = metric_value_kwargs["result_format"]
 
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
-    value_counts = filtered.groupBy(F.col(column_name)).count()
+    value_counts = filtered.groupBy(F.col(column_name).alias(column_name)).count()
     if result_format["result_format"] == "COMPLETE":
         rows = value_counts.collect()
     else:
@@ -2166,19 +2473,225 @@ def _spark_map_condition_rows(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs,
     )
+
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
 
     result_format = metric_value_kwargs["result_format"]
 
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
     if result_format["result_format"] == "COMPLETE":
         return filtered.collect()
     else:
         return filtered.limit(result_format["partial_unexpected_count"]).collect()
+
+
+def _spark_column_pair_map_condition_values(
+    cls,
+    execution_engine: SparkDFExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        unexpected_condition,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
+    )
+
+    # noinspection PyPep8Naming
+    column_A_name = accessor_domain_kwargs["column_A"]
+    # noinspection PyPep8Naming
+    column_B_name = accessor_domain_kwargs["column_B"]
+
+    column_list = [column_A_name, column_B_name]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+
+    result_format = metric_value_kwargs["result_format"]
+    if result_format["result_format"] == "COMPLETE":
+        rows = filtered.select(
+            [
+                F.col(column_A_name).alias(column_A_name),
+                F.col(column_B_name).alias(column_B_name),
+            ]
+        ).collect()
+    else:
+        rows = (
+            filtered.select(
+                [
+                    F.col(column_A_name).alias(column_A_name),
+                    F.col(column_B_name).alias(column_B_name),
+                ]
+            )
+            .limit(result_format["partial_unexpected_count"])
+            .collect()
+        )
+
+    unexpected_list = [(row[column_A_name], row[column_B_name]) for row in rows]
+    return unexpected_list
+
+
+def _spark_column_pair_map_condition_filtered_row_count(
+    cls,
+    execution_engine: SparkDFExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
+    )
+
+    # noinspection PyPep8Naming
+    column_A_name = accessor_domain_kwargs["column_A"]
+    # noinspection PyPep8Naming
+    column_B_name = accessor_domain_kwargs["column_B"]
+
+    column_list = [column_A_name, column_B_name]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    return df.count()
+
+
+def _spark_multicolumn_map_condition_values(
+    cls,
+    execution_engine: SqlAlchemyExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
+    (
+        unexpected_condition,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
+    )
+
+    if "column_list" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
+(_spark_multicolumn_map_condition_values).
+"""
+        )
+
+    column_list = accessor_domain_kwargs["column_list"]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+
+    column_selector = [
+        F.col(column_name).alias(column_name) for column_name in column_list
+    ]
+
+    domain_values = filtered.select(column_selector)
+
+    result_format = metric_value_kwargs["result_format"]
+    if result_format["result_format"] == "COMPLETE":
+        domain_values = (
+            domain_values.select(column_selector).toPandas().to_dict("records")
+        )
+    else:
+        domain_values = (
+            domain_values.select(column_selector)
+            .limit(result_format["partial_unexpected_count"])
+            .toPandas()
+            .to_dict("records")
+        )
+
+    return domain_values
+
+
+def _spark_multicolumn_map_condition_filtered_row_count(
+    cls,
+    execution_engine: SparkDFExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+):
+    """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
+    _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    df = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs,
+    )
+
+    if "column_list" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
+(_spark_multicolumn_map_condition_filtered_row_count).
+"""
+        )
+
+    column_list = accessor_domain_kwargs["column_list"]
+
+    for column_name in column_list:
+        if column_name not in metrics["table.columns"]:
+            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
+
+    return df.count()
 
 
 class MapMetricProvider(MetricProvider):
@@ -2197,6 +2710,11 @@ class MapMetricProvider(MetricProvider):
     condition_value_keys = tuple()
     function_value_keys = tuple()
     filter_column_isnull = True
+
+    SQLALCHEMY_SELECTABLE_METRICS = {
+        "compound_columns.count",
+        "compound_columns.unique",
+    }
 
     @classmethod
     def _register_metric_functions(cls):
@@ -2227,6 +2745,7 @@ class MapMetricProvider(MetricProvider):
                     )
 
                 condition_provider = candidate_metric_fn
+                # noinspection PyUnresolvedReferences
                 metric_name = cls.condition_metric_name
                 metric_domain_keys = cls.condition_domain_keys
                 metric_value_keys = cls.condition_value_keys
@@ -2242,7 +2761,7 @@ class MapMetricProvider(MetricProvider):
                 )
                 if issubclass(engine, PandasExecutionEngine):
                     register_metric(
-                        metric_name=metric_name + ".condition",
+                        metric_name=f"{metric_name}.condition",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -2251,7 +2770,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=metric_fn_type,
                     )
                     register_metric(
-                        metric_name=metric_name + ".unexpected_count",
+                        metric_name=f"{metric_name}.unexpected_count",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -2260,7 +2779,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
-                        metric_name=metric_name + ".unexpected_index_list",
+                        metric_name=f"{metric_name}.unexpected_index_list",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -2269,7 +2788,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
-                        metric_name=metric_name + ".unexpected_rows",
+                        metric_name=f"{metric_name}.unexpected_rows",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -2279,7 +2798,7 @@ class MapMetricProvider(MetricProvider):
                     )
                     if domain_type == MetricDomainTypes.COLUMN:
                         register_metric(
-                            metric_name=metric_name + ".unexpected_values",
+                            metric_name=f"{metric_name}.unexpected_values",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2288,7 +2807,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=metric_name + ".unexpected_value_counts",
+                            metric_name=f"{metric_name}.unexpected_value_counts",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2298,7 +2817,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     elif domain_type == MetricDomainTypes.COLUMN_PAIR:
                         register_metric(
-                            metric_name=metric_name + ".unexpected_values",
+                            metric_name=f"{metric_name}.unexpected_values",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2307,7 +2826,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=metric_name + ".filtered_row_count",
+                            metric_name=f"{metric_name}.filtered_row_count",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2317,7 +2836,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     elif domain_type == MetricDomainTypes.MULTICOLUMN:
                         register_metric(
-                            metric_name=metric_name + ".unexpected_values",
+                            metric_name=f"{metric_name}.unexpected_values",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2326,7 +2845,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=metric_name + ".filtered_row_count",
+                            metric_name=f"{metric_name}.filtered_row_count",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2336,7 +2855,7 @@ class MapMetricProvider(MetricProvider):
                         )
                 elif issubclass(engine, SqlAlchemyExecutionEngine):
                     register_metric(
-                        metric_name=metric_name + ".condition",
+                        metric_name=f"{metric_name}.condition",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -2345,7 +2864,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=metric_fn_type,
                     )
                     register_metric(
-                        metric_name=metric_name + ".unexpected_rows",
+                        metric_name=f"{metric_name}.unexpected_rows",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -2366,7 +2885,7 @@ class MapMetricProvider(MetricProvider):
                                 metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
                             )
                             register_metric(
-                                metric_name=metric_name + ".unexpected_count",
+                                metric_name=f"{metric_name}.unexpected_count",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -2376,7 +2895,7 @@ class MapMetricProvider(MetricProvider):
                             )
                         else:
                             register_metric(
-                                metric_name=metric_name + ".unexpected_count",
+                                metric_name=f"{metric_name}.unexpected_count",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -2388,7 +2907,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
                     ):
                         register_metric(
-                            metric_name=metric_name + ".unexpected_count",
+                            metric_name=f"{metric_name}.unexpected_count",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
@@ -2398,7 +2917,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     if domain_type == MetricDomainTypes.COLUMN:
                         register_metric(
-                            metric_name=metric_name + ".unexpected_values",
+                            metric_name=f"{metric_name}.unexpected_values",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2407,7 +2926,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=metric_name + ".unexpected_value_counts",
+                            metric_name=f"{metric_name}.unexpected_value_counts",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2417,7 +2936,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     elif domain_type == MetricDomainTypes.COLUMN_PAIR:
                         register_metric(
-                            metric_name=metric_name + ".unexpected_values",
+                            metric_name=f"{metric_name}.unexpected_values",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2426,7 +2945,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=metric_name + ".filtered_row_count",
+                            metric_name=f"{metric_name}.filtered_row_count",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2436,7 +2955,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     elif domain_type == MetricDomainTypes.MULTICOLUMN:
                         register_metric(
-                            metric_name=metric_name + ".unexpected_values",
+                            metric_name=f"{metric_name}.unexpected_values",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2445,7 +2964,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=metric_name + ".filtered_row_count",
+                            metric_name=f"{metric_name}.filtered_row_count",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -2455,7 +2974,7 @@ class MapMetricProvider(MetricProvider):
                         )
                 elif issubclass(engine, SparkDFExecutionEngine):
                     register_metric(
-                        metric_name=metric_name + ".condition",
+                        metric_name=f"{metric_name}.condition",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -2464,7 +2983,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=metric_fn_type,
                     )
                     register_metric(
-                        metric_name=metric_name + ".unexpected_rows",
+                        metric_name=f"{metric_name}.unexpected_rows",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -2473,29 +2992,41 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
-                        register_metric(
-                            metric_name=metric_name + ".unexpected_count.aggregate_fn",
-                            metric_domain_keys=metric_domain_keys,
-                            metric_value_keys=metric_value_keys,
-                            execution_engine=engine,
-                            metric_class=cls,
-                            metric_provider=_spark_map_condition_unexpected_count_aggregate_fn,
-                            metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
-                        )
-                        register_metric(
-                            metric_name=metric_name + ".unexpected_count",
-                            metric_domain_keys=metric_domain_keys,
-                            metric_value_keys=metric_value_keys,
-                            execution_engine=engine,
-                            metric_class=cls,
-                            metric_provider=None,
-                            metric_fn_type=MetricFunctionTypes.VALUE,
-                        )
+                        if domain_type == MetricDomainTypes.COLUMN:
+                            register_metric(
+                                metric_name=metric_name
+                                + ".unexpected_count.aggregate_fn",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=_spark_map_condition_unexpected_count_aggregate_fn,
+                                metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
+                            )
+                            register_metric(
+                                metric_name=f"{metric_name}.unexpected_count",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=None,
+                                metric_fn_type=MetricFunctionTypes.VALUE,
+                            )
+                        else:
+                            register_metric(
+                                metric_name=f"{metric_name}.unexpected_count",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=_spark_map_condition_unexpected_count_value,
+                                metric_fn_type=MetricFunctionTypes.VALUE,
+                            )
                     elif (
                         metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
                     ):
                         register_metric(
-                            metric_name=metric_name + ".unexpected_count",
+                            metric_name=f"{metric_name}.unexpected_count",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
@@ -2505,21 +3036,59 @@ class MapMetricProvider(MetricProvider):
                         )
                     if domain_type == MetricDomainTypes.COLUMN:
                         register_metric(
-                            metric_name=metric_name + ".unexpected_values",
+                            metric_name=f"{metric_name}.unexpected_values",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
                             metric_class=cls,
-                            metric_provider=spark_column_map_condition_values,
+                            metric_provider=_spark_column_map_condition_values,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=metric_name + ".unexpected_value_counts",
+                            metric_name=f"{metric_name}.unexpected_value_counts",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
                             metric_class=cls,
                             metric_provider=_spark_column_map_condition_value_counts,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                    elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+                        register_metric(
+                            metric_name=f"{metric_name}.unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_column_pair_map_condition_values,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                        register_metric(
+                            metric_name=f"{metric_name}.filtered_row_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_column_pair_map_condition_filtered_row_count,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                    elif domain_type == MetricDomainTypes.MULTICOLUMN:
+                        register_metric(
+                            metric_name=f"{metric_name}.unexpected_values",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_multicolumn_map_condition_values,
+                            metric_fn_type=MetricFunctionTypes.VALUE,
+                        )
+                        register_metric(
+                            metric_name=f"{metric_name}.filtered_row_count",
+                            metric_domain_keys=metric_domain_keys,
+                            metric_value_keys=(*metric_value_keys, "result_format"),
+                            execution_engine=engine,
+                            metric_class=cls,
+                            metric_provider=_spark_multicolumn_map_condition_filtered_row_count,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
             elif metric_fn_type in [
@@ -2532,11 +3101,12 @@ class MapMetricProvider(MetricProvider):
                         "A MapMetricProvider must have a function_metric_name to have a decorated column_function_partial method."
                     )
                 map_function_provider = candidate_metric_fn
+                # noinspection PyUnresolvedReferences
                 metric_name = cls.function_metric_name
                 metric_domain_keys = cls.function_domain_keys
                 metric_value_keys = cls.function_value_keys
                 register_metric(
-                    metric_name=metric_name + ".map",
+                    metric_name=f"{metric_name}.map",
                     metric_domain_keys=metric_domain_keys,
                     metric_value_keys=metric_value_keys,
                     execution_engine=engine,
@@ -2562,19 +3132,19 @@ class MapMetricProvider(MetricProvider):
         metric_suffix = ".unexpected_count"
         if metric_name.endswith(metric_suffix):
             try:
-                _ = get_metric_provider(metric_name + ".aggregate_fn", execution_engine)
+                _ = get_metric_provider(f"{metric_name}.aggregate_fn", execution_engine)
                 has_aggregate_fn = True
             except ge_exceptions.MetricProviderError:
                 has_aggregate_fn = False
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name + ".aggregate_fn",
+                    f"{metric_name}.aggregate_fn",
                     metric.metric_domain_kwargs,
                     base_metric_value_kwargs,
                 )
             else:
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    metric_name[: -len(metric_suffix)] + ".condition",
+                    f"{metric_name[:-len(metric_suffix)]}.condition",
                     metric.metric_domain_kwargs,
                     base_metric_value_kwargs,
                 )
@@ -2583,7 +3153,7 @@ class MapMetricProvider(MetricProvider):
         metric_suffix = ".unexpected_count.aggregate_fn"
         if metric_name.endswith(metric_suffix):
             dependencies["unexpected_condition"] = MetricConfiguration(
-                metric_name[: -len(metric_suffix)] + ".condition",
+                f"{metric_name[:-len(metric_suffix)]}.condition",
                 metric.metric_domain_kwargs,
                 base_metric_value_kwargs,
             )
@@ -2597,15 +3167,15 @@ class MapMetricProvider(MetricProvider):
         ]:
             if metric_name.endswith(metric_suffix):
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    metric_name[: -len(metric_suffix)] + ".condition",
+                    f"{metric_name[:-len(metric_suffix)]}.condition",
                     metric.metric_domain_kwargs,
                     base_metric_value_kwargs,
                 )
 
         try:
-            _ = get_metric_provider(metric_name + ".map", execution_engine)
+            _ = get_metric_provider(f"{metric_name}.map", execution_engine)
             dependencies["metric_map_fn"] = MetricConfiguration(
-                metric_name + ".map",
+                f"{metric_name}.map",
                 metric.metric_domain_kwargs,
                 metric.metric_value_kwargs,
             )
@@ -2613,6 +3183,27 @@ class MapMetricProvider(MetricProvider):
             pass
 
         return dependencies
+
+    @staticmethod
+    def is_sqlalchemy_metric_selectable(
+        map_metric_provider: MetaMetricProvider,
+    ) -> bool:
+        """
+        :param map_metric_provider: object of type "MapMetricProvider", whose SQLAlchemy implementation is inspected
+        :return: boolean indicating whether or not the returned value of a method implementing the metric resolves all
+        columns -- hence the caller must not use "select_from" clause as part of its own SQLAlchemy query; otherwise an
+        unwanted selectable (e.g., table) will be added to "FROM", leading to duplicated and/or erroneous results.
+        """
+        # noinspection PyUnresolvedReferences
+        return (
+            hasattr(map_metric_provider, "condition_metric_name")
+            and map_metric_provider.condition_metric_name
+            in MapMetricProvider.SQLALCHEMY_SELECTABLE_METRICS
+        ) or (
+            hasattr(map_metric_provider, "function_metric_name")
+            and map_metric_provider.function_metric_name
+            in MapMetricProvider.SQLALCHEMY_SELECTABLE_METRICS
+        )
 
 
 class ColumnMapMetricProvider(MapMetricProvider):
@@ -2650,8 +3241,22 @@ class ColumnMapMetricProvider(MapMetricProvider):
         table_domain_kwargs: dict = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
+        dependencies["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+            metric_dependencies=None,
+        )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
             metric_dependencies=None,
@@ -2700,8 +3305,22 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
             for k, v in metric.metric_domain_kwargs.items()
             if k not in ["column_A", "column_B", "ignore_row_if"]
         }
+        dependencies["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+            metric_dependencies=None,
+        )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
             metric_dependencies=None,
@@ -2748,8 +3367,22 @@ class MulticolumnMapMetricProvider(MapMetricProvider):
             for k, v in metric.metric_domain_kwargs.items()
             if k not in ["column_list", "ignore_row_if"]
         }
+        dependencies["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+            metric_dependencies=None,
+        )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
             metric_dependencies=None,

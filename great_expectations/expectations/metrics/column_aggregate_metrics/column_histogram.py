@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import numpy as np
 
@@ -33,7 +33,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
@@ -50,7 +50,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         """return a list of counts corresponding to bins
@@ -87,7 +87,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             case_conditions.append(
                 sa.func.sum(
                     sa.case([(sa.column(column) < bins[idx + 1], 1)], else_=0)
-                ).label("bin_" + str(idx))
+                ).label(f"bin_{str(idx)}")
             )
             idx += 1
 
@@ -106,7 +106,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                         ],
                         else_=0,
                     )
-                ).label("bin_" + str(idx))
+                ).label(f"bin_{str(idx)}")
             )
 
         if (
@@ -123,7 +123,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             case_conditions.append(
                 sa.func.sum(
                     sa.case([(bins[-2] <= sa.column(column), 1)], else_=0)
-                ).label("bin_" + str(len(bins) - 1))
+                ).label(f"bin_{str(len(bins) - 1)}")
             )
         else:
             case_conditions.append(
@@ -140,7 +140,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                         ],
                         else_=0,
                     )
-                ).label("bin_" + str(len(bins) - 1))
+                ).label(f"bin_{str(len(bins) - 1)}")
             )
 
         query = (
@@ -163,7 +163,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(

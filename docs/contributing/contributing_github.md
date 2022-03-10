@@ -1,8 +1,8 @@
 ---
-title: Contributing through Github
+title: Contributing through GitHub
 ---
 
-## Making changes directly through Github
+## Making changes directly through GitHub
 
 If you want to change documentation, but not code, we suggest using the GitHub markdown editor, which means you don’t have to fork the repo at all. Here’s how you do this:
 
@@ -14,7 +14,7 @@ If you want to change documentation, but not code, we suggest using the GitHub m
 
 * On each page, you’ll see an `Edit` button in the lower left. Click this to go to the source file in the Great Expectations GitHub repo.
 
-#### 1B. Edit from Github
+#### 1B. Edit from GitHub
 
 * If you’re already on GitHub, the docs are located in `great_expectations > docs`. You can directly navigate to the respective page you want to edit (but getting there from https://docs.greatexpectations.io/docs/ is a little easier).
 
@@ -24,7 +24,7 @@ If you want to change documentation, but not code, we suggest using the GitHub m
 
 * Make your edits and use the Preview tab to preview changes.
 
-* Please pay close attention to the [Style Guide](/docs/contributing/contributing_style).
+* Please pay close attention to the [Style Guide](/docs/contributing/style_guides/docs_style).
 
 ### Submit a pull request
 

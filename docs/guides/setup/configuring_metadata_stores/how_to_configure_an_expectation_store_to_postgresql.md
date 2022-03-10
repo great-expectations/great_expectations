@@ -20,7 +20,7 @@ Steps
 
 1. **Configure the** `config_variables.yml` **file with your database credentials**
 
-    We recommend that database credentials be stored in the  `config_variables.yml` file, which is located in the `uncommitted/` folder by default, and is not part of source control.  The following lines add database credentials under the key `db_creds`. Additional options for configuring the `config_variables.yml` file or additional environment variables can be found [here](../configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md).
+    We recommend that database credentials be stored in the `config_variables.yml` file, which is located in the `uncommitted/` folder by default, and is not part of source control. The following lines add database credentials under the key `db_creds`. Additional options for configuring the `config_variables.yml` file or additional environment variables can be found [here](../configuring_data_contexts/how_to_configure_credentials.md).
 
     ```yaml
     db_creds:
@@ -65,12 +65,12 @@ Steps
     ```
 
 
-4. **Confirm that the new Expectations store has been added by running** ``great_expectations --v3-api store list``
+4. **Confirm that the new Expectations store has been added by running** ``great_expectations store list``
 
     Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_postgres_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in PostgreSQL as long as we set the ``expectations_store_name`` variable to ``expectations_postgres_store``, which we did in the previous step.  The config for ``expectations_store`` can be removed if you would like.
 
     ```bash
-    great_expectations --v3-api store list
+    great_expectations store list
 
     - name: expectations_store
     class_name: ExpectationsStore
@@ -92,14 +92,14 @@ Steps
     ```
 
 
-5. **Create a new Expectation Suite by running** ``great_expectations --v3-api suite new``
+5. **Create a new Expectation Suite by running** ``great_expectations suite new``
 
     This command prompts you to create and name a new Expectation Suite and to select a sample batch of data for the Suite to describe. Behind the scenes, Great Expectations will create a new table in your database called ``ge_expectations_store``, and populate the fields ``expectation_suite_name`` and ``value`` with information from the newly created Expectation Suite.
 
     If you follow the prompts and create an Expectation Suite called ``exp1``, you can expect to see output similar to the following :
 
     ```bash
-    great_expectations --v3-api suite new
+    great_expectations suite new
 
     #  ...
 
@@ -116,17 +116,13 @@ Steps
     ```
 
 
-6. **Confirm that Expectations can be accessed from PostgreSQL by running** ``great_expectations --v3-api suite list``
+6. **Confirm that Expectations can be accessed from PostgreSQL by running** ``great_expectations suite list``
 
     The output should include the Expectation Suite we created in the previous step: ``exp1``.
 
     ```bash
-    great_expectations --v3-api suite list
+    great_expectations suite list
 
     1 Expectation Suites found:
      - exp1
     ```
-
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.
-

@@ -15,7 +15,6 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class ExpectColumnValuesToBeNull(ColumnMapExpectation):
@@ -70,6 +69,67 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     }
 
     map_metric = "column_values.null"
+    args_keys = ("column",)
+
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column", "mostly", "row_condition", "condition_parser"],
+        )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
+
+        if params["mostly"] is not None:
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            template_str = "values must be null, at least $mostly_pct % of the time."
+        else:
+            template_str = "values must be null."
+
+        if include_column_name:
+            template_str = f"$column {template_str}"
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = f"{conditional_template_str}, then {template_str}"
+            params_with_json_schema.update(conditional_params)
+
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -80,7 +140,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -103,14 +163,14 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             template_str = "values must be null."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -134,7 +194,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         result_dict = result.result
 
@@ -170,22 +230,14 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
+        result_format = self.get_result_format(
+            configuration=configuration, runtime_configuration=runtime_configuration
+        )
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
         total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
+        unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
 
         if total_count is None or total_count == 0:
             # Vacuously true
@@ -201,9 +253,9 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             success=success,
             element_count=metrics.get("table.row_count"),
             nonnull_count=nonnull_count,
-            unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
-            unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
+            unexpected_count=metrics.get(f"{self.map_metric}.unexpected_count"),
+            unexpected_list=metrics.get(f"{self.map_metric}.unexpected_values"),
             unexpected_index_list=metrics.get(
-                self.map_metric + ".unexpected_index_list"
+                f"{self.map_metric}.unexpected_index_list"
             ),
         )

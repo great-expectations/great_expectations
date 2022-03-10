@@ -1,10 +1,9 @@
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
-from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +25,10 @@ _registered_renderers = {}
 
 def register_renderer(
     object_name: str,
-    parent_class: Type[Union["Expectation", "Metric"]],
+    parent_class: Type[Union["Expectation", "Metric"]],  # noqa: F821
     renderer_fn: Callable,
 ):
+    # noinspection PyUnresolvedReferences
     renderer_name = renderer_fn._renderer_type
     if object_name not in _registered_renderers:
         logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
@@ -63,24 +63,32 @@ def register_renderer(
         return
 
 
+def get_renderer_names(object_name: str) -> List[str]:
+    return list(_registered_renderers.get(object_name, {}).keys())
+
+
+def get_renderer_impls(object_name: str) -> List[str]:
+    return list(_registered_renderers.get(object_name, {}).values())
+
+
 def get_renderer_impl(object_name, renderer_type):
     return _registered_renderers.get(object_name, {}).get(renderer_type)
 
 
-def register_expectation(expectation: Type["Expectation"]) -> None:
+def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F821
     expectation_type = expectation.expectation_type
     # TODO: add version to key
     if expectation_type in _registered_expectations:
         if _registered_expectations[expectation_type] == expectation:
             logger.info(
-                "Multiple declarations of expectation " + expectation_type + " found."
+                f"Multiple declarations of expectation {expectation_type} found."
             )
             return
         else:
             logger.warning(
-                "Overwriting declaration of expectation " + expectation_type + "."
+                f"Overwriting declaration of expectation {expectation_type}."
             )
-    logger.debug("Registering expectation: " + expectation_type)
+    logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
 
 
@@ -96,11 +104,11 @@ def register_metric(
     metric_name: str,
     metric_domain_keys: Tuple[str, ...],
     metric_value_keys: Tuple[str, ...],
-    execution_engine: Type["ExecutionEngine"],
-    metric_class: Type["MetricProvider"],
+    execution_engine: Type["ExecutionEngine"],  # noqa: F821
+    metric_class: Type["MetricProvider"],  # noqa: F821
     metric_provider: Optional[Callable],
     metric_fn_type: Optional[
-        Union["MetricFunctionTypes", "MetricPartialFunctionTypes"]
+        Union["MetricFunctionTypes", "MetricPartialFunctionTypes"]  # noqa: F821
     ] = None,
 ) -> dict:
     res = {}
@@ -167,8 +175,8 @@ def register_metric(
 
 
 def get_metric_provider(
-    metric_name: str, execution_engine: "ExecutionEngine"
-) -> Tuple["MetricProvider", Callable]:
+    metric_name: str, execution_engine: "ExecutionEngine"  # noqa: F821
+) -> Tuple["MetricProvider", Callable]:  # noqa: F821
     try:
         metric_definition = _registered_metrics[metric_name]
         return metric_definition["providers"][type(execution_engine).__name__]
@@ -179,8 +187,8 @@ def get_metric_provider(
 
 
 def get_metric_function_type(
-    metric_name: str, execution_engine: "ExecutionEngine"
-) -> Optional[Union["MetricPartialFunctionTypes", "MetricFunctionTypes"]]:
+    metric_name: str, execution_engine: "ExecutionEngine"  # noqa: F821
+) -> Optional[Union["MetricPartialFunctionTypes", "MetricFunctionTypes"]]:  # noqa: F821
     try:
         metric_definition = _registered_metrics[metric_name]
         provider_fn, provider_class = metric_definition["providers"][
@@ -195,7 +203,7 @@ def get_metric_function_type(
 
 def get_metric_kwargs(
     metric_name: str,
-    configuration: Optional["ExpectationConfiguration"] = None,
+    configuration: Optional["ExpectationConfiguration"] = None,  # noqa: F821
     runtime_configuration: Optional[dict] = None,
 ) -> Dict:
     try:
@@ -244,7 +252,7 @@ def get_metric_kwargs(
 
 
 def get_domain_metrics_dict_by_name(
-    metrics: Dict[Tuple, Any], metric_domain_kwargs: IDDict
+    metrics: Dict[Tuple[str, str, str], Any], metric_domain_kwargs: IDDict
 ):
     return {
         metric_edge_key_id_tuple[0]: metric_value
@@ -258,7 +266,7 @@ def get_expectation_impl(expectation_name):
 
 
 def list_registered_expectation_implementations(
-    expectation_root: Type["Expectation"] = None,
+    expectation_root: Type["Expectation"] = None,  # noqa: F821
 ) -> List[str]:
     registered_expectation_implementations = []
     for (

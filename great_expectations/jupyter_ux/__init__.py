@@ -8,11 +8,17 @@ from datetime import datetime
 import pandas as pd
 import tzlocal
 from IPython.core.display import HTML, display
+from packaging import version
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
-pd.set_option("display.max_colwidth", -1)
+
+if version.parse(pd.__version__) <= version.parse("1.0.0"):
+    # support for negative integers was deprecated in version 1.0.1
+    pd.set_option("display.max_colwidth", -1)
+else:
+    pd.set_option("display.max_colwidth", None)
 
 from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
@@ -167,8 +173,7 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
     logger.addHandler(chandler)
     logger.setLevel(log_level)
     logger.info(
-        "Great Expectations logging enabled at %s level by JupyterUX module."
-        % (log_level,)
+        f"Great Expectations logging enabled at {log_level} level by JupyterUX module."
     )
     #
     # # Filter warnings

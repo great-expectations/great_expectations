@@ -31,31 +31,30 @@ data.
 
 When you're deploying Great Expectations, you'll use a `Checkpoint` to run a validation, testing whether data meets expectations, and potentially performing other actions like building and saving a Data Docs site, sending a notification, or signaling a pipeline runner.
 
-Great Expectations makes it possible to maintain state about data pipelines using `Stores`. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Results, Metrics, Checkpoints, or even Data Docs sites. Stores, and other configuration, is managed using a `Data Context`. The Data Context configuration is usually stored as a yaml file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
+Great Expectations makes it possible to maintain state about data pipelines using `Stores`. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Results, Metrics, Checkpoints, or even Data Docs sites. Stores, and other configuration, is managed using a `Data Context`. The Data Context configuration is usually stored as a YAML file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
 
 ## Concepts in the codebase
 
 This section describes links to explanations of the foundational concepts used to integrate Great Expectations into your code. It is a glossary
 of the main concepts and classes you will encounter while using Great Expectations.
 
-* [Checkpoints and Actions](./checkpoints_and_actions)
-* [Data Context](./data_context)
-* [Data discovery](./data_discovery)
-* [Data Docs](./data_docs)
-* [Datasources](./datasources)
-* [Dividing Data Assets into Batches](./dividing_data_assets_into_batches)
-* [Evaluation Parameters](./evaluation_parameters)
-* [Expectations](./expectations/expectations)
-  * [Conditional Expectations](./expectations/conditional_expectations)
-  * [Distributional Expectations](./expectations/distributional_expectations)
-  * [Implemented Expectations](./expectations/implemented_expectations)
-  * [Result format](./expectations/result_format)
-  * [Standard arguments](./expectations/standard_arguments)
-* [Expectation Suite operations](./expectation_suite_operations)
-* [Metrics](./metrics)
-* [Profilers](./profilers)
-* [Stores](./stores)
-* [Validation](./validation)
+* [Checkpoints and Actions](./checkpoints_and_actions.md)
+* [Data Context](./data_context.md)
+* [Data discovery](./data_discovery.md)
+* [Data Docs](./data_docs.md)
+* [Datasources](./datasources.md)
+* [Dividing Data Assets into Batches](./dividing_data_assets_into_batches.md)
+* [Evaluation Parameters](./evaluation_parameters.md)
+* [Expectations](./expectations/expectations.md)
+  * [Conditional Expectations](./expectations/conditional_expectations.md)
+  * [Distributional Expectations](./expectations/distributional_expectations.md)
+  * [Implemented Expectations](./expectations/implemented_expectations.md)
+  * [Result format](./expectations/result_format.md)
+  * [Standard arguments](./expectations/standard_arguments.md)
+* [Expectation Suite operations](./expectation_suite_operations.md)
+* [Metrics](./metrics.md)
+* [Profilers](./profilers.md)
+* [Validation](./validation.md)
 
 
 ## Design decisions
@@ -110,6 +109,6 @@ permissions.
 In some cases **the thing that "makes a batch a batch" is the act of attending to it--for example by validating or
 profiling the data**. It's all about **your** Expectations.
 
-Great Expectations provides a mechanism to automatically generate expectations, using a feature called a [**Profiler**](./profilers). A Profiler builds an **Expectation Suite** from one or more **Data Assets**. It may also validates the data against the newly-generated Expectation Suite to return a **Validation Result**. There are several Profilers included with Great Expectations.
+Great Expectations provides a mechanism to automatically generate expectations, using a feature called a [**Profiler**](./profilers.md). A Profiler builds an **Expectation Suite** from one or more **Data Assets**. It may also validates the data against the newly-generated Expectation Suite to return a **Validation Result**. There are several Profilers included with Great Expectations.
 
 A Profiler makes it possible to quickly create a starting point for generating expectations about a Dataset. For example, during the `init` flow, Great Expectations currently uses the **UserConfigurableProfiler** to demonstrate important features of **Expectations** by creating and validating an Expectation Suite that has several different kinds of expectations built from a small sample of data. A Profiler is also critical to generating the Expectation Suites used during profiling.

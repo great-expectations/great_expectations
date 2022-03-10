@@ -5,7 +5,6 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -63,8 +62,8 @@ class ConfigurationStore(Store):
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
-                store_backend["filepath_template"] = store_backend.get(
-                    "filepath_template", "{0}.yml"
+                store_backend["filepath_suffix"] = store_backend.get(
+                    "filepath_suffix", ".yml"
                 )
 
         super().__init__(
@@ -91,7 +90,7 @@ class ConfigurationStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
-        if isinstance(self.store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()
             return config_schema.dump(value)
@@ -139,7 +138,7 @@ class ConfigurationStore(Store):
             else:
                 print(f"\t{len_keys} keys found:")
                 for key in report_object["keys"][:10]:
-                    print("\t\t" + str(key))
+                    print(f"		{str(key)}")
             if len_keys > 10:
                 print("\t\t...")
             print()

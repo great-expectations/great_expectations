@@ -190,3 +190,7 @@ class ExpectColumnValuesToBeXmlParseable(ColumnMapExpectation):
                 }
             )
         ]
+
+
+if __name__ == "__main__":
+    ExpectColumnValuesToBeXmlParseable().print_diagnostic_checklist()

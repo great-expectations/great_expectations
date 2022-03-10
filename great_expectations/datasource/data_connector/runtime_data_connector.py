@@ -2,12 +2,7 @@ import logging
 from typing import Any, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequest,
-    BatchRequestBase,
-    RuntimeBatchRequest,
-)
+from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchMarkers,
@@ -35,8 +30,7 @@ class RuntimeDataConnector(DataConnector):
         name (str): The name of this DataConnector
         datasource_name (str): The name of the Datasource that contains it
         execution_engine (ExecutionEngine): An ExecutionEngine
-        batch_identifiers (list): a list of keys that must be defined in the batch_identifiers dict of
-        RuntimeBatchRequest
+        batch_identifiers (list): a list of keys that must be defined in the batch_identifiers dict of RuntimeBatchRequest
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
@@ -127,6 +121,7 @@ class RuntimeDataConnector(DataConnector):
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
+        self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,
             batch_spec,
@@ -143,7 +138,7 @@ class RuntimeDataConnector(DataConnector):
 
     def _get_batch_definition_list_from_batch_request(
         self,
-        batch_request: BatchRequest,
+        batch_request: RuntimeBatchRequest,
     ) -> List[BatchDefinition]:
         """
         <Will> 202103. The following behavior of the _data_references_cache follows a pattern that we are using for
@@ -163,6 +158,7 @@ class RuntimeDataConnector(DataConnector):
                 batch_identifiers=batch_request.batch_identifiers
             )
             batch_identifiers = batch_request.batch_identifiers
+
         if not batch_identifiers:
             batch_identifiers = {}
 
@@ -259,7 +255,7 @@ class RuntimeDataConnector(DataConnector):
         "{str(type(runtime_parameters))}", which is illegal.
                         """
             )
-        keys_present = [
+        keys_present: List[str] = [
             key
             for key, val in runtime_parameters.items()
             if val is not None and key in ["batch_data", "query", "path"]
@@ -270,11 +266,12 @@ class RuntimeDataConnector(DataConnector):
                 "'query', 'path'."
             )
 
-    def _validate_batch_request(self, batch_request: BatchRequestBase):
+    def _validate_batch_request(self, batch_request: RuntimeBatchRequest):
         super()._validate_batch_request(batch_request=batch_request)
 
         runtime_parameters = batch_request.runtime_parameters
         batch_identifiers = batch_request.batch_identifiers
+
         if not (
             (not runtime_parameters and not batch_identifiers)
             or (runtime_parameters and batch_identifiers)
@@ -285,12 +282,14 @@ class RuntimeDataConnector(DataConnector):
                 both absent in the batch_request parameter.
                 """
             )
+
         if runtime_parameters:
             self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
 
     def _validate_batch_identifiers(self, batch_identifiers: dict):
         if batch_identifiers is None:
             batch_identifiers = {}
+
         self._validate_batch_identifiers_configuration(
             batch_identifiers=list(batch_identifiers.keys())
         )
@@ -358,6 +357,7 @@ appear among the configured batch identifiers.
                 print(
                     f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}): {unmatched_data_references[:max_examples]}\n"
                 )
+
         report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
         report_obj["example_unmatched_data_references"] = unmatched_data_references[
             :max_examples

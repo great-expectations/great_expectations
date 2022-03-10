@@ -8,8 +8,8 @@
 
 # NOTE - 20210114
 # aiobotocore is a dependency of the s3fs package
-# The latest version of aiobotocore (v1.2.0) is only compatible with botocore up to 1.19.52
-# botocore==1.19.52 is compatible with boto3==1.16.52
-botocore==1.19.52  # From aiobotocore v1.2.0 dependencies https://pypi.org/project/aiobotocore/
-boto3==1.16.52  # from botocore==1.19.52 dependency
+# The latest version of aiobotocore (v1.4.0) is only compatible with botocore up to 1.20.106
+# botocore==1.20.106 is compatible with boto3==1.17.106
+botocore==1.20.106  # From aiobotocore v1.4.0 dependencies https://pypi.org/project/aiobotocore/
+boto3==1.17.106  # from botocore==1.20.106 dependency
 # END NOTE

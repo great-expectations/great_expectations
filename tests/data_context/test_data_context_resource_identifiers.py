@@ -1,6 +1,7 @@
 import pytest
 from freezegun import freeze_time
 
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -25,7 +26,7 @@ def test_expectation_suite_identifier_to_tuple():
 @freeze_time("09/26/2019 13:42:41")
 def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
     validation_result_identifier = ValidationResultIdentifier(
-        expectation_suite_identifier, "my_run_id", "my_batch_identifier"
+        expectation_suite_identifier, RunIdentifier("my_run_id"), "my_batch_identifier"
     )
     assert validation_result_identifier.to_tuple() == (
         "my",
@@ -44,7 +45,7 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
     )
 
     validation_result_identifier_no_run_id = ValidationResultIdentifier(
-        expectation_suite_identifier, None, "my_batch_identifier"
+        expectation_suite_identifier, RunIdentifier(None), "my_batch_identifier"
     )
     assert validation_result_identifier_no_run_id.to_tuple() == (
         "my",
@@ -63,7 +64,7 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
     )
 
     validation_result_identifier_no_batch_identifier = ValidationResultIdentifier(
-        expectation_suite_identifier, "my_run_id", None
+        expectation_suite_identifier, RunIdentifier("my_run_id"), None
     )
     assert validation_result_identifier_no_batch_identifier.to_tuple() == (
         "my",
@@ -82,7 +83,9 @@ def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
     )
 
     validation_result_identifier_no_run_id_no_batch_identifier = (
-        ValidationResultIdentifier(expectation_suite_identifier, None, None)
+        ValidationResultIdentifier(
+            expectation_suite_identifier, RunIdentifier(None), None
+        )
     )
     assert validation_result_identifier_no_run_id_no_batch_identifier.to_tuple() == (
         "my",

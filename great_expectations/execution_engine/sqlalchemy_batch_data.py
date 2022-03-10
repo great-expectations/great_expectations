@@ -1,7 +1,7 @@
 import logging
-import uuid
 
 from great_expectations.execution_engine.execution_engine import BatchData
+from great_expectations.util import generate_temporary_table_name
 
 try:
     import sqlalchemy as sa
@@ -12,6 +12,7 @@ except ImportError:
     sa = None
     quoted_name = None
     DefaultDialect = None
+    DatabaseError = None
 
 logger = logging.getLogger(__name__)
 
@@ -32,11 +33,11 @@ class SqlAlchemyBatchData(BatchData):
         # Option 3
         selectable=None,
         create_temp_table: bool = True,
-        temp_table_name: str = None,
         temp_table_schema_name: str = None,
+        temp_table_name: str = None,
         use_quoted_name: bool = False,
-        source_table_name: str = None,
         source_schema_name: str = None,
+        source_table_name: str = None,
     ):
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
@@ -122,21 +123,20 @@ class SqlAlchemyBatchData(BatchData):
                 self._selectable = sa.Table(
                     table_name,
                     sa.MetaData(),
-                    schema_name=None,
+                    schema=None,
                 )
             else:
                 self._selectable = sa.Table(
                     table_name,
                     sa.MetaData(),
-                    schema_name=schema_name,
+                    schema=schema_name,
                 )
 
         elif create_temp_table:
             if temp_table_name:
                 generated_table_name = temp_table_name
             else:
-                # Suggestion: Pull this into a separate "_generate_temporary_table_name" method
-                generated_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+                generated_table_name = generate_temporary_table_name()
                 # mssql expects all temporary table names to have a prefix '#'
                 if engine.dialect.name.lower() == "mssql":
                     generated_table_name = f"#{generated_table_name}"
@@ -151,14 +151,14 @@ class SqlAlchemyBatchData(BatchData):
                         compile_kwargs={"literal_binds": True},
                     )
             self._create_temporary_table(
-                generated_table_name,
-                query,
+                temp_table_name=generated_table_name,
+                query=query,
                 temp_table_schema_name=temp_table_schema_name,
             )
             self._selectable = sa.Table(
                 generated_table_name,
                 sa.MetaData(),
-                schema_name=temp_table_schema_name,
+                schema=temp_table_schema_name,
             )
         else:
             if query:
@@ -199,41 +199,42 @@ class SqlAlchemyBatchData(BatchData):
         :param query:
         """
         if self.sql_engine_dialect.name.lower() == "bigquery":
-            stmt = "CREATE OR REPLACE TABLE `{temp_table_name}` AS {query}".format(
-                temp_table_name=temp_table_name, query=query
-            )
+            stmt = f"CREATE OR REPLACE TABLE `{temp_table_name}` AS {query}"
+        elif self.sql_engine_dialect.name.lower() == "dremio":
+            stmt = f"CREATE OR REPLACE VDS {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name.lower() == "snowflake":
             if temp_table_schema_name is not None:
-                temp_table_name = temp_table_schema_name + "." + temp_table_name
-            stmt = (
-                "CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}".format(
-                    temp_table_name=temp_table_name, query=query
-                )
-            )
+                temp_table_name = f"{temp_table_schema_name}.{temp_table_name}"
+
+            stmt = f"CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name == "mysql":
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the
             # generic case.
-            stmt = "CREATE TEMPORARY TABLE {temp_table_name} AS {query}".format(
-                temp_table_name=temp_table_name, query=query
-            )
+            stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name == "mssql":
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
             # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
             # changing column names), so this is not an option!
-            query = query.string  # extracting string from MSSQLCompiler object
+            # noinspection PyUnresolvedReferences
+            if isinstance(query, sa.dialects.mssql.base.MSSQLCompiler):
+                query = query.string  # extracting string from MSSQLCompiler object
+
             if "from" in query:
                 strsep = "from"
             else:
                 strsep = "FROM"
             querymod = query.split(strsep, maxsplit=1)
-            stmt = (querymod[0] + "into {temp_table_name} from" + querymod[1]).format(
+            stmt = f"{querymod[0]}into {{temp_table_name}} from{querymod[1]}".format(
                 temp_table_name=temp_table_name
             )
+        # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
+        # Similar message may be needed in the future for Trino backend.
         elif self.sql_engine_dialect.name.lower() == "awsathena":
-            stmt = "CREATE TABLE {temp_table_name} AS {query}".format(
-                temp_table_name=temp_table_name, query=query
+            logger.warning(
+                f"GE has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
+            stmt = f"CREATE TABLE {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name.lower() == "oracle":
             # oracle 18c introduced PRIVATE temp tables which are transient objects
             stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE DEFINITION AS {query}".format(
@@ -244,10 +245,13 @@ class SqlAlchemyBatchData(BatchData):
             stmt_2 = "CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}".format(
                 temp_table_name=temp_table_name, query=query
             )
-        else:
-            stmt = 'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'.format(
+        # Please note that Teradata is currently experimental (as of 0.13.43)
+        elif self.sql_engine_dialect.name.lower() == "teradatasql":
+            stmt = 'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 temp_table_name=temp_table_name, query=query
             )
+        else:
+            stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
         if self.sql_engine_dialect.name.lower() == "oracle":
             try:
                 self._engine.execute(stmt_1)

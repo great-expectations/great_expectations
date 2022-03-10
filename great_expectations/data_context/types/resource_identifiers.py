@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import Union
+from typing import Optional, Union
 from uuid import UUID
 
 from dateutil.parser import parse
@@ -42,7 +42,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
         return cls(expectation_suite_name=tuple_[0])
 
     def __repr__(self):
-        return self.__class__.__name__ + "::" + self._expectation_suite_name
+        return f"{self.__class__.__name__}::{self._expectation_suite_name}"
 
 
 class ExpectationSuiteIdentifierSchema(Schema):
@@ -96,7 +96,7 @@ class BatchIdentifierSchema(Schema):
 
 
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifer
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier
     and run_id.
     """
 
@@ -133,7 +133,7 @@ class ValidationResultIdentifier(DataContextKey):
         self._batch_identifier = batch_identifier
 
     @property
-    def expectation_suite_identifier(self):
+    def expectation_suite_identifier(self) -> ExpectationSuiteIdentifier:
         return self._expectation_suite_identifier
 
     @property
@@ -193,10 +193,46 @@ class ValidationResultIdentifier(DataContextKey):
             batch_identifier=batch_identifier,
         )
 
-    # TODO: [Rob] nix method after GeCloudIdentifier is implemented
+
+class GeCloudIdentifier(DataContextKey):
+    def __init__(self, resource_type: str, ge_cloud_id: Optional[str] = None):
+        super().__init__()
+
+        self._resource_type = resource_type
+        self._ge_cloud_id = ge_cloud_id if ge_cloud_id is not None else ""
+
+    @property
+    def resource_type(self):
+        return self._resource_type
+
+    @resource_type.setter
+    def resource_type(self, value):
+        self._resource_type = value
+
+    @property
+    def ge_cloud_id(self):
+        return self._ge_cloud_id
+
+    @ge_cloud_id.setter
+    def ge_cloud_id(self, value):
+        self._ge_cloud_id = value
+
+    def to_tuple(self):
+        return (self.resource_type, self.ge_cloud_id)
+
+    def to_fixed_length_tuple(self):
+        return self.to_tuple()
+
     @classmethod
-    def from_ge_tuple(cls, tuple_):
-        return tuple_[0]
+    def from_tuple(cls, tuple_):
+        return cls(resource_type=tuple_[0], ge_cloud_id=tuple_[1])
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls.from_tuple(tuple_)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
 
 
 class ValidationResultIdentifierSchema(Schema):
@@ -314,7 +350,7 @@ class ConfigurationIdentifier(DataContextKey):
         return cls(configuration_key=tuple_[0])
 
     def __repr__(self):
-        return self.__class__.__name__ + "::" + self._configuration_key
+        return f"{self.__class__.__name__}::{self._configuration_key}"
 
 
 class ConfigurationIdentifierSchema(Schema):

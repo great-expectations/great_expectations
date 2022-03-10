@@ -18,14 +18,14 @@ This guide will help you implement renderers for your custom Expectations, allow
 
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_expectations.md).
+- Implemented a custom Expectation.
 - Set up a [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md) site.
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md) containing your custom Expectation.
-- Generated one Validation Result (from running a [Checkpoint](../../../guides/validation/how_to_validate_data_by_running_a_checkpoint.md) or [Validation Operator](../../../guides/validation/how_to_add_a_validation_operator.md)) containing your custom Expectation
+- Ran one [Checkpoint](../../../guides/validation/how_to_validate_data_by_running_a_checkpoint.md) to validate data.
     
 </Prerequisites>
 
-See also this [complete custom expectation with renderer example](https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py).
+See also this [complete custom expectation with renderer example](https://github.com/superconductive/ge_tutorials/blob/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py).
 
 Steps
 -----
@@ -431,74 +431,74 @@ This example shows how you can render your custom Expectation using different co
 
 <TabItem value="graph">
 
-    <Prerequisites>
+<Prerequisites>
 
-       - Have installed and are familiarized with [Altair](https://altair-viz.github.io/)
+   - Have installed and are familiarized with [Altair](https://altair-viz.github.io/)
 
-    </Prerequisites>
+</Prerequisites>
 
-    **Input:**
+**Input:**
 
-    ```python
-    example_expectation_config = ExpectationConfiguration(**{
-        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
-        "kwargs": {
-            "column": "BATHRM",
-            "partition_object": {
-                "values": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 24.0],
-                "weights": [
-                    0.000429396884072176,
-                    0.37112959384655597,
-                    0.34935170405219973,
-                    0.18408057725876764,
-                    0.07543383087363596,
-                    0.01257386093141785,
-                    0.004658022720695996,
-                    0.0012135129332474538,
-                    0.0006627647558505326,
-                    0.000214698442036088,
-                    0.00013068600819587966,
-                    6.534300409793983e-05,
-                    2.8004144613402784e-05,
-                    9.33471487113426e-06,
-                    9.33471487113426e-06,
-                    9.33471487113426e-06
-                ]
-            },
-            "threshold": 0.6,
-            "result_format": "COMPLETE"
-        }
-    })
-    ```
+```python
+example_expectation_config = ExpectationConfiguration(**{
+    "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+    "kwargs": {
+        "column": "BATHRM",
+        "partition_object": {
+            "values": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 24.0],
+            "weights": [
+                0.000429396884072176,
+                0.37112959384655597,
+                0.34935170405219973,
+                0.18408057725876764,
+                0.07543383087363596,
+                0.01257386093141785,
+                0.004658022720695996,
+                0.0012135129332474538,
+                0.0006627647558505326,
+                0.000214698442036088,
+                0.00013068600819587966,
+                6.534300409793983e-05,
+                2.8004144613402784e-05,
+                9.33471487113426e-06,
+                9.33471487113426e-06,
+                9.33471487113426e-06
+            ]
+        },
+        "threshold": 0.6,
+        "result_format": "COMPLETE"
+    }
+})
+```
 
-    **Rendered Output:**
+**Rendered Output:**
 
-    ![Graph Example](../../../images/kl_divergence.png)
+![Graph Example](../../../images/kl_divergence.png)
 
-    **Implementation:**
+**Implementation:**
 
-    ```python
-    import altair as alt
+```python
+import altair as alt
 
-    class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
-        ...
+class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
+    ...
 
-        @classmethod
-        @renderer(renderer_type="renderer.prescriptive")
-        @render_evaluation_parameter_string
-        def _prescriptive_renderer(
-            cls,
-            configuration=None,
-            result=None,
-            language=None,
-            runtime_configuration=None,
-            **kwargs
-        ):
-            runtime_configuration = runtime_configuration or {}
-            include_column_name = runtime_configuration.get("include_column_name", True)
-            include_column_name = (
-                include_column_name if include_column_name is not None else True
-            )
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
             styling = runtime_configuration.get("styling")
             # get params dict with all expected kwargs
             params = substitute_none_for_missing(
@@ -641,7 +641,7 @@ This example shows how you can render your custom Expectation using different co
                     }
                 )
             return expected_distribution
-
+```
 </TabItem>
 </Tabs>
 

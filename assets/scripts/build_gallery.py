@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import traceback
+from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, run
 from typing import Dict
 
@@ -18,6 +19,10 @@ chandler.setFormatter(
 )
 logger.addHandler(chandler)
 logger.setLevel(logging.DEBUG)
+
+
+expectation_tracebacks = StringIO()
+expectation_checklists = StringIO()
 
 
 def execute_shell_command(command: str) -> int:
@@ -126,7 +131,6 @@ def build_gallery(
     built_expectations = set()
     logger.info("Loading great_expectations library.")
     installed_packages = pkg_resources.working_set
-    installed_packages_names = [i.key for i in installed_packages]
     installed_packages_txt = sorted(f"{i.key}=={i.version}" for i in installed_packages)
     logger.debug(f"Found the following packages: {installed_packages_txt}")
 
@@ -142,9 +146,18 @@ def build_gallery(
             impl = great_expectations.expectations.registry.get_expectation_impl(
                 expectation
             )
-            diagnostics = impl().run_diagnostics()
-            gallery_info[expectation] = diagnostics
-            built_expectations.add(expectation)
+            try:
+                diagnostics = impl().run_diagnostics()
+                checklist_string = diagnostics.generate_checklist()
+                expectation_checklists.write(f"\n\n----------------\n{expectation}\n")
+                expectation_checklists.write(f"{checklist_string}\n")
+                gallery_info[expectation] = diagnostics.to_json_dict()
+                built_expectations.add(expectation)
+            except Exception:
+                logger.error(f"Failed to run diagnostics for: {expectation}")
+                print(traceback.format_exc())
+                expectation_tracebacks.write(f"\n\n----------------\n{expectation}\n")
+                expectation_tracebacks.write(traceback.format_exc())
     else:
         built_expectations = set(core_expectations)
 
@@ -176,11 +189,15 @@ def build_gallery(
             just_installed = set()
             if expectation_module in requirements_dict:
                 logger.info(f"Loading dependencies for module {expectation_module}")
-                for req in requirements_dict[expectation_module]["requirements"]:
-                    req_package = [
-                        package.key for package in pkg_resources.parse_requirements(req)
-                    ]
-                    if req_package in installed_packages_names:
+                requirements = requirements_dict[expectation_module].get(
+                    "requirements", []
+                )
+                parsed_requirements = pkg_resources.parse_requirements(requirements)
+                for req in parsed_requirements:
+                    is_satisfied = any(
+                        [installed_pkg in req for installed_pkg in installed_packages]
+                    )
+                    if is_satisfied:
                         continue
                     just_installed.add(req)
                     logger.debug(f"Executing command: 'pip install \"{req}\"'")
@@ -198,10 +215,22 @@ def build_gallery(
                 impl = great_expectations.expectations.registry.get_expectation_impl(
                     expectation
                 )
-
-                diagnostics = impl().run_diagnostics()
-                gallery_info[expectation] = diagnostics
-                built_expectations.add(expectation)
+                try:
+                    diagnostics = impl().run_diagnostics()
+                    checklist_string = diagnostics.generate_checklist()
+                    expectation_checklists.write(
+                        f"\n\n----------------\n(contrib) {expectation}\n"
+                    )
+                    expectation_checklists.write(f"{checklist_string}\n")
+                    gallery_info[expectation] = diagnostics.to_json_dict()
+                    built_expectations.add(expectation)
+                except Exception:
+                    logger.error(f"Failed to run diagnostics for: {expectation}")
+                    print(traceback.format_exc())
+                    expectation_tracebacks.write(
+                        f"\n\n----------------\n{expectation}\n"
+                    )
+                    expectation_tracebacks.write(traceback.format_exc())
 
             logger.info(f"Unloading just-installed for module {expectation_module}")
             for req in just_installed:
@@ -222,5 +251,13 @@ def build_gallery(
 
 if __name__ == "__main__":
     gallery_info = build_gallery(include_core=True, include_contrib_experimental=True)
-    with open("./expectation_library.json", "w") as outfile:
+    tracebacks = expectation_tracebacks.getvalue()
+    checklists = expectation_checklists.getvalue()
+    if tracebacks != "":
+        print(tracebacks)
+    if checklists != "":
+        print(checklists)
+        with open("./checklists.txt", "w") as outfile:
+            outfile.write(checklists)
+    with open("./expectation_library_v2.json", "w") as outfile:
         json.dump(gallery_info, outfile)

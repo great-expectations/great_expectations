@@ -1,12 +1,11 @@
-import os
 import sys
 
 import click
-import requests
 
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_logging import logger
 from great_expectations.cli.v012.util import cli_message, cli_message_list
+from great_expectations.core.usage_statistics.util import send_usage_message
 
 
 @click.group()
@@ -44,8 +43,11 @@ def docs_build(directory, site_name, view=True, assume_yes=False):
     """Build Data Docs for a project."""
     context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
-    toolkit.send_usage_message(
-        data_context=context, event="cli.docs.build", success=True
+    send_usage_message(
+        data_context=context,
+        event="cli.docs.build",
+        api_version="v2",
+        success=True,
     )
 
 
@@ -77,8 +79,11 @@ def docs_list(directory):
         list_intro_string = _build_intro_string(docs_sites_strings)
         cli_message_list(docs_sites_strings, list_intro_string)
 
-    toolkit.send_usage_message(
-        data_context=context, event="cli.docs.list", success=True
+    send_usage_message(
+        data_context=context,
+        event="cli.docs.list",
+        api_version="v2",
+        success=True,
     )
 
 
@@ -110,14 +115,20 @@ def clean_data_docs(directory, site_name=None, all=None):
     context.clean_data_docs(site_name=site_name)
     failed = False
     if not failed and context is not None:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.docs.clean", success=True
+        send_usage_message(
+            data_context=context,
+            event="cli.docs.clean",
+            api_version="v2",
+            success=True,
         )
-        cli_message("<green>{}</green>".format("Cleaned data docs"))
+        cli_message("<green>Cleaned data docs</green>")
 
     if failed and context is not None:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.docs.clean", success=False
+        send_usage_message(
+            data_context=context,
+            event="cli.docs.clean",
+            api_version="v2",
+            success=False,
         )
 
 

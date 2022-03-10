@@ -31,15 +31,7 @@ Steps
 
     In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
-    ```yaml
-    expectations_store_name: expectations_store
-
-    stores:
-        expectations_store:
-            class_name: ExpectationsStore
-            store_backend:
-                class_name: TupleFilesystemStoreBackend
-                base_directory: expectations/
+    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L38-L45
     ```
 
 
@@ -49,68 +41,46 @@ Steps
 
     :::warning
 
-    If you are also storing [Validations in GCS](./how_to_configure_a_validation_result_store_in_gcs.md) or [DataDocs in GCS](../configuring_data_docs/how_to_host_and_share_data_docs_on_gcs), please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+    If you are also storing [Validations in GCS](./how_to_configure_a_validation_result_store_in_gcs.md) or [DataDocs in GCS](../configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
     :::
 
-    ```yaml
-    expectations_store_name: expectations_GCS_store
-    stores:
-        expectations_GCS_store:
-            class_name: ExpectationsStore
-            store_backend:
-                class_name: TupleGCSStoreBackend
-                project: '<your_GCP_project_name>'
-                bucket: '<your_GCS_bucket_name>'
-                prefix: '<your_GCS_folder_name>'
+    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L53-L62
     ```
 
 
 4. **Copy existing Expectation JSON files to the GCS bucket**. (This step is optional).
 
-    One way to copy Expectations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. The following example will copy one Expectation, ``exp1`` from a local folder to the GCS bucket.   Information on other ways to copy Expectation JSON files, like the Cloud Storage browser in the Google Cloud Console, can be found in the [Documentation for Google Cloud](https://cloud.google.com/storage/docs/uploading-objects).
+    One way to copy Expectations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. The following example will copy one Expectation, ``my_expectation_suite`` from a local folder to the GCS bucket. Information on other ways to copy Expectation JSON files, like the Cloud Storage browser in the Google Cloud Console, can be found in the [Documentation for Google Cloud](https://cloud.google.com/storage/docs/uploading-objects).
 
-    ```bash
-    gsutil cp exp1.json gs://'<your_GCS_bucket_name>'/'<your_GCS_folder_name>'
-
-    Operation completed over 1 objects/58.8 KiB.
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L106
+    ```
+   
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L137
     ```
 
 
-5. **Confirm that the new Expectations store has been added by running** ``great_expectations --v3-api store list``.
+5. **Confirm that the new Expectations store has been added by running:**
 
-    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_GCS_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in GCS as long as we set the ``expectations_store_name`` variable to ``expectations_GCS_store``, and the config for ``expectations_store`` can be removed if you would like.
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L144
+    ```
+   
+    Only the active Stores will be listed. Great Expectations will look for Expectations in GCS as long as we set the ``expectations_store_name`` variable to ``expectations_GCS_store``, and the config for ``expectations_store`` can be removed if you would like.
 
-    ```bash
-    great_expectations --v3-api store list
-
-    - name: expectations_store
-    class_name: ExpectationsStore
-    store_backend:
-        class_name: TupleFilesystemStoreBackend
-        base_directory: expectations/
-
-    - name: expectations_GCS_store
-    class_name: ExpectationsStore
-    store_backend:
-        class_name: TupleGCSStoreBackend
-        project: '<your_GCP_project_name>'
-        bucket: '<your_GCS_bucket_name>'
-        prefix: '<your_GCS_folder_name>'
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L155-L161
     ```
 
 
-6. **Confirm that Expectations can be accessed from GCS by running** ``great_expectations --v3-api suite list``.
+6. **Confirm that Expectations can be accessed from GCS by running:**
 
-    If you followed Step 4, the output should include the Expectation we copied to GCS: ``exp1``.  If you did not copy Expectations to the new Store, you will see a message saying no Expectations were found.
-
-    ```bash
-    great_expectations --v3-api suite list
-
-    1 Expectation Suite found:
-     - exp1
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L171
     ```
 
+    If you followed Step 4, the output should include the Expectation we copied to GCS: ``my_expectation_suite``. If you did not copy Expectations to the new Store, you will see a message saying no Expectations were found.
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L182-L183
+    ```
 
+### Additional Notes
+To view the full script used in this page, see it on GitHub:
+- [how_to_configure_an_expectation_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py)

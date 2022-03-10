@@ -1,25 +1,28 @@
 import logging
-import os
 import re
-from typing import Dict, List, Optional
-
-import great_expectations.exceptions as ge_exceptions
-
-try:
-    from azure.storage.blob import BlobServiceClient
-except ImportError:
-    azure = None
+from typing import List, Optional
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector import (
+from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+)
 from great_expectations.datasource.data_connector.util import list_azure_keys
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
+
+try:
+    from azure.storage.blob import BlobServiceClient
+except ImportError:
+    BlobServiceClient = None
+    logger.debug(
+        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
+    )
 
 
 class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
@@ -85,7 +88,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._container = container
-        self._name_starts_with = os.path.join(name_starts_with, "")
+        self._name_starts_with = FilePathDataConnector.sanitize_prefix(name_starts_with)
         self._delimiter = delimiter
 
         if azure_options is None:
@@ -153,13 +156,17 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return path_list
 
-    def _get_full_file_path(
-        self,
-        path: str,
-        data_asset_name: Optional[str] = None,
+    def _get_full_file_path_for_asset(
+        self, path: str, asset: Optional[Asset] = None
     ) -> str:
-        # data_asset_name isn't used in this method.
+        # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return os.path.join(
-            f"{self._account_name}.blob.core.windows.net", self._container, path
+        template_arguments: dict = {
+            "account_name": self._account_name,
+            "container": self._container,
+            "path": path,
+        }
+        return self.execution_engine.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            template_arguments=template_arguments,
         )

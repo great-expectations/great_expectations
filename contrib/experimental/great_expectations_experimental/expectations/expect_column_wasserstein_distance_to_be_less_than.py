@@ -335,5 +335,4 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnWassersteinDistanceToBeLessThan().self_check()
-    print(json.dumps(self_check_report, indent=2))
+    ExpectColumnWassersteinDistanceToBeLessThan().print_diagnostic_checklist()
