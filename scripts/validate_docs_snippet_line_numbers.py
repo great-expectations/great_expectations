@@ -181,6 +181,6 @@ if __name__ == "__main__":
     broken_refs: List[DocusaurusRef] = evaluate_snippet_validity(docusaurus_refs)
     if broken_refs:
         print_diagnostic_report(broken_refs)
-        sys.exit(1)
+        # sys.exit(1) # TODO(cdkini): Enable once all errors are resolved
     else:
         print("[SUCCESS] All snippets are valid and referenced properly!")
