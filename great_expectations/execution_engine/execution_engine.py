@@ -1,6 +1,7 @@
 import copy
 import logging
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
@@ -136,6 +137,17 @@ class DataConnectorStorageDataReferenceResolver:
         ](
             template_arguments
         )
+
+
+@dataclass
+class SplitDomainKwargs:
+    """compute_domain_kwargs, accessor_domain_kwargs when split from domain_kwargs
+
+    The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+    """
+
+    compute: dict
+    accessor: dict
 
 
 class ExecutionEngine(ABC):
@@ -499,7 +511,7 @@ class ExecutionEngine(ABC):
         domain_kwargs: Dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[Dict, Dict]:
+    ) -> SplitDomainKwargs:
         """Split domain_kwargs for all domain types into compute and accessor domain kwargs.
 
         Args:
@@ -528,54 +540,46 @@ class ExecutionEngine(ABC):
                 'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
+        split_domain_kwargs: SplitDomainKwargs
         if domain_type == MetricDomainTypes.TABLE:
-            (
-                compute_domain_kwargs,
-                accessor_domain_kwargs,
-            ) = self._split_table_metric_domain_kwargs(
+            split_domain_kwargs = self._split_table_metric_domain_kwargs(
                 domain_kwargs,
                 domain_type,
                 accessor_keys,
             )
 
         elif domain_type == MetricDomainTypes.COLUMN:
-            (
-                compute_domain_kwargs,
-                accessor_domain_kwargs,
-            ) = self._split_column_metric_domain_kwargs(
+            split_domain_kwargs = self._split_column_metric_domain_kwargs(
                 domain_kwargs,
                 domain_type,
             )
 
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            (
-                compute_domain_kwargs,
-                accessor_domain_kwargs,
-            ) = self._split_column_pair_metric_domain_kwargs(
+            split_domain_kwargs = self._split_column_pair_metric_domain_kwargs(
                 domain_kwargs,
                 domain_type,
             )
 
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            (
-                compute_domain_kwargs,
-                accessor_domain_kwargs,
-            ) = self._split_multi_column_metric_domain_kwargs(
+            split_domain_kwargs = self._split_multi_column_metric_domain_kwargs(
                 domain_kwargs,
                 domain_type,
             )
         else:
             compute_domain_kwargs = copy.deepcopy(domain_kwargs)
             accessor_domain_kwargs = {}
+            split_domain_kwargs = SplitDomainKwargs(
+                compute_domain_kwargs, accessor_domain_kwargs
+            )
 
-        return compute_domain_kwargs, accessor_domain_kwargs
+        return split_domain_kwargs
 
     @staticmethod
     def _split_table_metric_domain_kwargs(
         domain_kwargs: Dict,
         domain_type: MetricDomainTypes,
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[Dict, Dict]:
+    ) -> SplitDomainKwargs:
         """Split domain_kwargs for table domain types into compute and accessor domain kwargs.
 
         Args:
@@ -616,13 +620,13 @@ class ExecutionEngine(ABC):
                 logger.warning(
                     f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
                 )
-        return compute_domain_kwargs, accessor_domain_kwargs
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod
     def _split_column_metric_domain_kwargs(
         domain_kwargs: Dict,
         domain_type: MetricDomainTypes,
-    ) -> Tuple[Dict, Dict]:
+    ) -> SplitDomainKwargs:
         """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
 
         Args:
@@ -648,13 +652,13 @@ class ExecutionEngine(ABC):
 
         accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
 
-        return compute_domain_kwargs, accessor_domain_kwargs
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod
     def _split_column_pair_metric_domain_kwargs(
         domain_kwargs: Dict,
         domain_type: MetricDomainTypes,
-    ) -> Tuple[Dict, Dict]:
+    ) -> SplitDomainKwargs:
         """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
 
         Args:
@@ -681,13 +685,13 @@ class ExecutionEngine(ABC):
         accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
         accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
 
-        return compute_domain_kwargs, accessor_domain_kwargs
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     @staticmethod
     def _split_multi_column_metric_domain_kwargs(
         domain_kwargs: Dict,
         domain_type: MetricDomainTypes,
-    ) -> Tuple[Dict, Dict]:
+    ) -> SplitDomainKwargs:
         """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
 
         Args:
@@ -720,7 +724,7 @@ class ExecutionEngine(ABC):
 
         accessor_domain_kwargs["column_list"] = column_list
 
-        return compute_domain_kwargs, accessor_domain_kwargs
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
 
 class MetricPartialFunctionTypes(Enum):

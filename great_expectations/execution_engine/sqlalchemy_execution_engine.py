@@ -29,7 +29,10 @@ from great_expectations.exceptions import (
 )
 from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    SplitDomainKwargs,
+)
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -660,23 +663,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             SqlAlchemy column
         """
-        selectable = self.get_domain_records(
-            domain_kwargs=domain_kwargs,
+        selectable = self.get_domain_records(domain_kwargs)
+
+        split_domain_kwargs = self._split_domain_kwargs(
+            domain_kwargs, domain_type, accessor_keys
         )
 
-        (compute_domain_kwargs, accessor_domain_kwargs,) = self._split_domain_kwargs(
-            domain_kwargs=domain_kwargs,
-            domain_type=domain_type,
-            accessor_keys=accessor_keys,
-        )
-
-        return selectable, compute_domain_kwargs, accessor_domain_kwargs
+        return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
     def _split_column_metric_domain_kwargs(
         self,
         domain_kwargs: Dict,
         domain_type: MetricDomainTypes,
-    ) -> Tuple[Dict, Dict]:
+    ) -> SplitDomainKwargs:
         """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
 
         Args:
@@ -685,7 +684,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             like to be using.
 
         Returns:
-            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
         """
         assert (
@@ -708,13 +707,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
 
-        return compute_domain_kwargs, accessor_domain_kwargs
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     def _split_column_pair_metric_domain_kwargs(
         self,
         domain_kwargs: Dict,
         domain_type: MetricDomainTypes,
-    ) -> Tuple[Dict, Dict]:
+    ) -> SplitDomainKwargs:
         """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
 
         Args:
@@ -723,7 +722,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             like to be using.
 
         Returns:
-            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
         """
         assert (
@@ -752,13 +751,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
             accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
 
-        return compute_domain_kwargs, accessor_domain_kwargs
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     def _split_multi_column_metric_domain_kwargs(
         self,
         domain_kwargs: Dict,
         domain_type: MetricDomainTypes,
-    ) -> Tuple[Dict, Dict]:
+    ) -> SplitDomainKwargs:
         """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
 
         Args:
@@ -767,7 +766,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             like to be using.
 
         Returns:
-            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
             The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
         """
         assert (
@@ -793,7 +792,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             accessor_domain_kwargs["column_list"] = column_list
 
-        return compute_domain_kwargs, accessor_domain_kwargs
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     def resolve_metric_bundle(
         self,

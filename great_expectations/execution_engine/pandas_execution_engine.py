@@ -569,9 +569,7 @@ Please check your config."""
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
-        data = self.get_domain_records(
-            domain_kwargs=domain_kwargs,
-        )
+        data = self.get_domain_records(domain_kwargs)
 
         table = domain_kwargs.get("table", None)
         if table:
@@ -579,13 +577,13 @@ Please check your config."""
                 "PandasExecutionEngine does not currently support multiple named tables."
             )
 
-        (compute_domain_kwargs, accessor_domain_kwargs,) = self._split_domain_kwargs(
-            domain_kwargs=domain_kwargs,
-            domain_type=domain_type,
-            accessor_keys=accessor_keys,
+        split_domain_kwargs = self._split_domain_kwargs(
+            domain_kwargs,
+            domain_type,
+            accessor_keys,
         )
 
-        return data, compute_domain_kwargs, accessor_domain_kwargs
+        return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
     ### Splitter methods for partitioning dataframes ###
     @staticmethod
