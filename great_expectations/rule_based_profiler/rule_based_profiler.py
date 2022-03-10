@@ -378,9 +378,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Add Rule object to existing profiler object by reconciling profiler rules and updating _profiler_config.
         """
-        if not isinstance(rule, Rule):
-            raise TypeError("add_rule() method requires a Rule to be passed in.")
-
         rules_dict: dict = {rule.name: rule.to_json_dict()}
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
             rules=rules_dict,
@@ -849,8 +846,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if self.variables:
             variables_dict = self.variables.to_dict()
 
-        if variables_dict.get("parameter_nodes"):
-            variables_dict = variables_dict["parameter_nodes"]["variables"]["variables"]
+        parameter_nodes: Optional[dict] = variables_dict.get("parameter_nodes")
+        if parameter_nodes:
+            variables_dict = parameter_nodes["variables"]["variables"]
 
         serializeable_dict: dict = {
             "class_name": self.__class__.__name__,
