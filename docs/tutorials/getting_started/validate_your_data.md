@@ -19,7 +19,7 @@ This will open a **Jupyter Notebook** that will allow you to complete the config
 The Jupyter Notebook contains some boilerplate code that allows you to configure a new Checkpoint. The second code cell is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit the `data_asset_name` to reference the data we want to validate (the February data), as follows:
 
 
-```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L164-L177
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L161-L174
 ```
 
 You can then execute all cells in the notebook in order to store the Checkpoint to your Data Context.
