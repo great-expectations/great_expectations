@@ -2395,6 +2395,16 @@ def _format_map_output(
     if result_format["result_format"] == "BASIC":
         return return_obj
 
+    if len(unexpected_list) and isinstance(unexpected_list[0], dict):
+        # in the case of multicolumn map expectations `unexpected_list` contains dicts,
+        # which will throw an exception when we hash it to count unique members.
+        # As a workaround, we flatten the values out to tuples.
+        immutable_unexpected_list = [
+            tuple([val for val in item.values()]) for item in unexpected_list
+        ]
+    else:
+        immutable_unexpected_list = unexpected_list
+
     # Try to return the most common values, if possible.
     partial_unexpected_counts = None
     if 0 < result_format.get("partial_unexpected_count"):
@@ -2402,7 +2412,7 @@ def _format_map_output(
             partial_unexpected_counts = [
                 {"value": key, "count": value}
                 for key, value in sorted(
-                    Counter(unexpected_list).most_common(
+                    Counter(immutable_unexpected_list).most_common(
                         result_format["partial_unexpected_count"]
                     ),
                     key=lambda x: (-x[1], x[0]),
@@ -2410,7 +2420,7 @@ def _format_map_output(
             ]
         except TypeError:
             partial_unexpected_counts = [
-                "partial_exception_counts requires a hashable type"
+                {"error": "partial_exception_counts requires a hashable type"}
             ]
         finally:
             return_obj["result"].update(
