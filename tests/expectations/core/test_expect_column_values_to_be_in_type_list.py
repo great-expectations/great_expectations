@@ -57,6 +57,10 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
     )
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyathena"),
+    reason="pyathena is not installed",
+)
 def test_expect_column_values_to_be_in_type_list_dialect_pyathena_boolean(sa):
     from pyathena import sqlalchemy_athena
 
