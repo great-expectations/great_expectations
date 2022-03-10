@@ -131,7 +131,7 @@ stages:
 
         - script: |
             pip install pytest pytest-azurepipelines
-            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --aws tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --aws tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials

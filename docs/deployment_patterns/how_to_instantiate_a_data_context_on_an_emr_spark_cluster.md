@@ -1,7 +1,7 @@
 ---
 title: How to instantiate a Data Context on an EMR Spark cluster
 ---
-import Prerequisites from '../guides/connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
 This guide will help you instantiate a Data Context on an EMR Spark cluster.
 
@@ -10,8 +10,6 @@ The guide demonstrates the recommended path for instantiating a Data Context wit
 
 
 <Prerequisites>
-
-- [Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration](../tutorials/getting_started/intro.md).
 
 </Prerequisites>
 
