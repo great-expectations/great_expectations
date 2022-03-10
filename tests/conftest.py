@@ -7,6 +7,7 @@ import os
 import random
 import shutil
 import sys
+import warnings
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -119,10 +120,16 @@ def pytest_configure(config):
 
 
 def pytest_addoption(parser):
+    # note: --no-spark will be deprecated in favor of --spark
     parser.addoption(
         "--no-spark",
         action="store_true",
-        help="If set, suppress all tests against the spark test suite",
+        help="If set, suppress tests against the spark test suite",
+    )
+    parser.addoption(
+        "--spark",
+        action="store_true",
+        help="If set, execute tests against the spark test suite",
     )
     parser.addoption(
         "--no-sqlalchemy",
@@ -130,9 +137,15 @@ def pytest_addoption(parser):
         help="If set, suppress all tests using sqlalchemy",
     )
     parser.addoption(
+        "--postgresql",
+        action="store_true",
+        help="If set, execute tests against postgresql",
+    )
+    # note: --no-postgresql will be deprecated in favor of --postgresql
+    parser.addoption(
         "--no-postgresql",
         action="store_true",
-        help="If set, suppress all tests against postgresql",
+        help="If set, supress tests against postgresql",
     )
     parser.addoption(
         "--mysql",
@@ -185,10 +198,21 @@ def build_test_backends_list(metafunc):
 
 
 def build_test_backends_list_cfe(metafunc):
+    # adding deprecation warnings
+    if metafunc.config.getoption("--no-postgresql"):
+        warnings.warn(
+            "--no-sqlalchemy is deprecated as of v0.14 in favor of the --postgresql flag. It will be removed in v0.16. Please adjust your tests accordingly",
+            DeprecationWarning,
+        )
+    if metafunc.config.getoption("--no-spark"):
+        warnings.warn(
+            "--no-spark is deprecated as of v0.14 in favor of the --spark flag. It will be removed in v0.16. Please adjust your tests accordingly.",
+            DeprecationWarning,
+        )
     include_pandas: bool = True
-    include_spark: bool = not metafunc.config.getoption("--no-spark")
+    include_spark: bool = metafunc.config.getoption("--spark")
     include_sqlalchemy: bool = not metafunc.config.getoption("--no-sqlalchemy")
-    include_postgresql = not metafunc.config.getoption("--no-postgresql")
+    include_postgresql: bool = metafunc.config.getoption("--postgresql")
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
@@ -201,6 +225,7 @@ def build_test_backends_list_cfe(metafunc):
         include_mysql=include_mysql,
         include_mssql=include_mssql,
         include_bigquery=include_bigquery,
+        include_aws=include_aws,
     )
     return test_backend_names
 
