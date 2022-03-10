@@ -826,14 +826,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def to_json_dict(self) -> dict:
         rule: Rule
-        variables_dict: dict = {}
-
-        if self.variables:
-            variables_dict = self.variables.to_dict()
-
-        parameter_nodes: Optional[dict] = variables_dict.get("parameter_nodes")
-        if parameter_nodes:
-            variables_dict = parameter_nodes["variables"]["variables"]
+        variables_dict: dict = convert_variables_to_dict(self.variables)
 
         serializeable_dict: dict = {
             "class_name": self.__class__.__name__,

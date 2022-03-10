@@ -117,9 +117,9 @@ class CheckpointStore(ConfigurationStore):
     def get_checkpoint(
         self, name: Optional[str], ge_cloud_id: Optional[str]
     ) -> CheckpointConfig:
-        key: Union[
-            GeCloudIdentifier, ConfigurationIdentifier
-        ] = CheckpointStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
+            name=name, ge_cloud_id=ge_cloud_id
+        )
         try:
             checkpoint_config: CheckpointConfig = self.get(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
