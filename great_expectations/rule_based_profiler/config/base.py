@@ -432,13 +432,12 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         ] = profiler.reconcile_profiler_variables(
             variables=variables,
         )
+        runtime_variables: Optional[Dict[str, Any]] = convert_variables_to_dict(
+            variables=effective_variables
+        )
 
         effective_rules: List["Rule"] = profiler.reconcile_profiler_rules(  # noqa: F821
             rules=rules,
-        )
-
-        runtime_variables: Optional[Dict[str, Any]] = convert_variables_to_dict(
-            variables=effective_variables
         )
 
         rule: "Rule"  # noqa: F821
