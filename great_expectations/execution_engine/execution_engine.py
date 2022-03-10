@@ -528,16 +528,14 @@ class ExecutionEngine(ABC):
                 'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = {}
         if domain_type == MetricDomainTypes.TABLE:
             (
                 compute_domain_kwargs,
                 accessor_domain_kwargs,
             ) = self._split_table_metric_domain_kwargs(
-                domain_kwargs=domain_kwargs,
-                domain_type=domain_type,
-                accessor_keys=accessor_keys,
+                domain_kwargs,
+                domain_type,
+                accessor_keys,
             )
 
         elif domain_type == MetricDomainTypes.COLUMN:
@@ -545,8 +543,8 @@ class ExecutionEngine(ABC):
                 compute_domain_kwargs,
                 accessor_domain_kwargs,
             ) = self._split_column_metric_domain_kwargs(
-                domain_kwargs=domain_kwargs,
-                domain_type=domain_type,
+                domain_kwargs,
+                domain_type,
             )
 
         elif domain_type == MetricDomainTypes.COLUMN_PAIR:
@@ -554,8 +552,8 @@ class ExecutionEngine(ABC):
                 compute_domain_kwargs,
                 accessor_domain_kwargs,
             ) = self._split_column_pair_metric_domain_kwargs(
-                domain_kwargs=domain_kwargs,
-                domain_type=domain_type,
+                domain_kwargs,
+                domain_type,
             )
 
         elif domain_type == MetricDomainTypes.MULTICOLUMN:
@@ -563,9 +561,12 @@ class ExecutionEngine(ABC):
                 compute_domain_kwargs,
                 accessor_domain_kwargs,
             ) = self._split_multi_column_metric_domain_kwargs(
-                domain_kwargs=domain_kwargs,
-                domain_type=domain_type,
+                domain_kwargs,
+                domain_type,
             )
+        else:
+            compute_domain_kwargs = copy.deepcopy(domain_kwargs)
+            accessor_domain_kwargs = {}
 
         return compute_domain_kwargs, accessor_domain_kwargs
 
