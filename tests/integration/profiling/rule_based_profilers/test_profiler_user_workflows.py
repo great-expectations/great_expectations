@@ -2106,7 +2106,6 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
     assert value_set_computed == value_set_expected
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -2202,7 +2201,6 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
     )
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
