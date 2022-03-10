@@ -1513,7 +1513,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 2,
+                "variable_count": 3,
             },
             "event": "profiler.run",
             "success": True,
@@ -1748,7 +1748,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 5,
+                "variable_count": 6,
             },
             "event": "profiler.run",
             "success": True,
