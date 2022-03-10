@@ -153,13 +153,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         self._usage_statistics_handler = usage_statistics_handler
 
-        # Necessary to annotate ExpectationSuite during `run()`
-        rule_to_load_into_citation: dict = {}
         rule_to_load_into_citation = rules
-        # if isinstance(rules, Rule):
-        #    rule_to_load_into_citation = rules.to_json_dict()
-        # elif isinstance(rules, dict):
-        #    rule_to_load_into_citation = rules
         self._citation = {
             "name": name,
             "config_version": config_version,
@@ -384,15 +378,14 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def add_rule(self, rule: Rule) -> None:
         """
-        Add Rule object to existing profiler object by appending to self._rules. In cases where a Rule with the same name exists, it is updated.
+        Add Rule object to existing profiler object by reconciling profiler rules and updating _profiler_config.
         """
         if not isinstance(rule, Rule):
-            raise TypeError("add_rule method requires a Rule to be passed in.")
+            raise TypeError("add_rule() method requires a Rule to be passed in.")
         rules_dict: dict = {rule.name: rule.to_json_dict()}
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
             rules=rules_dict,
         )
-        rule: Rule
         updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
             rule.name: rule.to_json_dict() for rule in effective_rules
         }
@@ -583,48 +576,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             effective_rule_config = rule_config
 
         return effective_rule_config
-
-    @staticmethod
-    def _get_domain_builder_configs(rule_config: Dict[str, Dict[str, Any]]) -> dict:
-        domain_builder_config: Union[dict, DomainBuilder] = rule_config.get(
-            "domain_builder", {}
-        )
-        if not isinstance(domain_builder_config, dict):
-            domain_builder_config = domain_builder_config.to_json_dict()
-        return domain_builder_config
-
-    @staticmethod
-    def _get_expectation_configuration_builder_configs(
-        rule_config: Dict[str, Dict[str, Any]]
-    ) -> List[dict]:
-        expectation_configuration_builder_configs: Union[
-            dict, ExpectationConfigurationBuilder
-        ] = rule_config.get("expectation_configuration_builders", [])
-        expectation_configuration_builders: List[dict] = []
-        if len(expectation_configuration_builder_configs) > 0 and isinstance(
-            expectation_configuration_builder_configs[0],
-            ExpectationConfigurationBuilder,
-        ):
-            for (
-                expectation_configuration_obj
-            ) in expectation_configuration_builder_configs:
-                expectation_configuration_builders.append(
-                    expectation_configuration_obj.to_json_dict()
-                )
-        return expectation_configuration_builders
-
-    @staticmethod
-    def _get_parameter_builder_configs(
-        rule_config: Dict[str, Dict[str, Any]]
-    ) -> List[dict]:
-        existing_parameter_builders: List = rule_config.get("parameter_builders", [])
-        parameter_builders: List[dict] = []
-        if len(existing_parameter_builders) > 0 and isinstance(
-            existing_parameter_builders[0], ParameterBuilder
-        ):
-            for param_builder_obj in existing_parameter_builders:
-                parameter_builders.append(param_builder_obj.to_json_dict())
-        return parameter_builders
 
     @staticmethod
     def _reconcile_rule_domain_builder_config(
@@ -1071,6 +1022,8 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
 
         key: Union[GeCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
+            print(ge_cloud_id)
+            print("this was ge_cloud_id")
             key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
         else:
             key = ConfigurationIdentifier(
@@ -1216,7 +1169,9 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
 
         key: Union[
             GeCloudIdentifier, ConfigurationIdentifier
-        ] = ConfigurationStore.determine_key(name="contract", ge_cloud_id=ge_cloud_id)
+        ] = ConfigurationStore.determine_key(
+            name=new_profiler.name, ge_cloud_id=ge_cloud_id
+        )
         profiler_store.set(key=key, value=config)
 
         return new_profiler

@@ -1,5 +1,6 @@
 import os
 from unittest import mock
+from unittest.mock import MagicMock, patch
 
 from ruamel.yaml import YAML
 
@@ -131,38 +132,6 @@ def test_batches_are_accessible(
 # unittest for save_profiler
 def test_save_profiler():
     pass
-
-
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch(
-    "great_expectations.rule_based_profiler.domain_builder.SimpleColumnSuffixDomainBuilder"
-)
-@mock.patch(
-    "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
-)
-def test_add_rule(
-    mock_data_context: mock.MagicMock,
-    mock_domain_builder: mock.MagicMock,
-    mock_expectation_configuration_builder: mock.MagicMock,
-):
-    profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_mocked_rbp", data_context=mock_data_context, config_version=1.0
-    )
-    first_rule: Rule = Rule(
-        name="first_rule",
-        domain_builder=mock_domain_builder,
-        expectation_configuration_builders=mock_expectation_configuration_builder,
-    )
-    profiler.add_rule(first_rule)
-    assert len(profiler.rules) == 1
-
-    second_rule: Rule = Rule(
-        name="second_rule",
-        domain_builder=mock_domain_builder,
-        expectation_configuration_builders=mock_expectation_configuration_builder,
-    )
-    profiler.add_rule(second_rule)
-    assert len(profiler.rules) == 2
 
 
 @mock.patch(

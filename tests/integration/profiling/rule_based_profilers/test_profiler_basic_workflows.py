@@ -131,6 +131,8 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
         domain_builder=domain_builder,
         expectation_configuration_builders=[default_expectation_configuration_builder],
     )
+    print(simple_rule.to_json_dict())
+    print("###")
     my_rbp: RuleBasedProfiler = RuleBasedProfiler(
         name="my_simple_rbp", data_context=context, config_version=1.0
     )
