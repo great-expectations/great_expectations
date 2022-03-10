@@ -4,7 +4,7 @@ title: How to configure an Expectation Store to use a filesystem
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, newly profiled Expectations are stored as Expectation Suites in JSON format in the ``expectations/`` subdirectory of your ``great_expectations`` folder.  This guide will help you configure a new storage location for Expectations on your filesystem.
+By default, newly profiled <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations`` folder.  This guide will help you configure a new storage location for Expectations on your filesystem.
 
 <Prerequisites>
 
@@ -29,7 +29,7 @@ mv expectations/npi_expectations.json shared_expectations/
 
 ### 2. Identify your Data Context Expectations Store
 
-In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a <TechnicalTag tag="store" text="Store" /> called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
 ```yaml
 expectations_store_name: expectations_store
@@ -45,7 +45,7 @@ stores:
 
 ### 3. Update your configuration file to include a new store for Expectations results on your filesystem
 
-In the example below, Expectations Store is being set to ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
+In the example below, <TechnicalTag tag="expectation_store" text="Expectations Store" /> is being set to ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
 
 ```yaml
 expectations_store_name: shared_expectations_filesystem_store

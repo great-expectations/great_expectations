@@ -4,7 +4,7 @@ title: How to configure an Expectation Store to use PostgreSQL
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, newly profiled Expectations are stored as Expectation Suites in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder.  This guide will help you configure Great Expectations to store them in a PostgreSQL database.
+By default, newly profiled <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder.  This guide will help you configure Great Expectations to store them in a PostgreSQL database.
 
 <Prerequisites>
 
@@ -34,7 +34,7 @@ db_creds:
 
 ### 2. Identify your Data Context Expectations Store
 
-In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a <TechnicalTag tag="store" text="Store" /> called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
 ```yaml
 expectations_store_name: expectations_store
@@ -66,7 +66,7 @@ stores:
 
 ### 4. Confirm that the new Expectations Store has been added by running ``great_expectations store list``
 
-Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_postgres_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in PostgreSQL as long as we set the ``expectations_store_name`` variable to ``expectations_postgres_store``, which we did in the previous step.  The config for ``expectations_store`` can be removed if you would like.
+Notice the output contains two <TechnicalTag tag="expectation_store" text="Expectation Stores" />: the original ``expectations_store`` on the local filesystem and the ``expectations_postgres_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in PostgreSQL as long as we set the ``expectations_store_name`` variable to ``expectations_postgres_store``, which we did in the previous step.  The config for ``expectations_store`` can be removed if you would like.
 
 ```bash
 great_expectations store list
