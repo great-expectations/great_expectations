@@ -23,7 +23,6 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.util import probabilistic_test
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.core.usage_statistics.util import (
@@ -695,7 +694,6 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -838,7 +836,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1089,7 +1086,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1392,7 +1388,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     }
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1518,7 +1513,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 2,
+                "variable_count": 3,
             },
             "event": "profiler.run",
             "success": True,
@@ -1531,7 +1526,6 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1539,7 +1533,6 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
 @freeze_time("09/26/2019 13:42:41")
 def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
-    bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000,
 ):
     context: DataContext = (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
@@ -1579,29 +1572,9 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
         include_config=True,
         auto=True,
     )
-    assert result.success
     assert result.expectation_config.kwargs["auto"]
-    assert (
-        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
-        ]["expect_table_row_count_to_be_between_min_value_mean_value"]
-        < result.expectation_config.kwargs["min_value"]
-        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
-        ]["expect_table_row_count_to_be_between_mean_value"]
-    )
-    assert (
-        bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
-        ]["expect_table_row_count_to_be_between_mean_value"]
-        < result.expectation_config.kwargs["max_value"]
-        < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
-        ]["expect_table_row_count_to_be_between_max_value_mean_value"]
-    )
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1755,7 +1728,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 5,
+                "variable_count": 6,
             },
             "event": "profiler.run",
             "success": True,
@@ -1768,7 +1741,6 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -1808,63 +1780,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         expectation_suite_name=expectation_suite_name,
     )
     assert len(validator.batches) == 36
-
-    # Use all batches, loaded by Validator, for estimating Expectation argument values.
-    result = validator.expect_column_quantile_values_to_be_between(
-        column="fare_amount",
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
-    )
-    assert result.success
-
-    key: str
-    value: Any
-    expectation_config_kwargs: dict = {
-        key: value
-        for key, value in result.expectation_config["kwargs"].items()
-        if key != "quantile_ranges"
-    }
-    assert expectation_config_kwargs == {
-        "column": "fare_amount",
-        "allow_relative_error": "linear",
-        "result_format": "SUMMARY",
-        "include_config": True,
-        "auto": True,
-        "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
-    }
-
-    value_ranges_expected: List[List[float]]
-    value_ranges_computed: List[List[float]]
-
-    value_ranges_expected = [
-        [5.8, 6.5],
-        [8.5, 9.6],
-        [13.3, 15.6],
-    ]
-    value_ranges_computed = result.expectation_config["kwargs"]["quantile_ranges"][
-        "value_ranges"
-    ]
-
-    assert len(value_ranges_computed) == len(value_ranges_expected)
-
-    paired_quantiles: zip
-    value_ranges: Tuple[List[float]]
-    idx: int
-
-    paired_quantiles = zip(
-        value_ranges_computed,
-        value_ranges_expected,
-    )
-    for value_ranges in list(paired_quantiles):
-        for idx in range(2):
-            np.testing.assert_allclose(
-                actual=value_ranges[0][idx],
-                desired=value_ranges[1][idx],
-                rtol=RTOL,
-                atol=ATOL,
-                err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
-            )
 
     parameter_builder_batch_request: dict
 
@@ -1911,6 +1826,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                             "allow_relative_error": "$variables.allow_relative_error",
                         },
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "round_decimals": 2,
                     }
@@ -2009,6 +1925,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                             "allow_relative_error": "$variables.allow_relative_error",
                         },
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "round_decimals": "$variables.round_decimals",
                     }
@@ -2043,7 +1960,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
     assert result.success
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -2115,7 +2031,6 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
     assert value_set_computed == value_set_expected
 
 
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
@@ -2163,7 +2078,6 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
         include_config=True,
         auto=True,
     )
-    assert result.success
 
     key: str
     value: Any
@@ -2186,32 +2100,7 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
         "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
     }
 
-    rtol: float = 2.0e1 * RTOL
-    atol: float = 2.0e1 * ATOL
 
-    min_value_actual: float = result.expectation_config["kwargs"]["min_value"]
-    min_value_expected: float = -1.8796e2
-
-    np.testing.assert_allclose(
-        actual=min_value_actual,
-        desired=min_value_expected,
-        rtol=rtol,
-        atol=atol,
-        err_msg=f"Actual value of {min_value_actual} differs from expected value of {min_value_expected} by more than {atol + rtol * abs(min_value_expected)} tolerance.",
-    )
-
-    max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
-    max_value_expected: float = -5.79
-    np.testing.assert_allclose(
-        actual=max_value_actual,
-        desired=max_value_expected,
-        rtol=rtol,
-        atol=atol,
-        err_msg=f"Actual value of {max_value_actual} differs from expected value of {max_value_expected} by more than {atol + rtol * abs(max_value_expected)} tolerance.",
-    )
-
-
-@probabilistic_test
 @pytest.mark.skipif(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",

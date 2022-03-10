@@ -6,6 +6,9 @@ import pandas as pd
 import pytest
 import scipy.stats as stats
 
+RANDOM_SEED = 43792
+RANDOM_STATE = np.random.Generator(np.random.PCG64(RANDOM_SEED))
+
 
 def generate_distribution_parameters(
     false_positive_rate: np.float64,
@@ -44,11 +47,13 @@ def generate_distribution_parameters(
                 loc=bimodal_mean_1,
                 scale=bimodal_stdev_1,
                 size=5000,
+                random_state=RANDOM_STATE,
             ),
             stats.norm.rvs(
                 loc=bimodal_mean_2,
                 scale=bimodal_stdev_2,
                 size=5000,
+                random_state=RANDOM_STATE,
             ),
         ]
     )
@@ -115,6 +120,7 @@ def generate_distribution_samples(
                 loc=distribution_parameters["normal"]["mean"],
                 scale=distribution_parameters["normal"]["stdev"],
                 size=size,
+                random_state=RANDOM_STATE,
             )
         ),
         "uniform": np.around(
@@ -122,6 +128,7 @@ def generate_distribution_samples(
                 loc=distribution_parameters["uniform"]["lower_bound"],
                 scale=distribution_parameters["uniform"]["scale"],
                 size=size,
+                random_state=RANDOM_STATE,
             )
         ),
         "bimodal": np.around(
@@ -131,11 +138,13 @@ def generate_distribution_samples(
                         loc=distribution_parameters["bimodal"]["mean_1"],
                         scale=distribution_parameters["bimodal"]["stdev_1"],
                         size=size // 2,
+                        random_state=RANDOM_STATE,
                     ),
                     stats.norm.rvs(
                         loc=distribution_parameters["bimodal"]["mean_2"],
                         scale=distribution_parameters["bimodal"]["stdev_2"],
                         size=size // 2,
+                        random_state=RANDOM_STATE,
                     ),
                 ]
             )
@@ -146,6 +155,7 @@ def generate_distribution_samples(
                 loc=distribution_parameters["exponential"]["lower_bound"],
                 scale=distribution_parameters["exponential"]["scale"],
                 size=size,
+                random_state=RANDOM_STATE,
             )
         ),
     }

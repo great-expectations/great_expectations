@@ -15,7 +15,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
-from great_expectations.util import probabilistic_test
 from tests.conftest import skip_if_python_below_minimum_version
 
 # Allowable tolerance for how closely a bootstrap method approximates the sample
@@ -147,10 +146,12 @@ def test_bootstrap_point_estimate_efficacy(
         )
         # Actual false-positives must be within the efficacy tolerance of desired (configured)
         # false_positive_rate parameter value.
-        assert (
-            false_positive_rate - EFFICACY_TOLERANCE
-            <= actual_false_positive_rates[distribution]
-            <= false_positive_rate + EFFICACY_TOLERANCE
+        np.testing.assert_allclose(
+            actual=actual_false_positive_rates[distribution],
+            desired=false_positive_rate,
+            rtol=RTOL,
+            atol=EFFICACY_TOLERANCE,
+            err_msg=f"Actual value of {actual_false_positive_rates[distribution]} differs from expected value of {false_positive_rate} by more than {ATOL + EFFICACY_TOLERANCE * abs(actual_false_positive_rates[distribution])} tolerance.",
         )
 
 
@@ -197,10 +198,12 @@ def test_bootstrap_point_estimate_bias_corrected_efficacy(
         )
         # Actual false-positives must be within the efficacy tolerance of desired (configured)
         # false_positive_rate parameter value.
-        assert (
-            false_positive_rate - EFFICACY_TOLERANCE
-            <= actual_false_positive_rates[distribution]
-            <= false_positive_rate + EFFICACY_TOLERANCE
+        np.testing.assert_allclose(
+            actual=actual_false_positive_rates[distribution],
+            desired=false_positive_rate,
+            rtol=RTOL,
+            atol=EFFICACY_TOLERANCE,
+            err_msg=f"Actual value of {actual_false_positive_rates[distribution]} differs from expected value of {false_positive_rate} by more than {ATOL + EFFICACY_TOLERANCE * abs(actual_false_positive_rates[distribution])} tolerance.",
         )
 
 
@@ -250,92 +253,10 @@ def test_bootstrap_point_estimate_scipy_efficacy(
         )
         # Actual false-positives must be within the efficacy tolerance of desired (configured)
         # false_positive_rate parameter value.
-        assert (
-            false_positive_rate - EFFICACY_TOLERANCE
-            <= actual_false_positive_rates[distribution]
-            <= false_positive_rate + EFFICACY_TOLERANCE
-        )
-
-
-@probabilistic_test
-def test_compare_bootstrap_small_sample_point_estimate_performance(
-    bootstrap_distribution_parameters_and_20_samples_with_01_false_positive,
-):
-    # We measure performance on a small metric value sample size. As metric value sample size gets large,
-    # the relative performance of each method becomes chaotic and the decision to use the bootstrap method
-    # in the first place becomes questionable.
-
-    false_positive_rate: np.float64 = (
-        bootstrap_distribution_parameters_and_20_samples_with_01_false_positive[
-            "false_positive_rate"
-        ]
-    )
-    distribution_parameters: Dict[
-        str, Dict[str, Number]
-    ] = bootstrap_distribution_parameters_and_20_samples_with_01_false_positive[
-        "distribution_parameters"
-    ]
-    distribution_samples: pd.DataFrame = (
-        bootstrap_distribution_parameters_and_20_samples_with_01_false_positive[
-            "distribution_samples"
-        ]
-    )
-
-    (
-        lower_quantile_root_mean_squared_error_mean,
-        upper_quantile_root_mean_squared_error_mean,
-    ) = compute_quantile_root_mean_squared_error_of_bootstrap(
-        method=_compute_bootstrap_quantiles_point_estimate_custom_mean_method,
-        false_positive_rate=false_positive_rate,
-        distribution_parameters=distribution_parameters,
-        distribution_samples=distribution_samples,
-    )
-
-    (
-        lower_quantile_root_mean_squared_error_bias_corrected,
-        upper_quantile_root_mean_squared_error_bias_corrected,
-    ) = compute_quantile_root_mean_squared_error_of_bootstrap(
-        method=_compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method,
-        false_positive_rate=false_positive_rate,
-        distribution_parameters=distribution_parameters,
-        distribution_samples=distribution_samples,
-    )
-
-    # Custom bias corrected point estimate consistently outperforms custom biased estimator implementation when
-    # metric value sample size is small
-    total_root_mean_squared_error_bias_corrected: Number = (
-        lower_quantile_root_mean_squared_error_bias_corrected
-        + upper_quantile_root_mean_squared_error_bias_corrected
-    )
-    total_root_mean_squared_error_mean: Number = (
-        lower_quantile_root_mean_squared_error_mean
-        + upper_quantile_root_mean_squared_error_mean
-    )
-    assert (
-        total_root_mean_squared_error_bias_corrected
-        < total_root_mean_squared_error_mean
-    )
-
-    # scipy.stats.bootstrap wasn't implemented until scipy 1.6
-    if version.parse(scipy.__version__) >= version.parse("1.6"):
-        (
-            lower_quantile_root_mean_squared_error_scipy,
-            upper_quantile_root_mean_squared_error_scipy,
-        ) = compute_quantile_root_mean_squared_error_of_bootstrap(
-            method=_compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method,
-            false_positive_rate=false_positive_rate,
-            distribution_parameters=distribution_parameters,
-            distribution_samples=distribution_samples,
-        )
-
-        # SciPy with "BCa" bias correction and "Mean of the Confidence Interval" point estimate consistently
-        # underperforms both custom implementations
-        total_root_mean_squared_error_scipy = (
-            lower_quantile_root_mean_squared_error_scipy
-            + upper_quantile_root_mean_squared_error_scipy
-        )
-        assert total_root_mean_squared_error_scipy > total_root_mean_squared_error_mean
-        assert (
-            total_root_mean_squared_error_scipy
-            > total_root_mean_squared_error_bias_corrected
+        np.testing.assert_allclose(
+            actual=actual_false_positive_rates[distribution],
+            desired=false_positive_rate,
+            rtol=RTOL,
+            atol=EFFICACY_TOLERANCE,
+            err_msg=f"Actual value of {actual_false_positive_rates[distribution]} differs from expected value of {false_positive_rate} by more than {ATOL + EFFICACY_TOLERANCE * abs(actual_false_positive_rates[distribution])} tolerance.",
         )
