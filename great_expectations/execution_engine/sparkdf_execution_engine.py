@@ -513,9 +513,7 @@ Please check your config."""
             )
 
         split_domain_kwargs = self._split_domain_kwargs(
-            domain_kwargs,
-            domain_type,
-            accessor_keys,
+            domain_kwargs, domain_type, accessor_keys
         )
 
         return data, split_domain_kwargs.compute, split_domain_kwargs.accessor

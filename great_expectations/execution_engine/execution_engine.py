@@ -543,9 +543,7 @@ class ExecutionEngine(ABC):
         split_domain_kwargs: SplitDomainKwargs
         if domain_type == MetricDomainTypes.TABLE:
             split_domain_kwargs = self._split_table_metric_domain_kwargs(
-                domain_kwargs,
-                domain_type,
-                accessor_keys,
+                domain_kwargs, domain_type, accessor_keys
             )
 
         elif domain_type == MetricDomainTypes.COLUMN:
