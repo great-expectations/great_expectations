@@ -38,48 +38,48 @@ variables:
 stages:
   - stage: user_install_linux
     dependsOn: []
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
     jobs:
       - template: azure/user-install-matrix.yml
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "ubuntu-latest"
 
   - stage: dev_install_linux
     dependsOn: user_install_linux
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
     jobs:
       - template: azure/dev-install-matrix.yml
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "ubuntu-latest"
 
   - stage: user_install_macOS
     dependsOn: []
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
     jobs:
       - template: azure/user-install-matrix.yml
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "macOS-latest"
 
   - stage: dev_install_macOS
     dependsOn: user_install_macOS
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
     jobs:
       - template: azure/dev-install-matrix.yml
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "macOS-latest"
 
   - stage: user_install_windows
     dependsOn: []
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
     jobs:
       - template: azure/user-install-matrix.yml
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "windows-latest"
 
   - stage: dev_install_windows
     dependsOn: user_install_windows
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
     jobs:
       - template: azure/dev-install-matrix.yml
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         parameters:
           vmImage: "windows-latest"
