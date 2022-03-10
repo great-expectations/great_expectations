@@ -2,7 +2,7 @@
 title: Deploying Great Expectations in a hosted environment without file system or CLI
 ---
 
-If you follow the steps of the [Getting Started](../tutorials/getting_started/intro.md) tutorial, you create a standard deployment of Great Expectations. By default, this relies on two components:
+If you follow the steps of the [Getting Started](../tutorials/getting_started/tutorial_overview.md) tutorial, you create a standard deployment of Great Expectations. By default, this relies on two components:
 
 1. The Great Expectations [CLI](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
 2. The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for Validation Results, etc.

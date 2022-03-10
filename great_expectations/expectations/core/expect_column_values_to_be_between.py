@@ -107,7 +107,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             "strict_max": False,
         },
         rules={
-            "default_column_values_between_rule": {
+            "default_expect_column_values_to_be_between_rule": {
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",

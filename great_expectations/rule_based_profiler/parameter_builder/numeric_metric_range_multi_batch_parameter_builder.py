@@ -471,9 +471,7 @@ detected.
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> int:
         # Obtain round_decimals directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        round_decimals: Optional[
-            Union[Any]
-        ] = get_parameter_value_and_validate_return_type(
+        round_decimals: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.round_decimals,
             expected_return_type=None,
