@@ -336,7 +336,7 @@ def usage_statistics_enabled_method(
                 time_end: int = int(round(time.time() * 1000))
                 delta_t: int = time_end - time_begin
 
-                handler = get_usage_statistics_handler(args)
+                handler = get_usage_statistics_handler(list(args))
                 if handler:
                     event_duration_property_name: str = (
                         f"{event_name}.duration".replace(".", "_")

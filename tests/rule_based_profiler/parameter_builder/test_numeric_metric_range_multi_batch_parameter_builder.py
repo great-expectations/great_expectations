@@ -46,8 +46,15 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     numeric_metric_range_parameter_builder.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
