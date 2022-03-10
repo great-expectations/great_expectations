@@ -12,7 +12,7 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
 :::note Prerequisites
-- Completing [Step 1: Setup](/docs/tutorials/getting_started/initialize_a_data_context) of the Getting Started tutorial is recommended.
+- Completing [Step 1: Setup](../../tutorials/getting_started/tutorial_setup.md) of the Getting Started tutorial is recommended.
 :::
 	
 Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all of the features of Great Expectations from a single entry point: Your Data Context.  You will also have your Stores and Data Docs configured in the manner most suitable for your project's purposes.
