@@ -2,8 +2,9 @@
 title: How to configure a Validation Result Store to PostgreSQL
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, Validation Results are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure Great Expectations to store them in a PostgreSQL database.
+By default, Validation Results are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since <TechnicalTag tag="validation_result" text="Validation Results" /> may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure Great Expectations to store them in a PostgreSQL database.
 
 <Prerequisites>
 
@@ -45,7 +46,7 @@ db_creds:
 
 ### 2. Identify your Data Context Validation Results Store
 
-In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validation Results in a Store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
+As with all <TechnicalTag tag="store" text="Stores" />, you can use your <TechnicalTag tag="data_context" text="Data Context" /> to find your <TechnicalTag tag="validation_result_store" text="Validation Results Store" />.  In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validation Results in a Store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
 
 ```yaml
 validations_store_name: validations_store

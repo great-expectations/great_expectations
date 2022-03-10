@@ -1,12 +1,12 @@
 ---
 title: How to configure a Validation Result store on a filesystem
 ---
-
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, Validation results are stored in the ``uncommitted/validations/`` directory.  Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validation Results on your filesystem.
+By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in the ``uncommitted/validations/`` directory.  Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validation Results on your filesystem.
 
-This guide will explain how to use a Validation Action to update Data Docs sites with new Validation Results from Validation Operator runs.
+This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new Validation Results from <TechnicalTag tag="checkpoint" text="Checkpoint" /> runs.
 
 <Prerequisites>
 
@@ -21,7 +21,7 @@ This guide will explain how to use a Validation Action to update Data Docs sites
 
 ### 1. Configure a new folder on your filesystem where Validation Results will be stored
 
-Create a new folder where you would like to store your Validation results, and move your existing Validation results over to the new location. In our case, the name of the Validation result is ``npi_validations`` and the path to our new storage location is ``shared_validations/``.
+Create a new folder where you would like to store your Validation Results, and move your existing Validation Results over to the new location. In our case, the name of the Validation Result is ``npi_validations`` and the path to our new storage location is ``shared_validations/``.
 
 ```bash
 # in the great_expectations/ folder
@@ -31,7 +31,7 @@ mv uncommitted/validations/npi_validations/ uncommitted/shared_validations/
 
 ### 2. Identify your Data Context Validation Results Store
 
-In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validation Results in a Store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
+As with other <TechnicalTag tag="store" text="Stores" />, you can find your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> by using your <TechnicalTag tag="data_context" text="Data Context" />.  In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validation Results in a Store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
 
 ```yaml
 validations_store_name: validations_store
