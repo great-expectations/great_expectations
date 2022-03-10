@@ -105,6 +105,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
             "strict_min": False,
             "strict_max": False,
             "num_bootstrap_samples": 9999,
+            "bootstrap_random_seed": None,
             "false_positive_rate": 0.05,
             "truncate_values": {
                 "lower_bound": None,
@@ -126,6 +127,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                         "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "truncate_values": "$variables.truncate_values",
                         "round_decimals": "$variables.round_decimals",
