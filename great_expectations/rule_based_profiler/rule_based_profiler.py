@@ -306,6 +306,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
+        expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
@@ -314,10 +315,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
             :param variables attribute name/value pairs (overrides)
             :param rules name/(configuration-dictionary) (overrides)
             :param reconciliation_directives directives for how each rule component should be overwritten
-            :param expectation_suite_name: A name for returned Expectation suite.
+            :param expectation_suite: An existing ExpectationSuite to update.
+            :param expectation_suite_name: A name for returned ExpectationSuite.
             :param include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
         :return: Set of rule evaluation results in the form of an ExpectationSuite
         """
+        assert bool(expectation_suite) ^ bool(
+            expectation_suite_name
+        ), "Ambiguous arguments provided; you may pass in an ExpectationSuite or provide a name to instantiate a new one (but you may not do both)."
+
         effective_variables: Optional[
             ParameterContainer
         ] = self.reconcile_profiler_variables(
@@ -329,15 +335,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules, reconciliation_directives=reconciliation_directives
         )
 
-        if expectation_suite_name is None:
-            expectation_suite_name = (
-                f"tmp.profiler_{self.__class__.__name__}_suite_{str(uuid.uuid4())[:8]}"
+        if expectation_suite is None:
+            if expectation_suite_name is None:
+                expectation_suite_name = f"tmp.profiler_{self.__class__.__name__}_suite_{str(uuid.uuid4())[:8]}"
+            expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name,
+                data_context=self._data_context,
             )
-
-        expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name,
-            data_context=self._data_context,
-        )
 
         if include_citation:
             expectation_suite.add_citation(

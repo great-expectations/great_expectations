@@ -8,6 +8,7 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -1358,3 +1359,35 @@ def test_add_rule_bad_rule(
     with pytest.raises(AttributeError) as e:
         profiler.add_rule(not_a_rule)
     assert "'dict' object has no attribute 'name'" in str(e.value)
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_run_with_expectation_suite_arg(mock_data_context: mock.MagicMock):
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_rbp", data_context=mock_data_context, config_version=1.0
+    )
+    suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name="my_expectation_suite"
+    )
+    result_suite: ExpectationSuite = profiler.run(expectation_suite=suite)
+
+    assert id(suite) == id(result_suite)
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_run_with_conflicting_expectation_suite_args_raises_error(
+    mock_data_context: mock.MagicMock,
+):
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_rbp", data_context=mock_data_context, config_version=1.0
+    )
+    suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name="my_expectation_suite"
+    )
+
+    with pytest.raises(AssertionError) as e:
+        profiler.run(
+            expectation_suite=suite, expectation_suite_name="my_expectation_suite"
+        )
+
+    assert "Ambiguous arguments provided" in str(e.value)
