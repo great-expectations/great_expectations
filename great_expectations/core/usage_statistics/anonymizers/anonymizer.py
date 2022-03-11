@@ -76,6 +76,7 @@ class Anonymizer:
             if Anonymizer._is_core_great_expectations_class(object_module_name):
                 anonymized_info_dict["parent_class"] = object_class_name
             elif len(parents) != 1:
+                # __bases__ provides us with the inheritance hierarchy - all GE core objects subclass exactly ONE parent class
                 if len(parents) == 0:
                     logger.info(
                         "Could not find any parent classes when anonymizing payload"
