@@ -354,4 +354,4 @@ def test_profiler_run_with_expectation_suite_arg(
 
     assert id(res) == id(basic_expectation_suite)
     assert len(res.expectations) == 8
-    assert basic_expectation_suite.expectations == existing_expectations
+    assert basic_expectation_suite.expectations[:4] == existing_expectations
