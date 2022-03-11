@@ -320,8 +320,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
             :param include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
         :return: Set of rule evaluation results in the form of an ExpectationSuite
         """
-        assert bool(expectation_suite) ^ bool(
-            expectation_suite_name
+        assert not (
+            expectation_suite and expectation_suite_name
         ), "Ambiguous arguments provided; you may pass in an ExpectationSuite or provide a name to instantiate a new one (but you may not do both)."
 
         effective_variables: Optional[

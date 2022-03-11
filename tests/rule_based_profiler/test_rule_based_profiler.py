@@ -917,7 +917,11 @@ def test_run_profiler_without_dynamic_args(
 
     assert mock_profiler_run.called
     assert mock_profiler_run.call_args == mock.call(
-        variables=None, rules=None, expectation_suite_name=None, include_citation=True
+        variables=None,
+        rules=None,
+        expectation_suite=None,
+        expectation_suite_name=None,
+        include_citation=True,
     )
 
 
@@ -949,6 +953,7 @@ def test_run_profiler_with_dynamic_args(
     assert mock_profiler_run.call_args == mock.call(
         variables=variables,
         rules=rules,
+        expectation_suite=None,
         expectation_suite_name=expectation_suite_name,
         include_citation=include_citation,
     )

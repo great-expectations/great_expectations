@@ -311,7 +311,7 @@ from great_expectations.exceptions import DataContextError""",
         # Profiler instantiation/usage
         """suite = context.run_profiler_with_dynamic_arguments(
     name="my_profiler",
-    expectation_suite_name=expectation_suite_name,
+    expectation_suite=validator.expectation_suite,
 )""",
     ]
 
