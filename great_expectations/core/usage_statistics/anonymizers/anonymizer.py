@@ -75,34 +75,18 @@ class Anonymizer:
 
             if Anonymizer._is_core_great_expectations_class(object_module_name):
                 anonymized_info_dict["parent_class"] = object_class_name
-            elif len(parents) != 1:
-                # __bases__ provides us with the inheritance hierarchy - all GE core objects subclass exactly ONE parent class
-                if len(parents) == 0:
-                    logger.info(
-                        "Could not find any parent classes when anonymizing payload"
-                    )
-                else:
-                    logger.info(
-                        "Due to the ambiguity brought on by multiple inheritance, short-circuiting anonymization of payload"
-                    )
-                anonymized_info_dict["parent_class"] = "__not_recognized__"
-                anonymized_info_dict["anonymized_class"] = self.anonymize(
-                    object_class_name
-                )
             else:
-                parent_class: type = parents[0]
-                parent_module_name: str = parent_class.__module__
-                if Anonymizer._is_core_great_expectations_class(parent_module_name):
-                    anonymized_info_dict["parent_class"] = parent_class.__name__
-                    anonymized_info_dict["anonymized_class"] = self.anonymize(
-                        object_class_name
-                    )
-                else:
-                    anonymized_info_dict["parent_class"] = "__not_recognized__"
-                    anonymized_info_dict["anonymized_class"] = self.anonymize(
-                        object_class_name
-                    )
+                parent_class: type
+                for parent_class in parents:
+                    parent_module_name: str = parent_class.__module__
+                    if Anonymizer._is_core_great_expectations_class(parent_module_name):
+                        anonymized_info_dict["parent_class"] = parent_class.__name__
+                        anonymized_info_dict["anonymized_class"] = self.anonymize(
+                            object_class_name
+                        )
+                        break
 
+            # Catch-all to prevent edge cases from slipping past
             if not anonymized_info_dict.get("parent_class"):
                 anonymized_info_dict["parent_class"] = "__not_recognized__"
                 anonymized_info_dict["anonymized_class"] = self.anonymize(
