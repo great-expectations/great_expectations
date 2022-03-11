@@ -92,6 +92,9 @@ class Anonymizer:
                 parent_module_name: str = parent_class.__module__
                 if parent_module_name.startswith("great_expectations"):
                     anonymized_info_dict["parent_class"] = parent_class.__name__
+                    anonymized_info_dict["anonymized_class"] = self.anonymize(
+                        object_class_name
+                    )
                 else:
                     self._anonymize_class_with_unrecognized_parent(
                         anonymized_info_dict=anonymized_info_dict,
