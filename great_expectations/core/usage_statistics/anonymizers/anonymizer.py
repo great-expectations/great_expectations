@@ -1,6 +1,6 @@
 import logging
 from hashlib import md5
-from typing import Optional
+from typing import Optional, Tuple
 
 from great_expectations.util import load_class
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class Anonymizer:
     """Anonymize string names in an optionally-consistent way."""
 
-    def __init__(self, salt=None):
+    def __init__(self, salt: Optional[str] = None) -> None:
         if salt is not None and not isinstance(salt, str):
             logger.error("invalid salt: must provide a string. Setting a random salt.")
             salt = None
@@ -22,10 +22,10 @@ class Anonymizer:
             self._salt = salt
 
     @property
-    def salt(self):
+    def salt(self) -> str:
         return self._salt
 
-    def anonymize(self, string_):
+    def anonymize(self, string_: Optional[str]) -> Optional[str]:
         if string_ is None:
             return None
 
@@ -41,12 +41,12 @@ class Anonymizer:
 
     def anonymize_object_info(
         self,
-        anonymized_info_dict,
+        anonymized_info_dict: dict,
         ge_classes,
-        object_=None,
-        object_class=None,
-        object_config=None,
-        runtime_environment=None,
+        object_: Optional[object] = None,
+        object_class: Optional[type] = None,
+        object_config: Optional[dict] = None,
+        runtime_environment: Optional[dict] = None,
     ) -> dict:
         assert (
             object_ or object_class or object_config
@@ -56,6 +56,7 @@ class Anonymizer:
             runtime_environment = {}
 
         object_class_name: Optional[str] = None
+        object_module_name: Optional[str] = None
         try:
             if object_class is None and object_ is not None:
                 object_class = object_.__class__
@@ -65,16 +66,21 @@ class Anonymizer:
                     "module_name"
                 ) or runtime_environment.get("module_name")
                 object_class = load_class(object_class_name, object_module_name)
-            object_class_name = object_class.__name__
 
-            for ge_class in ge_classes:
-                if issubclass(object_class, ge_class):
-                    anonymized_info_dict["parent_class"] = ge_class.__name__
-                    if not object_class == ge_class:
-                        anonymized_info_dict["anonymized_class"] = self.anonymize(
-                            object_class_name
-                        )
-                    break
+            object_class_name = object_class.__name__
+            object_module_name = object_class.__module__
+
+            if object_module_name.startswith("great_expectations"):
+                anonymized_info_dict["parent_class"] = object_class_name
+            else:
+                bases: Tuple[type, ...] = object_class.__bases__
+                if len(bases) == 1:
+                    parent_class: type = bases[0]
+                    parent_module_name: str = parent_class.__module__
+                    if parent_module_name.startswith("great_expectations"):
+                        anonymized_info_dict["parent_class"] = parent_class.__name__
+                    else:
+                        anonymized_info_dict["parent_class"] = "__not_recognized__"
 
             if not anonymized_info_dict.get("parent_class"):
                 anonymized_info_dict["parent_class"] = "__not_recognized__"
