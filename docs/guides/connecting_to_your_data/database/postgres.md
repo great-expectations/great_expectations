@@ -78,10 +78,10 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L18-L35
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L21-L37
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L41
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L45
 ```
 
 </TabItem>
@@ -110,7 +110,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L43
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L49
 ```
 
 </TabItem>
