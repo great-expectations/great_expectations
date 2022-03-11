@@ -46,7 +46,7 @@ stores:
 
 ### 3. Update your configuration file to include a new Store for Validation Results on Azure Storage account
 
-In our case, the name is set to ``validations_AZ_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleAzureBlobStoreBackend``,  ``container`` will be set to the name of your blob container (the equivalent of S3 bucket for Azure) you wish to store your Validation Results, ``prefix`` will be set to the folder in the container where Validation files will be located, and ``connection_string`` will be set to ``${AZURE_STORAGE_CONNECTION_STRING}``, which references the corresponding key in the ``config_variables.yml`` file.
+In our case, the name is set to ``validations_AZ_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleAzureBlobStoreBackend``,  ``container`` will be set to the name of your blob container (the equivalent of S3 bucket for Azure) you wish to store your Validation Results, ``prefix`` will be set to the folder in the container where Validation Result files will be located, and ``connection_string`` will be set to ``${AZURE_STORAGE_CONNECTION_STRING}``, which references the corresponding key in the ``config_variables.yml`` file.
 
 ```yaml
 validations_store_name: validations_AZ_store

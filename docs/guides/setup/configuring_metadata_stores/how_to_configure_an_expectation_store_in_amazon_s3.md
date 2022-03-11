@@ -4,7 +4,7 @@ title: How to configure an Expectation Store to use Amazon S3
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, newly profiled <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  This guide will help you configure Great Expectations to store them in an Amazon S3 bucket.
+By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  This guide will help you configure Great Expectations to store them in an Amazon S3 bucket.
 
 <Prerequisites>
 
@@ -23,7 +23,7 @@ Instructions on how to set up [boto3](https://github.com/boto/boto3) with AWS ca
 
 ### 2. Identify your Data Context Expectations Store
 
-In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+As with other <TechnicalTag tag="store" text="Stores" />, you can find your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> with your <TechnicalTag tag="data_context" text="Data Context" />.  In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
 ```yaml
 expectations_store_name: expectations_store
@@ -94,7 +94,7 @@ store_backend:
 
 ### 6. Confirm that Expectations can be accessed from Amazon S3 by running ``great_expectations suite list``
 
-If you followed Step 4, The output should include the 2 Expectations we copied to Amazon S3: ``exp1`` and ``exp2``.  If you did not copy Expectations to the new <TechnicalTag tag="store" text="Store" />, you will see a message saying no Expectations were found.
+If you followed Step 4, The output should include the 2 Expectations we copied to Amazon S3: ``exp1`` and ``exp2``.  If you did not copy Expectations to the new Store, you will see a message saying no Expectations were found.
 
 ```bash
 great_expectations suite list

@@ -4,7 +4,7 @@ title: How to configure a Validation Result store in GCS
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, Validation Results are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validation Results in a Google Cloud Storage (GCS) bucket.
+By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validation Results in a Google Cloud Storage (GCS) bucket.
 
 <Prerequisites>
 
@@ -30,7 +30,7 @@ The Google Cloud Platform documentation describes how to verify your [authentica
 
 ### 2. Identify your Data Context Validation Results Store
 
-As with other Stores, you can find your Validation Results Store through your <TechnicalTag tag="data_context" text="Data Context" />. In your ``great_expectations.yml``, look for the following lines. The configuration tells Great Expectations to look for Validation Results in a Store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
+As with other <TechnicalTag tag="store" text="Stores" />, you can find your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> through your <TechnicalTag tag="data_context" text="Data Context" />. In your ``great_expectations.yml``, look for the following lines. The configuration tells Great Expectations to look for Validation Results in a Store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
 
 ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L79-L86
 ```
@@ -38,7 +38,7 @@ As with other Stores, you can find your Validation Results Store through your <T
 
 ### 3. Update your configuration file to include a new Store for Validation Results on GCS
 
-In our case, the name is set to ``validations_GCS_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleGCSStoreBackend``, ``project`` will be set to your GCP project, ``bucket`` will be set to the address of your GCS bucket, and ``prefix`` will be set to the folder on GCS where Validation files will be located.
+In our case, the name is set to ``validations_GCS_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleGCSStoreBackend``, ``project`` will be set to your GCP project, ``bucket`` will be set to the address of your GCS bucket, and ``prefix`` will be set to the folder on GCS where Validation Result files will be located.
 
 ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L94-L103
 ```

@@ -25,7 +25,7 @@ Instructions on how to set up [boto3](https://github.com/boto/boto3) with AWS ca
 
 ### 2. Identify your Data Context Validation Results Store
 
-Look for the following section in your <TechnicalTag relative="../../../" tag="data_context" text="Data Context's" /> ``great_expectations.yml`` file:
+As with other <TechnicalTag tag="store" text="Stores" />, you can find your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> with your <TechnicalTag tag="data_context" text="Data Context" />.  Look for the following section in your <TechnicalTag relative="../../../" tag="data_context" text="Data Context's" /> ``great_expectations.yml`` file:
 
 ```yaml
 validations_store_name: validations_store
@@ -44,7 +44,7 @@ The configuration file tells Great Expectations to look for Validation Results i
 In the example below, the new Store's name is set to ``validations_S3_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder in your S3 bucket where Validation results will be located.
 
 :::caution
-If you are also storing Expectations in S3 ([How to configure an Expectation store to use Amazon S3](./how_to_configure_an_expectation_store_in_amazon_s3.md)), or DataDocs in S3 ([How to host and share Data Docs on Amazon S3](../configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md)), then please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are also storing <TechnicalTag tag="expectation" text="Expectations" /> in S3 ([How to configure an Expectation store to use Amazon S3](./how_to_configure_an_expectation_store_in_amazon_s3.md)), or DataDocs in S3 ([How to host and share Data Docs on Amazon S3](../configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md)), then please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 ```yaml

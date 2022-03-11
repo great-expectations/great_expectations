@@ -61,7 +61,7 @@ stores:
 
 ### 4. Confirm that the location has been updated by running ``great_expectations store list``
 
-Notice the output contains two Validation stores: the original ``validations_store`` and the ``shared_validations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Validation Results in the ``uncommitted/shared_validations/`` folder as long as we set the ``validations_store_name`` variable to ``shared_validations_filesystem_store``. The config for ``validations_store`` can be removed if you would like.
+Notice the output contains two Validation Result Stores: the original ``validations_store`` and the ``shared_validations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Validation Results in the ``uncommitted/shared_validations/`` folder as long as we set the ``validations_store_name`` variable to ``shared_validations_filesystem_store``. The config for ``validations_store`` can be removed if you would like.
 
 ```bash
 great_expectations store list

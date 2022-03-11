@@ -3,6 +3,7 @@ title: "Setup: Overview"
 ---
 # [![Setup Icon](../../images/universal_map/Gear-active.png)](./setup_overview.md) Setup: Overview 
 
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->

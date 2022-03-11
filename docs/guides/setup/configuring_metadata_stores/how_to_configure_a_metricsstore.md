@@ -11,7 +11,7 @@ Storing metrics is still a **beta** feature of Great Expectations, and we expect
 
 ### 1. Adding a MetricStore
 
-A `MetricStore` is a special store that can store Metrics computed during Validation. A `MetricStore` tracks the run_id of the Validation and the <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> name in addition to the Metric name and Metric kwargs.
+A `MetricStore` is a special <TechnicalTag tag="store" text="Store" /> that can store Metrics computed during Validation. A `MetricStore` tracks the run_id of the Validation and the <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> name in addition to the Metric name and Metric kwargs.
 
 To define a `MetricStore`, add a <TechnicalTag tag="metric_store" text="Metric Store" /> config to the `stores` section of your `great_expectations.yml`.
 This config requires two keys:

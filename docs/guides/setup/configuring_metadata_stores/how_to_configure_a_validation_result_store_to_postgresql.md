@@ -77,7 +77,7 @@ stores:
 
 ### 5. Confirm that the new Validation Results Store has been added by running ``great_expectations store list``
 
-Notice the output contains two Validation stores: the original ``validations_store`` on the local filesystem and the ``validations_postgres_store`` we just configured.  This is ok, since Great Expectations will look for Validation Results in PostgreSQL as long as we set the ``validations_store_name`` variable to ``validations_postgres_store``. The config for ``validations_store`` can be removed if you would like.
+Notice the output contains two Validation Result Stores: the original ``validations_store`` on the local filesystem and the ``validations_postgres_store`` we just configured.  This is ok, since Great Expectations will look for Validation Results in PostgreSQL as long as we set the ``validations_store_name`` variable to ``validations_postgres_store``. The config for ``validations_store`` can be removed if you would like.
 
 ```bash
 great_expectations store list
