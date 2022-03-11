@@ -211,7 +211,7 @@ validator.head(n_rows=5, fetch_all=False)
             code=f"""\
 suite = context.run_profiler_with_dynamic_arguments(
     name="{self._profiler_name}",
-    expectation_suite_name=expectation_suite_name,
+    expectation_suite=validator.expectation_suite
 )
 """,
             lint=True,
