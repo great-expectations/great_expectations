@@ -41,6 +41,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
     )
 
     with pytest.raises(TypeError) as excinfo:
+        # noinspection PyArgumentList
         _: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
             MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 name="my_name",
@@ -55,6 +56,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
     )
 
     with pytest.raises(TypeError) as excinfo:
+        # noinspection PyArgumentList
         _: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
             MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 name="my_name",
@@ -275,3 +277,47 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         atol=atol,
         err_msg=f"Actual value of {actual_parameter_value.value} differs from expected value of {expected_parameter_value} by more than {atol + rtol * abs(actual_parameter_value.value)} tolerance.",
     )
+
+
+def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    data_context: DataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    metric_domain_kwargs_for_parameter_builder: str = "$domain.domain_kwargs"
+
+    mean_unexpected_map_metric_multi_batch_parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
+        name="my_pickup_datetime_count_values_unique_mean_unexpected_map_metric",
+        map_metric_name="column_values.unique",
+        total_count_parameter_builder_name="my_total_count",
+        null_count_parameter_builder_name="my_null_count",
+        metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
+        metric_value_kwargs=None,
+        batch_list=None,
+        batch_request=batch_request,
+        json_serialize=False,
+        data_context=data_context,
+    )
+
+    assert set(
+        mean_unexpected_map_metric_multi_batch_parameter_builder.to_json_dict().keys()
+    ) == {
+        "class_name",
+        "module_name",
+        "name",
+        "map_metric_name",
+        "total_count_parameter_builder_name",
+        "null_count_parameter_builder_name",
+        "metric_domain_kwargs",
+        "metric_value_kwargs",
+        "batch_request",
+        "json_serialize",
+    }

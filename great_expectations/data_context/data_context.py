@@ -101,6 +101,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     GeCloudIdentifier,
     ValidationResultIdentifier,
@@ -3316,6 +3317,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             profiler_store=self.profiler_store,
             ge_cloud_id=ge_cloud_id,
         )
+
+    def save_profiler(
+        self,
+        profiler: RuleBasedProfiler,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        key: Union[
+            GeCloudIdentifier, ConfigurationIdentifier
+        ] = self.profiler_store.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+        self.profiler_store.set(key=key, value=profiler.config)
 
     def get_profiler(
         self,

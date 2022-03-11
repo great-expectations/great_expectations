@@ -104,7 +104,7 @@ class CheckpointStore(ConfigurationStore):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=ge_cloud_id
         )
         try:
@@ -117,7 +117,7 @@ class CheckpointStore(ConfigurationStore):
     def get_checkpoint(
         self, name: Optional[str], ge_cloud_id: Optional[str]
     ) -> CheckpointConfig:
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=ge_cloud_id
         )
         try:
@@ -156,7 +156,7 @@ class CheckpointStore(ConfigurationStore):
     def add_checkpoint(
         self, checkpoint: "Checkpoint", name: Optional[str], ge_cloud_id: Optional[str]
     ) -> None:
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=ge_cloud_id
         )
         checkpoint_config: CheckpointConfig = checkpoint.get_config()
@@ -164,18 +164,3 @@ class CheckpointStore(ConfigurationStore):
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
             ge_cloud_id = checkpoint_ref.ge_cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)
-
-    def _determine_key(
-        self, name: Optional[str], ge_cloud_id: Optional[str]
-    ) -> Union[GeCloudIdentifier, ConfigurationIdentifier]:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id."
-
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
-        else:
-            key = ConfigurationIdentifier(configuration_key=name)
-
-        return key
