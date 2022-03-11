@@ -1067,6 +1067,7 @@ def test_add_profiler(
         data_context=mock_data_context,
         profiler_store=mock_data_context.profiler_store,
     )
+
     assert isinstance(profiler, RuleBasedProfiler)
     assert profiler.name == profiler_config_with_placeholder_args.name
     assert mock_data_context.profiler_store.set.call_args == mock.call(
