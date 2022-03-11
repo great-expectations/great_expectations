@@ -1,3 +1,4 @@
+# Delete this once you fix the tests :)
 tests/core/usage_statistics/test_anonymizer.py::test_anonymizer__is_parent_class_recognized - AssertionError: assert None == 'TestClass'
 tests/core/usage_statistics/test_usage_statistics_handler_methods.py::test_build_init_payload - AssertionError: assert [{'anonymized...'Datasource'}] == [{'anonymized...'Datasource'}]
 tests/data_context/test_data_context.py::test_add_datasource_from_yaml - KeyError: 'anonymized_execution_engine'
