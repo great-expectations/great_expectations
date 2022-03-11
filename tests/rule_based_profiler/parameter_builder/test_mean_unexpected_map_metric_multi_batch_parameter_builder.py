@@ -9,10 +9,8 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
-    MetricMultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.mean_unexpected_map_metric_multi_batch_parameter_builder import (
     MeanUnexpectedMapMetricMultiBatchParameterBuilder,
+    MetricMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from tests.rule_based_profiler.conftest import ATOL, RTOL
