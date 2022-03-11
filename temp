@@ -1,0 +1,15 @@
+tests/core/usage_statistics/test_anonymizer.py::test_anonymizer__is_parent_class_recognized - AssertionError: assert None == 'TestClass'
+tests/core/usage_statistics/test_usage_statistics_handler_methods.py::test_build_init_payload - AssertionError: assert [{'anonymized...'Datasource'}] == [{'anonymized...'Datasource'}]
+tests/data_context/test_data_context.py::test_add_datasource_from_yaml - KeyError: 'anonymized_execution_engine'
+tests/data_context/test_data_context.py::test_add_datasource_from_yaml_with_substitution_variables - KeyError: 'anonymized_execution_engine'
+tests/data_context/test_data_context_test_yaml_config.py::test_datasource_config - KeyError: 'anonymized_execution_engine'
+tests/data_context/test_data_context_test_yaml_config.py::test_error_states - KeyError: 'anonymized_execution_engine'
+tests/data_context/test_data_context_test_yaml_config.py::test_golden_path_inferred_asset_pandas_datasource_configuration - KeyError: 'anonymized_execution_engine'
+tests/data_context/test_data_context_test_yaml_config.py::test_golden_path_configured_asset_pandas_datasource_configuration - KeyError: 'anonymized_execution_engine'
+tests/datasource/test_datasource_anonymizer.py::test_anonymize_datasource_info_v3_api_core_ge_class - AssertionError: assert {'anonymized_... 'Datasource'} == {'anonymized_... 'Datasource'}
+tests/datasource/test_datasource_anonymizer.py::test_anonymize_datasource_info_v3_api_custom_subclass - AssertionError: assert {'anonymized_... 'Datasource'} == {'anonymized_...61c3569', ...}
+tests/datasource/test_datasource_anonymizer.py::test_is_parent_class_recognized_yes - AssertionError: assert 'LegacyDatasource' == 'PandasDatasource'
+tests/datasource/test_datasource_anonymizer.py::test_is_parent_class_recognized_v2_api_yes - AssertionError: assert 'LegacyDatasource' == 'PandasDatasource'
+tests/datasource/test_datasource_anonymizer.py::test_is_parent_class_recognized_v2_api_no - AssertionError: assert 'BaseDatasource' is None
+tests/datasource/test_datasource_anonymizer.py::test_is_parent_class_recognized_v3_api_yes - AssertionError: assert 'BaseDatasource' == 'SimpleSqlalchemyDatasource'
+tests/datasource/test_datasource_anonymizer.py::test_is_parent_class_recognized_v3_api_no - AssertionError: assert 'LegacyDatasource' is None

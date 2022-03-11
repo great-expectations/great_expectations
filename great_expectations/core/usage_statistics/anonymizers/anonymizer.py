@@ -151,7 +151,7 @@ class Anonymizer:
                 if Anonymizer._is_core_great_expectations_class(parent_module_name):
                     return parent_class.__name__
 
-            return None
-
         except AttributeError:
-            return None
+            pass
+
+        return None
