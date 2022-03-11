@@ -44,7 +44,6 @@ class Anonymizer:
     def anonymize_object_info(
         self,
         anonymized_info_dict: dict,
-        ge_classes,
         object_: Optional[object] = None,
         object_class: Optional[type] = None,
         object_config: Optional[dict] = None,
