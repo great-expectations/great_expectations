@@ -119,7 +119,7 @@ class Anonymizer:
 
     @staticmethod
     def _is_parent_class_recognized(
-        classes_to_check,
+        classes_to_check=None,
         object_=None,
         object_class=None,
         object_config=None,
@@ -141,9 +141,15 @@ class Anonymizer:
                 object_module_name = object_config.get("module_name")
                 object_class = load_class(object_class_name, object_module_name)
 
-            for class_to_check in classes_to_check:
-                if issubclass(object_class, class_to_check):
-                    return class_to_check.__name__
+            object_class_name = object_class.__name__
+            object_module_name = object_class.__module__
+            parents: Tuple[type, ...] = object_class.__bases__
+
+            parent_class: type
+            for parent_class in parents:
+                parent_module_name: str = parent_class.__module__
+                if Anonymizer._is_core_great_expectations_class(parent_module_name):
+                    return parent_class.__name__
 
             return None
 
