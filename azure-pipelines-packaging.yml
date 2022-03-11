@@ -13,7 +13,7 @@
 #  * User and developer workflows
 
 schedules:
-- cron: 0 0 * * *
+- cron: 0 8 * * *
   displayName: Scheduled Runs
   branches:
     include:
