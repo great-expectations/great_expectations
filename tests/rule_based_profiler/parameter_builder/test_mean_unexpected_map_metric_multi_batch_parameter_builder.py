@@ -279,7 +279,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
     )
 
 
-def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_serialization(
+def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
