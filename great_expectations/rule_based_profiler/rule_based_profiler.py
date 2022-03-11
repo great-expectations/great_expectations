@@ -359,6 +359,27 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return expectation_suite
 
+    def add_rule(self, rule: Rule) -> None:
+        """
+        Add Rule object to existing profiler object by reconciling profiler rules and updating _profiler_config.
+        """
+        rules_dict: Dict[str, Dict[str, Any]] = {
+            rule.name: rule.to_json_dict(),
+        }
+        effective_rules: List[Rule] = self.reconcile_profiler_rules(
+            rules=rules_dict,
+            reconciliation_directives=ReconciliationDirectives(
+                domain_builder=ReconciliationStrategy.UPDATE,
+                parameter_builder=ReconciliationStrategy.UPDATE,
+                expectation_configuration_builder=ReconciliationStrategy.UPDATE,
+            ),
+        )
+        updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
+            rule.name: rule.to_json_dict() for rule in effective_rules
+        }
+        self.rules: List[Rule] = effective_rules
+        self._profiler_config.rules = updated_rules
+
     def reconcile_profiler_variables(
         self,
         variables: Optional[Dict[str, Any]] = None,
@@ -807,13 +828,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def to_json_dict(self) -> dict:
         rule: Rule
+        variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
+            self.variables
+        )
+
         serializeable_dict: dict = {
             "class_name": self.__class__.__name__,
             "module_name": self.__class__.__module__,
             "name": self.name,
-            "variables": self.variables.to_dict()["parameter_nodes"]["variables"][
-                "variables"
-            ],
+            "variables": variables_dict,
             "rules": [rule.to_json_dict() for rule in self.rules],
         }
         return serializeable_dict
