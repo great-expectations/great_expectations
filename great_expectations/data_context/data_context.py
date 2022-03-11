@@ -3417,7 +3417,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
-        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
         Args:
             batch_request: The batch request used to supply arguments at runtime.
