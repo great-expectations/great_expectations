@@ -802,7 +802,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "domain_kwargs": compute_domain_kwargs,
                 }
             queries[domain_id]["select"].append(
-                engine_fn.label(metric_to_resolve.metric_name.join(random.choices(string.ascii_lowercase, k=2)))
+                engine_fn.label(
+                    metric_to_resolve.metric_name.join(
+                        random.choices(string.ascii_lowercase, k=2)
+                    )
+                )
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
