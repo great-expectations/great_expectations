@@ -117,7 +117,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     def _get_iterator(self, data_asset_name, query_parameters=None):
         raw_query = self._get_raw_query(data_asset_name=data_asset_name)
         if raw_query is None:
-            logger.warning("No query defined for data asset: %s" % data_asset_name)
+            logger.warning(f"No query defined for data asset: {data_asset_name}")
             # There is no valid query path or temp query storage defined with the data_asset_name
             return None
 

@@ -101,6 +101,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     GeCloudIdentifier,
     ValidationResultIdentifier,
@@ -1913,7 +1914,7 @@ class BaseDataContext(ConfigPeer):
         Returns:
             datasource (Datasource)
         """
-        logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
+        logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
 
         module_name = kwargs.get("module_name", "great_expectations.datasource")
         verify_dynamic_loading_support(module_name=module_name)
@@ -2078,7 +2079,7 @@ class BaseDataContext(ConfigPeer):
             keys = self.expectations_store.list_keys()
         except KeyError as e:
             raise ge_exceptions.InvalidConfigError(
-                "Unable to find configured store: %s" % str(e)
+                f"Unable to find configured store: {str(e)}"
             )
         return keys
 
@@ -2279,7 +2280,7 @@ class BaseDataContext(ConfigPeer):
                 resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
             )
         else:
-            key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
 
@@ -2290,7 +2291,7 @@ class BaseDataContext(ConfigPeer):
 
         else:
             raise ge_exceptions.DataContextError(
-                "expectation_suite %s not found" % expectation_suite_name
+                f"expectation_suite {expectation_suite_name} not found"
             )
 
     def list_expectation_suite_names(self) -> List[str]:
@@ -2618,7 +2619,7 @@ class BaseDataContext(ConfigPeer):
 
             for site_name, site_config in sites.items():
                 logger.debug(
-                    "Building Data Docs Site %s" % site_name,
+                    f"Building Data Docs Site {site_name}",
                 )
 
                 if (site_names and (site_name in site_names)) or not site_names:
@@ -2884,7 +2885,7 @@ class BaseDataContext(ConfigPeer):
             total_start_time = datetime.datetime.now()
 
             for name in data_asset_names_to_profiled:
-                logger.info("\tProfiling '%s'..." % name)
+                logger.info(f"\tProfiling '{name}'...")
                 try:
                     profiling_results["results"].append(
                         self.profile_data_asset(
@@ -2911,7 +2912,7 @@ class BaseDataContext(ConfigPeer):
                     skipped_data_assets += 1
                 except SQLAlchemyError as e:
                     logger.warning(
-                        "SqlAlchemyError while profiling %s. Skipping." % name[1]
+                        f"SqlAlchemyError while profiling {name[1]}. Skipping."
                     )
                     logger.debug(str(e))
                     skipped_data_assets += 1
@@ -3317,6 +3318,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id=ge_cloud_id,
         )
 
+    def save_profiler(
+        self,
+        profiler: RuleBasedProfiler,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        key: Union[
+            GeCloudIdentifier, ConfigurationIdentifier
+        ] = self.profiler_store.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+        self.profiler_store.set(key=key, value=profiler.config)
+
     def get_profiler(
         self,
         name: Optional[str] = None,
@@ -3359,9 +3371,28 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
+
+        Args:
+            name: Identifier used to retrieve the profiler from a store.
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            variables: Attribute name/value pairs (overrides)
+            rules: Key-value pairs of name/configuration-dictionary (overrides)
+            expectation_suite: An existing ExpectationSuite to update.
+            expectation_suite_name: A name for returned ExpectationSuite.
+            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
+
+        Returns:
+            Set of rule evaluation results in the form of an ExpectationSuite.
+
+        Raises:
+            AssertionError if both a `name` and `ge_cloud_id` are provided.
+            AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
+        """
         return RuleBasedProfiler.run_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
@@ -3369,6 +3400,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id=ge_cloud_id,
             variables=variables,
             rules=rules,
+            expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
         )
@@ -3381,15 +3413,34 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
+
+        Args:
+            batch_request: The batch request used to supply arguments at runtime.
+            name: Identifier used to retrieve the profiler from a store.
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            expectation_suite: An existing ExpectationSuite to update.
+            expectation_suite_name: A name for returned ExpectationSuite.
+            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
+
+        Returns:
+            Set of rule evaluation results in the form of an ExpectationSuite.
+
+        Raises:
+            AssertionError if both a `name` and `ge_cloud_id` are provided.
+            AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
+        """
         return RuleBasedProfiler.run_profiler_on_data(
             data_context=self,
             profiler_store=self.profiler_store,
             batch_request=batch_request,
             name=name,
             ge_cloud_id=ge_cloud_id,
+            expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
         )
@@ -3977,10 +4028,8 @@ class DataContext(BaseDataContext):
         cls.scaffold_directories(ge_dir)
 
         if os.path.isfile(os.path.join(ge_dir, cls.GE_YML)):
-            message = """Warning. An existing `{}` was found here: {}.
-    - No action was taken.""".format(
-                cls.GE_YML, ge_dir
-            )
+            message = f"""Warning. An existing `{cls.GE_YML}` was found here: {ge_dir}.
+    - No action was taken."""
             warnings.warn(message)
         else:
             cls.write_project_template_to_disk(ge_dir, usage_statistics_enabled)
@@ -4319,7 +4368,7 @@ class DataContext(BaseDataContext):
             self.config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
-        logger.debug("Starting DataContext.add_store for store %s" % store_name)
+        logger.debug(f"Starting DataContext.add_store for store {store_name}")
 
         new_store = super().add_store(store_name, store_config)
         self._save_project_config()
@@ -4328,7 +4377,7 @@ class DataContext(BaseDataContext):
     def add_datasource(
         self, name, **kwargs
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
+        logger.debug(f"Starting DataContext.add_datasource for datasource {name}")
 
         new_datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
@@ -4422,9 +4471,7 @@ class DataContext(BaseDataContext):
 
         for i in range(4):
             logger.debug(
-                "Searching for config file {} ({} layer deep)".format(
-                    search_start_dir, i
-                )
+                f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
             potential_ge_dir = os.path.join(search_start_dir, cls.GE_DIR)
@@ -4433,7 +4480,7 @@ class DataContext(BaseDataContext):
                 potential_yml = os.path.join(potential_ge_dir, cls.GE_YML)
                 if os.path.isfile(potential_yml):
                     yml_path = potential_yml
-                    logger.debug("Found config file at " + str(yml_path))
+                    logger.debug(f"Found config file at {str(yml_path)}")
                     break
             # move up one directory
             search_start_dir = os.path.dirname(search_start_dir)
