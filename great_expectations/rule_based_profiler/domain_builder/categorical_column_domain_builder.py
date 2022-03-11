@@ -75,11 +75,11 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             column_names=column_names,
         )
 
+        self._exclude_columns = exclude_columns
+
         self._limit_mode = limit_mode
         self._max_unique_values = max_unique_values
         self._max_proportion_unique = max_proportion_unique
-
-        self._exclude_columns = exclude_columns
 
         self._cardinality_checker = None
 
