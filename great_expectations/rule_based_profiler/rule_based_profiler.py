@@ -974,6 +974,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
@@ -988,6 +989,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         result: ExpectationSuite = profiler.run(
             variables=variables,
             rules=rules,
+            expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
         )
@@ -1001,6 +1003,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         batch_request: Union[BatchRequest, RuntimeBatchRequest, dict],
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
@@ -1019,6 +1022,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
 
         result: ExpectationSuite = profiler.run(
             rules=rules,
+            expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
         )
