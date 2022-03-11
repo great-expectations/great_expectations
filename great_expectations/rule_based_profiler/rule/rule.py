@@ -70,7 +70,7 @@ class Rule(SerializableDictDot):
                         parameter_container=parameter_container,
                         domain=domain,
                         variables=variables,
-                        parameters=self.parameters,
+                        parameters=self._parameters,
                     )
 
             expectation_configuration_builder: ExpectationConfigurationBuilder
