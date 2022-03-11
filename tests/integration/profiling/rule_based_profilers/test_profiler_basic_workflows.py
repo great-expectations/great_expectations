@@ -129,7 +129,9 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
         expectation_configuration_builders=[default_expectation_configuration_builder],
     )
     my_rbp: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_simple_rbp", data_context=context, config_version=1.0
+        name="my_simple_rbp",
+        config_version=1.0,
+        data_context=context,
     )
     my_rbp.add_rule(rule=simple_rule)
     res: ExpectationSuite = my_rbp.run()
@@ -179,7 +181,11 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
         parameter_builders=[numeric_range_parameter_builder],
         expectation_configuration_builders=[config_builder],
     )
-    my_rbp = RuleBasedProfiler(name="my_rbp", data_context=context, config_version=1.0)
+    my_rbp = RuleBasedProfiler(
+        name="my_rbp",
+        config_version=1.0,
+        data_context=context,
+    )
     my_rbp.add_rule(rule=simple_rule)
     res: ExpectationSuite = my_rbp.run()
     assert len(res.expectations) == 4
@@ -229,8 +235,10 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         parameter_builders=[numeric_range_parameter_builder],
         expectation_configuration_builders=[config_builder],
     )
-    my_rbp: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rbp", data_context=context, config_version=1.0
+    my_rbp = RuleBasedProfiler(
+        name="my_rbp",
+        config_version=1.0,
+        data_context=context,
     )
     res: dict = my_rbp.config.to_json_dict()
     assert res == {
