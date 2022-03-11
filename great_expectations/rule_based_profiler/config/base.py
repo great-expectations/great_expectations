@@ -125,12 +125,6 @@ class DomainBuilderConfig(DictDot):
 class DomainBuilderConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
-        fields = (
-            "module_name",
-            "class_name",
-            "batch_request",
-        )
-        ordered = True
 
     __config_class__ = DomainBuilderConfig
 
@@ -175,14 +169,6 @@ class ParameterBuilderConfig(DictDot):
 class ParameterBuilderConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
-        fields = (
-            "name",
-            "module_name",
-            "class_name",
-            "json_serialize",
-            "batch_request",
-        )
-        ordered = True
 
     __config_class__ = ParameterBuilderConfig
 
@@ -236,13 +222,6 @@ class ExpectationConfigurationBuilderConfig(DictDot):
 class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
-        fields = (
-            "module_name",
-            "class_name",
-            "expectation_type",
-            "meta",
-        )
-        ordered = True
 
     __config_class__ = ExpectationConfigurationBuilderConfig
 
@@ -331,12 +310,6 @@ class RuleConfig(SerializableDictDot):
 class RuleConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
-        fields = (
-            "domain_builder",
-            "parameter_builders",
-            "expectation_configuration_builders",
-        )
-        ordered = True
 
     __config_class__ = RuleConfig
 
