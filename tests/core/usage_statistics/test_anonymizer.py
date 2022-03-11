@@ -217,11 +217,9 @@ def test_anonymize_object_info_with_custom_user_defined_object_with_multiple_par
         object_=MyCustomMultipleInheritanceClass(expectation_suite_name="my_name"),
     )
 
-    # Because we iterate through parents sequentially, the ExpectationSuite is the class
-    # that is picked up and stored in the payload.
     assert anonymized_result == {
         "anonymized_class": "1e1716661acfa73d538a191ed13efcfd",
-        "parent_class": "ExpectationSuite",
+        "parent_class": "ExpectationSuite,BatchRequest",
     }
 
 

@@ -1,6 +1,6 @@
 import logging
 from hashlib import md5
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from great_expectations.util import load_class
 
@@ -77,23 +77,28 @@ class Anonymizer:
                 anonymized_info_dict["parent_class"] = object_class_name
             else:
 
-                # Chetan - 20220311 - If we can't identify the class in question, we iterate through the
-                # parents. While GE does not utilize multiple inheritance when defining core objects (as of v0.14.10),
-                # it is important to recognize that this approach will select the FIRST valid parent and ignore the rest.
+                # Chetan - 20220311 - If we can't identify the class in question, we iterate through the parents.
+                # While GE rarely utilizes multiple inheritance when defining core objects (as of v0.14.10),
+                # it is important to recognize that this is possibility.
                 #
-                # As the alternative would be to default to "__not_recognized__" in the face of ambiguity, we deem it appropriate
-                # to select the first valid result, even if it doesn't convey the full picture of the object's inheritance hierarchy.
-                # Some information is better than no information.
+                # In the presence of multiple valid parents, we generate a comma-delimited list.
+
+                parent_class_list: List[str] = []
 
                 parent_class: type
                 for parent_class in parents:
                     parent_module_name: str = parent_class.__module__
                     if Anonymizer._is_core_great_expectations_class(parent_module_name):
-                        anonymized_info_dict["parent_class"] = parent_class.__name__
-                        anonymized_info_dict["anonymized_class"] = self.anonymize(
-                            object_class_name
-                        )
-                        break
+                        parent_class_list.append(parent_class.__name__)
+
+                if parent_class_list:
+                    concatenated_parent_classes: str = ",".join(
+                        cls for cls in parent_class_list
+                    )
+                    anonymized_info_dict["parent_class"] = concatenated_parent_classes
+                    anonymized_info_dict["anonymized_class"] = self.anonymize(
+                        object_class_name
+                    )
 
             # Catch-all to prevent edge cases from slipping past
             if not anonymized_info_dict.get("parent_class"):
