@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 class Anonymizer:
     """Anonymize string names in an optionally-consistent way."""
 
-    CORE_OBJECT_PREFIX = "great_expectations"
+    # Any class that starts with this __module__ is considered a "core" object
+    CORE_GE_OBJECT_MODULE_PREFIX = "great_expectations"
 
     def __init__(self, salt: Optional[str] = None) -> None:
         if salt is not None and not isinstance(salt, str):
@@ -76,9 +77,11 @@ class Anonymizer:
                 anonymized_info_dict["parent_class"] = object_class_name
             elif len(parents) != 1:
                 if len(parents) == 0:
-                    logger.debug("Could not find parent class when anonymizing payload")
+                    logger.info(
+                        "Could not find any parent classes when anonymizing payload"
+                    )
                 else:
-                    logger.debug(
+                    logger.info(
                         "Due to the ambiguity brought on by multiple inheritance, short-circuiting anonymization of payload"
                     )
                 anonymized_info_dict["parent_class"] = "__not_recognized__"
@@ -113,7 +116,7 @@ class Anonymizer:
 
     @staticmethod
     def _is_core_great_expectations_class(class_name: str) -> bool:
-        return class_name.startswith(Anonymizer.CORE_OBJECT_PREFIX)
+        return class_name.startswith(Anonymizer.CORE_GE_OBJECT_MODULE_PREFIX)
 
     @staticmethod
     def _is_parent_class_recognized(
