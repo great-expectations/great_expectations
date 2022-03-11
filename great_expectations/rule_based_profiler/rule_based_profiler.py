@@ -1103,6 +1103,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             key = ConfigurationIdentifier(
                 configuration_key=config.name,
             )
+
         profiler_store.set(key=key, value=config)
 
         return new_profiler

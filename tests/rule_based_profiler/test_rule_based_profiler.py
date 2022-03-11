@@ -32,7 +32,7 @@ def sample_rule_dict():
             "column_names": None,
             "module_name": "great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder",
             "batch_request": {
-                "datasource_name": "hello",
+                "datasource_name": "my_sample_datasource",
                 "data_connector_name": "default_inferred_data_connector_name",
                 "data_asset_name": "yellow_tripdata_sample_2018",
                 "batch_spec_passthrough": None,
