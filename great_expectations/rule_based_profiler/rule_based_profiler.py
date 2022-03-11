@@ -363,7 +363,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Add Rule object to existing profiler object by reconciling profiler rules and updating _profiler_config.
         """
-        rules_dict: Dict[str, Dict[str, Any]] = {rule.name: rule.to_json_dict()}
+        rules_dict: Dict[str, Dict[str, Any]] = {
+            rule.name: rule.to_json_dict(),
+        }
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
             rules=rules_dict,
             reconciliation_directives=ReconciliationDirectives(
