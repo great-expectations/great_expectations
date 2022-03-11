@@ -110,7 +110,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L49
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L50
 ```
 
 </TabItem>
