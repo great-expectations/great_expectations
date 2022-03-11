@@ -64,14 +64,13 @@ class Rule(SerializableDictDot):
             )
             self._parameters[domain.id] = parameter_container
             parameter_builder: ParameterBuilder
-            if self.parameter_builders:
-                for parameter_builder in self.parameter_builders:
-                    parameter_builder.build_parameters(
-                        parameter_container=parameter_container,
-                        domain=domain,
-                        variables=variables,
-                        parameters=self._parameters,
-                    )
+            for parameter_builder in self.parameter_builders:
+                parameter_builder.build_parameters(
+                    parameter_container=parameter_container,
+                    domain=domain,
+                    variables=variables,
+                    parameters=self._parameters,
+                )
 
             expectation_configuration_builder: ExpectationConfigurationBuilder
             for (
