@@ -3375,6 +3375,24 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
+
+        Args:
+            name: Identifier used to retrieve the profiler from a store.
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            variables: Attribute name/value pairs (overrides)
+            rules: Key-value pairs of name/configuration-dictionary (overrides)
+            expectation_suite: An existing ExpectationSuite to update.
+            expectation_suite_name: A name for returned ExpectationSuite.
+            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
+
+        Returns:
+            Set of rule evaluation results in the form of an ExpectationSuite.
+
+        Raises:
+            AssertionError if both a `name` and `ge_cloud_id` are provided.
+            AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
+        """
         return RuleBasedProfiler.run_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
@@ -3399,6 +3417,23 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
+        """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
+
+        Args:
+            batch_request: The batch request used to supply arguments at runtime.
+            name: Identifier used to retrieve the profiler from a store.
+            ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
+            expectation_suite: An existing ExpectationSuite to update.
+            expectation_suite_name: A name for returned ExpectationSuite.
+            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler.
+
+        Returns:
+            Set of rule evaluation results in the form of an ExpectationSuite.
+
+        Raises:
+            AssertionError if both a `name` and `ge_cloud_id` are provided.
+            AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
+        """
         return RuleBasedProfiler.run_profiler_on_data(
             data_context=self,
             profiler_store=self.profiler_store,
