@@ -1,14 +1,9 @@
-from unittest import mock
-
 import pytest
 from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.domain_builder import (
     DomainBuilder,
@@ -19,7 +14,6 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
-    NumericMetricRangeMultiBatchParameterBuilder,
 )
 from great_expectations.rule_based_profiler.rule.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
@@ -132,7 +126,9 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
         expectation_configuration_builders=[default_expectation_configuration_builder],
     )
     my_rbp: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_simple_rbp", data_context=context, config_version=1.0
+        name="my_simple_rbp",
+        config_version=1.0,
+        data_context=context,
     )
     my_rbp.add_rule(rule=simple_rule)
     res: ExpectationSuite = my_rbp.run()
@@ -182,7 +178,11 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
         parameter_builders=[numeric_range_parameter_builder],
         expectation_configuration_builders=[config_builder],
     )
-    my_rbp = RuleBasedProfiler(name="my_rbp", data_context=context, config_version=1.0)
+    my_rbp = RuleBasedProfiler(
+        name="my_rbp",
+        config_version=1.0,
+        data_context=context,
+    )
     my_rbp.add_rule(rule=simple_rule)
     res: ExpectationSuite = my_rbp.run()
     assert len(res.expectations) == 4
@@ -232,8 +232,10 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         parameter_builders=[numeric_range_parameter_builder],
         expectation_configuration_builders=[config_builder],
     )
-    my_rbp: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rbp", data_context=context, config_version=1.0
+    my_rbp = RuleBasedProfiler(
+        name="my_rbp",
+        config_version=1.0,
+        data_context=context,
     )
     res: dict = my_rbp.config.to_json_dict()
     assert res == {

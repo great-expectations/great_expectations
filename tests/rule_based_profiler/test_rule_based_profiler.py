@@ -1259,7 +1259,9 @@ def test_add_single_rule(
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rbp", data_context=mock_data_context, config_version=1.0
+        name="my_rbp",
+        config_version=1.0,
+        data_context=mock_data_context,
     )
     first_rule: Rule = Rule(
         name="first_rule",
@@ -1267,7 +1269,7 @@ def test_add_single_rule(
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
     first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
-    profiler.add_rule(first_rule)
+    profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
     duplicate_of_first_rule: Rule = Rule(
@@ -1276,7 +1278,7 @@ def test_add_single_rule(
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
     duplicate_of_first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
-    profiler.add_rule(duplicate_of_first_rule)
+    profiler.add_rule(rule=duplicate_of_first_rule)
     assert len(profiler.rules) == 1
 
 
@@ -1295,7 +1297,9 @@ def test_add_rule_overwrite_first_rule(
 ):
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rbp", data_context=mock_data_context, config_version=1.0
+        name="my_rbp",
+        config_version=1.0,
+        data_context=mock_data_context,
     )
     first_rule: Rule = Rule(
         name="first_rule",
@@ -1303,7 +1307,7 @@ def test_add_rule_overwrite_first_rule(
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
     first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
-    profiler.add_rule(first_rule)
+    profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
 
@@ -1321,7 +1325,9 @@ def test_add_rule_add_second_rule(
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rbp", data_context=mock_data_context, config_version=1.0
+        name="my_rbp",
+        config_version=1.0,
+        data_context=mock_data_context,
     )
     first_rule: Rule = Rule(
         name="first_rule",
@@ -1329,7 +1335,7 @@ def test_add_rule_add_second_rule(
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
     first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
-    profiler.add_rule(first_rule)
+    profiler.add_rule(rule=first_rule)
     assert len(profiler.rules) == 1
 
     second_rule: Rule = Rule(
@@ -1338,7 +1344,7 @@ def test_add_rule_add_second_rule(
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
     second_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
-    profiler.add_rule(second_rule)
+    profiler.add_rule(rule=second_rule)
     assert len(profiler.rules) == 2
 
 
@@ -1348,7 +1354,9 @@ def test_add_rule_bad_rule(
     sample_rule_dict: dict,
 ):
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rbp", data_context=mock_data_context, config_version=1.0
+        name="my_rbp",
+        config_version=1.0,
+        data_context=mock_data_context,
     )
     not_a_rule: dict = {
         "name": "first_rule",
@@ -1356,5 +1364,6 @@ def test_add_rule_bad_rule(
         "expectation_configuration_builder": "expectation_configuration_builder",
     }
     with pytest.raises(AttributeError) as e:
-        profiler.add_rule(not_a_rule)
+        # noinspection PyTypeChecker
+        profiler.add_rule(rule=not_a_rule)
     assert "'dict' object has no attribute 'name'" in str(e.value)
