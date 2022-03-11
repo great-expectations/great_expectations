@@ -312,7 +312,7 @@ class Validator:
 
             if self.interactive_evaluation:
                 configuration.process_evaluation_parameters(
-                    self._expectation_suite.evaluation_parameters,
+                    self.expectation_suite.evaluation_parameters,
                     True,
                     self._data_context,
                 )
@@ -328,7 +328,7 @@ class Validator:
                 else:
                     validation_result = expectation.validate(
                         validator=self,
-                        evaluation_parameters=self._expectation_suite.evaluation_parameters,
+                        evaluation_parameters=self.expectation_suite.evaluation_parameters,
                         data_context=self._data_context,
                         runtime_configuration=basic_runtime_configuration,
                     )
@@ -339,7 +339,7 @@ class Validator:
                     stored_config = configuration.get_raw_configuration()
                 else:
                     # Append the expectation to the config.
-                    stored_config = self._expectation_suite._add_expectation(
+                    stored_config = self.expectation_suite._add_expectation(
                         expectation_configuration=configuration.get_raw_configuration(),
                         send_usage_event=False,
                     )
@@ -1175,7 +1175,7 @@ aborting graph resolution.
             + "Please use ExpectationSuite.add_expectation instead.",
             DeprecationWarning,
         )
-        self._expectation_suite.append_expectation(expectation_config)
+        self.expectation_suite.append_expectation(expectation_config)
 
     def find_expectation_indexes(
         self,
@@ -1188,7 +1188,7 @@ aborting graph resolution.
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
-        return self._expectation_suite.find_expectation_indexes(
+        return self.expectation_suite.find_expectation_indexes(
             expectation_configuration=expectation_configuration, match_type=match_type
         )
 
@@ -1204,7 +1204,7 @@ aborting graph resolution.
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
-        return self._expectation_suite.find_expectations(
+        return self.expectation_suite.find_expectations(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
             ge_cloud_id=ge_cloud_id,
@@ -1218,7 +1218,7 @@ aborting graph resolution.
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
 
-        return self._expectation_suite.remove_expectation(
+        return self.expectation_suite.remove_expectation(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
             remove_multiple_matches=remove_multiple_matches,
@@ -1425,7 +1425,7 @@ set as active.
              copy of _expectation_suite, not the original object.
         """
 
-        expectation_suite = copy.deepcopy(self._expectation_suite)
+        expectation_suite = copy.deepcopy(self.expectation_suite)
         expectations = expectation_suite.expectations
 
         discards = defaultdict(int)
@@ -1851,8 +1851,8 @@ set as active.
         Returns:
             The current value of the evaluation parameter.
         """
-        if parameter_name in self._expectation_suite.evaluation_parameters:
-            return self._expectation_suite.evaluation_parameters[parameter_name]
+        if parameter_name in self.expectation_suite.evaluation_parameters:
+            return self.expectation_suite.evaluation_parameters[parameter_name]
         else:
             return default_value
 
@@ -1865,7 +1865,7 @@ set as active.
             parameter_name (string): The name of the kwarg to be replaced at evaluation time
             parameter_value (any): The value to be used
         """
-        self._expectation_suite.evaluation_parameters.update(
+        self.expectation_suite.evaluation_parameters.update(
             {parameter_name: parameter_value}
         )
 
@@ -1884,7 +1884,7 @@ set as active.
             batch_markers = self.active_batch_markers
         if batch_definition is None:
             batch_definition = self.active_batch_definition
-        self._expectation_suite.add_citation(
+        self.expectation_suite.add_citation(
             comment,
             batch_spec=batch_spec,
             batch_markers=batch_markers,
@@ -1893,14 +1893,18 @@ set as active.
         )
 
     @property
+    def expectation_suite(self) -> ExpectationSuite:
+        return self._expectation_suite
+
+    @property
     def expectation_suite_name(self) -> str:
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
-        return self._expectation_suite.expectation_suite_name
+        return self.expectation_suite.expectation_suite_name
 
     @expectation_suite_name.setter
     def expectation_suite_name(self, expectation_suite_name: str) -> None:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
-        self._expectation_suite.expectation_suite_name = expectation_suite_name
+        self.expectation_suite.expectation_suite_name = expectation_suite_name
 
     def test_expectation_function(
         self, function: Callable, *args, **kwargs
@@ -2067,20 +2071,20 @@ set as active.
                 )
             else:
                 expectation_suite: ExpectationSuite = copy.deepcopy(expectation_suite)
-            self._expectation_suite = expectation_suite
+            self.expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:
                 if (
-                    self._expectation_suite.expectation_suite_name
+                    self.expectation_suite.expectation_suite_name
                     != expectation_suite_name
                 ):
                     logger.warning(
                         "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
-                            n1=self._expectation_suite.expectation_suite_name,
+                            n1=self.expectation_suite.expectation_suite_name,
                             n2=expectation_suite_name,
                         )
                     )
-                self._expectation_suite.expectation_suite_name = expectation_suite_name
+                self.expectation_suite.expectation_suite_name = expectation_suite_name
 
         else:
             if expectation_suite_name is None:
@@ -2090,7 +2094,7 @@ set as active.
                 data_context=self._data_context,
             )
 
-        self._expectation_suite.execution_engine_type = type(
+        self.expectation_suite.execution_engine_type = type(
             self.execution_engine
         ).__name__
 
