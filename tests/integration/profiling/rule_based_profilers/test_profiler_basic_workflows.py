@@ -1,9 +1,12 @@
+from typing import List
+
 import pytest
 from ruamel import yaml
 
-import great_expectations as ge
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.domain_builder import (
     DomainBuilder,
@@ -21,7 +24,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 
 @pytest.fixture
 def data_context_with_taxi_data(empty_data_context):
-    context: ge.DataContext = empty_data_context
+    context: DataContext = empty_data_context
 
     # finding path to taxi_data relative to current test file
     data_path: str = file_relative_path(
@@ -70,7 +73,7 @@ def test_domain_builder(data_context_with_taxi_data):
     will be run on.  This test will SimpleColumnSuffixDomainBuilder on the suffix "_amount", which
     returns 4 columns as the domain.
     """
-    context: ge.DataContext = data_context_with_taxi_data
+    context: DataContext = data_context_with_taxi_data
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_multibatch_datasource_other_possibility",
         data_connector_name="default_inferred_data_connector_name",
@@ -104,7 +107,7 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
     The test eventually asserts that the profiler return 4 Expectations, one per column in
     our domain.
     """
-    context: ge.DataContext = data_context_with_taxi_data
+    context: DataContext = data_context_with_taxi_data
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_multibatch_datasource_other_possibility",
         data_connector_name="default_inferred_data_connector_name",
@@ -143,7 +146,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     we use a MetricMultiBatchParameterBuilder to pass in the min_value parameter to
     expect_column_values_to_be_greater_than.
     """
-    context: ge.DataContext = data_context_with_taxi_data
+    context: DataContext = data_context_with_taxi_data
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_multibatch_datasource_other_possibility",
         data_connector_name="default_inferred_data_connector_name",
@@ -197,7 +200,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
 
     The test tests that context.save_profiler() and context.get_profiler() return the expected RBP.
     """
-    context: ge.DataContext = data_context_with_taxi_data
+    context: DataContext = data_context_with_taxi_data
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_multibatch_datasource_other_possibility",
         data_connector_name="default_inferred_data_connector_name",
@@ -304,3 +307,59 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         "config_version": 1.0,
         "name": "my_rbp",
     }
+
+
+def test_profiler_run_with_expectation_suite_arg(
+    data_context_with_taxi_data: DataContext, basic_expectation_suite: ExpectationSuite
+):
+    context: DataContext = data_context_with_taxi_data
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="taxi_multibatch_datasource_other_possibility",
+        data_connector_name="default_inferred_data_connector_name",
+        data_asset_name="yellow_tripdata_sample_2018",
+        data_connector_query={"index": -1},
+    )
+    domain_builder: DomainBuilder = SimpleColumnSuffixDomainBuilder(
+        data_context=context,
+        batch_request=batch_request,
+        column_name_suffixes=["_amount"],
+    )
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expectation_type="expect_column_values_to_not_be_null",
+        column="$domain.domain_kwargs.column",
+    )
+    simple_rule: Rule = Rule(
+        name="rule_with_no_variables_no_parameters",
+        domain_builder=domain_builder,
+        expectation_configuration_builders=[default_expectation_configuration_builder],
+    )
+    my_rbp: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_simple_rbp", data_context=context, config_version=1.0
+    )
+    my_rbp.add_rule(rule=simple_rule)
+
+    existing_expectations: List[ExpectationConfiguration] = [
+        ExpectationConfiguration(
+            expectation_type="expect_column_to_exist",
+            kwargs={"column": "infinities"},
+        ),
+        ExpectationConfiguration(
+            expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
+        ),
+        ExpectationConfiguration(
+            expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
+        ),
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_unique",
+            kwargs={"column": "naturals"},
+        ),
+    ]
+
+    assert len(basic_expectation_suite.expectations) == 4
+    assert basic_expectation_suite.expectations == existing_expectations
+
+    res: ExpectationSuite = my_rbp.run(expectation_suite=basic_expectation_suite)
+
+    assert id(res) == id(basic_expectation_suite)
+    assert len(res.expectations) == 8
+    assert basic_expectation_suite.expectations[:4] == existing_expectations
