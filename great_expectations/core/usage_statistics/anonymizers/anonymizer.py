@@ -76,6 +76,14 @@ class Anonymizer:
             if Anonymizer._is_core_great_expectations_class(object_module_name):
                 anonymized_info_dict["parent_class"] = object_class_name
             else:
+
+                # Chetan - 20220311 - If we can't identify the class in question, we iterate through the
+                # parents. While GE does not utilize multiple inheritance when defining core objects (as of v0.14.10),
+                # it is important to recognize that this approach will select the FIRST valid parent and ignore the rest.
+                #
+                # As the alternative would be to default to __not_recognized__ in the face of ambiguity, we deem it approrpriate
+                # to select the first valid result, even if it doesn't convey the full picture of the object's inheritance hierarchy.
+
                 parent_class: type
                 for parent_class in parents:
                     parent_module_name: str = parent_class.__module__
