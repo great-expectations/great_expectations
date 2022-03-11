@@ -78,10 +78,10 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L21-L37
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L21-L38
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L45
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L46
 ```
 
 </TabItem>
