@@ -67,7 +67,7 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L18-L35
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L19-L33
 ```
 Run this code to test your configuration.
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L42
@@ -81,7 +81,7 @@ Put your connection string in this template:
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L18-L35
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L41-L43
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L41
 ```
 
 </TabItem>
@@ -110,7 +110,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L44
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L43
 ```
 
 </TabItem>
