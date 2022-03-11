@@ -68,7 +68,7 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 1. The first cell does several things: It imports all the relevant libraries, loads a Data Context, and creates a `Validator`, which combines a Batch Request to define your batch of data, and an Expectation Suite.
 2. The second cell allows you to specify which columns you want to **ignore** when creating Expectations. Remember how we want to add some tests on the `passenger_count` column to ensure that its values range between 1 and 6? **Let’s comment just this one line to include it**:
 
-```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L85-L89
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L86-L90
 ```
 
 3. The next cell is where you configure a `UserConfigurableProfiler` and instantiate it, which will then profile the data and create the relevant Expectations to add to your `taxi.demo` suite.

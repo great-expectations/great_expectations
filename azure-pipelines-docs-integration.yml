@@ -66,6 +66,12 @@ stages:
       - bash: python scripts/docs_link_checker.py -p docs -r docs -s docs --skip-external
         name: LinkChecker
 
+    - job: line_number_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      steps:
+      - bash: python scripts/validate_docs_snippet_line_numbers.py
+        name: LineNumberChecker
+
   - stage: docusaurus_tests
     dependsOn: scope_check
     pool:
