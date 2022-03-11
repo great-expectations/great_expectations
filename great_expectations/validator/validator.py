@@ -2071,7 +2071,7 @@ set as active.
                 )
             else:
                 expectation_suite: ExpectationSuite = copy.deepcopy(expectation_suite)
-            self.expectation_suite = expectation_suite
+            self._expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:
                 if (
