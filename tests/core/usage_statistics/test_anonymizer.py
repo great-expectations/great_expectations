@@ -14,7 +14,7 @@ def anonymizer_with_consistent_salt() -> Anonymizer:
 
 
 # The following empty classes are used in this test module only.
-# They are used to ensure class hierarchy is appropriately processed by Anonymizer._is_parent_class_recognized()
+# They are used to ensure class hierarchy is appropriately processed by Anonymizer utilities.
 
 
 class BaseTestClass:

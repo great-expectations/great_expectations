@@ -81,8 +81,9 @@ class Anonymizer:
                 # parents. While GE does not utilize multiple inheritance when defining core objects (as of v0.14.10),
                 # it is important to recognize that this approach will select the FIRST valid parent and ignore the rest.
                 #
-                # As the alternative would be to default to __not_recognized__ in the face of ambiguity, we deem it approrpriate
+                # As the alternative would be to default to "__not_recognized__" in the face of ambiguity, we deem it appropriate
                 # to select the first valid result, even if it doesn't convey the full picture of the object's inheritance hierarchy.
+                # Some information is better than no information.
 
                 parent_class: type
                 for parent_class in parents:
