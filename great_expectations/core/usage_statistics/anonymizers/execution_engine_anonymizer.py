@@ -37,7 +37,6 @@ class ExecutionEngineAnonymizer(Anonymizer):
 
         self.anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
             object_config=execution_engine_config_dict,
         )
 

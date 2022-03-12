@@ -2,16 +2,15 @@ from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnExpectation
 
 
 class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
@@ -109,7 +108,9 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
 
     """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -122,6 +123,8 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
+
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -199,7 +202,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                     )
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -208,7 +211,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -264,14 +267,14 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                     )
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -315,7 +318,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         if not observed_value:
             return [template_string_object, "--"]
         else:
-            return [template_string_object, "%.1f%%" % (100 * observed_value)]
+            return [template_string_object, f"{100 * observed_value:.1f}%"]
 
     def _validate(
         self,

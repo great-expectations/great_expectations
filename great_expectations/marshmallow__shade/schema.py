@@ -409,9 +409,7 @@ class Schema(base.SchemaABC, metaclass=SchemaMeta):
         self.error_messages = messages
 
     def __repr__(self) -> str:
-        return "<{ClassName}(many={self.many})>".format(
-            ClassName=self.__class__.__name__, self=self
-        )
+        return f"<{self.__class__.__name__}(many={self.many})>"
 
     @property
     def dict_class(self) -> type:
@@ -663,7 +661,7 @@ class Schema(base.SchemaABC, metaclass=SchemaMeta):
                 d_kwargs = {}
                 # Allow partial loading of nested schemas.
                 if partial_is_collection:
-                    prefix = field_name + "."
+                    prefix = f"{field_name}."
                     len_prefix = len(prefix)
                     sub_partial = [
                         f[len_prefix:] for f in partial if f.startswith(prefix)

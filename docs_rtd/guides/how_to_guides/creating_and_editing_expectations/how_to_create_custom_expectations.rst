@@ -435,7 +435,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
         This guide will walk you through the process of creating your own Modular Expectations in 6 simple steps!
 
-        See also this `complete example <https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py>`_.
+        See also this `complete example <https://github.com/superconductive/ge_tutorials/blob/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py>`_.
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -646,7 +646,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
            3. If you plan on contributing your Expectation back to the library of main Expectations, you should build a JSON test for it in the ``tests/test_definitions/name_of_your_expectation`` directory.
 
         7. **Import**: To use a custom Expectation, you need to ensure it has been imported into the running python interpreter. While including the module in your `plugins/` directory will make it *available* to import, you must still import the Expectation:
-        
+
         .. code-block:: python
 
            # get a validator
@@ -661,8 +661,8 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
         8. **Optional:** Implement :ref:`Custom Data Docs Renderers <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`
 
         We have now implemented our own Custom Expectations! For more information about Expectations and Metrics, please reference the core concepts documentation.
-        
+
         Additional Notes:
         -----------------
-        
+
         1. Arguments for Custom Expectations currently **must be provided as keyword arguments**; positional arguments should be avoided.

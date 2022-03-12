@@ -34,7 +34,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.self_check.util import expectationSuiteSchema
-from great_expectations.util import gen_directory_tree_str
+from great_expectations.util import gen_directory_tree_str, is_library_loadable
 
 
 @pytest.fixture()
@@ -1006,6 +1006,10 @@ def test_TupleS3StoreBackend_with_s3_put_options():
     assert my_store.list_keys() == [(".ge_store_backend_id",), ("AAA",)]
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google"),
+    reason="google is not installed",
+)
 def test_TupleGCSStoreBackend_base_public_path():
     """
     What does this test and why?
@@ -1053,6 +1057,10 @@ def test_TupleGCSStoreBackend_base_public_path():
     )
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google"),
+    reason="google is not installed",
+)
 def test_TupleGCSStoreBackend():
     # pytest.importorskip("google-cloud-storage")
     """
