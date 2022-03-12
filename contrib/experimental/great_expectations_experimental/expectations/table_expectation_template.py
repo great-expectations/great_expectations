@@ -6,60 +6,29 @@ import json
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 from typing import Any, Dict, Optional, Tuple
 
-import numpy as np
 from sklearn.inspection import permutation_importance
-from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.linear_model import Ridge
 
 from great_expectations.core import ExpectationConfiguration
-
-#!!! This giant block of imports should be something simpler, such as:
-# from great_exepectations.helpers.expectation_creation import *
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
     TableExpectation,
 )
-from great_expectations.expectations.metrics import (
-    ColumnMapMetricProvider,
-    MetricDomainTypes,
-    column_condition_partial,
-)
-from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.expectations.metrics import MetricDomainTypes, metric_value
+from great_expectations.expectations.metrics.metric_provider import MetricConfiguration
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.validator.validator import Validator
 
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
-class TableFeatureImportances(TableMetricProvider):
+class TableModelingRidgeFeatureImportances(TableMetricProvider):
 
-    # This is a built in metric - you do not have to implement it yourself. If you would like to use
-    # a metric that does not yet exist, you can use the template below to implement it!
-    metric_name = "table.feature_importances"
-    value_keys = ("y_column", "n", "model")
+    metric_name = "table.modeling.ridge.feature_importances"
+    value_keys = ("y_column", "model")
 
-    # Below are metric computations for different dialects (Pandas, SqlAlchemy, Spark)
-    # They can be used to compute the table data you will need to validate your Expectation
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
@@ -89,41 +58,13 @@ class TableFeatureImportances(TableMetricProvider):
 
         return {i: j for i, j in zip(X.columns, importances.importances_mean)}
 
-    # @metric_value(engine=SqlAlchemyExecutionEngine)
-    # def _sqlalchemy(
-    #     cls,
-    #     execution_engine: SqlAlchemyExecutionEngine,
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     columns = metrics.get("table.columns")
-    #
-    #     # For each column, testing if alphabetical and returning number of alphabetical columns
-    #     return len([column for column in columns if column.isalpha()])
-
-    # @metric_value(engine=SparkDFExecutionEngine)
-    # def _spark(
-    #     cls,
-    #     execution_engine: SparkDFExecutionEngine,
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     columns = metrics.get("table.columns")
-    #
-    #     # For each column, testing if alphabetical and returning number of alphabetical columns
-    #     return len([column for column in columns if column.isalpha()])
-
     @classmethod
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
         configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
+        execution_engine=None,
+        runtime_configuration=None,
     ):
         return {
             "table.columns": MetricConfiguration(
@@ -134,7 +75,7 @@ class TableFeatureImportances(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTablePredictiveFeaturesToBe(TableExpectation):
+class ExpectTableRidgeFeatureImportancesToBe(TableExpectation):
     """TODO: add a docstring here"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -152,7 +93,7 @@ class ExpectTablePredictiveFeaturesToBe(TableExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "n": "1",
+                        "n_features": 1,
                         "important_columns": ["x_1"],
                         "y_column": "y",
                         "threshold": 0.35,
@@ -162,27 +103,28 @@ class ExpectTablePredictiveFeaturesToBe(TableExpectation):
                         "success": True,
                     },
                 },
+                {
+                    "title": "basic_negative_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"n_features": 2, "y_column": "y", "threshold": 0.35},
+                    "out": {"success": False},
+                },
             ],
         }
     ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
-        ],
-        "package": "experimental_expectations",
+        "tags": ["ai/ml", "fair-ai", "hackathon-22"],
+        "contributors": ["@austiezr"],
     }
 
-    metric_dependencies = ("table.feature_importances",)
-    success_keys = ("n", "important_columns", "y_column", "threshold", "model")
+    metric_dependencies = ("table.modeling.ridge.feature_importances",)
+    success_keys = ("n_features", "important_columns", "y_column", "threshold", "model")
 
     default_kwarg_values = {
-        "n": None,
+        "n_features": None,
         "important_columns": None,
         "y_column": None,
         "threshold": None,
@@ -190,7 +132,7 @@ class ExpectTablePredictiveFeaturesToBe(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
-        "model": "LogisticRegression",
+        "model": "Ridge",
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -209,26 +151,29 @@ class ExpectTablePredictiveFeaturesToBe(TableExpectation):
         if configuration is None:
             configuration = self.configuration
 
-        n = configuration.kwargs["n"]
-        columns = configuration.kwargs["important_columns"]
-        threshold = configuration.kwargs["threshold"]
-        y = configuration.kwargs["y_column"]
+        n_features = configuration.kwargs.get("n_features")
+        columns = configuration.kwargs.get("important_columns")
+        threshold = configuration.kwargs.get("threshold")
+        y_column = configuration.kwargs.get("y_column")
 
         try:
-            assert n is not None, "n number of features to return is required"
-            assert isinstance(n, (str, int)), "n must be a string or integer"
+            assert (
+                columns is not None or threshold is not None
+            ), "at least one of important_columns or threshold is required"
+            assert (
+                isinstance(n_features, int) or n_features is None
+            ), "n_features must be an integer"
             if columns is not None:
                 assert (
                     isinstance(columns, tuple) or isinstance(columns, list)
                 ) and all(
                     isinstance(i, str) for i in columns
                 ), "columns must be a tuple or list of string column names"
-            assert threshold is not None, "threshold is required"
-            assert isinstance(threshold, float) and (
-                0 <= threshold <= 1
-            ), "threshold must be a float between 0 and 1"
-            assert y is not None, "y target column must be specified"
-            assert isinstance(y, str), "y must be a string column name"
+            assert (
+                isinstance(threshold, float) and (0 <= threshold <= 1)
+            ) or threshold is None, "threshold must be a float between 0 and 1"
+            assert y_column is not None, "target y_column must be specified"
+            assert isinstance(y_column, str), "y_column must be a string column name"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         super().validate_configuration(configuration)
@@ -237,27 +182,48 @@ class ExpectTablePredictiveFeaturesToBe(TableExpectation):
     def _validate(
         self,
         configuration: ExpectationConfiguration,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        metrics,
+        runtime_configuration=None,
+        execution_engine=None,
     ):
 
         importances = dict(
             sorted(
-                metrics["table.feature_importances"].items(),
+                metrics["table.modeling.ridge.feature_importances"].items(),
                 key=lambda item: item[1],
                 reverse=True,
             )
         )
-        n = configuration.get("n")
-        columns = configuration.get("important_columns")
-        threshold = configuration.get("threshold")
-        breakpoint()
+        n_features = configuration["kwargs"].get("n_features")
+        columns = configuration["kwargs"].get("important_columns")
+        threshold = configuration["kwargs"].get("threshold")
 
-        return True
+        if columns:
+            column_success = []
+            for i in columns:
+                if importances[i] >= threshold:
+                    column_success.append(True)
+                else:
+                    column_success.append(False)
+            column_success = all(column_success)
+        else:
+            column_success = True
+
+        if n_features:
+            n_features_success = []
+            for i in importances.keys():
+                if importances[i] >= threshold:
+                    n_features_success.append(True)
+            n_features_success = len(n_features_success) == int(n_features)
+        else:
+            n_features_success = True
+
+        success = column_success and n_features_success
+
+        return {"success": success, "result": {"observed_value": importances}}
 
 
 if __name__ == "__main__":
-    # ExpectTablePredictiveFeaturesToBe().print_diagnostic_checklist()
-    out = ExpectTablePredictiveFeaturesToBe().run_diagnostics()
-    breakpoint()
+    ExpectTableRidgeFeatureImportancesToBe().print_diagnostic_checklist()
+    # out = ExpectTableRidgeFeatureImportancesToBe().run_diagnostics()
+    # breakpoint()
