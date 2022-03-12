@@ -38,7 +38,6 @@ class ActionAnonymizer(Anonymizer):
             object_=action_obj,
             object_config=action_config,
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
             runtime_environment={"module_name": "great_expectations.checkpoint"},
         )
 

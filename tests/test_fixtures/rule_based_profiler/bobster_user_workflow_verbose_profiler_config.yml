@@ -1,0 +1,39 @@
+# This profiler is meant to be used on the NYC taxi data:
+# tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_20(18|19|20)-*.csv
+name: bobster user workflow
+class_name: RuleBasedProfiler
+config_version: 1.0
+
+variables:
+  # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
+  jan_2018_thru_nov_2020_monthly_tripdata_batch_request:
+    datasource_name: taxi_pandas
+    data_connector_name: monthly
+    data_asset_name: my_reports
+    data_connector_query:
+      index: ":-1"
+  false_positive_rate: 5.0e-2
+  bootstrap_random_seed: 43792
+
+rules:
+  row_count_range_rule:
+    domain_builder:
+      class_name: TableDomainBuilder
+    parameter_builders:
+      - name: row_count_range
+        class_name: NumericMetricRangeMultiBatchParameterBuilder
+        batch_request: $variables.jan_2018_thru_nov_2020_monthly_tripdata_batch_request
+        metric_name: table.row_count
+        false_positive_rate: $variables.false_positive_rate
+        bootstrap_random_seed: $variables.bootstrap_random_seed
+        round_decimals: 0
+        truncate_values:
+          lower_bound: 0
+    expectation_configuration_builders:
+      - expectation_type: expect_table_row_count_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        min_value: $parameter.row_count_range.value.value_range[0]
+        max_value: $parameter.row_count_range.value.value_range[1]
+        meta:
+          profiler_details: $parameter.row_count_range.details
