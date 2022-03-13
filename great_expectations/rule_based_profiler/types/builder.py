@@ -30,19 +30,27 @@ class Builder(SerializableDictDot):
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
+        self._batch_list = batch_list
+        self._batch_request = batch_request
+
         if data_context is None:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"{self.__class__.__name__} requires a data_context, but none was provided."
             )
 
         self._data_context = data_context
-        self._batch_request = batch_request
-
-        self._batch_list = batch_list
 
     """
     Full getter/setter accessors for "batch_request" and "batch_list" are for configuring Builder dynamically.
     """
+
+    @property
+    def batch_list(self) -> Optional[List[Batch]]:
+        return self._batch_list
+
+    @batch_list.setter
+    def batch_list(self, value: List[Batch]) -> None:
+        self._batch_list = value
 
     @property
     def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
@@ -53,14 +61,6 @@ class Builder(SerializableDictDot):
         self, value: Union[BatchRequest, RuntimeBatchRequest, dict]
     ) -> None:
         self._batch_request = value
-
-    @property
-    def batch_list(self) -> Optional[List[Batch]]:
-        return self._batch_list
-
-    @batch_list.setter
-    def batch_list(self, value: List[Batch]) -> None:
-        self._batch_list = value
 
     @property
     def data_context(self) -> "DataContext":  # noqa: F821
