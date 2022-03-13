@@ -101,12 +101,12 @@ Using these example configurations, add in your GCS bucket and path to a directo
   </TabItem>
   <TabItem value="python">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L10-L29
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L11-L30
   ```
 
   Run this code to test your configuration.
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L40
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L43
   ```
   </TabItem>
   </Tabs>
@@ -167,7 +167,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L42
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L47
 ```
 
 </TabItem>
