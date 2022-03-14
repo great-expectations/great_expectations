@@ -93,6 +93,7 @@ def test_cardinality_checker_instantiation_invalid_limit_mode_parameter():
 
 def test_cardinality_checker_instantiation_invalid_max_unique_values_parameter():
     with pytest.raises(ProfilerConfigurationError) as excinfo:
+        # noinspection PyTypeChecker
         _: CardinalityChecker = CardinalityChecker(
             max_unique_values="invalid_input_type_string"
         )
@@ -102,6 +103,7 @@ def test_cardinality_checker_instantiation_invalid_max_unique_values_parameter()
 
 def test_cardinality_checker_instantiation_invalid_max_proportion_unique_parameter():
     with pytest.raises(ProfilerConfigurationError) as excinfo:
+        # noinspection PyTypeChecker
         _: CardinalityChecker = CardinalityChecker(
             max_proportion_unique="invalid_input_type_string"
         )

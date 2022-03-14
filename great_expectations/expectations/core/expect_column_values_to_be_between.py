@@ -119,8 +119,11 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                         "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
                         "enforce_numeric_metric": True,
                         "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "json_serialize": True,
                     },
                     {
                         "name": "max_estimator",
@@ -128,8 +131,11 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                         "metric_name": "column.max",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
                         "enforce_numeric_metric": True,
                         "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "json_serialize": True,
                     },
                 ],
                 "expectation_configuration_builders": [

@@ -70,6 +70,7 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
+
             if row_condition and self._supports_row_condition:
                 data = self._apply_row_condition(
                     row_condition=row_condition, condition_parser=condition_parser
@@ -78,6 +79,14 @@ class MetaPandasDataset(Dataset):
                 data = self
 
             series = data[column]
+
+            func_args = inspect.getfullargspec(func)[0][1:]
+            if (
+                "parse_strings_as_datetimes" in func_args
+                and pd.api.types.is_datetime64_any_dtype(series)
+            ):
+                kwargs["parse_strings_as_datetimes"] = True
+
             if func.__name__ in [
                 "expect_column_values_to_not_be_null",
                 "expect_column_values_to_be_null",

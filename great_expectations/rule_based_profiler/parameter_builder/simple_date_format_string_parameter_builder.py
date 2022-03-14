@@ -90,7 +90,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        threshold: Union[float, str] = 1.0,
+        threshold: Union[str, float] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
@@ -261,6 +261,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
+        fmt_string: str
         ratio: float
         for fmt_string, ratio in format_string_success_ratios.items():
             if ratio > best_ratio and ratio >= threshold:

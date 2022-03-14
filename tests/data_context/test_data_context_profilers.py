@@ -115,3 +115,33 @@ def test_run_profiler_on_data_emits_proper_usage_stats(
             }
         )
     ]
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_save_profiler(
+    mock_data_context: mock.MagicMock,
+    populated_profiler_store: ProfilerStore,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+):
+    with mock.patch(
+        "great_expectations.data_context.store.profiler_store.ProfilerStore.set",
+        return_value=profiler_config_with_placeholder_args,
+    ):
+        mock_data_context.save_profiler(
+            profiler=profiler_config_with_placeholder_args,
+            profiler_store=populated_profiler_store,
+            name="my_profiler",
+            ge_cloud_id=None,
+        )
+
+    with mock.patch(
+        "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
+        return_value=profiler_config_with_placeholder_args,
+    ):
+        profiler = RuleBasedProfiler.get_profiler(
+            data_context=mock_data_context,
+            profiler_store=populated_profiler_store,
+            name="my_profiler",
+            ge_cloud_id=None,
+        )
+    assert isinstance(profiler, RuleBasedProfiler)
