@@ -1,5 +1,4 @@
 import json
-import pickle
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
