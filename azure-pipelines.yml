@@ -22,6 +22,7 @@ trigger:
     include:
     - pre_pr-* # Can be used to test both `great_expectations` and `dependency_graph` pipelines
     - main
+    exclude:
     - develop
 
 resources:
@@ -86,7 +87,7 @@ stages:
 
     jobs:
       - job: compatibility_matrix
-        # condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
