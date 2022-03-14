@@ -4,9 +4,6 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymizer import (
     DataConnectorAnonymizer,
 )
-from great_expectations.core.usage_statistics.anonymizers.execution_engine_anonymizer import (
-    ExecutionEngineAnonymizer,
-)
 from great_expectations.datasource import (
     BaseDatasource,
     Datasource,
@@ -37,7 +34,6 @@ class DatasourceAnonymizer(Anonymizer):
             BaseDatasource,
         ]
 
-        self._execution_engine_anonymizer = ExecutionEngineAnonymizer(salt=salt)
         self._data_connector_anonymizer = DataConnectorAnonymizer(salt=salt)
 
     def anonymize_datasource_info(self, name, config):
@@ -59,7 +55,7 @@ class DatasourceAnonymizer(Anonymizer):
             execution_engine_config = config.get("execution_engine")
             anonymized_info_dict[
                 "anonymized_execution_engine"
-            ] = self._execution_engine_anonymizer.anonymize_execution_engine_info(
+            ] = self.anonymize_execution_engine_info(
                 name=execution_engine_config.get("name", ""),
                 config=execution_engine_config,
             )

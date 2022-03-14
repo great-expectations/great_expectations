@@ -75,9 +75,6 @@ class UsageStatisticsHandler:
         from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
             DatasourceAnonymizer,
         )
-        from great_expectations.core.usage_statistics.anonymizers.execution_engine_anonymizer import (
-            ExecutionEngineAnonymizer,
-        )
         from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
             ExpectationSuiteAnonymizer,
         )
@@ -87,7 +84,6 @@ class UsageStatisticsHandler:
 
         self._anonymizer = Anonymizer(data_context_id)
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
-        self._execution_engine_anonymizer = ExecutionEngineAnonymizer(data_context_id)
         self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)

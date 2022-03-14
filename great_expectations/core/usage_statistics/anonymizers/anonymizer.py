@@ -396,3 +396,27 @@ class Anonymizer:
             object_config=config,
         )
         return anonymized_info_dict
+
+    def anonymize_execution_engine_info(self, name, config):
+        anonymized_info_dict = {}
+        anonymized_info_dict["anonymized_name"] = self.anonymize(name)
+
+        from great_expectations.data_context.types.base import (
+            ExecutionEngineConfig,
+            executionEngineConfigSchema,
+        )
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        execution_engine_config: ExecutionEngineConfig = (
+            executionEngineConfigSchema.load(config)
+        )
+        execution_engine_config_dict: dict = executionEngineConfigSchema.dump(
+            execution_engine_config
+        )
+
+        self.anonymize_object_info(
+            anonymized_info_dict=anonymized_info_dict,
+            object_config=execution_engine_config_dict,
+        )
+
+        return anonymized_info_dict
