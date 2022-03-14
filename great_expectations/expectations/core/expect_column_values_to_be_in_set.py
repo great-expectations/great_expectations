@@ -139,6 +139,8 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                         "class_name": "ValueSetMultiBatchParameterBuilder",
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "json_serialize": True,
                     },
                 ],
                 "expectation_configuration_builders": [
