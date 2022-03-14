@@ -1,13 +1,9 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import (
-    StoreBackendAnonymizer,
-)
 
 
 class DataDocsSiteAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
-        self._store_backend_anonymizer = StoreBackendAnonymizer(salt=salt)
 
     def anonymize_data_docs_site_info(self, site_name, site_config):
         site_config_module_name = site_config.get("module_name")
@@ -24,7 +20,7 @@ class DataDocsSiteAnonymizer(Anonymizer):
         store_backend_config = site_config.get("store_backend")
         anonymized_info_dict[
             "anonymized_store_backend"
-        ] = self._store_backend_anonymizer.anonymize_store_backend_info(
+        ] = self.anonymize_store_backend_info(
             store_backend_object_config=store_backend_config
         )
         site_index_builder_config = site_config.get("site_index_builder")
