@@ -1,13 +1,9 @@
-from great_expectations.core.usage_statistics.anonymizers.action_anonymizer import (
-    ActionAnonymizer,
-)
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 
 
 class ValidationOperatorAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
-        self._action_anonymizer = ActionAnonymizer(salt=salt)
 
     def anonymize_validation_operator_info(
         self, validation_operator_name, validation_operator_obj
@@ -26,7 +22,7 @@ class ValidationOperatorAnonymizer(Anonymizer):
 
         if actions_dict:
             anonymized_info_dict["anonymized_action_list"] = [
-                self._action_anonymizer.anonymize_action_info(
+                self.anonymize_action_info(
                     action_name=action_name, action_obj=action_obj
                 )
                 for action_name, action_obj in actions_dict.items()

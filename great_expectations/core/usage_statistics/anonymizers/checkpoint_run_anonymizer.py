@@ -14,9 +14,6 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     get_batch_request_as_dict,
 )
-from great_expectations.core.usage_statistics.anonymizers.action_anonymizer import (
-    ActionAnonymizer,
-)
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
@@ -45,14 +42,10 @@ class CheckpointRunAnonymizer(Anonymizer):
         batch_request_anonymizer: BatchRequestAnonymizer = BatchRequestAnonymizer(
             self._salt
         )
-        action_anonymizer: ActionAnonymizer = ActionAnonymizer(self._salt)
 
         attribute_name: str
         attribute_value: Optional[Union[str, dict]]
         validation_obj: dict
-        action_config_dict: dict
-        action_name: str
-        action_obj: dict
 
         checkpoint_optional_top_level_keys: List[str] = []
 
@@ -90,7 +83,7 @@ class CheckpointRunAnonymizer(Anonymizer):
             # noinspection PyBroadException
             try:
                 anonymized_action_list = [
-                    action_anonymizer.anonymize_action_info(
+                    self.anonymize_action_info(
                         action_name=action_config_dict["name"],
                         action_config=action_config_dict["action"],
                     )
@@ -136,7 +129,7 @@ class CheckpointRunAnonymizer(Anonymizer):
                     # noinspection PyBroadException
                     try:
                         anonymized_validation_action_list = [
-                            action_anonymizer.anonymize_action_info(
+                            self.anonymize_action_info(
                                 action_name=action_config_dict["name"],
                                 action_config=action_config_dict["action"],
                             )
