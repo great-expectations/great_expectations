@@ -1,19 +1,9 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.render.renderer.site_builder import (
-    DefaultSiteIndexBuilder,
-    DefaultSiteSectionBuilder,
-    SiteBuilder,
-)
 
 
 class SiteBuilderAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
-        self._ge_classes = [
-            SiteBuilder,
-            DefaultSiteSectionBuilder,
-            DefaultSiteIndexBuilder,
-        ]
 
     def anonymize_site_builder_info(self, site_builder_config):
         class_name = site_builder_config.get("class_name")
