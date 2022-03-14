@@ -21,8 +21,8 @@ class ProfilerAnonymizer(Anonymizer):
         )
         return anonymized_info_dict
 
-    def is_parent_class_recognized(self, config) -> Optional[str]:
-        return self._is_parent_class_recognized(
+    def get_parent_class(self, config) -> Optional[str]:
+        return self._get_parent_class(
             classes_to_check=self._ge_classes,
             object_config=config,
         )

@@ -50,7 +50,7 @@ class StoreAnonymizer(Anonymizer):
 
         return anonymized_info_dict
 
-    def is_parent_class_recognized(self, store_obj):
-        return self._is_parent_class_recognized(
+    def get_parent_class(self, store_obj):
+        return self._get_parent_class(
             classes_to_check=self._ge_classes, object_=store_obj
         )
