@@ -1,4 +1,5 @@
 import json
+import pickle
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
@@ -7,7 +8,7 @@ import json
 from typing import Any, Dict, Optional, Tuple
 
 from sklearn.inspection import permutation_importance
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import LinearRegression
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -26,8 +27,8 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableModelingRidgeFeatureImportances(TableMetricProvider):
 
-    metric_name = "table.modeling.ridge.feature_importances"
-    value_keys = ("y_column", "model")
+    metric_name = "table.modeling.linear.feature_importances"
+    value_keys = ("y_column",)
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
@@ -46,7 +47,7 @@ class TableModelingRidgeFeatureImportances(TableMetricProvider):
             df.drop(columns=[metric_value_kwargs["y_column"]]),
             df[metric_value_kwargs["y_column"]],
         )
-        model = Ridge().fit(X, y)
+        model = LinearRegression().fit(X, y)
         importances = permutation_importance(
             model,
             X,
@@ -75,8 +76,8 @@ class TableModelingRidgeFeatureImportances(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTableRidgeFeatureImportancesToBe(TableExpectation):
-    """TODO: add a docstring here"""
+class ExpectTableLinearFeatureImportancesToBe(TableExpectation):
+    """Expect Feature Importances of specified columns in table for Linear Regression to meet threshold."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -97,7 +98,6 @@ class ExpectTableRidgeFeatureImportancesToBe(TableExpectation):
                         "important_columns": ["x_1"],
                         "y_column": "y",
                         "threshold": 0.35,
-                        "model": "LogisticRegression",
                     },
                     "out": {
                         "success": True,
@@ -120,8 +120,13 @@ class ExpectTableRidgeFeatureImportancesToBe(TableExpectation):
         "contributors": ["@austiezr"],
     }
 
-    metric_dependencies = ("table.modeling.ridge.feature_importances",)
-    success_keys = ("n_features", "important_columns", "y_column", "threshold", "model")
+    metric_dependencies = ("table.modeling.linear.feature_importances",)
+    success_keys = (
+        "n_features",
+        "important_columns",
+        "y_column",
+        "threshold",
+    )
 
     default_kwarg_values = {
         "n_features": None,
@@ -132,7 +137,6 @@ class ExpectTableRidgeFeatureImportancesToBe(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
-        "model": "Ridge",
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -189,7 +193,7 @@ class ExpectTableRidgeFeatureImportancesToBe(TableExpectation):
 
         importances = dict(
             sorted(
-                metrics["table.modeling.ridge.feature_importances"].items(),
+                metrics["table.modeling.linear.feature_importances"].items(),
                 key=lambda item: item[1],
                 reverse=True,
             )
@@ -224,6 +228,4 @@ class ExpectTableRidgeFeatureImportancesToBe(TableExpectation):
 
 
 if __name__ == "__main__":
-    ExpectTableRidgeFeatureImportancesToBe().print_diagnostic_checklist()
-    # out = ExpectTableRidgeFeatureImportancesToBe().run_diagnostics()
-    # breakpoint()
+    ExpectTableLinearFeatureImportancesToBe().print_diagnostic_checklist()
