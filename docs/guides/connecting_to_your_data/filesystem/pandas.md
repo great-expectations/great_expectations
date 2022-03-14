@@ -7,9 +7,10 @@ import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you connect to your data stored on a filesystem using pandas.
-This will allow you to validate and explore your data.
+This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
 <Prerequisites>
 
@@ -30,7 +31,7 @@ Import these necessary packages and modules.
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L1-L4
 ```
 
-Load your DataContext into memory using the `get_context()` method.
+Load your <TechnicalTag tag="data_context" text="Data Context" /> into memory using the `get_context()` method.
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L6
 ```
@@ -46,7 +47,8 @@ Using this example configuration add in the path to a directory that contains so
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L8-L27
 ```
@@ -68,6 +70,7 @@ Run this code to test your configuration.
 ```
 
 </TabItem>
+
 </Tabs>
 
 If you specified a directory containing CSV files you will see them listed as `Available data_asset_names` in the output of `test_yaml_config()`.
@@ -85,7 +88,8 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L35
 ```
@@ -97,11 +101,12 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 ```
 
 </TabItem>
+
 </Tabs>
 
 ### 5. Test your new Datasource
 
-Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
+Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a <TechnicalTag tag="batch_request" text="Batch Request" />.
 
 <Tabs
   defaultValue='runtime_batch_request'
@@ -122,7 +127,7 @@ Then load data into the `Validator`.
   </TabItem>
   <TabItem value="batch_request">
 
-Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
+Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L62-L66
 ```
@@ -130,7 +135,8 @@ Then load data into the `Validator`.
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L72-L78
 ```
 
-  </TabItem>
+</TabItem>
+
 </Tabs>
 
 
