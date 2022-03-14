@@ -58,9 +58,6 @@ from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymi
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
 )
-from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
-    ProfilerAnonymizer,
-)
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
