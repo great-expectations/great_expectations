@@ -4,25 +4,27 @@ title: How to create a Batch of data from an in-memory Spark or Pandas dataframe
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you load the following as Batches for use in creating Expectations:
+This guide will help you load the following as <TechnicalTag tag="batch" text="Batches" /> for use in creating <TechnicalTag tag="expectation" text="Expectations" />:
 1. **Pandas DataFrames**
 2. **Spark DataFrames**
 
 
-What used to be called a “Batch” in the old API was replaced with [Validator](../../reference/validation.md). A Validator knows how to validate a particular Batch of data on a particular [Execution Engine](../../reference/execution_engine.md) against a particular [Expectation Suite](../../reference/expectations/expectations.md). In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
+What used to be called a “Batch” in the old API was replaced with <TechnicalTag tag="validator" text="Validator" />. A Validator knows how to <TechnicalTag tag="validation" text="Validate" /> a particular Batch of data on a particular <TechnicalTag tag="execution_engine" text="Execution Engine" /> against a particular <TechnicalTag tag="expectation_suite" text="Expectation Suite" />. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
 
 You can read more about the core classes that make Great Expectations run in our [Core Concepts reference guide](../../reference/core_concepts.md).
 
 
 <Tabs
-     groupId='spark-or-pandas'
-     defaultValue='spark'
-     values={[
-     {label: 'Spark DataFrame', value:'spark'},
-     {label: 'Pandas DataFrame', value:'pandas'},
-     ]}>
-     <TabItem value='spark'>
+   groupId='spark-or-pandas'
+   defaultValue='spark'
+   values={[
+   {label: 'Spark DataFrame', value:'spark'},
+   {label: 'Pandas DataFrame', value:'pandas'},
+   ]}>
+     
+<TabItem value='spark'>
 
 <Prerequisites>
 
@@ -43,7 +45,7 @@ You can read more about the core classes that make Great Expectations run in our
      ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L1-L9
      ```
 
-     Load an on-disk Data Context (ie. from a `great_expectations.yml` configuration) via the `get_context()` command:
+     Load an on-disk <TechnicalTag tag="data_context" text="Data Context" /> (ie. from a `great_expectations.yml` configuration) via the `get_context()` command:
 
      ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L11
      ```
@@ -64,11 +66,11 @@ You can read more about the core classes that make Great Expectations run in our
 
 3. **Construct a RuntimeBatchRequest**
 
-    We will create a ``RuntimeBatchRequest`` and pass it our Spark DataFrame or path via the ``runtime_parameters`` argument, under either the ``batch_data`` or ``path`` key. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration.
+    We will create a ``RuntimeBatchRequest`` and pass it our Spark DataFrame or path via the ``runtime_parameters`` argument, under either the ``batch_data`` or ``path`` key. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime <TechnicalTag tag="data_connector" text="Data Connector" /> configuration.
     
     If you are providing a filesystem path instead of a materialized DataFrame, you may use either an absolute or relative path (with respect to the current working directory). Under the hood, Great Expectations will instantiate a Spark Dataframe using the appropriate ``spark.read.*`` method, which will be inferred from the file extension. If your file names do not have extensions, you can specify the appropriate reader method explicitly via the ``batch_spec_passthrough`` argument. Any Spark reader options (i.e. ``delimiter`` or ``header``) that are required to properly read your data can also be specified with the ``batch_spec_passthrough`` argument, in a dictionary nested under a key named ``reader_options``.
 
-    Here is an example Datasource configuration in YAML.
+    Here is an example <TechnicalTag tag="datasource" text="Datasource" /> configuration in YAML.
     ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L27-L40
     ```
    
@@ -84,7 +86,7 @@ You can read more about the core classes that make Great Expectations run in our
     ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L50
     ```
    
-    Here is a Runtime Batch Request using an in-memory DataFrame:
+    Here is a Runtime <TechnicalTag tag="batch_request" text="Batch Request" /> using an in-memory DataFrame:
     ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L48-L57
     ```
 
@@ -93,7 +95,7 @@ You can read more about the core classes that make Great Expectations run in our
     ```
 
     :::note Best Practice
-    Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through Data Docs and ensures your logical Data Assets are not confused with any particular view of them provided by an Execution Engine.
+    Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through <TechnicalTag tag="data_docs" text="Data Docs" /> and ensures your logical <TechnicalTag tag="data_asset" text="Data Assets" /> are not confused with any particular view of them provided by an Execution Engine.
     :::
 
 4. **Construct a Validator**
@@ -207,6 +209,7 @@ You can read more about the core classes that make Great Expectations run in our
 
 
 </TabItem>
+
 </Tabs>
 
 
