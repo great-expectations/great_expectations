@@ -300,3 +300,17 @@ class Anonymizer:
             anonymized_info_dict["anonymized_datasource_name"] = "__not_found__"
 
         return anonymized_info_dict
+
+    def anonymize_site_builder_info(self, site_builder_config):
+        class_name = site_builder_config.get("class_name")
+        module_name = site_builder_config.get("module_name")
+        if module_name is None:
+            module_name = "great_expectations.render.renderer.site_builder"
+
+        anonymized_info_dict = {}
+        self.anonymize_object_info(
+            object_config={"class_name": class_name, "module_name": module_name},
+            anonymized_info_dict=anonymized_info_dict,
+        )
+
+        return anonymized_info_dict
