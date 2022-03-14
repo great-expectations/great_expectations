@@ -3,7 +3,8 @@ title: How to create a Custom Column Map Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-**`ColumnMapExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+**`ColumnMapExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
+They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
 This guide will walk you through the process of creating a custom `ColumnMapExpectation`.
 

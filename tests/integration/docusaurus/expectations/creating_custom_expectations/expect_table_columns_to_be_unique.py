@@ -92,7 +92,7 @@ class TableColumnsUnique(TableMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectTableColumnsToBeUnique(TableExpectation):
-    """TODO: add a docstring here"""
+    """Expect table to contain unique columns."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -199,14 +199,27 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
             "result": {"observed_value": {"duplicate_columns": duplicate_columns}},
         }
 
-    # This object contains metadata for display in the public Gallery
+    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "tags": [],  # Tags for this Expectation in the Gallery
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            "@your_name_here",  # Don't forget to add your github handle here!
-        ],
+        "tags": ["uniqueness"],
+        "contributors": ["@joegargery"],
     }
 
 
 if __name__ == "__main__":
     ExpectTableColumnsToBeUnique().print_diagnostic_checklist()
+
+# Note to users: code below this line is only for integration testing -- ignore!
+
+diagnostics = ExpectTableColumnsToBeUnique().run_diagnostics()
+
+for check in diagnostics["tests"]:
+    assert check["test_passed"] is True
+    assert check["error_message"] is None
+    assert check["stack_trace"] is None
+
+for check in diagnostics["errors"]:
+    assert check is None
+
+for check in diagnostics["maturity_checklist"]["experimental"]:
+    assert check["passed"] is True

@@ -1,12 +1,12 @@
 ---
-title: How to create a Custom Column Aggregate Expectation
+title: How to create a Custom Table Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-**`ColumnExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
-They are evaluated for a single column, and produce an aggregate metric, such as a mean, standard deviation, number of unique values, column type, etc. If that metric meets the conditions you set, the Expectation considers that data valid.
+**`TableExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
+They are evaluated for a table, and answers a semantic question about the table itself. For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer how many columns and rows are in your table.
 
-This guide will walk you through the process of creating your own custom `ColumnExpectation`.
+This guide will walk you through the process of creating your own custom `TableExpectation`.
 
 <Prerequisites>
 
@@ -18,23 +18,23 @@ This guide will walk you through the process of creating your own custom `Column
 
 ### 1. Choose a name for your Expectation
 
-First, decide on a name for your own Expectation. By convention, `ColumnExpectations` always start with `expect_column_`. 
+First, decide on a name for your own Expectation. By convention, `TableExpectations` always start with `expect_table_`. 
 For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
-- `ExpectColumnMaxToBeBetweenCustom`
-- `expect_column_max_to_be_between_custom`
+- `ExpectTableColumnsToBeUnique`
+- `expect_table_columns_to_be_unique`
 
 ### 2. Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [ColumnExpectation here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py).
+You can find the template file for a custom [TableExpectation here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/table_expectation_template.py).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash 
-cp column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to_be_between_custom.py
+cp table_expectation_template.py /SOME_DIRECTORY/expect_table_columns_to_be_unique.py
 ```
 
 <details>
@@ -60,7 +60,7 @@ cp column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to
 Once you've copied and renamed the template file, you can execute it as follows.
 
 ```bash 
-python expect_column_max_to_be_between_custom.py
+python expect_table_columns_to_be_unique.py
 ```
 
 The template file is set up so that this will run the Expectation's `print_diagnostic_checklist()` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
@@ -84,36 +84,36 @@ By convention, your [**Metric**](../../../reference/metrics.md) class is defined
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L49
+```python file=../../../../examples/expectations/table_expectation_template.py#L85
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L82
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L94
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L50
+```python file=../../../../examples/expectations/table_expectation_template.py#L86
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L83
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L95
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L114
+```python file=../../../../examples/expectations/table_expectation_template.py#L150
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L315
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L213
 ```
 
 Later, you can go back and write a more thorough docstring.
 
 At this point you can re-run your diagnostic checklist. You should see something like this:
 ```
-$ python expect_column_max_to_be_between_custom.py
+$ python expect_table_columns_to_be_unique.py
 
-Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
+Completeness checklist for ExpectTableColumnsToBeUnique:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
@@ -132,7 +132,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L132
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L99-L139
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -141,7 +141,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 * `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
 	* `include_in_gallery`: This must be set to `True` if you want this test case to be visible in the Gallery as an example.
-	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "x", "min_value": 4, "strict_min": True}` in the example above is equivalent to `expect_column_max_to_be_between_custom(column="x", min_value=4, strict_min=True)`
+	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"strict": True}` in the example above is equivalent to `expect_table_columns_to_be_unique(strict=True)`
 	* `out` is based on the Validation Result returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
@@ -154,9 +154,9 @@ If you run your Expectation file again, you won't see any new checkmarks, as the
 However, you should see that the tests you've written are now being caught and reported in your checklist:
 
 ```
-$ python expect_column_column_max_to_be_between_custom.py
+$ python expect_table_columns_to_be_unique.py
 
-Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
+Completeness checklist for ExpectTableColumnsToBeUnique:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
 ...
@@ -181,12 +181,17 @@ By the time your Expectation is complete, your Metric will have functions for al
 Metrics answer questions about your data posed by your Expectation, <br/> and allow your Expectation to judge whether your data meets ***your*** expectations.
 :::
 
-Your Metric function will have the `@column_aggregate_value` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate the max of a column using the PandasExecutionEngine.
+Your Metric function will have the `@metric_value` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to find the unique columns of a table with the PandasExecutionEngine.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L41-L44
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L38-L53
 ```
 
-This is all that you need to define for now. In the next step, we will implement the method to validate the results of this Metric.
+:::note
+The `@metric_value` decorator allows us to explicitly structure queries and directly access our compute domain. 
+While this can result in extra roundtrips to your database in some situations, it allows for advanced functionality and customization of your Custom Expectations.
+:::
+
+This is all that you need to define for now. In the next step, we will implement the method to validate the result of this Metric.
 
 
 <details>
@@ -209,22 +214,22 @@ The remainder of the Metric Identifier simply describes what the Metric computes
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L30
+```python file=../../../../examples/expectations/table_expectation_template.py#L32
 ```
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L39
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L35
 ```
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L57
+```python file=../../../../examples/expectations/table_expectation_template.py#L93
 ```
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L135
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L142
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -233,12 +238,12 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L27
+```python file=../../../../examples/expectations/table_expectation_template.py#L29
 ```
 
 with 
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L36
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L32
 ```
 
 ### 7. Validate
@@ -247,23 +252,23 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L95-L101
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L181-L187
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
 and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not.
 
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
-For example, here is the definition of a `_validate(...)` method to validate the results of our `column.custom_max` Metric against our success keys:
+For example, here is the definition of a `_validate(...)` method to validate the results of our `table.columns.unique` Metric against our success keys:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L196-L231
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L181-L202
 ```
 
 Running your diagnostic checklist at this point should return something like this:
 ```
-$ python expect_column_max_to_be_between_custom.py
+$ python expect_table_columns_to_be_unique.py
 
-Completeness checklist for ExpectColumnMaxToBeBetweenCustom:
+Completeness checklist for ExpectTableColumnsToBeUnique:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
   ✔ Has at least one positive and negative example case, and all test cases pass
@@ -283,12 +288,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L105-L110
+```python file=../../../../examples/expectations/table_expectation_template.py#L141-L146
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L308-L311
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L205-L208
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
@@ -297,5 +302,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
+- [expect_table_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py)
 :::
