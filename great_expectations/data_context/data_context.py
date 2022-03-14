@@ -52,9 +52,6 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import (
     CheckpointAnonymizer,
 )
-from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymizer import (
-    DataConnectorAnonymizer,
-)
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
 )
@@ -3790,12 +3787,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             config_defaults={},
         )
 
-        data_connector_anonymizer = DataConnectorAnonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = (
-            data_connector_anonymizer.anonymize_data_connector_info(
-                name=data_connector_name, config=config
-            )
+        usage_stats_event_payload = anonymizer.anonymize_data_connector_info(
+            name=data_connector_name, config=config
         )
         return instantiated_class, usage_stats_event_payload
 
@@ -3867,9 +3862,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
             self.data_context_id
         )
-        data_connector_anonymizer: DataConnectorAnonymizer = DataConnectorAnonymizer(
-            self.data_context_id
-        )
         if anonymizer.get_parent_class(store_obj=instantiated_class) is not None:
             store_name: str = name or config.get("name") or "my_temp_store"
             store_name = instantiated_class.store_name or store_name
@@ -3915,14 +3907,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 name=checkpoint_name, config=checkpoint_config
             )
 
-        elif data_connector_anonymizer.get_parent_class(config=config) is not None:
+        elif anonymizer.get_parent_class(config=config) is not None:
             data_connector_name: str = (
                 name or config.get("name") or "my_temp_data_connector"
             )
-            usage_stats_event_payload = (
-                data_connector_anonymizer.anonymize_data_connector_info(
-                    name=data_connector_name, config=config
-                )
+            usage_stats_event_payload = anonymizer.anonymize_data_connector_info(
+                name=data_connector_name, config=config
             )
 
         else:
