@@ -36,7 +36,6 @@ class StoreBackendAnonymizer(Anonymizer):
             self.anonymize_object_info(
                 object_=store_backend_obj,
                 anonymized_info_dict=anonymized_info_dict,
-                ge_classes=self._ge_classes,
             )
         else:
             class_name = store_backend_object_config.get("class_name")
@@ -46,6 +45,5 @@ class StoreBackendAnonymizer(Anonymizer):
             self.anonymize_object_info(
                 object_config={"class_name": class_name, "module_name": module_name},
                 anonymized_info_dict=anonymized_info_dict,
-                ge_classes=self._ge_classes,
             )
         return anonymized_info_dict

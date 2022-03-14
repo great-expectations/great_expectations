@@ -1893,6 +1893,10 @@ set as active.
         )
 
     @property
+    def expectation_suite(self) -> ExpectationSuite:
+        return self._expectation_suite
+
+    @property
     def expectation_suite_name(self) -> str:
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
         return self._expectation_suite.expectation_suite_name
@@ -2134,7 +2138,7 @@ class BridgeValidator:
             determined by the type of data within the given batch
         """
         self.batch = batch
-        self.expectation_suite = expectation_suite
+        self._expectation_suite = expectation_suite
 
         if isinstance(expectation_engine, dict):
             expectation_engine = ClassConfig(**expectation_engine)
@@ -2188,7 +2192,7 @@ class BridgeValidator:
 
             return self.expectation_engine(
                 self.batch.data,
-                expectation_suite=self.expectation_suite,
+                expectation_suite=self._expectation_suite,
                 batch_kwargs=self.batch.batch_kwargs,
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,
@@ -2210,7 +2214,7 @@ class BridgeValidator:
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,
                 data_context=self.batch.data_context,
-                expectation_suite=self.expectation_suite,
+                expectation_suite=self._expectation_suite,
                 **init_kwargs,
                 **self.batch.batch_kwargs.get("dataset_options", {}),
             )
@@ -2225,7 +2229,7 @@ class BridgeValidator:
 
             return self.expectation_engine(
                 spark_df=self.batch.data,
-                expectation_suite=self.expectation_suite,
+                expectation_suite=self._expectation_suite,
                 batch_kwargs=self.batch.batch_kwargs,
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,

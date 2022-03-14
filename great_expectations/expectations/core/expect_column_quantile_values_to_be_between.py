@@ -150,6 +150,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             ],
             "allow_relative_error": "linear",
             "num_bootstrap_samples": 9999,
+            "bootstrap_random_seed": None,
             "false_positive_rate": 0.05,
             "truncate_values": {
                 "lower_bound": None,
@@ -158,7 +159,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             "round_decimals": 1,
         },
         rules={
-            "column_quantiles_rule": {
+            "default_expect_column_quantile_values_to_be_between_rule": {
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
@@ -175,6 +176,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                             "allow_relative_error": "$variables.allow_relative_error",
                         },
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
                         "round_decimals": "$variables.round_decimals",
                     }

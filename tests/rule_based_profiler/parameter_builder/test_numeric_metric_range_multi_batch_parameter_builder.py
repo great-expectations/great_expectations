@@ -1,3 +1,5 @@
+from typing import Dict, Optional
+
 import numpy as np
 
 from great_expectations.data_context import DataContext
@@ -8,12 +10,11 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
+    ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-from great_expectations.util import probabilistic_test
 
 
-@probabilistic_test
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -45,11 +46,21 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     assert parameter_container.parameter_nodes is None
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+    variables: Optional[ParameterContainer] = None
     numeric_metric_range_parameter_builder.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
-    assert len(parameter_container.parameter_nodes) == 1
+    parameter_nodes: Optional[Dict[str, ParameterNode]] = (
+        parameter_container.parameter_nodes or {}
+    )
+    assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
     expected_value_dict: dict = {
@@ -58,6 +69,8 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
             "metric_configuration": {
                 "domain_kwargs": {},
                 "metric_name": "table.row_count",
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
             },
             "num_batches": 3,
         },

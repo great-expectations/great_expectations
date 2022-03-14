@@ -25,7 +25,6 @@ class CheckpointAnonymizer(Anonymizer):
 
         self.anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
             object_config=checkpoint_config_dict,
         )
         return anonymized_info_dict

@@ -9,6 +9,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 try:
     import sqlalchemy as sa
@@ -98,6 +99,64 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         "max_value",
         "strict_max",
         "parse_strings_as_datetimes",
+        "auto",
+        "profiler_config",
+    )
+
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_max_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        class_name="RuleBasedProfilerConfig",
+        module_name="great_expectations.rule_based_profiler",
+        variables={
+            "strict_min": False,
+            "strict_max": False,
+            "num_bootstrap_samples": 9999,
+            "bootstrap_random_seed": None,
+            "false_positive_rate": 0.05,
+            "truncate_values": {
+                "lower_bound": None,
+                "upper_bound": None,
+            },
+            "round_decimals": None,
+        },
+        rules={
+            "default_expect_column_max_to_be_between_rule": {
+                "domain_builder": {
+                    "class_name": "ColumnDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "parameter_builders": [
+                    {
+                        "name": "max_range_estimator",
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_name": "column.max",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "truncate_values": "$variables.truncate_values",
+                        "round_decimals": "$variables.round_decimals",
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_max_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "column": "$domain.domain_kwargs.column",
+                        "min_value": "$parameter.max_range_estimator.value.value_range[0]",
+                        "max_value": "$parameter.max_range_estimator.value.value_range[1]",
+                        "strict_min": "$variables.strict_min",
+                        "strict_max": "$variables.strict_max",
+                        "meta": {
+                            "profiler_details": "$parameter.max_range_estimator.details",
+                        },
+                    },
+                ],
+            },
+        },
     )
 
     # Default values
@@ -110,6 +169,8 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "parse_strings_as_datetimes": False,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
     args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 

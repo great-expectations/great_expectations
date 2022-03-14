@@ -128,7 +128,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             "mostly": 1.0,
         },
         rules={
-            "default_column_values_between_rule": {
+            "default_expect_column_values_to_be_in_set_rule": {
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",

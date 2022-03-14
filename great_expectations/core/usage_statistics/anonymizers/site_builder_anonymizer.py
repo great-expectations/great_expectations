@@ -25,7 +25,6 @@ class SiteBuilderAnonymizer(Anonymizer):
         self.anonymize_object_info(
             object_config={"class_name": class_name, "module_name": module_name},
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
         )
 
         return anonymized_info_dict
