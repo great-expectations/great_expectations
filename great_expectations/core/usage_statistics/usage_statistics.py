@@ -72,9 +72,6 @@ class UsageStatisticsHandler:
         from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
             CheckpointRunAnonymizer,
         )
-        from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
-            DataDocsSiteAnonymizer,
-        )
         from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
             DatasourceAnonymizer,
         )
@@ -95,7 +92,6 @@ class UsageStatisticsHandler:
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
         self._execution_engine_anonymizer = ExecutionEngineAnonymizer(data_context_id)
         self._store_anonymizer = StoreAnonymizer(data_context_id)
-        self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
         self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
@@ -177,7 +173,7 @@ class UsageStatisticsHandler:
                 for validation_operator_name, validation_operator_obj in self._data_context.validation_operators.items()
             ],
             "anonymized_data_docs_sites": [
-                self._data_docs_sites_anonymizer.anonymize_data_docs_site_info(
+                self._anonymizer.anonymize_data_docs_site_info(
                     site_name=site_name, site_config=site_config
                 )
                 for site_name, site_config in self._data_context.project_config_with_variables_substituted.data_docs_sites.items()
