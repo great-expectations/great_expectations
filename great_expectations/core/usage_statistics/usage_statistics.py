@@ -162,7 +162,7 @@ class UsageStatisticsHandler:
                 for datasource_name, datasource_config in self._data_context.project_config_with_variables_substituted.datasources.items()
             ],
             "anonymized_stores": [
-                self._store_anonymizer.anonymize_store_info(store_name, store_obj)
+                self._anonymizer.anonymize_store_info(store_name, store_obj)
                 for store_name, store_obj in self._data_context.stores.items()
             ],
             "anonymized_validation_operators": [

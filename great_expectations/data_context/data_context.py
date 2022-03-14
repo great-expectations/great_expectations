@@ -48,6 +48,7 @@ from great_expectations.core.expectation_validation_result import get_metric_kwa
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import (
     CheckpointAnonymizer,
 )
@@ -59,9 +60,6 @@ from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer 
 )
 from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
     ProfilerAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
-    StoreAnonymizer,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
@@ -3685,8 +3683,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         store_name = instantiated_class.store_name or store_name
         self.config["stores"][store_name] = config
 
-        store_anonymizer = StoreAnonymizer(self.data_context_id)
-        usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+        anonymizer = Anonymizer(self.data_context_id)
+        usage_stats_event_payload = anonymizer.anonymize_store_info(
             store_name=store_name, store_obj=instantiated_class
         )
         return instantiated_class, usage_stats_event_payload
@@ -3867,7 +3865,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
         # If a subclass of a supported type, find the parent class and anonymize
-        store_anonymizer: StoreAnonymizer = StoreAnonymizer(self.data_context_id)
+        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
         datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
             self.data_context_id
         )
@@ -3877,10 +3875,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         data_connector_anonymizer: DataConnectorAnonymizer = DataConnectorAnonymizer(
             self.data_context_id
         )
-        if store_anonymizer.get_parent_class(store_obj=instantiated_class) is not None:
+        if anonymizer.get_parent_class(store_obj=instantiated_class) is not None:
             store_name: str = name or config.get("name") or "my_temp_store"
             store_name = instantiated_class.store_name or store_name
-            usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+            usage_stats_event_payload = anonymizer.anonymize_store_info(
                 store_name=store_name, store_obj=instantiated_class
             )
         elif datasource_anonymizer.get_parent_class(config=config) is not None:
