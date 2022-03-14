@@ -12,6 +12,7 @@ from great_expectations.cli import cli
 from great_expectations.cli.suite import (
     _process_suite_edit_flags_and_prompt,
     _process_suite_new_flags_and_prompt,
+    _suite_new_workflow,
 )
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import (
@@ -4476,3 +4477,24 @@ def test__process_suite_edit_flags_and_prompt(
                 }
             ),
         ]
+
+
+interactive_mode, profile = _process_suite_new_flags_and_prompt(
+    context=context,
+    usage_event_end=None,
+    interactive_flag=True,
+    manual_flag=False,
+    profile=False,
+    batch_request=None,
+)
+
+_suite_new_workflow(
+    context=context,
+    expectation_suite_name="test",
+    interactive_mode=interactive_mode,
+    profile=profile,
+    profiler_name=None,
+    no_jupyter=False,
+    usage_event=None,
+    batch_request=None,
+)
