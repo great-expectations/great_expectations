@@ -649,7 +649,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[Selectable, dict, dict]:
-        """deprecated-v0.14.10 use zz__get_data_and_split_domain instead
+        """deprecated-v0.14.10 use get_data_and_split_domain instead
         Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
@@ -666,7 +666,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         # deprecated-v0.14.10
         warnings.warn(
-            "get_compute_domain is deprecated as of v0.14.10, it will be removed in v0.17.0. Please use zz__get_data_and_split_domain instead.",
+            "get_compute_domain is deprecated as of v0.14.10, it will be removed in v0.17.0. Please use get_data_and_split_domain instead.",
             DeprecationWarning,
         )
 

@@ -82,14 +82,10 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        (
-            selectable,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
+        (selectable, split_domain_kwargs,) = execution_engine.get_data_and_split_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
-        column_name = accessor_domain_kwargs["column"]
+        column_name = split_domain_kwargs.accessor["column"]
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
         dialect = sqlalchemy_engine.dialect

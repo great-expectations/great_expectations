@@ -564,7 +564,7 @@ Please check your config."""
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[pd.DataFrame, dict, dict]:
-        """deprecated-v0.14.10 use zz__get_data_and_split_domain instead
+        """deprecated-v0.14.10 use get_data_and_split_domain instead
         Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
         obtain and/or query a batch.  Returns in the format of a Pandas DataFrame. If the domain is a single column,
         this is added to 'accessor domain kwargs' and used for later access
@@ -587,7 +587,7 @@ Please check your config."""
         """
         # deprecated-v0.14.10
         warnings.warn(
-            "get_compute_domain is deprecated as of v0.14.10, it will be removed in v0.17.0. Please use zz__get_data_and_split_domain instead.",
+            "get_compute_domain is deprecated as of v0.14.10, it will be removed in v0.17.0. Please use get_data_and_split_domain instead.",
             DeprecationWarning,
         )
 

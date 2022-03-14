@@ -31,7 +31,7 @@ class TableHead(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
+        df, _ = execution_engine.get_data_and_split_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         if metric_value_kwargs.get("fetch_all", cls.default_kwarg_values["fetch_all"]):
@@ -47,7 +47,7 @@ class TableHead(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        selectable, _, _ = execution_engine.get_compute_domain(
+        selectable, _ = execution_engine.get_data_and_split_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         df = None

@@ -121,11 +121,7 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
         else:
             compute_domain_kwargs = metric_domain_kwargs
 
-        (
-            df,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
+        (df, split_domain_kwargs,) = execution_engine.get_data_and_split_domain(
             compute_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
 
@@ -149,14 +145,14 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
         if metric_value_kwargs["strictly"] is True:
             return (
                 F.when(diff <= 0, F.lit(True)).otherwise(F.lit(False)),
-                compute_domain_kwargs,
-                accessor_domain_kwargs,
+                split_domain_kwargs.compute,
+                split_domain_kwargs.accessor,
             )
         # If we expect values to be flat or increasing then unexpected values are those
         # that are decreasing
         else:
             return (
                 F.when(diff < 0, F.lit(True)).otherwise(F.lit(False)),
-                compute_domain_kwargs,
-                accessor_domain_kwargs,
+                split_domain_kwargs.compute,
+                split_domain_kwargs.accessor,
             )

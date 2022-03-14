@@ -65,11 +65,11 @@ def column_aggregate_value(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
 
-                df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+                df, split_domain_kwargs = execution_engine.get_data_and_split_domain(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name = split_domain_kwargs.accessor["column"]
 
                 if column_name not in metrics["table.columns"]:
                     raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(

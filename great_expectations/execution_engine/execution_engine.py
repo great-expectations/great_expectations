@@ -454,7 +454,7 @@ class ExecutionEngine(ABC):
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
     ) -> Tuple[Any, dict, dict]:
-        """deprecated-v0.14.10 use zz__get_data_and_split_domain instead
+        """deprecated-v0.14.10 use get_data_and_split_domain instead
         get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
         and specific engine semantics.
 
@@ -473,7 +473,7 @@ class ExecutionEngine(ABC):
         # deprecated-v0.14.10
         raise NotImplementedError
 
-    def zz__get_data_and_split_domain(
+    def get_data_and_split_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],

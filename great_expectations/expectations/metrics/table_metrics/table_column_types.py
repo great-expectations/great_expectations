@@ -37,7 +37,7 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        df, _, _ = execution_engine.get_compute_domain(
+        df, _ = execution_engine.get_data_and_split_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         return [

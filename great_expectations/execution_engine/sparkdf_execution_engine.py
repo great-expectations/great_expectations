@@ -501,7 +501,7 @@ Please check your config."""
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[DataFrame, dict, dict]:
-        """deprecated-v0.14.10 use zz__get_data_and_split_domain instead
+        """deprecated-v0.14.10 use get_data_and_split_domain instead
         Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Spark DataFrame.
 
@@ -523,7 +523,7 @@ Please check your config."""
         """
         # deprecated-v0.14.10
         warnings.warn(
-            "get_compute_domain is deprecated as of v0.14.10, it will be removed in v0.17.0. Please use zz__get_data_and_split_domain instead.",
+            "get_compute_domain is deprecated as of v0.14.10, it will be removed in v0.17.0. Please use get_data_and_split_domain instead.",
             DeprecationWarning,
         )
 

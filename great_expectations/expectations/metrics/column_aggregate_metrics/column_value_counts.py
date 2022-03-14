@@ -40,10 +40,10 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if collate is not None:
             raise ValueError("collate parameter is not supported in PandasDataset")
 
-        df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+        df, split_domain_kwargs = execution_engine.get_data_and_split_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
-        column = accessor_domain_kwargs["column"]
+        column = split_domain_kwargs.accessor["column"]
 
         counts = df[column].value_counts()
         if sort == "value":

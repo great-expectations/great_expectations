@@ -38,14 +38,10 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        (
-            selectable,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
+        (selectable, split_domain_kwargs,) = execution_engine.get_data_and_split_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
-        column_name = accessor_domain_kwargs["column"]
+        column_name = split_domain_kwargs.accessor["column"]
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
         """SqlAlchemy Median Implementation"""
@@ -88,14 +84,10 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        (
-            df,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
+        (df, split_domain_kwargs,) = execution_engine.get_data_and_split_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
-        column = accessor_domain_kwargs["column"]
+        column = split_domain_kwargs.accessor["column"]
         # We will get the two middle values by choosing an epsilon to add
         # to the 50th percentile such that we always get exactly the middle two values
         # (i.e. 0 < epsilon < 1 / (2 * values))

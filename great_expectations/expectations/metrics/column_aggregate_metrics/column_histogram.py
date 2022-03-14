@@ -36,10 +36,10 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+        df, split_domain_kwargs = execution_engine.get_data_and_split_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
-        column = accessor_domain_kwargs["column"]
+        column = split_domain_kwargs.accessor["column"]
         bins = metric_value_kwargs["bins"]
         hist, bin_edges = np.histogram(df[column], bins, density=False)
         return list(hist)
@@ -59,10 +59,10 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             column: the name of the column for which to get the histogram
             bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
         """
-        selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
+        selectable, split_domain_kwargs = execution_engine.get_data_and_split_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
-        column = accessor_domain_kwargs["column"]
+        column = split_domain_kwargs.accessor["column"]
         bins = metric_value_kwargs["bins"]
 
         case_conditions = []
