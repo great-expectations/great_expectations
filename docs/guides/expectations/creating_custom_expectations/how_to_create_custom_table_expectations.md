@@ -4,7 +4,7 @@ title: How to create a Custom Table Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
 **`TableExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
-They are evaluated for a table, and answers a semantic question about the table itself. For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer how many columns and rows are in your table.
+They are evaluated for an entire table, and answer a semantic question about the table itself. For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer how many columns and rows are in your table.
 
 This guide will walk you through the process of creating your own custom `TableExpectation`.
 
