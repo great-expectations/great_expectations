@@ -26,6 +26,3 @@ class StoreAnonymizer(Anonymizer):
         )
 
         return anonymized_info_dict
-
-    def get_parent_class(self, store_obj):
-        return self._get_parent_class(object_=store_obj)

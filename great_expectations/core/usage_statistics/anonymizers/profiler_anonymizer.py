@@ -1,5 +1,3 @@
-from typing import Optional
-
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 
 
@@ -16,8 +14,3 @@ class ProfilerAnonymizer(Anonymizer):
             object_config=config,
         )
         return anonymized_info_dict
-
-    def get_parent_class(self, config) -> Optional[str]:
-        return self._get_parent_class(
-            object_config=config,
-        )

@@ -30,8 +30,3 @@ class DataConnectorAnonymizer(Anonymizer):
         )
 
         return anonymized_info_dict
-
-    def get_parent_class(self, config):
-        return self._get_parent_class(
-            object_config=config,
-        )

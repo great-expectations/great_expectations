@@ -133,14 +133,13 @@ class Anonymizer:
         return class_name.startswith(Anonymizer.CORE_GE_OBJECT_MODULE_PREFIX)
 
     @staticmethod
-    def _get_parent_class(
+    def get_parent_class(
         classes_to_check: Optional[List[type]] = None,
         object_: Optional[object] = None,
         object_class: Optional[type] = None,
         object_config: Optional[dict] = None,
     ) -> Optional[str]:
         """Check if the parent class is a subclass of any core GE class.
-        This private method is intended to be used by anonymizers in a public `get_parent_class()` method.
 
         These anonymizers define and provide an optional list of core GE classes_to_check.
         If not provided, the object's inheritance hierarchy is traversed.

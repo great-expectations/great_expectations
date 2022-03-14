@@ -143,19 +143,19 @@ class DatasourceAnonymizer(Anonymizer):
         return anonymized_info_dict
 
     def get_parent_class(self, config) -> Optional[str]:
-        return self._get_parent_class(
+        return super().get_parent_class(
             classes_to_check=self._ge_classes + self._legacy_ge_classes,
             object_config=config,
         )
 
     def get_parent_class_v2_api(self, config) -> Optional[str]:
-        return self._get_parent_class(
+        return super().get_parent_class(
             classes_to_check=self._legacy_ge_classes,
             object_config=config,
         )
 
     def get_parent_class_v3_api(self, config) -> Optional[str]:
-        return self._get_parent_class(
+        return super().get_parent_class(
             classes_to_check=self._ge_classes,
             object_config=config,
         )

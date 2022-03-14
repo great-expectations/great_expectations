@@ -1,5 +1,3 @@
-from typing import Optional
-
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
@@ -24,8 +22,3 @@ class CheckpointAnonymizer(Anonymizer):
             object_config=checkpoint_config_dict,
         )
         return anonymized_info_dict
-
-    def get_parent_class(self, config) -> Optional[str]:
-        return self._get_parent_class(
-            object_config=config,
-        )
