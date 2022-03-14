@@ -3862,13 +3862,23 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
             self.data_context_id
         )
-        if anonymizer.get_parent_class(store_obj=instantiated_class) is not None:
+
+        parent_class_from_object = anonymizer.get_parent_class(
+            object_=instantiated_class
+        )
+        parent_class_from_config = anonymizer.get_parent_class(object_config=config)
+
+        if parent_class_from_object is not None and parent_class_from_object.endswith(
+            "Store"
+        ):
             store_name: str = name or config.get("name") or "my_temp_store"
             store_name = instantiated_class.store_name or store_name
             usage_stats_event_payload = anonymizer.anonymize_store_info(
                 store_name=store_name, store_obj=instantiated_class
             )
-        elif datasource_anonymizer.get_parent_class(config=config) is not None:
+        elif parent_class_from_config is not None and parent_class_from_config.endswith(
+            "Datasource"
+        ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
             if datasource_anonymizer.get_parent_class_v3_api(config=config):
                 # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
@@ -3879,8 +3889,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             else:
                 # for v2 api
                 full_datasource_config = config
-            parent_class_name = datasource_anonymizer.get_parent_class(config=config)
-            if parent_class_name == "SimpleSqlalchemyDatasource":
+            if parent_class_from_config == "SimpleSqlalchemyDatasource":
                 # Use the raw config here, defaults will be added in the anonymizer
                 usage_stats_event_payload = (
                     datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
@@ -3894,7 +3903,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     )
                 )
 
-        elif checkpoint_anonymizer.get_parent_class(config=config) is not None:
+        elif parent_class_from_config is not None and parent_class_from_config.endswith(
+            "Checkpoint"
+        ):
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             checkpoint_config: Union[CheckpointConfig, dict]
@@ -3907,7 +3918,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 name=checkpoint_name, config=checkpoint_config
             )
 
-        elif anonymizer.get_parent_class(config=config) is not None:
+        elif parent_class_from_config is not None and parent_class_from_config.endswith(
+            "DataConnector"
+        ):
             data_connector_name: str = (
                 name or config.get("name") or "my_temp_data_connector"
             )
