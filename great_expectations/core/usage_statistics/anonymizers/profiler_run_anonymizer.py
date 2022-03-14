@@ -5,9 +5,6 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
 )
-from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
-    ExpectationSuiteAnonymizer,
-)
 from great_expectations.core.usage_statistics.util import (
     aggregate_all_core_expectation_types,
 )
@@ -25,7 +22,6 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         self._salt = salt
         self._batch_request_anonymizer = BatchRequestAnonymizer(self._salt)
-        self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(self._salt)
 
     def anonymize_profiler_run(self, profiler_config: RuleBasedProfilerConfig) -> dict:
         """
@@ -186,7 +182,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         expectation_type: Optional[str] = expectation_configuration_builder.get(
             "expectation_type"
         )
-        self._expectation_suite_anonymizer.anonymize_expectation(
+        self.anonymize_expectation(
             expectation_type, anonymized_expectation_configuration_builder
         )
 

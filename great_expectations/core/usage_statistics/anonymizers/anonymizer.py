@@ -2,6 +2,9 @@ import logging
 from hashlib import md5
 from typing import List, Optional, Tuple
 
+from great_expectations.core.usage_statistics.util import (
+    aggregate_all_core_expectation_types,
+)
 from great_expectations.util import load_class
 
 logger = logging.getLogger(__name__)
@@ -12,6 +15,7 @@ class Anonymizer:
 
     # Any class that starts with this __module__ is considered a "core" object
     CORE_GE_OBJECT_MODULE_PREFIX = "great_expectations"
+    CORE_GE_EXPECTATION_TYPES = aggregate_all_core_expectation_types()
 
     def __init__(self, salt: Optional[str] = None) -> None:
         if salt is not None and not isinstance(salt, str):
@@ -445,3 +449,34 @@ class Anonymizer:
         )
 
         return anonymized_info_dict
+
+    def anonymize_expectation_suite_info(self, expectation_suite):
+        anonymized_info_dict = {}
+        anonymized_expectation_counts = list()
+
+        expectations = expectation_suite.expectations
+        expectation_types = [
+            expectation.expectation_type for expectation in expectations
+        ]
+        for expectation_type in set(expectation_types):
+            expectation_info = {"count": expectation_types.count(expectation_type)}
+            self.anonymize_expectation(expectation_type, expectation_info)
+            anonymized_expectation_counts.append(expectation_info)
+
+        anonymized_info_dict["anonymized_name"] = self.anonymize(
+            expectation_suite.expectation_suite_name
+        )
+        anonymized_info_dict["expectation_count"] = len(expectations)
+        anonymized_info_dict[
+            "anonymized_expectation_counts"
+        ] = anonymized_expectation_counts
+
+        return anonymized_info_dict
+
+    def anonymize_expectation(
+        self, expectation_type: Optional[str], info_dict: dict
+    ) -> None:
+        if expectation_type in self.CORE_GE_EXPECTATION_TYPES:
+            info_dict["expectation_type"] = expectation_type
+        else:
+            info_dict["anonymized_expectation_type"] = self.anonymize(expectation_type)

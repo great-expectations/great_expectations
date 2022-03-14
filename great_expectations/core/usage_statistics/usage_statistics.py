@@ -75,9 +75,6 @@ class UsageStatisticsHandler:
         from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
             DatasourceAnonymizer,
         )
-        from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
-            ExpectationSuiteAnonymizer,
-        )
         from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
             ProfilerRunAnonymizer,
         )
@@ -85,7 +82,6 @@ class UsageStatisticsHandler:
         self._anonymizer = Anonymizer(data_context_id)
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
         self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
-        self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
         self._profiler_run_anonymizer = ProfilerRunAnonymizer(data_context_id)
 
@@ -171,9 +167,7 @@ class UsageStatisticsHandler:
                 for site_name, site_config in self._data_context.project_config_with_variables_substituted.data_docs_sites.items()
             ],
             "anonymized_expectation_suites": [
-                self._expectation_suite_anonymizer.anonymize_expectation_suite_info(
-                    expectation_suite
-                )
+                self._anonymizer.anonymize_expectation_suite_info(expectation_suite)
                 for expectation_suite in expectation_suites
             ],
         }
