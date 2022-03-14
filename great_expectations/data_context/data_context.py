@@ -3410,7 +3410,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     )
     def run_profiler_on_data(
         self,
-        batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -3420,7 +3421,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
         Args:
-            batch_request: The batch request used to supply arguments at runtime.
+            batch_list: List of Batch objects used to supply arguments at runtime.
+            batch_request: The batch_request used to supply arguments at runtime.
             name: Identifier used to retrieve the profiler from a store.
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
             expectation_suite: An existing ExpectationSuite to update.
@@ -3431,12 +3433,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             Set of rule evaluation results in the form of an ExpectationSuite.
 
         Raises:
+            ProfilerConfigurationError is both "batch_list" and "batch_request" arguments are specified.
             AssertionError if both a `name` and `ge_cloud_id` are provided.
             AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
         """
         return RuleBasedProfiler.run_profiler_on_data(
             data_context=self,
             profiler_store=self.profiler_store,
+            batch_list=batch_list,
             batch_request=batch_request,
             name=name,
             ge_cloud_id=ge_cloud_id,
