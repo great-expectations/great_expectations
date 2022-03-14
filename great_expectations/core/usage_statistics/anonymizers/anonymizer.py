@@ -50,6 +50,21 @@ class Anonymizer:
         object_config: Optional[dict] = None,
         runtime_environment: Optional[dict] = None,
     ) -> dict:
+        """Given an object, anonymize relevant fields and return result as a dictionary.
+
+        Args:
+            anonymized_info_dict: The payload object to hydrate with anonymized values.
+            object_: The specific object to anonymize.
+            object_class: The class of the specific object to anonymize.
+            object_config: The dictionary configuration of the specific object to anonymize.
+            runtime_environment: A dictionary containing relevant runtime information (like class_name and module_name)
+
+        Returns:
+            The anonymized_info_dict that's been populated with anonymized values.
+
+        Raises:
+            AssertionError if no object_, object_class, or object_config is provided.
+        """
         assert (
             object_ or object_class or object_config
         ), "Must pass either object_ or object_class or object_config."
@@ -124,11 +139,23 @@ class Anonymizer:
         object_class: Optional[type] = None,
         object_config: Optional[dict] = None,
     ) -> Optional[str]:
-        """
-        Check if the parent class is a subclass of any core GE class.
-        This private method is intended to be used by anonymizers in a public `get_parent_class()` method. These anonymizers define and provide the core GE classes_to_check.
+        """Check if the parent class is a subclass of any core GE class.
+        This private method is intended to be used by anonymizers in a public `get_parent_class()` method.
+
+        These anonymizers define and provide an optional list of core GE classes_to_check.
+        If not provided, the object's inheritance hierarchy is traversed.
+
+        Args:
+            classes_to_check: An optinal list of candidate parent classes to iterate through.
+            object_: The specific object to analyze.
+            object_class: The class of the specific object to analyze.
+            object_config: The dictionary configuration of the specific object to analyze.
+
         Returns:
-            The name of the parent class found, or None if no parent class was found
+            The name of the parent class found, or None if no parent class was found.
+
+        Raises:
+            AssertionError if no object_, object_class, or object_config is provided.
         """
         assert (
             object_ or object_class or object_config
@@ -144,14 +171,15 @@ class Anonymizer:
             object_class_name = object_class.__name__
             object_module_name = object_class.__module__
 
+            # Utilize candidate list if provided.
             if classes_to_check:
                 for class_to_check in classes_to_check:
                     if issubclass(object_class, class_to_check):
                         return class_to_check.__name__
                 return None
 
+            # Otherwise, iterate through parents in inheritance hierarchy.
             parents: Tuple[type, ...] = object_class.__bases__
-
             parent_class: type
             for parent_class in parents:
                 parent_module_name: str = parent_class.__module__
