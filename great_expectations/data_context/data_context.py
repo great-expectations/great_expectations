@@ -3877,20 +3877,31 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         data_connector_anonymizer: DataConnectorAnonymizer = DataConnectorAnonymizer(
             self.data_context_id
         )
-        if (
-            store_anonymizer.is_parent_class_recognized(store_obj=instantiated_class)
-            is not None
-        ):
+
+        store_parent_class: Optional[str] = store_anonymizer.get_parent_class(
+            store_obj=instantiated_class
+        )
+        datasource_parent_class: Optional[str] = datasource_anonymizer.get_parent_class(
+            config=config
+        )
+        checkpoint_parent_class: Optional[str] = checkpoint_anonymizer.get_parent_class(
+            config=config
+        )
+        data_connector_parent_class: Optional[
+            str
+        ] = data_connector_anonymizer.get_parent_class(config=config)
+
+        if store_parent_class is not None and store_parent_class.endswith("Store"):
             store_name: str = name or config.get("name") or "my_temp_store"
             store_name = instantiated_class.store_name or store_name
             usage_stats_event_payload = store_anonymizer.anonymize_store_info(
                 store_name=store_name, store_obj=instantiated_class
             )
-        elif (
-            datasource_anonymizer.is_parent_class_recognized(config=config) is not None
+        elif datasource_parent_class is not None and datasource_parent_class.endswith(
+            "Datasource"
         ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
-            if datasource_anonymizer.is_parent_class_recognized_v3_api(config=config):
+            if datasource_anonymizer.get_parent_class_v3_api(config=config):
                 # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
                 datasource_config = datasourceConfigSchema.load(
                     instantiated_class.config
@@ -3899,10 +3910,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             else:
                 # for v2 api
                 full_datasource_config = config
-            parent_class_name = datasource_anonymizer.is_parent_class_recognized(
-                config=config
-            )
-            if parent_class_name == "SimpleSqlalchemyDatasource":
+            if datasource_parent_class == "SimpleSqlalchemyDatasource":
                 # Use the raw config here, defaults will be added in the anonymizer
                 usage_stats_event_payload = (
                     datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
@@ -3916,8 +3924,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     )
                 )
 
-        elif (
-            checkpoint_anonymizer.is_parent_class_recognized(config=config) is not None
+        elif checkpoint_parent_class is not None and checkpoint_parent_class.endswith(
+            "Checkpoint"
         ):
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
@@ -3932,8 +3940,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
 
         elif (
-            data_connector_anonymizer.is_parent_class_recognized(config=config)
-            is not None
+            data_connector_parent_class is not None
+            and data_connector_parent_class.endswith("DataConnector")
         ):
             data_connector_name: str = (
                 name or config.get("name") or "my_temp_data_connector"
