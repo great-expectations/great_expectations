@@ -358,31 +358,36 @@ def test_is_custom_parent_class_recognized_v2_api_yes():
 
 
 def test_is_parent_class_recognized_v2_api_no():
-    v3_batch_request_api_datasources = [
+    classes = [
+        # v3_batch_request_api_datasources
         "SimpleSqlalchemyDatasource",
         "Datasource",
         "BaseDatasource",
-    ]
-    custom_non_datsource_classes = [
+        # custom_non_datsource_classes
         "MyCustomNonDatasourceClass",
         "MyOtherCustomNonDatasourceClass",
     ]
-    parent_classes = v3_batch_request_api_datasources + custom_non_datsource_classes
+    expected_parents = [
+        "BaseDatasource",
+        "BaseDatasource",
+        None,
+        None,
+        None,
+    ]
+
     configs = [
         {
             "name": "test_datasource",
-            "class_name": parent_class,
+            "class_name": class_,
             "module_name": "great_expectations.datasource",
         }
-        for parent_class in parent_classes
+        for class_ in classes
     ]
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.is_parent_class_recognized_v2_api(
-            config=configs[idx]
-        )
-        assert parent_class != parent_classes[idx]
-        assert parent_class is None
+
+    for config, parent in zip(configs, expected_parents):
+        res = datasource_anonymizer.is_parent_class_recognized_v2_api(config=config)
+        assert res == parent
 
 
 def test_is_parent_class_recognized_v3_api_yes():
@@ -421,29 +426,35 @@ def test_is_custom_parent_class_recognized_v3_api_yes():
 
 
 def test_is_parent_class_recognized_v3_api_no():
-    v2_batch_kwargs_api_datasources = [
+    classes = [
+        # v2_batch_kwargs_api_datasources
         "PandasDatasource",
         "SqlAlchemyDatasource",
         "SparkDFDatasource",
         "LegacyDatasource",
-    ]
-    custom_non_datsource_classes = [
+        # custom_non_datasource_classes
         "MyCustomNonDatasourceClass",
         "MyOtherCustomNonDatasourceClass",
     ]
-    parent_classes = v2_batch_kwargs_api_datasources + custom_non_datsource_classes
+    expected_parents = [
+        "LegacyDatasource",
+        "LegacyDatasource",
+        "LegacyDatasource",
+        None,
+        None,
+        None,
+    ]
+
     configs = [
         {
             "name": "test_datasource",
-            "class_name": parent_class,
+            "class_name": class_,
             "module_name": "great_expectations.datasource",
         }
-        for parent_class in parent_classes
+        for class_ in classes
     ]
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.is_parent_class_recognized_v3_api(
-            config=configs[idx]
-        )
-        assert parent_class != parent_classes[idx]
-        assert parent_class is None
+
+    for config, parent in zip(configs, expected_parents):
+        res = datasource_anonymizer.is_parent_class_recognized_v3_api(config=config)
+        assert res == parent
