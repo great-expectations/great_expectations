@@ -32,7 +32,6 @@ class ValidationOperatorAnonymizer(Anonymizer):
             self.anonymize_object_info(
                 object_=validation_operator_obj,
                 anonymized_info_dict=anonymized_info_dict,
-                ge_classes=self._ge_classes,
             )
         )
 

@@ -1,5 +1,4 @@
 from typing import List
-from unittest import mock
 
 import pytest
 
@@ -88,34 +87,46 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
     assert domains == alice_all_column_domains
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch("great_expectations.core.batch.BatchRequest")
 def test_unsupported_cardinality_limit(
-    mock_data_context: mock.MagicMock,
-    mock_batch_request: mock.MagicMock,
+    alice_columnar_table_single_batch_context,
 ):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
     with pytest.raises(ProfilerConfigurationError) as excinfo:
-        _: DomainBuilder = CategoricalColumnDomainBuilder(
-            batch_request=mock_batch_request,
-            data_context=mock_data_context,
+        _: List[Domain] = CategoricalColumnDomainBuilder(
+            batch_request=batch_request,
+            data_context=data_context,
             limit_mode="&*#$&INVALID&*#$*&",
-        )
+        ).get_domains()
+
     assert "specify a supported cardinality mode" in str(excinfo.value)
     assert "REL_1" in str(excinfo.value)
     assert "MANY" in str(excinfo.value)
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch("great_expectations.core.batch.BatchRequest")
 def test_unspecified_cardinality_limit(
-    mock_data_context: mock.MagicMock,
-    mock_batch_request: mock.MagicMock,
+    alice_columnar_table_single_batch_context,
 ):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
     with pytest.raises(ProfilerConfigurationError) as excinfo:
-        _: DomainBuilder = CategoricalColumnDomainBuilder(
-            data_context=mock_data_context,
-            batch_request=mock_batch_request,
-        )
+        _: List[Domain] = CategoricalColumnDomainBuilder(
+            data_context=data_context,
+            batch_request=batch_request,
+        ).get_domains()
+
     assert "Please pass ONE of the following parameters" in str(excinfo.value)
     assert "you passed 0 parameters" in str(excinfo.value)
 

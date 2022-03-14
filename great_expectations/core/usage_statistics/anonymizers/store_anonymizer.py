@@ -40,7 +40,6 @@ class StoreAnonymizer(Anonymizer):
         self.anonymize_object_info(
             object_=store_obj,
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
         )
 
         anonymized_info_dict[
