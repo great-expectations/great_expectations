@@ -24,7 +24,9 @@ If your Great Expectations deployment is in an environment without a file system
 
 ## Steps
 
-### 1. Decide where you would like to save the desired credentials or config values - in a YAML file, environment variables, or a combination - then save the values.
+### 1. Save credentials and config
+
+Decide where you would like to save the desired credentials or config values - in a YAML file, environment variables, or a combination - then save the values.
 
 In most cases, we suggest using a config variables YAML file. YAML files make variables more visible, easily editable, and allow for modularization (e.g. one file for dev, another for prod).
 
