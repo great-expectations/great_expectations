@@ -27,8 +27,8 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 )
 
 
+# <snippet>
 # This class defines a Metric to support your Expectation.
-# For most ColumnExpectations, the main business logic for calculation will live in this class.
 class TableColumnsUnique(TableMetricProvider):
 
     # This is the id string that will be used to reference your Metric.
@@ -89,8 +89,8 @@ class TableColumnsUnique(TableMetricProvider):
         }
 
 
-# This class defines the Expectation itself
-# The main business logic for calculation lives here.
+# </snippet>
+# <snippet>
 class ExpectTableColumnsToBeUnique(TableExpectation):
     """Expect table to contain unique columns."""
 
@@ -206,6 +206,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
     }
 
 
+# </snippet>
 if __name__ == "__main__":
     ExpectTableColumnsToBeUnique().print_diagnostic_checklist()
 
