@@ -6,52 +6,10 @@ from great_expectations.data_context.types.base import (
     dataConnectorConfigSchema,
 )
 
-from great_expectations.datasource.data_connector import (
-    DataConnector,
-    RuntimeDataConnector,
-    FilePathDataConnector,
-    ConfiguredAssetFilePathDataConnector,
-    InferredAssetFilePathDataConnector,
-    ConfiguredAssetFilesystemDataConnector,
-    InferredAssetFilesystemDataConnector,
-    ConfiguredAssetS3DataConnector,
-    InferredAssetS3DataConnector,
-    ConfiguredAssetAzureDataConnector,
-    InferredAssetAzureDataConnector,
-    ConfiguredAssetGCSDataConnector,
-    InferredAssetGCSDataConnector,
-    ConfiguredAssetSqlDataConnector,
-    InferredAssetSqlDataConnector,
-    ConfiguredAssetDBFSDataConnector,
-    InferredAssetDBFSDataConnector,
-)
-
 
 class DataConnectorAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
-
-        # This list should contain all DataConnector types. When new DataConnector types
-        # are created, please make sure to add ordered bottom up in terms of inheritance order
-        self._ge_classes = [
-            InferredAssetDBFSDataConnector,
-            ConfiguredAssetDBFSDataConnector,
-            InferredAssetSqlDataConnector,
-            ConfiguredAssetSqlDataConnector,
-            InferredAssetGCSDataConnector,
-            ConfiguredAssetGCSDataConnector,
-            InferredAssetAzureDataConnector,
-            ConfiguredAssetAzureDataConnector,
-            InferredAssetS3DataConnector,
-            ConfiguredAssetS3DataConnector,
-            InferredAssetFilesystemDataConnector,
-            ConfiguredAssetFilesystemDataConnector,
-            InferredAssetFilePathDataConnector,
-            ConfiguredAssetFilePathDataConnector,
-            FilePathDataConnector,
-            RuntimeDataConnector,
-            DataConnector,
-        ]
 
     def anonymize_data_connector_info(self, name, config):
         anonymized_info_dict = {
@@ -75,6 +33,5 @@ class DataConnectorAnonymizer(Anonymizer):
 
     def get_parent_class(self, config):
         return self._get_parent_class(
-            classes_to_check=self._ge_classes,
             object_config=config,
         )

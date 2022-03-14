@@ -7,7 +7,6 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 class ValidationOperatorAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
-        # ordered bottom up in terms of inheritance order
         self._action_anonymizer = ActionAnonymizer(salt=salt)
 
     def anonymize_validation_operator_info(
