@@ -437,12 +437,25 @@ class ExecutionEngine(ABC):
 
         raise NotImplementedError
 
+    @staticmethod
+    def _are_domain_kwargs_valid(domain_kwargs: dict):
+        """Determine if domain_kwargs are valid for the execution engine
+
+        This will be called when getting data, override in subclass to perform
+        checks, defaults to allow all domain_kwargs.
+
+        Raises:
+            ValueError if domain_kwargs are invalid
+        """
+        pass
+
     def get_compute_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
     ) -> Tuple[Any, dict, dict]:
-        """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
+        """deprecated-v0.14.10 use zz__get_data_and_split_domain instead
+        get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
         and specific engine semantics.
 
         Returns:
@@ -457,7 +470,44 @@ class ExecutionEngine(ABC):
             provided to this method.
         """
 
+        # deprecated-v0.14.10
         raise NotImplementedError
+
+    def zz__get_data_and_split_domain(
+        self,
+        domain_kwargs: dict,
+        domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
+    ) -> Tuple[Any, SplitDomainKwargs]:
+        """Retrieves data and computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
+        and specific engine semantics.
+
+        Args:
+            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+
+        Returns:
+            A tuple consisting of three elements:
+
+            1. data corresponding to the compute domain;
+            2. SplitDomainKwargs which contains:
+                a. a modified copy of domain_kwargs describing the domain of the data returned in (1);
+                b. a dictionary describing the access instructions for data elements included in the compute domain
+                (e.g. specific column name).
+
+            In general, the union of the compute_domain_kwargs and accessor_domain_kwargs will be the same as the domain_kwargs
+            provided to this method.
+        """
+
+        self._are_domain_kwargs_valid(domain_kwargs)
+        data: Any = self.get_domain_records(domain_kwargs)
+        split_domain_kwargs = self._split_domain_kwargs(
+            domain_kwargs, domain_type, accessor_keys
+        )
+        return data, split_domain_kwargs
 
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
