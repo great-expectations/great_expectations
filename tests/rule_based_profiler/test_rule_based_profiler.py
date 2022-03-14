@@ -1,12 +1,14 @@
 import logging
 from typing import Any, Dict, List, Optional
 from unittest import mock
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -22,6 +24,37 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 )
 from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.util import deep_filter_properties_iterable
+
+
+@pytest.fixture()
+def sample_rule_dict():
+    return {
+        "domain_builder": {
+            "column_names": None,
+            "module_name": "great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder",
+            "batch_request": {
+                "datasource_name": "my_sample_datasource",
+                "data_connector_name": "default_inferred_data_connector_name",
+                "data_asset_name": "yellow_tripdata_sample_2018",
+                "batch_spec_passthrough": None,
+                "data_connector_query": {"index": -1},
+                "limit": None,
+            },
+            "column_name_suffixes": ["_amount"],
+            "class_name": "SimpleColumnSuffixDomainBuilder",
+        },
+        "parameter_builders": [],
+        "expectation_configuration_builders": [
+            {
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                "condition": None,
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "meta": {},
+                "column": "$domain.domain_kwargs.column",
+                "class_name": "DefaultExpectationConfigurationBuilder",
+            }
+        ],
+    }
 
 
 def test_reconcile_profiler_variables_no_overrides(
@@ -884,7 +917,11 @@ def test_run_profiler_without_dynamic_args(
 
     assert mock_profiler_run.called
     assert mock_profiler_run.call_args == mock.call(
-        variables=None, rules=None, expectation_suite_name=None, include_citation=True
+        variables=None,
+        rules=None,
+        expectation_suite=None,
+        expectation_suite_name=None,
+        include_citation=True,
     )
 
 
@@ -916,6 +953,7 @@ def test_run_profiler_with_dynamic_args(
     assert mock_profiler_run.call_args == mock.call(
         variables=variables,
         rules=rules,
+        expectation_suite=None,
         expectation_suite_name=expectation_suite_name,
         include_citation=include_citation,
     )
@@ -1211,3 +1249,159 @@ def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
 
     assert res == keys
     assert store.list_keys.called
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch(
+    "great_expectations.rule_based_profiler.domain_builder.SimpleColumnSuffixDomainBuilder"
+)
+@mock.patch(
+    "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
+)
+def test_add_single_rule(
+    mock_expectation_configuration_builder: mock.MagicMock,
+    mock_domain_builder: mock.MagicMock,
+    mock_data_context: mock.MagicMock,
+    sample_rule_dict: dict,
+):
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_rbp",
+        config_version=1.0,
+        data_context=mock_data_context,
+    )
+    first_rule: Rule = Rule(
+        name="first_rule",
+        domain_builder=mock_domain_builder,
+        expectation_configuration_builders=mock_expectation_configuration_builder,
+    )
+    first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    profiler.add_rule(rule=first_rule)
+    assert len(profiler.rules) == 1
+
+    duplicate_of_first_rule: Rule = Rule(
+        name="first_rule",
+        domain_builder=mock_domain_builder,
+        expectation_configuration_builders=mock_expectation_configuration_builder,
+    )
+    duplicate_of_first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    profiler.add_rule(rule=duplicate_of_first_rule)
+    assert len(profiler.rules) == 1
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch(
+    "great_expectations.rule_based_profiler.domain_builder.SimpleColumnSuffixDomainBuilder"
+)
+@mock.patch(
+    "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
+)
+def test_add_rule_overwrite_first_rule(
+    mock_expectation_configuration_builder: mock.MagicMock,
+    mock_domain_builder: mock.MagicMock,
+    mock_data_context: mock.MagicMock,
+    sample_rule_dict: dict,
+):
+
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_rbp",
+        config_version=1.0,
+        data_context=mock_data_context,
+    )
+    first_rule: Rule = Rule(
+        name="first_rule",
+        domain_builder=mock_domain_builder,
+        expectation_configuration_builders=mock_expectation_configuration_builder,
+    )
+    first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    profiler.add_rule(rule=first_rule)
+    assert len(profiler.rules) == 1
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch(
+    "great_expectations.rule_based_profiler.domain_builder.SimpleColumnSuffixDomainBuilder"
+)
+@mock.patch(
+    "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
+)
+def test_add_rule_add_second_rule(
+    mock_expectation_configuration_builder: mock.MagicMock,
+    mock_domain_builder: mock.MagicMock,
+    mock_data_context: mock.MagicMock,
+    sample_rule_dict: dict,
+):
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_rbp",
+        config_version=1.0,
+        data_context=mock_data_context,
+    )
+    first_rule: Rule = Rule(
+        name="first_rule",
+        domain_builder=mock_domain_builder,
+        expectation_configuration_builders=mock_expectation_configuration_builder,
+    )
+    first_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    profiler.add_rule(rule=first_rule)
+    assert len(profiler.rules) == 1
+
+    second_rule: Rule = Rule(
+        name="second_rule",
+        domain_builder=mock_domain_builder,
+        expectation_configuration_builders=mock_expectation_configuration_builder,
+    )
+    second_rule.to_json_dict = MagicMock(return_value=sample_rule_dict)
+    profiler.add_rule(rule=second_rule)
+    assert len(profiler.rules) == 2
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_add_rule_bad_rule(
+    mock_data_context: mock.MagicMock,
+    sample_rule_dict: dict,
+):
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_rbp",
+        config_version=1.0,
+        data_context=mock_data_context,
+    )
+    not_a_rule: dict = {
+        "name": "first_rule",
+        "domain_builder": "domain_builder",
+        "expectation_configuration_builder": "expectation_configuration_builder",
+    }
+    with pytest.raises(AttributeError) as e:
+        # noinspection PyTypeChecker
+        profiler.add_rule(rule=not_a_rule)
+    assert "'dict' object has no attribute 'name'" in str(e.value)
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_run_with_expectation_suite_arg(mock_data_context: mock.MagicMock):
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_rbp", data_context=mock_data_context, config_version=1.0
+    )
+    suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name="my_expectation_suite"
+    )
+    result_suite: ExpectationSuite = profiler.run(expectation_suite=suite)
+
+    assert id(suite) == id(result_suite)
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_run_with_conflicting_expectation_suite_args_raises_error(
+    mock_data_context: mock.MagicMock,
+):
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_rbp", data_context=mock_data_context, config_version=1.0
+    )
+    suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name="my_expectation_suite"
+    )
+
+    with pytest.raises(AssertionError) as e:
+        profiler.run(
+            expectation_suite=suite, expectation_suite_name="my_expectation_suite"
+        )
+
+    assert "Ambiguous arguments provided" in str(e.value)

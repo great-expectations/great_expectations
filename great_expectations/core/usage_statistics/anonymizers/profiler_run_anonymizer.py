@@ -172,7 +172,6 @@ class ProfilerRunAnonymizer(Anonymizer):
         anonymized_domain_builder: dict = self.anonymize_object_info(
             object_config=domain_builder,
             anonymized_info_dict={},
-            ge_classes=self._ge_domain_builders,
             runtime_environment={
                 "module_name": "great_expectations.rule_based_profiler.domain_builder"
             },
@@ -207,7 +206,6 @@ class ProfilerRunAnonymizer(Anonymizer):
         anonymized_parameter_builder: dict = self.anonymize_object_info(
             object_config=parameter_builder,
             anonymized_info_dict={},
-            ge_classes=self._ge_parameter_builders,
             runtime_environment={
                 "module_name": "great_expectations.rule_based_profiler.parameter_builder"
             },
@@ -252,7 +250,6 @@ class ProfilerRunAnonymizer(Anonymizer):
         anonymized_expectation_configuration_builder: dict = self.anonymize_object_info(
             object_config=expectation_configuration_builder,
             anonymized_info_dict={},
-            ge_classes=self._ge_expectation_configuration_builders,
             runtime_environment={
                 "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder"
             },

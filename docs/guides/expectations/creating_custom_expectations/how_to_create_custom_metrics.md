@@ -75,7 +75,7 @@ If you have never used Python Decorators and don’t know what they are and how 
 Find the following code snippet in your Metric Provider class:
 
 ````python
-@column_condition_partial(engine=PandasExecutionPandasExecutionEngineEngine)
+@column_condition_partial(engine=PandasExecutionEngine)
 def _pandas(cls, column, **kwargs):
     return column == 3
 ````

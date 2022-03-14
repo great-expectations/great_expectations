@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -25,6 +25,15 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
     """
     Compute mean unexpected count ratio (as a fraction) of a specified map-style metric across all specified batches.
     """
+
+    exclude_field_names: Set[
+        str
+    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "metric_name",
+        "enforce_numeric_metric",
+        "replace_nan_with_zero",
+        "reduce_scalar_metric",
+    }
 
     def __init__(
         self,
