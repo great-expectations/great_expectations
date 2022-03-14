@@ -8,9 +8,11 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityChecker,
     CardinalityLimitMode,
     RelativeCardinalityLimit,
+    validate_input_parameters,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     build_simple_domains_from_column_names,
+    get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
@@ -31,10 +33,11 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-        limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
-        max_unique_values: Optional[int] = None,
-        max_proportion_unique: Optional[int] = None,
+        column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_columns: Optional[Union[str, Optional[List[str]]]] = None,
+        limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
+        max_unique_values: Optional[Union[str, int]] = None,
+        max_proportion_unique: Optional[Union[str, float]] = None,
     ):
         """Create column domains where cardinality is within the specified limit.
 
@@ -55,6 +58,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
+            column_names: Explicitly specified column_names list desired (if None, it is computed based on active Batch)
+            exclude_columns: If provided, these columns are pre-filtered and excluded from consideration, cardinality is not computed.
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
@@ -62,35 +67,45 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
                 cardinality limit to use when filtering columns.
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
-            exclude_columns: If provided, these columns are pre-filtered and
-                excluded from consideration, cardinality is not computed.
         """
         super().__init__(
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
-            column_names=None,
-        )
-
-        self._cardinality_checker = CardinalityChecker(
-            limit_mode=limit_mode,
-            max_unique_values=max_unique_values,
-            max_proportion_unique=max_proportion_unique,
+            column_names=column_names,
         )
 
         self._exclude_columns = exclude_columns
+
+        self._limit_mode = limit_mode
+        self._max_unique_values = max_unique_values
+        self._max_proportion_unique = max_proportion_unique
+
+        self._cardinality_checker = None
 
     @property
     def domain_type(self) -> Union[str, MetricDomainTypes]:
         return MetricDomainTypes.COLUMN
 
     @property
-    def cardinality_checker(self) -> CardinalityChecker:
-        return self._cardinality_checker
+    def limit_mode(self) -> Optional[Union[CardinalityLimitMode, str]]:
+        return self._limit_mode
 
     @property
-    def exclude_columns(self) -> List[str]:
+    def max_unique_values(self) -> Optional[Union[str, int]]:
+        return self._max_unique_values
+
+    @property
+    def max_proportion_unique(self) -> Optional[Union[str, float]]:
+        return self._max_proportion_unique
+
+    @property
+    def exclude_columns(self) -> Optional[Union[str, Optional[List[str]]]]:
         return self._exclude_columns
+
+    @property
+    def cardinality_checker(self) -> Optional[CardinalityChecker]:
+        return self._cardinality_checker
 
     def _get_domains(
         self,
@@ -105,9 +120,52 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             List of domains that match the desired cardinality.
         """
         table_column_names: List[str] = self.get_effective_column_names(
-            include_columns=None,
+            include_columns=self.column_names,
             exclude_columns=self.exclude_columns,
             variables=variables,
+        )
+
+        # Obtain limit_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        limit_mode: Optional[
+            Union[CardinalityLimitMode, str]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.limit_mode,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
+
+        # Obtain max_unique_values from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        max_unique_values: Optional[int] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.max_unique_values,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
+
+        # Obtain max_proportion_unique from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        max_proportion_unique: Optional[
+            float
+        ] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.max_proportion_unique,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
+
+        validate_input_parameters(
+            limit_mode=limit_mode,
+            max_unique_values=max_unique_values,
+            max_proportion_unique=max_proportion_unique,
+        )
+
+        self._cardinality_checker = CardinalityChecker(
+            limit_mode=limit_mode,
+            max_unique_values=max_unique_values,
+            max_proportion_unique=max_proportion_unique,
         )
 
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
