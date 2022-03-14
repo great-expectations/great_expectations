@@ -66,9 +66,6 @@ class UsageStatisticsHandler:
         from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
             Anonymizer,
         )
-        from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
-            BatchAnonymizer,
-        )
         from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
             BatchRequestAnonymizer,
         )
@@ -100,7 +97,6 @@ class UsageStatisticsHandler:
         self._store_anonymizer = StoreAnonymizer(data_context_id)
         self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
         self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
-        self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
         self._profiler_run_anonymizer = ProfilerRunAnonymizer(data_context_id)
@@ -387,10 +383,9 @@ def run_validation_operator_usage_statistics(
     if data_context._usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
+            anonymizer = data_context._usage_statistics_handler._anonymizer
             payload["anonymized_batches"] = [
-                batch_anonymizer.anonymize_batch_info(batch)
-                for batch in assets_to_validate
+                anonymizer.anonymize_batch_info(batch) for batch in assets_to_validate
             ]
         except Exception as e:
             logger.debug(
