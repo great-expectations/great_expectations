@@ -13,6 +13,7 @@ variables:
     data_connector_query:
       index: ":-1"
   false_positive_rate: 5.0e-2
+  bootstrap_random_seed: 43792
 
 rules:
   row_count_range_rule:
@@ -24,6 +25,7 @@ rules:
         batch_request: $variables.jan_2018_thru_nov_2020_monthly_tripdata_batch_request
         metric_name: table.row_count
         false_positive_rate: $variables.false_positive_rate
+        bootstrap_random_seed: $variables.bootstrap_random_seed
         round_decimals: 0
         truncate_values:
           lower_bound: 0

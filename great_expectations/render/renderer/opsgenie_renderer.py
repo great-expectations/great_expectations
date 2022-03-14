@@ -53,19 +53,12 @@ class OpsgenieRenderer(Renderer):
             if validation_result.success:
                 status = "Success 🎉"
 
-            summary_text = """Batch Validation Status: {}
-Expectation suite name: {}
-Data asset name: {}
-Run ID: {}
-Batch ID: {}
-Summary: {}""".format(
-                status,
-                expectation_suite_name,
-                data_asset_name,
-                run_id,
-                batch_id,
-                check_details_text,
-            )
+            summary_text = f"""Batch Validation Status: {status}
+Expectation suite name: {expectation_suite_name}
+Data asset name: {data_asset_name}
+Run ID: {run_id}
+Batch ID: {batch_id}
+Summary: {check_details_text}"""
 
         return summary_text
 

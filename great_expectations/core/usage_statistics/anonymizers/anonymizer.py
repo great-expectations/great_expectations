@@ -1,6 +1,6 @@
 import logging
 from hashlib import md5
-from typing import Optional
+from typing import List, Optional, Tuple
 
 from great_expectations.util import load_class
 
@@ -10,7 +10,10 @@ logger = logging.getLogger(__name__)
 class Anonymizer:
     """Anonymize string names in an optionally-consistent way."""
 
-    def __init__(self, salt=None):
+    # Any class that starts with this __module__ is considered a "core" object
+    CORE_GE_OBJECT_MODULE_PREFIX = "great_expectations"
+
+    def __init__(self, salt: Optional[str] = None) -> None:
         if salt is not None and not isinstance(salt, str):
             logger.error("invalid salt: must provide a string. Setting a random salt.")
             salt = None
@@ -22,10 +25,10 @@ class Anonymizer:
             self._salt = salt
 
     @property
-    def salt(self):
+    def salt(self) -> str:
         return self._salt
 
-    def anonymize(self, string_):
+    def anonymize(self, string_: Optional[str]) -> Optional[str]:
         if string_ is None:
             return None
 
@@ -41,13 +44,27 @@ class Anonymizer:
 
     def anonymize_object_info(
         self,
-        anonymized_info_dict,
-        ge_classes,
-        object_=None,
-        object_class=None,
-        object_config=None,
-        runtime_environment=None,
+        anonymized_info_dict: dict,
+        object_: Optional[object] = None,
+        object_class: Optional[type] = None,
+        object_config: Optional[dict] = None,
+        runtime_environment: Optional[dict] = None,
     ) -> dict:
+        """Given an object, anonymize relevant fields and return result as a dictionary.
+
+        Args:
+            anonymized_info_dict: The payload object to hydrate with anonymized values.
+            object_: The specific object to anonymize.
+            object_class: The class of the specific object to anonymize.
+            object_config: The dictionary configuration of the specific object to anonymize.
+            runtime_environment: A dictionary containing relevant runtime information (like class_name and module_name)
+
+        Returns:
+            The anonymized_info_dict that's been populated with anonymized values.
+
+        Raises:
+            AssertionError if no object_, object_class, or object_config is provided.
+        """
         assert (
             object_ or object_class or object_config
         ), "Must pass either object_ or object_class or object_config."
@@ -56,6 +73,7 @@ class Anonymizer:
             runtime_environment = {}
 
         object_class_name: Optional[str] = None
+        object_module_name: Optional[str] = None
         try:
             if object_class is None and object_ is not None:
                 object_class = object_.__class__
@@ -65,22 +83,45 @@ class Anonymizer:
                     "module_name"
                 ) or runtime_environment.get("module_name")
                 object_class = load_class(object_class_name, object_module_name)
+
             object_class_name = object_class.__name__
+            object_module_name = object_class.__module__
+            parents: Tuple[type, ...] = object_class.__bases__
 
-            for ge_class in ge_classes:
-                if issubclass(object_class, ge_class):
-                    anonymized_info_dict["parent_class"] = ge_class.__name__
-                    if not object_class == ge_class:
-                        anonymized_info_dict["anonymized_class"] = self.anonymize(
-                            object_class_name
-                        )
-                    break
+            if Anonymizer._is_core_great_expectations_class(object_module_name):
+                anonymized_info_dict["parent_class"] = object_class_name
+            else:
 
+                # Chetan - 20220311 - If we can't identify the class in question, we iterate through the parents.
+                # While GE rarely utilizes multiple inheritance when defining core objects (as of v0.14.10),
+                # it is important to recognize that this is possibility.
+                #
+                # In the presence of multiple valid parents, we generate a comma-delimited list.
+
+                parent_class_list: List[str] = []
+
+                parent_class: type
+                for parent_class in parents:
+                    parent_module_name: str = parent_class.__module__
+                    if Anonymizer._is_core_great_expectations_class(parent_module_name):
+                        parent_class_list.append(parent_class.__name__)
+
+                if parent_class_list:
+                    concatenated_parent_classes: str = ",".join(
+                        cls for cls in parent_class_list
+                    )
+                    anonymized_info_dict["parent_class"] = concatenated_parent_classes
+                    anonymized_info_dict["anonymized_class"] = self.anonymize(
+                        object_class_name
+                    )
+
+            # Catch-all to prevent edge cases from slipping past
             if not anonymized_info_dict.get("parent_class"):
                 anonymized_info_dict["parent_class"] = "__not_recognized__"
                 anonymized_info_dict["anonymized_class"] = self.anonymize(
                     object_class_name
                 )
+
         except AttributeError:
             anonymized_info_dict["parent_class"] = "__not_recognized__"
             anonymized_info_dict["anonymized_class"] = self.anonymize(object_class_name)
@@ -88,17 +129,33 @@ class Anonymizer:
         return anonymized_info_dict
 
     @staticmethod
-    def _is_parent_class_recognized(
-        classes_to_check,
-        object_=None,
-        object_class=None,
-        object_config=None,
+    def _is_core_great_expectations_class(class_name: str) -> bool:
+        return class_name.startswith(Anonymizer.CORE_GE_OBJECT_MODULE_PREFIX)
+
+    @staticmethod
+    def _get_parent_class(
+        classes_to_check: Optional[List[type]] = None,
+        object_: Optional[object] = None,
+        object_class: Optional[type] = None,
+        object_config: Optional[dict] = None,
     ) -> Optional[str]:
-        """
-        Check if the parent class is a subclass of any core GE class.
-        This private method is intended to be used by anonymizers in a public `is_parent_class_recognized()` method. These anonymizers define and provide the core GE classes_to_check.
+        """Check if the parent class is a subclass of any core GE class.
+        This private method is intended to be used by anonymizers in a public `get_parent_class()` method.
+
+        These anonymizers define and provide an optional list of core GE classes_to_check.
+        If not provided, the object's inheritance hierarchy is traversed.
+
+        Args:
+            classes_to_check: An optinal list of candidate parent classes to iterate through.
+            object_: The specific object to analyze.
+            object_class: The class of the specific object to analyze.
+            object_config: The dictionary configuration of the specific object to analyze.
+
         Returns:
-            The name of the parent class found, or None if no parent class was found
+            The name of the parent class found, or None if no parent class was found.
+
+        Raises:
+            AssertionError if no object_, object_class, or object_config is provided.
         """
         assert (
             object_ or object_class or object_config
@@ -111,11 +168,25 @@ class Anonymizer:
                 object_module_name = object_config.get("module_name")
                 object_class = load_class(object_class_name, object_module_name)
 
-            for class_to_check in classes_to_check:
-                if issubclass(object_class, class_to_check):
-                    return class_to_check.__name__
+            object_class_name = object_class.__name__
+            object_module_name = object_class.__module__
 
-            return None
+            # Utilize candidate list if provided.
+            if classes_to_check:
+                for class_to_check in classes_to_check:
+                    if issubclass(object_class, class_to_check):
+                        return class_to_check.__name__
+                return None
+
+            # Otherwise, iterate through parents in inheritance hierarchy.
+            parents: Tuple[type, ...] = object_class.__bases__
+            parent_class: type
+            for parent_class in parents:
+                parent_module_name: str = parent_class.__module__
+                if Anonymizer._is_core_great_expectations_class(parent_module_name):
+                    return parent_class.__name__
 
         except AttributeError:
-            return None
+            pass
+
+        return None

@@ -42,7 +42,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
         return cls(expectation_suite_name=tuple_[0])
 
     def __repr__(self):
-        return self.__class__.__name__ + "::" + self._expectation_suite_name
+        return f"{self.__class__.__name__}::{self._expectation_suite_name}"
 
 
 class ExpectationSuiteIdentifierSchema(Schema):
@@ -350,7 +350,7 @@ class ConfigurationIdentifier(DataContextKey):
         return cls(configuration_key=tuple_[0])
 
     def __repr__(self):
-        return self.__class__.__name__ + "::" + self._configuration_key
+        return f"{self.__class__.__name__}::{self._configuration_key}"
 
 
 class ConfigurationIdentifierSchema(Schema):

@@ -4,7 +4,10 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.types import (
     Domain,
     InferredSemanticDomainType,
@@ -14,30 +17,34 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
+class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
     """
     This DomainBuilder utilizes a "best-effort" semantic interpretation of ("storage") columns of a table.
     """
 
     def __init__(
         self,
-        data_context: "DataContext",  # noqa: F821
-        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
+        column_names: Optional[Union[str, Optional[List[str]]]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
     ):
         """
         Args:
-            data_context: DataContext
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+            data_context: DataContext
+            column_names: Explicitly specified column_names list desired (if None, it is computed based on active Batch)
+            semantic_types: single or multiple type specifications using SemanticDomainTypes (or string equivalents)
         """
-
         super().__init__(
-            batch=batch,
-            data_context=data_context,
+            batch_list=batch_list,
             batch_request=batch_request,
+            data_context=data_context,
+            column_names=column_names,
         )
 
         if semantic_types is None:
@@ -64,35 +71,39 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
         """
+        table_column_names: List[str] = self.get_effective_column_names(
+            include_columns=self.column_names,
+            exclude_columns=None,
+            variables=variables,
+        )
+
+        # Obtain semantic_types from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        semantic_types: Union[
+            str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.semantic_types,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
+
         semantic_types: List[
             SemanticDomainTypes
-        ] = _parse_semantic_domain_type_argument(semantic_types=self.semantic_types)
+        ] = _parse_semantic_domain_type_argument(semantic_types=semantic_types)
 
-        batch_id: str = self.get_batch_id(variables=variables)
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)
         column_types_dict_list: List[Dict[str, Any]] = self.get_validator(
             variables=variables
         ).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.column_types",
                 metric_domain_kwargs={
-                    "batch_id": batch_id,
+                    "batch_id": batch_ids[-1],  # active_batch_id
                 },
                 metric_value_kwargs={
                     "include_nested": True,
                 },
-                metric_dependencies=None,
-            )
-        )
-
-        table_column_names: List[str] = self.get_validator(
-            variables=variables
-        ).get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs={
-                    "batch_id": batch_id,
-                },
-                metric_value_kwargs=None,
                 metric_dependencies=None,
             )
         )

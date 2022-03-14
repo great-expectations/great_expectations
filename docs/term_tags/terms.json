@@ -1,0 +1,162 @@
+{
+  "batch": {
+    "term": "Batch",
+    "definition": "A selection of records from a Data Asset.",
+    "url": "terms/batch"
+  },
+  "batch_request": {
+    "term": "Batch Request",
+    "definition": "Provided to a Datasource in order to create a Batch.",
+    "url": "terms/batch_request"
+  },
+  "catalog_asset": {
+    "term": "Catalog Asset",
+    "definition": "A collection of records within a Datasource which is usually named based on the underlying data system and sliced in different ways to correspond to multiple desired specifications.",
+    "url": "terms/catalog_asset"
+  },
+  "checkpoint": {
+    "term": "Checkpoint",
+    "definition": "The primary means for validating data in a production deployment of Great Expectations.",
+    "url": "terms/checkpoint"
+  },
+  "checkpoint_store": {
+    "term": "Checkpoint Store",
+    "definition": "A connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.",
+    "url": "terms/checkpoint_store"
+  },
+  "cli": {
+    "term": "CLI",
+    "definition": "Command Line Interface",
+    "url": "terms/cli"
+  },
+  "custom_expectation": {
+    "term": "Custom Expectation",
+    "definition": "An extension of the `Expectation` class, developed outside of the Great Expectations library.",
+    "url": "terms/custom_expectation"
+  },
+  "data_asset": {
+    "term": "Data Asset",
+    "definition": "A collection of records within a Datasource which is usually named based on the underlying data system and sliced to correspond to a desired specification.",
+    "url": "terms/data_asset"
+  },
+  "data_connector": {
+    "term": "Data Connector",
+    "definition": "Provides the configuration details based on the source data system which are needed by a Datasource to define Data Assets.",
+    "url": "terms/data_connector"
+  },
+  "data_context": {
+    "term": "Data Context",
+    "definition": "The primary entry point for a Great Expectations deployment, with configurations and methods for all supporting components.",
+    "url": "terms/data_context"
+  },
+  "data_docs": {
+    "term": "Data Docs",
+    "definition": "Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.",
+    "url": "terms/data_docs"
+  },
+  "data_docs_store": {
+    "term": "Data Docs Store",
+    "definition": "A connector to store and retrieve information pertaining to Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.",
+    "url": "terms/data_docs_store"
+  },
+  "datasource": {
+    "term": "Datasource",
+    "definition": "Provides a standard API for accessing and interacting with data from a wide variety of source systems.",
+    "url": "terms/datasource"
+  },
+  "evaluation_parameter": {
+    "term": "Evaluation Parameter",
+    "definition": "A dynamic value used during Validation of an Expectation which is populated by evaluating simple expressions or by referencing previously generated metrics.",
+    "url": "terms/evaluation_parameter"
+  },
+  "evaluation_parameter_store": {
+    "term": "Evaluation Parameter Store",
+    "definition": "A connector to store and retrieve information about parameters used during Validation of an Expectation which reference simple expressions or previously generated metrics.",
+    "url": "terms/evaluation_parameter_store"
+  },
+  "execution_engine": {
+    "term": "Execution Engine",
+    "definition": "A system capable of processing data to compute Metrics.",
+    "url": "terms/execution_engine"
+  },
+  "expectation": {
+    "term": "Expectation",
+    "definition": "A verifiable assertion about data.",
+    "url": "terms/expectation"
+  },
+  "expectation_suite": {
+    "term": "Expectation Suite",
+    "definition": "A collection of verifiable assertions about data.",
+    "url": "terms/expectation_suite"
+  },
+  "expectation_store": {
+    "term": "Expectation Store",
+    "definition": "A connector to store and retrieve information about collections of verifiable assertions about data.",
+    "url": "terms/expectation_store"
+  },
+  "metric": {
+    "term": "Metric",
+    "definition": "A computed attribute of data such as the mean of a column.",
+    "url": "terms/metric"
+  },
+  "metric_store": {
+    "term": "Metric Store",
+    "definition": "A connector to store and retrieve information about computed attributes of data, such as the mean of a column.",
+    "url": "terms/metric_store"
+  },
+  "profiler": {
+    "term": "Profiler",
+    "definition": "Generates Metrics and candidate Expectations from data.",
+    "url": "terms/profiler"
+  },
+  "profiling": {
+    "term": "Profiling",
+    "definition": "The act of generating Metrics and candidate Expectations from data.",
+    "url": "terms/profiler"
+  },
+  "renderer": {
+    "term": "Renderer",
+    "definition": "A method for converting Expectations, Validation Results, etc. into Data Docs or other output such as email notifications or slack messages.",
+    "url": "terms/renderer"
+  },
+  "store": {
+    "term": "Store",
+    "definition": "A connector to store and retrieve information about metadata in Great Expectations.",
+    "url": "terms/store"
+  },
+  "supporting_resource": {
+    "term": "Supporting Resource",
+    "definition": "A resource external to the Great Expectations code base which Great Expectations utilizes.",
+    "url": "terms/supporting_resource"
+  },
+  "validation": {
+    "term": "Validation",
+    "definition": "The act of applying an Expectation Suite to a Batch.",
+    "url": "guides/validation/validate_data_overview"
+  },
+  "action": {
+    "term": "Action",
+    "definition": "A Python class with a run method that takes a Validation Result and does something with it",
+    "url": "terms/action"
+  },
+  "validation_result": {
+    "term": "Validation Result",
+    "definition": "Generated when data is Validated against an Expectation or Expectation Suite.",
+    "url": "terms/validation_result"
+  },
+  "validation_result_store": {
+    "term": "Validation Result Store",
+    "definition": "A connector to store and retrieve information about objects generated when data is Validated against an Expectation Suite.",
+    "url": "terms/validation_result_store"
+  },
+  "validator": {
+    "term": "Validator",
+    "definition": "Used to run an Expectation Suite against data.",
+    "url": "terms/validator"
+  },
+  "plugin": {
+    "term": "Plugin",
+    "definition": "Extends Great Expectations' components and/or functionality.",
+    "url": "terms/plugin"
+  }
+}

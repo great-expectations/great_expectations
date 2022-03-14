@@ -45,17 +45,15 @@ class DatasourceAnonymizer(Anonymizer):
         anonymized_info_dict["anonymized_name"] = self.anonymize(name)
 
         # Legacy Datasources (<= v0.12 v2 BatchKwargs API)
-        if self.is_parent_class_recognized_v2_api(config=config) is not None:
+        if self.get_parent_class_v2_api(config=config) is not None:
             self.anonymize_object_info(
                 anonymized_info_dict=anonymized_info_dict,
-                ge_classes=self._legacy_ge_classes,
                 object_config=config,
             )
         # Datasources (>= v0.13 v3 BatchRequest API), and custom v2 BatchKwargs API
-        elif self.is_parent_class_recognized_v3_api(config=config) is not None:
+        elif self.get_parent_class_v3_api(config=config) is not None:
             self.anonymize_object_info(
                 anonymized_info_dict=anonymized_info_dict,
-                ge_classes=self._ge_classes,
                 object_config=config,
             )
             execution_engine_config = config.get("execution_engine")
@@ -85,7 +83,6 @@ class DatasourceAnonymizer(Anonymizer):
             config["module_name"] = "great_expectations.datasource"
         self.anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
             object_config=config,
         )
 
@@ -145,20 +142,20 @@ class DatasourceAnonymizer(Anonymizer):
 
         return anonymized_info_dict
 
-    def is_parent_class_recognized(self, config) -> Optional[str]:
-        return self._is_parent_class_recognized(
+    def get_parent_class(self, config) -> Optional[str]:
+        return self._get_parent_class(
             classes_to_check=self._ge_classes + self._legacy_ge_classes,
             object_config=config,
         )
 
-    def is_parent_class_recognized_v2_api(self, config) -> Optional[str]:
-        return self._is_parent_class_recognized(
+    def get_parent_class_v2_api(self, config) -> Optional[str]:
+        return self._get_parent_class(
             classes_to_check=self._legacy_ge_classes,
             object_config=config,
         )
 
-    def is_parent_class_recognized_v3_api(self, config) -> Optional[str]:
-        return self._is_parent_class_recognized(
+    def get_parent_class_v3_api(self, config) -> Optional[str]:
+        return self._get_parent_class(
             classes_to_check=self._ge_classes,
             object_config=config,
         )

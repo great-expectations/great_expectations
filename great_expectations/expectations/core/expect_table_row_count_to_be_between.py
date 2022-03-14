@@ -11,6 +11,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 
 class ExpectTableRowCountToBeBetween(TableExpectation):
@@ -71,7 +72,68 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     success_keys = (
         "min_value",
         "max_value",
+        "auto",
+        "profiler_config",
     )
+
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        class_name="RuleBasedProfilerConfig",
+        module_name="great_expectations.rule_based_profiler",
+        variables={
+            "false_positive_rate": 0.05,
+            "sampling_method": "bootstrap",
+            "num_bootstrap_samples": 9999,
+            "bootstrap_random_seed": None,
+            "round_decimals": 0,
+            "truncate_values": {
+                "lower_bound": 0,
+                "upper_bound": None,
+            },
+        },
+        rules={
+            "default_expect_table_row_count_to_be_between_rule": {
+                "domain_builder": {
+                    "class_name": "TableDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "parameter_builders": [
+                    {
+                        "name": "row_count_range",
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_name": "table.row_count",
+                        "metric_domain_kwargs": None,
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": True,
+                        "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "sampling_method": "$variables.sampling_method",
+                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                        "round_decimals": "$variables.round_decimals",
+                        "truncate_values": "$variables.truncate_values",
+                        "json_serialize": True,
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_table_row_count_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "min_value": "$parameter.row_count_range.value.value_range[0]",
+                        "max_value": "$parameter.row_count_range.value.value_range[1]",
+                        "meta": {
+                            "profiler_details": "$parameter.row_count_range.details",
+                        },
+                    }
+                ],
+            },
+        },
+    )
+
     default_kwarg_values = {
         "min_value": None,
         "max_value": None,
@@ -79,6 +141,8 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "min_value",

@@ -92,7 +92,6 @@ When possible, include test data and tests that includes null values (`None` in 
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L88
 ```
 
-:::note
 When you define data in your examples, we will mostly guess the type of the columns. 
 Sometimes you need to specify the precise type of the columns for each backend. Then you use the `schemas` attribute (on the same level as `data` and `tests` in the dictionary):
 
@@ -105,6 +104,22 @@ Sometimes you need to specify the precise type of the columns for each backend. 
     "x": "INTEGER",
   },
 ```
+
+:::info
+While Pandas is fairly flexible in typing, Spark and many SQL dialects are much more strict. 
+
+You may find you wish to use data that is incompatible with a given backend, or write different individual tests for different backends. 
+To do this, you can use the `only_for` attribute, which accepts a list containing `pandas`, `spark`, `sqlite`, a SQL dialect, or a combination of any of the above:
+
+```console
+"only_for": ["spark", "pandas"]
+```
+
+Passing this attribute on the same level as `data`, `tests`, and `schemas` 
+will tell Great Expectations to only instantiate the data specified in that example for the given backend, ensuring you don't encounter any backend-related errors relating to data before your Custom Expectation can even be tested:
+
+
+Passing this attribute within a test (at the same level as `title`, `in`, `out`, etc.) will execute that individual test only for that specified backend.
 :::
 
 ### 3. Defining our tests
@@ -119,19 +134,26 @@ You will need to:
 
 If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publically displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L89-L116
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L132
 ```
+
+:::note
+You may have noticed that specifying `test_backends` isn't required for successfully testing your Custom Expectation.
+
+If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.
+:::
 
 <details>
   <summary>Can I test for errors?</summary>
 Yes! If you would like to define an example case illustrating when your Custom Expectation should throw an error, 
-you can replace the <code>out</code> key with an <code>error</code> key defining a <code>traceback_substring</code>. 
+you can pass an empty <code>out</code> key, and include an <code>error</code> key defining a <code>traceback_substring</code>. 
 <br/><br/>
 For example:
 <br/><br/>
-<code>{`"error": {
-          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
-        }`}
+<code>{`"out": {},
+"error": {
+    "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+}`}
 </code>
 </details>
 

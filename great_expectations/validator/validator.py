@@ -26,6 +26,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
@@ -40,6 +41,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.registry import (
     get_expectation_impl,
@@ -47,6 +49,14 @@ from great_expectations.expectations.registry import (
     list_registered_expectation_implementations,
 )
 from great_expectations.marshmallow__shade import ValidationError
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.rule_based_profiler import (
+    BaseRuleBasedProfiler,
+    ReconciliationDirectives,
+    ReconciliationStrategy,
+)
+from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.exception_info import ExceptionInfo
@@ -69,7 +79,7 @@ except ImportError:
         "Unable to load pandas; install optional pandas dependency for support."
     )
 
-MAX_METRIC_COMPUTATION_RETRIES = 3
+MAX_METRIC_COMPUTATION_RETRIES: int = 3
 
 
 ValidationStatistics = namedtuple(
@@ -211,7 +221,7 @@ class Validator:
         return list(combined_dir)
 
     @property
-    def data_context(self) -> Optional["DataContext"]:
+    def data_context(self) -> Optional["DataContext"]:  # noqa: F821
         return self._data_context
 
     @property
@@ -289,8 +299,13 @@ class Validator:
                         f"Invalid positional argument: {arg}"
                     )
 
-            configuration = ExpectationConfiguration(
-                expectation_type=name, kwargs=expectation_kwargs, meta=meta
+            configuration: ExpectationConfiguration = (
+                self._build_expectation_configuration(
+                    expectation_type=name,
+                    expectation_kwargs=expectation_kwargs,
+                    meta=meta,
+                    expectation_impl=expectation_impl,
+                )
             )
 
             exception_info: ExceptionInfo
@@ -360,6 +375,242 @@ class Validator:
 
         return inst_expectation
 
+    def _build_expectation_configuration(
+        self,
+        expectation_type: str,
+        expectation_kwargs: dict,
+        meta: dict,
+        expectation_impl: "Expectation",  # noqa: F821
+    ) -> ExpectationConfiguration:
+        success_keys: Tuple[str] = (
+            expectation_impl.success_keys
+            if hasattr(expectation_impl, "success_keys")
+            else tuple()
+        )
+        arg_keys: Tuple[str] = (
+            expectation_impl.arg_keys
+            if hasattr(expectation_impl, "arg_keys")
+            else tuple()
+        )
+        runtime_keys: Tuple[str] = (
+            expectation_impl.runtime_keys
+            if hasattr(expectation_impl, "runtime_keys")
+            else None
+        ) or tuple()
+        # noinspection PyTypeChecker
+        override_keys: Tuple[str] = success_keys + arg_keys + runtime_keys
+
+        key: str
+        value: Any
+        expectation_kwargs_overrides: dict = {
+            key: value
+            for key, value in expectation_kwargs.items()
+            if key in override_keys
+        }
+        expectation_kwargs_overrides = convert_to_json_serializable(
+            data=expectation_kwargs_overrides
+        )
+
+        auto: Optional[bool] = expectation_kwargs.get("auto")
+        profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
+            "profiler_config"
+        )
+        default_profiler_config: Optional[
+            RuleBasedProfilerConfig
+        ] = expectation_impl.default_kwarg_values.get("profiler_config")
+
+        if auto and profiler_config is None and default_profiler_config is None:
+            raise ValueError(
+                "Automatic Expectation argument estimation requires a Rule-Based Profiler to be provided."
+            )
+
+        configuration: ExpectationConfiguration
+
+        if auto:
+            # Save custom Rule-Based Profiler configuration for reconciling it with optionally-specified default
+            # Rule-Based Profiler configuration as an override argument to "BaseRuleBasedProfiler.run()" method.
+            override_profiler_config: Optional[RuleBasedProfilerConfig]
+            if default_profiler_config:
+                override_profiler_config = copy.deepcopy(profiler_config)
+            else:
+                override_profiler_config = None
+
+            """
+            If default Rule-Based Profiler configuration exists, use it as base with custom Rule-Based Profiler
+            configuration as override; otherwise, use custom Rule-Based Profiler configuration with no override.
+            """
+            profiler_config = default_profiler_config or profiler_config
+
+            profiler: BaseRuleBasedProfiler = self._build_rule_based_profiler(
+                expectation_type=expectation_type,
+                expectation_kwargs=expectation_kwargs,
+                success_keys=success_keys,
+                profiler_config=profiler_config,
+                override_profiler_config=override_profiler_config,
+            )
+
+            expectation_configurations: List[
+                ExpectationConfiguration
+            ] = profiler.run().expectations
+
+            configuration = expectation_configurations[0]
+
+            # Reconcile explicitly provided "ExpectationConfiguration" success_kwargs as overrides to generated values.
+            expectation_kwargs = configuration.kwargs
+            expectation_kwargs.update(expectation_kwargs_overrides)
+
+            if meta is None:
+                meta = {}
+
+            meta["profiler_config"] = profiler.to_json_dict()
+
+            configuration = ExpectationConfiguration(
+                expectation_type=expectation_type,
+                kwargs=expectation_kwargs,
+                meta=meta,
+            )
+        else:
+            configuration = ExpectationConfiguration(
+                expectation_type=expectation_type,
+                kwargs=expectation_kwargs,
+                meta=meta,
+            )
+
+        return configuration
+
+    def _build_rule_based_profiler(
+        self,
+        expectation_type: str,
+        expectation_kwargs: dict,
+        success_keys: Tuple[str],
+        profiler_config: RuleBasedProfilerConfig,
+        override_profiler_config: Optional[RuleBasedProfilerConfig] = None,
+    ) -> BaseRuleBasedProfiler:
+        assert (
+            profiler_config.name == expectation_type
+        ), "The name of profiler used to build an ExpectationConfiguration must equal to expectation_type of the expectation being invoked."
+
+        profiler: BaseRuleBasedProfiler = BaseRuleBasedProfiler(
+            profiler_config=profiler_config,
+            data_context=self.data_context,
+        )
+
+        rules: List[Rule] = profiler.rules
+
+        assert (
+            len(rules) == 1
+        ), "A Rule-Based Profiler for an Expectation can have exactly one rule."
+
+        rule: Rule
+
+        rule = rules[0]
+
+        domain_type: MetricDomainTypes
+
+        if override_profiler_config is None:
+            override_profiler_config = {}
+
+        if isinstance(override_profiler_config, RuleBasedProfilerConfig):
+            override_profiler_config = override_profiler_config.to_json_dict()
+
+        override_profiler_config.pop("name", None)
+        override_profiler_config.pop("config_version", None)
+
+        override_variables: Optional[Dict[str, Any]] = override_profiler_config.get(
+            "variables"
+        )
+        if override_variables is None:
+            override_variables = {}
+
+        effective_variables: Optional[
+            ParameterContainer
+        ] = profiler.reconcile_profiler_variables(variables=override_variables)
+        profiler.variables = effective_variables
+
+        override_rules: Optional[
+            Dict[str, Dict[str, Any]]
+        ] = override_profiler_config.get("rules")
+        if override_rules is None:
+            override_rules = {}
+
+        assert (
+            len(override_rules) <= 1
+        ), "An override Rule-Based Profiler for an Expectation can have exactly one rule."
+
+        if override_rules:
+            profiler.rules[0].name = list(override_rules.keys())[0]
+
+            effective_rules: List[Rule] = profiler.reconcile_profiler_rules(
+                rules=override_rules,
+                reconciliation_directives=ReconciliationDirectives(
+                    domain_builder=ReconciliationStrategy.UPDATE,
+                    parameter_builder=ReconciliationStrategy.REPLACE,
+                    expectation_configuration_builder=ReconciliationStrategy.REPLACE,
+                ),
+            )
+            profiler.rules = effective_rules
+
+            rule = profiler.rules[0]
+
+        self._validate_rule_and_update_rule_properties(
+            rule=rule,
+            expectation_type=expectation_type,
+            expectation_kwargs=expectation_kwargs,
+            success_keys=success_keys,
+        )
+
+        return profiler
+
+    def _validate_rule_and_update_rule_properties(
+        self,
+        rule: Rule,
+        expectation_type: str,
+        expectation_kwargs: dict,
+        success_keys: Tuple[str],
+    ) -> None:
+        assert (
+            rule.expectation_configuration_builders[0].expectation_type
+            == expectation_type
+        ), "ExpectationConfigurationBuilder in profiler used to build an ExpectationConfiguration must have the same expectation_type as the expectation being invoked."
+
+        domain_type: MetricDomainTypes = rule.domain_builder.domain_type
+        # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
+        if domain_type == MetricDomainTypes.COLUMN:
+            column_name = expectation_kwargs["column"]
+            rule.domain_builder.column_names = [column_name]
+            if rule.domain_builder.batch_request is None:
+                # A DomainBuilder that emits MetricDomainTypes.COLUMN type Domain object needs exactly 1 Batch of data.
+                rule.domain_builder.batch_list = [self.active_batch]
+        elif domain_type == MetricDomainTypes.TABLE:
+            pass  # No action is needed.
+        else:
+            pass  # No action is needed.
+
+        # TODO: <Alex>Add "metric_domain_kwargs_override" when "Expectation" defines "domain_keys" separately.</Alex>
+        key: str
+        value: Any
+        metric_value_kwargs_override: dict = {
+            key: value
+            for key, value in expectation_kwargs.items()
+            if key in success_keys
+            and key not in BaseRuleBasedProfiler.EXPECTATION_SUCCESS_KEYS
+        }
+        for parameter_builder in rule.parameter_builders:
+            if parameter_builder.batch_request is None:
+                """
+                Despite potentially having access to all loaded Batch objects, in general, a ParameterBuilder should
+                exclude using active Batch (in order to avoid estimation bias).  However, when ParameterBuilder is part
+                of RuleBasedProfiler used to estimate arguments of an Expectation class, all Batch objects must be used.
+                """
+                parameter_builder.batch_list = list(self.batches.values())
+
+            if hasattr(parameter_builder, "metric_name") and hasattr(
+                parameter_builder, "metric_value_kwargs"
+            ):
+                metric_value_kwargs: dict = parameter_builder.metric_value_kwargs or {}
+                metric_value_kwargs.update(metric_value_kwargs_override)
+                parameter_builder.metric_value_kwargs = metric_value_kwargs
+
     @property
     def execution_engine(self) -> ExecutionEngine:
         """Returns the execution engine being used by the validator at the given time"""
@@ -372,13 +623,21 @@ class Validator:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
-    def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
-        """Return a dictionary with the requested metrics"""
+    def compute_metrics(
+        self, metric_configurations: List[MetricConfiguration]
+    ) -> Dict[Tuple[str, str, str], Any]:
+        """
+        metrics: List of desired MetricConfiguration objects to be resolved.
+        Return Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+        """
         graph: ValidationGraph = ValidationGraph()
-        for metric_name, metric_configuration in metrics.items():
+
+        metric_configuration: MetricConfiguration
+        for metric_configuration in metric_configurations:
             provider_cls, _ = get_metric_provider(
                 metric_configuration.metric_name, self.execution_engine
             )
+
             self._get_default_domain_kwargs(
                 metric_provider_cls=provider_cls,
                 metric_configuration=metric_configuration,
@@ -403,14 +662,28 @@ class Validator:
             graph=graph,
             metrics=resolved_metrics,
         )
+
+        return resolved_metrics
+
+    def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
+        """
+        metrics: Dictionary of desired metrics to be resolved, with metric_name as key and MetricConfiguration as value.
+        Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
+        """
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = self.compute_metrics(
+            metric_configurations=list(metrics.values())
+        )
+
+        metric_configuration: MetricConfiguration
         return {
-            metric_name: resolved_metrics[metric_configuration.id]
-            for (metric_name, metric_configuration) in metrics.items()
+            metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
+            for metric_configuration in metrics.values()
         }
 
     @staticmethod
     def _get_default_domain_kwargs(
-        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
+        metric_provider_cls: "MetricProvider",  # noqa: F821
+        metric_configuration: MetricConfiguration,
     ) -> None:
         for key in metric_provider_cls.domain_keys:
             if (
@@ -423,7 +696,8 @@ class Validator:
 
     @staticmethod
     def _get_default_value_kwargs(
-        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
+        metric_provider_cls: "MetricProvider",  # noqa: F821
+        metric_configuration: MetricConfiguration,
     ) -> None:
         for key in metric_provider_cls.value_keys:
             if (
@@ -436,7 +710,9 @@ class Validator:
 
     def get_metric(self, metric: MetricConfiguration) -> Any:
         """return the value of the requested metric."""
-        return self.get_metrics({"_": metric})["_"]
+        return self.get_metrics(metrics={metric.metric_name: metric})[
+            metric.metric_name
+        ]
 
     def graph_validate(
         self,
@@ -949,7 +1225,7 @@ aborting graph resolution.
             ge_cloud_id=ge_cloud_id,
         )
 
-    def load_batch_list(self, batch_list: List[Batch]) -> List[Batch]:
+    def load_batch_list(self, batch_list: List[Batch]) -> None:
         for batch in batch_list:
             try:
                 assert isinstance(
@@ -962,8 +1238,6 @@ aborting graph resolution.
             # We set the active_batch_id in each iteration of the loop to keep in sync with the active_batch_id for the
             # execution_engine. The final active_batch_id will be that of the final batch loaded.
             self.active_batch_id = batch.id
-
-        return batch_list
 
     @property
     def batches(self) -> Dict[str, Batch]:
@@ -1041,7 +1315,7 @@ set as active.
                     expectation_configuration=item.expectation_config,
                     match_type="runtime",
                 )
-            warnings.warn("Removed %s expectations that were 'False'" % len(res))
+            warnings.warn(f"Removed {len(res)} expectations that were 'False'")
 
     def get_default_expectation_arguments(self) -> dict:
         """Fetch default expectation arguments for this data_asset
@@ -1171,9 +1445,7 @@ set as active.
 
             expectations = new_expectations
 
-        message = "\t%d expectation(s) included in expectation_suite." % len(
-            expectations
-        )
+        message = f"\t{len(expectations)} expectation(s) included in expectation_suite."
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (
@@ -1621,6 +1893,10 @@ set as active.
         )
 
     @property
+    def expectation_suite(self) -> ExpectationSuite:
+        return self._expectation_suite
+
+    @property
     def expectation_suite_name(self) -> str:
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
         return self._expectation_suite.expectation_suite_name
@@ -1862,7 +2138,7 @@ class BridgeValidator:
             determined by the type of data within the given batch
         """
         self.batch = batch
-        self.expectation_suite = expectation_suite
+        self._expectation_suite = expectation_suite
 
         if isinstance(expectation_engine, dict):
             expectation_engine = ClassConfig(**expectation_engine)
@@ -1916,7 +2192,7 @@ class BridgeValidator:
 
             return self.expectation_engine(
                 self.batch.data,
-                expectation_suite=self.expectation_suite,
+                expectation_suite=self._expectation_suite,
                 batch_kwargs=self.batch.batch_kwargs,
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,
@@ -1938,7 +2214,7 @@ class BridgeValidator:
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,
                 data_context=self.batch.data_context,
-                expectation_suite=self.expectation_suite,
+                expectation_suite=self._expectation_suite,
                 **init_kwargs,
                 **self.batch.batch_kwargs.get("dataset_options", {}),
             )
@@ -1953,7 +2229,7 @@ class BridgeValidator:
 
             return self.expectation_engine(
                 spark_df=self.batch.data,
-                expectation_suite=self.expectation_suite,
+                expectation_suite=self._expectation_suite,
                 batch_kwargs=self.batch.batch_kwargs,
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,

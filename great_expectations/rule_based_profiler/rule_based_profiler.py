@@ -16,6 +16,11 @@ from great_expectations.core.batch import (
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+    get_profiler_run_usage_statistics,
+    usage_statistics_enabled_method,
+)
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -39,6 +44,9 @@ from great_expectations.rule_based_profiler.domain_builder.domain_builder import
 from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
+from great_expectations.rule_based_profiler.helpers.util import (
+    convert_variables_to_dict,
+)
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
@@ -52,26 +60,6 @@ from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-
-def _validate_builder_override_config(builder_config: dict):
-    """
-    In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
-    candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.
-
-    :param builder_config: candidate builder override configuration
-    :raises: ProfilerConfigurationError
-    """
-    if not all(
-        [
-            isinstance(builder_config, dict),
-            "class_name" in builder_config,
-            "module_name" in builder_config,
-        ]
-    ):
-        raise ge_exceptions.ProfilerConfigurationError(
-            'Both "class_name" and "module_name" must be specified.'
-        )
 
 
 class ReconciliationStrategy(Enum):
@@ -120,6 +108,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
     ):
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
@@ -144,6 +133,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         if variables is None:
             variables = {}
+
+        self._usage_statistics_handler = usage_statistics_handler
 
         # Necessary to annotate ExpectationSuite during `run()`
         self._citation = {
@@ -306,11 +297,16 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
         return expectation_configuration_builder
 
+    @usage_statistics_enabled_method(
+        event_name="profiler.run",
+        args_payload_fn=get_profiler_run_usage_statistics,
+    )
     def run(
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
+        expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
@@ -319,10 +315,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
             :param variables attribute name/value pairs (overrides)
             :param rules name/(configuration-dictionary) (overrides)
             :param reconciliation_directives directives for how each rule component should be overwritten
-            :param expectation_suite_name: A name for returned Expectation suite.
+            :param expectation_suite: An existing ExpectationSuite to update.
+            :param expectation_suite_name: A name for returned ExpectationSuite.
             :param include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
         :return: Set of rule evaluation results in the form of an ExpectationSuite
         """
+        assert not (
+            expectation_suite and expectation_suite_name
+        ), "Ambiguous arguments provided; you may pass in an ExpectationSuite or provide a name to instantiate a new one (but you may not do both)."
+
         effective_variables: Optional[
             ParameterContainer
         ] = self.reconcile_profiler_variables(
@@ -334,15 +335,14 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules, reconciliation_directives=reconciliation_directives
         )
 
-        if expectation_suite_name is None:
-            expectation_suite_name = (
-                f"tmp.profiler_{self.__class__.__name__}_suite_{str(uuid.uuid4())[:8]}"
-            )
+        if expectation_suite is None:
+            if expectation_suite_name is None:
+                expectation_suite_name = f"tmp.profiler_{self.__class__.__name__}_suite_{str(uuid.uuid4())[:8]}"
 
-        expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name,
-            data_context=self._data_context,
-        )
+            expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name,
+                data_context=self._data_context,
+            )
 
         if include_citation:
             expectation_suite.add_citation(
@@ -364,6 +364,27 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return expectation_suite
 
+    def add_rule(self, rule: Rule) -> None:
+        """
+        Add Rule object to existing profiler object by reconciling profiler rules and updating _profiler_config.
+        """
+        rules_dict: Dict[str, Dict[str, Any]] = {
+            rule.name: rule.to_json_dict(),
+        }
+        effective_rules: List[Rule] = self.reconcile_profiler_rules(
+            rules=rules_dict,
+            reconciliation_directives=ReconciliationDirectives(
+                domain_builder=ReconciliationStrategy.UPDATE,
+                parameter_builder=ReconciliationStrategy.UPDATE,
+                expectation_configuration_builder=ReconciliationStrategy.UPDATE,
+            ),
+        )
+        updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
+            rule.name: rule.to_json_dict() for rule in effective_rules
+        }
+        self.rules: List[Rule] = effective_rules
+        self._profiler_config.rules = updated_rules
+
     def reconcile_profiler_variables(
         self,
         variables: Optional[Dict[str, Any]] = None,
@@ -382,20 +403,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         effective_variables: ParameterContainer
         if variables and isinstance(variables, dict):
-            variables_configs: dict = self.variables.to_dict()["parameter_nodes"][
-                "variables"
-            ]["variables"]
-
-            if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
-                variables_configs = nested_update(
-                    variables_configs,
-                    variables,
-                )
-            elif reconciliation_strategy == ReconciliationStrategy.REPLACE:
-                variables_configs = variables
-            elif reconciliation_strategy == ReconciliationStrategy.UPDATE:
-                variables_configs.update(variables)
-
+            variables_configs: dict = self._reconcile_profiler_variables_as_dict(
+                variables=variables, reconciliation_strategy=reconciliation_strategy
+            )
             effective_variables = build_parameter_container_for_variables(
                 variables_configs=variables_configs
             )
@@ -403,6 +413,30 @@ class BaseRuleBasedProfiler(ConfigPeer):
             effective_variables = self.variables
 
         return effective_variables
+
+    def _reconcile_profiler_variables_as_dict(
+        self,
+        variables: Optional[Dict[str, Any]],
+        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.variables,
+    ) -> dict:
+        if variables is None:
+            variables = {}
+
+        variables_configs: Optional[Dict[str, Any]] = convert_variables_to_dict(
+            variables=self.variables
+        )
+
+        if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
+            variables_configs = nested_update(
+                variables_configs,
+                variables,
+            )
+        elif reconciliation_strategy == ReconciliationStrategy.REPLACE:
+            variables_configs = variables
+        elif reconciliation_strategy == ReconciliationStrategy.UPDATE:
+            variables_configs.update(variables)
+
+        return variables_configs
 
     def reconcile_profiler_rules(
         self,
@@ -421,6 +455,16 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param reconciliation_directives directives for how each rule component should be overwritten
         :return: reconciled rules in their canonical List[Rule] object form
         """
+        effective_rules: Dict[str, Rule] = self._reconcile_profiler_rules_as_dict(
+            rules, reconciliation_directives
+        )
+        return list(effective_rules.values())
+
+    def _reconcile_profiler_rules_as_dict(
+        self,
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
+    ) -> Dict[str, Rule]:
         if rules is None:
             rules = {}
 
@@ -443,8 +487,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             for rule_name, rule_config in override_rule_configs.items()
         }
         effective_rules.update(override_rules)
-
-        return list(effective_rules.values())
+        return effective_rules
 
     @staticmethod
     def _reconcile_rule_config(
@@ -790,17 +833,21 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def to_json_dict(self) -> dict:
         rule: Rule
+        variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
+            self.variables
+        )
+
         serializeable_dict: dict = {
+            "class_name": self.__class__.__name__,
+            "module_name": self.__class__.__module__,
             "name": self.name,
-            "variables": self.variables.to_dict()["parameter_nodes"]["variables"][
-                "variables"
-            ],
+            "variables": variables_dict,
             "rules": [rule.to_json_dict() for rule in self.rules],
         }
         return serializeable_dict
 
     def __repr__(self) -> str:
-        json_dict: dict = self.to_json_dict()
+        json_dict: dict = self.config.to_json_dict()
         return json.dumps(json_dict, indent=2)
 
     def __str__(self) -> str:
@@ -910,9 +957,14 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             rules=rules,
         )
 
+        usage_statistics_handler: Optional[UsageStatisticsHandler] = None
+        if data_context:
+            usage_statistics_handler = data_context.usage_statistics_handler
+
         super().__init__(
             profiler_config=profiler_config,
             data_context=data_context,
+            usage_statistics_handler=usage_statistics_handler,
         )
 
     @staticmethod
@@ -923,6 +975,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
@@ -937,6 +990,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         result: ExpectationSuite = profiler.run(
             variables=variables,
             rules=rules,
+            expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
         )
@@ -950,6 +1004,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         batch_request: Union[BatchRequest, RuntimeBatchRequest, dict],
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
@@ -962,17 +1017,21 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
 
         rules: Dict[
             str, Dict[str, Any]
-        ] = profiler._generate_rule_overrides_from_batch_request(batch_request)
+        ] = profiler._generate_rule_overrides_from_batch_request(
+            batch_request=batch_request
+        )
 
         result: ExpectationSuite = profiler.run(
             rules=rules,
+            expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
         )
         return result
 
     def _generate_rule_overrides_from_batch_request(
-        self, batch_request: Union[BatchRequest, RuntimeBatchRequest, dict]
+        self,
+        batch_request: Union[BatchRequest, RuntimeBatchRequest, dict],
     ) -> Dict[str, Dict[str, Any]]:
         """Iterates through the profiler's builder attributes and generates a set of
         Rules that contain overrides from the input batch request. This only applies to
@@ -1120,6 +1179,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         config: dict = profiler_config.to_json_dict()
         if name:
             config.update({"name": name})
+
         config = filter_properties_dict(properties=config, clean_falsy=True)
 
         profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
@@ -1171,3 +1231,23 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         if ge_cloud_mode:
             return profiler_store.list_keys()
         return [x.configuration_key for x in profiler_store.list_keys()]
+
+
+def _validate_builder_override_config(builder_config: dict):
+    """
+    In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
+    candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.
+
+    :param builder_config: candidate builder override configuration
+    :raises: ProfilerConfigurationError
+    """
+    if not all(
+        (
+            isinstance(builder_config, dict),
+            "class_name" in builder_config,
+            "module_name" in builder_config,
+        )
+    ):
+        raise ge_exceptions.ProfilerConfigurationError(
+            'Both "class_name" and "module_name" must be specified.'
+        )

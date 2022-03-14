@@ -34,7 +34,7 @@ You can find the template file for a custom [ColumnExpectation here](https://git
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash 
-mv column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to_be_between_custom.py
+cp column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to_be_between_custom.py
 ```
 
 <details>
@@ -48,7 +48,7 @@ mv column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to
     </p>
     <p>
         <ul>
-            <li>If you're building a Custom Expectation for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all plugins in the directory available for use.</li>
+            <li>If you're building a Custom Expectation for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all plugins in the directory available for use.</li>
             <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
         </ul>
     </p>
@@ -72,22 +72,19 @@ Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
-    Has basic input validation and type checking
-    Has both Statement Renderers: prescriptive and diagnostic
-    Has core logic that passes tests for all applicable Execution Engines
-    Passes all linting checks
-    Has a robust suite of tests, as determined by a code owner
-    Has passed a manual review by a code owner for code standards and style guides
+...
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first four steps on the checklist.
 
 ### 4. Change the Expectation class name and add a docstring
 
+By convention, your [**Metric**](../../../reference/metrics.md) class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
+
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L47-L49
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L49
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -95,7 +92,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L49
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L50
 ```
 
 with something like:
@@ -103,7 +100,7 @@ with something like:
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L84
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L114
 ```
 
 with this one:
@@ -153,7 +150,8 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 <code>test_backends</code> is an optional key you can pass to offer more granular control over which backends and SQL dialects your tests are run against.
 </details>
 
-Run your Expectation file again. The newly added examples won't pass as tests yet, because the Expectation itself hasn't been implemented yet, but they'll check the box for example cases.
+If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet. 
+However, you should see that the tests you've written are now being caught and reported in your checklist:
 
 ```
 $ python expect_column_column_max_to_be_between_custom.py
@@ -161,8 +159,11 @@ $ python expect_column_column_max_to_be_between_custom.py
 Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
-  ✔ Has at least one positive and negative example case, and all test cases pass
-    Has core logic and passes tests on at least one Execution Engine
+...
+	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
+		  Only 0 / 2 tests for pandas are passing
+		  Failing: basic_positive_test, basic_positive_test
+...
 ```
 
 :::note
@@ -196,7 +197,6 @@ The `ColumnAggregateMetricProvider` and `ColumnExpectation` classes have built-i
     </p>
     <p>
         <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
-An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class):
     </p>
     <p>
         <b>Metric Condition Value Keys</b> (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
@@ -209,7 +209,7 @@ The remainder of the Metric Identifier simply describes what the Metric computes
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L29
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L30
 ```
 
 with
@@ -219,7 +219,7 @@ with
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L56
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L57
 ```
 
 with
@@ -233,7 +233,7 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L26
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L27
 ```
 
 with 
@@ -247,7 +247,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L65-L71
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L95-L101
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -283,7 +283,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L75-L80
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L105-L110
 ```
 
 would become
