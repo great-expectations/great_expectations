@@ -338,6 +338,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if expectation_suite is None:
             if expectation_suite_name is None:
                 expectation_suite_name = f"tmp.profiler_{self.__class__.__name__}_suite_{str(uuid.uuid4())[:8]}"
+
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
                 data_context=self._data_context,

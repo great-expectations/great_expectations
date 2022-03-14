@@ -1,29 +1,9 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.data_context.store import (
-    DatabaseStoreBackend,
-    InMemoryStoreBackend,
-    StoreBackend,
-    TupleFilesystemStoreBackend,
-    TupleGCSStoreBackend,
-    TupleS3StoreBackend,
-    TupleStoreBackend,
-)
 
 
 class StoreBackendAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
-
-        # ordered bottom up in terms of inheritance order
-        self._ge_classes = [
-            TupleFilesystemStoreBackend,
-            TupleS3StoreBackend,
-            TupleGCSStoreBackend,
-            InMemoryStoreBackend,
-            DatabaseStoreBackend,
-            TupleStoreBackend,
-            StoreBackend,
-        ]
 
     def anonymize_store_backend_info(
         self, store_backend_obj=None, store_backend_object_config=None
