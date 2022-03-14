@@ -386,3 +386,13 @@ class Anonymizer:
         ] = self.anonymize_store_backend_info(store_backend_obj=store_backend_obj)
 
         return anonymized_info_dict
+
+    def anonymize_profiler_info(self, name: str, config: dict) -> dict:
+        anonymized_info_dict: dict = {
+            "anonymized_name": self.anonymize(name),
+        }
+        self.anonymize_object_info(
+            anonymized_info_dict=anonymized_info_dict,
+            object_config=config,
+        )
+        return anonymized_info_dict
