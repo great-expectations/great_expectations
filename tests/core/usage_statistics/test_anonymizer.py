@@ -82,30 +82,30 @@ def test_anonymizer_consistent_salt():
     assert len(anon_name_2) == 32
 
 
-def test_anonymizer__get_parent_class():
+def test_anonymizer_get_parent_class():
     """
     What does this test and why?
-    The method Anonymizer._get_parent_class() should return the name of the parent class if it is or is a subclass of one of the classes_to_check. If not, it should return None. It should do so regardless of the parameter used to pass in the object definition (object_, object_class, object_config). It should also return the first matching class in classes_to_check, even if a later class also matches.
+    The method Anonymizer.get_parent_class() should return the name of the parent class if it is or is a subclass of one of the classes_to_check. If not, it should return None. It should do so regardless of the parameter used to pass in the object definition (object_, object_class, object_config). It should also return the first matching class in classes_to_check, even if a later class also matches.
     """
     anonymizer = Anonymizer()
 
     # classes_to_check in order of inheritance hierarchy
     classes_to_check = [TestClass, BaseTestClass]
     assert (
-        anonymizer._get_parent_class(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_class=MyCustomTestClass
         )
         == "TestClass"
     )
     assert (
-        anonymizer._get_parent_class(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_class=SomeOtherClass
         )
         is None
     )
     classes_to_check = [BaseTestClass]
     assert (
-        anonymizer._get_parent_class(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_class=TestClass
         )
         == "BaseTestClass"
@@ -117,20 +117,20 @@ def test_anonymizer__get_parent_class():
     some_other_class = SomeOtherClass()
     classes_to_check = [TestClass, BaseTestClass]
     assert (
-        anonymizer._get_parent_class(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_=my_custom_test_class
         )
         == "TestClass"
     )
     assert (
-        anonymizer._get_parent_class(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_=some_other_class
         )
         is None
     )
     classes_to_check = [BaseTestClass]
     assert (
-        anonymizer._get_parent_class(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_=test_class
         )
         == "BaseTestClass"
@@ -151,20 +151,20 @@ def test_anonymizer__get_parent_class():
     }
     classes_to_check = [TestClass, BaseTestClass]
     assert (
-        anonymizer._get_parent_class(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_config=my_custom_test_class_config
         )
         == "TestClass"
     )
     assert (
-        anonymizer._get_parent_class(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_config=some_other_class_config
         )
         is None
     )
     classes_to_check = [BaseTestClass]
     assert (
-        anonymizer._get_parent_class(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_config=test_class_config
         )
         == "BaseTestClass"

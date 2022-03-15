@@ -2,12 +2,6 @@ import logging
 from typing import Dict, List, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
-    BatchRequestAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
-    ExpectationSuiteAnonymizer,
-)
 from great_expectations.core.usage_statistics.util import (
     aggregate_all_core_expectation_types,
 )
@@ -24,8 +18,6 @@ class ProfilerRunAnonymizer(Anonymizer):
         self._ge_expectation_types = aggregate_all_core_expectation_types()
 
         self._salt = salt
-        self._batch_request_anonymizer = BatchRequestAnonymizer(self._salt)
-        self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(self._salt)
 
     def anonymize_profiler_run(self, profiler_config: RuleBasedProfilerConfig) -> dict:
         """
@@ -107,9 +99,9 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         batch_request: Optional[dict] = domain_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[
-                dict
-            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
+            anonymized_batch_request: Optional[dict] = self.anonymize_batch_request(
+                **batch_request
+            )
             anonymized_domain_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
@@ -145,9 +137,9 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         batch_request: Optional[dict] = parameter_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[
-                dict
-            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
+            anonymized_batch_request: Optional[dict] = self.anonymize_batch_request(
+                **batch_request
+            )
             anonymized_parameter_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
@@ -186,7 +178,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         expectation_type: Optional[str] = expectation_configuration_builder.get(
             "expectation_type"
         )
-        self._expectation_suite_anonymizer.anonymize_expectation(
+        self.anonymize_expectation(
             expectation_type, anonymized_expectation_configuration_builder
         )
 
