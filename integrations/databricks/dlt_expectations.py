@@ -84,6 +84,7 @@ def expect(
     dlt_library=dlt_mock_library,
     dlt_table_before_exec=False,
     dlt_table_after_exec=False,
+    dlt_decorator_table_name="clickstream_prepared_for_ge",
 ):
     """
     Run a single expectation on a Delta Live Table
@@ -170,7 +171,7 @@ def expect(
                 # TODO: Testing accessing data from within decorator
                 @dlt.table(comment="table from inside decorator before exec")
                 def table_inside_decorator():
-                    df = dlt.read("clickstream_prepared_for_ge").limit(15)
+                    df = dlt.read(dlt_decorator_table_name).limit(15)
                     print(
                         "size, shape (rows, cols) in table_inside_decorator before exec",
                         (df.count(), len(df.columns)),
@@ -183,7 +184,7 @@ def expect(
                 # TODO: Testing accessing data from within decorator
                 @dlt.table(comment="table from inside decorator after exec")
                 def table_inside_decorator():
-                    df = dlt.read("clickstream_prepared_for_ge").limit(16)
+                    df = dlt.read(dlt_decorator_table_name).limit(16)
                     print(
                         "size, shape (rows, cols) in table_inside_decorator after exec",
                         (df.count(), len(df.columns)),
