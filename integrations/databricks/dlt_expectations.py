@@ -52,13 +52,13 @@ def _get_dlt_library(dlt_library: Optional[ModuleType] = None) -> ModuleType:
     try:
         import dlt
 
-        print(
-            "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-        )
-        print("dir(dlt)", dir(dlt))
-        print(
-            "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-        )
+        # print(
+        #     "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+        # )
+        # print("dir(dlt)", dir(dlt))
+        # print(
+        #     "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+        # )
     except NameError:
         dlt = dlt_library
 
@@ -89,18 +89,18 @@ def expect(
     Run a single expectation on a Delta Live Table
     Please provide either a dlt_expectation_condition OR a ge_expectation_configuration, not both.
     """
-    currently_executing_function = get_currently_executing_function()
-    print(
-        "get_currently_executing_function() in dlt_expectations.expect",
-        currently_executing_function,
-    )
-    currently_executing_function_call_arguments = (
-        get_currently_executing_function_call_arguments()
-    )
-    print(
-        "get_currently_executing_function_call_arguments() in dlt_expectations.expect",
-        currently_executing_function_call_arguments,
-    )
+    # currently_executing_function = get_currently_executing_function()
+    # print(
+    #     "get_currently_executing_function() in dlt_expectations.expect",
+    #     currently_executing_function,
+    # )
+    # currently_executing_function_call_arguments = (
+    #     get_currently_executing_function_call_arguments()
+    # )
+    # print(
+    #     "get_currently_executing_function_call_arguments() in dlt_expectations.expect",
+    #     currently_executing_function_call_arguments,
+    # )
 
     def decorator_expect(func):
         @functools.wraps(func)
