@@ -11,7 +11,6 @@ from great_expectations._version import get_versions  # isort:skip
 __version__ = get_versions()["version"]  # isort:skip
 del get_versions  # isort:skip
 
-
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
@@ -66,7 +65,6 @@ except ImportError:
     TextClause = None
     quoted_name = None
     OperationalError = None
-
 
 try:
     import psycopg2
@@ -203,7 +201,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_data_dict: Optional[dict] = None,
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
-        **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
+        **kwargs,
+        # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
     ):
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
@@ -1076,12 +1075,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 if self.engine.dialect.name.lower() == "bigquery":
                     return (
                         sa.select("*")
-                            .select_from(
-                            sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                        .select_from(
+                            sa.table(
+                                table_name, schema=batch_spec.get("schema_name", None)
+                            )
                         )
-                            .where(split_clause)
-                            .order_by(sa.func.rand())
-                            .limit(sample_size)
+                        .where(split_clause)
+                        .order_by(sa.func.rand())
+                        .limit(sample_size)
                     )
                 return (
                     sa.select("*")
