@@ -66,9 +66,6 @@ class UsageStatisticsHandler:
         from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
             Anonymizer,
         )
-        from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
-            BatchRequestAnonymizer,
-        )
         from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
             CheckpointRunAnonymizer,
         )
@@ -81,7 +78,6 @@ class UsageStatisticsHandler:
 
         self._anonymizer = Anonymizer(data_context_id)
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
-        self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
         self._profiler_run_anonymizer = ProfilerRunAnonymizer(data_context_id)
 
@@ -497,10 +493,10 @@ def get_batch_list_usage_statistics(
     if data_context._usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            batch_request_anonymizer: "BatchRequestAnonymizer" = (  # noqa: F821
-                data_context._usage_statistics_handler._batch_request_anonymizer
+            anonymizer: Anonymizer = (  # noqa: F821
+                data_context._usage_statistics_handler._anonymizer
             )
-            payload = batch_request_anonymizer.anonymize_batch_request(*args, **kwargs)
+            payload = anonymizer.anonymize_batch_request(*args, **kwargs)
         except Exception as e:
             logger.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"

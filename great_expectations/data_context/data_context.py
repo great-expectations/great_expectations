@@ -49,9 +49,6 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import (
-    CheckpointAnonymizer,
-)
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
 )
@@ -3755,11 +3752,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
-        checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-            self.data_context_id
-        )
+        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+        usage_stats_event_payload = anonymizer.anonymize_checkpoint_info(
             name=checkpoint_name, config=checkpoint_config
         )
 
@@ -3863,9 +3858,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
             self.data_context_id
         )
-        checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-            self.data_context_id
-        )
 
         parent_class_from_object = anonymizer.get_parent_class(
             object_=instantiated_class
@@ -3918,7 +3910,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             checkpoint_config = checkpoint_config.to_json_dict()
             checkpoint_config.update({"name": checkpoint_name})
-            usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+            usage_stats_event_payload = anonymizer.anonymize_checkpoint_info(
                 name=checkpoint_name, config=checkpoint_config
             )
 
