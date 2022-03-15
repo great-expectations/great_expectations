@@ -4975,7 +4975,7 @@ def data_context_with_query_store(
     store_config = yaml.load(
         f"""
     class_name: SqlAlchemyQueryStore
-    credentials: 
+    credentials:
         connection_string: {titanic_sqlite_db_connection_string}
     queries:
         col_count:
@@ -6983,4 +6983,29 @@ data_connectors:
             "name": "generic_csv_generator",
         }
     ]
+    return context
+
+
+@pytest.fixture
+def sqlalchemy_missing_data_asset_data_context(empty_data_context, db_file):
+
+    context: DataContext = empty_data_context
+
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        connection_string: sqlite:///{db_file}
+        class_name: SqlAlchemyExecutionEngine
+        module_name: great_expectations.execution_engine
+    data_connectors:
+        default_configured_data_connector_name:
+            class_name: ConfiguredAssetSqlDataConnector
+            module_name: great_expectations.datasource.data_connector
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
     return context

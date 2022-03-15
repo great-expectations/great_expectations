@@ -6,6 +6,7 @@ from unittest import mock
 import pytest
 from _pytest.capture import CaptureResult
 from click.testing import CliRunner, Result
+from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -30,6 +31,8 @@ from tests.render.test_util import (
     load_notebook_from_path,
     run_notebook,
 )
+
+yaml = YAML()
 
 
 def test_suite_help_output(caplog):
@@ -4479,22 +4482,28 @@ def test__process_suite_edit_flags_and_prompt(
         ]
 
 
-interactive_mode, profile = _process_suite_new_flags_and_prompt(
-    context=context,
-    usage_event_end=None,
-    interactive_flag=True,
-    manual_flag=False,
-    profile=False,
-    batch_request=None,
-)
+def test_suite_new_configured_asset_sql_data_connector_missing_data_asset(
+    sqlalchemy_missing_data_asset_data_context,
+):
 
-_suite_new_workflow(
-    context=context,
-    expectation_suite_name="test",
-    interactive_mode=interactive_mode,
-    profile=profile,
-    profiler_name=None,
-    no_jupyter=False,
-    usage_event=None,
-    batch_request=None,
-)
+    context: DataContext = sqlalchemy_missing_data_asset_data_context
+
+    interactive_mode, profile = _process_suite_new_flags_and_prompt(
+        context=context,
+        usage_event_end=None,
+        interactive_flag=True,
+        manual_flag=False,
+        profile=False,
+        batch_request=None,
+    )
+
+    _suite_new_workflow(
+        context=context,
+        expectation_suite_name="test",
+        interactive_mode=interactive_mode,
+        profile=profile,
+        profiler_name=None,
+        no_jupyter=False,
+        usage_event=None,
+        batch_request=None,
+    )
