@@ -594,7 +594,7 @@ class Validator:
         # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
         if domain_type == MetricDomainTypes.COLUMN:
             column_name = expectation_kwargs["column"]
-            rule.domain_builder.column_names = [column_name]
+            rule.domain_builder.include_column_names = [column_name]
 
         for parameter_builder in rule.parameter_builders:
             if hasattr(parameter_builder, "metric_name") and hasattr(
@@ -1703,9 +1703,7 @@ set as active.
                     # noinspection PyProtectedMember
                     handler.send_usage_message(
                         event="data_asset.validate",
-                        event_payload=handler._batch_anonymizer.anonymize_batch_info(
-                            self
-                        ),
+                        event_payload=handler.anonymizer.anonymize_batch_info(self),
                         success=False,
                     )
                 return ExpectationValidationResult(success=False)
@@ -1815,7 +1813,7 @@ set as active.
                 # noinspection PyProtectedMember
                 handler.send_usage_message(
                     event="data_asset.validate",
-                    event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
+                    event_payload=handler.anonymizer.anonymize_batch_info(self),
                     success=False,
                 )
             raise
@@ -1828,7 +1826,7 @@ set as active.
             # noinspection PyProtectedMember
             handler.send_usage_message(
                 event="data_asset.validate",
-                event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
+                event_payload=handler.anonymizer.anonymize_batch_info(self),
                 success=True,
             )
         return result

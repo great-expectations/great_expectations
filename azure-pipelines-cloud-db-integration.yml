@@ -39,7 +39,7 @@ stages:
               retryCount: '2'
 
           - script: |
-              pip install pytest-azurepipelines
+              pip install pytest-azurepipelines==1.0.1
               pip freeze > pip-freeze.txt
               mkdir -p junit
               pytest -v $(test_script) \
@@ -103,7 +103,7 @@ stages:
               retryCount: '2'
 
           - script: |
-              pip install pytest-azurepipelines
+              pip install pytest-azurepipelines==1.0.1
               pip freeze > pip-freeze.txt
               mkdir -p junit
               pytest -v $(test_script) \

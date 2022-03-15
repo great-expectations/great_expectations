@@ -4975,7 +4975,7 @@ def data_context_with_query_store(
     store_config = yaml.load(
         f"""
     class_name: SqlAlchemyQueryStore
-    credentials: 
+    credentials:
         connection_string: {titanic_sqlite_db_connection_string}
     queries:
         col_count:
@@ -5618,7 +5618,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    my_row_count_range_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_row_count_range_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -5638,7 +5638,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_ranges_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_column_ranges_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -6243,7 +6243,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_column_timestamps_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -6299,7 +6299,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ),
     ]
-    my_column_regex_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_column_regex_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -6426,35 +6426,33 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
-        my_row_count_range_rule_expectation_configurations_oneshot_sampling_method
+        my_row_count_range_rule_expectation_configurations_oneshot_estimator
     )
     expectation_configurations.extend(
-        my_column_ranges_rule_expectation_configurations_oneshot_sampling_method
+        my_column_ranges_rule_expectation_configurations_oneshot_estimator
     )
     expectation_configurations.extend(
-        my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method
+        my_column_timestamps_rule_expectation_configurations_oneshot_estimator
     )
 
     expectation_configurations.extend(
-        my_column_regex_rule_expectation_configurations_oneshot_sampling_method
+        my_column_regex_rule_expectation_configurations_oneshot_estimator
     )
     expectation_configurations.extend(
         my_rule_for_very_few_cardinality_expectation_configurations
     )
-    expectation_suite_name_oneshot_sampling_method: str = (
-        "bobby_columnar_table_multi_batch_oneshot_sampling_method"
+    expectation_suite_name_oneshot_estimator: str = (
+        "bobby_columnar_table_multi_batch_oneshot_estimator"
     )
-    expected_expectation_suite_oneshot_sampling_method: ExpectationSuite = (
-        ExpectationSuite(
-            expectation_suite_name=expectation_suite_name_oneshot_sampling_method,
-            data_context=empty_data_context,
-        )
+    expected_expectation_suite_oneshot_estimator: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name_oneshot_estimator,
+        data_context=empty_data_context,
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
-        expected_expectation_suite_oneshot_sampling_method._add_expectation(
+        expected_expectation_suite_oneshot_estimator._add_expectation(
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
@@ -6469,16 +6467,16 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
-    expected_expectation_suite_oneshot_sampling_method.add_citation(
+    expected_expectation_suite_oneshot_estimator.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
         profiler_config=serialized_config,
     )
 
     return {
         "profiler_config": verbose_profiler_config,
-        "test_configuration_oneshot_sampling_method": {
-            "expectation_suite_name": expectation_suite_name_oneshot_sampling_method,
-            "expected_expectation_suite": expected_expectation_suite_oneshot_sampling_method,
+        "test_configuration_oneshot_estimator": {
+            "expectation_suite_name": expectation_suite_name_oneshot_estimator,
+            "expected_expectation_suite": expected_expectation_suite_oneshot_estimator,
         },
     }
 
@@ -6605,8 +6603,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    expectation_suite_name_bootstrap_sampling_method: str = (
-        "bobby_columnar_table_multi_batch_bootstrap_sampling_method"
+    expectation_suite_name_bootstrap_estimator: str = (
+        "bobby_columnar_table_multi_batch_bootstrap_estimator"
     )
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
@@ -6641,8 +6639,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
 
     return {
         "profiler_config": verbose_profiler_config,
-        "test_configuration_bootstrap_sampling_method": {
-            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
+        "test_configuration_bootstrap_estimator": {
+            "expectation_suite_name": expectation_suite_name_bootstrap_estimator,
             "expect_table_row_count_to_be_between_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value,
             "expect_table_row_count_to_be_between_min_value_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value,
             "expect_table_row_count_to_be_between_max_value_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value,
@@ -6759,14 +6757,14 @@ def quentin_columnar_table_multi_batch():
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    expectation_suite_name_bootstrap_sampling_method: str = (
+    expectation_suite_name_bootstrap_estimator: str = (
         "quentin_columnar_table_multi_batch"
     )
 
     return {
         "profiler_config": verbose_profiler_config,
         "test_configuration": {
-            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
+            "expectation_suite_name": expectation_suite_name_bootstrap_estimator,
             "expect_column_quantile_values_to_be_between_quantile_ranges_by_column": {
                 "tolls_amount": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
                 "fare_amount": [

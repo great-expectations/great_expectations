@@ -62,7 +62,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         replace_nan_with_zero: Union[str, bool] = True,
         reduce_scalar_metric: Union[str, bool] = True,
         false_positive_rate: Union[str, float] = 5.0e-2,
-        sampling_method: str = "bootstrap",
+        estimator: str = "bootstrap",
         num_bootstrap_samples: Optional[Union[str, int]] = None,
         bootstrap_random_seed: Optional[int] = None,
         round_decimals: Optional[Union[str, int]] = None,
@@ -88,7 +88,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
             identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
-            sampling_method: choice of the sampling algorithm: "oneshot" (one observation) or "bootstrap" (default)
+            estimator: choice of the estimation algorithm: "oneshot" (one observation) or "bootstrap" (default)
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
             9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
@@ -117,7 +117,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
 
         self._false_positive_rate = false_positive_rate
 
-        self._sampling_method = sampling_method
+        self._estimator = estimator
 
         self._num_bootstrap_samples = num_bootstrap_samples
 
@@ -155,8 +155,8 @@ detected.
         return self._false_positive_rate
 
     @property
-    def sampling_method(self) -> str:
-        return self._sampling_method
+    def estimator(self) -> str:
+        return self._estimator
 
     @property
     def num_bootstrap_samples(self) -> Optional[Union[str, int]]:
@@ -222,27 +222,27 @@ detected.
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
 
-        # Obtain sampling_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        sampling_method: str = get_parameter_value_and_validate_return_type(
+        # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        estimator: str = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self.sampling_method,
+            parameter_reference=self.estimator,
             expected_return_type=str,
             variables=variables,
             parameters=parameters,
         )
         if (
-            sampling_method
+            estimator
             not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
         ):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "sampling_method" for {self.__class__.__name__} can be only one of
-{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{sampling_method}" was detected).
+                message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
+{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
 """
             )
 
         estimator: Callable
         etimator_kwargs: dict
-        if sampling_method == "bootstrap":
+        if estimator == "bootstrap":
             estimator = self._get_bootstrap_estimate
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
