@@ -18,14 +18,16 @@ class ColumnDomainBuilder(DomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-        column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
     ):
         """
         Args:
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
             data_context: DataContext
-            column_names: Explicitly specified column_names list desired (if None, it is computed based on active Batch)
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
         """
         super().__init__(
             batch_list=batch_list,
@@ -33,7 +35,8 @@ class ColumnDomainBuilder(DomainBuilder):
             data_context=data_context,
         )
 
-        self._column_names = column_names
+        self._include_column_names = include_column_names
+        self._exclude_column_names = exclude_column_names
 
     @property
     def domain_type(self) -> Union[str, MetricDomainTypes]:
@@ -41,36 +44,44 @@ class ColumnDomainBuilder(DomainBuilder):
 
     """
     All DomainBuilder classes, whose "domain_type" property equals "MetricDomainTypes.COLUMN", must extend present class
-    (ColumnDomainBuilder) in order to provide full getter/setter accessor for "column_names" property (as override).
+    (ColumnDomainBuilder) in order to provide full getter/setter accessor for "include_column_names" property (as override).
     """
 
     @property
-    def column_names(self) -> Optional[Union[str, Optional[List[str]]]]:
-        return self._column_names
+    def include_column_names(self) -> Optional[Union[str, Optional[List[str]]]]:
+        return self._include_column_names
 
-    @column_names.setter
-    def column_names(self, value: Optional[Union[str, Optional[List[str]]]]) -> None:
-        self._column_names = value
+    @property
+    def exclude_column_names(self) -> Optional[Union[str, Optional[List[str]]]]:
+        return self._exclude_column_names
+
+    @include_column_names.setter
+    def include_column_names(
+        self, value: Optional[Union[str, Optional[List[str]]]]
+    ) -> None:
+        self._include_column_names = value
 
     def get_effective_column_names(
         self,
-        include_columns: Optional[Union[str, Optional[List[str]]]] = None,
-        exclude_columns: Optional[Union[str, Optional[List[str]]]] = None,
         variables: Optional[ParameterContainer] = None,
     ) -> List[str]:
-        # Obtain include_columns from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        include_columns = get_parameter_value_and_validate_return_type(
+        # Obtain include_column_names from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        include_column_names: Optional[
+            List[str]
+        ] = get_parameter_value_and_validate_return_type(
             domain=None,
-            parameter_reference=include_columns,
+            parameter_reference=self.include_column_names,
             expected_return_type=None,
             variables=variables,
             parameters=None,
         )
 
-        # Obtain exclude_columns from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        exclude_columns = get_parameter_value_and_validate_return_type(
+        # Obtain exclude_column_names from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        exclude_column_names: Optional[
+            List[str]
+        ] = get_parameter_value_and_validate_return_type(
             domain=None,
-            parameter_reference=exclude_columns,
+            parameter_reference=self.exclude_column_names,
             expected_return_type=None,
             variables=variables,
             parameters=None,
@@ -89,16 +100,16 @@ class ColumnDomainBuilder(DomainBuilder):
             )
         )
 
-        effective_column_names: List[str] = include_columns or table_columns
+        effective_column_names: List[str] = include_column_names or table_columns
 
-        if exclude_columns is None:
-            exclude_columns = []
+        if exclude_column_names is None:
+            exclude_column_names = []
 
         column_name: str
         effective_column_names = [
             column_name
             for column_name in effective_column_names
-            if column_name not in exclude_columns
+            if column_name not in exclude_column_names
         ]
 
         if set(effective_column_names) == set(table_columns):
@@ -122,8 +133,6 @@ class ColumnDomainBuilder(DomainBuilder):
         """
         return build_simple_domains_from_column_names(
             column_names=self.get_effective_column_names(
-                include_columns=self.column_names,
-                exclude_columns=None,
                 variables=variables,
             ),
             domain_type=self.domain_type,
