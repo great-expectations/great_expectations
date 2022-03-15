@@ -21,6 +21,7 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
+    is_fully_qualified_parameter_name_literal_string_format,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -224,7 +225,11 @@ def get_parameter_value(
                 variables=variables,
                 parameters=parameters,
             )
-    elif isinstance(parameter_reference, str) and parameter_reference.startswith("$"):
+    elif isinstance(
+        parameter_reference, str
+    ) and is_fully_qualified_parameter_name_literal_string_format(
+        fully_qualified_parameter_name=parameter_reference
+    ):
         parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=parameter_reference,
             domain=domain,
@@ -239,6 +244,17 @@ def get_parameter_value(
                     variables=variables,
                     parameters=parameters,
                 )
+        elif isinstance(
+            parameter_reference, str
+        ) and is_fully_qualified_parameter_name_literal_string_format(
+            fully_qualified_parameter_name=parameter_reference
+        ):
+            parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
+                fully_qualified_parameter_name=parameter_reference,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
 
     return parameter_reference
 
