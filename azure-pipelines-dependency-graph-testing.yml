@@ -164,7 +164,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               git clone https://github.com/superconductive/dgtest.git
               pip install -e dgtest
 
@@ -214,7 +214,7 @@ stages:
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              pip install pytest pytest-azurepipelines
+              pip install pytest pytest-azurepipelines==1.0.1
               pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
@@ -266,7 +266,7 @@ stages:
           - script: |
               # Install dependencies
               pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               git clone https://github.com/superconductive/dgtest.git
               pip install -e dgtest
 
@@ -305,7 +305,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               git clone https://github.com/superconductive/dgtest.git
               pip install -e dgtest
 
@@ -352,7 +352,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-azurepipelines
+              pip install pytest pytest-azurepipelines==1.0.1
               git clone https://github.com/superconductive/dgtest.git
               pip install -e dgtest
 
