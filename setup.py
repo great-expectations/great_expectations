@@ -15,8 +15,8 @@ def get_extras_require():
         "s3": "boto",
     }
     ignore_keys = ("contrib", "sqlalchemy", "test")
-    rx = re.compile(r"\./requirements-dev-(.*).txt")
-    for fname in sorted(glob("./requirements-dev-*.txt")):
+    rx = re.compile(r"requirements-dev-(.*).txt")
+    for fname in sorted(glob("requirements-dev-*.txt")):
         key = rx.match(fname).group(1)
         if key in ignore_keys:
             continue
