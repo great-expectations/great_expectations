@@ -3607,7 +3607,7 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     profiler_code_cell: str = f"""\
 suite = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
-    expectation_suite_name=expectation_suite_name,
+    expectation_suite=validator.expectation_suite
 )
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
@@ -3731,7 +3731,7 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     profiler_code_cell: str = f"""\
 suite = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
-    expectation_suite_name=expectation_suite_name,
+    expectation_suite=validator.expectation_suite
 )
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")

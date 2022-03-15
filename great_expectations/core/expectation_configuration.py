@@ -1307,9 +1307,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 urn = ge_urn.parseString(string_urn)
             except ParserError:
                 logger.warning(
-                    "Unable to parse great_expectations urn {}".format(
-                        value["$PARAMETER"]
-                    )
+                    f"Unable to parse great_expectations urn {value['$PARAMETER']}"
                 )
                 continue
 

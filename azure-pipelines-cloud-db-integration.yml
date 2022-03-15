@@ -13,7 +13,7 @@ stages:
           matrix:
             performance:
               test_script: 'tests/performance/test_bigquery_benchmarks.py'
-              extra_args: '--bigquery --performance-tests --no-spark --no-postgresql --benchmark-json=junit/benchmark.json -k test_taxi_trips_benchmark[1-True-V3] '
+              extra_args: '--bigquery --performance-tests --benchmark-json=junit/benchmark.json -k test_taxi_trips_benchmark[1-True-V3] '
           maxParallel: 1
 
         steps:
@@ -39,14 +39,14 @@ stages:
               retryCount: '2'
 
           - script: |
-              pip install pytest-azurepipelines
+              pip install pytest-azurepipelines==1.0.1
               pip freeze > pip-freeze.txt
               mkdir -p junit
               pytest -v $(test_script) \
                 $(extra_args) \
                 --bigquery \
                 --junitxml=junit/test-results.xml \
-                --no-spark --no-postgresql --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
+                 --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
                 --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
             env:
@@ -103,14 +103,14 @@ stages:
               retryCount: '2'
 
           - script: |
-              pip install pytest-azurepipelines
+              pip install pytest-azurepipelines==1.0.1
               pip freeze > pip-freeze.txt
               mkdir -p junit
               pytest -v $(test_script) \
                 $(extra_args) \
                 --bigquery \
                 --junitxml=junit/test-results.xml \
-                --no-spark --no-postgresql --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
+                --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
                 --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
             env:

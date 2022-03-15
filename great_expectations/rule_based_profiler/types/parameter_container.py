@@ -17,7 +17,6 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.types import SerializableDictDot, SerializableDotDict
-from great_expectations.util import deep_filter_properties_iterable
 
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
 
@@ -192,7 +191,6 @@ class ParameterContainer(SerializableDictDot):
 
         if isinstance(source, dict):
             if not isinstance(source, ParameterNode):
-                deep_filter_properties_iterable(properties=source, inplace=True)
                 source = ParameterNode(source)
 
             key: str

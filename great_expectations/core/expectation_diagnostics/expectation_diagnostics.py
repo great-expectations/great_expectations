@@ -102,7 +102,7 @@ class ExpectationDiagnostics(SerializableDictDot):
                 message=message,
                 sub_messages=[
                     {
-                        "message": '"' + short_description + '"',
+                        "message": f'"{short_description}"',
                         "passed": True,
                     }
                 ],
@@ -299,16 +299,16 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         for check in checks:
             if check["passed"]:
-                output_message += "\n ✔ " + check["message"]
+                output_message += f"\n ✔ {check['message']}"
             else:
-                output_message += "\n   " + check["message"]
+                output_message += f"\n   {check['message']}"
 
             if "sub_messages" in check:
                 for sub_message in check["sub_messages"]:
                     if sub_message["passed"]:
-                        output_message += "\n    ✔ " + sub_message["message"]
+                        output_message += f"\n    ✔ {sub_message['message']}"
                     else:
-                        output_message += "\n      " + sub_message["message"]
+                        output_message += f"\n      {sub_message['message']}"
         output_message += "\n"
 
         return output_message
@@ -327,15 +327,23 @@ class ExpectationDiagnostics(SerializableDictDot):
             sub_messages.append(
                 {
                     "message": "No example found to get kwargs for ExpectationConfiguration",
-                    "passed": False,
+                    "passed": passed,
                 }
             )
         else:
-            expectation_config = ExpectationConfiguration(
-                expectation_type=expectation_instance.expectation_type,
-                kwargs=first_test.input,
-            )
-            passed = expectation_instance.validate_configuration(expectation_config)
+            if "validate_configuration" not in expectation_instance.__class__.__dict__:
+                sub_messages.append(
+                    {
+                        "message": "No validate_configuration method defined",
+                        "passed": passed,
+                    }
+                )
+            else:
+                expectation_config = ExpectationConfiguration(
+                    expectation_type=expectation_instance.expectation_type,
+                    kwargs=first_test.input,
+                )
+                passed = expectation_instance.validate_configuration(expectation_config)
 
         return ExpectationDiagnosticCheckMessage(
             message="Has basic input validation and type checking",

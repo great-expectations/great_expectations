@@ -1,4 +1,4 @@
-## Save & Review Your Expectations
+## Review & Save Your Expectations
 
 Let's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.
 

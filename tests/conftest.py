@@ -7,6 +7,7 @@ import os
 import random
 import shutil
 import sys
+import warnings
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -23,9 +24,13 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+)
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     GeCloudConfig,
@@ -53,6 +58,9 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
+)
+from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
+    DEFAULT_CANDIDATE_STRINGS,
 )
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
@@ -112,10 +120,16 @@ def pytest_configure(config):
 
 
 def pytest_addoption(parser):
+    # note: --no-spark will be deprecated in favor of --spark
     parser.addoption(
         "--no-spark",
         action="store_true",
-        help="If set, suppress all tests against the spark test suite",
+        help="If set, suppress tests against the spark test suite",
+    )
+    parser.addoption(
+        "--spark",
+        action="store_true",
+        help="If set, execute tests against the spark test suite",
     )
     parser.addoption(
         "--no-sqlalchemy",
@@ -123,9 +137,15 @@ def pytest_addoption(parser):
         help="If set, suppress all tests using sqlalchemy",
     )
     parser.addoption(
+        "--postgresql",
+        action="store_true",
+        help="If set, execute tests against postgresql",
+    )
+    # note: --no-postgresql will be deprecated in favor of --postgresql
+    parser.addoption(
         "--no-postgresql",
         action="store_true",
-        help="If set, suppress all tests against postgresql",
+        help="If set, supress tests against postgresql",
     )
     parser.addoption(
         "--mysql",
@@ -178,10 +198,21 @@ def build_test_backends_list(metafunc):
 
 
 def build_test_backends_list_cfe(metafunc):
+    # adding deprecation warnings
+    if metafunc.config.getoption("--no-postgresql"):
+        warnings.warn(
+            "--no-sqlalchemy is deprecated as of v0.14 in favor of the --postgresql flag. It will be removed in v0.16. Please adjust your tests accordingly",
+            DeprecationWarning,
+        )
+    if metafunc.config.getoption("--no-spark"):
+        warnings.warn(
+            "--no-spark is deprecated as of v0.14 in favor of the --spark flag. It will be removed in v0.16. Please adjust your tests accordingly.",
+            DeprecationWarning,
+        )
     include_pandas: bool = True
-    include_spark: bool = not metafunc.config.getoption("--no-spark")
+    include_spark: bool = metafunc.config.getoption("--spark")
     include_sqlalchemy: bool = not metafunc.config.getoption("--no-sqlalchemy")
-    include_postgresql = not metafunc.config.getoption("--no-postgresql")
+    include_postgresql: bool = metafunc.config.getoption("--postgresql")
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
@@ -194,6 +225,7 @@ def build_test_backends_list_cfe(metafunc):
         include_mysql=include_mysql,
         include_mssql=include_mssql,
         include_bigquery=include_bigquery,
+        include_aws=include_aws,
     )
     return test_backend_names
 
@@ -4919,6 +4951,46 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
 
 
 @pytest.fixture
+def data_context_with_query_store(
+    empty_data_context, titanic_sqlite_db_connection_string
+):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: {titanic_sqlite_db_connection_string}
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+    """
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    store_config = yaml.load(
+        f"""
+    class_name: SqlAlchemyQueryStore
+    credentials: 
+        connection_string: {titanic_sqlite_db_connection_string}
+    queries:
+        col_count:
+            query: "SELECT COUNT(*) FROM titanic;"
+            return_type: "scalar"
+        dist_col_count:
+            query: "SELECT COUNT(DISTINCT PClass) FROM titanic;"
+            return_type: "scalar"
+    """
+    )
+    context.add_store("my_query_store", store_config)
+    return context
+
+
+@pytest.fixture
 def ge_cloud_base_url():
     return "https://app.test.greatexpectations.io"
 
@@ -5158,8 +5230,18 @@ def populated_profiler_store(
 ) -> ProfilerStore:
     skip_if_python_below_minimum_version()
 
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(
+        profiler_config_with_placeholder_args
+    )
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(serialized_config)
+
+    profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        **deserialized_config
+    )
+
     profiler_store = empty_profiler_store
-    profiler_store.set(key=profiler_key, value=profiler_config_with_placeholder_args)
+    profiler_store.set(key=profiler_key, value=profiler_config)
     return profiler_store
 
 
@@ -5205,34 +5287,38 @@ def alice_columnar_table_single_batch(empty_data_context):
 
     my_rule_for_user_ids_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_of_type",
-                "kwargs": {
-                    "column": "user_id",
-                    "type_": "INTEGER",
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_be_of_type",
+            kwargs={
+                "column": "user_id",
+                "type_": "INTEGER",
+            },
+            meta={},
         ),
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_between",
-                "kwargs": {
-                    "min_value": 397433,  # From the data
-                    "max_value": 999999999999,
-                    "column": "user_id",
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_be_between",
+            kwargs={
+                "min_value": 1000,
+                "max_value": 999999999999,
+                "column": "user_id",
+            },
+            meta={},
         ),
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_not_be_null",
-                "kwargs": {
-                    "column": "user_id",
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_not_be_null",
+            kwargs={
+                "column": "user_id",
+            },
+            meta={},
+        ),
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_less_than",
+            meta={},
+            kwargs={"value": 9488404, "column": "user_id"},
+        ),
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_greater_than",
+            meta={},
+            kwargs={"value": 397433, "column": "user_id"},
         ),
     ]
 
@@ -5261,92 +5347,83 @@ def alice_columnar_table_single_batch(empty_data_context):
         my_rule_for_timestamps_expectation_configurations.extend(
             [
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_of_type",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "type_": "TIMESTAMP",
-                        },
-                        "meta": {},
-                    }
+                    expectation_type="expect_column_values_to_be_of_type",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "type_": "TIMESTAMP",
+                    },
+                    meta={},
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_increasing",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                        },
-                        "meta": {},
-                    }
+                    expectation_type="expect_column_values_to_be_increasing",
+                    kwargs={
+                        "column": column_data["column_name"],
+                    },
+                    meta={},
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                        },
-                        "meta": {},
-                    }
+                    expectation_type="expect_column_values_to_be_dateutil_parseable",
+                    kwargs={
+                        "column": column_data["column_name"],
+                    },
+                    meta={},
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_min_to_be_between",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "min_value": "2004-10-19T10:23:54",  # From variables
-                            "max_value": "2004-10-19T10:23:54",  # From variables
-                        },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
-                                ],
-                            }
-                        },
-                    }
+                    expectation_type="expect_column_min_to_be_between",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "min_value": "2004-10-19T10:23:54",  # From variables
+                        "max_value": "2004-10-19T10:23:54",  # From variables
+                    },
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
+                            ],
+                        }
+                    },
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_max_to_be_between",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "min_value": "2004-10-19T10:23:54",  # From variables
-                            "max_value": event_ts_column_data[
-                                "observed_max_time_str"
+                    expectation_type="expect_column_max_to_be_between",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "min_value": "2004-10-19T10:23:54",  # From variables
+                        "max_value": event_ts_column_data[
+                            "observed_max_time_str"
+                        ],  # Pin to event_ts column
+                    },
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+                            ],
+                        }
+                    },
+                ),
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_match_strftime_format",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "strftime_format": {
+                            "value": event_ts_column_data[
+                                "observed_strftime_format"
                             ],  # Pin to event_ts column
-                        },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
-                                ],
-                            }
-                        },
-                    }
-                ),
-                ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_match_strftime_format",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "strftime_format": {
-                                "value": event_ts_column_data[
-                                    "observed_strftime_format"
-                                ],  # Pin to event_ts column
-                                "details": {"success_ratio": 1.0},
+                            "details": {
+                                "success_ratio": 1.0,
+                                "candidate_strings": sorted(DEFAULT_CANDIDATE_STRINGS),
                             },
                         },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
-                                ],
-                            }
-                        },
-                    }
+                    },
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                            ],
+                        }
+                    },
                 ),
             ]
         )
@@ -5355,16 +5432,14 @@ def alice_columnar_table_single_batch(empty_data_context):
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_in_set",
-                "kwargs": {
-                    "column": "user_agent",
-                    "value_set": [
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-                    ],
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "user_agent",
+                "value_set": [
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+                ],
+            },
+            meta={},
         ),
     ]
 
@@ -5419,12 +5494,16 @@ def alice_columnar_table_single_batch(empty_data_context):
 @pytest.fixture
 def alice_columnar_table_single_batch_context(
     monkeypatch,
-    empty_data_context,
+    empty_data_context_stats_enabled,
     alice_columnar_table_single_batch,
 ):
     skip_if_python_below_minimum_version()
 
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
+    # We need our salt to be consistent between runs to ensure idempotent anonymized values
+    context._usage_statistics_handler = UsageStatisticsHandler(
+        context, "00000000-0000-0000-0000-00000000a004", "N/A"
+    )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
     data_path: str = os.path.join(context.root_directory, data_relative_path)
@@ -6174,7 +6253,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "column": "pickup_datetime",
                     "strftime_format": {
                         "value": "%Y-%m-%d %H:%M:%S",
-                        "details": {"success_ratio": 1.0},
+                        "details": {
+                            "success_ratio": 1.0,
+                            "candidate_strings": [
+                                "%Y-%m-%d %H:%M:%S",
+                                "%y-%m-%d",
+                            ],
+                        },
                     },
                 },
                 "meta": {
@@ -6194,7 +6279,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "column": "dropoff_datetime",
                     "strftime_format": {
                         "value": "%Y-%m-%d %H:%M:%S",
-                        "details": {"success_ratio": 1.0},
+                        "details": {
+                            "success_ratio": 1.0,
+                            "candidate_strings": [
+                                "%Y-%m-%d %H:%M:%S",
+                                "%y-%m-%d",
+                            ],
+                        },
                     },
                 },
                 "meta": {
@@ -6401,6 +6492,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -6571,6 +6663,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -6678,8 +6771,8 @@ def quentin_columnar_table_multi_batch():
                 "tolls_amount": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
                 "fare_amount": [
                     [5.842754275, 6.5],
-                    [8.675167517, 9.661311131],
-                    [13.344354435, 15.815389039],
+                    [8.675167517, 9.5750000000],
+                    [13.344354435, 15.650000000],
                 ],
                 "tip_amount": [
                     [0.0, 0.0],
@@ -6688,7 +6781,7 @@ def quentin_columnar_table_multi_batch():
                 ],
                 "total_amount": [
                     [8.2740033, 11.422183043],
-                    [11.358555106, 14.959993149],
+                    [11.2955000, 14.875000000],
                     [16.746263451, 21.327684643],
                 ],
             },
@@ -6709,6 +6802,7 @@ def quentin_columnar_table_multi_batch_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")

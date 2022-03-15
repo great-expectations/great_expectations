@@ -164,7 +164,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               git clone https://github.com/superconductive/dgtest.git
               pip install -e dgtest
 
@@ -214,8 +214,8 @@ stages:
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              pip install pytest pytest-azurepipelines
-              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pip install pytest pytest-azurepipelines==1.0.1
+              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
 
@@ -266,13 +266,13 @@ stages:
           - script: |
               # Install dependencies
               pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               git clone https://github.com/superconductive/dgtest.git
               pip install -e dgtest
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
-                --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
 
@@ -305,13 +305,13 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               git clone https://github.com/superconductive/dgtest.git
               pip install -e dgtest
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
-                --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
 
@@ -352,7 +352,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-azurepipelines
+              pip install pytest pytest-azurepipelines==1.0.1
               git clone https://github.com/superconductive/dgtest.git
               pip install -e dgtest
 

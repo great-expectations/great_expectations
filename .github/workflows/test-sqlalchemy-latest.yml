@@ -43,7 +43,7 @@ jobs:
           pip install --upgrade SQLAlchemy
       - name: Test with pytest
         run: |
-          pytest --no-spark --ignore=tests/cli --ignore=tests/integration/usage_statistics
+          pytest --postgresql --ignore=tests/cli --ignore=tests/integration/usage_statistics
       - name: Notify via Slack
         uses: act10ns/slack@v1
         with:

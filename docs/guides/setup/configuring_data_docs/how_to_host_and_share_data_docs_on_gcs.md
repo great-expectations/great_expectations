@@ -43,7 +43,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
   **main.py:**
 
-    ```python file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L88-L117
+    ```python file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L89-L118
     ```
 
 3. **If you haven't done so already, authenticate the gcloud CLI and set the project.**
@@ -55,7 +55,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
   Issue the following CLI command from within the app directory created above:
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L129
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L131
     ```
 
 5. **Set up Google App Engine firewall for your app to control access.**
@@ -66,19 +66,19 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
   You may also replace the default ``local_site`` if you would only like to maintain a single GCS Data Docs site.
 
-    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L138-L154
+    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L140-L156
     ```
 
 7. **Build the GCS Data Docs site.**
 
   Use the following CLI command: 
   
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L174
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L176
     ```
 
   If successful, the CLI will provide the object URL of the index page. Since the bucket is not public, this URL will be inaccessible. Rather, you will access the Data Docs site using the App Engine app configured above.
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L185-L192
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L187-L194
     ```
 
 8. **Test that everything was configured properly by launching your App Engine app.**
