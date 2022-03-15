@@ -50,7 +50,7 @@ class DatasourceAnonymizer(Anonymizer):
             execution_engine_config = config.get("execution_engine")
             anonymized_info_dict[
                 "anonymized_execution_engine"
-            ] = self.anonymize_execution_engine_info(
+            ] = self._anonymize_execution_engine_info(
                 name=execution_engine_config.get("name", ""),
                 config=execution_engine_config,
             )

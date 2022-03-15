@@ -243,8 +243,17 @@ class Anonymizer:
         return anonymized_info_dict
 
     def anonymize_validation_operator_info(
-        self, validation_operator_name: str, validation_operator_obj
-    ):
+        self, validation_operator_name: str, validation_operator_obj: object
+    ) -> dict:
+        """
+
+        Args:
+            validation_operator_name (str):
+            validation_operator_obj (object):
+
+        Returns:
+
+        """
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(validation_operator_name)
         }
@@ -267,7 +276,7 @@ class Anonymizer:
 
         return anonymized_info_dict
 
-    def anonymize_batch_kwargs(self, batch_kwargs):
+    def _anonymize_batch_kwargs(self, batch_kwargs: dict) -> List[str]:
         ge_batch_kwarg_keys = [
             "datasource",
             "reader_method",
@@ -297,7 +306,17 @@ class Anonymizer:
 
         return anonymized_batch_kwarg_keys
 
-    def anonymize_batch_info(self, batch):
+    def anonymize_batch_info(
+        self, batch: Union[Tuple[dict, str], "DataAsset", "Validator"]  # noqa: F821
+    ) -> dict:
+        """
+
+        Args:
+            batch (Union[Tuple[dict, str], "DataAsset", "Validator"]):
+
+        Returns:
+
+        """
         from great_expectations.data_asset import DataAsset
         from great_expectations.validator.validator import Validator
 
@@ -321,7 +340,7 @@ class Anonymizer:
         if batch_kwargs:
             anonymized_info_dict[
                 "anonymized_batch_kwarg_keys"
-            ] = self.anonymize_batch_kwargs(batch_kwargs)
+            ] = self._anonymize_batch_kwargs(batch_kwargs)
         else:
             anonymized_info_dict["anonymized_batch_kwarg_keys"] = []
         if expectation_suite_name:
@@ -339,7 +358,7 @@ class Anonymizer:
 
         return anonymized_info_dict
 
-    def anonymize_site_builder_info(self, site_builder_config):
+    def _anonymize_site_builder_info(self, site_builder_config: dict) -> dict:
         class_name = site_builder_config.get("class_name")
         module_name = site_builder_config.get("module_name")
         if module_name is None:
@@ -353,9 +372,11 @@ class Anonymizer:
 
         return anonymized_info_dict
 
-    def anonymize_store_backend_info(
-        self, store_backend_obj=None, store_backend_object_config=None
-    ):
+    def _anonymize_store_backend_info(
+        self,
+        store_backend_obj: Optional[object] = None,
+        store_backend_object_config: Optional[dict] = None,
+    ) -> dict:
         assert (
             store_backend_obj or store_backend_object_config
         ), "Must pass store_backend_obj or store_backend_object_config."
@@ -376,14 +397,23 @@ class Anonymizer:
             )
         return anonymized_info_dict
 
-    def anonymize_data_docs_site_info(self, site_name, site_config):
+    def anonymize_data_docs_site_info(self, site_name: str, site_config: dict) -> dict:
+        """
+
+        Args:
+            site_name (str):
+            site_config (dict):
+
+        Returns:
+
+        """
         site_config_module_name = site_config.get("module_name")
         if site_config_module_name is None:
             site_config[
                 "module_name"
             ] = "great_expectations.render.renderer.site_builder"
 
-        anonymized_info_dict = self.anonymize_site_builder_info(
+        anonymized_info_dict = self._anonymize_site_builder_info(
             site_builder_config=site_config,
         )
         anonymized_info_dict["anonymized_name"] = self.anonymize(site_name)
@@ -391,11 +421,11 @@ class Anonymizer:
         store_backend_config = site_config.get("store_backend")
         anonymized_info_dict[
             "anonymized_store_backend"
-        ] = self.anonymize_store_backend_info(
+        ] = self._anonymize_store_backend_info(
             store_backend_object_config=store_backend_config
         )
         site_index_builder_config = site_config.get("site_index_builder")
-        anonymized_site_index_builder = self.anonymize_site_builder_info(
+        anonymized_site_index_builder = self._anonymize_site_builder_info(
             site_builder_config=site_index_builder_config
         )
         # Note AJB-20201218 show_cta_footer was removed in v 0.9.9 via PR #1249
@@ -409,7 +439,16 @@ class Anonymizer:
 
         return anonymized_info_dict
 
-    def anonymize_store_info(self, store_name, store_obj):
+    def anonymize_store_info(self, store_name: str, store_obj: object) -> dict:
+        """
+
+        Args:
+            store_name (str):
+            store_obj (object):
+
+        Returns:
+
+        """
         anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(store_name)
         store_backend_obj = store_obj.store_backend
@@ -421,11 +460,20 @@ class Anonymizer:
 
         anonymized_info_dict[
             "anonymized_store_backend"
-        ] = self.anonymize_store_backend_info(store_backend_obj=store_backend_obj)
+        ] = self._anonymize_store_backend_info(store_backend_obj=store_backend_obj)
 
         return anonymized_info_dict
 
     def anonymize_profiler_info(self, name: str, config: dict) -> dict:
+        """
+
+        Args:
+            name (str):
+            config (dict):
+
+        Returns:
+
+        """
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(name),
         }
@@ -435,7 +483,7 @@ class Anonymizer:
         )
         return anonymized_info_dict
 
-    def anonymize_execution_engine_info(self, name, config):
+    def _anonymize_execution_engine_info(self, name: str, config: dict) -> dict:
         anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(name)
 
@@ -459,7 +507,16 @@ class Anonymizer:
 
         return anonymized_info_dict
 
-    def anonymize_data_connector_info(self, name, config):
+    def anonymize_data_connector_info(self, name: str, config: dict) -> dict:
+        """
+
+        Args:
+            name (str):
+            config (dict):
+
+        Returns:
+
+        """
         anonymized_info_dict = {
             "anonymized_name": self.anonymize(name),
         }
@@ -484,7 +541,17 @@ class Anonymizer:
 
         return anonymized_info_dict
 
-    def anonymize_expectation_suite_info(self, expectation_suite):
+    def anonymize_expectation_suite_info(
+        self, expectation_suite: "ExpectationSuite"  # noqa: F821
+    ) -> dict:
+        """
+
+        Args:
+            expectation_suite ("ExpectationSuite"):
+
+        Returns:
+
+        """
         anonymized_info_dict = {}
         anonymized_expectation_counts = list()
 
@@ -510,6 +577,12 @@ class Anonymizer:
     def anonymize_expectation(
         self, expectation_type: Optional[str], info_dict: dict
     ) -> None:
+        """
+
+        Args:
+            expectation_type (Optional[str]):
+            info_dict (dict):
+        """
         if expectation_type in self.CORE_GE_EXPECTATION_TYPES:
             info_dict["expectation_type"] = expectation_type
         else:
@@ -518,6 +591,13 @@ class Anonymizer:
     def anonymize_batch_request(
         self, *args, **kwargs
     ) -> Optional[Dict[str, List[str]]]:
+        """
+            *args:
+            **kwargs:
+
+        Returns:
+
+        """
         anonymized_batch_request_properties_dict: Optional[Dict[str, List[str]]] = None
 
         # noinspection PyBroadException
@@ -622,7 +702,7 @@ class Anonymizer:
         self,
         destination: Optional[Dict[str, Union[Dict[str, str], List[str]]]],
         source: Optional[Any] = None,
-    ):
+    ) -> None:
         if isinstance(source, dict):
             key: str
             value: Any
@@ -647,7 +727,7 @@ class Anonymizer:
                 )
 
     @staticmethod
-    def _is_getting_started_keyword(value: str):
+    def _is_getting_started_keyword(value: str) -> bool:
         return value in [
             GETTING_STARTED_DATASOURCE_NAME,
             GETTING_STARTED_EXPECTATION_SUITE_NAME,
@@ -655,6 +735,15 @@ class Anonymizer:
         ]
 
     def anonymize_checkpoint_info(self, name: str, config: dict) -> dict:
+        """
+
+        Args:
+            name (str):
+            config (dict):
+
+        Returns:
+
+        """
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(name),
         }
