@@ -89,7 +89,7 @@ stages:
       - job: compatibility_matrix
         condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         variables:
-          GE_pytest_opts: '--no-sqlalchemy --spark'
+          GE_pytest_opts: '--no-sqlalchemy'
         strategy:
           matrix:
             Python36-Pandas023:
@@ -168,7 +168,7 @@ stages:
           postgres: postgres
 
         variables:
-          GE_pytest_opts: ''
+          GE_pytest_opts: '--postgresql --spark'
 
         strategy:
           matrix:
