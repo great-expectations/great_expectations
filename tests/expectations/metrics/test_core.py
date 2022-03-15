@@ -657,6 +657,9 @@ def test_map_column_value_lengths_between_pd():
     assert ser_expected_lengths.equals(result_series)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:pandas.Int64Index is deprecated*:FutureWarning:tests.expectations.metrics"
+)
 def test_map_column_values_increasing_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
@@ -845,6 +848,9 @@ def test_map_column_values_increasing_spark(spark_session):
     ]
 
 
+@pytest.mark.filterwarnings(
+    "ignore:pandas.Int64Index is deprecated*:FutureWarning:tests.expectations.metrics"
+)
 def test_map_column_values_decreasing_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
