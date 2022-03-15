@@ -336,9 +336,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             handler.send_usage_message(
                 event="execution_engine.sqlalchemy.connect",
                 event_payload={
-                    "anonymized_name": handler._execution_engine_anonymizer.anonymize(
-                        self.name
-                    ),
+                    "anonymized_name": handler._anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
                 },
                 success=True,
