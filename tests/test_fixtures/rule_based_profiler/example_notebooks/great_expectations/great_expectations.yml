@@ -14,32 +14,6 @@ config_version: 3.0
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
 datasources:
-  taxi_multibatch_datasource_other_possibility:
-    module_name: great_expectations.datasource
-    execution_engine:
-      module_name: great_expectations.execution_engine
-      class_name: PandasExecutionEngine
-    data_connectors:
-      default_inferred_data_connector_name:
-        module_name: great_expectations.datasource.data_connector
-        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
-        default_regex:
-          group_names:
-            - data_asset_name
-            - month
-          pattern: (yellow_tripdata_sample_2018)-(\d.*)\.csv
-        class_name: InferredAssetFilesystemDataConnector
-      default_inferred_data_connector_name_all_years:
-        module_name: great_expectations.datasource.data_connector
-        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
-        default_regex:
-          group_names:
-            - data_asset_name
-            - year
-            - month
-          pattern: (yellow_tripdata_sample)_(\d.*)-(\d.*)\.csv
-        class_name: InferredAssetFilesystemDataConnector
-    class_name: Datasource
   taxi_multi_batch_datsource:
     module_name: great_expectations.datasource
     execution_engine:
