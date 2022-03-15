@@ -63,9 +63,6 @@ class UsageStatisticsHandler:
         # the risk of cyclic import issues. If these anonymizers have been imported at any earlier point
         # in the program's lifetime, retrieval of the import will be O(1) and not impact performance.
 
-        from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
-            Anonymizer,
-        )
         from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
             CheckpointRunAnonymizer,
         )
@@ -93,6 +90,10 @@ class UsageStatisticsHandler:
             self._sigint_handler = None
 
         atexit.register(self._close_worker)
+
+    @property
+    def anonymizer(self) -> Anonymizer:
+        return self._anonymizer
 
     def _teardown(self, signum: int, frame: Optional[FrameType]) -> None:
         self._close_worker()

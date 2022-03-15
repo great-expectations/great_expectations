@@ -860,7 +860,7 @@ class DataAsset:
                     handler = data_context._usage_statistics_handler
                     handler.send_usage_message(
                         event="data_asset.validate",
-                        event_payload=handler._anonymizer.anonymize_batch_info(self),
+                        event_payload=handler.anonymizer.anonymize_batch_info(self),
                         success=False,
                     )
                 return ExpectationValidationResult(success=False)
@@ -1020,7 +1020,7 @@ class DataAsset:
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
                     event="data_asset.validate",
-                    event_payload=handler._anonymizer.anonymize_batch_info(self),
+                    event_payload=handler.anonymizer.anonymize_batch_info(self),
                     success=False,
                 )
             raise
@@ -1031,7 +1031,7 @@ class DataAsset:
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
                 event="data_asset.validate",
-                event_payload=handler._anonymizer.anonymize_batch_info(self),
+                event_payload=handler.anonymizer.anonymize_batch_info(self),
                 success=True,
             )
         return result
