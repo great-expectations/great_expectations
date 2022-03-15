@@ -2105,6 +2105,11 @@ class BaseDataContext(ConfigPeer):
                     value["credentials"]["url"] = PasswordMasker.mask_db_url(
                         value["credentials"]["url"]
                     )
+            elif "execution_engine" in value:
+                if "connection_string" in value["execution_engine"]:
+                    value["execution_engine"]["connection_string"] = PasswordMasker.mask_db_url(
+                        value["execution_engine"]["connection_string"]
+                    )
 
             datasources.append(value)
         return datasources
