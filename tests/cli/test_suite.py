@@ -4482,10 +4482,9 @@ def test__process_suite_edit_flags_and_prompt(
         ]
 
 
-def test_suite_new_configured_asset_sql_data_connector_missing_data_asset(
+def test_suite_new_load_jupyter_configured_asset_sql_data_connector_missing_data_asset(
     sqlalchemy_missing_data_asset_data_context,
 ):
-
     context: DataContext = sqlalchemy_missing_data_asset_data_context
 
     interactive_mode, profile = _process_suite_new_flags_and_prompt(
@@ -4497,13 +4496,41 @@ def test_suite_new_configured_asset_sql_data_connector_missing_data_asset(
         batch_request=None,
     )
 
-    _suite_new_workflow(
-        context=context,
-        expectation_suite_name="test",
-        interactive_mode=interactive_mode,
-        profile=profile,
-        profiler_name=None,
-        no_jupyter=False,
-        usage_event=None,
-        batch_request=None,
+    try:
+        _suite_new_workflow(
+            context=context,
+            expectation_suite_name="test",
+            interactive_mode=interactive_mode,
+            profile=profile,
+            profiler_name=None,
+            no_jupyter=True,
+            usage_event=None,
+            batch_request=None,
+        )
+    except TypeError:
+        pytest.fail(
+            "data_asset_name does not need to be required before suite new/edit notebook workflow begins"
+        )
+
+
+def test_suite_new_configured_asset_sql_data_connector_missing_data_asset_get_from_validator(
+    sqlalchemy_missing_data_asset_data_context,
+):
+    context: DataContext = sqlalchemy_missing_data_asset_data_context
+
+    batch_request: dict[str, Any] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "default_configured_data_connector",
+        "data_asset_name": None,
+        "limit": 1000,
+    }
+
+    expectation_suite_name: str = "test"
+
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request, expectation_suite_name=expectation_suite_name
     )

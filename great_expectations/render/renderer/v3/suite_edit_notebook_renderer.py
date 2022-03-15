@@ -372,11 +372,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         suite_name: str = suite.expectation_suite_name
 
-        if (
-            batch_request
-            and isinstance(batch_request, dict)
-            and BatchRequest(**batch_request)
-        ):
+        if batch_request and isinstance(batch_request, dict):
             batch_request = standardize_batch_request_display_ordering(
                 batch_request=batch_request
             )

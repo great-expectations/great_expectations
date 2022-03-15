@@ -6999,7 +6999,7 @@ def sqlalchemy_missing_data_asset_data_context(empty_data_context, db_file):
         class_name: SqlAlchemyExecutionEngine
         module_name: great_expectations.execution_engine
     data_connectors:
-        default_configured_data_connector_name:
+        default_configured_data_connector:
             class_name: ConfiguredAssetSqlDataConnector
             module_name: great_expectations.datasource.data_connector
         """,

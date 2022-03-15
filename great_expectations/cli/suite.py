@@ -735,15 +735,9 @@ def _suite_edit_workflow(
                 if batch_request != batch_request_from_citation:
                     batch_request_from_citation_is_up_to_date = False
 
-            if not (
-                batch_request
-                and isinstance(batch_request, dict)
-                and BatchRequest(**batch_request)
-            ):
-                if (
-                    batch_request_from_citation
-                    and isinstance(batch_request_from_citation, dict)
-                    and BatchRequest(**batch_request_from_citation)
+            if not (batch_request and isinstance(batch_request, dict)):
+                if batch_request_from_citation and isinstance(
+                    batch_request_from_citation, dict
                 ):
                     batch_request = copy.deepcopy(batch_request_from_citation)
                 else:

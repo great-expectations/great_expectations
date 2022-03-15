@@ -1016,7 +1016,6 @@ def add_citation_with_batch_request(
         expectation_suite is not None
         and batch_request
         and isinstance(batch_request, dict)
-        and BatchRequest(**batch_request)
     ):
         expectation_suite.add_citation(
             comment="Created suite added via CLI",

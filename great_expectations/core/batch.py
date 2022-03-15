@@ -871,50 +871,39 @@ def get_batch_request_from_acceptable_arguments(
 def standardize_batch_request_display_ordering(
     batch_request: Dict[str, Union[str, int, Dict[str, Any]]]
 ) -> Dict[str, Union[str, Dict[str, Any]]]:
-    datasource_name: str = batch_request["datasource_name"]
-    data_connector_name: str = batch_request["data_connector_name"]
-    data_asset_name: str = batch_request["data_asset_name"]
+    datasource_name: str = batch_request.get("datasource_name")
+    data_connector_name: str = batch_request.get("data_connector_name")
+    data_asset_name: str = batch_request.get("data_asset_name")
     runtime_parameters: str = batch_request.get("runtime_parameters")
     batch_identifiers: str = batch_request.get("batch_identifiers")
-    batch_request.pop("datasource_name")
-    batch_request.pop("data_connector_name")
-    batch_request.pop("data_asset_name")
-    # NOTE: AJB 20211217 The below conditionals should be refactored
+    if datasource_name is not None:
+        batch_request.pop("datasource_name")
+    if data_connector_name is not None:
+        batch_request.pop("data_connector_name")
+    if data_asset_name is not None:
+        batch_request.pop("data_asset_name")
     if runtime_parameters is not None:
         batch_request.pop("runtime_parameters")
     if batch_identifiers is not None:
         batch_request.pop("batch_identifiers")
-    if runtime_parameters is not None and batch_identifiers is not None:
-        batch_request = {
-            "datasource_name": datasource_name,
-            "data_connector_name": data_connector_name,
-            "data_asset_name": data_asset_name,
-            "runtime_parameters": runtime_parameters,
-            "batch_identifiers": batch_identifiers,
-            **batch_request,
-        }
-    elif runtime_parameters is not None and batch_identifiers is None:
-        batch_request = {
-            "datasource_name": datasource_name,
-            "data_connector_name": data_connector_name,
-            "data_asset_name": data_asset_name,
-            "runtime_parameters": runtime_parameters,
-            **batch_request,
-        }
-    elif runtime_parameters is None and batch_identifiers is not None:
-        batch_request = {
-            "datasource_name": datasource_name,
-            "data_connector_name": data_connector_name,
-            "data_asset_name": data_asset_name,
-            "batch_identifiers": batch_identifiers,
-            **batch_request,
-        }
-    else:
-        batch_request = {
-            "datasource_name": datasource_name,
-            "data_connector_name": data_connector_name,
-            "data_asset_name": data_asset_name,
-            **batch_request,
-        }
+
+    required_display_ordered_keys: dict[str, Any] = {
+        "datasource_name": datasource_name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+    }
+    optional_keys: dict[str, Any] = {
+        "runtime_parameters": runtime_parameters,
+        "batch_identifiers": batch_identifiers,
+    }
+    optional_display_ordered_keys: dict[str, Any] = {
+        key: value for key, value in optional_keys.items() if value is not None
+    }
+
+    batch_request = {
+        **required_display_ordered_keys,
+        **optional_display_ordered_keys,
+        **batch_request,
+    }
 
     return batch_request
