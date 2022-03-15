@@ -305,7 +305,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
+              pip install pytest pytest-cov pytest-azurepipelines
               git clone https://github.com/superconductive/dgtest.git
               pip install -e dgtest
 
