@@ -16,6 +16,9 @@ from great_expectations.rule_based_profiler.domain_builder.categorical_column_do
 from great_expectations.rule_based_profiler.domain_builder.map_metric_column_domain_builder import (
     MapMetricColumnDomainBuilder,
 )
+from great_expectations.rule_based_profiler.domain_builder.table_column_types_column_domain_builder import (
+    TableColumnTypesColumnDomainBuilder,
+)
 
 from great_expectations.rule_based_profiler.domain_builder.simple_semantic_type_domain_builder import (  # isort:skip
     SimpleSemanticTypeColumnDomainBuilder,
