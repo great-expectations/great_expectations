@@ -32,7 +32,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
         name="row_count_range",
         metric_name="table.row_count",
-        sampling_method="bootstrap",
+        estimator="bootstrap",
         false_positive_rate=1.0e-2,
         round_decimals=0,
         data_context=data_context,
