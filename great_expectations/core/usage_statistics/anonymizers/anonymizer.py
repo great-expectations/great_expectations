@@ -49,6 +49,19 @@ class Anonymizer:
         return self._salt
 
     def anonymize(self, string_: Optional[str]) -> Optional[str]:
+        """Obsfuscates a given string using an MD5 hash.
+
+        Utilized to anonymize user-specific/sensitive strings in usage statistics payloads.
+
+        Args:
+            string_ (Optional[str]): The input string to anonymize.
+
+        Returns:
+            The MD5 hash of the input string. If an input of None is provided, the string is untouched.
+
+        Raises:
+            TypeError if input string does not adhere to type signature Optional[str].
+        """
         if string_ is None:
             return None
 
@@ -62,7 +75,7 @@ class Anonymizer:
         salted = self._salt + string_
         return md5(salted.encode("utf-8")).hexdigest()
 
-    def anonymize_object_info(
+    def _anonymize_object_info(
         self,
         anonymized_info_dict: dict,
         object_: Optional[object] = None,
@@ -108,7 +121,7 @@ class Anonymizer:
             object_module_name = object_class.__module__
             parents: Tuple[type, ...] = object_class.__bases__
 
-            if Anonymizer._is_core_great_expectations_class(object_module_name):
+            if self._is_core_great_expectations_class(object_module_name):
                 anonymized_info_dict["parent_class"] = object_class_name
             else:
 
@@ -210,12 +223,17 @@ class Anonymizer:
 
         return None
 
-    def anonymize_action_info(self, action_name, action_obj=None, action_config=None):
+    def _anonymize_action_info(
+        self,
+        action_name: str,
+        action_obj: Optional[object] = None,
+        action_config: Optional[dict] = None,
+    ) -> dict:
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(action_name),
         }
 
-        self.anonymize_object_info(
+        self._anonymize_object_info(
             object_=action_obj,
             object_config=action_config,
             anonymized_info_dict=anonymized_info_dict,
@@ -225,7 +243,7 @@ class Anonymizer:
         return anonymized_info_dict
 
     def anonymize_validation_operator_info(
-        self, validation_operator_name, validation_operator_obj
+        self, validation_operator_name: str, validation_operator_obj
     ):
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(validation_operator_name)
@@ -233,7 +251,7 @@ class Anonymizer:
         actions_dict: dict = validation_operator_obj.actions
 
         anonymized_info_dict.update(
-            self.anonymize_object_info(
+            self._anonymize_object_info(
                 object_=validation_operator_obj,
                 anonymized_info_dict=anonymized_info_dict,
             )
@@ -241,7 +259,7 @@ class Anonymizer:
 
         if actions_dict:
             anonymized_info_dict["anonymized_action_list"] = [
-                self.anonymize_action_info(
+                self._anonymize_action_info(
                     action_name=action_name, action_obj=action_obj
                 )
                 for action_name, action_obj in actions_dict.items()
@@ -328,7 +346,7 @@ class Anonymizer:
             module_name = "great_expectations.render.renderer.site_builder"
 
         anonymized_info_dict = {}
-        self.anonymize_object_info(
+        self._anonymize_object_info(
             object_config={"class_name": class_name, "module_name": module_name},
             anonymized_info_dict=anonymized_info_dict,
         )
@@ -343,7 +361,7 @@ class Anonymizer:
         ), "Must pass store_backend_obj or store_backend_object_config."
         anonymized_info_dict = {}
         if store_backend_obj is not None:
-            self.anonymize_object_info(
+            self._anonymize_object_info(
                 object_=store_backend_obj,
                 anonymized_info_dict=anonymized_info_dict,
             )
@@ -352,7 +370,7 @@ class Anonymizer:
             module_name = store_backend_object_config.get("module_name")
             if module_name is None:
                 module_name = "great_expectations.data_context.store"
-            self.anonymize_object_info(
+            self._anonymize_object_info(
                 object_config={"class_name": class_name, "module_name": module_name},
                 anonymized_info_dict=anonymized_info_dict,
             )
@@ -396,7 +414,7 @@ class Anonymizer:
         anonymized_info_dict["anonymized_name"] = self.anonymize(store_name)
         store_backend_obj = store_obj.store_backend
 
-        self.anonymize_object_info(
+        self._anonymize_object_info(
             object_=store_obj,
             anonymized_info_dict=anonymized_info_dict,
         )
@@ -411,7 +429,7 @@ class Anonymizer:
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(name),
         }
-        self.anonymize_object_info(
+        self._anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
             object_config=config,
         )
@@ -434,7 +452,7 @@ class Anonymizer:
             execution_engine_config
         )
 
-        self.anonymize_object_info(
+        self._anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
             object_config=execution_engine_config_dict,
         )
@@ -459,7 +477,7 @@ class Anonymizer:
             data_connector_config
         )
 
-        self.anonymize_object_info(
+        self._anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
             object_config=data_connector_config_dict,
         )
@@ -647,7 +665,7 @@ class Anonymizer:
         checkpoint_config: dict = checkpointConfigSchema.load(CommentedMap(**config))
         checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
 
-        self.anonymize_object_info(
+        self._anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
             object_config=checkpoint_config_dict,
         )

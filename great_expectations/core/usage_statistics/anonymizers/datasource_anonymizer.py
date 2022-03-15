@@ -37,13 +37,13 @@ class DatasourceAnonymizer(Anonymizer):
 
         # Legacy Datasources (<= v0.12 v2 BatchKwargs API)
         if self.get_parent_class_v2_api(config=config) is not None:
-            self.anonymize_object_info(
+            self._anonymize_object_info(
                 anonymized_info_dict=anonymized_info_dict,
                 object_config=config,
             )
         # Datasources (>= v0.13 v3 BatchRequest API), and custom v2 BatchKwargs API
         elif self.get_parent_class_v3_api(config=config) is not None:
-            self.anonymize_object_info(
+            self._anonymize_object_info(
                 anonymized_info_dict=anonymized_info_dict,
                 object_config=config,
             )
@@ -72,7 +72,7 @@ class DatasourceAnonymizer(Anonymizer):
         anonymized_info_dict["anonymized_name"] = self.anonymize(name)
         if config.get("module_name") is None:
             config["module_name"] = "great_expectations.datasource"
-        self.anonymize_object_info(
+        self._anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
             object_config=config,
         )
