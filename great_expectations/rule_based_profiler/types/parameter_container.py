@@ -71,8 +71,16 @@ def _parse_attribute_name(name: str) -> ParseResults:
         )
 
 
+def is_fully_qualified_parameter_name_literal_string_format(
+    fully_qualified_parameter_name: str,
+) -> bool:
+    return fully_qualified_parameter_name.startswith("$")
+
+
 def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
-    if not fully_qualified_parameter_name.startswith("$"):
+    if not is_fully_qualified_parameter_name_literal_string_format(
+        fully_qualified_parameter_name=fully_qualified_parameter_name
+    ):
         raise ge_exceptions.ProfilerExecutionError(
             message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
 names must start with $ (e.g., "${fully_qualified_parameter_name}").
