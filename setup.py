@@ -1,61 +1,43 @@
+import re
+from glob import glob
+
 from setuptools import find_packages, setup
 
 import versioneer
 
+
+def get_extras_require():
+    results = {}
+    extra_keys = {
+        "aws_secrets": "boto",
+        "azure_secrets": "azure",
+        "gcp": "bigquery",
+        "s3": "boto",
+    }
+    ignore_keys = ("contrib", "sqlalchemy", "test")
+    rx = re.compile(r"\./requirements-dev-(.*).txt")
+    for fname in sorted(glob("./requirements-dev-*.txt")):
+        key = rx.match(fname).group(1)
+        if key in ignore_keys:
+            continue
+        with open(fname) as f:
+            results[key] = f.read().splitlines()
+
+    lite = results.pop("lite")
+    results["boto"] = [req for req in lite if req.startswith("boto")]
+    results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
+    results["airflow"] += results["boto"]
+
+    for new_key, existing_key in extra_keys.items():
+        results[new_key] = results[existing_key]
+
+    results.pop("boto")
+    return results
+
+
 # Parse requirements.txt
 with open("requirements.txt") as f:
     required = f.read().splitlines()
-
-with open("requirements-dev-lite.txt") as f:
-    dev_lite = f.read().splitlines()
-
-req_boto = [req for req in dev_lite if req.startswith("boto")]
-req_sqlalchemy = [req for req in dev_lite if req.startswith("sqlalchemy")]
-
-with open("requirements-dev-airflow.txt") as f:
-    req_airflow = f.read().splitlines()
-
-with open("requirements-dev-arrow.txt") as f:
-    req_arrow = f.read().splitlines()
-
-with open("requirements-dev-athena.txt") as f:
-    req_athena = f.read().splitlines()
-
-with open("requirements-dev-azure.txt") as f:
-    req_azure = f.read().splitlines()
-
-with open("requirements-dev-bigquery.txt") as f:
-    req_bigquery = f.read().splitlines()
-
-with open("requirements-dev-dremio.txt") as f:
-    req_dremio = f.read().splitlines()
-
-with open("requirements-dev-excel.txt") as f:
-    req_excel = f.read().splitlines()
-
-with open("requirements-dev-mssql.txt") as f:
-    req_mssql = f.read().splitlines()
-
-with open("requirements-dev-mysql.txt") as f:
-    req_mysql = f.read().splitlines()
-
-with open("requirements-dev-pagerduty.txt") as f:
-    req_pagerduty = f.read().splitlines()
-
-with open("requirements-dev-postgresql.txt") as f:
-    req_postgresql = f.read().splitlines()
-
-with open("requirements-dev-redshift.txt") as f:
-    req_redshift = f.read().splitlines()
-
-with open("requirements-dev-snowflake.txt") as f:
-    req_snowflake = f.read().splitlines()
-
-with open("requirements-dev-spark.txt") as f:
-    req_spark = f.read().splitlines()
-
-with open("requirements-dev-teradata.txt") as f:
-    req_teradata = f.read().splitlines()
 
 # try:
 #    import pypandoc
@@ -71,29 +53,7 @@ config = {
     "version": versioneer.get_version(),
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
-    "extras_require": {
-        "airflow": req_airflow + req_boto,
-        "arrow": req_arrow,
-        "athena": req_athena,
-        "aws_secrets": req_boto,
-        "azure": req_azure,
-        "azure_secrets": req_azure,
-        "bigquery": req_bigquery,
-        "dremio": req_dremio,
-        "excel": req_excel,
-        "gcp": req_bigquery,
-        "mssql": req_mssql,
-        "mysql": req_mysql,
-        "pagerduty": req_pagerduty,
-        "postgresql": req_postgresql,
-        "redshift": req_redshift,
-        # "s3": ["boto3>=1.14"],
-        "s3": req_boto,
-        "snowflake": req_snowflake,
-        "spark": req_spark,
-        "sqlalchemy": req_sqlalchemy,
-        "teradata": req_teradata,
-    },
+    "extras_require": get_extras_require(),
     "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
