@@ -243,16 +243,18 @@ class Anonymizer:
         return anonymized_info_dict
 
     def anonymize_validation_operator_info(
-        self, validation_operator_name: str, validation_operator_obj: object
+        self,
+        validation_operator_name: str,
+        validation_operator_obj: object,
     ) -> dict:
-        """
+        """Anonymize ValidationOperator objs from the 'great_expectations.validation_operators' module.
 
         Args:
-            validation_operator_name (str):
-            validation_operator_obj (object):
+            validation_operator_name (str): The name of the operator.
+            validation_operator_obj (object): An instance of the operator base class or one of its children.
 
         Returns:
-
+            An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(validation_operator_name)
@@ -309,13 +311,14 @@ class Anonymizer:
     def anonymize_batch_info(
         self, batch: Union[Tuple[dict, str], "DataAsset", "Validator"]  # noqa: F821
     ) -> dict:
-        """
+        """Anonymize Batch objs - can be derived from a variety of types.
 
         Args:
-            batch (Union[Tuple[dict, str], "DataAsset", "Validator"]):
+            batch (Union[Tuple[dict, str], "DataAsset", "Validator"]): The object used to
+            obtain relevant details such as 'batch_kwargs' and 'expectation_suite_name'.
 
         Returns:
-
+            An anonymized dictionary payload that obfuscates user-specific details.
         """
         from great_expectations.data_asset import DataAsset
         from great_expectations.validator.validator import Validator
@@ -398,14 +401,14 @@ class Anonymizer:
         return anonymized_info_dict
 
     def anonymize_data_docs_site_info(self, site_name: str, site_config: dict) -> dict:
-        """
+        """Anonymize details around a DataDocs depolyment.
 
         Args:
-            site_name (str):
-            site_config (dict):
+            site_name (str): The name of the DataDocs site.
+            site_config (dict): The dictionary configuration for the site.
 
         Returns:
-
+            An anonymized dictionary payload that obfuscates user-specific details.
         """
         site_config_module_name = site_config.get("module_name")
         if site_config_module_name is None:
@@ -440,14 +443,14 @@ class Anonymizer:
         return anonymized_info_dict
 
     def anonymize_store_info(self, store_name: str, store_obj: object) -> dict:
-        """
+        """Anonymize Store objs from the 'great_expectations.data_context.store' module.
 
         Args:
-            store_name (str):
-            store_obj (object):
+            store_name (str): The name of the store.
+            store_obj (object): An instance of the Store base class or one of its children.
 
         Returns:
-
+            An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(store_name)
@@ -465,14 +468,14 @@ class Anonymizer:
         return anonymized_info_dict
 
     def anonymize_profiler_info(self, name: str, config: dict) -> dict:
-        """
+        """Anonymize RuleBasedProfiler objs from the 'great_expectations.rule_based_profiler' module.
 
         Args:
-            name (str):
-            config (dict):
+            name (str): The name of the given profiler.
+            config (dict): The dictionary configuration of the given profiler.
 
         Returns:
-
+            An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(name),
@@ -508,14 +511,14 @@ class Anonymizer:
         return anonymized_info_dict
 
     def anonymize_data_connector_info(self, name: str, config: dict) -> dict:
-        """
+        """Anonymize DataConnector objs from the 'great_expectations.datasource.data_connector' module.
 
         Args:
-            name (str):
-            config (dict):
+            name (str): The name of the connector.
+            config (dict): The dictionary configuration corresponding to the connector.
 
         Returns:
-
+            An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict = {
             "anonymized_name": self.anonymize(name),
@@ -544,13 +547,13 @@ class Anonymizer:
     def anonymize_expectation_suite_info(
         self, expectation_suite: "ExpectationSuite"  # noqa: F821
     ) -> dict:
-        """
+        """Anonymize ExpectationSuite objs from the 'great_expectations.core' module.
 
         Args:
-            expectation_suite ("ExpectationSuite"):
+            expectation_suite ("ExpectationSuite"): An instance of ExpectationSuite.
 
         Returns:
-
+            An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict = {}
         anonymized_expectation_counts = list()
@@ -577,11 +580,11 @@ class Anonymizer:
     def anonymize_expectation(
         self, expectation_type: Optional[str], info_dict: dict
     ) -> None:
-        """
+        """Anonymize Expectation objs from 'great_expectations.expectations'.
 
         Args:
-            expectation_type (Optional[str]):
-            info_dict (dict):
+            expectation_type (Optional[str]): The string name of the Expectation.
+            info_dict (dict): A dictionary to update within this function.
         """
         if expectation_type in self.CORE_GE_EXPECTATION_TYPES:
             info_dict["expectation_type"] = expectation_type
@@ -591,12 +594,13 @@ class Anonymizer:
     def anonymize_batch_request(
         self, *args, **kwargs
     ) -> Optional[Dict[str, List[str]]]:
-        """
-            *args:
-            **kwargs:
+        """Construct a BatchRequest from given args and anonymize user-specificy details.
+
+            *args: Used to instantiate a BatchRequest.
+            **kwargs: Used to instantiate a BatchRequest.
 
         Returns:
-
+            An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_batch_request_properties_dict: Optional[Dict[str, List[str]]] = None
 
@@ -735,14 +739,14 @@ class Anonymizer:
         ]
 
     def anonymize_checkpoint_info(self, name: str, config: dict) -> dict:
-        """
+        """Anonymize Checkpoint objs from the 'great_expectations.checkpoint' module.
 
         Args:
-            name (str):
-            config (dict):
+            name (str): The name of the checkpoint.
+            config (dict): The dictionary configuration corresponding to the checkpoint.
 
         Returns:
-
+            An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(name),
