@@ -26,7 +26,6 @@ def get_extras_require():
     lite = results.pop("lite")
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["airflow"] += results["boto"]
 
     for new_key, existing_key in extra_keys.items():
         results[new_key] = results[existing_key]
