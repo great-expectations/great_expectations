@@ -15,57 +15,57 @@ config_version: 3.0
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
 datasources:
   taxi_multibatch_datasource_other_possibility:
+    module_name: great_expectations.datasource
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      class_name: PandasExecutionEngine
     data_connectors:
       default_inferred_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
+        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         default_regex:
           group_names:
             - data_asset_name
             - month
           pattern: (yellow_tripdata_sample_2018)-(\d.*)\.csv
-        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         class_name: InferredAssetFilesystemDataConnector
-        module_name: great_expectations.datasource.data_connector
       default_inferred_data_connector_name_all_years:
+        module_name: great_expectations.datasource.data_connector
+        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         default_regex:
           group_names:
             - data_asset_name
             - year
             - month
           pattern: (yellow_tripdata_sample)_(\d.*)-(\d.*)\.csv
-        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         class_name: InferredAssetFilesystemDataConnector
-        module_name: great_expectations.datasource.data_connector
-    execution_engine:
-      class_name: PandasExecutionEngine
-      module_name: great_expectations.execution_engine
     class_name: Datasource
-    module_name: great_expectations.datasource
   taxi_multi_batch_datsource:
+    module_name: great_expectations.datasource
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      class_name: PandasExecutionEngine
     data_connectors:
       default_inferred_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
+        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         default_regex:
           group_names:
             - data_asset_name
             - month
           pattern: (yellow_tripdata_sample_2018)-(\d.*)\.csv
-        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         class_name: InferredAssetFilesystemDataConnector
-        module_name: great_expectations.datasource.data_connector
       default_inferred_data_connector_name_all_years:
+        module_name: great_expectations.datasource.data_connector
+        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         default_regex:
           group_names:
             - data_asset_name
             - year
             - month
           pattern: (yellow_tripdata_sample)_(\d.*)-(\d.*)\.csv
-        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         class_name: InferredAssetFilesystemDataConnector
-        module_name: great_expectations.datasource.data_connector
-    execution_engine:
-      class_name: PandasExecutionEngine
-      module_name: great_expectations.execution_engine
     class_name: Datasource
-    module_name: great_expectations.datasource
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
@@ -132,7 +132,7 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
-  data_context_id: 757fb482-cb14-4645-b5c7-f6a899254779
-  enabled: true
   usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+  enabled: true
+  data_context_id: 757fb482-cb14-4645-b5c7-f6a899254779
 notebooks:
