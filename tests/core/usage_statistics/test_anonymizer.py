@@ -174,7 +174,7 @@ def test_anonymizer_get_parent_class():
 def test_anonymize_object_info_with_core_ge_object(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt.anonymize_object_info(
+    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
         anonymized_info_dict={},
         object_=ExpectationSuite(expectation_suite_name="my_suite"),
     )
@@ -185,7 +185,7 @@ def test_anonymize_object_info_with_core_ge_object(
 def test_anonymize_object_info_with_custom_user_defined_object_with_single_parent(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt.anonymize_object_info(
+    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
         anonymized_info_dict={},
         object_=MyCustomExpectationSuite(expectation_suite_name="my_suite"),
     )
@@ -199,7 +199,7 @@ def test_anonymize_object_info_with_custom_user_defined_object_with_single_paren
 def test_anonymize_object_info_with_custom_user_defined_object_with_no_parent(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt.anonymize_object_info(
+    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
         anonymized_info_dict={}, object_=BaseTestClass()
     )
 
@@ -212,7 +212,7 @@ def test_anonymize_object_info_with_custom_user_defined_object_with_no_parent(
 def test_anonymize_object_info_with_custom_user_defined_object_with_multiple_parents(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt.anonymize_object_info(
+    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
         anonymized_info_dict={},
         object_=MyCustomMultipleInheritanceClass(expectation_suite_name="my_name"),
     )
@@ -227,7 +227,7 @@ def test_anonymize_object_info_with_missing_args_raises_error(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
     with pytest.raises(AssertionError) as e:
-        anonymizer_with_consistent_salt.anonymize_object_info(
+        anonymizer_with_consistent_salt._anonymize_object_info(
             anonymized_info_dict={},
             object_=None,
             object_class=None,
