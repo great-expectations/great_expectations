@@ -8,9 +8,10 @@ import Prerequisites from '../../components/prerequisites.jsx'
 import WhereToRunCode from '../../components/where_to_run_code.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you connect to your data stored on Microsoft Azure Blob Storage (ABS) using Pandas.
-This will allow you to validate and explore your data.
+This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
 <Prerequisites>
 
@@ -38,10 +39,10 @@ Load your DataContext into memory using the `get_context()` method.
 
 ### 3. Configure your Datasource
 
-Great Expectations provides two types of `DataConnectors` classes for connecting to ABS: `InferredAssetAzureDataConnector` and `ConfiguredAssetAzureDataConnector`
+Great Expectations provides two types of <TechnicalTag tag="data_connector" text="Data Connector" /> classes for connecting to ABS: `InferredAssetAzureDataConnector` and `ConfiguredAssetAzureDataConnector`
 
-  - An `InferredAssetAzureDataConnector` utilizes regular expressions to infer `data_asset_names` by evaluating filename patterns that exist in your bucket. This `DataConnector`, along with a `RuntimeDataConnector`, is provided as a default when utilizing our Jupyter Notebooks.
-  - A `ConfiguredAssetAzureDataConnector` requires an explicit listing of each `DataAsset` you want to connect to. This allows for more granularity and control than its `Inferred` counterpart but also requires a more complex setup.
+- An `InferredAssetAzureDataConnector` utilizes regular expressions to infer `data_asset_names` by evaluating filename patterns that exist in your bucket. This `DataConnector`, along with a `RuntimeDataConnector`, is provided as a default when utilizing our Jupyter Notebooks.
+- A `ConfiguredAssetAzureDataConnector` requires an explicit listing of each <TechnicalTag tag="data_asset" text="Data Asset" /> you want to connect to. This allows for more granularity and control than its `Inferred` counterpart but also requires a more complex setup.
 
 As the `InferredAssetDataConnectors` have fewer options and are generally simpler to use, we recommend starting with them.
 
@@ -76,68 +77,82 @@ Using these example configurations, add in your ABS container and path to a dire
   ]}>
 
 <TabItem value="inferred">
-  The below configuration is representative of the default setup you'll see when preparing your own environment.
 
-  <Tabs
-    groupId="yaml-or-python"
-    defaultValue='yaml'
-    values={[
-    {label: 'YAML', value:'yaml'},
-    {label: 'Python', value:'python'},
-    ]}>
-  <TabItem value="yaml">
+The below configuration is representative of the default setup you'll see when preparing your own environment.
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L13-L37
-  ```
+<Tabs
+groupId="yaml-or-python"
+defaultValue='yaml'
+values={[
+{label: 'YAML', value:'yaml'},
+{label: 'Python', value:'python'},
+]}>
 
-  Run this code to test your configuration.
+<TabItem value="yaml">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L52
-  ```
-  </TabItem>
-  <TabItem value="python">
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L13-L37
+```
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L13-L38
-  ```
+Run this code to test your configuration.
 
-  Run this code to test your configuration.
-
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L59
-  ```
-  </TabItem>
-  </Tabs>
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L52
+```
 </TabItem>
+
+<TabItem value="python">
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L13-L38
+```
+
+Run this code to test your configuration.
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L59
+```
+
+</TabItem>
+
+</Tabs>
+
+</TabItem>
+
 <TabItem value="configured">
-  The below configuration is highly tuned to the specific bucket and blobs relevant to this example. You'll have to fine-tune your own regular expressions and assets to fit your use-case.
-  <Tabs
-    groupId="yaml-or-python"
-    defaultValue='yaml'
-    values={[
-    {label: 'YAML', value:'yaml'},
-    {label: 'Python', value:'python'},
-    ]}>
-  <TabItem value="yaml">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py#L10-L27
-  ```
+The below configuration is highly tuned to the specific bucket and blobs relevant to this example. You'll have to fine-tune your own regular expressions and assets to fit your use-case.
 
-  Run this code to test your configuration.
+<Tabs
+groupId="yaml-or-python"
+defaultValue='yaml'
+values={[
+{label: 'YAML', value:'yaml'},
+{label: 'Python', value:'python'},
+]}>
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py#L38
-  ```
-  </TabItem>
-  <TabItem value="python">
+<TabItem value="yaml">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py#L10-L27
-  ```
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py#L10-L27
+```
 
-  Run this code to test your configuration. 
+Run this code to test your configuration.
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py#L37
-  ```
-  </TabItem>
-  </Tabs>
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py#L38
+```
 </TabItem>
+
+<TabItem value="python">
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py#L10-L27
+```
+
+Run this code to test your configuration. 
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py#L37
+```
+</TabItem>
+
+</Tabs>
+
+</TabItem>
+
 </Tabs>
 
 If you specified an ABS path containing CSV files you will see them listed as `Available data_asset_names` in the output of `test_yaml_config()`.
@@ -155,32 +170,36 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L54
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L61
 ```
 
 </TabItem>
+
 </Tabs>
 
 ### 5. Test your new Datasource
 
-Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
+Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a <TechnicalTag tag="batch_request" text="Batch Request" />.
 
 Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
+
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L57-L61
 ```
 
 Then load data into the `Validator`.
+
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L69-L74
 ```
-
 
 <Congratulations />
 
