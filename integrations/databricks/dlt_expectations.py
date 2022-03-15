@@ -82,6 +82,8 @@ def expect(
     data_context: Optional[BaseDataContext] = None,
     ge_expectation_configuration: Optional[ExpectationConfiguration] = None,
     dlt_library=dlt_mock_library,
+    dlt_table_before_exec=False,
+    dlt_table_after_exec=False,
 ):
     """
     Run a single expectation on a Delta Live Table
@@ -146,27 +148,50 @@ def expect(
                 # TODO: getting the df from args[0] is throwing an in-pipeline error, how do we get access to the dataframe?
 
             if dlt_expectation is not None:
-                print(
-                    f'Here we would normally apply: @dlt.expect("{dlt_expectation.name}", "{dlt_expectation.condition}")'
-                )
-                print(
-                    f"Here we are instead calling @dlt_mock_library_injected.expect() with appropriate parameters, in the real system the `dlt_mock_library_injected` will be replaced with the main `dlt` library that we pass into the decorator via the `dlt` parameter."
-                )
-                dlt_expect_return_value = dlt.expect(
-                    dlt_expectation.name, dlt_expectation.condition
-                )
+                # print(
+                #     f'Here we would normally apply: @dlt.expect("{dlt_expectation.name}", "{dlt_expectation.condition}")'
+                # )
+                # print(
+                #     f"Here we are instead calling @dlt_mock_library_injected.expect() with appropriate parameters, in the real system the `dlt_mock_library_injected` will be replaced with the main `dlt` library that we pass into the decorator via the `dlt` parameter."
+                # )
+                # TODO: Reenable:
+                # dlt_expect_return_value = dlt.expect(
+                #     dlt_expectation.name, dlt_expectation.condition
+                # )
                 print("\n")
 
-                # TODO: Remove, these diagnostics are for development work only:
-                _dlt_expect_return_value_diagnostics(dlt_expect_return_value)
+            #     # TODO: Remove, these diagnostics are for development work only:
+            #     _dlt_expect_return_value_diagnostics(dlt_expect_return_value)
+            #
+            # # TODO: Remove, these diagnostics are for development work only:
+            # _dlt_diagnostics(dlt)
 
-            # TODO: Remove, these diagnostics are for development work only:
-            _dlt_diagnostics(dlt)
+            if dlt_table_before_exec:
+                # TODO: Testing accessing data from within decorator
+                @dlt.table(comment="table from inside decorator before exec")
+                def table_inside_decorator():
+                    df = dlt.read("clickstream_prepared_for_ge").limit(15)
+                    print(
+                        "size, shape (rows, cols) in table_inside_decorator before exec",
+                        (df.count(), len(df.columns)),
+                    )
+                    return df
 
             func_result = func(*args, **kwargs)
 
-            # TODO: Remove, these diagnostics are for development work only:
-            _func_result_diagnostics(func_result)
+            if dlt_table_after_exec:
+                # TODO: Testing accessing data from within decorator
+                @dlt.table(comment="table from inside decorator after exec")
+                def table_inside_decorator():
+                    df = dlt.read("clickstream_prepared_for_ge").limit(16)
+                    print(
+                        "size, shape (rows, cols) in table_inside_decorator after exec",
+                        (df.count(), len(df.columns)),
+                    )
+                    return df
+
+            # # TODO: Remove, these diagnostics are for development work only:
+            # _func_result_diagnostics(func_result)
 
             return func_result
 
