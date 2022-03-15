@@ -4511,26 +4511,3 @@ def test_suite_new_load_jupyter_configured_asset_sql_data_connector_missing_data
         pytest.fail(
             "data_asset_name does not need to be required before suite new/edit notebook workflow begins"
         )
-
-
-def test_suite_new_configured_asset_sql_data_connector_missing_data_asset_get_from_validator(
-    sqlalchemy_missing_data_asset_data_context,
-):
-    context: DataContext = sqlalchemy_missing_data_asset_data_context
-
-    batch_request: dict[str, Any] = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "default_configured_data_connector",
-        "data_asset_name": None,
-        "limit": 1000,
-    }
-
-    expectation_suite_name: str = "test"
-
-    suite: ExpectationSuite = context.create_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
-
-    validator = context.get_validator(
-        batch_request=batch_request, expectation_suite_name=expectation_suite_name
-    )

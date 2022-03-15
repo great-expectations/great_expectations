@@ -1,11 +1,13 @@
 import json
 import random
+from typing import Any
 
 import pytest
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 
@@ -1195,3 +1197,33 @@ def test_ConfiguredAssetSqlDataConnector_with_sorting(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     pass
+
+
+def test_update_configured_asset_sql_data_connector_missing_data_asset(
+    sqlalchemy_missing_data_asset_data_context,
+):
+    context: DataContext = sqlalchemy_missing_data_asset_data_context
+
+    data_asset_name: str = "table_containing_id_spacers_for_D"
+
+    batch_request: dict[str, Any] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "default_configured_data_connector",
+        "data_asset_name": data_asset_name,
+        "limit": 1000,
+    }
+
+    expectation_suite_name: str = "test"
+
+    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    validator = context.get_validator(
+        batch_request=batch_request, expectation_suite_name=expectation_suite_name
+    )
+
+    assert (
+        validator.batches[validator.active_batch_id].batch_definition.data_asset_name
+        == data_asset_name
+    )
