@@ -2,6 +2,9 @@ import logging
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     AttributedResolvedMetrics,
     MetricComputationResult,
@@ -9,9 +12,6 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         candidate_regexes: Optional[Union[Iterable[str], str]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -61,13 +62,15 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             candidate_regexes: a list of candidate regex strings that will REPLACE the default
             batch_list: Optional[List[Batch]] = None,
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
             name=name,
             batch_list=batch_list,
-            data_context=data_context,
             batch_request=batch_request,
+            json_serialize=json_serialize,
+            data_context=data_context,
         )
 
         self._metric_domain_kwargs = metric_domain_kwargs
@@ -122,7 +125,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         """
         metric_computation_result: MetricComputationResult
 
-        metric_computation_result: MetricComputationResult = self.get_metrics(
+        metric_computation_result = self.get_metrics(
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=self.metric_value_kwargs,
@@ -230,29 +233,40 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
     @staticmethod
     def _get_regex_matched_greater_than_threshold(
-        regex_string_success_ratio_dict: dict,
+        regex_string_success_ratio_dict: Dict[str, float],
         threshold: float,
     ) -> List[str]:
         """
         Helper method to calculate which regex_strings match greater than threshold
         """
-        regex_string_success_list: List[str] = []
-        for regex_string, ratio in regex_string_success_ratio_dict.items():
-            if ratio >= threshold:
-                regex_string_success_list.append(regex_string)
+        regex_string: str
+        ratio: float
+        regex_string_success_list: List[str] = [
+            regex_string
+            for regex_string, ratio in regex_string_success_ratio_dict.items()
+            if ratio >= threshold
+        ]
+
         return regex_string_success_list
 
     @staticmethod
     def _get_sorted_regex_and_ratios(
-        regex_string_success_ratio_dict: dict,
+        regex_string_success_ratio_dict: Dict[str, float],
     ) -> Tuple[List[float], List[str]]:
         """
-        Helper method to sort all regexes that were evaluated by their success ratio. Returns Tuple(ratio, sorted_strings)
+        Helper method to sort all regexes that were evaluated by their success ratio.
+
+        Returns Tuple(ratio, sorted_strings)
         """
-        regex_string = regex_string_success_ratio_dict.keys()
-        ratio = list(regex_string_success_ratio_dict.values())
-        sorted_regex_strings = [
-            i for _, i in sorted(zip(ratio, regex_string), reverse=True)
+        regex_strings: List[str] = list(regex_string_success_ratio_dict.keys())
+        ratios: List[float] = list(regex_string_success_ratio_dict.values())
+
+        regex_string: str
+        ratio: float
+        sorted_regex_strings: List[str] = [
+            regex_string
+            for ratio, regex_string in sorted(zip(ratios, regex_strings), reverse=True)
         ]
-        ratio.sort(reverse=True)
-        return ratio, sorted_regex_strings
+        ratios.sort(reverse=True)
+
+        return ratios, sorted_regex_strings

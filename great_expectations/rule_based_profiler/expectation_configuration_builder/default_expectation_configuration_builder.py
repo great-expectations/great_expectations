@@ -20,10 +20,10 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.rule_based_profiler.util import (
+from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 
 text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))
@@ -301,7 +301,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Union[ExpectationConfiguration, None]:
+    ) -> Optional[ExpectationConfiguration]:
         """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""
         parameter_name: str
         fully_qualified_parameter_name: str

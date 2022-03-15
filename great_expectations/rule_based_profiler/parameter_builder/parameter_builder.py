@@ -9,22 +9,24 @@ import numpy as np
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.rule_based_profiler.helpers.util import (
+    build_metric_domain_kwargs,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_validator as get_validator_using_batch_list_or_batch_request,
+)
 from great_expectations.rule_based_profiler.types import (
     Attributes,
     Builder,
     Domain,
     ParameterContainer,
     build_parameter_container,
-)
-from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
-from great_expectations.rule_based_profiler.util import (
-    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_parameter_value_and_validate_return_type,
-)
-from great_expectations.rule_based_profiler.util import (
-    get_validator as get_validator_using_batch_list_or_batch_request,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -90,6 +92,7 @@ class ParameterBuilder(Builder, ABC):
         name: str,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -101,6 +104,7 @@ class ParameterBuilder(Builder, ABC):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -111,6 +115,8 @@ class ParameterBuilder(Builder, ABC):
 
         self._name = name
 
+        self._json_serialize = json_serialize
+
     def build_parameters(
         self,
         parameter_container: ParameterContainer,
@@ -118,6 +124,7 @@ class ParameterBuilder(Builder, ABC):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         parameter_computation_impl: Optional[Callable] = None,
+        json_serialize: Optional[bool] = None,
     ) -> None:
         computed_parameter_value: Any
         parameter_computation_details: dict
@@ -135,9 +142,21 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
+        if json_serialize is None:
+            # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            json_serialize = get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.json_serialize,
+                expected_return_type=bool,
+                variables=variables,
+                parameters=parameters,
+            )
+
         parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
-                "value": convert_to_json_serializable(data=computed_parameter_value),
+                "value": convert_to_json_serializable(data=computed_parameter_value)
+                if json_serialize
+                else computed_parameter_value,
                 "details": parameter_computation_details,
             },
         }
@@ -155,31 +174,9 @@ class ParameterBuilder(Builder, ABC):
     def name(self) -> str:
         return self._name
 
-    """
-    Full getter/setter accessors for "batch_request" and "batch_list" are for configuring ParameterBuilder dynamically.
-    """
-
     @property
-    def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
-        return self._batch_request
-
-    @batch_request.setter
-    def batch_request(
-        self, value: Union[BatchRequest, RuntimeBatchRequest, dict]
-    ) -> None:
-        self._batch_request = value
-
-    @property
-    def batch_list(self) -> Optional[List[Batch]]:
-        return self._batch_list
-
-    @batch_list.setter
-    def batch_list(self, value: List[Batch]) -> None:
-        self._batch_list = value
-
-    @property
-    def data_context(self) -> "DataContext":  # noqa: F821
-        return self._data_context
+    def json_serialize(self) -> Union[str, bool]:
+        return self._json_serialize
 
     @abstractmethod
     def _build_parameters(
@@ -260,8 +257,6 @@ class ParameterBuilder(Builder, ABC):
         significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
-        # IDs of Batch objects used to compute the metric -- commonly obtained via the "get_batch_ids()"
-        # method in this module, although it can readily accept the list of Batch IDs generated through any other means.
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
             variables=variables,
@@ -429,7 +424,7 @@ class ParameterBuilder(Builder, ABC):
                 0
             ].metric_values
             if len(metric_value_kwargs) == 1
-            else list(attributed_resolved_metrics_map.values()),
+            else attributed_resolved_metrics_map.values(),
             details={
                 "metric_configuration": {
                     "metric_name": metric_name,

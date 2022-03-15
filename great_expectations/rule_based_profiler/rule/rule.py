@@ -55,7 +55,7 @@ class Rule(SerializableDictDot):
         """
         expectation_configurations: List[ExpectationConfiguration] = []
 
-        domains: List[Domain] = self._domain_builder.get_domains(variables=variables)
+        domains: List[Domain] = self.domain_builder.get_domains(variables=variables)
 
         domain: Domain
         for domain in domains:
@@ -64,18 +64,18 @@ class Rule(SerializableDictDot):
             )
             self._parameters[domain.id] = parameter_container
             parameter_builder: ParameterBuilder
-            for parameter_builder in self._parameter_builders:
+            for parameter_builder in self.parameter_builders:
                 parameter_builder.build_parameters(
                     parameter_container=parameter_container,
                     domain=domain,
                     variables=variables,
-                    parameters=self.parameters,
+                    parameters=self._parameters,
                 )
 
             expectation_configuration_builder: ExpectationConfigurationBuilder
             for (
                 expectation_configuration_builder
-            ) in self._expectation_configuration_builders:
+            ) in self.expectation_configuration_builders:
                 expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
                         domain=domain,

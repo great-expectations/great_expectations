@@ -70,7 +70,7 @@ stages:
     variables:
       python.version: '3.x'
       GE_pytest_pip_opts: '--requirement requirements-dev-test.txt'
-      GE_pytest_opts: '--no-sqlalchemy --no-spark'
+      GE_pytest_opts: '--no-sqlalchemy'
 
     jobs:
 
@@ -169,7 +169,7 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
       - job: mssql
@@ -203,7 +203,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
       - job: postgres
@@ -234,5 +234,5 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'

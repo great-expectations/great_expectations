@@ -215,7 +215,7 @@ stages:
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
 
@@ -272,7 +272,7 @@ stages:
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
-                --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
 
@@ -311,7 +311,7 @@ stages:
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
-                --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
 

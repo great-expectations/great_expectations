@@ -7,6 +7,7 @@ import os
 import random
 import shutil
 import sys
+import warnings
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -23,9 +24,13 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+)
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     GeCloudConfig,
@@ -66,7 +71,7 @@ from great_expectations.self_check.util import (
     get_dataset,
     get_sqlite_connection_url,
 )
-from great_expectations.util import is_library_loadable, probabilistic_test
+from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
 
 RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
@@ -115,10 +120,16 @@ def pytest_configure(config):
 
 
 def pytest_addoption(parser):
+    # note: --no-spark will be deprecated in favor of --spark
     parser.addoption(
         "--no-spark",
         action="store_true",
-        help="If set, suppress all tests against the spark test suite",
+        help="If set, suppress tests against the spark test suite",
+    )
+    parser.addoption(
+        "--spark",
+        action="store_true",
+        help="If set, execute tests against the spark test suite",
     )
     parser.addoption(
         "--no-sqlalchemy",
@@ -126,9 +137,15 @@ def pytest_addoption(parser):
         help="If set, suppress all tests using sqlalchemy",
     )
     parser.addoption(
+        "--postgresql",
+        action="store_true",
+        help="If set, execute tests against postgresql",
+    )
+    # note: --no-postgresql will be deprecated in favor of --postgresql
+    parser.addoption(
         "--no-postgresql",
         action="store_true",
-        help="If set, suppress all tests against postgresql",
+        help="If set, supress tests against postgresql",
     )
     parser.addoption(
         "--mysql",
@@ -181,10 +198,21 @@ def build_test_backends_list(metafunc):
 
 
 def build_test_backends_list_cfe(metafunc):
+    # adding deprecation warnings
+    if metafunc.config.getoption("--no-postgresql"):
+        warnings.warn(
+            "--no-sqlalchemy is deprecated as of v0.14 in favor of the --postgresql flag. It will be removed in v0.16. Please adjust your tests accordingly",
+            DeprecationWarning,
+        )
+    if metafunc.config.getoption("--no-spark"):
+        warnings.warn(
+            "--no-spark is deprecated as of v0.14 in favor of the --spark flag. It will be removed in v0.16. Please adjust your tests accordingly.",
+            DeprecationWarning,
+        )
     include_pandas: bool = True
-    include_spark: bool = not metafunc.config.getoption("--no-spark")
+    include_spark: bool = metafunc.config.getoption("--spark")
     include_sqlalchemy: bool = not metafunc.config.getoption("--no-sqlalchemy")
-    include_postgresql = not metafunc.config.getoption("--no-postgresql")
+    include_postgresql: bool = metafunc.config.getoption("--postgresql")
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
@@ -197,6 +225,7 @@ def build_test_backends_list_cfe(metafunc):
         include_mysql=include_mysql,
         include_mssql=include_mssql,
         include_bigquery=include_bigquery,
+        include_aws=include_aws,
     )
     return test_backend_names
 
@@ -225,15 +254,6 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_aws_integration)
         if "docs" in item.keywords:
             item.add_marker(skip_docs_integration)
-
-
-@pytest.fixture
-def always_failing_test():
-    @probabilistic_test
-    def failing_test_func():
-        assert False, "Executing 'test_method()' failed."
-
-    return failing_test_func
 
 
 @pytest.fixture(autouse=True)
@@ -4931,6 +4951,46 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
 
 
 @pytest.fixture
+def data_context_with_query_store(
+    empty_data_context, titanic_sqlite_db_connection_string
+):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: {titanic_sqlite_db_connection_string}
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+    """
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    store_config = yaml.load(
+        f"""
+    class_name: SqlAlchemyQueryStore
+    credentials: 
+        connection_string: {titanic_sqlite_db_connection_string}
+    queries:
+        col_count:
+            query: "SELECT COUNT(*) FROM titanic;"
+            return_type: "scalar"
+        dist_col_count:
+            query: "SELECT COUNT(DISTINCT PClass) FROM titanic;"
+            return_type: "scalar"
+    """
+    )
+    context.add_store("my_query_store", store_config)
+    return context
+
+
+@pytest.fixture
 def ge_cloud_base_url():
     return "https://app.test.greatexpectations.io"
 
@@ -5434,12 +5494,16 @@ def alice_columnar_table_single_batch(empty_data_context):
 @pytest.fixture
 def alice_columnar_table_single_batch_context(
     monkeypatch,
-    empty_data_context,
+    empty_data_context_stats_enabled,
     alice_columnar_table_single_batch,
 ):
     skip_if_python_below_minimum_version()
 
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
+    # We need our salt to be consistent between runs to ensure idempotent anonymized values
+    context._usage_statistics_handler = UsageStatisticsHandler(
+        context, "00000000-0000-0000-0000-00000000a004", "N/A"
+    )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
     data_path: str = os.path.join(context.root_directory, data_relative_path)
@@ -6428,6 +6492,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -6598,6 +6663,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -6705,8 +6771,8 @@ def quentin_columnar_table_multi_batch():
                 "tolls_amount": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
                 "fare_amount": [
                     [5.842754275, 6.5],
-                    [8.675167517, 9.661311131],
-                    [13.344354435, 15.815389039],
+                    [8.675167517, 9.5750000000],
+                    [13.344354435, 15.650000000],
                 ],
                 "tip_amount": [
                     [0.0, 0.0],
@@ -6715,7 +6781,7 @@ def quentin_columnar_table_multi_batch():
                 ],
                 "total_amount": [
                     [8.2740033, 11.422183043],
-                    [11.358555106, 14.959993149],
+                    [11.2955000, 14.875000000],
                     [16.746263451, 21.327684643],
                 ],
             },
@@ -6736,6 +6802,7 @@ def quentin_columnar_table_multi_batch_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")

@@ -254,8 +254,7 @@ def convert_to_json_serializable(data):
 
     else:
         raise TypeError(
-            "%s is of type %s which cannot be serialized."
-            % (str(data), type(data).__name__)
+            f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
         )
 
 
@@ -568,7 +567,7 @@ class S3Url:
     @property
     def key(self):
         if self._parsed.query:
-            return self._parsed.path.lstrip("/") + "?" + self._parsed.query
+            return f"{self._parsed.path.lstrip('/')}?{self._parsed.query}"
         else:
             return self._parsed.path.lstrip("/")
 

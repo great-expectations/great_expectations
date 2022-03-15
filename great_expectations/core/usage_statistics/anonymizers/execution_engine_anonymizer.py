@@ -3,25 +3,11 @@ from great_expectations.data_context.types.base import (
     ExecutionEngineConfig,
     executionEngineConfigSchema,
 )
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
 
 
 class ExecutionEngineAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
-
-        # ordered bottom up in terms of inheritance order
-        self._ge_classes = [
-            PandasExecutionEngine,
-            SparkDFExecutionEngine,
-            SqlAlchemyExecutionEngine,
-            ExecutionEngine,
-        ]
 
     def anonymize_execution_engine_info(self, name, config):
         anonymized_info_dict = {}
@@ -37,7 +23,6 @@ class ExecutionEngineAnonymizer(Anonymizer):
 
         self.anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
             object_config=execution_engine_config_dict,
         )
 

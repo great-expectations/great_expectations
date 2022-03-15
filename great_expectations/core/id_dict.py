@@ -15,7 +15,7 @@ class IDDict(dict):
             return tuple()
         elif len(id_keys) == 1:
             key = list(id_keys)[0]
-            return key + "=" + str(self[key])
+            return f"{key}={str(self[key])}"
 
         _id_dict = {k: self[k] for k in id_keys}
         return hashlib.md5(
