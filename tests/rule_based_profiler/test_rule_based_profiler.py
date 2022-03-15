@@ -1,4 +1,3 @@
-import logging
 from typing import Any, Dict, List, Optional
 from unittest import mock
 from unittest.mock import MagicMock
@@ -957,48 +956,6 @@ def test_run_profiler_with_dynamic_args(
         expectation_suite_name=expectation_suite_name,
         include_citation=include_citation,
     )
-
-
-@mock.patch("great_expectations.rule_based_profiler.rule.Rule.generate")
-@mock.patch(
-    "great_expectations.rule_based_profiler.parameter_builder.ParameterBuilder.get_metrics"
-)
-@mock.patch(
-    "great_expectations.rule_based_profiler.parameter_builder.ParameterBuilder.get_batch_ids"
-)
-@mock.patch(
-    "great_expectations.rule_based_profiler.domain_builder.DomainBuilder.get_batch_ids"
-)
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-def test_run_profiler_on_data_emits_appropriate_logging(
-    mock_data_context: mock.MagicMock,
-    mock_domain_builder_get_batch_ids: mock.MagicMock,
-    mock_parameter_builder_get_batch_ids: mock.MagicMock,
-    mock_parameter_builder_get_metrics: mock.MagicMock,
-    mock_rule_generate: mock.MagicMock,
-    populated_profiler_store: ProfilerStore,
-    profiler_name: str,
-    caplog: Any,
-):
-    batch_request: BatchRequest = BatchRequest(
-        datasource_name="my_datasource",
-        data_connector_name="my_data_connector",
-        data_asset_name="my_data_asset",
-    )
-
-    caplog.set_level(
-        logging.DEBUG,
-        logger="great_expectations.rule_based_profiler.rule_based_profiler",
-    )
-    with caplog.at_level(logging.DEBUG):
-        RuleBasedProfiler.run_profiler_on_data(
-            data_context=mock_data_context,
-            profiler_store=populated_profiler_store,
-            name=profiler_name,
-            batch_request=batch_request,
-        )
-
-    assert "Converted batch request" in caplog.text
 
 
 @mock.patch(

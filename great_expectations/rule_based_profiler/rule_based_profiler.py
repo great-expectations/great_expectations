@@ -12,7 +12,6 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
     batch_request_contains_batch_data,
-    get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -29,7 +28,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config.base import (
     DomainBuilderConfig,
     ExpectationConfigurationBuilderConfig,
@@ -894,36 +892,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         Raises:
             ProfilerConfigurationError is both "batch_list" and "batch_request" arguments are specified.
         """
-        arg: Any
-        num_supplied_batch_specification_args: int = sum(
-            [
-                0 if arg is None else 1
-                for arg in (
-                    batch_list,
-                    batch_request,
-                )
-            ]
-        )
-        if num_supplied_batch_specification_args > 1:
-            raise ge_exceptions.ProfilerConfigurationError(
-                f'Please pass at most one of "batch_list" and "batch_request" arguments (you passed {num_supplied_batch_specification_args} arguments).'
-            )
-
-        batch_data_property_name: str
-        batch_data_property_value: Optional[
-            Union[List[Batch], BatchRequest, RuntimeBatchRequest, dict]
-        ]
-
-        if batch_list is None:
-            batch_data_property_name = "batch_request"
-            batch_data_property_value = batch_request
-            if not isinstance(batch_request, dict):
-                batch_request = get_batch_request_as_dict(batch_request=batch_request)
-                logger.debug("Converted batch request to dictionary: %s", batch_request)
-        else:
-            batch_data_property_name = "batch_list"
-            batch_data_property_value = batch_list
-
         resulting_rules: List[Rule] = []
 
         rule: Rule
@@ -933,10 +901,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         for rule in rules:
             domain_builder = rule.domain_builder
             if force_batch_data or domain_builder.batch_request is None:
-                setattr(
-                    domain_builder,
-                    batch_data_property_name,
-                    batch_data_property_value,
+                domain_builder.set_batch_data(
+                    batch_list=batch_list,
+                    batch_request=batch_request,
                 )
 
             """
@@ -948,10 +915,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
             if parameter_builders:
                 for parameter_builder in parameter_builders:
                     if force_batch_data or parameter_builder.batch_request is None:
-                        setattr(
-                            parameter_builder,
-                            batch_data_property_name,
-                            batch_data_property_value,
+                        parameter_builder.set_batch_data(
+                            batch_list=batch_list,
+                            batch_request=batch_request,
                         )
 
             resulting_rules.append(rule)
@@ -1109,7 +1075,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             return profiler_store.list_keys()
         return [x.configuration_key for x in profiler_store.list_keys()]
 
-    def self_check(self, pretty_print=True) -> dict:
+    def self_check(self, pretty_print: bool = True) -> dict:
         """
         Necessary to enable integration with `DataContext.test_yaml_config`
         Args:

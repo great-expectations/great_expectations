@@ -586,14 +586,15 @@ class Validator:
         }
 
         domain_type: MetricDomainTypes = rule.domain_builder.domain_type
+        if domain_type not in MetricDomainTypes:
+            raise ValueError(
+                f'Domain type declaration "{domain_type}" in "MetricDomainTypes" does not exist.'
+            )
+
         # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
         if domain_type == MetricDomainTypes.COLUMN:
             column_name = expectation_kwargs["column"]
             rule.domain_builder.column_names = [column_name]
-        elif domain_type == MetricDomainTypes.TABLE:
-            pass  # No action is needed.
-        else:
-            pass  # No action is needed.
 
         for parameter_builder in rule.parameter_builders:
             if hasattr(parameter_builder, "metric_name") and hasattr(
