@@ -145,7 +145,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -168,7 +168,7 @@ stages:
           postgres: postgres
 
         variables:
-          GE_pytest_opts: ''
+          GE_pytest_opts: '--postgresql --spark'
 
         strategy:
           matrix:
@@ -219,8 +219,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -262,7 +262,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-azurepipelines
+              pip install pytest pytest-azurepipelines==1.0.1
               pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -312,7 +312,7 @@ stages:
 
           - script: |
               pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -344,7 +344,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -384,7 +384,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-azurepipelines
+              pip install pytest pytest-azurepipelines==1.0.1
               pytest --postgresql --spark --aws-integration -v tests/cli
             displayName: 'pytest'
 

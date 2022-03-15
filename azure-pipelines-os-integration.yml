@@ -94,7 +94,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               pytest $(GE_pytest_opts)
             displayName: 'pytest'
 
@@ -118,7 +118,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               pytest $(GE_pytest_opts)
             displayName: 'pytest'
 
@@ -168,7 +168,7 @@ stages:
 
           - script: |
               pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -202,7 +202,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -233,6 +233,6 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
               pytest --postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
