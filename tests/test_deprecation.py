@@ -5,6 +5,24 @@ from typing import List, Tuple
 import versioneer
 
 
+def test_deprecation_warnings_are_accompanied_by_appropriate_comment():
+    pattern: re.Pattern = re.compile(r"deprecated-v(\d*)\.(\d*)\.(\d*)")
+    files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
+
+    # Filter out parts of the codebase that aren't written by the GE team
+    files = list(filter(lambda f: "marshmallow__shade" not in f, files))
+
+    for file in files:
+        with open(file) as f:
+            contents = f.read()
+
+        matches: List[Tuple[str, str, str]] = pattern.findall(contents)
+        warning_count: int = contents.count("DeprecationWarning")
+        assert (
+            len(matches) == warning_count
+        ), f"Either a 'deprecated-v...' comment or 'DeprecationWarning' call is missing from {file}"
+
+
 def test_deprecation_warnings_have_been_removed_after_two_minor_versions():
     """
     What does this test do and why?
@@ -40,5 +58,5 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions():
         for file, version in unneeded_deprecation_warnings:
             print(f"{file} - v{version}")
 
-    # Chetan - 20220315 - This should be 0 once we've cleared deprecation warnings in v0.16.0
+    # Chetan - 20220315 - This should be 0 once we've cleared deprecation warnings in v0.16.0.
     assert len(unneeded_deprecation_warnings) == 29

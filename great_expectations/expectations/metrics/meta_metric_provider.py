@@ -24,6 +24,7 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
     """
 
     # TODO: <Alex>All logging/warning directives should be placed into a common module to be imported as needed.</Alex>
+    # deprecated-v0.13.12
     warnings.simplefilter("default", category=DeprecationWarning)
 
     # Arguments: True -- suppresses the warnings; False -- outputs the warnings (to stderr).
