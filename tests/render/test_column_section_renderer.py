@@ -1539,6 +1539,9 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
 
 
 # noinspection PyPep8Naming
+@pytest.mark.filterwarnings(
+    "ignore:Cannot get %*::great_expectations.render.renderer.profiling_results_overview_section_renderer"
+)
 def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
     # This rather specific test is a reaction to the error documented in #679
     validation = ExpectationSuiteValidationResult(

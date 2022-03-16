@@ -33,7 +33,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
 
     regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
         RegexPatternStringParameterBuilder(
-            name="my_simple_regex_string_parameter_builder",
+            name="my_regex_pattern_string_parameter_builder",
             data_context=data_context,
             candidate_regexes=candidate_regexes,
         )
@@ -54,7 +54,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
     }
     regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
         RegexPatternStringParameterBuilder(
-            name="my_simple_regex_string_parameter_builder",
+            name="my_regex_pattern_string_parameter_builder",
             candidate_regexes=candidate_regexes,
             threshold=0.5,
             data_context=data_context,
@@ -85,7 +85,7 @@ def test_regex_pattern_string_parameter_builder_alice(
 
     regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
         RegexPatternStringParameterBuilder(
-            name="my_regex",
+            name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
             batch_request=batch_request,
@@ -102,7 +102,9 @@ def test_regex_pattern_string_parameter_builder_alice(
     regex_pattern_string_parameter.build_parameters(
         parameter_container=parameter_container, domain=domain
     )
-    fully_qualified_parameter_name_for_value: str = "$parameter.my_regex"
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_regex_pattern_string_parameter_builder"
+    )
     expected_value: dict = {
         "value": [r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$"],
         "details": {
@@ -262,6 +264,125 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
                 r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ": 0,
             },
             "threshold": 0.9,
+        },
+    }
+
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+            parameters={domain.id: parameter_container},
+        )
+        == expected_value
+    )
+
+
+def test_regex_pattern_string_parameter_builder_alice_single_regex_pattern(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    metric_domain_kwargs = {"column": "id"}
+    candidate_regexes: List[str] = [
+        r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
+    ]
+
+    regex_pattern_string_parameter_builder: RegexPatternStringParameterBuilder = (
+        RegexPatternStringParameterBuilder(
+            name="my_regex_pattern_string_parameter_builder",
+            metric_domain_kwargs=metric_domain_kwargs,
+            candidate_regexes=candidate_regexes,
+            batch_request=batch_request,
+            data_context=data_context,
+        )
+    )
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+    )
+    assert parameter_container.parameter_nodes is None
+
+    regex_pattern_string_parameter_builder.build_parameters(
+        parameter_container=parameter_container, domain=domain
+    )
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_regex_pattern_string_parameter_builder"
+    )
+    expected_value: dict = {
+        "value": [r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$"],
+        "details": {
+            "evaluated_regexes": {
+                r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$": 1.0,
+            },
+            "threshold": 1.0,
+        },
+    }
+
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+            parameters={domain.id: parameter_container},
+        )
+        == expected_value
+    )
+
+
+def test_regex_pattern_string_parameter_builder_alice_two_regex_patterns(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    metric_domain_kwargs = {"column": "id"}
+    candidate_regexes: List[str] = [
+        r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
+        r"^\d{1}$",
+    ]
+
+    regex_pattern_string_parameter_builder: RegexPatternStringParameterBuilder = (
+        RegexPatternStringParameterBuilder(
+            name="my_regex_pattern_string_parameter_builder",
+            metric_domain_kwargs=metric_domain_kwargs,
+            candidate_regexes=candidate_regexes,
+            batch_request=batch_request,
+            data_context=data_context,
+        )
+    )
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+    )
+    assert parameter_container.parameter_nodes is None
+
+    regex_pattern_string_parameter_builder.build_parameters(
+        parameter_container=parameter_container, domain=domain
+    )
+
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_regex_pattern_string_parameter_builder"
+    )
+    expected_value: dict = {
+        "value": [r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$"],
+        "details": {
+            "evaluated_regexes": {
+                r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$": 1.0,
+                r"^\d{1}$": 0,
+            },
+            "threshold": 1.0,
         },
     }
 

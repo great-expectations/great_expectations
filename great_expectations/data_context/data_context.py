@@ -48,20 +48,9 @@ from great_expectations.core.expectation_validation_result import get_metric_kwa
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import (
-    CheckpointAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymizer import (
-    DataConnectorAnonymizer,
-)
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
-    ProfilerAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
-    StoreAnonymizer,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
@@ -3410,7 +3399,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     )
     def run_profiler_on_data(
         self,
-        batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -3420,7 +3410,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
         Args:
-            batch_request: The batch request used to supply arguments at runtime.
+            batch_list: List of Batch objects used to supply arguments at runtime.
+            batch_request: The batch_request used to supply arguments at runtime.
             name: Identifier used to retrieve the profiler from a store.
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
             expectation_suite: An existing ExpectationSuite to update.
@@ -3431,12 +3422,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             Set of rule evaluation results in the form of an ExpectationSuite.
 
         Raises:
+            ProfilerConfigurationError is both "batch_list" and "batch_request" arguments are specified.
             AssertionError if both a `name` and `ge_cloud_id` are provided.
             AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
         """
         return RuleBasedProfiler.run_profiler_on_data(
             data_context=self,
             profiler_store=self.profiler_store,
+            batch_list=batch_list,
             batch_request=batch_request,
             name=name,
             ge_cloud_id=ge_cloud_id,
@@ -3685,8 +3678,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         store_name = instantiated_class.store_name or store_name
         self.config["stores"][store_name] = config
 
-        store_anonymizer = StoreAnonymizer(self.data_context_id)
-        usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+        anonymizer = Anonymizer(self.data_context_id)
+        usage_stats_event_payload = anonymizer.anonymize_store_info(
             store_name=store_name, store_obj=instantiated_class
         )
         return instantiated_class, usage_stats_event_payload
@@ -3759,11 +3752,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
-        checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-            self.data_context_id
-        )
+        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+        usage_stats_event_payload = anonymizer.anonymize_checkpoint_info(
             name=checkpoint_name, config=checkpoint_config
         )
 
@@ -3795,12 +3786,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             config_defaults={},
         )
 
-        data_connector_anonymizer = DataConnectorAnonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = (
-            data_connector_anonymizer.anonymize_data_connector_info(
-                name=data_connector_name, config=config
-            )
+        usage_stats_event_payload = anonymizer.anonymize_data_connector_info(
+            name=data_connector_name, config=config
         )
         return instantiated_class, usage_stats_event_payload
 
@@ -3830,11 +3819,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             },
         )
 
-        profiler_anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
-            self.data_context_id
-        )
+        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload: dict = profiler_anonymizer.anonymize_profiler_info(
+        usage_stats_event_payload: dict = anonymizer.anonymize_profiler_info(
             name=profiler_name, config=profiler_config
         )
 
@@ -3867,30 +3854,29 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
         # If a subclass of a supported type, find the parent class and anonymize
-        store_anonymizer: StoreAnonymizer = StoreAnonymizer(self.data_context_id)
+        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
         datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
             self.data_context_id
         )
-        checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-            self.data_context_id
+
+        parent_class_from_object = anonymizer.get_parent_class(
+            object_=instantiated_class
         )
-        data_connector_anonymizer: DataConnectorAnonymizer = DataConnectorAnonymizer(
-            self.data_context_id
-        )
-        if (
-            store_anonymizer.is_parent_class_recognized(store_obj=instantiated_class)
-            is not None
+        parent_class_from_config = anonymizer.get_parent_class(object_config=config)
+
+        if parent_class_from_object is not None and parent_class_from_object.endswith(
+            "Store"
         ):
             store_name: str = name or config.get("name") or "my_temp_store"
             store_name = instantiated_class.store_name or store_name
-            usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+            usage_stats_event_payload = anonymizer.anonymize_store_info(
                 store_name=store_name, store_obj=instantiated_class
             )
-        elif (
-            datasource_anonymizer.is_parent_class_recognized(config=config) is not None
+        elif parent_class_from_config is not None and parent_class_from_config.endswith(
+            "Datasource"
         ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
-            if datasource_anonymizer.is_parent_class_recognized_v3_api(config=config):
+            if datasource_anonymizer.get_parent_class_v3_api(config=config):
                 # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
                 datasource_config = datasourceConfigSchema.load(
                     instantiated_class.config
@@ -3899,10 +3885,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             else:
                 # for v2 api
                 full_datasource_config = config
-            parent_class_name = datasource_anonymizer.is_parent_class_recognized(
-                config=config
-            )
-            if parent_class_name == "SimpleSqlalchemyDatasource":
+            if parent_class_from_config == "SimpleSqlalchemyDatasource":
                 # Use the raw config here, defaults will be added in the anonymizer
                 usage_stats_event_payload = (
                     datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
@@ -3916,8 +3899,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     )
                 )
 
-        elif (
-            checkpoint_anonymizer.is_parent_class_recognized(config=config) is not None
+        elif parent_class_from_config is not None and parent_class_from_config.endswith(
+            "Checkpoint"
         ):
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
@@ -3927,21 +3910,18 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             checkpoint_config = checkpoint_config.to_json_dict()
             checkpoint_config.update({"name": checkpoint_name})
-            usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+            usage_stats_event_payload = anonymizer.anonymize_checkpoint_info(
                 name=checkpoint_name, config=checkpoint_config
             )
 
-        elif (
-            data_connector_anonymizer.is_parent_class_recognized(config=config)
-            is not None
+        elif parent_class_from_config is not None and parent_class_from_config.endswith(
+            "DataConnector"
         ):
             data_connector_name: str = (
                 name or config.get("name") or "my_temp_data_connector"
             )
-            usage_stats_event_payload = (
-                data_connector_anonymizer.anonymize_data_connector_info(
-                    name=data_connector_name, config=config
-                )
+            usage_stats_event_payload = anonymizer.anonymize_data_connector_info(
+                name=data_connector_name, config=config
             )
 
         else:

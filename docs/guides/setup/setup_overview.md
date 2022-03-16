@@ -3,6 +3,7 @@ title: "Setup: Overview"
 ---
 # [![Setup Icon](../../images/universal_map/Gear-active.png)](./setup_overview.md) Setup: Overview 
 
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
@@ -15,7 +16,7 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 - Completing [Step 1: Setup](../../tutorials/getting_started/tutorial_setup.md) of the Getting Started tutorial is recommended.
 :::
 	
-Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all of the features of Great Expectations from a single entry point: Your Data Context.  You will also have your Stores and Data Docs configured in the manner most suitable for your project's purposes.
+Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all of the features of Great Expectations from a single entry point: Your <TechnicalTag relative="../" tag="data_context" text="Data Context" />.  You will also have your <TechnicalTag relative="../" tag="store" text="Stores" /> and <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> configured in the manner most suitable for your project's purposes.
 
 ### The alternative to manual Setup
 
@@ -27,7 +28,7 @@ If you're not interested in managing your own configuration or infrastructure th
 
 Setup entails ensuring your system is prepared to run Great Expectations, installing Great Expectations itself, and initializing your deployment. Optionally, you can also tweak the configuration of some components, such as Stores and Data Docs. We'll look at each of these things in sequence.
 
-Note: configuration of Datasources, Expectation Suites, and Checkpoints will be handled separately. We consider those to be configuration of components after your main Great Expectations deployment is set up.
+Note: configuration of <TechnicalTag relative="../" tag="datasource" text="Datasources" />, <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> will be handled separately. We consider those to be configuration of components after your main Great Expectations deployment is set up.
 
 <!-- The following subsections should be repeated as necessary.  They should give a high level map of the things that need to be done or optionally can be done in this process, preferably in the order that they should be addressed (assuming there is one). If the process crosses multiple steps of the Universal Map, use the <SetupHeader> <ConnectHeader> <CreateHeader> and <ValidateHeader> tags to indicate which Universal Map step the subsections fall under. -->
 
@@ -35,7 +36,7 @@ Note: configuration of Datasources, Expectation Suites, and Checkpoints will be 
 
 The first thing to take care of is making sure your work environment has the utilities you need to install and run Great Expectations.  These include a working Python install (version 3.6 or greater), the ability to pip install Python packages, an internet connection, and a browser so that you can use Jupyter notebooks.  Best practices are to use a virtual environment for your project's workspace.
 
-If you are having trouble with any of these, our documentation on [Supporting Resources](../../terms/supporting_resource.md) will direct you to more information and helpful tutorials.
+If you are having trouble with any of these, our documentation on <TechnicalTag relative="../" tag="supporting_resource" text="Supporting Resources" /> will direct you to more information and helpful tutorials.
 
 ### 2. Installation
 
@@ -73,7 +74,7 @@ Once your Data Context is initialized, you'll be all set to start using Great Ex
 
 #### Stores
 
-Stores are the locations where your Data Context stores information about your Expectations, your Validation Results, and your Metrics.  By default, these are stored locally.  But you can reconfigure them to work with a variety of backends.  
+Stores are the locations where your Data Context stores information about your <TechnicalTag relative="../" tag="expectation" text="Expectations" />, your <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, and your <TechnicalTag relative="../" tag="metric" text="Metrics" />.  By default, these are stored locally.  But you can reconfigure them to work with a variety of backends.  
 
 See our [guides for configuring Stores](./index.md#stores) for more information.
 
@@ -85,11 +86,9 @@ See our [guides on configuring Data Docs](./index.md#data-docs) for more informa
 
 #### Plugins
 
-Python files that are placed in the `plugins` directory in your project (which is created automatically when you initialize your <TechnicalTag relative="../" tag="data_context" text="Data Context" />) can be used to extend Great Expectations.  If you have Custom Expectations or other extensions to Great Expectations that you wish to use as Plugins in your deployment of Great Expectations, you should include them in the `plugins` directory.
+Python files are treated as <TechnicalTag relative="../" tag="plugin" text="Plugins" /> if they are in the `plugins` directory in your project (which is created automatically when you initialize your Data Context) can be used to extend Great Expectations.  If you have <TechnicalTag relative="../" tag="custom_expectation" text="Custom Expectations" /> or other extensions to Great Expectations that you wish to use as Plugins in your deployment of Great Expectations, you should include them in the `plugins` directory.
 
 ## Wrapping up
-
-<!-- This section is essentially a victory lap.  It should reiterate what they have accomplished/are now capable of doing.  If there is a next process (such as the universal map steps) this should state that the reader is now ready to move on to it. -->
 
 That's all there is to the Setup step.  Once you have your Data Context initialized you will almost always start from your Data Context (as illustrated below) for everything else you do through Great Expectations.
 
