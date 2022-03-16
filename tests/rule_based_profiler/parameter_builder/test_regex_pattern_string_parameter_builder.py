@@ -358,6 +358,7 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
         regex_pattern_string_parameter_builder.build_parameters(
             parameter_container=parameter_container, domain=domain
         )
+
     assert (
         e.value.message
         == "column_values.nonnull.count was not found in the resolved Metrics for ParameterBuilder."
