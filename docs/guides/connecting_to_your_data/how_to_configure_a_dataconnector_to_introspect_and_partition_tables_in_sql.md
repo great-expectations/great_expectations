@@ -4,14 +4,15 @@ title: How to configure a DataConnector to introspect and partition tables in SQ
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you introspect and partition tables in an SQL database using `SimpleSqlalchemyDatasource`, which
 operates as a proxy to `InferredAssetSqlDataConnector` and `ConfiguredAssetSqlDataConnector`.  For background, please
-see the `Datasource` specific guides in the "Connecting to your data" section.
+see the [Datasource specific guides](../connecting_to_your_data/index.md) in the [Connecting to your data](../connecting_to_your_data/connect_to_data_overview.md) section of our documentation.
 
 The SQL database introspection and partitioning are useful for:
 - Exploring the schema and column metadata of the tables in your SQL database, and
-- Organizing the tables into data assets according to the partitioning considerations informed by this exploration.
+- Organizing the tables into <TechnicalTag tag="data_asset" text="Data Assets" /> according to the partitioning considerations informed by this exploration.
 
 Partitioning enables you to select the desired subsets of your dataset for [Validation](/docs/reference/validation).
 
@@ -32,7 +33,7 @@ achieve the introspection of your SQL database with the semantics consistent wit
 Only `introspection` and `tables` are the legal top-level keys in the `SimpleSqlalchemyDatasource` configuration.
 :::
 
-To learn more about `Datasources`, `Data Connectors`, and `Batch(es)`, please see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md).
+To learn more about <TechnicalTag tag="datasource" text="Datasources" />, <TechnicalTag tag="data_connector" text="Data Connectors" />, and <TechnicalTag tag="batch" text="Batch(es)" />, please see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md).
 
 ## Preliminary Steps
 
@@ -59,7 +60,8 @@ Load your DataContext into memory using the `get_context()` method.
   {label: 'Introspection (InferredAssetSqlDataConnector)', value:'introspection'},
   {label: 'Tables (ConfiguredAssetSqlDataConnector)', value:'tables'},
   ]}>
-  <TabItem value="introspection">
+
+<TabItem value="introspection">
 
 ### 1. Configure your SimpleSqlalchemyDatasource for introspection
 
@@ -101,7 +103,7 @@ Then specify the connection string for your database, and again run this code to
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L23
 ```
 
-Notice that the output reports an empty `Data Connectors` list, signaling a misconfiguration.
+Notice that the output reports an empty Data Connectors list, signaling a misconfiguration.
 
 Feel free to experiment with the arguments to
 
@@ -165,6 +167,7 @@ and naming structures of tables in your SQL database:
 ```
 
 </TabItem>
+
 <TabItem value="tables">
 
 ### 1. Configure your SimpleSqlalchemyDatasource to characterize tables
@@ -210,6 +213,7 @@ Finally, once your `Data Connector` configuration satisfies your requirements, s
 ```
 
 </TabItem>
+
 </Tabs>
 
 

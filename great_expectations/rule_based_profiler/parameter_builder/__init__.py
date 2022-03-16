@@ -1,4 +1,5 @@
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (  # isort:skip
+    AttributedResolvedMetrics,
     ParameterBuilder,
     MetricComputationResult,
     MetricValues,
