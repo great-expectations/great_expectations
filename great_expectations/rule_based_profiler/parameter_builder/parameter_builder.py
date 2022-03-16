@@ -372,16 +372,14 @@ class ParameterBuilder(Builder, ABC):
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
-                resolved_metric_value: Union[
-                    Tuple[str, str, str], None
-                ] = resolved_metrics.get(metric_configuration.id)
-                if resolved_metric_value is None:
-                    raise ge_exceptions.ProfilerExecutionError(
-                        f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
-                    )
-                attributed_resolved_metrics.add_resolved_metric(
-                    value=resolved_metric_value
+            resolved_metric_value: Union[
+                Tuple[str, str, str], None
+            ] = resolved_metrics.get(metric_configuration.id)
+            if resolved_metric_value is None:
+                raise ge_exceptions.ProfilerExecutionError(
+                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
                 )
+            attributed_resolved_metrics.add_resolved_metric(value=resolved_metric_value)
 
         metric_attributes_id: str
         metric_values: AttributedResolvedMetrics
