@@ -7007,3 +7007,39 @@ def sqlite_missing_data_asset_data_context(empty_data_context, db_file):
         **config,
     )
     return context
+
+
+@pytest.fixture
+def postgres_introspection_directives_schema_data_context(
+    empty_data_context, test_connectable_postgresql_db
+):
+
+    context: DataContext = empty_data_context
+
+    postgres_connection_string: str = test_connectable_postgresql_db.url
+
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        connection_string: {postgres_connection_string}
+        class_name: SqlAlchemyExecutionEngine
+        module_name: great_expectations.execution_engine
+    data_connectors:
+        inferred_data_connector_public_schema:
+            class_name: InferredAssetSqlDataConnector
+            module_name: great_expectations.datasource.data_connector
+            introspection_directives:
+                schema_name: public
+        inferred_data_connector_test_connection_schema:
+            class_name: InferredAssetSqlDataConnector
+            module_name: great_expectations.datasource.data_connector
+            introspection_directives:
+                schema_name: connection_test
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context

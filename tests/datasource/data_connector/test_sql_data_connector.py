@@ -7,7 +7,6 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -1253,9 +1252,7 @@ def test_replace_and_save_runtime_data_connector_with_limit(
 
     expectation_suite_name: str = "test"
 
-    expectation_suite: ExpectationSuite = context.create_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
@@ -1272,3 +1269,48 @@ def test_replace_and_save_runtime_data_connector_with_limit(
         validator.expect_column_values_to_not_be_null(column="date")
     )
     assert validation_result.result["element_count"] == limit
+
+
+def test_introspection_directives_schema_only_selects_schema_objects(
+    postgres_introspection_directives_schema_data_context,
+):
+    context: DataContext = postgres_introspection_directives_schema_data_context
+
+    data_asset_name: str = "test_df"
+
+    batch_request: dict[str, Any] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "inferred_data_connector_test_connection_schema",
+        "data_asset_name": data_asset_name,
+        "limit": 1000,
+    }
+
+    expectation_suite_name: str = "test"
+
+    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    validator: Validator = context.get_validator(
+        batch_request=batch_request, expectation_suite_name=expectation_suite_name
+    )
+
+    assert (
+        validator.batches[validator.active_batch_id].batch_definition.data_asset_name
+        == data_asset_name
+    )
+
+    batch_request: dict[str, Any] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "inferred_data_connector_public_schema",
+        "data_asset_name": data_asset_name,
+        "limit": 1000,
+    }
+
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    # this will fail because the table with data_asset_name does not exist in the public schema
+    with pytest.raises(KeyError):
+        validator: Validator = context.get_validator(
+            batch_request=batch_request, expectation_suite_name=expectation_suite_name
+        )
