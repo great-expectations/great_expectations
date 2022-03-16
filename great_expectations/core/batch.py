@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+from collections import OrderedDict
 from typing import Any, Callable, Dict, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -887,23 +888,27 @@ def standardize_batch_request_display_ordering(
     if batch_identifiers is not None:
         batch_request.pop("batch_identifiers")
 
-    required_display_ordered_keys: Dict[str, Optional[str]] = {
-        "datasource_name": datasource_name,
-        "data_connector_name": data_connector_name,
-        "data_asset_name": data_asset_name,
-    }
-    optional_keys: Dict[str, Optional[str]] = {
-        "runtime_parameters": runtime_parameters,
-        "batch_identifiers": batch_identifiers,
-    }
-    optional_display_ordered_keys: Dict[str, Optional[str]] = {
-        key: value for key, value in optional_keys.items() if value is not None
-    }
+    required_display_ordered_keys: OrderedDict[str, Optional[str]] = OrderedDict(
+        {
+            "datasource_name": datasource_name,
+            "data_connector_name": data_connector_name,
+            "data_asset_name": data_asset_name,
+        }
+    )
+    optional_keys: OrderedDict[str, Optional[str]] = OrderedDict(
+        {
+            "runtime_parameters": runtime_parameters,
+            "batch_identifiers": batch_identifiers,
+        }
+    )
+    optional_display_ordered_keys: OrderedDict[str, Optional[str]] = OrderedDict(
+        {key: value for key, value in optional_keys.items() if value is not None}
+    )
 
-    batch_request = {
-        **required_display_ordered_keys,
-        **optional_display_ordered_keys,
-        **batch_request,
-    }
-
-    return batch_request
+    return OrderedDict(
+        {
+            **required_display_ordered_keys,
+            **optional_display_ordered_keys,
+            **batch_request,
+        }
+    )
