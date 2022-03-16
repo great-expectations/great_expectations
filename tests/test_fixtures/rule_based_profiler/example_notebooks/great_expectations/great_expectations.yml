@@ -18,28 +18,28 @@ datasources:
     execution_engine:
       module_name: great_expectations.execution_engine
       class_name: PandasExecutionEngine
-    module_name: great_expectations.datasource
     class_name: Datasource
     data_connectors:
       default_inferred_data_connector_name:
-        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
-        module_name: great_expectations.datasource.data_connector
-        class_name: InferredAssetFilesystemDataConnector
         default_regex:
           group_names:
             - data_asset_name
             - month
           pattern: (yellow_tripdata_sample_2018)-(\d.*)\.csv
-      default_inferred_data_connector_name_all_years:
+        class_name: InferredAssetFilesystemDataConnector
         base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         module_name: great_expectations.datasource.data_connector
-        class_name: InferredAssetFilesystemDataConnector
+      default_inferred_data_connector_name_all_years:
         default_regex:
           group_names:
             - data_asset_name
             - year
             - month
           pattern: (yellow_tripdata_sample)_(\d.*)-(\d.*)\.csv
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
+        module_name: great_expectations.datasource.data_connector
+    module_name: great_expectations.datasource
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
