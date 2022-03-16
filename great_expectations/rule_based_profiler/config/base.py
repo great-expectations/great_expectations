@@ -128,14 +128,14 @@ class DomainBuilderConfigSchema(NotNullSchema):
 
     __config_class__ = DomainBuilderConfig
 
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
     module_name = fields.String(
         required=False,
         allow_none=True,
         missing="great_expectations.rule_based_profiler.domain_builder",
+    )
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
     )
     batch_request = fields.Raw(
         required=False,
@@ -176,14 +176,14 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=True,
         allow_none=False,
     )
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
     module_name = fields.String(
         required=False,
         allow_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
+    )
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
     )
     json_serialize = fields.Boolean(
         required=False,
@@ -225,14 +225,14 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
 
     __config_class__ = ExpectationConfigurationBuilderConfig
 
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
     module_name = fields.String(
         required=False,
         allow_none=True,
         missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
+    )
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
     )
     expectation_type = fields.Str(
         required=True,
@@ -510,20 +510,19 @@ class RuleBasedProfilerConfigSchema(Schema):
 
     class Meta:
         unknown = INCLUDE
+        fields = (
+            "name",
+            "config_version",
+            "module_name",
+            "class_name",
+            "variables",
+            "rules",
+        )
+        ordered = True
 
     name = fields.String(
         required=True,
         allow_none=False,
-    )
-    class_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="RuleBasedProfiler",
-    )
-    module_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="great_expectations.rule_based_profiler",
     )
     config_version = fields.Float(
         required=True,
@@ -532,6 +531,16 @@ class RuleBasedProfilerConfigSchema(Schema):
         error_messages={
             "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
         },
+    )
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.rule_based_profiler",
+    )
+    class_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="RuleBasedProfiler",
     )
     variables = fields.Dict(
         keys=fields.String(
