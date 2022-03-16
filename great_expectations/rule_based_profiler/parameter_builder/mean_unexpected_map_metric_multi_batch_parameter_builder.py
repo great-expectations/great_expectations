@@ -8,8 +8,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (

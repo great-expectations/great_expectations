@@ -5,7 +5,7 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder import (
     AttributedResolvedMetrics,
     MetricComputationResult,
     MetricValues,
@@ -136,7 +136,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         metric_values: MetricValues
 
-        metric_values = metric_computation_result.metric_values
+        metric_values = metric_computation_result.metric_values[0].metric_values
 
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]

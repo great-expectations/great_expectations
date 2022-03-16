@@ -111,7 +111,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         return (
             _get_unique_values_from_nested_collection_of_sets(
-                collection=parameter_node.value
+                collection=parameter_node.value[0].metric_values
             ),
             parameter_node.details,
         )
