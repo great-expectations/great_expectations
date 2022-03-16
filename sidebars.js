@@ -303,6 +303,8 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
+        'deployment_patterns/how_to_use_great_expectations_with_prefect',
+
         { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
       ]
     },
