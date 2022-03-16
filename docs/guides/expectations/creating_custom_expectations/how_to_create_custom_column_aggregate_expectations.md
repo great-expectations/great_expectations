@@ -162,7 +162,7 @@ Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 		  Only 0 / 2 tests for pandas are passing
-		  Failing: basic_positive_test, basic_positive_test
+		  Failing: basic_positive_test, basic_negative_test
 ...
 ```
 
@@ -186,8 +186,8 @@ Your Metric function will have the `@column_aggregate_value` decorator, with the
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L41-L44
 ```
 
-This is all that you need to define for now. 
-The `ColumnAggregateMetricProvider` and `ColumnExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
+This is all that you need to define for now. In the next step, we will implement the method to validate the results of this Metric.
+
 
 <details>
   <summary>Other parameters</summary>
