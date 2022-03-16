@@ -217,6 +217,8 @@ except (ImportError, KeyError):
 
 try:
     import sqlalchemy.dialects.mysql as mysqltypes
+
+    # noinspection PyPep8Naming
     from sqlalchemy.dialects.mysql import dialect as mysqlDialect
 
     MYSQL_TYPES = {
@@ -240,6 +242,8 @@ except (ImportError, KeyError):
 
 try:
     import sqlalchemy.dialects.mssql as mssqltypes
+
+    # noinspection PyPep8Naming
     from sqlalchemy.dialects.mssql import dialect as mssqlDialect
 
     MSSQL_TYPES = {
@@ -278,6 +282,35 @@ except (ImportError, KeyError):
     mssqlDialect = None
     MSSQL_TYPES = {}
 
+try:
+    import sqlalchemy_trino
+    import sqlalchemy_trino.datatype as trinotypes
+    from sqlalchemy_trino.dialect import TrinoDialect as trinoDialect
+
+    TRINO_TYPES = {
+        "BOOLEAN": trinotypes._type_map["boolean"],
+        "TINYINT": trinotypes._type_map["tinyint"],
+        "SMALLINT": trinotypes._type_map["smallint"],
+        "INT": trinotypes._type_map["int"],
+        "INTEGER": trinotypes._type_map["integer"],
+        "BIGINT": trinotypes._type_map["bigint"],
+        "REAL": trinotypes._type_map["real"],
+        "DOUBLE": trinotypes._type_map["double"],
+        "DECIMAL": trinotypes._type_map["decimal"],
+        "VARCHAR": trinotypes._type_map["varchar"],
+        "CHAR": trinotypes._type_map["char"],
+        "VARBINARY": trinotypes._type_map["varbinary"],
+        "JSON": trinotypes._type_map["json"],
+        "DATE": trinotypes._type_map["date"],
+        "TIME": trinotypes._type_map["time"],
+        "TIMESTAMP": trinotypes._type_map["timestamp"],
+    }
+except (ImportError, KeyError):
+    sqlalchemy_trino = None
+    trinotypes = None
+    trinoDialect = None
+    TRINO_TYPES = {}
+
 
 SQL_DIALECT_NAMES = (
     "sqlite",
@@ -285,6 +318,7 @@ SQL_DIALECT_NAMES = (
     "mysql",
     "mssql",
     "bigquery",
+    "trino",
 )
 
 
@@ -377,6 +411,7 @@ def get_dataset(
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
+                    # noinspection PyUnresolvedReferences
                     type_ = getattr(pd.core.dtypes.dtypes, value)
                     # If this raises AttributeError it's okay: it means someone built a bad test
                 pandas_schema[key] = type_
@@ -494,6 +529,7 @@ def get_dataset(
 
         if table_name is None:
             table_name = generate_test_table_name()
+
         df.to_sql(
             name=table_name,
             con=engine,
@@ -553,6 +589,7 @@ def get_dataset(
 
         if table_name is None:
             table_name = generate_test_table_name()
+
         df.to_sql(
             name=table_name,
             con=engine,
@@ -566,19 +603,17 @@ def get_dataset(
         # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
         # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
         # rather than referring the table by name.
-        custom_sql = f"SELECT * FROM {table_name}"
+        custom_sql: str = f"SELECT * FROM {table_name}"
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
+
     elif dataset_type == "bigquery":
         if not create_engine:
             return None
         engine = _create_bigquery_engine()
-        schema = None
         if schemas and dataset_type in schemas:
             schema = schemas[dataset_type]
-            # BigQuery does not allow for column names to have spaces
-            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
 
         df.columns = df.columns.str.replace(" ", "_")
 
@@ -649,6 +684,7 @@ def get_dataset(
 
         if table_name is None:
             table_name = generate_test_table_name()
+
         df.to_sql(
             name=table_name,
             con=engine,
@@ -665,7 +701,7 @@ def get_dataset(
     elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
 
-        SPARK_TYPES = {
+        spark_types = {
             "StringType": sparktypes.StringType,
             "IntegerType": sparktypes.IntegerType,
             "LongType": sparktypes.LongType,
@@ -696,7 +732,7 @@ def get_dataset(
                 spark_schema = sparktypes.StructType(
                     [
                         sparktypes.StructField(
-                            column, SPARK_TYPES[schema[column]](), True
+                            column, spark_types[schema[column]](), True
                         )
                         for column in schema
                     ]
@@ -750,7 +786,7 @@ def get_dataset(
                 spark_df = spark.createDataFrame(data_reshaped, string_schema)
                 for c in spark_df.columns:
                     spark_df = spark_df.withColumn(
-                        c, spark_df[c].cast(SPARK_TYPES[schema[c]]())
+                        c, spark_df[c].cast(spark_types[schema[c]]())
                     )
         elif len(data_reshaped) == 0:
             # if we have an empty dataset and no schema, need to assign an arbitrary type
@@ -775,7 +811,6 @@ def get_test_validator_with_data(
     execution_engine,
     data,
     schemas=None,
-    profiler=ColumnsExistProfiler,
     caching=True,
     table_name=None,
     sqlite_db_path=None,
@@ -817,9 +852,10 @@ def get_test_validator_with_data(
 
         return build_pandas_validator_with_data(df=df)
 
-    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
+    elif execution_engine in SQL_DIALECT_NAMES:
         if not create_engine:
             return None
+
         return build_sa_validator_with_data(
             df=df,
             sa_engine_name=execution_engine,
@@ -832,7 +868,7 @@ def get_test_validator_with_data(
     elif execution_engine == "spark":
         import pyspark.sql.types as sparktypes
 
-        SPARK_TYPES = {
+        spark_types: dict = {
             "StringType": sparktypes.StringType,
             "IntegerType": sparktypes.IntegerType,
             "LongType": sparktypes.LongType,
@@ -864,7 +900,7 @@ def get_test_validator_with_data(
                 spark_schema = sparktypes.StructType(
                     [
                         sparktypes.StructField(
-                            column, SPARK_TYPES[schema[column]](), True
+                            column, spark_types[schema[column]](), True
                         )
                         for column in schema
                     ]
@@ -918,7 +954,7 @@ def get_test_validator_with_data(
                 spark_df = spark.createDataFrame(data_reshaped, string_schema)
                 for c in spark_df.columns:
                     spark_df = spark_df.withColumn(
-                        c, spark_df[c].cast(SPARK_TYPES[schema[c]]())
+                        c, spark_df[c].cast(spark_types[schema[c]]())
                     )
         elif len(data_reshaped) == 0:
             # if we have an empty dataset and no schema, need to assign an arbitrary type
@@ -994,6 +1030,11 @@ def build_sa_validator_with_data(
         dialect_types["bigquery"] = BIGQUERY_TYPES
     except AttributeError:
         pass
+    try:
+        dialect_classes["trino"] = trinoDialect
+        dialect_types["trino"] = TRINO_TYPES
+    except AttributeError:
+        pass
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
@@ -1012,6 +1053,8 @@ def build_sa_validator_with_data(
         )
     elif sa_engine_name == "bigquery":
         engine = _create_bigquery_engine()
+    elif sa_engine_name == "trino":
+        engine = _create_trino_engine()
     else:
         engine = None
 
@@ -1022,12 +1065,6 @@ def build_sa_validator_with_data(
     # Add the data to the database as a new table
 
     if sa_engine_name == "bigquery":
-        schema = None
-        if schemas and sa_engine_name in schemas:
-            schema = schemas[sa_engine_name]
-            # bigquery does not allow column names to have spaces
-            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
-
         df.columns = df.columns.str.replace(" ", "_")
 
     sql_dtypes = {}
@@ -1072,19 +1109,33 @@ def build_sa_validator_with_data(
     if table_name is None:
         table_name = generate_test_table_name()
 
+    if sa_engine_name in [
+        "trino",
+    ]:
+        table_name = table_name.lower()
+        sql_insert_method = "multi"
+    else:
+        sql_insert_method = None
+
     df.to_sql(
         name=table_name,
         con=engine,
         index=False,
         dtype=sql_dtypes,
         if_exists="replace",
+        method=sql_insert_method,
     )
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
-    return Validator(execution_engine=execution_engine, batches=(batch,))
+    return Validator(
+        execution_engine=execution_engine,
+        batches=[
+            batch,
+        ],
+    )
 
 
 def modify_locale(func):
@@ -1127,7 +1178,12 @@ def build_spark_validator_with_data(
         df=df,
         batch_id=batch.id,
     )
-    return Validator(execution_engine=execution_engine, batches=(batch,))
+    return Validator(
+        execution_engine=execution_engine,
+        batches=[
+            batch,
+        ],
+    )
 
 
 def build_pandas_engine(
@@ -1231,7 +1287,7 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
+    if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v2_sql = [
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
@@ -1301,7 +1357,73 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
 
 
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
+    candidate_test_is_on_temporary_notimplemented_list_cfe_trino = [
+        "expect_column_distinct_values_to_contain_set",
+        "expect_column_max_to_be_between",
+        "expect_column_mean_to_be_between",
+        "expect_column_median_to_be_between",
+        "expect_column_min_to_be_between",
+        "expect_column_most_common_value_to_be_in_set",
+        "expect_column_quantile_values_to_be_between",
+        "expect_column_sum_to_be_between",
+        "expect_column_kl_divergence_to_be_less_than",
+        "expect_column_value_lengths_to_be_between",
+        "expect_column_values_to_be_between",
+        "expect_column_values_to_be_in_set",
+        "expect_column_values_to_be_in_type_list",
+        "expect_column_values_to_be_null",
+        "expect_column_values_to_be_of_type",
+        "expect_column_values_to_be_unique",
+        "expect_column_values_to_match_like_pattern",
+        "expect_column_values_to_match_like_pattern_list",
+        "expect_column_values_to_match_regex",
+        "expect_column_values_to_match_regex_list",
+        "expect_column_values_to_not_be_null",
+        "expect_column_values_to_not_match_like_pattern",
+        "expect_column_values_to_not_match_like_pattern_list",
+        "expect_column_values_to_not_match_regex",
+        "expect_column_values_to_not_match_regex_list",
+        "expect_column_pair_values_A_to_be_greater_than_B",
+        "expect_column_pair_values_to_be_equal",
+        "expect_column_pair_values_to_be_in_set",
+        "expect_compound_columns_to_be_unique",
+        "expect_select_column_values_to_be_unique_within_record",
+        "expect_table_column_count_to_be_between",
+        "expect_table_column_count_to_equal",
+        "expect_table_row_count_to_be_between",
+        "expect_table_row_count_to_equal",
+    ]
+    candidate_test_is_on_temporary_notimplemented_list_cfe_other_sql = [
+        "expect_column_values_to_be_increasing",
+        "expect_column_values_to_be_decreasing",
+        "expect_column_values_to_match_strftime_format",
+        "expect_column_values_to_be_dateutil_parseable",
+        "expect_column_values_to_be_json_parseable",
+        "expect_column_values_to_match_json_schema",
+        "expect_column_stdev_to_be_between",
+        # "expect_column_unique_value_count_to_be_between",
+        # "expect_column_proportion_of_unique_values_to_be_between",
+        # "expect_column_most_common_value_to_be_in_set",
+        # "expect_column_max_to_be_between",
+        # "expect_column_min_to_be_between",
+        # "expect_column_sum_to_be_between",
+        # "expect_column_pair_values_A_to_be_greater_than_B",
+        # "expect_column_pair_values_to_be_equal",
+        # "expect_column_pair_values_to_be_in_set",
+        # "expect_multicolumn_sum_to_equal",
+        # "expect_compound_columns_to_be_unique",
+        "expect_multicolumn_values_to_be_unique",
+        # "expect_select_column_values_to_be_unique_within_record",
+        "expect_column_pair_cramers_phi_value_to_be_less_than",
+        "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
+        "expect_column_chisquare_test_p_value_to_be_greater_than",
+        "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    ]
+    if context in ["trino"]:
+        return expectation_type in set(
+            candidate_test_is_on_temporary_notimplemented_list_cfe_trino
+        ).union(set(candidate_test_is_on_temporary_notimplemented_list_cfe_other_sql))
+    if context in SQL_DIALECT_NAMES:
         expectations_not_implemented_v3_sql = [
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
@@ -1374,6 +1496,7 @@ def build_test_backends_list(
     include_mssql=False,
     include_bigquery=False,
     include_aws=False,
+    include_trino=False,
     raise_exceptions_for_backends: bool = True,
 ) -> List[str]:
     """Attempts to identify supported backends by checking which imports are available."""
@@ -1462,6 +1585,7 @@ def build_test_backends_list(
                 test_backends += ["mysql"]
 
         if include_mssql:
+            # noinspection PyUnresolvedReferences
             try:
                 engine = create_engine(
                     f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
@@ -1487,6 +1611,7 @@ def build_test_backends_list(
                 test_backends += ["mssql"]
 
         if include_bigquery:
+            # noinspection PyUnresolvedReferences
             try:
                 engine = _create_bigquery_engine()
                 conn = engine.connect()
@@ -1514,9 +1639,33 @@ def build_test_backends_list(
                 and not aws_secret_access_key
                 and not aws_session_token
             ):
-                logger.warning(
-                    f"AWS tests are requested, but credentials were not set up"
-                )
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "AWS tests are requested, but credentials were not set up"
+                    )
+                else:
+                    logger.warning(
+                        "AWS tests are requested, but credentials were not set up"
+                    )
+
+        if include_trino:
+            # noinspection PyUnresolvedReferences
+            try:
+                engine = _create_trino_engine()
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "trino tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"trino tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["trino"]
+
     return test_backends
 
 
@@ -1527,18 +1676,6 @@ def generate_expectation_tests(
     raise_exceptions_for_backends: bool = False,
 ):
     """
-
-    :param expectation_type: snake_case name of the expectation type
-    :param examples_config: a dictionary that defines the data and test cases for the expectation
-    :param expectation_execution_engines_dict: shows which backends/execution engines the
-            expectation is implemented for. It can be obtained from the output of the expectation's self_check method
-            Example:
-            {
-             "PandasExecutionEngine": True,
-             "SqlAlchemyExecutionEngine": False,
-             "SparkDFExecutionEngine": False
-            }
-    :return:
     """
     parametrized_tests = []
 
@@ -1587,6 +1724,7 @@ def generate_expectation_tests(
             include_mysql=dialects_to_include.get("mysql", False),
             include_mssql=dialects_to_include.get("mssql", False),
             include_bigquery=dialects_to_include.get("bigquery", False),
+            include_trino=dialects_to_include.get("trino", False),
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
@@ -1763,7 +1901,6 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
     NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
         of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
 
-    :param data_asset: (DataAsset) A great expectations DataAsset
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test
@@ -2040,3 +2177,33 @@ def _bigquery_dataset() -> str:
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
         )
     return dataset
+
+
+def _create_trino_engine() -> Engine:
+    trino_user = os.getenv("GE_TEST_TRINO_USER")
+    if not trino_user:
+        raise ValueError(
+            "Environment Variable GE_TEST_TRINO_USER is required to run trino expectation tests."
+        )
+
+    trino_password = os.getenv("GE_TEST_TRINO_PASSWORD")
+    if not trino_password:
+        raise ValueError(
+            "Environment Variable GE_TEST_TRINO_PASSWORD is required to run trino expectation tests."
+        )
+
+    trino_account = os.getenv("GE_TEST_TRINO_ACCOUNT")
+    if not trino_account:
+        raise ValueError(
+            "Environment Variable GE_TEST_TRINO_ACCOUNT is required to run trino expectation tests."
+        )
+
+    trino_cluster = os.getenv("GE_TEST_TRINO_CLUSTER")
+    if not trino_cluster:
+        raise ValueError(
+            "Environment Variable GE_TEST_TRINO_CLUSTER is required to run trino expectation tests."
+        )
+
+    return create_engine(
+        f"trino://{trino_user}:{trino_password}@{trino_account}-{trino_cluster}.trino.galaxy.starburst.io:443/test_suite/test_ci"
+    )

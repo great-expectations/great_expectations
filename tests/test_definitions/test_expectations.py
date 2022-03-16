@@ -45,9 +45,14 @@ def pytest_generate_tests(metafunc):
         )
         backends = build_test_backends_list(metafunc)
         for c in backends:
+            if c in [
+                "trino",
+            ]:
+                continue
             for filename in test_configuration_files:
                 file = open(filename)
                 # Use OrderedDict so that python2 will use the correct order of columns in all cases
+                # noinspection PyTypeChecker
                 test_configuration = json.load(file, object_pairs_hook=OrderedDict)
 
                 for d in test_configuration["datasets"]:
