@@ -136,7 +136,7 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pip install pytest pytest-azurepipelines==1.0.1
+            pip install pytest pytest-azurepipelines
             pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --aws tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
