@@ -69,7 +69,7 @@ stages:
   - stage: os_integration
     variables:
       python.version: '3.x'
-      GE_pytest_pip_opts: '--requirement requirements-dev-base.txt'
+      GE_pytest_pip_opts: '--requirement requirements-dev-test.txt'
       GE_pytest_opts: '--no-sqlalchemy'
 
     jobs:

@@ -420,11 +420,7 @@ class ParameterBuilder(Builder, ABC):
 
         # Nineth: Compose and return result to receiver (apply simplications to cases of single "metric_value_kwargs").
         return MetricComputationResult(
-            metric_values=list(attributed_resolved_metrics_map.values())[
-                0
-            ].metric_values
-            if len(metric_value_kwargs) == 1
-            else attributed_resolved_metrics_map.values(),
+            list(attributed_resolved_metrics_map.values()),
             details={
                 "metric_configuration": {
                     "metric_name": metric_name,

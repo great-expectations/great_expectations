@@ -58,7 +58,7 @@ source ge_dev/bin/activate
 
 pip install --upgrade pip==21.3.1
 
-pip install -r requirements-dev-lite.txt -c constraints-dev.txt -e .
+pip install -r requirements.txt -r requirements-dev-lite.txt -c constraints-dev.txt -e .
 ```
 
 Confirm that tests are passing (only against pandas and sqlalchemy with sqlite), without the need for running any Docker containers.
