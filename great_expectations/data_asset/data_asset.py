@@ -72,7 +72,7 @@ class DataAsset:
         if "autoinspect_func" in kwargs:
             # deprecated-v0.10.10
             warnings.warn(
-                "Autoinspect_func is deprecated as of v0.10.10 and will be removed in a future version; use a profiler instead (migration is easy!).",
+                "Autoinspect_func is deprecated as of v0.10.10 and will be removed in v0.16; use a profiler instead (migration is easy!).",
                 category=DeprecationWarning,
             )
         super().__init__(*args, **kwargs)

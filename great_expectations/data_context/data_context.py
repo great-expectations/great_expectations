@@ -1437,7 +1437,7 @@ class BaseDataContext(ConfigPeer):
         # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
         # deprecated-v0.13.20
         warnings.warn(
-            "get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in a future version of GE. Please use"
+            "get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use"
             "get_batch_list instead.",
             DeprecationWarning,
         )
