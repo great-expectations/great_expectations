@@ -1163,6 +1163,7 @@ aborting graph resolution.
 
     def append_expectation(self, expectation_config: ExpectationConfiguration) -> None:
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
+        # deprecated-v0.13.0
         warnings.warn(
             "append_expectation is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.add_expectation instead.",
@@ -1176,6 +1177,7 @@ aborting graph resolution.
         match_type: str = "domain",
     ) -> List[int]:
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
+        # deprecated-v0.13.0
         warnings.warn(
             "find_expectation_indexes is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
@@ -1192,6 +1194,7 @@ aborting graph resolution.
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
+        # deprecated-v0.13.0
         warnings.warn(
             "find_expectations is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
@@ -1372,6 +1375,7 @@ set as active.
         Returns an expectation configuration, providing an option to discard failed expectation and discard/ include'
         different result aspects, such as exceptions and result format.
         """
+        # deprecated-v0.13.0
         warnings.warn(
             "get_expectations_config is deprecated, and will be removed in a future release. "
             + "Please use get_expectation_suite instead.",
@@ -1647,6 +1651,7 @@ set as active.
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
             if isinstance(run_id, str) and not run_name:
+                # deprecated-v0.13.0
                 warnings.warn(
                     "String run_ids will be deprecated in the future. Please provide a run_id of type "
                     "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "

@@ -223,6 +223,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             # If no legacy rendering is present, return None.
             return None
 
+        # deprecated-v0.13.28
         warnings.warn(
             "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
             DeprecationWarning,

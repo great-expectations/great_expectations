@@ -291,6 +291,7 @@ class ActionListValidationOperator(ValidationOperator):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
                 "String run_ids will be deprecated in the future. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
@@ -768,6 +769,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
                 "String run_ids will be deprecated in the future. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "

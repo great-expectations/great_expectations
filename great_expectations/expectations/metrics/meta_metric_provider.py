@@ -38,6 +38,7 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
                 alias = getattr(cls, "_DeprecatedMetaMetricProvider__alias")
 
                 if alias is not None:
+                    # deprecated-v0.13.12
                     warnings.warn(
                         f"""{cls.__name__} has been renamed to {alias} -- the alias {cls.__name__} will be \
 deprecated in the future.
@@ -57,6 +58,7 @@ deprecated in the future.
             alias = getattr(b, "_DeprecatedMetaMetricProvider__alias", None)
 
             if alias is not None:
+                # deprecated-v0.13.12
                 warnings.warn(
                     f"""{b.__name__} has been renamed to {alias.__name__} -- the alias {b.__name__} will be deprecated \
 in the future.

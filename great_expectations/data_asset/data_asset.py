@@ -70,6 +70,7 @@ class DataAsset:
         batch_markers = kwargs.pop("batch_markers", {})
 
         if "autoinspect_func" in kwargs:
+            # deprecated-v0.10.10
             warnings.warn(
                 "Autoinspect_func is no longer supported; use a profiler instead (migration is easy!).",
                 category=DeprecationWarning,
@@ -403,6 +404,7 @@ class DataAsset:
 
     def append_expectation(self, expectation_config):
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
+        # deprecated-v0.12.0
         warnings.warn(
             "append_expectation is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.add_expectation instead.",
@@ -416,6 +418,7 @@ class DataAsset:
         match_type: str = "domain",
     ) -> List[int]:
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
+        # deprecated-v0.12.0
         warnings.warn(
             "find_expectation_indexes is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
@@ -431,6 +434,7 @@ class DataAsset:
         match_type: str = "domain",
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
+        # deprecated-v0.12.0
         warnings.warn(
             "find_expectations is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
@@ -447,6 +451,7 @@ class DataAsset:
         remove_multiple_matches: bool = False,
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.remove()"""
+        # deprecated-v0.12.0
         warnings.warn(
             "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
             + "Please use ExpectationSuite.remove_expectation instead.",
@@ -534,6 +539,7 @@ class DataAsset:
         discard_catch_exceptions_kwargs=True,
         suppress_warnings=False,
     ):
+        # deprecated-v0.10.10
         warnings.warn(
             "get_expectations_config is deprecated, and will be removed in a future release. "
             + "Please use get_expectation_suite instead.",
@@ -794,6 +800,7 @@ class DataAsset:
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
             if isinstance(run_id, str) and not run_name:
+                # deprecated-v0.11.0
                 warnings.warn(
                     "String run_ids will be deprecated in the future. Please provide a run_id of type "
                     "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "

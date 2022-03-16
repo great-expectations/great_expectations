@@ -1437,6 +1437,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
             "expect_select_column_values_to_be_unique_within_record instead."
         )
+        # deprecated-v0.13.4
         warnings.warn(
             deprecation_warning,
             DeprecationWarning,

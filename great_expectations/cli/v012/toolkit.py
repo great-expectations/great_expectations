@@ -81,6 +81,7 @@ def create_expectation_suite(
     :return: a tuple: (success, suite name, profiling_results)
     """
     if generator_asset:
+        # deprecated-v0.13.12
         warnings.warn(
             "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
             "Please update code accordingly.",

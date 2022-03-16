@@ -210,6 +210,7 @@ class BatchKwargsGenerator:
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
                 "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
                 "Please update code accordingly.",
@@ -228,6 +229,7 @@ class BatchKwargsGenerator:
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
                 "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
                 "Please update code accordingly.",
@@ -255,6 +257,7 @@ class BatchKwargsGenerator:
         ):
             raise ValueError("Please provide either name or data_asset_name.")
         if kwargs.get("name"):
+            # deprecated-v0.11.0
             warnings.warn(
                 "The 'name' argument will be deprecated and renamed to 'data_asset_name'. "
                 "Please update code accordingly.",
@@ -296,6 +299,7 @@ class BatchKwargsGenerator:
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
                 "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
                 "Please update code accordingly.",

@@ -107,6 +107,7 @@ except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
+        # deprecated-v0.14.7
         warnings.warn(
             "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
             DeprecationWarning,
@@ -583,6 +584,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
 
                 if ignore_row_if == "never":
+                    # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
 "neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.

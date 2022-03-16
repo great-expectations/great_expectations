@@ -1016,6 +1016,7 @@ class UpdateDataDocsAction(ValidationAction):
         """
         super().__init__(data_context)
         if target_site_names:
+            # deprecated-v0.10.10
             warnings.warn(
                 "target_site_names is deprecated. Please use site_names instead.",
                 DeprecationWarning,

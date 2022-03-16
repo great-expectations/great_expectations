@@ -111,6 +111,7 @@ class ValidationResultIdentifier(DataContextKey):
         super().__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
         if isinstance(run_id, str):
+            # deprecated-v0.11.0
             warnings.warn(
                 "String run_ids will be deprecated in the future. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "

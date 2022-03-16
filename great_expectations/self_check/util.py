@@ -140,6 +140,7 @@ except ImportError:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
         import pybigquery.sqlalchemy_bigquery as BigQueryDialect
 
+        # deprecated-v0.14.7
         warnings.warn(
             "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
             DeprecationWarning,

@@ -153,6 +153,7 @@ def kde_partition_data(data, estimate_tails=True):
 
 
 def partition_data(data, bins="auto", n_bins=10):
+    # deprecated-v0.10.10
     warnings.warn(
         "partition_data is deprecated and will be removed. Use either continuous_partition_data or \
                     categorical_partition_data instead.",
