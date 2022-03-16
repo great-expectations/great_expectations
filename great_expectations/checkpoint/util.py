@@ -37,14 +37,14 @@ def send_slack_notification(
         response = session.post(url=url, headers=headers, json=query)
     except requests.ConnectionError:
         logger.warning(
-            f"Failed to connect to Slack webhook at {slack_webhook} after {10} retries."
+            f"Failed to connect to Slack webhook after {10} retries."
         )
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:
             logger.warning(
-                "Request to Slack webhook at "
+                "Request to Slack webhook "
                 f"returned error {response.status_code}: {response.text}"
             )
 
@@ -78,7 +78,7 @@ def send_opsgenie_alert(query, suite_name, settings):
     else:
         if response.status_code != 202:
             logger.warning(
-                "Request to Opsgenie API at "
+                "Request to Opsgenie API "
                 f"returned error {response.status_code}: {response.text}"
             )
         else:
@@ -92,7 +92,7 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
         response = session.post(url=microsoft_teams_webhook, json=query)
     except requests.ConnectionError:
         logger.warning(
-            "Failed to connect to Microsoft Teams webhook " "after 10 retries."
+            "Failed to connect to Microsoft Teams webhook after 10 retries."
         )
 
     except Exception as e:
@@ -114,7 +114,7 @@ def send_webhook_notifications(query, webhook, target_platform):
         response = session.post(url=webhook, json=query)
     except requests.ConnectionError:
         logger.warning(
-            f"Failed to connect to {target_platform} webhook " "after 10 retries."
+            f"Failed to connect to {target_platform} webhook after 10 retries."
         )
     except Exception as e:
         logger.error(str(e))
