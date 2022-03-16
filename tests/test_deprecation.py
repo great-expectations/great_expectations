@@ -6,6 +6,12 @@ import versioneer
 
 
 def test_deprecation_warnings_have_been_removed_after_two_minor_versions():
+    """
+    What does this test do and why?
+
+    To ensure that we're appropriately deprecating, we want to test that we're fully
+    removing warnings (and the code they correspond to) after two minor versions have passed.
+    """
     current_version: str = versioneer.get_version()
     current_minor_version: int = int(current_version.split(".")[1])
 
