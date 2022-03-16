@@ -1,11 +1,32 @@
 import glob
 import re
-from typing import List, Tuple
+from typing import List, Tuple, Union, cast
+
+import pytest
+from packaging import version
 
 import versioneer
 
 
-def test_deprecation_warnings_are_accompanied_by_appropriate_comment():
+@pytest.fixture
+def regex_for_deprecation_comments() -> re.Pattern:
+    pattern: re.Pattern = re.compile(r"deprecated-v(.+)")
+    return pattern
+
+
+@pytest.fixture
+def files_with_deprecation_warnings() -> List[str]:
+    files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
+    # Filter out parts of the codebase that aren't written by the GE team
+    files = list(filter(lambda f: "marshmallow__shade" not in f, files))
+
+    return files
+
+
+def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
+    regex_for_deprecation_comments: re.Pattern,
+    files_with_deprecation_warnings: List[str],
+):
     """
     What does this test do and why?
 
@@ -14,24 +35,21 @@ def test_deprecation_warnings_are_accompanied_by_appropriate_comment():
 
     This test is meant to capture instances where one or the other is missing.
     """
-    pattern: re.Pattern = re.compile(r"deprecated-v(\d*)\.(\d*)\.(\d*)")
-    files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
-
-    # Filter out parts of the codebase that aren't written by the GE team
-    files = list(filter(lambda f: "marshmallow__shade" not in f, files))
-
-    for file in files:
+    for file in files_with_deprecation_warnings:
         with open(file) as f:
             contents = f.read()
 
-        matches: List[Tuple[str, str, str]] = pattern.findall(contents)
+        matches: List[str] = regex_for_deprecation_comments.findall(contents)
         warning_count: int = contents.count("DeprecationWarning")
         assert (
             len(matches) == warning_count
         ), f"Either a 'deprecated-v...' comment or 'DeprecationWarning' call is missing from {file}"
 
 
-def test_deprecation_warnings_have_been_removed_after_two_minor_versions():
+def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
+    regex_for_deprecation_comments: re.Pattern,
+    files_with_deprecation_warnings: List[str],
+):
     """
     What does this test do and why?
 
@@ -39,32 +57,32 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions():
     removing warnings (and the code they correspond to) after two minor versions have passed.
     """
     current_version: str = versioneer.get_version()
-    current_minor_version: int = int(current_version.split(".")[1])
-
-    pattern: re.Pattern = re.compile(r"deprecated-v(\d*)\.(\d*)\.(\d*)")
-    files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
+    current_parsed_version: version.Version = cast(
+        version.Version, version.parse(current_version)
+    )
+    current_minor_version: int = current_parsed_version.minor
 
     unneeded_deprecation_warnings: List[Tuple[str, str]] = []
-    for file in files:
+    for file in files_with_deprecation_warnings:
         with open(file) as f:
             contents = f.read()
 
-        matches: List[Tuple[str, str, str]] = pattern.findall(contents)
+        matches: List[str] = regex_for_deprecation_comments.findall(contents)
         for match in matches:
-            minor_version: int = int(match[1])
+            parsed_version: version.Version = cast(
+                version.Version, version.parse(match)
+            )
+            minor_version: int = parsed_version.minor
             if current_minor_version - minor_version > 2:
-                unneeded_deprecation_warning: Tuple[str, str] = (
-                    file,
-                    ".".join(m for m in match),
-                )
+                unneeded_deprecation_warning: Tuple[str, str] = (file, match)
                 unneeded_deprecation_warnings.append(unneeded_deprecation_warning)
 
     if unneeded_deprecation_warnings:
         print(
             "\nThe following deprecation warnings must be cleared per the code style guide:"
         )
-        for file, version in unneeded_deprecation_warnings:
-            print(f"{file} - v{version}")
+        for file, version_ in unneeded_deprecation_warnings:
+            print(f"{file} - v{version_}")
 
     # Chetan - 20220316 - Note that this will break as soon as v0.16.0 lands;
     # this should be cleaned up and made 0 at that point.
