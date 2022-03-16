@@ -5,8 +5,12 @@ from typing import Any
 import pytest
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
+    ExpectationValidationResult,
+)
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
@@ -1227,3 +1231,44 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset(
         validator.batches[validator.active_batch_id].batch_definition.data_asset_name
         == data_asset_name
     )
+
+
+def test_replace_and_save_runtime_data_connector_with_limit(
+    sqlalchemy_missing_data_asset_data_context,
+):
+    context: DataContext = sqlalchemy_missing_data_asset_data_context
+
+    data_asset_name: str = "table_containing_id_spacers_for_D"
+    limit: int = 10
+
+    batch_request: dict[str, Any] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "default_runtime_data_connector",
+        "data_asset_name": data_asset_name,
+        "runtime_parameters": {
+            "query": f"SELECT * FROM {data_asset_name} LIMIT {limit}"
+        },
+        "batch_identifiers": {"default_identifier_name": "default"},
+    }
+
+    expectation_suite_name: str = "test"
+
+    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    validator: Validator = context.get_validator(
+        batch_request=batch_request, expectation_suite_name=expectation_suite_name
+    )
+
+    assert (
+        validator.batches[validator.active_batch_id].batch_definition.data_asset_name
+        == data_asset_name
+    )
+
+    validation_result: ExpectationValidationResult = (
+        validator.expect_column_values_to_not_be_null(column="date")
+    )
+    assert validation_result.result["element_count"] == limit
