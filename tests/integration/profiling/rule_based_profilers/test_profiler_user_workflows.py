@@ -413,7 +413,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
+def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_estimator(
     mock_emit,
     caplog,
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -446,13 +446,13 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 
     expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=bobby_columnar_table_multi_batch[
-            "test_configuration_oneshot_sampling_method"
+            "test_configuration_oneshot_estimator"
         ]["expectation_suite_name"],
         include_citation=True,
     )
 
     assert sorted(expectation_suite) == sorted(
-        bobby_columnar_table_multi_batch["test_configuration_oneshot_sampling_method"][
+        bobby_columnar_table_multi_batch["test_configuration_oneshot_estimator"][
             "expected_expectation_suite"
         ]
     )
@@ -1395,7 +1395,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
+def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_estimator(
     mock_emit,
     caplog,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
@@ -1430,7 +1430,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
 
     expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
+            "test_configuration_bootstrap_estimator"
         ][
             "expectation_suite_name"
         ],
@@ -1451,20 +1451,20 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
 
     assert (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
+            "test_configuration_bootstrap_estimator"
         ]["expect_table_row_count_to_be_between_min_value_mean_value"]
         < min_value
         < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
+            "test_configuration_bootstrap_estimator"
         ]["expect_table_row_count_to_be_between_mean_value"]
     )
     assert (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
+            "test_configuration_bootstrap_estimator"
         ]["expect_table_row_count_to_be_between_mean_value"]
         < max_value
         < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
+            "test_configuration_bootstrap_estimator"
         ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
 

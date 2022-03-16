@@ -33,8 +33,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-        column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        exclude_columns: Optional[Union[str, Optional[List[str]]]] = None,
+        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
@@ -58,8 +58,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
-            column_names: Explicitly specified column_names list desired (if None, it is computed based on active Batch)
-            exclude_columns: If provided, these columns are pre-filtered and excluded from consideration, cardinality is not computed.
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
@@ -72,10 +72,9 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
-            column_names=column_names,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
         )
-
-        self._exclude_columns = exclude_columns
 
         self._limit_mode = limit_mode
         self._max_unique_values = max_unique_values
@@ -100,10 +99,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         return self._max_proportion_unique
 
     @property
-    def exclude_columns(self) -> Optional[Union[str, Optional[List[str]]]]:
-        return self._exclude_columns
-
-    @property
     def cardinality_checker(self) -> Optional[CardinalityChecker]:
         return self._cardinality_checker
 
@@ -120,8 +115,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             List of domains that match the desired cardinality.
         """
         table_column_names: List[str] = self.get_effective_column_names(
-            include_columns=self.column_names,
-            exclude_columns=self.exclude_columns,
             variables=variables,
         )
 

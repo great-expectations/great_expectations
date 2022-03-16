@@ -109,6 +109,11 @@
     "definition": "Generates Metrics and candidate Expectations from data.",
     "url": "terms/profiler"
   },
+  "profile": {
+    "term": "Profile",
+    "definition": "The act of generating Metrics and candidate Expectations from data.",
+    "url": "terms/profiler"
+  },
   "profiling": {
     "term": "Profiling",
     "definition": "The act of generating Metrics and candidate Expectations from data.",
@@ -131,6 +136,11 @@
   },
   "validation": {
     "term": "Validation",
+    "definition": "The act of applying an Expectation Suite to a Batch.",
+    "url": "guides/validation/validate_data_overview"
+  },
+  "validate": {
+    "term": "Validate",
     "definition": "The act of applying an Expectation Suite to a Batch.",
     "url": "guides/validation/validate_data_overview"
   },
