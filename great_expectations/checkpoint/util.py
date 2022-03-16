@@ -36,9 +36,7 @@ def send_slack_notification(
     try:
         response = session.post(url=url, headers=headers, json=query)
     except requests.ConnectionError:
-        logger.warning(
-            f"Failed to connect to Slack webhook after {10} retries."
-        )
+        logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
     except Exception as e:
         logger.error(str(e))
     else:
@@ -91,9 +89,7 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
     try:
         response = session.post(url=microsoft_teams_webhook, json=query)
     except requests.ConnectionError:
-        logger.warning(
-            "Failed to connect to Microsoft Teams webhook after 10 retries."
-        )
+        logger.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
 
     except Exception as e:
         logger.error(str(e))
