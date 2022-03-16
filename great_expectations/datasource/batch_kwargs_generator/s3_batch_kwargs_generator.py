@@ -337,7 +337,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # deprecated-v0.11.0
             warnings.warn(
                 "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' moving forward.",
+                "Please use 'data_asset_name' instead.",
                 DeprecationWarning,
             )
             data_asset_name = generator_asset
