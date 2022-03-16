@@ -295,7 +295,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         if generator_asset:
             # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in a future release. "
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
                 "Please use 'data_asset_name' moving forward.",
                 DeprecationWarning,
             )

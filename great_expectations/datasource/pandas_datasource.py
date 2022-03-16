@@ -210,7 +210,7 @@ class PandasDatasource(LegacyDatasource):
         elif "s3" in batch_kwargs:
             # deprecated-v0.13.0
             warnings.warn(
-                "Direct GE Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in a future release. "
+                "Direct GE Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "
                 "Please use a path including the s3a:// protocol instead.",
                 DeprecationWarning,
             )

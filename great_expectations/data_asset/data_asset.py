@@ -112,7 +112,7 @@ class DataAsset:
             tuple(expectation_suite, validation_results)
         """
         warnings.warn(
-            "The term autoinspect is deprecated and will be removed in a future release. Please use 'profile'\
+            "The term autoinspect is deprecated and will be removed in v0.16. Please use 'profile'\
         instead."
         )
         expectation_suite, validation_results = profiler.profile(self)
@@ -406,7 +406,7 @@ class DataAsset:
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
         # deprecated-v0.12.0
         warnings.warn(
-            "append_expectation is deprecated as of v0.12.0 and will be removed in a future release. "
+            "append_expectation is deprecated as of v0.12.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.add_expectation instead.",
             DeprecationWarning,
         )
@@ -420,7 +420,7 @@ class DataAsset:
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         # deprecated-v0.12.0
         warnings.warn(
-            "find_expectation_indexes is deprecated as of v0.12.0 and will be removed in a future release. "
+            "find_expectation_indexes is deprecated as of v0.12.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
@@ -436,7 +436,7 @@ class DataAsset:
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         # deprecated-v0.12.0
         warnings.warn(
-            "find_expectations is deprecated as of v0.12.0 and will be removed in a future release. "
+            "find_expectations is deprecated as of v0.12.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
@@ -453,7 +453,7 @@ class DataAsset:
         """This method is a thin wrapper for ExpectationSuite.remove()"""
         # deprecated-v0.12.0
         warnings.warn(
-            "DataAsset.remove_expectations is deprecated as of v0.12.0 and will be removed in a future release. "
+            "DataAsset.remove_expectations is deprecated as of v0.12.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.remove_expectation instead.",
             DeprecationWarning,
         )
@@ -541,7 +541,7 @@ class DataAsset:
     ):
         # deprecated-v0.10.10
         warnings.warn(
-            "get_expectations_config is deprecated as of v0.10.10 and will be removed in a future release. "
+            "get_expectations_config is deprecated as of v0.10.10 and will be removed in v0.16. "
             + "Please use get_expectation_suite instead.",
             DeprecationWarning,
         )
@@ -802,7 +802,7 @@ class DataAsset:
             if isinstance(run_id, str) and not run_name:
                 # deprecated-v0.11.0
                 warnings.warn(
-                    "String run_ids are deprecated as of v0.11.0 and support will be removed in a future release. Please provide a run_id of type "
+                    "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                     "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                     "and run_time (both optional). Instead of providing a run_id, you may also provide"
                     "run_name and run_time separately.",

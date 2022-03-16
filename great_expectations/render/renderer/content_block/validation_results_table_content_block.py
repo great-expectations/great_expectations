@@ -226,7 +226,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         # deprecated-v0.13.28
         warnings.warn(
             "V2 API style custom rendering is deprecated as of v0.13.28 and is not fully supported anymore; "
-            "As it will be removed in a future release, please transition to V3 API and associated rendering style",
+            "As it will be removed in v0.16, please transition to V3 API and associated rendering style",
             DeprecationWarning,
         )
 

@@ -1018,7 +1018,7 @@ class UpdateDataDocsAction(ValidationAction):
         if target_site_names:
             # deprecated-v0.10.10
             warnings.warn(
-                "target_site_names is deprecated as of v0.10.10 and will be removed in a future release. Please use site_names instead.",
+                "target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
                 DeprecationWarning,
             )
             if site_names:

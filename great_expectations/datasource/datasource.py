@@ -178,7 +178,7 @@ class LegacyDatasource:
         if isinstance(data_asset_type, str):
             warnings.warn(
                 "String-only configuration for data_asset_type is deprecated as of v0.7.11. "
-                "As support will be removed in a future release, please use module_name and class_name instead.",
+                "As support will be removed in v0.16, please use module_name and class_name instead.",
                 DeprecationWarning,
             )
         self._data_asset_type = data_asset_type
@@ -391,7 +391,7 @@ class LegacyDatasource:
                 )
             # deprecated-v0.11.2
             warnings.warn(
-                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in a future release. Please use data_asset_name instead.",
+                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
                 DeprecationWarning,
             )
             data_asset_name = kwargs.pop("name")

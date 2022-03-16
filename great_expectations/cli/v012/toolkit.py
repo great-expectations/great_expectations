@@ -83,7 +83,7 @@ def create_expectation_suite(
     if generator_asset:
         # deprecated-v0.13.12
         warnings.warn(
-            "The 'generator_asset' argument is deprecated as of v0.13.12 and will be removed in a future release. Please use 'data_asset_name' instead.",
+            "The 'generator_asset' argument is deprecated as of v0.13.12 and will be removed in v0.16. Please use 'data_asset_name' instead.",
             DeprecationWarning,
         )
         data_asset_name = generator_asset
