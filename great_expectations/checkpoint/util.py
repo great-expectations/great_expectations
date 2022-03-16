@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List, Optional, Union
 
+import boto3
 import requests
 
 import great_expectations.exceptions as ge_exceptions
@@ -519,3 +520,40 @@ def send_cloud_notification(url: str, headers: dict):
             return {"cloud_notification_result": message}
         else:
             return {"cloud_notification_result": "Cloud notification succeeded."}
+
+
+def send_sns_notification(
+    sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs
+) -> str:
+    """
+    Sen=ds JSON Results to an SNS topic with a schema of:
+
+    {
+        "passed": validation_passed
+        "results": validation_results
+    }
+
+    :param sns_topic_arn:  The SNS Arn to publish messages to
+    :param sns_subject: : The SNS Message Subject - [passed or failed]
+    :param validation_results:  The results of the validation ran
+    :param kwargs:  Keyword arguments to pass to the boto3 Session
+    :return:  Message ID that was published
+
+    """
+    message_dict = {
+        "TopicArn": sns_topic_arn,
+        "Subject": sns_subject,  # Fail or success so consumers can filter.
+        "Message": validation_results,
+        "MessageAttributes": {
+            "string": {"DataType": "String.Array"},
+            "MessageStructure": "json",
+        },
+    }
+    session = boto3.Session(**kwargs)
+    sns = session.client("sns")
+    try:
+        response = sns.publish(**message_dict)
+    except sns.exceptions.InvalidParameterException:
+        logger.error(f"Received invalid for message: {validation_results}")
+    else:
+        return f"Successfully posted results to {response['MessageId']}"

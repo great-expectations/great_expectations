@@ -3,10 +3,14 @@ An action is a way to take an arbitrary method and make it configurable and runn
 
 The only requirement from an action is for it to have a take_action method.
 """
+
 import logging
 import warnings
 from typing import Dict, Optional, Union
 from urllib.parse import urljoin
+
+from great_expectations.checkpoint import Checkpoint
+
 
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.types.refs import GeCloudResourceRef
@@ -16,18 +20,19 @@ try:
 except ImportError:
     pypd = None
 
-
 from great_expectations.checkpoint.util import (
     send_cloud_notification,
     send_email,
     send_microsoft_teams_notifications,
     send_opsgenie_alert,
     send_slack_notification,
+    send_sns_notification,
 )
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
     ValidationResultIdentifier,
+    ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
@@ -53,8 +58,8 @@ class ValidationAction:
             ValidationResultIdentifier, GeCloudIdentifier
         ],
         data_asset,
-        expectation_suite_identifier=None,
-        checkpoint_identifier=None,
+        expectation_suite_identifier: ExpectationSuiteIdentifier = None,
+        checkpoint_identifier: Checkpoint = None,
         **kwargs,
     ):
         """
@@ -62,6 +67,8 @@ class ValidationAction:
         :param validation_result_suite:
         :param validation_result_suite_identifier:
         :param data_asset:
+        :param expectation_suite_identifier:  The ExpectationSuiteIdentifier to use
+        :param checkpoint_identifier:  The Checkpoint to use
         :param: kwargs - any additional arguments the child might use
         :return:
         """
@@ -1134,3 +1141,39 @@ class CloudNotificationAction(ValidationAction):
             "Authorization": f"Bearer {self.data_context.ge_cloud_config.access_token}",
         }
         return send_cloud_notification(url=ge_cloud_url, headers=auth_headers)
+
+
+# TODO: Should this be done in batches?
+class SNSNotificationAction(ValidationAction):
+    """
+    Action that pushes validations results to an SNS topic with a subject of passed or failed.
+    """
+
+    def __init__(
+        self,
+        data_context: "DataContext",
+        sns_topic_arn: str,
+    ):
+        super().__init__(data_context)
+        self.sns_topic_arn = sns_topic_arn
+
+    def _run(
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
+        expectation_suite_identifier=None,
+        checkpoint_identifier=None,
+        **kwargs,
+    ):
+        logger.debug("SNSNotificationAction.run")
+
+        if validation_result_suite is None:
+            logger.warning(
+                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
+            )
+
+        return send_sns_notification(
+            self.sns_topic_arn,
+            validation_result_suite.success,
+            validation_result_suite.__str__(),
+        )
