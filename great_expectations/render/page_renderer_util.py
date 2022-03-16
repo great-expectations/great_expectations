@@ -22,7 +22,7 @@ def render_multiple_validation_result_pages_markdown(
 
     # deprecated-v0.12.1
     warnings.warn(
-        "This 'render_multiple_validation_result_pages_markdown' function will be deprecated "
+        "This 'render_multiple_validation_result_pages_markdown' function is deprecated as of v0.12.1 and will be removed in a future release."
         "Please use ValidationResultsPageRenderer.render_validation_operator_result() instead."
         "E.g. to replicate the functionality of rendering a ValidationOperatorResult to markdown:"
         "validation_results_page_renderer = ValidationResultsPageRenderer("

@@ -1165,7 +1165,7 @@ aborting graph resolution.
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
         # deprecated-v0.13.0
         warnings.warn(
-            "append_expectation is deprecated, and will be removed in a future release. "
+            "append_expectation is deprecated as of v0.13.0 and will be removed in a future release. "
             + "Please use ExpectationSuite.add_expectation instead.",
             DeprecationWarning,
         )
@@ -1179,7 +1179,7 @@ aborting graph resolution.
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
         # deprecated-v0.13.0
         warnings.warn(
-            "find_expectation_indexes is deprecated, and will be removed in a future release. "
+            "find_expectation_indexes is deprecated as of v0.13.0 and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
@@ -1196,7 +1196,7 @@ aborting graph resolution.
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
         # deprecated-v0.13.0
         warnings.warn(
-            "find_expectations is deprecated, and will be removed in a future release. "
+            "find_expectations is deprecated as of v0.13.0 and will be removed in a future release. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
@@ -1377,7 +1377,7 @@ set as active.
         """
         # deprecated-v0.13.0
         warnings.warn(
-            "get_expectations_config is deprecated, and will be removed in a future release. "
+            "get_expectations_config is deprecated as of v0.13.0 and will be removed in a future release. "
             + "Please use get_expectation_suite instead.",
             DeprecationWarning,
         )
@@ -1653,7 +1653,7 @@ set as active.
             if isinstance(run_id, str) and not run_name:
                 # deprecated-v0.13.0
                 warnings.warn(
-                    "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                    "String run_ids are deprecated as of v0.13.0 and support will be removed in the future. Please provide a run_id of type "
                     "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                     "and run_time (both optional). Instead of providing a run_id, you may also provide"
                     "run_name and run_time separately.",

@@ -70,9 +70,10 @@ except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
-        # deprecated-v0.14.10
+        # deprecated-v0.14.7
         warnings.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
+            "As support will be removed in a future release, please transition to sqlalchemy-bigquery",
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"

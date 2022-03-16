@@ -109,7 +109,8 @@ except ImportError:
 
         # deprecated-v0.14.7
         warnings.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
+            "As support will be removed in a future release, please transition to sqlalchemy-bigquery",
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
@@ -585,7 +586,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in a future version).  Please update code accordingly.
 """,
                         DeprecationWarning,
                     )

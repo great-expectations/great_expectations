@@ -1674,11 +1674,11 @@ class TableExpectation(Expectation, ABC):
         )
 
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.38
+            # deprecated-v0.13.41
             warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
-future release.  Please update code accordingly.
-""",
+                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 and will be removed in a \
+            future release.  Please update code accordingly.
+            """,
                 DeprecationWarning,
             )
 

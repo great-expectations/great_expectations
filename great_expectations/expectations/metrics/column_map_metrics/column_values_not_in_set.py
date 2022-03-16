@@ -34,9 +34,9 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.38
+            # deprecated-v0.13.41
             warnings.warn(
-                f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+                f"""The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 and will be removed in a \
 future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._pandas()", it is not used.
 """,
                 DeprecationWarning,
@@ -64,9 +64,9 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.38
+            # deprecated-v0.13.41
             warnings.warn(
-                f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+                f"""The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 and will be removed in a \
             future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._sqlalchemy()", it is not used.
             """,
                 DeprecationWarning,
@@ -89,9 +89,9 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.38
+            # deprecated-v0.13.41
             warnings.warn(
-                f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+                f"""The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 and will be removed in a \
             future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._spark()", it is not used.
             """,
                 DeprecationWarning,
