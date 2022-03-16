@@ -23,10 +23,10 @@ The `DataContextConfig` holds all of the associated configuration parameters to 
 Here we will show a few examples of common configurations, using the ``store_backend_defaults`` parameter. Note that you can use the existing API without defaults by omitting that parameter, and you can override all of the parameters as shown in the last example. A parameter set in ``DataContextConfig`` will override a parameter set in ``store_backend_defaults`` if both are used.
 
 The following ``store_backend_defaults`` are currently available:
-    - :py:class:`~great_expectations.data_context.types.base.S3StoreBackendDefaults`
-    - :py:class:`~great_expectations.data_context.types.base.GCSStoreBackendDefaults`
-    - :py:class:`~great_expectations.data_context.types.base.DatabaseStoreBackendDefaults`
-    - :py:class:`~great_expectations.data_context.types.base.FilesystemStoreBackendDefaults`
+- `S3StoreBackendDefaults`
+- `GCSStoreBackendDefaults`
+- `DatabaseStoreBackendDefaults`
+- `FilesystemStoreBackendDefaults`
 
 The following example shows a Data Context configuration with an SQLAlchemy <TechnicalTag relative="../../../" tag="datasource" text="Datasource" /> and an AWS S3 bucket for all metadata <TechnicalTag relative="../../../" tag="store" text="Stores" />, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
 

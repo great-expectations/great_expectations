@@ -14,9 +14,9 @@ This guide will explain how to host and share <TechnicalTag relative="../../../"
 
 ## Steps
 
-### 1. Filesystem-hosted Data Docs are configured by default for Great Expectations deployments created using great_expectations init
+### 1. Review defaults and change if desired.
 
-To create additional Data Docs sites, you may re-use the default Data Docs configuration below. You may replace ``local_site`` with your own site name, or leave the default.
+Filesystem-hosted Data Docs are configured by default for Great Expectations deployments created using great_expectations init.  To create additional Data Docs sites, you may re-use the default Data Docs configuration below. You may replace ``local_site`` with your own site name, or leave the default.
 
 ```yaml
 data_docs_sites:
