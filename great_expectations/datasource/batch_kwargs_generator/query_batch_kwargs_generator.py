@@ -143,8 +143,8 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
         if generator_asset:
             # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in a future release. "
+                "Please use 'data_asset_name' moving forward.",
                 DeprecationWarning,
             )
             data_asset_name = generator_asset
@@ -184,8 +184,8 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
         if generator_asset:
             # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in a future release. "
+                "Please use 'data_asset_name' moving forward.",
                 DeprecationWarning,
             )
         raise BatchKwargsError(

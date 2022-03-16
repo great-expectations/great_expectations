@@ -453,7 +453,7 @@ class DataAsset:
         """This method is a thin wrapper for ExpectationSuite.remove()"""
         # deprecated-v0.12.0
         warnings.warn(
-            "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
+            "DataAsset.remove_expectations is deprecated as of v0.12.0 and will be removed in a future release. "
             + "Please use ExpectationSuite.remove_expectation instead.",
             DeprecationWarning,
         )
