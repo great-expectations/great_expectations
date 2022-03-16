@@ -6,7 +6,6 @@ import numpy as np
 from dateutil.parser import parse
 from packaging import version
 
-from great_expectations.exceptions.exceptions import UnavailableMetricError
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
 
@@ -210,6 +209,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         pass
 
     try:
+        # sqlite
         # regex_match for sqlite introduced in sqlalchemy v1.4
         if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(
             sa.__version__
@@ -219,9 +219,11 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
             else:
                 return sa.not_(column.regexp_match(literal(regex)))
         else:
-            raise UnavailableMetricError(
-                "regex_match is only enabled for sqlite when SQLAlchemy version is >= 1.4"
+            logger.debug(
+                "regex_match is only enabled for sqlite when SQLAlchemy version is >= 1.4",
+                exc_info=True,
             )
+            pass
     except AttributeError:
         pass
 
