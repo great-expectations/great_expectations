@@ -22,7 +22,8 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-        column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         max_unexpected_values: Union[str, int] = 0,
         max_unexpected_ratio: Optional[Union[str, float]] = None,
         min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
@@ -37,7 +38,8 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
-            column_names: Explicitly specified column_names list desired (if None, it is computed based on active Batch)
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             max_unexpected_values: maximum "unexpected_count" value of "map_metric_name" (intra-Batch)
             max_unexpected_ratio: maximum "unexpected_count" value of "map_metric_name" divided by number of records
             (intra-Batch); if both "max_unexpected_values" and "max_unexpected_ratio" are specified, then
@@ -72,7 +74,8 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
-            column_names=column_names,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
         )
 
         self._map_metric_name = map_metric_name
@@ -151,8 +154,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         table_column_names: List[str] = self.get_effective_column_names(
-            include_columns=self.column_names,
-            exclude_columns=None,
             variables=variables,
         )
 

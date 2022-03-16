@@ -1,8 +1,13 @@
 import json
-from typing import List, Optional, Set, Union
+from typing import Any, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    RuntimeBatchRequest,
+    get_batch_request_as_dict,
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
@@ -31,7 +36,8 @@ class Builder(SerializableDictDot):
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
         self._batch_list = batch_list
-        self._batch_request = batch_request
+        self._batch_request = None
+        self.batch_request = batch_request
 
         if data_context is None:
             raise ge_exceptions.ProfilerExecutionError(
@@ -60,11 +66,39 @@ class Builder(SerializableDictDot):
     def batch_request(
         self, value: Union[BatchRequest, RuntimeBatchRequest, dict]
     ) -> None:
+        if not (value is None or isinstance(value, dict)):
+            value = get_batch_request_as_dict(batch_request=value)
+
         self._batch_request = value
 
     @property
     def data_context(self) -> "DataContext":  # noqa: F821
         return self._data_context
+
+    def set_batch_data(
+        self,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+    ) -> None:
+        arg: Any
+        num_supplied_batch_specification_args: int = sum(
+            [
+                0 if arg is None else 1
+                for arg in (
+                    batch_list,
+                    batch_request,
+                )
+            ]
+        )
+        if num_supplied_batch_specification_args > 1:
+            raise ge_exceptions.ProfilerConfigurationError(
+                f'Please pass at most one of "batch_list" and "batch_request" arguments (you passed {num_supplied_batch_specification_args} arguments).'
+            )
+
+        if batch_list is None:
+            self.batch_request = batch_request
+        else:
+            self.batch_list = batch_list
 
     def to_dict(self) -> dict:
         dict_obj: dict = super().to_dict()
