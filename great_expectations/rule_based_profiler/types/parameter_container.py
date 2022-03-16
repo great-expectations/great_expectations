@@ -207,6 +207,15 @@ class ParameterContainer(SerializableDictDot):
                 source[key] = self._convert_dictionaries_to_parameter_nodes(
                     source=value
                 )
+        elif isinstance(source, (list, tuple, set)):
+            source_type: type = type(source)
+            value: Any
+            return source_type(
+                [
+                    self._convert_dictionaries_to_parameter_nodes(source=value)
+                    for value in source
+                ]
+            )
 
         return source
 

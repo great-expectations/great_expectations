@@ -2,6 +2,7 @@
 title: How to configure a DataConnector for splitting and sampling tables in SQL
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you configure `Splitting` and `Sampling` for working with tables in an SQL database using
 `SimpleSqlalchemyDatasource`, which operates as a proxy to `InferredAssetSqlDataConnector` and
@@ -14,7 +15,7 @@ configuration, which exercises the `InferredAssetSqlDataConnector`).
 
 The `Splitting` and `Sampling` mechanisms provided by Great Expectations serve as additional tools for `Partitioning`
 your data at various levels of granularity:
-- `Splitting` provides the means of focusing the batch data on the values of certain dimensions of the data of interest.
+- `Splitting` provides the means of focusing the <TechnicalTag tag="batch" text="Batch" /> data on the values of certain dimensions of the data of interest.
 - `Sampling` provides a means for reducing the amount of data in the retrieved batch to facilitate data analysis.
 
 <Prerequisites>
@@ -65,7 +66,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 ## Splitting and Sampling
 
 To configure `Splitting`, specify a dimension (i.e., `column_name` or `column_names`), the method of `Splitting`, and
-parameters to be used by the specified `Splitting` method.  In the present example, the `Data Connectors` named
+parameters to be used by the specified `Splitting` method.  In the present example, the <TechnicalTag tag="data_connector" text="Data Connectors" /> named
 `by_num_riders` and `by_num_riders_random_sample` split the table `yellow_tripdata_sample_2019_01` on the column name
 `passenger_count` using the `_split_on_column_value` method of `Splitting`.
 
