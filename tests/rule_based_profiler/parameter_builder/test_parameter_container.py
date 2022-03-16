@@ -11,7 +11,7 @@ from great_expectations.rule_based_profiler.types import (
 )
 
 
-def test_parameter_container_operations(
+def test_build_parameter_container(
     parameters_with_different_depth_level_values,
     multi_part_name_parameter_container,
 ):
@@ -21,6 +21,17 @@ def test_parameter_container_operations(
         parameter_values=parameters_with_different_depth_level_values,
     )
     assert parameter_container == multi_part_name_parameter_container
+
+
+def test_get_fully_qualified_parameter_names(
+    parameters_with_different_depth_level_values,
+    multi_part_name_parameter_container,
+):
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    build_parameter_container(
+        parameter_container=parameter_container,
+        parameter_values=parameters_with_different_depth_level_values,
+    )
 
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
@@ -75,6 +86,34 @@ def test_parameter_container_operations(
     assert sorted(fully_qualified_parameter_names) == sorted(
         expected_fully_qualified_parameter_names
     )
+
+
+def test_get_parameter_values_for_fully_qualified_parameter_names(
+    parameters_with_different_depth_level_values,
+    multi_part_name_parameter_container,
+):
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    build_parameter_container(
+        parameter_container=parameter_container,
+        parameter_values=parameters_with_different_depth_level_values,
+    )
+
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=None,
+        details=None,
+    )
+    # Convert variables argument to ParameterContainer
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        variables_configs={
+            "my_int": 9,
+            "my_float": 3.38,
+            "my_string": "hello",
+        }
+    )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     expected_parameter_values_for_fully_qualified_parameter_names: Dict[str, Any] = {
         "$variables.my_int": 9,
