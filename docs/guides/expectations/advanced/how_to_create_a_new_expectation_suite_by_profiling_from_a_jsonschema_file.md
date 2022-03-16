@@ -2,12 +2,13 @@
 title: How to create a new Expectation Suite by profiling from a jsonschema file
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-The ``JsonSchemaProfiler`` helps you quickly create Expectation Suites from jsonschema files.
+The ``JsonSchemaProfiler`` helps you quickly create <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> from jsonschema files.
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
 - Have a valid jsonschema file that has top level object of type `object`
 
 </Prerequisites>
@@ -58,13 +59,13 @@ context.save_expectation_suite(suite)
 
 ## 7. (Optional) Generate Data Docs and review the results
 
-Data Docs provides a concise and useful way to review the Expectation Suite that has been created.
+<TechnicalTag tag="data_docs" text="Data Docs" /> provides a concise and useful way to review the Expectation Suite that has been created.
 
 ```bash
 context.build_data_docs()
 ```
 
-You can also review and update the Expectations created by the Profiler to get to the Expectation Suite you want using ``great_expectations suite edit``.
+You can also review and update the <TechnicalTag tag="expectation" text="Expectations" /> created by the <TechnicalTag tag="profiler" text="Profiler" /> to get to the Expectation Suite you want using ``great_expectations suite edit``.
 
 ## Additional notes
 

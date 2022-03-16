@@ -2,8 +2,9 @@
 title: How to create a new Expectation Suite using Rule Based Profilers
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-In this tutorial, you will develop hands-on experience with configuring a Rule-Based Profiler to create an Expectation Suite. You will Profile several batches of NYC yellow taxi trip data to come up with reasonable estimates for the ranges of Expectations for several numeric columns.
+In this tutorial, you will develop hands-on experience with configuring a Rule-Based <TechnicalTag tag="profiler" text="Profiler" /> to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />. You will <TechnicalTag tag="profiling" text="Profile" /> several <TechnicalTag tag="batch" text="Batches" /> of NYC yellow taxi trip data to come up with reasonable estimates for the ranges of <TechnicalTag tag="expectation" text="Expectations" /> for several numeric columns.
 
 :::warning
 
@@ -36,7 +37,7 @@ While the contents of this document accurately reflect the state of the feature,
 
 ### 3. Set up your Datasource
 
-- Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas.md). For the purpose of this tutorial, we will work from a `yaml` to set up your Datasource config. When you open up your notebook to create and test and save your Datasource config, replace the config docstring with the following docstring:
+- Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas.md). For the purpose of this tutorial, we will work from a `yaml` to set up your <TechnicalTag tag="datasource" text="Datasource" /> config. When you open up your notebook to create and test and save your Datasource config, replace the config docstring with the following docstring:
 - 
 ```python
 example_yaml = f"""
@@ -96,7 +97,7 @@ After that, we'll add our Domain Builder. In this case, we'll use a `TableDomain
 ```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L19-L20
 ```
 
-Next, we'll use a `NumericMetricRangeMultiBatchParameterBuilder` to get an estimate to use for the `min_value` and `max_value` of our `expect_table_row_count_to_be_between` Expectation. This Parameter Builder will take in a Batch Request consisting of the five Batches prior to our current Batch, and use the row counts of each of those months to get a probable range of row counts that you could use in your `ExpectationConfiguration`.
+Next, we'll use a `NumericMetricRangeMultiBatchParameterBuilder` to get an estimate to use for the `min_value` and `max_value` of our `expect_table_row_count_to_be_between` Expectation. This Parameter Builder will take in a <TechnicalTag tag="batch_request" text="Batch Request" /> consisting of the five Batches prior to our current Batch, and use the row counts of each of those months to get a probable range of row counts that you could use in your `ExpectationConfiguration`.
 
 ```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L21-L35
 ```
@@ -118,7 +119,7 @@ You can see here that we use a special `$` syntax to reference `variables` and `
 
 Now let's use our config to Profile our data and create a simple Expectation Suite!
 
-First we'll do some basic set-up - set up a Data Context and parse our YAML
+First we'll do some basic set-up - set up a <TechnicalTag tag="data_context" text="Data Context" /> and parse our YAML
 
 ```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L102-L106
 ```
