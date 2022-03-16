@@ -41,4 +41,4 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions():
             print(f"{file} - v{version}")
 
     # Chetan - 20220315 - This should be 0 once we've cleared deprecation warnings in v0.16.0
-    assert len(unneeded_deprecation_warnings) == 28
+    assert len(unneeded_deprecation_warnings) == 29
