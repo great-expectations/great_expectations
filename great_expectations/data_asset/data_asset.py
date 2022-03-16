@@ -111,9 +111,11 @@ class DataAsset:
         Returns:
             tuple(expectation_suite, validation_results)
         """
+        # deprecated-v0.10.10
         warnings.warn(
-            "The term autoinspect is deprecated and will be removed in v0.16. Please use 'profile'\
-        instead."
+            "The term autoinspect is deprecated as of v0.10.10 and will be removed in v0.16. Please use 'profile'\
+        instead.",
+            DeprecationWarning,
         )
         expectation_suite, validation_results = profiler.profile(self)
         return expectation_suite, validation_results
