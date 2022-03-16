@@ -1,5 +1,10 @@
 from typing import List, Set
+from unittest import mock
+from unittest.mock import MagicMock
 
+import pandas as pd
+
+from great_expectations.core.batch import Batch
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -12,10 +17,11 @@ from great_expectations.rule_based_profiler.types import (
 )
 
 
+@mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
-    alice_columnar_table_single_batch_context,
+    mock_data_context: mock.MagicMock,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: DataContext = mock_data_context
 
     candidate_regexes: Set[str] = {
         r"/\d+/",  # whole number with 1 or more digits
@@ -44,10 +50,11 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
     assert regex_pattern_string_parameter.CANDIDATE_REGEX == candidate_regexes
 
 
+@mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
-    alice_columnar_table_single_batch_context,
+    mock_data_context: mock.MagicMock,
 ):
-    data_context: DataContext = alice_columnar_table_single_batch_context
+    data_context: DataContext = mock_data_context
 
     candidate_regexes: Set[str] = {
         r"\d{1}",
@@ -393,4 +400,43 @@ def test_regex_pattern_string_parameter_builder_alice_two_regex_patterns(
             parameters={domain.id: parameter_container},
         )
         == expected_value
+    )
+
+
+# unittest version
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_regex_single_match(
+    mock_data_context: mock.MagicMock,
+):
+    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
+    batch = Batch(data=df)
+    mock_data_context.get_batch_list.return_value = [batch]
+    data_context: DataContext = mock_data_context
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    metric_domain_kwargs = {"column": "b"}
+    candidate_regexes: List[str] = [r"^\d{1}$"]
+
+    regex_pattern_string_parameter_builder: RegexPatternStringParameterBuilder = (
+        RegexPatternStringParameterBuilder(
+            name="my_regex_pattern_string_parameter_builder",
+            metric_domain_kwargs=metric_domain_kwargs,
+            candidate_regexes=candidate_regexes,
+            batch_request=batch_request,
+            data_context=data_context,
+        )
+    )
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+    )
+    assert parameter_container.parameter_nodes is None
+
+    regex_pattern_string_parameter_builder.build_parameters(
+        parameter_container=parameter_container, domain=domain
     )
