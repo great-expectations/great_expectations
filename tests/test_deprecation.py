@@ -33,8 +33,12 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions():
                 )
                 unneeded_deprecation_warnings.append(unneeded_deprecation_warning)
 
-    for file, version in unneeded_deprecation_warnings:
-        print(file, version)
+    if unneeded_deprecation_warnings:
+        print(
+            "\nThe following deprecation warnings must be cleared per the code style guide:"
+        )
+        for file, version in unneeded_deprecation_warnings:
+            print(f"{file} - v{version}")
 
     # Chetan - 20220315 - Enable this once we've cleared deprecation warnings <=v11
     # assert len(unneeded_deprecation_warnings) == 0
