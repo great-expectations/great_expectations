@@ -100,10 +100,10 @@ class ExpectColumnValuesToOnlyContainVowels(ColumnMapRegexExpectation):
                     "backend": "sqlalchemy",
                     "dialects": ["sqlite", "postgresql"],
                 },
-                # {
-                #     "backend": "spark",
-                #     "dialects": None,
-                # },
+                {
+                    "backend": "spark",
+                    "dialects": None,
+                },
             ],
         }
     ]
@@ -124,6 +124,9 @@ class ExpectColumnValuesToOnlyContainVowels(ColumnMapRegexExpectation):
         if configuration is None:
             configuration = self.configuration
 
+        # Vacuously True as all parameter validation is inherited
+        return True
+
     library_metadata = {
         "tags": ["regex"],
         "contributors": ["@abegong", "@austiezr"],
@@ -143,7 +146,6 @@ if __name__ == "__main__":
 
 diagnostics = ExpectColumnValuesToOnlyContainVowels().run_diagnostics()
 
-breakpoint()
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
     assert check["error_message"] is None

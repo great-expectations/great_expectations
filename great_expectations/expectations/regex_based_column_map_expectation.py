@@ -43,7 +43,7 @@ class ColumnMapRegexMetricProvider(ColumnMapMetricProvider):
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _dialect, **kwargs):
         regex_expression = get_dialect_regex_expression(column, cls.regex, _dialect)
-        breakpoint()
+
         if regex_expression is None:
             logger.warning(
                 "Regex is not supported for dialect %s" % str(_dialect.dialect.name)
@@ -52,9 +52,9 @@ class ColumnMapRegexMetricProvider(ColumnMapMetricProvider):
 
         return regex_expression
 
-    # @column_condition_partial(engine=SparkDFExecutionEngine)
-    # def _spark(cls, column, **kwargs):
-    #     return column.rlike(cls.regex)
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        return column.rlike(cls.regex)
 
 
 class ColumnMapRegexExpectation(ColumnMapExpectation, ABC):

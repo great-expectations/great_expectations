@@ -207,6 +207,16 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
     except (AttributeError, TypeError):
         pass
 
+    try:
+        # sqlite
+        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect):
+            if positive:
+                return column.regexp_match(literal(regex))
+            else:
+                return sa.not_(column.regexp_match(literal(regex)))
+    except AttributeError:
+        pass
+
     return None
 
 
