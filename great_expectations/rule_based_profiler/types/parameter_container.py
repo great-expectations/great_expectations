@@ -16,9 +16,7 @@ from pyparsing import (
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.types import Domain
-from great_expectations.types import SerializableDictDot
-from great_expectations.types.base import SerializableDotDict
-from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.types import SerializableDictDot, SerializableDotDict
 
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
 
@@ -73,8 +71,16 @@ def _parse_attribute_name(name: str) -> ParseResults:
         )
 
 
+def is_fully_qualified_parameter_name_literal_string_format(
+    fully_qualified_parameter_name: str,
+) -> bool:
+    return fully_qualified_parameter_name.startswith("$")
+
+
 def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
-    if not fully_qualified_parameter_name.startswith("$"):
+    if not is_fully_qualified_parameter_name_literal_string_format(
+        fully_qualified_parameter_name=fully_qualified_parameter_name
+    ):
         raise ge_exceptions.ProfilerExecutionError(
             message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
 names must start with $ (e.g., "${fully_qualified_parameter_name}").
@@ -102,8 +108,11 @@ class ParameterNode(SerializableDotDict):
     the situations where multiple long fully-qualified parameter names have overlapping intermediate parts (see below).
     """
 
+    def to_dict(self) -> dict:
+        return dict(self)
+
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=dict(self))
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 @dataclass
@@ -190,7 +199,6 @@ class ParameterContainer(SerializableDictDot):
 
         if isinstance(source, dict):
             if not isinstance(source, ParameterNode):
-                deep_filter_properties_iterable(properties=source, inplace=True)
                 source = ParameterNode(source)
 
             key: str

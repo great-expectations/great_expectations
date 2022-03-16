@@ -287,7 +287,7 @@ class PandasDatasource(LegacyDatasource):
             return {"reader_method": "read_sas"}
 
         raise BatchKwargsError(
-            "Unable to determine reader method from path: %s" % path, {"path": path}
+            f"Unable to determine reader method from path: {path}", {"path": path}
         )
 
     def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:
@@ -345,6 +345,6 @@ class PandasDatasource(LegacyDatasource):
             return reader_fn
         except AttributeError:
             raise BatchKwargsError(
-                "Unable to find reader_method %s in pandas." % reader_method,
+                f"Unable to find reader_method {reader_method} in pandas.",
                 {"reader_method": reader_method},
             )

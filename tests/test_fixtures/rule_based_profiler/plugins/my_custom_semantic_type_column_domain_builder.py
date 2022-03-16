@@ -20,7 +20,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: DataContext,
-        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, dict]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
@@ -29,7 +29,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     ):
         super().__init__(
             data_context=data_context,
-            batch=batch,
+            batch_list=batch_list,
             batch_request=batch_request,
         )
 
@@ -68,14 +68,14 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
         """
-        batch_id: str = self.get_batch_id(variables=variables)
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)
         table_column_names: List[str] = self.get_validator(
             variables=variables
         ).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
                 metric_domain_kwargs={
-                    "batch_id": batch_id,
+                    "batch_id": batch_ids[-1],  # active_batch_id
                 },
                 metric_value_kwargs=None,
                 metric_dependencies=None,

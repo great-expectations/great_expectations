@@ -69,7 +69,7 @@ class DocInherit:
             if self.name not in parent.__dict__:
                 continue
             if parent.__dict__[self.name].__doc__ is not None:
-                doc = doc + "\n" + parent.__dict__[self.name].__doc__
+                doc = f"{doc}\n{parent.__dict__[self.name].__doc__}"
 
         @wraps(self.mthd, assigned=("__name__", "__module__"))
         def f(*args, **kwargs):
@@ -115,7 +115,7 @@ def recursively_convert_to_json_serializable(test_obj):
     elif isinstance(test_obj, dict):
         new_dict = {}
         for key in test_obj:
-            if key == "row_condition":
+            if key == "row_condition" and test_obj[key] is not None:
                 ensure_row_condition_is_correct(test_obj[key])
             # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string
             new_dict[str(key)] = recursively_convert_to_json_serializable(test_obj[key])

@@ -24,6 +24,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.util import get_pyathena_potential_type
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -98,6 +99,7 @@ except ImportError:
             BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
     except ImportError:
+        sqla_bigquery = None
         bigquery_types_tuple = None
         pybigquery = None
 
@@ -249,7 +251,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             template_str = "values must be of type $type_."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -258,7 +260,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -298,14 +300,14 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             template_str = "values must be of type $type_."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -386,16 +388,22 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                         + "To install support, please run:"
                         + "  $ pip install 'sqlalchemy-bigquery[geography]'"
                     )
-                potential_type = getattr(type_module, expected_type)
-                # In the case of the PyAthena dialect we need to verify that
-                # the type returned is indeed a type and not an instance.
-                if not inspect.isclass(potential_type):
-                    type_class = type(potential_type)
+                elif type_module.__name__ == "pyathena.sqlalchemy_athena":
+                    potential_type = get_pyathena_potential_type(
+                        type_module, expected_type
+                    )
+                    # In the case of the PyAthena dialect we need to verify that
+                    # the type returned is indeed a type and not an instance.
+                    if not inspect.isclass(potential_type):
+                        real_type = type(potential_type)
+                    else:
+                        real_type = potential_type
+                    types.append(real_type)
                 else:
-                    type_class = potential_type
-                types.append(type_class)
+                    potential_type = getattr(type_module, expected_type)
+                    types.append(potential_type)
             except AttributeError:
-                logger.debug("Unrecognized type: %s" % expected_type)
+                logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
                 logger.warning(
                     "No recognized sqlalchemy types in type_list for current dialect."
@@ -421,7 +429,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 type_class = getattr(sparktypes, expected_type)
                 types.append(type_class)
             except AttributeError:
-                logger.debug("Unrecognized type: %s" % expected_type)
+                logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
                 raise ValueError("No recognized spark types in expected_types_list")
             types = tuple(types)

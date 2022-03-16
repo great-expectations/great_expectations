@@ -37,13 +37,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies including latest sqlalchemy version
         run: |
-          pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt -c constraints-dev.txt
+          pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt -c constraints-dev.txt
           pip install .
           pip install --requirement requirements.txt -c constraints-dev.txt
           pip install --upgrade SQLAlchemy
       - name: Test with pytest
         run: |
-          pytest --no-spark --ignore=tests/cli --ignore=tests/integration/usage_statistics
+          pytest --postgresql --ignore=tests/cli --ignore=tests/integration/usage_statistics
       - name: Notify via Slack
         uses: act10ns/slack@v1
         with:

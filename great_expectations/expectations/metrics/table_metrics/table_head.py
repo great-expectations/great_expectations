@@ -124,7 +124,7 @@ class TableHead(TableMetricProvider):
                         compile_kwargs={"literal_binds": True},
                     )
                 )
-                sql = f"SELECT TOP {metric_value_kwargs['n_rows']}" + sql[6:]
+                sql = f"SELECT TOP {metric_value_kwargs['n_rows']}{sql[6:]}"
             else:
                 stmt = stmt.limit(metric_value_kwargs["n_rows"])
                 sql = stmt.compile(

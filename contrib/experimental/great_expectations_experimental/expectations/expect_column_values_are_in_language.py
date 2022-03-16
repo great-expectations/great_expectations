@@ -172,5 +172,4 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesAreInLanguage().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesAreInLanguage().print_diagnostic_checklist()
