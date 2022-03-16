@@ -1,12 +1,15 @@
 import itertools
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
+    AttributedResolvedMetrics,
     MetricMultiBatchParameterBuilder,
+    MetricValues,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.types.parameter_container import (
@@ -109,10 +112,18 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameters=parameters,
         )
 
+        if not (
+            isinstance(parameter_node.value, list) and len(parameter_node.value) == 1
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({parameter_node.value} found).'
+            )
+
+        attributed_resolved_metrics: AttributedResolvedMetrics = parameter_node.value[0]
+        metric_values: MetricValues = attributed_resolved_metrics.metric_values
+
         return (
-            _get_unique_values_from_nested_collection_of_sets(
-                collection=parameter_node.value[0].metric_values
-            ),
+            _get_unique_values_from_nested_collection_of_sets(collection=metric_values),
             parameter_node.details,
         )
 
