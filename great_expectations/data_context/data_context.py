@@ -489,7 +489,8 @@ class BaseDataContext(ConfigPeer):
                 if self._ge_cloud_mode:
                     # when running in cloud mode, we want to know if a datasource has been improperly configured at
                     # init time.
-                    raise
+                    print(f"cant initialize datasource because of error: {e}")
+                    pass
                 else:
                     pass
 
@@ -2107,7 +2108,9 @@ class BaseDataContext(ConfigPeer):
                     )
             elif "execution_engine" in value:
                 if "connection_string" in value["execution_engine"]:
-                    value["execution_engine"]["connection_string"] = PasswordMasker.mask_db_url(
+                    value["execution_engine"][
+                        "connection_string"
+                    ] = PasswordMasker.mask_db_url(
                         value["execution_engine"]["connection_string"]
                     )
 

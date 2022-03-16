@@ -1259,7 +1259,7 @@ class GeCloudConfig(DictDot):
         return {
             "base_url": self.base_url,
             "organization_id": self.organization_id,
-            "access_token": self.access_token,
+            "access_token": "xxx",  # self.access_token,
             "account_id": self.account_id,  # TODO: remove when account_id is deprecated
         }
 
@@ -2085,6 +2085,37 @@ class DataContextConfig(BaseYamlConfig):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+    def to_sanitized_json_dict(self) -> dict:
+        """
+        Wrapper for `to_json_dict` which ensures sensitive fields are properly masked.
+        """
+        # avoid circular imports
+        from great_expectations.data_context.util import PasswordMasker
+
+        serializeable_dict = self.to_json_dict()
+
+        # mask cloud token in stores config
+        if "stores" in serializeable_dict and isinstance(
+            serializeable_dict["stores"], dict
+        ):
+            for store_name, store_config in serializeable_dict["stores"].items():
+                serializeable_dict["stores"][
+                    store_name
+                ] = PasswordMasker.sanitize_store_config(store_config)
+
+        # mask connection creds in datasources
+        if "datasources" in serializeable_dict and isinstance(
+            serializeable_dict["stores"], dict
+        ):
+            for datasource_name, datasource_config in serializeable_dict[
+                "datasources"
+            ].items():
+                serializeable_dict["datasources"][
+                    datasource_name
+                ] = PasswordMasker.sanitize_datasource_config(datasource_config)
+
+        return serializeable_dict
+
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -2093,7 +2124,7 @@ class DataContextConfig(BaseYamlConfig):
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
         """
-        json_dict: dict = self.to_json_dict()
+        json_dict: dict = self.to_sanitized_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
             inplace=True,

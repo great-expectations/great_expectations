@@ -519,6 +519,7 @@ class PasswordMasker:
     """
 
     MASKED_PASSWORD_STRING = "***"
+    MASKED_UUID = "********-****-****-****-************"
 
     @staticmethod
     def mask_db_url(url: str, use_urlparse: bool = False, **kwargs) -> str:
@@ -567,3 +568,44 @@ class PasswordMasker:
                 )
 
             return masked_url
+
+    @classmethod
+    def sanitize_datasource_config(cls, config: dict) -> dict:
+        """
+        Given a datasource config dict, replace sensitive fields inplace and return
+        the sanitized config.
+        """
+
+        # does the Datasource have a credentials field?
+        if "credentials" in config:
+            if "password" in config["credentials"]:
+                config["credentials"]["password"] = cls.MASKED_PASSWORD_STRING
+            if "url" in config["credentials"]:
+                config["credentials"]["url"] = cls.mask_db_url(
+                    config["credentials"]["url"]
+                )
+
+        # does the Datasource's Execution Engine have a connection string?
+        if "execution_engine" in config:
+            if "connection_string" in config["execution_engine"]:
+                config["execution_engine"]["connection_string"] = cls.mask_db_url(
+                    config["execution_engine"]["connection_string"]
+                )
+
+        return config
+
+    @classmethod
+    def sanitize_store_config(cls, config: dict) -> dict:
+        """
+        Given a Store config dict, replace sensitive fields inplace and return
+        the sanitized config.
+        """
+
+        if "store_backend" in config:
+            if "ge_cloud_credentials" in config["store_backend"]:
+                if "access_token" in config["store_backend"]["ge_cloud_credentials"]:
+                    config["store_backend"]["ge_cloud_credentials"][
+                        "access_token"
+                    ] = cls.MASKED_UUID
+
+        return config
