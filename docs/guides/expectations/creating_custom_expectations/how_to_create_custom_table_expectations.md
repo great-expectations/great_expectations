@@ -162,7 +162,7 @@ Completeness checklist for ExpectTableColumnsToBeUnique:
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 		  Only 0 / 2 tests for pandas are passing
-		  Failing: basic_positive_test, basic_positive_test
+		  Failing: basic_positive_test, basic_negative_test
 ...
 ```
 
