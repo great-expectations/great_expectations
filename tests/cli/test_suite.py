@@ -4483,9 +4483,9 @@ def test__process_suite_edit_flags_and_prompt(
 
 
 def test_suite_new_load_jupyter_configured_asset_sql_data_connector_missing_data_asset(
-    sqlalchemy_missing_data_asset_data_context,
+    sqlite_missing_data_asset_data_context,
 ):
-    context: DataContext = sqlalchemy_missing_data_asset_data_context
+    context: DataContext = sqlite_missing_data_asset_data_context
 
     interactive_mode, profile = _process_suite_new_flags_and_prompt(
         context=context,

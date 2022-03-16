@@ -1234,16 +1234,16 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset(
 
 
 def test_replace_and_save_runtime_data_connector_with_limit(
-    sqlalchemy_missing_data_asset_data_context,
+    data_context_with_datasource_sqlalchemy_engine,
 ):
-    context: DataContext = sqlalchemy_missing_data_asset_data_context
+    context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     data_asset_name: str = "table_containing_id_spacers_for_D"
     limit: int = 10
 
     batch_request: dict[str, Any] = {
         "datasource_name": "my_datasource",
-        "data_connector_name": "default_runtime_data_connector",
+        "data_connector_name": "default_runtime_data_connector_name",
         "data_asset_name": data_asset_name,
         "runtime_parameters": {
             "query": f"SELECT * FROM {data_asset_name} LIMIT {limit}"
