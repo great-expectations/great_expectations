@@ -144,7 +144,7 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
         batch_request=batch_request,
         data_context=data_context,
         limit_mode="VERY_FEW",
-        exclude_columns=[
+        exclude_column_names=[
             "id",
             "event_type",
             "user_id",
@@ -186,7 +186,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
         batch_request=batch_request,
         data_context=data_context,
         limit_mode="VERY_FEW",
-        exclude_columns=[],
+        exclude_column_names=[],
     )
     domains: List[Domain] = domain_builder.get_domains()
 

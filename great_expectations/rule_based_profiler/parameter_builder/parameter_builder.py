@@ -278,7 +278,7 @@ class ParameterBuilder(Builder, ABC):
         Then, all "MetricConfiguration" objects, collected into list as container, are resolved simultaneously.
         """
 
-        # Fist: Gather "metric_domain_kwargs" (corresponding to "batch_ids").
+        # First: Gather "metric_domain_kwargs" (corresponding to "batch_ids").
 
         domain_kwargs: dict = build_metric_domain_kwargs(
             batch_id=None,
@@ -372,9 +372,14 @@ class ParameterBuilder(Builder, ABC):
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
-            attributed_resolved_metrics.add_resolved_metric(
-                value=resolved_metrics[metric_configuration.id]
-            )
+            resolved_metric_value: Union[
+                Tuple[str, str, str], None
+            ] = resolved_metrics.get(metric_configuration.id)
+            if resolved_metric_value is None:
+                raise ge_exceptions.ProfilerExecutionError(
+                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
+                )
+            attributed_resolved_metrics.add_resolved_metric(value=resolved_metric_value)
 
         metric_attributes_id: str
         metric_values: AttributedResolvedMetrics
@@ -403,7 +408,7 @@ class ParameterBuilder(Builder, ABC):
                 metric_values.metric_values = np.array(metric_values.metric_values)
                 attributed_resolved_metrics_map[metric_attributes_id] = metric_values
 
-        # Eigth: Apply numeric/hygiene directives (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+        # Eighth: Apply numeric/hygiene directives (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
         for (
             metric_attributes_id,
             metric_values,
@@ -418,13 +423,9 @@ class ParameterBuilder(Builder, ABC):
                 parameters=parameters,
             )
 
-        # Nineth: Compose and return result to receiver (apply simplications to cases of single "metric_value_kwargs").
+        # Ninth: Compose and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
         return MetricComputationResult(
-            metric_values=list(attributed_resolved_metrics_map.values())[
-                0
-            ].metric_values
-            if len(metric_value_kwargs) == 1
-            else attributed_resolved_metrics_map.values(),
+            list(attributed_resolved_metrics_map.values()),
             details={
                 "metric_configuration": {
                     "metric_name": metric_name,
