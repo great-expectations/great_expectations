@@ -69,7 +69,7 @@ You may also replace the default ``local_site`` if you would only like to mainta
 :::
 
 You also may configure Great Expectations to store your <TechnicalTag relative="../../../" tag="expectation" text="Expectations" /> and <TechnicalTag relative="../../../" tag="validation_result" text="Validation Results" /> in this Azure Storage account.
-You can follow the documentation from the guides for [Expectations](../../setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md) and [Validation Results](../../setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage.md) but unsure you set ``container: \$web`` inplace of other container name.
+You can follow the documentation from the guides for [Expectations](../../setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md) and [Validation Results](../../setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage.md) but be sure you set ``container: \$web`` in place of the other container name.
 
 
 ### 4. Build the Azure Blob Data Docs site

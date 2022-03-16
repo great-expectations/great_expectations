@@ -55,12 +55,16 @@ If using environment variables, set values by entering ``export ENV_VAR_NAME=env
 ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L19-L25
 ```
 
-### 2. If using a YAML file, set the ``config_variables_file_path`` key in your ``great_expectations.yml`` or leave the default.
+### 2. Set ``config_variables_file_path``
+
+If using a YAML file, set the ``config_variables_file_path`` key in your ``great_expectations.yml`` or leave the default.
 
 ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L29
 ```
 
-### 3. Replace credentials or other values in your ``great_expectations.yml`` with ``${}``-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
+### 3. Replace credentials with placeholders
+
+Replace credentials or other values in your ``great_expectations.yml`` with ``${}``-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
 
 ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L33-L59
 ```
