@@ -122,7 +122,7 @@ def send_webhook_notifications(query, webhook, target_platform):
         if response.status_code != 200:
             logger.warning(
                 f"Request to {target_platform} webhook "
-                f"returned error {respone.status_code}: {response.text}"
+                f"returned error {response.status_code}: {response.text}"
             )
         else:
             return f"{target_platform} notification succeeded."
