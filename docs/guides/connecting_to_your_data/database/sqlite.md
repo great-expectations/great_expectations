@@ -8,9 +8,10 @@ import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you connect to data in a SQLite database.
-This will allow you to validate and explore your data.
+This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
 <Prerequisites>
 
@@ -44,7 +45,6 @@ sqlite:///<PATH_TO_DB_FILE>
 
 For more details on different ways to specify database files and information on how to connect to an in-memory SQLite database, please refer to the documentation on [SQLAlchemy](https://docs.sqlalchemy.org/en/14/core/engines.html#sqlite).
 
-
 ### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
@@ -66,28 +66,35 @@ Load your DataContext into memory using the `get_context()` method.
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 Put your connection string in this template:
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py#L10-L24
 ```
+
 Run this code to test your configuration.
+
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py#L32
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 Put your connection string in this template:
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py#L10-L27
 ```
+
 Run this code to test your configuration.
+
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py#L33
 ```
 
 </TabItem>
+
 </Tabs>
 
 You will see your database tables listed as `Available data_asset_names` in the output of `test_yaml_config()`.
@@ -105,23 +112,26 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py#L34
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py#L35
 ```
 
 </TabItem>
+
 </Tabs>
 
 ### 7. Test your new Datasource
 
-Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
+Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a `BatchRequest`.
 
 <Tabs
   defaultValue='runtime_batch_request'
@@ -129,23 +139,25 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
   {label: 'Using a SQL query', value:'runtime_batch_request'},
   {label: 'Using a table name', value:'batch_request'},
   ]}>
-  <TabItem value="runtime_batch_request">
+
+<TabItem value="runtime_batch_request">
 
 Here is an example of loading data by specifying a SQL query.
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py#L37-L50
 ```
 
-  </TabItem>
+</TabItem>
 
-  <TabItem value="batch_request">
+<TabItem value="batch_request">
 
 Here is an example of loading data by specifying an existing table name.
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py#L57-L68
 ```
 
-  </TabItem>
+</TabItem>
+
 </Tabs>
 
 <Congratulations />

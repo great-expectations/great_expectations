@@ -17,7 +17,6 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.types import SerializableDictDot, SerializableDotDict
-from great_expectations.util import deep_filter_properties_iterable
 
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
 
@@ -72,8 +71,16 @@ def _parse_attribute_name(name: str) -> ParseResults:
         )
 
 
+def is_fully_qualified_parameter_name_literal_string_format(
+    fully_qualified_parameter_name: str,
+) -> bool:
+    return fully_qualified_parameter_name.startswith("$")
+
+
 def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
-    if not fully_qualified_parameter_name.startswith("$"):
+    if not is_fully_qualified_parameter_name_literal_string_format(
+        fully_qualified_parameter_name=fully_qualified_parameter_name
+    ):
         raise ge_exceptions.ProfilerExecutionError(
             message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
 names must start with $ (e.g., "${fully_qualified_parameter_name}").
@@ -192,7 +199,6 @@ class ParameterContainer(SerializableDictDot):
 
         if isinstance(source, dict):
             if not isinstance(source, ParameterNode):
-                deep_filter_properties_iterable(properties=source, inplace=True)
                 source = ParameterNode(source)
 
             key: str
@@ -201,6 +207,15 @@ class ParameterContainer(SerializableDictDot):
                 source[key] = self._convert_dictionaries_to_parameter_nodes(
                     source=value
                 )
+        elif isinstance(source, (list, tuple, set)):
+            source_type: type = type(source)
+            value: Any
+            return source_type(
+                [
+                    self._convert_dictionaries_to_parameter_nodes(source=value)
+                    for value in source
+                ]
+            )
 
         return source
 

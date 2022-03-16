@@ -584,12 +584,3 @@ def test_deep_filter_properties_iterable_on_batch_request_dict():
 def test_hyphen():
     txt: str = "suite_validation_result"
     assert hyphen(txt=txt) == "suite-validation-result"
-
-
-def test_probabilistic_test_decorator(
-    always_failing_test,
-):
-    with pytest.raises(AssertionError) as e:
-        always_failing_test()
-
-    assert "Executing 'test_method()' failed." in str(e.value)

@@ -1,33 +1,43 @@
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.domain_builder.cardinality_checker import (
+from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
+    AbsoluteCardinalityLimit,
     CardinalityChecker,
     CardinalityLimitMode,
+    RelativeCardinalityLimit,
+    validate_input_parameters,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    build_simple_domains_from_column_names,
+    get_parameter_value_and_validate_return_type,
+    get_resolved_metrics_by_key,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.rule_based_profiler.types.domain import (
-    build_domains_from_column_names,
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class CategoricalColumnDomainBuilder(DomainBuilder):
+class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     """
     This DomainBuilder uses column cardinality to identify domains.
     """
+
+    exclude_field_names: Set[str] = ColumnDomainBuilder.exclude_field_names | {
+        "cardinality_checker",
+    }
 
     def __init__(
         self,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
-        max_unique_values: Optional[int] = None,
-        max_proportion_unique: Optional[int] = None,
-        exclude_columns: Optional[List[str]] = None,
+        max_unique_values: Optional[Union[str, int]] = None,
+        max_proportion_unique: Optional[Union[str, float]] = None,
     ):
         """Create column domains where cardinality is within the specified limit.
 
@@ -48,6 +58,8 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
@@ -55,30 +67,40 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
                 cardinality limit to use when filtering columns.
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
-            exclude_columns: If provided, these columns are pre-filtered and
-                excluded from consideration, cardinality is not computed.
         """
         super().__init__(
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
         )
 
-        self._cardinality_checker = CardinalityChecker(
-            limit_mode=limit_mode,
-            max_unique_values=max_unique_values,
-            max_proportion_unique=max_proportion_unique,
-        )
+        self._limit_mode = limit_mode
+        self._max_unique_values = max_unique_values
+        self._max_proportion_unique = max_proportion_unique
 
-        self._exclude_columns = exclude_columns
+        self._cardinality_checker = None
 
     @property
     def domain_type(self) -> Union[str, MetricDomainTypes]:
         return MetricDomainTypes.COLUMN
 
     @property
-    def exclude_columns(self) -> List[str]:
-        return self._exclude_columns
+    def limit_mode(self) -> Optional[Union[CardinalityLimitMode, str]]:
+        return self._limit_mode
+
+    @property
+    def max_unique_values(self) -> Optional[Union[str, int]]:
+        return self._max_unique_values
+
+    @property
+    def max_proportion_unique(self) -> Optional[Union[str, float]]:
+        return self._max_proportion_unique
+
+    @property
+    def cardinality_checker(self) -> Optional[CardinalityChecker]:
+        return self._cardinality_checker
 
     def _get_domains(
         self,
@@ -92,149 +114,151 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         Returns:
             List of domains that match the desired cardinality.
         """
-
-        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
-
-        # Here we use a single get_metric call to get column names to build the
-        # rest of the metrics.
-        batch_ids: List[str] = self.get_batch_ids(variables=variables)
-
-        table_column_names: List[str] = self._get_table_column_names_from_active_batch(
-            validator=validator,
-            batch_id=batch_ids[-1],  # active_batch_id
+        table_column_names: List[str] = self.get_effective_column_names(
+            variables=variables,
         )
 
-        metrics_for_cardinality_check: List[
-            Dict[str, List[MetricConfiguration]]
+        # Obtain limit_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        limit_mode: Optional[
+            Union[CardinalityLimitMode, str]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.limit_mode,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
+
+        # Obtain max_unique_values from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        max_unique_values: Optional[int] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.max_unique_values,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
+
+        # Obtain max_proportion_unique from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        max_proportion_unique: Optional[
+            float
+        ] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.max_proportion_unique,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
+
+        validate_input_parameters(
+            limit_mode=limit_mode,
+            max_unique_values=max_unique_values,
+            max_proportion_unique=max_proportion_unique,
+        )
+
+        self._cardinality_checker = CardinalityChecker(
+            limit_mode=limit_mode,
+            max_unique_values=max_unique_values,
+            max_proportion_unique=max_proportion_unique,
+        )
+
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)
+
+        metrics_for_cardinality_check: Dict[
+            str, List[MetricConfiguration]
         ] = self._generate_metric_configurations_to_check_cardinality(
             batch_ids=batch_ids, column_names=table_column_names
         )
 
-        candidate_column_names: List[str] = self._columns_meeting_cardinality_limit(
+        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
+        candidate_column_names: List[
+            str
+        ] = self._column_names_meeting_cardinality_limit(
             validator=validator,
-            table_column_names=table_column_names,
             metrics_for_cardinality_check=metrics_for_cardinality_check,
         )
 
-        column_domains: List[Domain] = build_domains_from_column_names(
-            candidate_column_names
+        return build_simple_domains_from_column_names(
+            column_names=candidate_column_names,
+            domain_type=self.domain_type,
         )
-
-        return column_domains
-
-    def _get_table_column_names_from_active_batch(
-        self,
-        validator: "Validator",  # noqa: F821
-        batch_id: str,
-    ):
-        """Retrieve table column names from the active batch.
-
-        Args:
-            validator: Validator to use in retrieving columns.
-
-        Returns:
-            List of column names from the active batch.
-        """
-
-        table_column_names: List[str] = validator.get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs={
-                    "batch_id": batch_id,
-                },
-                metric_value_kwargs=None,
-                metric_dependencies=None,
-            )
-        )
-
-        if self.exclude_columns is not None:
-            table_column_names = [
-                colname
-                for colname in table_column_names
-                if colname not in self.exclude_columns
-            ]
-
-        return table_column_names
 
     def _generate_metric_configurations_to_check_cardinality(
         self,
         batch_ids: List[str],
         column_names: List[str],
-    ) -> List[Dict[str, List[MetricConfiguration]]]:
+    ) -> Dict[str, List[MetricConfiguration]]:
         """Generate metric configurations used to compute metrics for checking cardinality.
 
         Args:
             batch_ids: List of batch_ids used to create metric configurations.
-            column_names: List of column names used to create metric configurations.
+            column_names: List of column_names used to create metric configurations.
 
         Returns:
-            List of dicts of the form [{column_name: List[MetricConfiguration]},...]
+            Dictionary of the form {
+                "my_column_name": List[MetricConfiguration],
+            }
         """
 
-        limit_mode: CardinalityLimitMode = self._cardinality_checker.limit_mode
+        limit_mode: Union[
+            AbsoluteCardinalityLimit, RelativeCardinalityLimit
+        ] = self.cardinality_checker.limit_mode
 
         column_name: str
-        metric_configurations: List[Dict[str, List[MetricConfiguration]]] = [
-            {
-                column_name: [
-                    MetricConfiguration(
-                        metric_name=limit_mode.metric_name_defining_limit,
-                        metric_domain_kwargs={
-                            "batch_id": batch_id,
-                            "column": column_name,
-                        },
-                        metric_value_kwargs=None,
-                        metric_dependencies=None,
-                    )
-                    for batch_id in batch_ids
-                ]
-            }
+        batch_id: str
+        metric_configurations: Dict[str, List[MetricConfiguration]] = {
+            column_name: [
+                MetricConfiguration(
+                    metric_name=limit_mode.metric_name_defining_limit,
+                    metric_domain_kwargs={
+                        "column": column_name,
+                        "batch_id": batch_id,
+                    },
+                    metric_value_kwargs=None,
+                    metric_dependencies=None,
+                )
+                for batch_id in batch_ids
+            ]
             for column_name in column_names
-        ]
+        }
 
         return metric_configurations
 
-    def _columns_meeting_cardinality_limit(
+    def _column_names_meeting_cardinality_limit(
         self,
         validator: "Validator",  # noqa: F821
-        table_column_names: List[str],
-        metrics_for_cardinality_check: List[Dict[str, List[MetricConfiguration]]],
+        metrics_for_cardinality_check: Dict[str, List[MetricConfiguration]],
     ) -> List[str]:
         """Compute cardinality and return column names meeting cardinality limit.
 
         Args:
             validator: Validator used to compute column cardinality.
-            table_column_names: column names to verify cardinality.
-            metrics_for_cardinality_check: metric configurations used to
-                compute cardinality.
+            metrics_for_cardinality_check: metric configurations used to compute cardinality.
 
         Returns:
             List of column names meeting cardinality.
         """
-        candidate_column_names: List[str] = table_column_names.copy()
+        column_name: str
+        resolved_metrics: Dict[Tuple[str, str, str], Any]
+        metric_value: Any
 
-        # TODO AJB 20220218: Remove loops and refactor into single call to validator.get_metrics()
-        #  by first building up MetricConfigurations to compute. See GREAT-584
-        for metric_for_cardinality_check in metrics_for_cardinality_check:
-            for (
-                column_name,
-                metric_config_batch_list,
-            ) in metric_for_cardinality_check.items():
-                if column_name not in candidate_column_names:
-                    continue
-                else:
-                    for metric_config in metric_config_batch_list:
+        resolved_metrics_by_column_name: Dict[
+            str, Dict[Tuple[str, str, str], Any]
+        ] = get_resolved_metrics_by_key(
+            validator=validator,
+            metric_configurations_by_key=metrics_for_cardinality_check,
+        )
 
-                        metric_value = validator.get_metric(metric=metric_config)
-
-                        batch_cardinality_within_limit: bool = (
-                            self._cardinality_checker.cardinality_within_limit(
-                                metric_value=metric_value
-                            )
-                        )
-
-                        if batch_cardinality_within_limit is False:
-                            candidate_column_names.remove(column_name)
-                            break
+        candidate_column_names: List[str] = [
+            column_name
+            for column_name, resolved_metrics in resolved_metrics_by_column_name.items()
+            if all(
+                [
+                    self.cardinality_checker.cardinality_within_limit(
+                        metric_value=metric_value
+                    )
+                    for metric_value in resolved_metrics.values()
+                ]
+            )
+        ]
 
         return candidate_column_names

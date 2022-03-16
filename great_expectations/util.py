@@ -95,8 +95,6 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "rendered_data_docs": "rendered_data_doc",
 }
 
-MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES: int = 3
-
 
 def pluralize(singular_ge_noun):
     """
@@ -1401,41 +1399,14 @@ def import_make_url():
     return make_url
 
 
-def probabilistic_test(
-    func: Callable = None,
-    max_num_retries: int = MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES,
-) -> Callable:
-    @wraps(func)
-    def run_pytest_method(*args, **kwargs) -> None:
-        assertion_error: Optional[AssertionError] = None
-        error_message: Optional[str] = None
+def get_pyathena_potential_type(type_module, type_):
+    if version.parse(type_module.pyathena.__version__) >= version.parse("2.5.0"):
+        # introduction of new column type mapping in 2.5
+        potential_type = type_module.AthenaDialect()._get_column_type(type_)
+    else:
+        if type_ == "string":
+            type_ = "varchar"
+        # < 2.5 column type mapping
+        potential_type = type_module._TYPE_MAPPINGS.get(type_)
 
-        all_assertions_passed: bool = False
-
-        idx: int = 0
-        while idx < max_num_retries:
-            try:
-                func(*args, **kwargs)
-                all_assertions_passed = True
-            except AssertionError as e:
-                error_message = re.sub(r"\W+", " ", str(e)).strip()
-                logger.warning(
-                    f"""Attempt {idx + 1} to execute "{func}" failed with error "{error_message}".  Retrying."""
-                )
-                all_assertions_passed = False
-                assertion_error = e
-
-            if all_assertions_passed:
-                break
-
-            idx += 1
-
-        if not all_assertions_passed:
-            logger.error(
-                f"""Aborting trying to execute "{func}" (exceeded maximum allowed \
-{MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES} attempts).  Error "{error_message}" is being raised.
-"""
-            )
-            raise assertion_error
-
-    return run_pytest_method
+    return potential_type
