@@ -7,7 +7,10 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.execution_engine import (
+    DataReference,
+    MetricDomainTypes,
+)
 from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
@@ -31,9 +34,11 @@ class TableHead(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        df, _ = execution_engine.get_data_and_split_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        data_reference: DataReference = execution_engine.get_data_reference(
+            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
+        df: pd.DataFrame = data_reference.data
+
         if metric_value_kwargs.get("fetch_all", cls.default_kwarg_values["fetch_all"]):
             return df
         return df.head(metric_value_kwargs["n_rows"])
@@ -47,9 +52,11 @@ class TableHead(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        selectable, _ = execution_engine.get_data_and_split_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        data_reference: DataReference = execution_engine.get_data_reference(
+            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
+        selectable = data_reference.data
+
         df = None
         table_name = getattr(selectable, "name", None)
         if table_name is None:

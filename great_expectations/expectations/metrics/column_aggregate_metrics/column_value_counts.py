@@ -7,7 +7,11 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.execution_engine import (
+    DataReference,
+    MetricDomainTypes,
+    SplitDomainKwargs,
+)
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
 )
@@ -40,9 +44,12 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if collate is not None:
             raise ValueError("collate parameter is not supported in PandasDataset")
 
-        df, split_domain_kwargs = execution_engine.get_data_and_split_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        data_reference: DataReference = execution_engine.get_data_reference(
+            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
+        df: pd.DataFrame = data_reference.data
+        split_domain_kwargs: SplitDomainKwargs = data_reference.split_domain_kwargs
+
         column = split_domain_kwargs.accessor["column"]
 
         counts = df[column].value_counts()

@@ -365,6 +365,21 @@ Please check your config."""
                 f"Unable to find reader_method {reader_method} in spark.",
             )
 
+    def _ensure_domain_kwargs_are_valid(self, domain_kwargs: dict) -> None:
+        """Determine if domain_kwargs are valid for the execution engine
+
+        This will be called when getting data, override in subclass to perform
+        checks, defaults to allow all domain_kwargs.
+
+        Raises:
+            ValueError if key "table" included in domain_kwargs
+        """
+        table = domain_kwargs.get("table", None)
+        if table:
+            raise ValueError(
+                "SparkDFExecutionEngine does not currently support multiple named tables."
+            )
+
     def get_domain_records(
         self,
         domain_kwargs: dict,
@@ -379,11 +394,7 @@ Please check your config."""
         Returns:
             A DataFrame (the data on which to compute)
         """
-        table = domain_kwargs.get("table", None)
-        if table:
-            raise ValueError(
-                "SparkDFExecutionEngine does not currently support multiple named tables."
-            )
+        self._ensure_domain_kwargs_are_valid(domain_kwargs)
 
         batch_id = domain_kwargs.get("batch_id")
         if batch_id is None:
@@ -478,68 +489,6 @@ Please check your config."""
             return data
 
         return data
-
-    @staticmethod
-    def _are_domain_kwargs_valid(domain_kwargs: dict) -> bool:
-        """Determine if domain_kwargs are valid for the execution engine
-
-        This will be called when getting data, override in subclass to perform
-        checks, defaults to allow all domain_kwargs.
-
-        Raises:
-            ValueError if key "table" included in domain_kwargs
-        """
-        table = domain_kwargs.get("table", None)
-        if table:
-            raise ValueError(
-                "SparkDFExecutionEngine does not currently support multiple named tables."
-            )
-
-    def get_compute_domain(
-        self,
-        domain_kwargs: dict,
-        domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[DataFrame, dict, dict]:
-        """deprecated-v0.14.10 use get_data_and_split_domain instead
-        Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
-        to obtain and/or query a batch. Returns in the format of a Spark DataFrame.
-
-        Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
-
-        Returns:
-            A tuple including:
-              - a DataFrame (the data on which to compute)
-              - a dictionary of compute_domain_kwargs, describing the DataFrame
-              - a dictionary of accessor_domain_kwargs, describing any accessors needed to
-                identify the domain within the compute domain
-        """
-        # deprecated-v0.14.10
-        warnings.warn(
-            "get_compute_domain is deprecated as of v0.14.10, it will be removed in v0.17.0. Please use get_data_and_split_domain instead.",
-            DeprecationWarning,
-        )
-
-        data = self.get_domain_records(domain_kwargs)
-
-        table = domain_kwargs.get("table", None)
-        if table:
-            raise ValueError(
-                "SparkDFExecutionEngine does not currently support multiple named tables."
-            )
-
-        split_domain_kwargs = self._split_domain_kwargs(
-            domain_kwargs, domain_type, accessor_keys
-        )
-
-        return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False

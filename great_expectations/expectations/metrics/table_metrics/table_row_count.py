@@ -1,11 +1,14 @@
 from typing import Any, Dict
 
+import pandas as pd
+
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import (
+    DataReference,
     MetricDomainTypes,
     MetricPartialFunctionTypes,
 )
@@ -31,9 +34,11 @@ class TableRowCount(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        df, _ = execution_engine.get_data_and_split_domain(
+        data_reference: DataReference = execution_engine.get_data_reference(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
+        df: pd.DataFrame = data_reference.data
+
         return df.shape[0]
 
     @metric_partial(

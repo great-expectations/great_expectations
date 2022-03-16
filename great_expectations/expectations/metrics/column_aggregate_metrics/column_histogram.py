@@ -3,6 +3,7 @@ import logging
 from typing import Any, Dict
 
 import numpy as np
+import pandas as pd
 
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -13,7 +14,11 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.execution_engine import (
+    DataReference,
+    MetricDomainTypes,
+    SplitDomainKwargs,
+)
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
 )
@@ -36,9 +41,13 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        df, split_domain_kwargs = execution_engine.get_data_and_split_domain(
+
+        data_reference: DataReference = execution_engine.get_data_reference(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
+        df: pd.DataFrame = data_reference.data
+        split_domain_kwargs: SplitDomainKwargs = data_reference.split_domain_kwargs
+
         column = split_domain_kwargs.accessor["column"]
         bins = metric_value_kwargs["bins"]
         hist, bin_edges = np.histogram(df[column], bins, density=False)
@@ -59,9 +68,12 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             column: the name of the column for which to get the histogram
             bins: tuple of bin edges for which to get histogram values; *must* be tuple to support caching
         """
-        selectable, split_domain_kwargs = execution_engine.get_data_and_split_domain(
+        data_reference: DataReference = execution_engine.get_data_reference(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
+        selectable = data_reference.data
+        split_domain_kwargs: SplitDomainKwargs = data_reference.split_domain_kwargs
+
         column = split_domain_kwargs.accessor["column"]
         bins = metric_value_kwargs["bins"]
 

@@ -1,12 +1,17 @@
 from typing import Any, Dict
 
+import pandas as pd
+
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.execution_engine import (
+    DataReference,
+    MetricDomainTypes,
+)
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -37,9 +42,11 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        df, _ = execution_engine.get_data_and_split_domain(
-            metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+        data_reference: DataReference = execution_engine.get_data_reference(
+            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
+        df: pd.DataFrame = data_reference.data
+
         return [
             {"name": name, "type": dtype}
             for (name, dtype) in zip(df.columns, df.dtypes)

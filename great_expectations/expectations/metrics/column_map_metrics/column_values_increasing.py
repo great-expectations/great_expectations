@@ -10,8 +10,10 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import (
+    DataReference,
     MetricDomainTypes,
     MetricPartialFunctionTypes,
+    SplitDomainKwargs,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
@@ -121,9 +123,10 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
         else:
             compute_domain_kwargs = metric_domain_kwargs
 
-        (df, split_domain_kwargs,) = execution_engine.get_data_and_split_domain(
-            compute_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
+        data_reference: DataReference = execution_engine.get_data_reference(
+            domain_kwargs=compute_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
+        split_domain_kwargs: SplitDomainKwargs = data_reference.split_domain_kwargs
 
         # NOTE: 20201105 - parse_strings_as_datetimes is not supported here;
         # instead detect types naturally

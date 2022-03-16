@@ -643,41 +643,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return selectable
 
-    def get_compute_domain(
-        self,
-        domain_kwargs: Dict,
-        domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[Selectable, dict, dict]:
-        """deprecated-v0.14.10 use get_data_and_split_domain instead
-        Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
-
-        Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
-
-        Returns:
-            SqlAlchemy column
-        """
-        # deprecated-v0.14.10
-        warnings.warn(
-            "get_compute_domain is deprecated as of v0.14.10, it will be removed in v0.17.0. Please use get_data_and_split_domain instead.",
-            DeprecationWarning,
-        )
-
-        selectable = self.get_domain_records(domain_kwargs)
-
-        split_domain_kwargs = self._split_domain_kwargs(
-            domain_kwargs, domain_type, accessor_keys
-        )
-
-        return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
-
     def _split_column_metric_domain_kwargs(
         self,
         domain_kwargs: Dict,

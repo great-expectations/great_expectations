@@ -2,12 +2,16 @@ import logging
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, Type
 
+import pandas as pd
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
+    DataReference,
     MetricDomainTypes,
     MetricPartialFunctionTypes,
+    SplitDomainKwargs,
 )
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     SparkDFExecutionEngine,
@@ -65,8 +69,12 @@ def column_aggregate_value(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
 
-                df, split_domain_kwargs = execution_engine.get_data_and_split_domain(
+                data_reference: DataReference = execution_engine.get_data_reference(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+                df: pd.DataFrame = data_reference.data
+                split_domain_kwargs: SplitDomainKwargs = (
+                    data_reference.split_domain_kwargs
                 )
 
                 column_name = split_domain_kwargs.accessor["column"]
