@@ -4,14 +4,14 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (  # isort:skip
+from great_expectations.rule_based_profiler.parameter_builder import (
+    AttributedResolvedMetrics,
+    MetricComputationDetails,
     MetricComputationResult,
     MetricValues,
-    MetricComputationDetails,
     ParameterBuilder,
 )
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 
 
 class MetricMultiBatchParameterBuilder(ParameterBuilder):
@@ -140,8 +140,14 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         )
 
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
-        if reduce_scalar_metric and metric_values.shape[1] == 1:
-            metric_values = metric_values[:, 0]
+        if (
+            reduce_scalar_metric
+            and isinstance(metric_values, list)
+            and len(metric_values) == 1
+            and isinstance(metric_values[0], AttributedResolvedMetrics)
+            and metric_values[0].metric_values.shape[1] == 1
+        ):
+            metric_values = metric_values[0].metric_values[:, 0]
 
         return (
             metric_values,
