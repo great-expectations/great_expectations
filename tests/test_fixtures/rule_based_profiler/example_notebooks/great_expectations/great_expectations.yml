@@ -15,28 +15,28 @@ config_version: 3.0
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
 datasources:
   taxi_multi_batch_datasource:
+    module_name: great_expectations.datasource
     data_connectors:
       default_inferred_data_connector_name:
+        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         default_regex:
           group_names:
             - data_asset_name
             - month
           pattern: (yellow_tripdata_sample_2018)-(\d.*)\.csv
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         module_name: great_expectations.datasource.data_connector
+        class_name: InferredAssetFilesystemDataConnector
       default_inferred_data_connector_name_all_years:
+        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         default_regex:
           group_names:
             - data_asset_name
             - year
             - month
           pattern: (yellow_tripdata_sample)_(\d.*)-(\d.*)\.csv
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: ../../../../test_sets/taxi_yellow_tripdata_samples
         module_name: great_expectations.datasource.data_connector
+        class_name: InferredAssetFilesystemDataConnector
     class_name: Datasource
-    module_name: great_expectations.datasource
     execution_engine:
       class_name: PandasExecutionEngine
       module_name: great_expectations.execution_engine
@@ -106,7 +106,7 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
-  data_context_id: 757fb482-cb14-4645-b5c7-f6a899254779
-  enabled: true
+  data_context_id: 57cfa461-1170-4b73-8299-09a30833d51e
   usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+  enabled: false
 notebooks:
