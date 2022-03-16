@@ -58,6 +58,13 @@ class ExpectColumnValuesToMatchSomeRegex(ColumnMapRegexExpectation):
 
         return True
 
+    # Here your regex is used to create a custom metric for this expectation
+    map_metric = ColumnMapRegexExpectation._register_metric(
+        regex_snake_name=regex_snake_name,
+        regex_camel_name=regex_camel_name,
+        regex_=regex,
+    )
+
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
@@ -65,13 +72,6 @@ class ExpectColumnValuesToMatchSomeRegex(ColumnMapRegexExpectation):
             "@your_name_here",  # Don't forget to add your github handle here!
         ],
     }
-
-    # Here your regex is used to create a custom metric for this expectation
-    map_metric = ColumnMapRegexExpectation._register_metric(
-        regex_snake_name=regex_snake_name,
-        regex_camel_name=regex_camel_name,
-        regex_=regex,
-    )
 
 
 if __name__ == "__main__":

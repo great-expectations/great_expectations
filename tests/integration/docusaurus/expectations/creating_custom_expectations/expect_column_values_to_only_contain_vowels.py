@@ -127,16 +127,16 @@ class ExpectColumnValuesToOnlyContainVowels(ColumnMapRegexExpectation):
         # Vacuously True as all parameter validation is inherited
         return True
 
-    library_metadata = {
-        "tags": ["regex"],
-        "contributors": ["@abegong", "@austiezr"],
-    }
-
     map_metric = ColumnMapRegexExpectation._register_metric(
         regex_snake_name=regex_snake_name,
         regex_camel_name=regex_camel_name,
         regex_=regex,
     )
+
+    library_metadata = {
+        "tags": ["regex"],
+        "contributors": ["@joegargery"],
+    }
 
 
 if __name__ == "__main__":
