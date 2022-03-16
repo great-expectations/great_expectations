@@ -5,11 +5,11 @@ title: How to dynamically load evaluation parameters from a database
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you create an Expectation that loads part of its Expectation configuration from a database at runtime. Using a dynamic Evaluation Parameter makes it possible to maintain part of an Expectation Suite in a shared database.
+This guide will help you create an <TechnicalTag tag="expectation" text="Expectation" /> that loads part of its Expectation configuration from a database at runtime. Using a dynamic <TechnicalTag tag="evaluation_parameter" text="Evaluation Parameter" /> makes it possible to maintain part of an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> in a shared database.
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
+  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
   - Obtained credentials for a database to query for dynamic values
   - Identified a SQL query that will return values for your expectation configuration.
 
@@ -19,7 +19,7 @@ This guide will help you create an Expectation that loads part of its Expectatio
 
 ### 1. Add a new SqlAlchemy Query Store to your Data Context
 
-A SqlAlchemy Query Store acts as a bridge that can query a SqlAlchemy-connected database and return the result of the query to be available for an evaluation parameter.
+A SqlAlchemy Query <TechnicalTag tag="store" text="Store" /> acts as a bridge that can query a SqlAlchemy-connected database and return the result of the query to be available for an evaluation parameter.
 
 Find the ``stores`` section in your ``great_expectations.yml`` file, and add the following configuration for a new store called "my_query_store". You can add and reference multiple Query Stores with different names.
 
@@ -79,7 +79,7 @@ batch = context.get_batch(
 
 ### 3. Define an Expectation that relies on a dynamic query
 
-Great Expectations recognizes several types of Evaluation Parameters that can use advanced features provided by the Data Context. To dynamically load data, we will be using a store-style URN, which starts with `urn:great_expectations:stores`. The next component of the URN is the name of the store we configured above (``my_query_store``), and the final component is the name of the query we defined above (``current_genre_ids``):
+Great Expectations recognizes several types of Evaluation Parameters that can use advanced features provided by the <TechnicalTag tag="data_context" text="Data Context" />. To dynamically load data, we will be using a store-style URN, which starts with `urn:great_expectations:stores`. The next component of the URN is the name of the store we configured above (``my_query_store``), and the final component is the name of the query we defined above (``current_genre_ids``):
 
 ```python
 batch.expect_column_values_to_be_in_set(
