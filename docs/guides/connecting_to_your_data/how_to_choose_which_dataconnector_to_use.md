@@ -4,8 +4,9 @@ title: How to choose which DataConnector to use
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide demonstrates how to choose which `DataConnector`s to configure within your `Datasource`s.
+This guide demonstrates how to choose which <TechnicalTag tag="data_connector" text="Data Connectors" /> to configure within your <TechnicalTag tag="datasource" text="Datasources" />.
 
 <Prerequisites>
 
@@ -14,7 +15,7 @@ This guide demonstrates how to choose which `DataConnector`s to configure within
 
 </Prerequisites>
 
-Great Expectations provides three types of `DataConnector` classes. Two classes are for connecting to Data Assets stored as file-system-like data (this includes files on disk, but also S3 object stores, etc) as well as relational database data:
+Great Expectations provides three types of `DataConnector` classes. Two classes are for connecting to <TechnicalTag tag="data_asset" text="Data Assets" /> stored as file-system-like data (this includes files on disk, but also S3 object stores, etc) as well as relational database data:
 
 - An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
 - A ConfiguredAssetDataConnector allows users to have the most fine-tuning, and requires an explicit listing of each Data Asset you want to connect to.
@@ -31,7 +32,7 @@ Great Expectations provides three types of `DataConnector` classes. Two classes 
 
 InferredAssetDataConnectors and ConfiguredAssetDataConnectors are used to define Data Assets and their associated data_references. A Data Asset is an abstraction that can consist of one or more data_references to CSVs or relational database tables. For instance, you might have a `yellow_tripdata` Data Asset containing information about taxi rides, which consists of twelve data_references to twelve CSVs, each consisting of one month of data.
 
-The third type of `DataConnector` class is for providing a batch's data directly at runtime:
+The third type of `DataConnector` class is for providing a <TechnicalTag tag="batch" text="Batch's" /> data directly at runtime:
 
 - A `RuntimeDataConnector` enables you to use a `RuntimeBatchRequest` to wrap either an in-memory dataframe, filepath, or SQL query, and must include batch identifiers that uniquely identify the data (e.g. a `run_id` from an AirFlow DAG run).
 
@@ -61,18 +62,21 @@ This configuration:
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L9-L27
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L40-L63
 ```
 
 </TabItem>
+
 </Tabs>
 
 will make available the following Data Assets and data_references:
@@ -113,18 +117,21 @@ Then this configuration:
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L95-L119
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L132-L158
 ```
 
 </TabItem>
+
 </Tabs>
 
 will make available the following Data Assets and data_references:
