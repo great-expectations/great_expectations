@@ -1219,7 +1219,7 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset(
 
     batch_request: BatchRequest = BatchRequest(**batch_request)
 
-    validator = context.get_validator(
+    validator: Validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name=expectation_suite_name
     )
 
