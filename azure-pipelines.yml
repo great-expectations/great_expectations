@@ -97,20 +97,20 @@ stages:
               numpy.version: '1.14.1'
               pandas.version: '0.23.4'
               scipy.version: '0.19.0'
-              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
             Python37-Pandas025:
               python.version: '3.7'
               numpy.version: '1.14.1'
               pandas.version: '0.25.3'
               # numpy 1.20 and pandas 0.25.3 do not coexist happily
               scipy.version: '0.19.0'
-              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-test.txt --constraint constraints-dev.txt'
             Python38-PandasLatest:
               python.version: '3.8'
               numpy.version: 'latest'
               pandas.version: 'latest'
               scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
@@ -145,7 +145,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
+              pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -219,7 +219,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
+              pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -256,13 +256,13 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt
+              pip install --requirement requirements-dev-test.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-azurepipelines==1.0.1
+              pip install pytest pytest-azurepipelines
               pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -305,14 +305,14 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
+              pip install pytest pytest-cov pytest-azurepipelines
               pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -338,13 +338,13 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines==1.0.1
+              pip install pytest pytest-cov pytest-azurepipelines
               pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -378,13 +378,13 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-azurepipelines==1.0.1
+              pip install pytest pytest-azurepipelines
               pytest --postgresql --spark --aws-integration -v tests/cli
             displayName: 'pytest'
 

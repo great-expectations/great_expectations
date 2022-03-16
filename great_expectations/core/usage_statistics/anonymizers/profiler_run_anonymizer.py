@@ -89,7 +89,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         return anonymized_rule
 
     def _anonymize_domain_builder(self, domain_builder: dict) -> dict:
-        anonymized_domain_builder: dict = self.anonymize_object_info(
+        anonymized_domain_builder: dict = self._anonymize_object_info(
             object_config=domain_builder,
             anonymized_info_dict={},
             runtime_environment={
@@ -123,7 +123,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         return anonymized_parameter_builders
 
     def _anonymize_parameter_builder(self, parameter_builder: dict) -> dict:
-        anonymized_parameter_builder: dict = self.anonymize_object_info(
+        anonymized_parameter_builder: dict = self._anonymize_object_info(
             object_config=parameter_builder,
             anonymized_info_dict={},
             runtime_environment={
@@ -167,7 +167,7 @@ class ProfilerRunAnonymizer(Anonymizer):
     def _anonymize_expectation_configuration_builder(
         self, expectation_configuration_builder: dict
     ) -> dict:
-        anonymized_expectation_configuration_builder: dict = self.anonymize_object_info(
+        anonymized_expectation_configuration_builder: dict = self._anonymize_object_info(
             object_config=expectation_configuration_builder,
             anonymized_info_dict={},
             runtime_environment={

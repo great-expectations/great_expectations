@@ -21,8 +21,8 @@ jobs:
           displayName: 'Install dependencies'
 
         - script: |
-            pip install pytest pytest-cov pytest-azurepipelines==1.0.1
-            pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            pip install pytest pytest-cov pytest-azurepipelines
+            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
           displayName: 'pytest'
 
         - task: PublishTestResults@2
@@ -49,13 +49,13 @@ jobs:
           displayName: 'Update pip'
 
         - script: |
-            pip install --requirement requirements-dev-lite.txt --constraint constraints-dev.txt -e .
+            pip install --requirement requirements.txt --requirement requirements-dev-contrib.txt --requirement requirements-dev-lite.txt --constraint constraints-dev.txt -e .
           displayName: 'Install dependencies'
 
         - script: |
             pip install -I pytest
-            pip install pytest-cov pytest-azurepipelines==1.0.1
-            pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            pip install pytest-cov pytest-azurepipelines
+            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
           displayName: 'pytest'
 
         - task: PublishTestResults@2
