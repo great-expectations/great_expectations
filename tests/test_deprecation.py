@@ -1,6 +1,6 @@
 import glob
 import re
-from typing import List, Tuple, cast
+from typing import List, Pattern, Tuple, cast
 
 import pytest
 from packaging import version
@@ -9,8 +9,8 @@ import versioneer
 
 
 @pytest.fixture
-def regex_for_deprecation_comments() -> re.Pattern:
-    pattern: re.Pattern = re.compile(r"deprecated-v(.+)")
+def regex_for_deprecation_comments() -> Pattern:
+    pattern: Pattern = re.compile(r"deprecated-v(.+)")
     return pattern
 
 
@@ -24,7 +24,7 @@ def files_with_deprecation_warnings() -> List[str]:
 
 
 def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
-    regex_for_deprecation_comments: re.Pattern,
+    regex_for_deprecation_comments: Pattern,
     files_with_deprecation_warnings: List[str],
 ):
     """
@@ -47,7 +47,7 @@ def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
 
 
 def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
-    regex_for_deprecation_comments: re.Pattern,
+    regex_for_deprecation_comments: Pattern,
     files_with_deprecation_warnings: List[str],
 ):
     """
