@@ -352,7 +352,7 @@ stages:
 
           - script: |
               # Install dependencies
-              pip install pytest pytest-azurepipelines
+              pip install pytest
               git clone https://github.com/superconductive/dgtest.git
               pip install -e dgtest
 
