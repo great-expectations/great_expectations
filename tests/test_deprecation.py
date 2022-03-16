@@ -6,6 +6,14 @@ import versioneer
 
 
 def test_deprecation_warnings_are_accompanied_by_appropriate_comment():
+    """
+    What does this test do and why?
+
+    For every invokation of 'DeprecationWarning', there must be a corresponding
+    comment with the following format: 'deprecated-v<MAJOR>.<MINOR>.<PATCH>'.
+
+    This test is meant to capture instances where one or the other is missing.
+    """
     pattern: re.Pattern = re.compile(r"deprecated-v(\d*)\.(\d*)\.(\d*)")
     files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
 
@@ -58,5 +66,5 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions():
         for file, version in unneeded_deprecation_warnings:
             print(f"{file} - v{version}")
 
-    # Chetan - 20220315 - This should be 0 once we've cleared deprecation warnings in v0.16.0.
+    # Chetan - 20220316 - Note that this will break as soon as v0.16.0 lands; this should be 0 at that point.
     assert len(unneeded_deprecation_warnings) == 29
