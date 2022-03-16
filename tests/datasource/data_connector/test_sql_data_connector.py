@@ -1204,9 +1204,9 @@ def test_ConfiguredAssetSqlDataConnector_with_sorting(
 
 
 def test_update_configured_asset_sql_data_connector_missing_data_asset(
-    sqlalchemy_missing_data_asset_data_context,
+    sqlite_missing_data_asset_data_context,
 ):
-    context: DataContext = sqlalchemy_missing_data_asset_data_context
+    context: DataContext = sqlite_missing_data_asset_data_context
 
     data_asset_name: str = "table_containing_id_spacers_for_D"
 
