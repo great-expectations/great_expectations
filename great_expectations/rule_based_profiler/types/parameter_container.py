@@ -71,8 +71,16 @@ def _parse_attribute_name(name: str) -> ParseResults:
         )
 
 
+def is_fully_qualified_parameter_name_literal_string_format(
+    fully_qualified_parameter_name: str,
+) -> bool:
+    return fully_qualified_parameter_name.startswith("$")
+
+
 def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
-    if not fully_qualified_parameter_name.startswith("$"):
+    if not is_fully_qualified_parameter_name_literal_string_format(
+        fully_qualified_parameter_name=fully_qualified_parameter_name
+    ):
         raise ge_exceptions.ProfilerExecutionError(
             message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
 names must start with $ (e.g., "${fully_qualified_parameter_name}").
@@ -199,6 +207,15 @@ class ParameterContainer(SerializableDictDot):
                 source[key] = self._convert_dictionaries_to_parameter_nodes(
                     source=value
                 )
+        elif isinstance(source, (list, tuple, set)):
+            source_type: type = type(source)
+            value: Any
+            return source_type(
+                [
+                    self._convert_dictionaries_to_parameter_nodes(source=value)
+                    for value in source
+                ]
+            )
 
         return source
 

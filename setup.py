@@ -1,6 +1,38 @@
+import re
+from glob import glob
+
 from setuptools import find_packages, setup
 
 import versioneer
+
+
+def get_extras_require():
+    results = {}
+    extra_keys = {
+        "aws_secrets": "boto",
+        "azure_secrets": "azure",
+        "gcp": "bigquery",
+        "s3": "boto",
+    }
+    ignore_keys = ("contrib", "sqlalchemy", "test")
+    rx = re.compile(r"requirements-dev-(.*).txt")
+    for fname in sorted(glob("requirements-dev-*.txt")):
+        key = rx.match(fname).group(1)
+        if key in ignore_keys:
+            continue
+        with open(fname) as f:
+            results[key] = f.read().splitlines()
+
+    lite = results.pop("lite")
+    results["boto"] = [req for req in lite if req.startswith("boto")]
+    results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
+
+    for new_key, existing_key in extra_keys.items():
+        results[new_key] = results[existing_key]
+
+    results.pop("boto")
+    return results
+
 
 # Parse requirements.txt
 with open("requirements.txt") as f:
@@ -20,21 +52,7 @@ config = {
     "version": versioneer.get_version(),
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
-    "extras_require": {
-        "spark": ["pyspark>=2.3.2"],
-        "sqlalchemy": ["sqlalchemy>=1.3.18"],
-        "airflow": ["apache-airflow[s3]>=1.9.0", "boto3>=1.7.3"],
-        "gcp": [
-            "google-cloud-storage>=1.28.0",
-            "google-cloud-secret-manager>=1.0.0",
-            "sqlalchemy-bigquery>=1.3.0",
-        ],
-        "redshift": ["psycopg2>=2.8"],
-        "s3": ["boto3>=1.14"],
-        "aws_secrets": ["boto3>=1.8.7"],
-        "azure_secrets": ["azure-identity>=1.0.0", "azure-keyvault-secrets>=4.0.0"],
-        "snowflake": ["snowflake-sqlalchemy>=1.2"],
-    },
+    "extras_require": get_extras_require(),
     "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
