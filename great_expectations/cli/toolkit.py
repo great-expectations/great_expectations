@@ -16,7 +16,7 @@ from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.data_context import DataContext
@@ -126,8 +126,6 @@ def get_default_expectation_suite_name(
     suite_name: str
     if data_asset_name:
         suite_name = f"{data_asset_name}.warning"
-    elif batch_request:
-        suite_name = f"batch-{BatchRequest(**batch_request).id}"
     else:
         suite_name = "warning"
     return suite_name
@@ -158,25 +156,30 @@ def launch_jupyter_notebook(notebook_path: str) -> None:
 
 def get_validator(
     context: DataContext,
-    batch_request: Union[dict, BatchRequest],
+    batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
     suite: Union[str, ExpectationSuite],
 ) -> Validator:
     assert isinstance(
         suite, (str, ExpectationSuite)
     ), "Invalid suite type (must be ExpectationSuite) or a string."
 
-    if isinstance(batch_request, dict):
-        batch_request = BatchRequest(**batch_request)
-
     validator: Validator
     if isinstance(suite, str):
-        validator = context.get_validator(
-            batch_request=batch_request, expectation_suite_name=suite
-        )
+        if isinstance(batch_request, dict):
+            validator = context.get_validator(
+                **batch_request, expectation_suite_name=suite
+            )
+        else:
+            validator = context.get_validator(
+                batch_request=batch_request, expectation_suite_name=suite
+            )
     else:
-        validator = context.get_validator(
-            batch_request=batch_request, expectation_suite=suite
-        )
+        if isinstance(batch_request, dict):
+            validator = context.get_validator(**batch_request, expectation_suite=suite)
+        else:
+            validator = context.get_validator(
+                batch_request=batch_request, expectation_suite=suite
+            )
     return validator
 
 
