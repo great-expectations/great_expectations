@@ -1,6 +1,6 @@
 import glob
 import re
-from typing import List, Tuple, Union, cast
+from typing import List, Tuple, cast
 
 import pytest
 from packaging import version
