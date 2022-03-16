@@ -384,7 +384,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-azurepipelines
+              pip install pytest
               pytest --postgresql --spark --aws-integration -v tests/cli
             displayName: 'pytest'
 
