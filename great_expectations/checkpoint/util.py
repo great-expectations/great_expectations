@@ -474,14 +474,12 @@ def send_cloud_notification(url: str, headers: dict):
     try:
         response = session.post(url=url, headers=headers)
     except requests.ConnectionError:
-        logger.error(
-            f"Failed to connect to Cloud backend at {url} " f"after {10} retries."
-        )
+        logger.error(f"Failed to connect to Cloud backend " f"after {10} retries.")
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:
-            message = f"Cloud Notification request at {url} returned error {response.status_code}: {response.text}"
+            message = f"Cloud Notification request returned error {response.status_code}: {response.text}"
             logger.error(message)
             return {"cloud_notification_result": message}
         else:
