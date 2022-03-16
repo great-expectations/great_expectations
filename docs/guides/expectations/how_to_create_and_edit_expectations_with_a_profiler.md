@@ -3,8 +3,9 @@ title: How to create and edit Expectations with the User Configurable Profiler
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you create a new Expectation Suite by profiling your data with the User Configurable Profiler.
+This guide will help you create a new <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> by profiling your data with the User Configurable <TechnicalTag tag="profiler" text="Profiler" />.
 
 <Prerequisites>
 
@@ -15,7 +16,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
 :::note
 
-The User Configurable Profiler makes it easier to produce a new Expectation Suite by building out a bunch of Expectations for your data.
+The User Configurable Profiler makes it easier to produce a new Expectation Suite by building out a bunch of <TechnicalTag tag="expectation" text="Expectations" /> for your data.
 
 These Expectations are deliberately over-fitted on your data e.g. if your table has 10,000 rows, the Profiler will produce an Expectation with the following config:
 
@@ -36,7 +37,7 @@ Thus, the intention is for this Expectation Suite to be edited and updated to be
 
 :::note
 
-You can access this same functionality from the Great Expectations CLI by running
+You can access this same functionality from the Great Expectations <TechnicalTag tag="cli" text="CLI" /> by running
 
 ```console
 great_expectations suite new --profile
@@ -51,7 +52,7 @@ If you go that route, you can follow along in the resulting Jupyter Notebook ins
 
 ### 1. Load or create your Data Context
 
-Load an on-disk Data Context via:
+Load an on-disk <TechnicalTag tag="data_context" text="Data Context" /> via:
 
 ```python
 from great_expectations.data_context.data_context import DataContext
@@ -65,7 +66,7 @@ Alternatively, [you can instantiate a Data Context without a .yml file](../setup
 
 ### 2. Set your expectation_suite_name and create your Batch Request 
 
-The Batch Request specifies which Batch of data you would like to profile in order to create your suite. We will pass it into a Validator in the next step.
+The <TechnicalTag tag="batch_request" text="Batch Request" /> specifies which <TechnicalTag tag="batch" text="Batch" /> of data you would like to <TechnicalTag tag="profiling" text="Profile" /> in order to create your Expectation Suite. We will pass it into a <TechnicalTag tag="validator" text="Validator" /> in the next step.
 
 ```python
 expectation_suite_name = "insert_the_name_of_your_suite_here"
@@ -111,7 +112,7 @@ suite = profiler.build_suite()
 
 ### 6. (Optional) Running validation, saving your suite, and building Data Docs
 
-If you'd like, you can Validate your data with the new Expectation Suite, save your Expectation Suite, and build Data Docs to take a closer look at the output
+If you'd like, you can <TechnicalTag tag="validation" text="Validate" /> your data with the new Expectation Suite, save your Expectation Suite, and build <TechnicalTag tag="data_docs" text="Data Docs" /> to take a closer look at the output
 
 ```python
 from great_expectations.checkpoint.checkpoint import SimpleCheckpoint

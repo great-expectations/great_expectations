@@ -3,6 +3,7 @@ title: How to create and edit Expectations with instant feedback from a sample B
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <Prerequisites>
 
@@ -14,7 +15,7 @@ import Prerequisites from '../../guides/connecting_to_your_data/components/prere
 
 ### 1. Use the CLI to begin the interactive process of creating Expectations 
 
-The ``--interactive`` mode denotes the fact that you are interacting with your data.  In other words, you have access to a data source and can specify a Batch of data to be used to create Expectations against.  ``--manual`` mode (please see [How to create and edit Expectations based on domain knowledge, without inspecting data directly](./how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md)) still allows you to create expectations (e.g., if you already know enough about your data, such as the various columns in a database table), but you will not be able to run validations, until you specify a Batch of data, which can be done at a later point; in fact, you can switch back and forth between the interactive and manual modes, and all your expectations will be intact.
+The ``--interactive`` mode denotes the fact that you are interacting with your data.  In other words, you have access to a <TechnicalTag tag="datasource" text="Datasource" /> and can specify a <TechnicalTag tag="batch" text="Batch" /> of data to be used to create <TechnicalTag tag="expectation" text="Expectations" /> against.  ``--manual`` mode (please see [How to create and edit Expectations based on domain knowledge, without inspecting data directly](./how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md)) still allows you to create Expectations (e.g., if you already know enough about your data, such as the various columns in a database table), but you will not be able to <TechnicalTag tag="validation" text="Validate" /> data until you specify a Batch of data, which can be done at a later point; in fact, you can switch back and forth between the interactive and manual modes, and all your Expectations will be intact.
 
 Run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
 
@@ -22,7 +23,7 @@ Run this command in the root directory of your project (where the init command c
 great_expectations suite new --interactive
 ```
 
-This command prompts you to select a Datasource, a Data Connector, and a Data Asset so as to identify a sample Batch of data the suite will eventually describe.  If there are unique choices (e.g., only one Data Connector in your datasource configuration), then Great Expectations will automatically select it for you (to speed up the process).
+This command prompts you to select a Datasource, a <TechnicalTag tag="data_connector" text="Data Connector" />, and a <TechnicalTag tag="data_asset" text="Data Asset" /> so as to identify a sample Batch of data the <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> will eventually describe.  If there are unique choices (e.g., only one Data Connector in your Datasource configuration), then Great Expectations will automatically select it for you (to speed up the process).
 
 Finally, unless you specify the name of the Expectation Suite on the command line (using the``--expectation-suite`` option), the command will ask you to name your new Expectation Suite and offer you a default name to simply accept, or provide your own.
 

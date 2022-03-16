@@ -3,14 +3,15 @@ title: How to create and edit Expectations based on domain knowledge, without in
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide shows how to create an Expectation Suite without a sample Batch.
+This guide shows how to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> without a sample <TechnicalTag tag="batch" text="Batch" />.
 
 Here are some of the reasons why you may wish to do this:
 
 1. You don't have a sample.
 2. You don't currently have access to the data to make a sample.
-3. You know exactly how you want your Expectations to be configured.
+3. You know exactly how you want your <TechnicalTag tag="expectation" text="Expectations" /> to be configured.
 4. You want to create Expectations parametrically (you can also do this in interactive mode).
 5. You don't want to spend the time to validate against a sample.
 
@@ -19,7 +20,7 @@ If you have a use case we have not considered, please [contact us on Slack](http
 <Prerequisites>
 
 - Configured a [Data Context](../../tutorials/getting_started/initialize_a_data_context.md).
-- Have your Data Context configured to save Expectations to your filesystem (please see [How to configure an Expectation store to use a filesystem](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)) or another Expectation Store if you are in a hosted environment.
+- Have your <TechnicalTag tag="data_context" text="Data Context" /> configured to save Expectations to your filesystem (please see [How to configure an Expectation store to use a filesystem](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)) or another <TechnicalTag tag="expectation_store" text="Expectation Store" /> if you are in a hosted environment.
 
 </Prerequisites>
 
@@ -27,7 +28,7 @@ If you have a use case we have not considered, please [contact us on Slack](http
 
 ### 1. Use the CLI to generate a helper notebook
 
-From the command line, run:
+From the command line, use the <TechnicalTag tag="cli" text="CLI" /> to run:
 
 ```bash
 great_expectations suite new
@@ -35,7 +36,7 @@ great_expectations suite new
 
 ### 2. Create Expectation Configurations in the helper notebook
 
-You are adding Expectation configurations to the suite. Since there is no sample Batch of data, no Validation happens during this process. To illustrate how to do this, consider a hypothetical example. Suppose that you have a table with the columns ``account_id``, ``user_id``, ``transaction_id``, ``transaction_type``, and ``transaction_amt_usd``. Then the following code snipped adds an Expectation that the columns of the actual table will appear in the order specified above:
+You are adding Expectation configurations to the suite. Since there is no sample Batch of data, no <TechnicalTag tag="validation" text="Validation" /> happens during this process. To illustrate how to do this, consider a hypothetical example. Suppose that you have a table with the columns ``account_id``, ``user_id``, ``transaction_id``, ``transaction_type``, and ``transaction_amt_usd``. Then the following code snipped adds an Expectation that the columns of the actual table will appear in the order specified above:
 
 ```python
 # Create an Expectation
@@ -119,4 +120,4 @@ You can see all the available Expectations in the [Expectation Gallery](https://
 
 Run the final cell in the helper notebook to save your Expectation Suite.
 
-This will create a JSON file with your Expectation Suite in the Store you have configured, which you can then load and use for [Validation](../../reference/validation.md).
+This will create a JSON file with your Expectation Suite in the <TechnicalTag tag="store" text="Store" /> you have configured, which you can then load and use for [Validation](../../reference/validation.md).

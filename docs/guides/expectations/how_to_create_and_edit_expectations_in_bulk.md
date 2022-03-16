@@ -3,8 +3,9 @@ title: How to create and edit Expectations in bulk
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-The `JsonSchemaProfiler` helps you quickly create Expectation Suites from jsonschema files.
+The `JsonSchemaProfiler` helps you quickly create <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> from jsonschema files.
 
 <Prerequisites>
 
@@ -59,19 +60,25 @@ context.save_expectation_suite(suite)
 
 ### 7. Optionally, generate Data Docs and review the results there.
 
-Data Docs provides a concise and useful way to review the Expectation Suite that has been created.
+<TechnicalTag tag="data_docs" text="Data Docs" /> provides a concise and useful way to review the Expectation Suite that has been created.
 
-````console
+In python, this is done by calling the `build_data_docs()` method of your <TechnicalTag tag="data_context" text="Data Context" />.
+
+```python
 context.build_data_docs()
+```
 
-You can also review and update the Expectations created by the profiler to get to the Expectation Suite you want using ``great_expectations suite edit``.
-````
+You can also review and update the Expectations created by the <TechnicalTag tag="profiler" text="Profiler" /> to get to the Expectation Suite you want using:
+
+```console
+great_expectations suite edit
+```
 
 ## Additional notes
 
 :::important
 
-Note that JsonSchemaProfiler generates Expectation Suites using column map expectations, which assumes a tabular data structure, because Great Expectations does not currently support nested data structures.
+Note that `JsonSchemaProfiler` generates Expectation Suites using column map <TechnicalTag tag="expectation" text="Expectations" />, which assumes a tabular data structure, because Great Expectations does not currently support nested data structures.
 
 :::
 
