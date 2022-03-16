@@ -17,7 +17,7 @@ context = ge.data_context.DataContext()
 {% if batch_request %}
 # Note that if you modify this batch request, you may save the new version as a .json file
 #  to pass in later via the --batch-request option
-# "limit" refers to the number of batches returned
+# "limit" will return the first n batches if n is positive, or the most recent n batches if n is negative
 batch_request = {{ batch_request }}
 {% endif %}
 
