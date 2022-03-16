@@ -27,7 +27,8 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-        column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
@@ -37,14 +38,16 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
             data_context: DataContext
-            column_names: Explicitly specified column_names list desired (if None, it is computed based on active Batch)
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             semantic_types: single or multiple type specifications using SemanticDomainTypes (or string equivalents)
         """
         super().__init__(
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
-            column_names=column_names,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
         )
 
         if semantic_types is None:
@@ -72,8 +75,6 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         Find the semantic column type for each column and return all domains matching the specified type or types.
         """
         table_column_names: List[str] = self.get_effective_column_names(
-            include_columns=self.column_names,
-            exclude_columns=None,
             variables=variables,
         )
 

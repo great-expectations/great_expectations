@@ -29,7 +29,7 @@ from great_expectations.util import deep_filter_properties_iterable
 def sample_rule_dict():
     return {
         "domain_builder": {
-            "column_names": None,
+            "include_column_names": None,
             "module_name": "great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder",
             "batch_request": {
                 "datasource_name": "my_sample_datasource",

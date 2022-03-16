@@ -96,7 +96,7 @@ stages:
           displayName: 'Update pip'
 
         - script: |
-            pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+            pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
             pip install --requirement requirements.txt
             pip install .
           displayName: 'Install dependencies'
@@ -136,7 +136,7 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pip install pytest pytest-azurepipelines==1.0.1
+            pip install pytest pytest-azurepipelines
             pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --aws tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
