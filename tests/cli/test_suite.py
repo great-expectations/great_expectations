@@ -32,7 +32,7 @@ from tests.render.test_util import (
     run_notebook,
 )
 
-yaml = YAML()
+yaml = YAML(typ="safe")
 
 
 def test_suite_help_output(caplog):
