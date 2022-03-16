@@ -1314,3 +1314,41 @@ def test_introspection_directives_schema_only_selects_schema_objects(
         context.get_validator(
             batch_request=batch_request, expectation_suite_name=expectation_suite_name
         )
+
+
+def test_update_configured_asset_sql_data_connector_missing_data_asset_persists(
+    sqlite_missing_data_asset_data_context,
+):
+    context: DataContext = sqlite_missing_data_asset_data_context
+
+    datasource_name: str = "my_datasource"
+    data_connector_name: str = "default_configured_data_connector"
+    data_asset_name: str = "table_containing_id_spacers_for_D"
+
+    batch_request: dict[str, Any] = {
+        "datasource_name": datasource_name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        "limit": 1000,
+    }
+
+    expectation_suite_name: str = "test"
+
+    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    validator: Validator = context.get_validator(
+        batch_request=batch_request, expectation_suite_name=expectation_suite_name
+    )
+
+    validator.expect_column_values_to_not_be_null(column="date")
+
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    assert (
+        data_asset_name
+        in context.datasources[datasource_name]
+        .data_connectors[data_connector_name]
+        .assets.keys()
+    )
