@@ -3894,10 +3894,11 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
 
 
 def test_map_multicolumn_sum_between_pd():
+    test_df = pd.DataFrame(
+        data={"a": [0, 1, 2], "b": [1, 2, 3], "c": [7, 8, 9]}
+    )
     engine = build_pandas_engine(
-        pd.DataFrame(
-            data={"a": [0, 1, 2], "b": [1, 2, 3], "c": [7, 8, 9]}
-        )
+        test_df
     )
 
     metrics: dict = {}
@@ -3909,9 +3910,9 @@ def test_map_multicolumn_sum_between_pd():
     metrics.update(results)
 
     """
-    Two tests:
-    1. Pass -- no unexpected rows.
-    2. Fail -- one or more unexpected rows.
+    Two sets of four tests:
+    1. Pass set -- no unexpected rows.
+    2. Fail set -- one or more unexpected rows.
     """
 
     # Save original metrics for testing unexpected results.
@@ -3990,7 +3991,7 @@ def test_map_multicolumn_sum_between_pd():
                 "column_list": ["a", "b"],
             },
             metric_value_kwargs={
-                "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
+                "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": len(test_df)}
             },
             metric_dependencies={
                 "unexpected_condition": condition_metric,
@@ -4011,7 +4012,7 @@ def test_map_multicolumn_sum_between_pd():
                 "column_list": ["a", "b"],
             },
             metric_value_kwargs={
-                "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
+                "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": len(test_df)}
             },
             metric_dependencies={
                 "unexpected_condition": condition_metric,
@@ -4070,7 +4071,7 @@ def test_map_multicolumn_sum_between_pd():
         condition_metric = MetricConfiguration(
             metric_name=condition_metric_name,
             metric_domain_kwargs={
-                "column_list": ["a", "b", "c"],
+                "column_list": ["a", "b"],
             },
             metric_value_kwargs=failing_metric_value_kwargs,
             metric_dependencies={
@@ -4100,8 +4101,8 @@ def test_map_multicolumn_sum_between_pd():
         metrics.update(results)
 
         # Condition metrics return "negative logic" series.
-        assert [x in unexpected_rows.index for x in list(metrics[condition_metric.id][0])] == [False, False, True]
-        assert metrics[unexpected_count_metric.id] == 1
+        assert list(metrics[condition_metric.id][0]) == [x in unexpected_rows.index for x in range(len(test_df))]
+        assert metrics[unexpected_count_metric.id] == len(unexpected_rows)
 
         unexpected_rows_metric = MetricConfiguration(
             metric_name=unexpected_rows_metric_name,
@@ -4109,7 +4110,7 @@ def test_map_multicolumn_sum_between_pd():
                 "column_list": ["a", "b", "c"],
             },
             metric_value_kwargs={
-                "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
+                "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": len(test_df)}
             },
             metric_dependencies={
                 "unexpected_condition": condition_metric,
@@ -4124,7 +4125,7 @@ def test_map_multicolumn_sum_between_pd():
         assert metrics[unexpected_rows_metric.id].equals(
             unexpected_rows
         )
-        assert len(metrics[unexpected_rows_metric.id].columns) == 3
+        assert len(metrics[unexpected_rows_metric.id].columns) == len(test_df.columns)
         pd.testing.assert_index_equal(
             metrics[unexpected_rows_metric.id].index, unexpected_rows.index
         )
@@ -4135,7 +4136,7 @@ def test_map_multicolumn_sum_between_pd():
                 "column_list": ["a", "b", "c"],
             },
             metric_value_kwargs={
-                "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
+                "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": len(test_df)}
             },
             metric_dependencies={
                 "unexpected_condition": condition_metric,
@@ -4148,7 +4149,7 @@ def test_map_multicolumn_sum_between_pd():
         metrics.update(results)
 
         assert len(metrics[unexpected_values_metric.id]) == len(unexpected_rows)
-        assert metrics[unexpected_values_metric.id] == unexpected_rows.to_dict(orient='records')
+        assert metrics[unexpected_values_metric.id] == unexpected_rows[['a', 'b']].to_dict(orient='records')
 
 
 def test_map_multicolumn_sum_between_sa():
