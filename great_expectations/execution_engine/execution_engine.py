@@ -525,11 +525,15 @@ class ExecutionEngine(ABC):
         )
         data: Any
         split_domain_kwargs: SplitDomainKwargs
-        data, split_domain_kwargs = self.get_data_reference(
+        data_reference: DataReference = self.get_data_reference(
             domain_kwargs, domain_type, accessor_keys
         )
 
-        return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
+        return (
+            data_reference.data,
+            data_reference.split_domain_kwargs.compute,
+            data_reference.split_domain_kwargs.accessor,
+        )
 
     def get_data_reference(
         self,
@@ -562,7 +566,7 @@ class ExecutionEngine(ABC):
 
         self._ensure_domain_kwargs_are_valid(domain_kwargs)
         data: Any = self.get_domain_records(domain_kwargs)
-        split_domain_kwargs = self._split_domain_kwargs(
+        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
         return DataReference(data, split_domain_kwargs)
