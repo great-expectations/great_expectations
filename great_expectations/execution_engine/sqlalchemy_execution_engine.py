@@ -1071,6 +1071,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 ).scalar()
                 p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
                 sample_size: int = round(p * num_rows)
+                if self.engine.dialect.name.lower() == "bigquery":
+                    return (
+                        sa.select("*")
+                        .select_from(
+                            sa.table(
+                                table_name, schema=batch_spec.get("schema_name", None)
+                            )
+                        )
+                        .where(split_clause)
+                        .order_by(sa.func.rand())
+                        .limit(sample_size)
+                    )
                 return (
                     sa.select("*")
                     .select_from(
