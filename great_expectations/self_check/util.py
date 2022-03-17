@@ -283,9 +283,9 @@ except (ImportError, KeyError):
     MSSQL_TYPES = {}
 
 try:
-    import sqlalchemy_trino
-    import sqlalchemy_trino.datatype as trinotypes
-    from sqlalchemy_trino.dialect import TrinoDialect as trinoDialect
+    import trino
+    import trino.sqlalchemy.datatype as trinotypes
+    from trino.sqlalchemy.dialect import TrinoDialect as trinoDialect
 
     TRINO_TYPES = {
         "BOOLEAN": trinotypes._type_map["boolean"],
@@ -306,7 +306,7 @@ try:
         "TIMESTAMP": trinotypes._type_map["timestamp"],
     }
 except (ImportError, KeyError):
-    sqlalchemy_trino = None
+    trino = None
     trinotypes = None
     trinoDialect = None
     TRINO_TYPES = {}

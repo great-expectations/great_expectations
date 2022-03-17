@@ -10,3 +10,4 @@
 --requirement requirements-dev-redshift.txt
 --requirement requirements-dev-snowflake.txt
 --requirement requirements-dev-teradata.txt
+--requirement requirements-dev-trino.txt
