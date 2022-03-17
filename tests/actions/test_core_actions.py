@@ -443,10 +443,7 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
         data_asset=None,
     ) == {"microsoft_teams_notification_result": None}
 
-    assert (
-        "Request to Microsoft Teams webhook at http://testing returned error 400"
-        in caplog.text
-    )
+    assert "Request to Microsoft Teams webhook returned error 400" in caplog.text
 
 
 class MockSMTPServer:
@@ -675,9 +672,7 @@ def test_cloud_notification_action_bad_response(
         "Authorization": f"Bearer {ge_cloud_access_token}",
     }
     expected_result = {
-        "cloud_notification_result": "Cloud Notification request at "
-        "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/contracts/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/suite-validation-results/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/notification-actions "
-        "returned error 418: test_text"
+        "cloud_notification_result": "Cloud Notification request returned error 418: test_text"
     }
 
     assert (
