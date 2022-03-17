@@ -141,12 +141,11 @@ class BaseDatasource:
         """
         self._validate_batch_request(batch_request=batch_request)
 
-        data_connector: DataConnector = self.data_connectors[
-            batch_request.data_connector_name
-        ]
-
         # if the data_asset_name is missing from a ConfiguredAssetSqlDataConnector config, add it as a table_name
-        if (type(data_connector) == ConfiguredAssetSqlDataConnector) and (
+        if (
+            type(self.data_connectors[batch_request.data_connector_name])
+            == ConfiguredAssetSqlDataConnector
+        ) and (
             "assets"
             not in self._datasource_config["data_connectors"][
                 batch_request.data_connector_name
@@ -156,7 +155,10 @@ class BaseDatasource:
                 batch_request.data_connector_name
             ]["assets"] = {}
 
-        if (type(data_connector) == ConfiguredAssetSqlDataConnector) and (
+        if (
+            type(self.data_connectors[batch_request.data_connector_name])
+            == ConfiguredAssetSqlDataConnector
+        ) and (
             batch_request.data_asset_name
             not in self._datasource_config["data_connectors"][
                 batch_request.data_connector_name
@@ -168,9 +170,9 @@ class BaseDatasource:
                 "table_name": batch_request.data_asset_name
             }
 
-            data_connector: DataConnector = self.data_connectors[
-                batch_request.data_connector_name
-            ]
+        data_connector: DataConnector = self.data_connectors[
+            batch_request.data_connector_name
+        ]
 
         batch_definition_list: List[
             BatchDefinition
