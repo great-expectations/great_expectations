@@ -44,8 +44,8 @@ rules:
           profiler_details: $parameter.row_count_range.details
   column_ranges_rule:
     domain_builder:
-      class_name: SimpleSemanticTypeColumnDomainBuilder
-      semantic_types:
+      class_name: ColumnDomainBuilder
+      include_semantic_types:
         - numeric
       # BatchRequest yielding exactly one batch (March, 2019 trip data)
       batch_request:
