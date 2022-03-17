@@ -3,7 +3,9 @@ title: How to create a Custom Column Map Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-**`ColumnMapExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+**`ColumnMapExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
+They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If that percentage meets a specified threshold (100% by default), the Expectation considers that data valid. 
+This threshold is configured via the `mostly` parameter, which can be passed as input to your Custom `ColumnMapExpectation` as a `float` between 0 and 1.
 
 This guide will walk you through the process of creating a custom `ColumnMapExpectation`.
 
@@ -85,7 +87,7 @@ By convention, your [**Metric**](../../../reference/metrics.md) class is defined
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L43-L45
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L48
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -93,7 +95,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L46
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L49
 ```
 
 with something like:
@@ -102,7 +104,7 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L103
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L104
 ```
 
 with this one:
@@ -149,7 +151,8 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
 
-Run your Expectation file again. The newly added examples won't pass as tests yet, because the Expectation itself hasn't been implemented yet, but they'll check the box for example cases.
+If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet. 
+However, you should see that the tests you've written are now being caught and reported in your checklist:
 
 ```
 $ python expect_column_values_to_equal_three.py
@@ -157,8 +160,11 @@ $ python expect_column_values_to_equal_three.py
 Completeness checklist for ExpectColumnValuesToEqualThree:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
-  ✔ Has at least one positive and negative example case, and all test cases pass
-    Has core logic and passes tests on at least one Execution Engine
+...
+	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
+		  Only 0 / 2 tests for pandas are passing
+		  Failing: basic_positive_test, basic_negative_test
+...
 ```
 
 :::note
@@ -202,7 +208,7 @@ Next, choose a Metric Identifier for your Metric. By convention, Metric Identifi
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L26
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L29
 ```
 
 with
@@ -212,7 +218,7 @@ with
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L54
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L57
 ```
 
 with
@@ -226,7 +232,7 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L23
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L26
 ```
 
 with 
@@ -264,7 +270,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L94-L99
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L95-L100
 ```
 
 would become

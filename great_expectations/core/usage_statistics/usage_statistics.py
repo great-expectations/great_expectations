@@ -27,6 +27,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 STOP_SIGNAL = object()
 
@@ -62,45 +63,20 @@ class UsageStatisticsHandler:
         # the risk of cyclic import issues. If these anonymizers have been imported at any earlier point
         # in the program's lifetime, retrieval of the import will be O(1) and not impact performance.
 
-        from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
-            BatchAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
-            BatchRequestAnonymizer,
-        )
         from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
             CheckpointRunAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
-            DataDocsSiteAnonymizer,
         )
         from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
             DatasourceAnonymizer,
         )
-        from great_expectations.core.usage_statistics.anonymizers.execution_engine_anonymizer import (
-            ExecutionEngineAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
-            ExpectationSuiteAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
-            StoreAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
-            ValidationOperatorAnonymizer,
+        from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
+            ProfilerRunAnonymizer,
         )
 
+        self._anonymizer = Anonymizer(data_context_id)
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
-        self._execution_engine_anonymizer = ExecutionEngineAnonymizer(data_context_id)
-        self._store_anonymizer = StoreAnonymizer(data_context_id)
-        self._validation_operator_anonymizer = ValidationOperatorAnonymizer(
-            data_context_id
-        )
-        self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
-        self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
-        self._batch_anonymizer = BatchAnonymizer(data_context_id)
-        self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
+        self._profiler_run_anonymizer = ProfilerRunAnonymizer(data_context_id)
 
         try:
             self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
@@ -114,6 +90,10 @@ class UsageStatisticsHandler:
             self._sigint_handler = None
 
         atexit.register(self._close_worker)
+
+    @property
+    def anonymizer(self) -> Anonymizer:
+        return self._anonymizer
 
     def _teardown(self, signum: int, frame: Optional[FrameType]) -> None:
         self._close_worker()
@@ -167,26 +147,24 @@ class UsageStatisticsHandler:
                 for datasource_name, datasource_config in self._data_context.project_config_with_variables_substituted.datasources.items()
             ],
             "anonymized_stores": [
-                self._store_anonymizer.anonymize_store_info(store_name, store_obj)
+                self._anonymizer.anonymize_store_info(store_name, store_obj)
                 for store_name, store_obj in self._data_context.stores.items()
             ],
             "anonymized_validation_operators": [
-                self._validation_operator_anonymizer.anonymize_validation_operator_info(
+                self._anonymizer.anonymize_validation_operator_info(
                     validation_operator_name=validation_operator_name,
                     validation_operator_obj=validation_operator_obj,
                 )
                 for validation_operator_name, validation_operator_obj in self._data_context.validation_operators.items()
             ],
             "anonymized_data_docs_sites": [
-                self._data_docs_sites_anonymizer.anonymize_data_docs_site_info(
+                self._anonymizer.anonymize_data_docs_site_info(
                     site_name=site_name, site_config=site_config
                 )
                 for site_name, site_config in self._data_context.project_config_with_variables_substituted.data_docs_sites.items()
             ],
             "anonymized_expectation_suites": [
-                self._expectation_suite_anonymizer.anonymize_expectation_suite_info(
-                    expectation_suite
-                )
+                self._anonymizer.anonymize_expectation_suite_info(expectation_suite)
                 for expectation_suite in expectation_suites
             ],
         }
@@ -331,7 +309,7 @@ def usage_statistics_enabled_method(
                 time_end: int = int(round(time.time() * 1000))
                 delta_t: int = time_end - time_begin
 
-                handler = get_usage_statistics_handler(args)
+                handler = get_usage_statistics_handler(list(args))
                 if handler:
                     event_duration_property_name: str = (
                         f"{event_name}.duration".replace(".", "_")
@@ -384,10 +362,9 @@ def run_validation_operator_usage_statistics(
     if data_context._usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
+            anonymizer = data_context._usage_statistics_handler._anonymizer
             payload["anonymized_batches"] = [
-                batch_anonymizer.anonymize_batch_info(batch)
-                for batch in assets_to_validate
+                anonymizer.anonymize_batch_info(batch) for batch in assets_to_validate
             ]
         except Exception as e:
             logger.debug(
@@ -517,10 +494,10 @@ def get_batch_list_usage_statistics(
     if data_context._usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            batch_request_anonymizer: "BatchRequestAnonymizer" = (  # noqa: F821
-                data_context._usage_statistics_handler._batch_request_anonymizer
+            anonymizer: Anonymizer = (  # noqa: F821
+                data_context._usage_statistics_handler._anonymizer
             )
-            payload = batch_request_anonymizer.anonymize_batch_request(*args, **kwargs)
+            payload = anonymizer.anonymize_batch_request(*args, **kwargs)
         except Exception as e:
             logger.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"
@@ -566,7 +543,55 @@ def get_checkpoint_run_usage_statistics(
             )
         except Exception as e:
             logger.debug(
-                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_checkpoint_run_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+            )
+
+    return payload
+
+
+def get_profiler_run_usage_statistics(
+    profiler: "RuleBasedProfiler",  # noqa: F821
+    variables: Optional[dict] = None,
+    rules: Optional[dict] = None,
+    *args,
+    **kwargs,
+) -> dict:
+    usage_statistics_handler: Optional[
+        UsageStatisticsHandler
+    ] = profiler._usage_statistics_handler
+
+    data_context_id: Optional[str] = None
+    if usage_statistics_handler:
+        data_context_id = usage_statistics_handler._data_context_id
+
+    anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+
+    payload: dict = {}
+
+    if usage_statistics_handler:
+        # noinspection PyBroadException
+        try:
+            profiler_run_anonymizer: "ProfilerRunAnonymizer" = (  # noqa: F821
+                usage_statistics_handler._profiler_run_anonymizer
+            )
+
+            resolved_runtime_config: "RuleBasedProfilerConfig" = (  # noqa: F821
+                RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
+                    profiler=profiler,
+                    variables=variables,
+                    rules=rules,
+                )
+            )
+
+            payload: dict = profiler_run_anonymizer.anonymize_profiler_run(
+                profiler_config=resolved_runtime_config
+            )
+        except Exception as e:
+            logger.debug(
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_profiler_run_usage_statistics: Unable to create anonymized_profiler_run payload field"
             )
 
     return payload

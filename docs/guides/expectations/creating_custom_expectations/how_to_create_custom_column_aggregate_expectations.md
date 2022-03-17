@@ -72,12 +72,7 @@ Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
-    Has basic input validation and type checking
-    Has both Statement Renderers: prescriptive and diagnostic
-    Has core logic that passes tests for all applicable Execution Engines
-    Passes all linting checks
-    Has a robust suite of tests, as determined by a code owner
-    Has passed a manual review by a code owner for code standards and style guides
+...
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first four steps on the checklist.
@@ -89,7 +84,7 @@ By convention, your [**Metric**](../../../reference/metrics.md) class is defined
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L47-L49
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L49
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -97,7 +92,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L49
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L50
 ```
 
 with something like:
@@ -155,7 +150,8 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 <code>test_backends</code> is an optional key you can pass to offer more granular control over which backends and SQL dialects your tests are run against.
 </details>
 
-Run your Expectation file again. The newly added examples won't pass as tests yet, because the Expectation itself hasn't been implemented yet, but they'll check the box for example cases.
+If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet. 
+However, you should see that the tests you've written are now being caught and reported in your checklist:
 
 ```
 $ python expect_column_column_max_to_be_between_custom.py
@@ -163,8 +159,11 @@ $ python expect_column_column_max_to_be_between_custom.py
 Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
-  ✔ Has at least one positive and negative example case, and all test cases pass
-    Has core logic and passes tests on at least one Execution Engine
+...
+	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
+		  Only 0 / 2 tests for pandas are passing
+		  Failing: basic_positive_test, basic_negative_test
+...
 ```
 
 :::note
@@ -187,8 +186,8 @@ Your Metric function will have the `@column_aggregate_value` decorator, with the
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L41-L44
 ```
 
-This is all that you need to define for now. 
-The `ColumnAggregateMetricProvider` and `ColumnExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
+This is all that you need to define for now. In the next step, we will implement the method to validate the results of this Metric.
+
 
 <details>
   <summary>Other parameters</summary>
@@ -210,7 +209,7 @@ The remainder of the Metric Identifier simply describes what the Metric computes
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L29
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L30
 ```
 
 with
@@ -220,7 +219,7 @@ with
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L56
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L57
 ```
 
 with
@@ -234,7 +233,7 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L26
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L27
 ```
 
 with 

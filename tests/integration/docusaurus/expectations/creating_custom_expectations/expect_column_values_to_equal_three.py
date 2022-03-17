@@ -3,6 +3,7 @@ from typing import Callable, Dict, Optional
 
 from numpy import array
 
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -15,7 +16,6 @@ from great_expectations.execution_engine.execution_engine import (
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.expectations.metrics import (
@@ -294,78 +294,76 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
                 )
             ]
 
-        @renderer(renderer_type="renderer.diagnostic.unexpected_table")
-        @render_evaluation_parameter_string
-        def _diagnostic_unexpected_table_renderer(
-            cls,
-            configuration: ExpectationConfiguration = None,
-            result: ExpectationValidationResult = None,
-            language: str = None,
-            runtime_configuration: dict = None,
-            **kwargs,
+    @renderer(renderer_type="renderer.diagnostic.unexpected_table")
+    @render_evaluation_parameter_string
+    def _diagnostic_unexpected_table_renderer(
+        cls,
+        configuration: ExpectationConfiguration = None,
+        result: ExpectationValidationResult = None,
+        language: str = None,
+        runtime_configuration: dict = None,
+        **kwargs,
+    ):
+        try:
+            result_dict = result.result
+        except KeyError:
+            return None
+
+        if result_dict is None:
+            return None
+
+        if not result_dict.get("partial_unexpected_list") and not result_dict.get(
+            "partial_unexpected_counts"
         ):
-            try:
-                result_dict = result.result
-            except KeyError:
-                return None
+            return None
 
-            if result_dict is None:
-                return None
+        table_rows = []
 
-            if not result_dict.get("partial_unexpected_list") and not result_dict.get(
-                "partial_unexpected_counts"
-            ):
-                return None
-
-            table_rows = []
-
-            if result_dict.get("partial_unexpected_counts"):
-                total_count = 0
-                for unexpected_count_dict in result_dict.get(
-                    "partial_unexpected_counts"
-                ):
-                    value = unexpected_count_dict.get("value")
-                    count = unexpected_count_dict.get("count")
-                    total_count += count
-                    if value is not None and value != "":
-                        table_rows.append([value, count])
-                    elif value == "":
-                        table_rows.append(["EMPTY", count])
-                    else:
-                        table_rows.append(["null", count])
-
-                if total_count == result_dict.get("unexpected_count"):
-                    header_row = ["Unexpected Value", "Count"]
+        if result_dict.get("partial_unexpected_counts"):
+            total_count = 0
+            for unexpected_count_dict in result_dict.get("partial_unexpected_counts"):
+                value = unexpected_count_dict.get("value")
+                count = unexpected_count_dict.get("count")
+                total_count += count
+                if value is not None and value != "":
+                    table_rows.append([value, count])
+                elif value == "":
+                    table_rows.append(["EMPTY", count])
                 else:
-                    header_row = ["Sampled Unexpected Values"]
-                    table_rows = [[row[0]] for row in table_rows]
+                    table_rows.append(["null", count])
 
+            if total_count == result_dict.get("unexpected_count"):
+                header_row = ["Unexpected Value", "Count"]
             else:
                 header_row = ["Sampled Unexpected Values"]
-                sampled_values_set = set()
-                for unexpected_value in result_dict.get("partial_unexpected_list"):
-                    if unexpected_value:
-                        string_unexpected_value = str(unexpected_value)
-                    elif unexpected_value == "":
-                        string_unexpected_value = "EMPTY"
-                    else:
-                        string_unexpected_value = "null"
-                    if string_unexpected_value not in sampled_values_set:
-                        table_rows.append([unexpected_value])
-                        sampled_values_set.add(string_unexpected_value)
+                table_rows = [[row[0]] for row in table_rows]
 
-            unexpected_table_content_block = RenderedTableContent(
-                **{
-                    "content_block_type": "table",
-                    "table": table_rows,
-                    "header_row": header_row,
-                    "styling": {
-                        "body": {"classes": ["table-bordered", "table-sm", "mt-3"]}
-                    },
-                }
-            )
+        else:
+            header_row = ["Sampled Unexpected Values"]
+            sampled_values_set = set()
+            for unexpected_value in result_dict.get("partial_unexpected_list"):
+                if unexpected_value:
+                    string_unexpected_value = str(unexpected_value)
+                elif unexpected_value == "":
+                    string_unexpected_value = "EMPTY"
+                else:
+                    string_unexpected_value = "null"
+                if string_unexpected_value not in sampled_values_set:
+                    table_rows.append([unexpected_value])
+                    sampled_values_set.add(string_unexpected_value)
 
-            return unexpected_table_content_block
+        unexpected_table_content_block = RenderedTableContent(
+            **{
+                "content_block_type": "table",
+                "table": table_rows,
+                "header_row": header_row,
+                "styling": {
+                    "body": {"classes": ["table-bordered", "table-sm", "mt-3"]}
+                },
+            }
+        )
+
+        return unexpected_table_content_block
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

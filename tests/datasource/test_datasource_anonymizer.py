@@ -254,7 +254,7 @@ introspection:
     }
 
 
-def test_is_parent_class_recognized_yes():
+def test_get_parent_class_yes():
 
     v2_batch_kwargs_api_datasources = [
         "PandasDatasource",
@@ -278,9 +278,7 @@ def test_is_parent_class_recognized_yes():
     ]
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.is_parent_class_recognized(
-            config=configs[idx]
-        )
+        parent_class = datasource_anonymizer.get_parent_class(config=configs[idx])
         assert parent_class == parent_classes[idx]
 
 
@@ -290,7 +288,7 @@ def test_is_custom_parent_class_recognized_yes():
         "class_name": "MyCustomV3ApiDatasource",
     }
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    parent_class = datasource_anonymizer.is_parent_class_recognized(config=config)
+    parent_class = datasource_anonymizer.get_parent_class(config=config)
     assert parent_class == "Datasource"
 
     config = {
@@ -298,11 +296,11 @@ def test_is_custom_parent_class_recognized_yes():
         "class_name": "MyCustomV2ApiDatasource",
     }
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    parent_class = datasource_anonymizer.is_parent_class_recognized(config=config)
+    parent_class = datasource_anonymizer.get_parent_class(config=config)
     assert parent_class == "PandasDatasource"
 
 
-def test_is_parent_class_recognized_no():
+def test_get_parent_class_no():
     parent_classes = ["MyCustomNonDatasourceClass", "MyOtherCustomNonDatasourceClass"]
     configs = [
         {
@@ -314,14 +312,12 @@ def test_is_parent_class_recognized_no():
     ]
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.is_parent_class_recognized(
-            config=configs[idx]
-        )
+        parent_class = datasource_anonymizer.get_parent_class(config=configs[idx])
         assert parent_class != parent_classes[idx]
         assert parent_class is None
 
 
-def test_is_parent_class_recognized_v2_api_yes():
+def test_get_parent_class_v2_api_yes():
     v2_batch_kwargs_api_datasources = [
         "PandasDatasource",
         "SqlAlchemyDatasource",
@@ -339,7 +335,7 @@ def test_is_parent_class_recognized_v2_api_yes():
     ]
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.is_parent_class_recognized_v2_api(
+        parent_class = datasource_anonymizer.get_parent_class_v2_api(
             config=configs[idx]
         )
         assert parent_class == parent_classes[idx]
@@ -351,13 +347,11 @@ def test_is_custom_parent_class_recognized_v2_api_yes():
         "class_name": "MyCustomV2ApiDatasource",
     }
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    parent_class = datasource_anonymizer.is_parent_class_recognized_v2_api(
-        config=config
-    )
+    parent_class = datasource_anonymizer.get_parent_class_v2_api(config=config)
     assert parent_class == "PandasDatasource"
 
 
-def test_is_parent_class_recognized_v2_api_no():
+def test_get_parent_class_v2_api_no():
     v3_batch_request_api_datasources = [
         "SimpleSqlalchemyDatasource",
         "Datasource",
@@ -378,14 +372,14 @@ def test_is_parent_class_recognized_v2_api_no():
     ]
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.is_parent_class_recognized_v2_api(
+        parent_class = datasource_anonymizer.get_parent_class_v2_api(
             config=configs[idx]
         )
         assert parent_class != parent_classes[idx]
         assert parent_class is None
 
 
-def test_is_parent_class_recognized_v3_api_yes():
+def test_get_parent_class_v3_api_yes():
     v3_batch_request_api_datasources = [
         "SimpleSqlalchemyDatasource",
         "Datasource",
@@ -402,7 +396,7 @@ def test_is_parent_class_recognized_v3_api_yes():
     ]
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.is_parent_class_recognized_v3_api(
+        parent_class = datasource_anonymizer.get_parent_class_v3_api(
             config=configs[idx]
         )
         assert parent_class == parent_classes[idx]
@@ -414,13 +408,11 @@ def test_is_custom_parent_class_recognized_v3_api_yes():
         "class_name": "MyCustomV3ApiDatasource",
     }
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    parent_class = datasource_anonymizer.is_parent_class_recognized_v3_api(
-        config=config
-    )
+    parent_class = datasource_anonymizer.get_parent_class_v3_api(config=config)
     assert parent_class == "Datasource"
 
 
-def test_is_parent_class_recognized_v3_api_no():
+def test_get_parent_class_v3_api_no():
     v2_batch_kwargs_api_datasources = [
         "PandasDatasource",
         "SqlAlchemyDatasource",
@@ -442,7 +434,7 @@ def test_is_parent_class_recognized_v3_api_no():
     ]
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.is_parent_class_recognized_v3_api(
+        parent_class = datasource_anonymizer.get_parent_class_v3_api(
             config=configs[idx]
         )
         assert parent_class != parent_classes[idx]

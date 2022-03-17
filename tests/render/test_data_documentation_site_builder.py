@@ -92,6 +92,9 @@ def assert_how_to_buttons(
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
+@pytest.mark.filterwarnings(
+    "ignore:String run_ids*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+)
 def test_configuration_driven_site_builder(
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
@@ -495,6 +498,9 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
 
 
 @pytest.mark.rendered_output
+@pytest.mark.filterwarnings(
+    "ignore:name is being deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+)
 def test_configuration_driven_site_builder_without_how_to_buttons(
     site_builder_data_context_with_html_store_titanic_random,
 ):

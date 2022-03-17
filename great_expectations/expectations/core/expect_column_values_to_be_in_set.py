@@ -16,6 +16,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 try:
     import sqlalchemy as sa
@@ -104,16 +105,67 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     }
 
     map_metric = "column_values.in_set"
-    success_keys = (
-        "value_set",
-        "mostly",
-        "parse_strings_as_datetimes",
-    )
-    default_kwarg_values = {"value_set": None, "parse_strings_as_datetimes": False}
+
     args_keys = (
         "column",
         "value_set",
     )
+
+    success_keys = (
+        "value_set",
+        "mostly",
+        "parse_strings_as_datetimes",
+        "auto",
+        "profiler_config",
+    )
+
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_values_to_be_in_set",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        class_name="RuleBasedProfilerConfig",
+        module_name="great_expectations.rule_based_profiler",
+        variables={
+            "mostly": 1.0,
+        },
+        rules={
+            "default_expect_column_values_to_be_in_set_rule": {
+                "domain_builder": {
+                    "class_name": "ColumnDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "parameter_builders": [
+                    {
+                        "name": "value_set",
+                        "class_name": "ValueSetMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "json_serialize": True,
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "column": "$domain.domain_kwargs.column",
+                        "value_set": "$parameter.value_set.value",
+                        "mostly": "$variables.mostly",
+                        "meta": {
+                            "profiler_details": "$parameter.value_set.details",
+                        },
+                    },
+                ],
+            },
+        },
+    )
+
+    default_kwarg_values = {
+        "value_set": None,
+        "parse_strings_as_datetimes": False,
+        "auto": False,
+        "profiler_config": default_profiler_config,
+    }
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -149,7 +201,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "parse_strings_as_datetimes": {
@@ -170,13 +222,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
 
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-        template_str = "values must belong to this set: " + values_string
+        template_str = f"values must belong to this set: {values_string}"
 
         if params["mostly"] is not None:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
@@ -191,7 +243,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -200,7 +252,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
@@ -244,13 +296,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
 
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-        template_str = "values must belong to this set: " + values_string
+        template_str = f"values must belong to this set: {values_string}"
 
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
@@ -265,14 +317,14 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [

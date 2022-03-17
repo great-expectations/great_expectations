@@ -103,7 +103,7 @@ class ExpectationDiagnostics(SerializableDictDot):
                 message=message,
                 sub_messages=[
                     {
-                        "message": '"' + short_description + '"',
+                        "message": f'"{short_description}"',
                         "passed": True,
                     }
                 ],
@@ -300,16 +300,16 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         for check in checks:
             if check["passed"]:
-                output_message += "\n ✔ " + check["message"]
+                output_message += f"\n ✔ {check['message']}"
             else:
-                output_message += "\n   " + check["message"]
+                output_message += f"\n   {check['message']}"
 
             if "sub_messages" in check:
                 for sub_message in check["sub_messages"]:
                     if sub_message["passed"]:
-                        output_message += "\n    ✔ " + sub_message["message"]
+                        output_message += f"\n    ✔ {sub_message['message']}"
                     else:
-                        output_message += "\n      " + sub_message["message"]
+                        output_message += f"\n      {sub_message['message']}"
         output_message += "\n"
 
         return output_message

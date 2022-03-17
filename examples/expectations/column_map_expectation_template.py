@@ -5,7 +5,9 @@ For detailed instructions on how to use it, please see:
 """
 
 import json
+from typing import Optional
 
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
