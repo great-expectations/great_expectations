@@ -7,6 +7,7 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -1332,11 +1333,12 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
         "limit": 1000,
     }
 
-    expectation_suite_name: str = "test"
-
-    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
-
     batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    expectation_suite_name: str = "test"
+    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
 
     validator: Validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name=expectation_suite_name
@@ -1344,15 +1346,15 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
 
     validator.expect_column_values_to_not_be_null(column="date")
 
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    # validator.save_expectation_suite should add the new citation
     assert (
-        validator.get_expectation_suite(discard_failed_expectations=False)["meta"][
-            "citations"
-        ]["batch_request"]["data_asset_name"]
+        expectation_suite.meta["citations"][0]["batch_request"].data_asset_name
         == data_asset_name
     )
 
-    validator.save_expectation_suite(discard_failed_expectations=False)
-
+    # data_asset_name should be updated in context.datasources
     assert (
         data_asset_name
         in context.datasources[datasource_name]
@@ -1360,6 +1362,7 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
         .assets.keys()
     )
 
+    # data_asset_name should be updated in context.config.datasources
     assert (
         data_asset_name
         in context.config.datasources[datasource_name]

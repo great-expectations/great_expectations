@@ -13,7 +13,6 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
@@ -258,12 +257,6 @@ def _suite_new_workflow(
             create_if_not_exist=True,
         )
         expectation_suite_name = suite.expectation_suite_name
-
-        toolkit.add_citation_with_batch_request(
-            data_context=context,
-            expectation_suite=suite,
-            batch_request=batch_request,
-        )
 
         send_usage_message(
             data_context=context,
