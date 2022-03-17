@@ -29,7 +29,7 @@ from great_expectations.util import deep_filter_properties_iterable
 def sample_rule_dict():
     return {
         "domain_builder": {
-            "column_names": None,
+            "include_column_names": None,
             "module_name": "great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder",
             "batch_request": {
                 "datasource_name": "my_sample_datasource",
@@ -72,7 +72,7 @@ def test_reconcile_profiler_variables_with_overrides(
 ):
     variables: Dict[str, Any] = {
         "false_positive_threshold": 2.0e-2,
-        "sampling_method": "bootstrap",
+        "estimator": "bootstrap",
         "mostly": 8.0e-1,
     }
     effective_variables: Optional[
@@ -82,7 +82,7 @@ def test_reconcile_profiler_variables_with_overrides(
         "variables"
     ] == {
         "false_positive_threshold": 2.0e-2,
-        "sampling_method": "bootstrap",
+        "estimator": "bootstrap",
         "mostly": 8.0e-1,
     }
 
@@ -177,7 +177,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
-                    "sampling_method": "bootstrap",
+                    "estimator": "bootstrap",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
@@ -388,7 +388,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
-                    "sampling_method": "bootstrap",
+                    "estimator": "bootstrap",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": False,
                     "reduce_scalar_metric": True,
@@ -609,7 +609,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
-                    "sampling_method": "bootstrap",
+                    "estimator": "bootstrap",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
@@ -720,7 +720,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
-                    "sampling_method": "bootstrap",
+                    "estimator": "bootstrap",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
@@ -846,7 +846,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
                     "name": "my_other_parameter",
                     "metric_name": "my_other_metric",
-                    "sampling_method": "bootstrap",
+                    "estimator": "bootstrap",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
                     "reduce_scalar_metric": True,
