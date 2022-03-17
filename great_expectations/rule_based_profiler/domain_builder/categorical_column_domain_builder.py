@@ -86,10 +86,15 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
         """
+        if include_semantic_types is None:
+            include_semantic_types = [
+                SemanticDomainTypes.LOGIC,
+            ]
+
         if exclude_semantic_types is None:
             exclude_semantic_types = [
                 SemanticDomainTypes.BINARY,
-                SemanticDomainTypes.LOGIC,
+                SemanticDomainTypes.CURRENCY,
                 SemanticDomainTypes.IDENTIFIER,
             ]
 
