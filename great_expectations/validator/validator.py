@@ -1531,6 +1531,7 @@ set as active.
             discard_catch_exceptions_kwargs,
             suppress_warnings,
         )
+
         if filepath is None and self._data_context is not None:
             self._data_context.save_expectation_suite(expectation_suite)
             if self.ge_cloud_mode:

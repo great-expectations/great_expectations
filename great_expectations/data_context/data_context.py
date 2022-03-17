@@ -1855,10 +1855,17 @@ class BaseDataContext(ConfigPeer):
                 )
             )
 
-        return self.get_validator_using_batch_list(
+        expectation_suite.add_citation(
+            comment="Created suite added via context.get_validator",
+            batch_request=batch_request,
+        )
+        validator: Validator = self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
             batch_list=batch_list,
         )
+        validator.save_expectation_suite()
+
+        return validator
 
     def get_validator_using_batch_list(
         self,

@@ -7,7 +7,6 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -1336,9 +1335,7 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
     batch_request: BatchRequest = BatchRequest(**batch_request)
 
     expectation_suite_name: str = "test"
-    expectation_suite: ExpectationSuite = context.create_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
     validator: Validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name=expectation_suite_name
@@ -1348,9 +1345,11 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
 
     validator.save_expectation_suite(discard_failed_expectations=False)
 
-    # validator.save_expectation_suite should add the new citation
+    # context.get_validator should add the new citation
     assert (
-        expectation_suite.meta["citations"][0]["batch_request"].data_asset_name
+        validator.expectation_suite.meta["citations"][0][
+            "batch_request"
+        ].data_asset_name
         == data_asset_name
     )
 
