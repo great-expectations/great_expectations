@@ -47,6 +47,60 @@ class ExpectMulticolumnSumToBeBetween(MulticolumnMapExpectation):
         "requirements": [],
     }
 
+    examples = [
+        {
+            "data": {
+                "a": [
+                    0,
+                    1,
+                    2
+                ],
+                "b": [
+                    1,
+                    2,
+                    3
+                ],
+            },
+            "tests": [
+                {
+                    "title": "basic_positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column_list": ["a", "b"], "min_value": 1, "max_value": 5},
+                    "out": {"success": True},
+                },
+                {
+                    "title": "basic_negative_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column_list": ["a", "b"], "min_value": 3, "max_value": 5},
+                    "out": {"success": False},
+                },
+                {
+                    "title": "strict_min_example",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column_list": ["a", "b"], "min_value": 1, "max_value": 5, "strict_min": True},
+                    "out": {"success": False},
+                },
+            ],
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                    "dialects": None,
+                },
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["sqlite", "postgresql"],
+                },
+                {
+                    "backend": "spark",
+                    "dialects": None,
+                },
+            ],
+        }
+    ]
+
     map_metric = "multicolumn_sum.between"
     success_keys = (
         "min_value",
