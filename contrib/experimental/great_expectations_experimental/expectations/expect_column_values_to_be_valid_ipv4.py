@@ -1,13 +1,9 @@
 import ipaddress
-import json
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -19,7 +15,7 @@ from great_expectations.expectations.metrics import (
 # This method compares a string to the valid IPv4 address format
 def is_valid_ipv4(addr: str) -> bool:
     try:
-        a = ipaddress.IPv4Address(addr)
+        ipaddress.IPv4Address(addr)
         return True
     except ipaddress.AddressValueError:
         return False
@@ -59,29 +55,29 @@ class ExpectColumnValuesToBeValidIPv4(ColumnMapExpectation):
             "data": {
                 "well_formed_ipv4": [
                     # decimal-dot notation IPv4 addresses
-                    '0.0.0.0',
-                    '192.168.0.1',
-                    '255.255.255.255',
+                    "0.0.0.0",
+                    "192.168.0.1",
+                    "255.255.255.255",
                     # integer fits into 32 bits
                     0,
                     3232235521,
                     4294967295,
                     # integer packed into a bytes object of length 4
-                    b'\x00\x00\x00\x00',
-                    b'\xC0\xA8\x00\x01',
-                    b'\xFF\xFF\xFF\xFF',
+                    b"\x00\x00\x00\x00",
+                    b"\xC0\xA8\x00\x01",
+                    b"\xFF\xFF\xFF\xFF",
                 ],
                 "malformed_ipv4": [
                     # has non-decimal value
-                    '192.168.0.1a',
+                    "192.168.0.1a",
                     # too short decimal-dot notation
-                    '192.168.0.',
+                    "192.168.0.",
                     # too long decimal-dot notation
-                    '192.168.0.1.1',
+                    "192.168.0.1.1",
                     # invalid format
-                    '192-168-0-1',
+                    "192-168-0-1",
                     # IPv4 addresses over range
-                    '255.255.255.256',
+                    "255.255.255.256",
                     -1,
                     4294967296,
                     # left field
@@ -107,7 +103,6 @@ class ExpectColumnValuesToBeValidIPv4(ColumnMapExpectation):
             ],
         }
     ]
-
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
@@ -150,8 +145,8 @@ class ExpectColumnValuesToBeValidIPv4(ColumnMapExpectation):
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "maturity": "experimental",
-        "tags": ["experimental", "hackathon", "typed-entities"], 
-        "contributors": [ 
+        "tags": ["experimental", "hackathon", "typed-entities"],
+        "contributors": [
             "@voidforall",
         ],
         "package": "experimental_expectations",
