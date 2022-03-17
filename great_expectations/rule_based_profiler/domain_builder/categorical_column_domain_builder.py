@@ -45,6 +45,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         ] = None,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        semantic_type_filter_module_name: str = "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
+        semantic_type_filter_class_name: str = "SimpleSemanticTypeFilter",
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
@@ -74,6 +76,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             to be excluded
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
+            semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces
+            semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
@@ -82,6 +86,13 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
         """
+        if exclude_semantic_types is None:
+            exclude_semantic_types = [
+                SemanticDomainTypes.BINARY,
+                SemanticDomainTypes.LOGIC,
+                SemanticDomainTypes.IDENTIFIER,
+            ]
+
         super().__init__(
             batch_list=batch_list,
             batch_request=batch_request,
@@ -90,6 +101,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             exclude_semantic_types=exclude_semantic_types,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
+            semantic_type_filter_module_name=semantic_type_filter_module_name,
+            semantic_type_filter_class_name=semantic_type_filter_class_name,
         )
 
         self._limit_mode = limit_mode

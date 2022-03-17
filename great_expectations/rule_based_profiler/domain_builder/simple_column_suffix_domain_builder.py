@@ -33,6 +33,8 @@ class SimpleColumnSuffixDomainBuilder(ColumnDomainBuilder):
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+        semantic_type_filter_module_name: str = "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
+        semantic_type_filter_class_name: str = "SimpleSemanticTypeFilter",
     ):
         """
         Args:
@@ -45,6 +47,8 @@ class SimpleColumnSuffixDomainBuilder(ColumnDomainBuilder):
             to be excluded
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
+            semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces
+            semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces
         """
         super().__init__(
             batch_list=batch_list,
@@ -54,6 +58,8 @@ class SimpleColumnSuffixDomainBuilder(ColumnDomainBuilder):
             exclude_semantic_types=exclude_semantic_types,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
+            semantic_type_filter_module_name=semantic_type_filter_module_name,
+            semantic_type_filter_class_name=semantic_type_filter_class_name,
         )
 
         if column_name_suffixes is None:
