@@ -17,8 +17,8 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types.parameter_container import (
-    VARIABLES_KEY,
+from great_expectations.rule_based_profiler.types import (
+    VARIABLES_PREFIX,
     ParameterContainer,
 )
 from great_expectations.types import DictDot, SerializableDictDot
@@ -484,7 +484,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         def _traverse_and_substitute(node: Any) -> None:
             if isinstance(node, dict):
                 for key, val in node.copy().items():
-                    if isinstance(val, str) and val.startswith(VARIABLES_KEY):
+                    if isinstance(val, str) and val.startswith(VARIABLES_PREFIX):
                         node[key] = get_parameter_value_and_validate_return_type(
                             domain=None,
                             parameter_reference=val,
