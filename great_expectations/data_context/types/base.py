@@ -2089,32 +2089,11 @@ class DataContextConfig(BaseYamlConfig):
         """
         Wrapper for `to_json_dict` which ensures sensitive fields are properly masked.
         """
-        # avoid circular imports
+        # postpone importing to avoid circular imports
         from great_expectations.data_context.util import PasswordMasker
 
         serializeable_dict = self.to_json_dict()
-
-        # mask cloud token in stores config
-        if "stores" in serializeable_dict and isinstance(
-            serializeable_dict["stores"], dict
-        ):
-            for store_name, store_config in serializeable_dict["stores"].items():
-                serializeable_dict["stores"][
-                    store_name
-                ] = PasswordMasker.sanitize_store_config(store_config)
-
-        # mask connection creds in datasources
-        if "datasources" in serializeable_dict and isinstance(
-            serializeable_dict["stores"], dict
-        ):
-            for datasource_name, datasource_config in serializeable_dict[
-                "datasources"
-            ].items():
-                serializeable_dict["datasources"][
-                    datasource_name
-                ] = PasswordMasker.sanitize_datasource_config(datasource_config)
-
-        return serializeable_dict
+        return PasswordMasker.sanitize_data_context_config(serializeable_dict)
 
     def __repr__(self) -> str:
         """

@@ -11,6 +11,8 @@ from functools import lru_cache
 from typing import Optional
 from urllib.parse import urlparse
 
+from great_expectations.types import safe_deep_copy
+
 try:
     from azure.identity import DefaultAzureCredential
     from azure.keyvault.secrets import SecretClient
@@ -519,10 +521,10 @@ class PasswordMasker:
     """
 
     MASKED_PASSWORD_STRING = "***"
-    MASKED_UUID = "********-****-****-****-************"
+    MASKED_UUID = "********************************"
 
-    @staticmethod
-    def mask_db_url(url: str, use_urlparse: bool = False, **kwargs) -> str:
+    @classmethod
+    def mask_db_url(cls, url: str, use_urlparse: bool = False, **kwargs) -> str:
         """
         Mask password in database url.
         Uses sqlalchemy engine parsing if sqlalchemy is installed, otherwise defaults to using urlparse from the stdlib which does not handle kwargs.
@@ -558,7 +560,7 @@ class PasswordMasker:
 
             colon = ":" if parsed_url.port is not None else ""
             masked_url = (
-                f"{parsed_url.scheme}://{parsed_url.username}:{PasswordMasker.MASKED_PASSWORD_STRING}"
+                f"{parsed_url.scheme}://{parsed_url.username}:{cls.MASKED_PASSWORD_STRING}"
                 f"@{parsed_url.hostname}{colon}{parsed_url.port or ''}{parsed_url.path or ''}"
             )
 
@@ -570,10 +572,45 @@ class PasswordMasker:
             return masked_url
 
     @classmethod
+    def sanitize_data_context_config(cls, config: dict) -> dict:
+        """
+        Mask sensitive fields in a DataContextConfig Dict.
+        """
+
+        # be defensive, since it would be logical to expect this method works with DataContextConfig
+        if not isinstance(config, dict):
+            raise TypeError(
+                f"PasswordMasker.sanitize_datasource_config expects param `config` "
+                + f"to be of type Dict, not of type {type(config)}"
+            )
+
+        config_copy = safe_deep_copy(config)  # be immutable
+
+        # mask cloud token in stores config
+        if "stores" in config_copy and isinstance(config_copy["stores"], dict):
+            for store_name, store_config in config_copy["stores"].items():
+                config_copy["stores"][store_name] = cls.sanitize_store_config(
+                    store_config
+                )
+
+        # mask connection creds in datasources
+        if "datasources" in config_copy and isinstance(
+            config_copy["datasources"], dict
+        ):
+            for datasource_name, datasource_config in config_copy[
+                "datasources"
+            ].items():
+                config_copy["datasources"][
+                    datasource_name
+                ] = cls.sanitize_datasource_config(datasource_config)
+
+        return config_copy
+
+    @classmethod
     def sanitize_datasource_config(cls, config: dict) -> dict:
         """
-        Given a datasource config dict, replace sensitive fields inplace and return
-        the sanitized config.
+        Given a datasource config dict, replace sensitive fields and return
+        a sanitized config.
         """
 
         # does the Datasource have a credentials field?

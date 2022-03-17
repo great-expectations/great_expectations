@@ -489,8 +489,7 @@ class BaseDataContext(ConfigPeer):
                 if self._ge_cloud_mode:
                     # when running in cloud mode, we want to know if a datasource has been improperly configured at
                     # init time.
-                    print(f"cant initialize datasource because of error: {e}")
-                    pass
+                    raise
                 else:
                     pass
 
