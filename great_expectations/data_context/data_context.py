@@ -2091,29 +2091,13 @@ class BaseDataContext(ConfigPeer):
         """
         datasources = []
         for (
-            key,
+            name,
             value,
         ) in self.project_config_with_variables_substituted.datasources.items():
-            value["name"] = key
-
-            if "credentials" in value:
-                if "password" in value["credentials"]:
-                    value["credentials"][
-                        "password"
-                    ] = PasswordMasker.MASKED_PASSWORD_STRING
-                if "url" in value["credentials"]:
-                    value["credentials"]["url"] = PasswordMasker.mask_db_url(
-                        value["credentials"]["url"]
-                    )
-            elif "execution_engine" in value:
-                if "connection_string" in value["execution_engine"]:
-                    value["execution_engine"][
-                        "connection_string"
-                    ] = PasswordMasker.mask_db_url(
-                        value["execution_engine"]["connection_string"]
-                    )
-
-            datasources.append(value)
+            datasource_config = copy.deepcopy(value)
+            datasource_config["name"] = name
+            masked_config = PasswordMasker.sanitize_datasource_config(datasource_config)
+            datasources.append(masked_config)
         return datasources
 
     def list_stores(self):
@@ -2126,7 +2110,8 @@ class BaseDataContext(ConfigPeer):
         ) in self.project_config_with_variables_substituted.stores.items():
             store_config = copy.deepcopy(value)
             store_config["name"] = name
-            stores.append(store_config)
+            masked_config = PasswordMasker.sanitize_store_config(store_config)
+            stores.append(masked_config)
         return stores
 
     def list_active_stores(self):
