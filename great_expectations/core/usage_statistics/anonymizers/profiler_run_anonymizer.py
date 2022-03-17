@@ -2,64 +2,10 @@ import logging
 from typing import Dict, List, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
-    BatchRequestAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
-    ExpectationSuiteAnonymizer,
-)
 from great_expectations.core.usage_statistics.util import (
     aggregate_all_core_expectation_types,
 )
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (
-    CategoricalColumnDomainBuilder,
-)
-from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
-    ColumnDomainBuilder,
-)
-from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
-    DomainBuilder,
-)
-from great_expectations.rule_based_profiler.domain_builder.map_metric_column_domain_builder import (
-    MapMetricColumnDomainBuilder,
-)
-from great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder import (
-    SimpleColumnSuffixDomainBuilder,
-)
-from great_expectations.rule_based_profiler.domain_builder.simple_semantic_type_domain_builder import (
-    SimpleSemanticTypeColumnDomainBuilder,
-)
-from great_expectations.rule_based_profiler.domain_builder.table_domain_builder import (
-    TableDomainBuilder,
-)
-from great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder import (
-    DefaultExpectationConfigurationBuilder,
-)
-from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
-    ExpectationConfigurationBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.mean_unexpected_map_metric_multi_batch_parameter_builder import (
-    MeanUnexpectedMapMetricMultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder import (
-    MetricMultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
-    NumericMetricRangeMultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
-    ParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
-    RegexPatternStringParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
-    SimpleDateFormatStringParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (
-    ValueSetMultiBatchParameterBuilder,
-)
 from great_expectations.util import deep_filter_properties_iterable
 
 logger = logging.getLogger(__name__)
@@ -69,35 +15,9 @@ class ProfilerRunAnonymizer(Anonymizer):
     def __init__(self, salt: Optional[str] = None) -> None:
         super().__init__(salt=salt)
 
-        # ordered bottom up in terms of inheritance order
-        self._ge_domain_builders = [
-            MapMetricColumnDomainBuilder,
-            CategoricalColumnDomainBuilder,
-            SimpleColumnSuffixDomainBuilder,
-            SimpleSemanticTypeColumnDomainBuilder,
-            ColumnDomainBuilder,
-            TableDomainBuilder,
-            DomainBuilder,
-        ]
-        self._ge_parameter_builders = [
-            MeanUnexpectedMapMetricMultiBatchParameterBuilder,
-            ValueSetMultiBatchParameterBuilder,
-            NumericMetricRangeMultiBatchParameterBuilder,
-            MetricMultiBatchParameterBuilder,
-            RegexPatternStringParameterBuilder,
-            SimpleDateFormatStringParameterBuilder,
-            ParameterBuilder,
-        ]
-        self._ge_expectation_configuration_builders = [
-            DefaultExpectationConfigurationBuilder,
-            ExpectationConfigurationBuilder,
-        ]
-
         self._ge_expectation_types = aggregate_all_core_expectation_types()
 
         self._salt = salt
-        self._batch_request_anonymizer = BatchRequestAnonymizer(self._salt)
-        self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(self._salt)
 
     def anonymize_profiler_run(self, profiler_config: RuleBasedProfilerConfig) -> dict:
         """
@@ -169,10 +89,9 @@ class ProfilerRunAnonymizer(Anonymizer):
         return anonymized_rule
 
     def _anonymize_domain_builder(self, domain_builder: dict) -> dict:
-        anonymized_domain_builder: dict = self.anonymize_object_info(
+        anonymized_domain_builder: dict = self._anonymize_object_info(
             object_config=domain_builder,
             anonymized_info_dict={},
-            ge_classes=self._ge_domain_builders,
             runtime_environment={
                 "module_name": "great_expectations.rule_based_profiler.domain_builder"
             },
@@ -180,9 +99,9 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         batch_request: Optional[dict] = domain_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[
-                dict
-            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
+            anonymized_batch_request: Optional[dict] = self.anonymize_batch_request(
+                **batch_request
+            )
             anonymized_domain_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
@@ -204,10 +123,9 @@ class ProfilerRunAnonymizer(Anonymizer):
         return anonymized_parameter_builders
 
     def _anonymize_parameter_builder(self, parameter_builder: dict) -> dict:
-        anonymized_parameter_builder: dict = self.anonymize_object_info(
+        anonymized_parameter_builder: dict = self._anonymize_object_info(
             object_config=parameter_builder,
             anonymized_info_dict={},
-            ge_classes=self._ge_parameter_builders,
             runtime_environment={
                 "module_name": "great_expectations.rule_based_profiler.parameter_builder"
             },
@@ -219,9 +137,9 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         batch_request: Optional[dict] = parameter_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[
-                dict
-            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
+            anonymized_batch_request: Optional[dict] = self.anonymize_batch_request(
+                **batch_request
+            )
             anonymized_parameter_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
@@ -249,10 +167,9 @@ class ProfilerRunAnonymizer(Anonymizer):
     def _anonymize_expectation_configuration_builder(
         self, expectation_configuration_builder: dict
     ) -> dict:
-        anonymized_expectation_configuration_builder: dict = self.anonymize_object_info(
+        anonymized_expectation_configuration_builder: dict = self._anonymize_object_info(
             object_config=expectation_configuration_builder,
             anonymized_info_dict={},
-            ge_classes=self._ge_expectation_configuration_builders,
             runtime_environment={
                 "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder"
             },
@@ -261,7 +178,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         expectation_type: Optional[str] = expectation_configuration_builder.get(
             "expectation_type"
         )
-        self._expectation_suite_anonymizer.anonymize_expectation(
+        self.anonymize_expectation(
             expectation_type, anonymized_expectation_configuration_builder
         )
 

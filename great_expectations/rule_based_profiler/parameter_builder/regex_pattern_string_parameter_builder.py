@@ -1,11 +1,12 @@
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder import (
     AttributedResolvedMetrics,
     MetricComputationResult,
     MetricValues,
@@ -125,7 +126,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         """
         metric_computation_result: MetricComputationResult
 
-        metric_computation_result: MetricComputationResult = self.get_metrics(
+        metric_computation_result = self.get_metrics(
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=self.metric_value_kwargs,
@@ -134,9 +135,22 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
+        # This should never happen.
+        if not (
+            isinstance(metric_computation_result.metric_values, list)
+            and len(metric_computation_result.metric_values) == 1
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.metric_values} found).'
+            )
+
+        attributed_resolved_metrics: AttributedResolvedMetrics
+
+        attributed_resolved_metrics = metric_computation_result.metric_values[0]
+
         metric_values: MetricValues
 
-        metric_values = metric_computation_result.metric_values
+        metric_values = attributed_resolved_metrics.metric_values
 
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
@@ -177,7 +191,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             match_regex_metric_value_kwargs_list.append(match_regex_metric_value_kwargs)
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
-        metric_computation_result: MetricComputationResult = self.get_metrics(
+        metric_computation_result = self.get_metrics(
             metric_name="column_values.match_regex.unexpected_count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=match_regex_metric_value_kwargs_list,
@@ -188,7 +202,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         regex_string_success_ratios: dict = {}
 
-        attributed_resolved_metrics: AttributedResolvedMetrics
         for attributed_resolved_metrics in metric_computation_result.metric_values:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = attributed_resolved_metrics.metric_values[:, 0]
@@ -233,29 +246,40 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
     @staticmethod
     def _get_regex_matched_greater_than_threshold(
-        regex_string_success_ratio_dict: dict,
+        regex_string_success_ratio_dict: Dict[str, float],
         threshold: float,
     ) -> List[str]:
         """
         Helper method to calculate which regex_strings match greater than threshold
         """
-        regex_string_success_list: List[str] = []
-        for regex_string, ratio in regex_string_success_ratio_dict.items():
-            if ratio >= threshold:
-                regex_string_success_list.append(regex_string)
+        regex_string: str
+        ratio: float
+        regex_string_success_list: List[str] = [
+            regex_string
+            for regex_string, ratio in regex_string_success_ratio_dict.items()
+            if ratio >= threshold
+        ]
+
         return regex_string_success_list
 
     @staticmethod
     def _get_sorted_regex_and_ratios(
-        regex_string_success_ratio_dict: dict,
+        regex_string_success_ratio_dict: Dict[str, float],
     ) -> Tuple[List[float], List[str]]:
         """
-        Helper method to sort all regexes that were evaluated by their success ratio. Returns Tuple(ratio, sorted_strings)
+        Helper method to sort all regexes that were evaluated by their success ratio.
+
+        Returns Tuple(ratio, sorted_strings)
         """
-        regex_string = regex_string_success_ratio_dict.keys()
-        ratio = list(regex_string_success_ratio_dict.values())
-        sorted_regex_strings = [
-            i for _, i in sorted(zip(ratio, regex_string), reverse=True)
+        regex_strings: List[str] = list(regex_string_success_ratio_dict.keys())
+        ratios: List[float] = list(regex_string_success_ratio_dict.values())
+
+        regex_string: str
+        ratio: float
+        sorted_regex_strings: List[str] = [
+            regex_string
+            for ratio, regex_string in sorted(zip(ratios, regex_strings), reverse=True)
         ]
-        ratio.sort(reverse=True)
-        return ratio, sorted_regex_strings
+        ratios.sort(reverse=True)
+
+        return ratios, sorted_regex_strings

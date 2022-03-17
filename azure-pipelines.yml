@@ -89,7 +89,7 @@ stages:
       - job: compatibility_matrix
         condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         variables:
-          GE_pytest_opts: '--no-sqlalchemy --no-spark'
+          GE_pytest_opts: '--no-sqlalchemy'
         strategy:
           matrix:
             Python36-Pandas023:
@@ -97,20 +97,20 @@ stages:
               numpy.version: '1.14.1'
               pandas.version: '0.23.4'
               scipy.version: '0.19.0'
-              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
             Python37-Pandas025:
               python.version: '3.7'
               numpy.version: '1.14.1'
               pandas.version: '0.25.3'
               # numpy 1.20 and pandas 0.25.3 do not coexist happily
               scipy.version: '0.19.0'
-              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-test.txt --constraint constraints-dev.txt'
             Python38-PandasLatest:
               python.version: '3.8'
               numpy.version: 'latest'
               pandas.version: 'latest'
               scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
@@ -168,7 +168,7 @@ stages:
           postgres: postgres
 
         variables:
-          GE_pytest_opts: ''
+          GE_pytest_opts: '--postgresql --spark'
 
         strategy:
           matrix:
@@ -256,14 +256,14 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt
+              pip install --requirement requirements-dev-test.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
   - stage: db_integration
@@ -305,7 +305,7 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
@@ -313,7 +313,7 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
       - job: mssql
@@ -338,14 +338,14 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
   - stage: cli_integration
@@ -378,14 +378,14 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-azurepipelines
-              pytest --aws-integration -v tests/cli
+              pip install pytest
+              pytest --postgresql --spark --aws-integration -v tests/cli
             displayName: 'pytest'
 
   - stage: deploy_gallery

@@ -95,8 +95,6 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "rendered_data_docs": "rendered_data_doc",
 }
 
-MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES: int = 2
-
 
 def pluralize(singular_ge_noun):
     """
@@ -1399,46 +1397,6 @@ def import_make_url():
     else:
         from sqlalchemy.engine import make_url
     return make_url
-
-
-def probabilistic_test(
-    func: Callable = None,
-    max_num_retries: int = MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES,
-) -> Callable:
-    @wraps(func)
-    def run_pytest_method(*args, **kwargs) -> None:
-        assertion_error: Optional[AssertionError] = None
-        error_message: Optional[str] = None
-
-        all_assertions_passed: bool = False
-
-        idx: int = 0
-        while idx < max_num_retries:
-            try:
-                func(*args, **kwargs)
-                all_assertions_passed = True
-            except AssertionError as e:
-                error_message = re.sub(r"\W+", " ", str(e)).strip()
-                logger.warning(
-                    f"""Attempt {idx + 1} to execute "{func}" failed with error "{error_message}".  Retrying."""
-                )
-                all_assertions_passed = False
-                assertion_error = e
-
-            if all_assertions_passed:
-                break
-
-            idx += 1
-
-        if not all_assertions_passed:
-            logger.error(
-                f"""Aborting trying to execute "{func}" (exceeded maximum allowed \
-{MAX_PROBABILISTIC_TEST_ASSERTION_RETRIES} attempts).  Error "{error_message}" is being raised.
-"""
-            )
-            raise assertion_error
-
-    return run_pytest_method
 
 
 def get_pyathena_potential_type(type_module, type_):
