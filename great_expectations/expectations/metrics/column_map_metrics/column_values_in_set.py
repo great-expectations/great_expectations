@@ -32,9 +32,10 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
             warnings.warn(
-                f"""The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 and will be removed in \
-            v0.16.  Please update code accordingly. Moreover, in "{cls.__name__}._pandas()", it is not used.
-            """,
+                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
+v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
+please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
+""",
                 DeprecationWarning,
             )
 
@@ -58,9 +59,10 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
             warnings.warn(
-                f"""The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 and will be removed in \
-            v0.16.  Please update code accordingly. Moreover, in "{cls.__name__}._sqlalchemy()", it is not used.
-            """,
+                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
+v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
+please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
+""",
                 DeprecationWarning,
             )
 
@@ -87,9 +89,10 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
             warnings.warn(
-                f"""The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 and will be removed in \
-            v0.16.  Please update code accordingly. Moreover, in "{cls.__name__}._spark()", it is not used.
-            """,
+                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
+v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
+please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
+""",
                 DeprecationWarning,
             )
 
