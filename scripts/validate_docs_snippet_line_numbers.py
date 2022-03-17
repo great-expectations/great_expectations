@@ -202,5 +202,5 @@ if __name__ == "__main__":
     # and effort. In the meanwhile, we want to set an upper bound on warnings to ensure we're not introducing
     # further regressions. As snippets are validated, developers should update this number.
     assert (
-        len(broken_refs) <= 542
+        len(broken_refs) <= 485
     ), "A broken snippet reference was introduced; please resolve the matter before merging."
