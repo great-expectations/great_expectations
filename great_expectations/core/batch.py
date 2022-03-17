@@ -905,10 +905,9 @@ def standardize_batch_request_display_ordering(
         {key: value for key, value in optional_keys.items() if value is not None}
     )
 
-    return OrderedDict(
-        {
-            **required_display_ordered_keys,
-            **optional_display_ordered_keys,
-            **batch_request,
-        }
-    )
+    # Python 3.6+ dictionaries are insertion ordered, therefore order will be preserved
+    return {
+        **required_display_ordered_keys,
+        **optional_display_ordered_keys,
+        **batch_request,
+    }

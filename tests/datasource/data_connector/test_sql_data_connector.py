@@ -1344,6 +1344,13 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
 
     validator.expect_column_values_to_not_be_null(column="date")
 
+    assert (
+        validator.get_expectation_suite(discard_failed_expectations=False)["meta"][
+            "citations"
+        ]["batch_request"]["data_asset_name"]
+        == data_asset_name
+    )
+
     validator.save_expectation_suite(discard_failed_expectations=False)
 
     assert (
