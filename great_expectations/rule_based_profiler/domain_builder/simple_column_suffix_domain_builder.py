@@ -7,7 +7,11 @@ from great_expectations.rule_based_profiler.helpers.util import (
     build_simple_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
+    SemanticDomainTypes,
+)
 
 
 class SimpleColumnSuffixDomainBuilder(ColumnDomainBuilder):
@@ -20,24 +24,42 @@ class SimpleColumnSuffixDomainBuilder(ColumnDomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        include_semantic_types: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        ] = None,
+        exclude_semantic_types: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        ] = None,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+        semantic_type_filter_module_name: Optional[str] = None,
+        semantic_type_filter_class_name: Optional[str] = None,
     ):
         """
         Args:
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
             data_context: DataContext
+            include_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
+            to be included
+            exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
+            to be excluded
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
+            semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces
+            semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces
         """
         super().__init__(
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
+            include_semantic_types=include_semantic_types,
+            exclude_semantic_types=exclude_semantic_types,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
+            semantic_type_filter_module_name=semantic_type_filter_module_name,
+            semantic_type_filter_class_name=semantic_type_filter_class_name,
         )
 
         if column_name_suffixes is None:
@@ -63,6 +85,8 @@ class SimpleColumnSuffixDomainBuilder(ColumnDomainBuilder):
         Find the column suffix for each column and return all domains matching the specified suffix.
         """
         table_column_names: List[str] = self.get_effective_column_names(
+            batch_ids=None,
+            validator=None,
             variables=variables,
         )
 
