@@ -1873,6 +1873,7 @@ class BaseDataContext(ConfigPeer):
                 batch_request.datasource_name
             ].config,
         )
+        self._save_project_config()
 
         return validator
 
