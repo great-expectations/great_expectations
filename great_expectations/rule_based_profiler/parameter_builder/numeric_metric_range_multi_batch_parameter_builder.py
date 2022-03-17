@@ -277,7 +277,7 @@ detected.
         metric_values: MetricValues
         if isinstance(parameter_node.value, list):
             num_parameter_node_value_elements: int = len(parameter_node.value)
-            if num_parameter_node_value_elements != 1:
+            if not (num_parameter_node_value_elements == 1):
                 raise ge_exceptions.ProfilerExecutionError(
                     message=f'Length of "AttributedResolvedMetrics" list for {self.__class__.__name__} must be exactly 1 ({num_parameter_node_value_elements} elements found).'
                 )
