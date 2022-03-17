@@ -1,6 +1,6 @@
+import ipaddress
 import json
 from typing import Optional
-import ipaddress
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
