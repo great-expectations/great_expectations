@@ -128,7 +128,7 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"]
     )
 
-    assert mock_emit.call_count == 45
+    assert mock_emit.call_count == 43
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
@@ -457,7 +457,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         ]
     )
 
-    assert mock_emit.call_count == 103
+    assert mock_emit.call_count == 99
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
@@ -503,7 +503,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                     {
                         "anonymized_name": "9b95e917ab153669bcd32ec522604556",
                         "anonymized_domain_builder": {
-                            "parent_class": "SimpleSemanticTypeColumnDomainBuilder",
+                            "parent_class": "ColumnDomainBuilder",
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
