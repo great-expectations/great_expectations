@@ -2,11 +2,12 @@ import logging
 import os
 import warnings
 
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
+    BatchKwargsGenerator,
+)
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, ClassInstantiationError
-
-from ...data_context.util import instantiate_class_from_config
-from .batch_kwargs_generator import BatchKwargsGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +117,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     def _get_iterator(self, data_asset_name, query_parameters=None):
         raw_query = self._get_raw_query(data_asset_name=data_asset_name)
         if raw_query is None:
-            logger.warning("No query defined for data asset: %s" % data_asset_name)
+            logger.warning(f"No query defined for data asset: {data_asset_name}")
             # There is no valid query path or temp query storage defined with the data_asset_name
             return None
 

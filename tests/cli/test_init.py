@@ -84,6 +84,7 @@ def test_cli_init_on_new_project(
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/

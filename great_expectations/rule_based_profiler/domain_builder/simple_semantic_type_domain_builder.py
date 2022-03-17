@@ -1,47 +1,71 @@
 from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.profile.base import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.domain_builder import (
+from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.types import (
     Domain,
-    DomainBuilder,
     InferredSemanticDomainType,
+    ParameterContainer,
     SemanticDomainTypes,
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
+class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
     """
     This DomainBuilder utilizes a "best-effort" semantic interpretation of ("storage") columns of a table.
     """
 
     def __init__(
         self,
-        data_context: DataContext,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
+        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
     ):
         """
         Args:
-            data_context: DataContext
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+            data_context: DataContext
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
+            semantic_types: single or multiple type specifications using SemanticDomainTypes (or string equivalents)
         """
-
         super().__init__(
-            data_context=data_context,
+            batch_list=batch_list,
             batch_request=batch_request,
+            data_context=data_context,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
         )
 
         if semantic_types is None:
             semantic_types = []
+
         self._semantic_types = semantic_types
+
+    @property
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.COLUMN
+
+    @property
+    def semantic_types(
+        self,
+    ) -> Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ]:
+        return self._semantic_types
 
     def _get_domains(
         self,
@@ -50,35 +74,37 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
         """
+        table_column_names: List[str] = self.get_effective_column_names(
+            variables=variables,
+        )
+
+        # Obtain semantic_types from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        semantic_types: Union[
+            str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]
+        ] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.semantic_types,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
+
         semantic_types: List[
             SemanticDomainTypes
-        ] = _parse_semantic_domain_type_argument(semantic_types=self._semantic_types)
+        ] = _parse_semantic_domain_type_argument(semantic_types=semantic_types)
 
-        batch_id: str = self.get_batch_id(variables=variables)
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)
         column_types_dict_list: List[Dict[str, Any]] = self.get_validator(
             variables=variables
         ).get_metric(
             metric=MetricConfiguration(
                 metric_name="table.column_types",
                 metric_domain_kwargs={
-                    "batch_id": batch_id,
+                    "batch_id": batch_ids[-1],  # active_batch_id
                 },
                 metric_value_kwargs={
                     "include_nested": True,
                 },
-                metric_dependencies=None,
-            )
-        )
-
-        table_column_names: List[str] = self.get_validator(
-            variables=variables
-        ).get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs={
-                    "batch_id": batch_id,
-                },
-                metric_value_kwargs=None,
                 metric_dependencies=None,
             )
         )
@@ -108,7 +134,7 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
 
         domains: List[Domain] = [
             Domain(
-                domain_type=MetricDomainTypes.COLUMN,
+                domain_type=self.domain_type,
                 domain_kwargs={
                     "column": column_name,
                 },

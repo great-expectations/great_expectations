@@ -31,7 +31,7 @@ Here we are creating an example configuration.  The configuration contains an **
 Also, if you would like to learn more about the **DataConnectors** used in this configuration, including other methods to organize assets, handle multi-file assets, name assets based on parts of a filename, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_inferredassetdataconnector.html) and [RuntimeDataConnectors](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches/how_to_configure_a_runtime_data_connector.html).
 """
 
-    DOCS_INTRO = f"""## Customize Your Datasource Configuration
+    DOCS_INTRO = """## Customize Your Datasource Configuration
 
 **If you are new to Great Expectations Datasources,** you should check out our [how-to documentation](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources.html)
 

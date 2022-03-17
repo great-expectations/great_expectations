@@ -27,8 +27,12 @@ from great_expectations.exceptions import (
     InvalidBatchSpecError,
     InvalidConfigError,
 )
+from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.execution_engine import (
+    MetricDomainTypes,
+    SplitDomainKwargs,
+)
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -93,41 +97,48 @@ try:
 except (ImportError, KeyError, AttributeError):
     snowflake = None
 
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import pybigquery.sqlalchemy_bigquery
+    import sqlalchemy_bigquery as sqla_bigquery
 
-    ###
-    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-    # to define an attribute "dialect". A PR has been submitted to fix this upstream
-    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-    # fix isn't present, add this "dialect" attribute here:
-    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
-        pybigquery.sqlalchemy_bigquery.dialect = (
-            pybigquery.sqlalchemy_bigquery.BigQueryDialect
-        )
-
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sa.dialects.registry.register(
-        "bigquery", "pybigquery.sqlalchemy_bigquery", "dialect"
-    )
-    try:
-        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
-        bigquery_types_tuple = None
-    except AttributeError:
-        # In older versions of the pybigquery driver, types were not exported, so we use a hack
-        logger.warning(
-            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-        )
-        from collections import namedtuple
-
-        BigQueryTypes = namedtuple(
-            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
-        )
-        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except (ImportError, AttributeError):
+    sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     bigquery_types_tuple = None
-    pybigquery = None
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+
+        warnings.warn(
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning,
+        )
+        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
+        ###
+        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+        # to define an attribute "dialect". A PR has been submitted to fix this upstream
+        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+        # fix isn't present, add this "dialect" attribute here:
+        if not hasattr(sqla_bigquery, "dialect"):
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
+
+        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        try:
+            getattr(sqla_bigquery, "INTEGER")
+            bigquery_types_tuple = None
+        except AttributeError:
+            # In older versions of the pybigquery driver, types were not exported, so we use a hack
+            logger.warning(
+                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+            )
+            from collections import namedtuple
+
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+    except (ImportError, AttributeError):
+        sqla_bigquery = None
+        bigquery_types_tuple = None
+        pybigquery = None
 
 try:
     import teradatasqlalchemy.dialect
@@ -156,7 +167,7 @@ def _get_dialect_type_module(dialect):
         if (
             isinstance(
                 dialect,
-                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+                sqla_bigquery.BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):
@@ -257,6 +268,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
                 )
 
+        # these are two backends where temp_table_creation is not supported we set the default value to False.
+        if self.engine.dialect.name.lower() in [
+            "trino",
+            "awsathena",  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
+        ]:
+            self._create_temp_table = False
+
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
             "postgresql",
@@ -267,7 +285,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect_module = import_library_module(
-                module_name="sqlalchemy.dialects." + self.engine.dialect.name
+                module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
         elif self.engine.dialect.name.lower() == "snowflake":
@@ -285,7 +303,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         elif self.engine.dialect.name.lower() == "bigquery":
             self.dialect_module = import_library_module(
-                module_name="pybigquery.sqlalchemy_bigquery"
+                module_name=_BIGQUERY_MODULE_NAME
             )
         elif self.engine.dialect.name.lower() == "teradatasql":
             # WARNING: Teradata Support is experimental, functionality is not fully under test
@@ -318,9 +336,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             handler.send_usage_message(
                 event="execution_engine.sqlalchemy.connect",
                 event_payload={
-                    "anonymized_name": handler._execution_engine_anonymizer.anonymize(
-                        self.name
-                    ),
+                    "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
                 },
                 success=True,
@@ -645,115 +661,136 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             SqlAlchemy column
         """
-        selectable = self.get_domain_records(
-            domain_kwargs=domain_kwargs,
-        )
-        # Extracting value from enum if it is given for future computation
-        domain_type = MetricDomainTypes(domain_type)
+        selectable = self.get_domain_records(domain_kwargs)
 
-        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
-        if (
-            domain_type != MetricDomainTypes.TABLE
-            and accessor_keys is not None
-            and len(list(accessor_keys)) > 0
-        ):
-            logger.warning(
-                'Accessor keys ignored since Metric Domain Type is not "table"'
+        split_domain_kwargs = self._split_domain_kwargs(
+            domain_kwargs, domain_type, accessor_keys
+        )
+
+        return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
+
+    def _split_column_metric_domain_kwargs(
+        self,
+        domain_kwargs: Dict,
+        domain_type: MetricDomainTypes,
+    ) -> SplitDomainKwargs:
+        """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
+
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using.
+
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        assert (
+            domain_type == MetricDomainTypes.COLUMN
+        ), "This method only supports MetricDomainTypes.COLUMN"
+
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
+
+        if "column" not in compute_domain_kwargs:
+            raise ge_exceptions.GreatExpectationsError(
+                "Column not provided in compute_domain_kwargs"
             )
 
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = {}
-        if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(list(accessor_keys)) > 0:
-                for key in accessor_keys:
-                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
-            if len(domain_kwargs.keys()) > 0:
-                # Warn user if kwarg not "normal".
-                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
-                    {
-                        "batch_id",
-                        "table",
-                        "row_condition",
-                        "condition_parser",
-                    }
-                )
-                if len(unexpected_keys) > 0:
-                    unexpected_keys_str: str = ", ".join(
-                        map(lambda element: f'"{element}"', unexpected_keys)
-                    )
-                    logger.warning(
-                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
-                    )
-            return selectable, compute_domain_kwargs, accessor_domain_kwargs
+        # Checking if case-sensitive and using appropriate name
+        if self.active_batch_data.use_quoted_name:
+            accessor_domain_kwargs["column"] = quoted_name(
+                compute_domain_kwargs.pop("column"), quote=True
+            )
+        else:
+            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
 
-        elif domain_type == MetricDomainTypes.COLUMN:
-            if "column" not in compute_domain_kwargs:
-                raise GreatExpectationsError(
-                    "Column not provided in compute_domain_kwargs"
-                )
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
-            # Checking if case-sensitive and using appropriate name
-            if self.active_batch_data.use_quoted_name:
-                accessor_domain_kwargs["column"] = quoted_name(
-                    compute_domain_kwargs.pop("column"), quote=True
-                )
-            else:
-                accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+    def _split_column_pair_metric_domain_kwargs(
+        self,
+        domain_kwargs: Dict,
+        domain_type: MetricDomainTypes,
+    ) -> SplitDomainKwargs:
+        """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
 
-            return selectable, compute_domain_kwargs, accessor_domain_kwargs
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using.
 
-        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            if not (
-                "column_A" in compute_domain_kwargs
-                and "column_B" in compute_domain_kwargs
-            ):
-                raise GreatExpectationsError(
-                    "column_A or column_B not found within compute_domain_kwargs"
-                )
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        assert (
+            domain_type == MetricDomainTypes.COLUMN_PAIR
+        ), "This method only supports MetricDomainTypes.COLUMN_PAIR"
 
-            # Checking if case-sensitive and using appropriate name
-            if self.active_batch_data.use_quoted_name:
-                accessor_domain_kwargs["column_A"] = quoted_name(
-                    compute_domain_kwargs.pop("column_A"), quote=True
-                )
-                accessor_domain_kwargs["column_B"] = quoted_name(
-                    compute_domain_kwargs.pop("column_B"), quote=True
-                )
-            else:
-                accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop(
-                    "column_A"
-                )
-                accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop(
-                    "column_B"
-                )
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
 
-            return selectable, compute_domain_kwargs, accessor_domain_kwargs
+        if not (
+            "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs
+        ):
+            raise ge_exceptions.GreatExpectationsError(
+                "column_A or column_B not found within compute_domain_kwargs"
+            )
 
-        elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "column_list" not in domain_kwargs:
-                raise GreatExpectationsError(
-                    "column_list not found within domain_kwargs"
-                )
+        # Checking if case-sensitive and using appropriate name
+        if self.active_batch_data.use_quoted_name:
+            accessor_domain_kwargs["column_A"] = quoted_name(
+                compute_domain_kwargs.pop("column_A"), quote=True
+            )
+            accessor_domain_kwargs["column_B"] = quoted_name(
+                compute_domain_kwargs.pop("column_B"), quote=True
+            )
+        else:
+            accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+            accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
 
-            column_list = compute_domain_kwargs.pop("column_list")
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
-            if len(column_list) < 2:
-                raise GreatExpectationsError(
-                    "column_list must contain at least 2 columns"
-                )
+    def _split_multi_column_metric_domain_kwargs(
+        self,
+        domain_kwargs: Dict,
+        domain_type: MetricDomainTypes,
+    ) -> SplitDomainKwargs:
+        """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
 
-            # Checking if case-sensitive and using appropriate name
-            if self.active_batch_data.use_quoted_name:
-                accessor_domain_kwargs["column_list"] = [
-                    quoted_name(column_name, quote=True) for column_name in column_list
-                ]
-            else:
-                accessor_domain_kwargs["column_list"] = column_list
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using.
 
-            return selectable, compute_domain_kwargs, accessor_domain_kwargs
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs split from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        assert (
+            domain_type == MetricDomainTypes.MULTICOLUMN
+        ), "This method only supports MetricDomainTypes.MULTICOLUMN"
 
-        # Letting selectable fall through
-        return selectable, compute_domain_kwargs, accessor_domain_kwargs
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
+
+        if "column_list" not in domain_kwargs:
+            raise GreatExpectationsError("column_list not found within domain_kwargs")
+
+        column_list = compute_domain_kwargs.pop("column_list")
+
+        if len(column_list) < 2:
+            raise GreatExpectationsError("column_list must contain at least 2 columns")
+
+        # Checking if case-sensitive and using appropriate name
+        if self.active_batch_data.use_quoted_name:
+            accessor_domain_kwargs["column_list"] = [
+                quoted_name(column_name, quote=True) for column_name in column_list
+            ]
+        else:
+            accessor_domain_kwargs["column_list"] = column_list
+
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
     def resolve_metric_bundle(
         self,
@@ -1094,11 +1131,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
-        ) and (
-            self.engine.dialect.name.lower()
-            not in [
-                "trino",
-            ]
         )
 
         if isinstance(batch_spec, RuntimeQueryBatchSpec):

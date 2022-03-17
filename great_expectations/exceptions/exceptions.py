@@ -131,6 +131,10 @@ class ProfilerExecutionError(ProfilerError):
     pass
 
 
+class ProfilerNotFoundError(ProfilerError):
+    pass
+
+
 class InvalidConfigError(DataContextError):
     def __init__(self, message):
         self.message = message
@@ -216,8 +220,8 @@ No module named `{}` could be found in your plugins directory.
 """
         self.message = template.format(module_name, module_name)
 
-        colored_template = "<red>" + template + "</red>"
-        module_snippet = "</red><yellow>" + module_name + "</yellow><red>"
+        colored_template = f"<red>{template}</red>"
+        module_snippet = f"</red><yellow>{module_name}</yellow><red>"
         self.cli_colored_message = colored_template.format(
             module_snippet, module_snippet
         )
@@ -258,12 +262,12 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
         - Please verify that the class named `{}` exists."""
             self.message = template.format(module_name, class_name, class_name)
 
-        colored_template = "<red>" + template + "</red>"
-        module_snippet = "</red><yellow>" + module_name + "</yellow><red>"
-        class_snippet = "</red><yellow>" + class_name + "</yellow><red>"
+        colored_template = f"<red>{template}</red>"
+        module_snippet = f"</red><yellow>{module_name}</yellow><red>"
+        class_snippet = f"</red><yellow>{class_name}</yellow><red>"
         if class_name_changes.get(class_name):
             new_class_snippet = (
-                "</red><yellow>" + class_name_changes.get(class_name) + "</yellow><red>"
+                f"</red><yellow>{class_name_changes.get(class_name)}</yellow><red>"
             )
             self.cli_colored_message = colored_template.format(
                 module_snippet, class_snippet, class_snippet, new_class_snippet
@@ -299,7 +303,7 @@ class ExpectationSuiteNotFoundError(GreatExpectationsError):
     def __init__(self, data_asset_name):
         self.data_asset_name = data_asset_name
         self.message = (
-            "No expectation suite found for data_asset_name %s" % data_asset_name
+            f"No expectation suite found for data_asset_name {data_asset_name}"
         )
         super().__init__(self.message)
 

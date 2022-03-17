@@ -55,7 +55,7 @@ def isprime(n):
 
     # range starts with 3 and only needs to go up
     # the square root of n for all odd numbers
-    for x in range(3, int(n ** 0.5) + 1, 2):
+    for x in range(3, int(n**0.5) + 1, 2):
         if n % x == 0:
             return False
 
@@ -1005,11 +1005,6 @@ def test_stats_mixed_expectations():
     assert expected == actual
 
 
-def test_generate_library_json_from_registered_expectations():
-    library_json = ge.util.generate_library_json_from_registered_expectations()
-    assert len(library_json) > 50
-
-
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
@@ -1069,6 +1064,10 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="pyarrow"),
+        reason="pyarrow is not installed",
+    )
     def test_read_feather(self):
         pandas_version = re.match(r"(\d+)\.(\d+)\..+", pd.__version__)
         if pandas_version is None:
@@ -1084,6 +1083,11 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="pyarrow")
+        and not is_library_loadable(library_name="fastparquet"),
+        reason="pyarrow and fastparquet are not installed",
+    )
     def test_read_parquet(self):
         """
         This test is unusual, because on travis (but only on travis), we have observed problems importing pyarrow,
@@ -1115,6 +1119,15 @@ class TestIO(unittest.TestCase):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_pickle(
             script_path + "/test_sets/Titanic.pkl",
+        )
+        assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
+        assert isinstance(df, PandasDataset)
+
+    def test_read_sas(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_sas(
+            script_path + "/test_sets/Titanic.sas7bdat",
+            encoding="latin-1",
         )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)

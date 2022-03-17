@@ -1,10 +1,9 @@
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -82,14 +81,14 @@ def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F82
     if expectation_type in _registered_expectations:
         if _registered_expectations[expectation_type] == expectation:
             logger.info(
-                "Multiple declarations of expectation " + expectation_type + " found."
+                f"Multiple declarations of expectation {expectation_type} found."
             )
             return
         else:
             logger.warning(
-                "Overwriting declaration of expectation " + expectation_type + "."
+                f"Overwriting declaration of expectation {expectation_type}."
             )
-    logger.debug("Registering expectation: " + expectation_type)
+    logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
 
 

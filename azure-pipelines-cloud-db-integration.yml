@@ -13,7 +13,7 @@ stages:
           matrix:
             performance:
               test_script: 'tests/performance/test_bigquery_benchmarks.py'
-              extra_args: '--bigquery --performance-tests --no-spark --no-postgresql --benchmark-json=junit/benchmark.json -k test_taxi_trips_benchmark[1-True-V3] '
+              extra_args: '--bigquery --performance-tests --benchmark-json=junit/benchmark.json -k test_taxi_trips_benchmark[1-True-V3] '
           maxParallel: 1
 
         steps:
@@ -35,7 +35,7 @@ stages:
             name: gcp_authkey
             displayName: 'Download Google Service Account'
             inputs:
-              secureFile: 'superconductive-service-acct.json'
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
 
           - script: |
@@ -46,13 +46,14 @@ stages:
                 $(extra_args) \
                 --bigquery \
                 --junitxml=junit/test-results.xml \
-                --no-spark --no-postgresql --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
+                 --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
                 --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
             env:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GE_TEST_BIGQUERY_PROJECT: $(GE_TEST_BIGQUERY_PROJECT)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+              GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
           - task: PublishTestResults@2
             inputs:
               searchFolder: junit
@@ -98,7 +99,7 @@ stages:
             name: gcp_authkey
             displayName: 'Download Google Service Account'
             inputs:
-              secureFile: 'superconductive-service-acct.json'
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
 
           - script: |
@@ -109,12 +110,12 @@ stages:
                 $(extra_args) \
                 --bigquery \
                 --junitxml=junit/test-results.xml \
-                --no-spark --no-postgresql --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
+                --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
                 --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
             env:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GE_TEST_BIGQUERY_PROJECT: $(GE_TEST_BIGQUERY_PROJECT)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
           # The pip freeze output could be helpful to reproduce performance test results.
           - publish: pip-freeze.txt

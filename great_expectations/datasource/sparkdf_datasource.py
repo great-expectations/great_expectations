@@ -3,14 +3,13 @@ import logging
 import uuid
 import warnings
 
+from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.dataset import SparkDFDataset
+from great_expectations.datasource.datasource import LegacyDatasource
+from great_expectations.exceptions import BatchKwargsError
 from great_expectations.types import ClassConfig
-
-from ..core.batch import Batch, BatchMarkers
-from ..core.util import get_or_create_spark_application
-from ..dataset import SparkDFDataset
-from ..exceptions import BatchKwargsError
-from ..types.configurations import classConfigSchema
-from .datasource import LegacyDatasource
+from great_expectations.types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +67,7 @@ class SparkDFDatasource(LegacyDatasource):
         batch_kwargs_generators=None,
         spark_config=None,
         force_reuse_spark_context=False,
-        **kwargs
+        **kwargs,
     ):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
@@ -117,7 +116,7 @@ class SparkDFDatasource(LegacyDatasource):
         batch_kwargs_generators=None,
         spark_config=None,
         force_reuse_spark_context=False,
-        **kwargs
+        **kwargs,
     ):
         """Build a new SparkDFDatasource instance.
 
@@ -134,7 +133,7 @@ class SparkDFDatasource(LegacyDatasource):
             batch_kwargs_generators,
             spark_config,
             force_reuse_spark_context,
-            **kwargs
+            **kwargs,
         )
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
         batch_kwargs_generators = configuration_with_defaults.pop(
@@ -145,7 +144,7 @@ class SparkDFDatasource(LegacyDatasource):
             data_context=data_context,
             data_asset_type=data_asset_type,
             batch_kwargs_generators=batch_kwargs_generators,
-            **configuration_with_defaults
+            **configuration_with_defaults,
         )
 
         if spark_config is None:
@@ -255,7 +254,7 @@ class SparkDFDatasource(LegacyDatasource):
             return {"reader_method": "parquet"}
 
         raise BatchKwargsError(
-            "Unable to determine reader method from path: %s" % path, {"path": path}
+            f"Unable to determine reader method from path: {path}", {"path": path}
         )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):
@@ -288,6 +287,6 @@ class SparkDFDatasource(LegacyDatasource):
             return getattr(reader, reader_method)
         except AttributeError:
             raise BatchKwargsError(
-                "Unable to find reader_method %s in spark." % reader_method,
+                f"Unable to find reader_method {reader_method} in spark.",
                 {"reader_method": reader_method},
             )

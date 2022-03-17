@@ -5,19 +5,21 @@ import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import (
+    ColumnExpectation,
+    InvalidExpectationConfigurationError,
+)
+from great_expectations.expectations.metrics.util import parse_value_set
 from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
-from ..metrics.util import parse_value_set
 
 
 class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
@@ -51,7 +53,9 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         "value_set",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
 
@@ -117,19 +121,19 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
 
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-        template_str = "distinct values must contain this set: " + values_string + "."
+        template_str = f"distinct values must contain this set: {values_string}."
 
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -138,7 +142,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
@@ -181,26 +185,26 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
 
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-        template_str = "distinct values must contain this set: " + values_string + "."
+        template_str = f"distinct values must contain this set: {values_string}."
 
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -231,8 +235,8 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
 
         if parse_strings_as_datetimes:
             warnings.warn(
-                f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
-            future release.  Please update code accordingly. 
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+            future release.  Please update code accordingly.
             """,
                 DeprecationWarning,
             )

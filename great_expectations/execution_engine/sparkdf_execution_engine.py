@@ -18,19 +18,18 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import AzureUrl, get_or_create_spark_application
-from great_expectations.exceptions import exceptions as ge_exceptions
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.validator.metric_configuration import MetricConfiguration
-
-from ..exceptions import (
+from great_expectations.exceptions import (
     BatchSpecError,
     ExecutionEngineError,
     GreatExpectationsError,
     ValidationError,
 )
-from ..expectations.row_conditions import parse_condition_to_spark
-from .sparkdf_batch_data import SparkDFBatchData
+from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.expectations.row_conditions import parse_condition_to_spark
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +249,7 @@ Please check your config."""
                         "org.apache.hadoop.fs.azure.NativeAzureFileSystem",
                     )
                     self.spark.conf.set(
-                        "fs.azure.account.key." + storage_account_url, credential
+                        f"fs.azure.account.key.{storage_account_url}", credential
                     )
                 reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
@@ -333,7 +332,7 @@ Please check your config."""
             return "parquet"
 
         raise ExecutionEngineError(
-            "Unable to determine reader method from path: %s" % path
+            f"Unable to determine reader method from path: {path}"
         )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):
@@ -363,7 +362,7 @@ Please check your config."""
             return getattr(reader, reader_method_op)
         except AttributeError:
             raise ExecutionEngineError(
-                "Unable to find reader_method %s in spark." % reader_method,
+                f"Unable to find reader_method {reader_method} in spark.",
             )
 
     def get_domain_records(
@@ -505,102 +504,24 @@ Please check your config."""
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
-        data = self.get_domain_records(
-            domain_kwargs=domain_kwargs,
-        )
-        # Extracting value from enum if it is given for future computation
-        domain_type = MetricDomainTypes(domain_type)
+        data = self.get_domain_records(domain_kwargs)
 
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = {}
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
-        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
-        if (
-            domain_type != MetricDomainTypes.TABLE
-            and accessor_keys is not None
-            and len(list(accessor_keys)) > 0
-        ):
-            logger.warning(
-                'Accessor keys ignored since Metric Domain Type is not "table"'
-            )
+        split_domain_kwargs = self._split_domain_kwargs(
+            domain_kwargs, domain_type, accessor_keys
+        )
 
-        if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(list(accessor_keys)) > 0:
-                for key in accessor_keys:
-                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
-            if len(compute_domain_kwargs.keys()) > 0:
-                # Warn user if kwarg not "normal".
-                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
-                    {
-                        "batch_id",
-                        "table",
-                        "row_condition",
-                        "condition_parser",
-                    }
-                )
-                if len(unexpected_keys) > 0:
-                    unexpected_keys_str: str = ", ".join(
-                        map(lambda element: f'"{element}"', unexpected_keys)
-                    )
-                    logger.warning(
-                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
-                    )
-            return data, compute_domain_kwargs, accessor_domain_kwargs
-
-        elif domain_type == MetricDomainTypes.COLUMN:
-            if "column" not in compute_domain_kwargs:
-                raise GreatExpectationsError(
-                    "Column not provided in compute_domain_kwargs"
-                )
-
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
-
-        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            if not (
-                "column_A" in compute_domain_kwargs
-                and "column_B" in compute_domain_kwargs
-            ):
-                raise GreatExpectationsError(
-                    "column_A or column_B not found within compute_domain_kwargs"
-                )
-
-            accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
-            accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
-
-        elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "column_list" not in domain_kwargs:
-                raise ge_exceptions.GreatExpectationsError(
-                    "column_list not found within domain_kwargs"
-                )
-
-            column_list = compute_domain_kwargs.pop("column_list")
-
-            if len(column_list) < 2:
-                raise ge_exceptions.GreatExpectationsError(
-                    "column_list must contain at least 2 columns"
-                )
-
-            accessor_domain_kwargs["column_list"] = column_list
-
-        return data, compute_domain_kwargs, accessor_domain_kwargs
+        return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
-        if filter_nan is False:
-            return super().add_column_row_condition(
-                domain_kwargs=domain_kwargs,
-                column_name=column_name,
-                filter_null=filter_null,
-                filter_nan=filter_nan,
-            )
-
-        # We explicitly handle filter_nan for spark using a spark-native condition
+        # We explicitly handle filter_nan & filter_null for spark using a spark-native condition
         if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
             raise GreatExpectationsError(
                 "ExecutionEngine does not support updating existing row_conditions."
@@ -774,7 +695,7 @@ Please check your config."""
         """Split on the hashed value of the named column"""
         try:
             getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
@@ -842,7 +763,7 @@ Please check your config."""
     ):
         try:
             getattr(hashlib, str(hash_function_name))
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.

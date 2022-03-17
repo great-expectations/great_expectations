@@ -1,16 +1,22 @@
 import os
 from typing import List
 
+# <snippet>
 from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
 
+# </snippet>
+
 CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
+# <snippet>
 context = ge.get_context()
+# </snippet>
 
-datasource_yaml = fr"""
+# <snippet>
+datasource_yaml = rf"""
 name: my_azure_datasource
 class_name: Datasource
 execution_engine:
@@ -35,6 +41,7 @@ data_connectors:
             group_names:
                 - data_asset_name
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -49,16 +56,22 @@ datasource_yaml = datasource_yaml.replace(
 )
 datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", CREDENTIAL)
 
+# <snippet>
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
+# <snippet>
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 
 # Here is a BatchRequest naming a data_asset
+# <snippet>
 batch_request = BatchRequest(
     datasource_name="my_azure_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
 )
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
@@ -66,12 +79,14 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
+# <snippet>
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
+# </snippet>
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.

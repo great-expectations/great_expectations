@@ -1,16 +1,18 @@
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
 
 
 class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
@@ -94,7 +96,9 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         "regex",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -158,7 +162,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "regex": {"schema": {"type": "string"}, "value": params.get("regex")},
@@ -188,7 +192,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                 template_str += "."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -197,7 +201,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -240,14 +244,14 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                 template_str += "."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         params_with_json_schema = {

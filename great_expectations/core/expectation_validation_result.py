@@ -33,7 +33,7 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     if "metric_kwargs_id" in metric_kwargs:
         return metric_kwargs["metric_kwargs_id"]
     if "column" in metric_kwargs:
-        return "column=" + metric_kwargs.get("column")
+        return f"column={metric_kwargs.get('column')}"
     return None
 
 
@@ -155,7 +155,8 @@ class ExpectationValidationResult(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def validate_result_dict(self, result):
+    @staticmethod
+    def validate_result_dict(result):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
         if result.get("unexpected_percent") and (
@@ -233,7 +234,7 @@ class ExpectationValidationResult(SerializableDictDot):
                         "ExpectationValidationResult.".format(metric_name)
                     )
         raise ge_exceptions.UnavailableMetricError(
-            "Unrecognized metric name {}".format(metric_name)
+            f"Unrecognized metric name {metric_name}"
         )
 
 
@@ -342,7 +343,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                 return self.statistics.get(metric_name_parts[1])
             else:
                 raise ge_exceptions.UnavailableMetricError(
-                    "Unrecognized metric {}".format(metric_name)
+                    f"Unrecognized metric {metric_name}"
                 )
 
         # Expose expectation-defined metrics

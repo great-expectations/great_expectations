@@ -9,6 +9,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.async_executor import AsyncExecutor
 from great_expectations.core.batch import Batch
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
@@ -20,8 +21,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
-
-from ..core.run_identifier import RunIdentifier
 
 logger = logging.getLogger(__name__)
 
@@ -430,9 +429,7 @@ class ActionListValidationOperator(ValidationOperator):
         batch_actions_results = {}
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
-            logger.debug(
-                "Processing validation action with name {}".format(action["name"])
-            )
+            logger.debug(f"Processing validation action with name {action['name']}")
 
             if hasattr(batch, "active_batch_id"):
                 batch_identifier = batch.active_batch_id
@@ -464,9 +461,7 @@ class ActionListValidationOperator(ValidationOperator):
                 ]
 
             except Exception as e:
-                logger.exception(
-                    "Error running action with name {}".format(action["name"])
-                )
+                logger.exception(f"Error running action with name {action['name']}")
                 raise e
 
         return batch_actions_results
@@ -724,9 +719,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Failed Batches:* {}".format(
-                        failed_data_assets_msg_strings
-                    ),
+                    "text": f"*Failed Batches:* {failed_data_assets_msg_strings}",
                 },
             }
             query["blocks"].append(failed_data_assets_element)

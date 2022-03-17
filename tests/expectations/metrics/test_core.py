@@ -530,8 +530,12 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
 
     condition_metric = MetricConfiguration(
         metric_name="column_values.in_set.condition",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"value_set": [1, 2, 3]},
+        metric_domain_kwargs={
+            "column": "a",
+        },
+        metric_value_kwargs={
+            "value_set": [1, 2, 3],
+        },
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -544,9 +548,15 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
         metric_name="column_values.in_set.unexpected_count.aggregate_fn",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"unexpected_condition": condition_metric},
+        metric_domain_kwargs={
+            "column": "a",
+        },
+        metric_value_kwargs={
+            "value_set": [1, 2, 3],
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(aggregate_partial,), metrics=metrics
@@ -554,8 +564,12 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     metrics.update(results)
     desired_metric = MetricConfiguration(
         metric_name="column_values.in_set.unexpected_count",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"value_set": [1, 2, 3]},
+        metric_domain_kwargs={
+            "column": "a",
+        },
+        metric_value_kwargs={
+            "value_set": [1, 2, 3],
+        },
         metric_dependencies={
             "metric_partial_fn": aggregate_partial,
         },
@@ -643,6 +657,9 @@ def test_map_column_value_lengths_between_pd():
     assert ser_expected_lengths.equals(result_series)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:pandas.Int64Index is deprecated*:FutureWarning:tests.expectations.metrics"
+)
 def test_map_column_values_increasing_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
@@ -831,6 +848,9 @@ def test_map_column_values_increasing_spark(spark_session):
     ]
 
 
+@pytest.mark.filterwarnings(
+    "ignore:pandas.Int64Index is deprecated*:FutureWarning:tests.expectations.metrics"
+)
 def test_map_column_values_decreasing_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
@@ -1339,11 +1359,15 @@ def test_map_unique_column_exists_spark(spark_session):
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.unexpected_rows",
-        metric_domain_kwargs={"column": "a"},
+        metric_domain_kwargs={
+            "column": "a",
+        },
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
-        metric_dependencies={"unexpected_condition": condition_metric},
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics

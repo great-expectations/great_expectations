@@ -1,16 +1,16 @@
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
+    GeCloudIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import (
@@ -139,7 +139,7 @@ class ConfigurationStore(Store):
             else:
                 print(f"\t{len_keys} keys found:")
                 for key in report_object["keys"][:10]:
-                    print("\t\t" + str(key))
+                    print(f"		{str(key)}")
             if len_keys > 10:
                 print("\t\t...")
             print()
@@ -150,3 +150,19 @@ class ConfigurationStore(Store):
 
     def serialization_self_check(self, pretty_print: bool):
         raise NotImplementedError
+
+    @staticmethod
+    def determine_key(
+        name: Optional[str], ge_cloud_id: Optional[str]
+    ) -> Union[GeCloudIdentifier, ConfigurationIdentifier]:
+        assert bool(name) ^ bool(
+            ge_cloud_id
+        ), "Must provide either name or ge_cloud_id."
+
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id:
+            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        else:
+            key = ConfigurationIdentifier(configuration_key=name)
+
+        return key

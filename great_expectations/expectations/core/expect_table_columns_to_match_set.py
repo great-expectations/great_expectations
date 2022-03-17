@@ -4,10 +4,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.expectations.util import (
-    add_values_with_json_schema_from_list_in_params,
-    render_evaluation_parameter_string,
-)
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import substitute_none_for_missing
@@ -75,7 +72,9 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         "exact_match",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -140,7 +139,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
             template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
 
             for idx in range(len(params["column_list"])):
-                params["column_list_" + str(idx)] = params["column_list"][idx]
+                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
         params_with_json_schema = {
             "column_list": {
@@ -191,7 +190,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
             template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
 
             for idx in range(len(params["column_list"])):
-                params["column_list_" + str(idx)] = params["column_list"][idx]
+                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
         return [
             RenderedStringTemplateContent(

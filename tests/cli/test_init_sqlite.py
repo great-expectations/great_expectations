@@ -136,6 +136,7 @@ great_expectations/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/

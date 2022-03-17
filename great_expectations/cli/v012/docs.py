@@ -1,8 +1,6 @@
-import os
 import sys
 
 import click
-import requests
 
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_logging import logger
@@ -123,7 +121,7 @@ def clean_data_docs(directory, site_name=None, all=None):
             api_version="v2",
             success=True,
         )
-        cli_message("<green>{}</green>".format("Cleaned data docs"))
+        cli_message("<green>Cleaned data docs</green>")
 
     if failed and context is not None:
         send_usage_message(

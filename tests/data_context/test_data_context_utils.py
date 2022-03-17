@@ -8,6 +8,7 @@ import great_expectations.exceptions as gee
 from great_expectations.data_context.util import (
     PasswordMasker,
     parse_substitution_variable,
+    secretmanager,
     substitute_value_from_aws_secrets_manager,
     substitute_value_from_azure_keyvault,
     substitute_value_from_gcp_secret_manager,
@@ -55,15 +56,18 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     This test uses database url examples from
     https://docs.sqlalchemy.org/en/14/core/engines.html#database-urls
     """
-    # PostgreSQL
+    # PostgreSQL (if installed in test environment)
     # default
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-    assert (
-        PasswordMasker.mask_db_url(
-            f"postgresql://scott:tiger@{db_hostname}:65432/mydatabase"
+    try:
+        assert (
+            PasswordMasker.mask_db_url(
+                f"postgresql://scott:tiger@{db_hostname}:65432/mydatabase"
+            )
+            == f"postgresql://scott:***@{db_hostname}:65432/mydatabase"
         )
-        == f"postgresql://scott:***@{db_hostname}:65432/mydatabase"
-    )
+    except ModuleNotFoundError:
+        pass
     assert (
         PasswordMasker.mask_db_url(
             f"postgresql://scott:tiger@{db_hostname}:65432/mydatabase",
@@ -79,13 +83,16 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
         == f"postgresql://scott:***@{db_hostname}/mydatabase"
     )
 
-    # psycopg2
-    assert (
-        PasswordMasker.mask_db_url(
-            f"postgresql+psycopg2://scott:tiger@{db_hostname}:65432/mydatabase"
+    # psycopg2 (if installed in test environment)
+    try:
+        assert (
+            PasswordMasker.mask_db_url(
+                f"postgresql+psycopg2://scott:tiger@{db_hostname}:65432/mydatabase"
+            )
+            == f"postgresql+psycopg2://scott:***@{db_hostname}:65432/mydatabase"
         )
-        == f"postgresql+psycopg2://scott:***@{db_hostname}:65432/mydatabase"
-    )
+    except ModuleNotFoundError:
+        pass
     assert (
         PasswordMasker.mask_db_url(
             f"postgresql+psycopg2://scott:tiger@{db_hostname}:65432/mydatabase",
@@ -146,13 +153,16 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
         == f"mysql+mysqldb://scott:***@{db_hostname}:65432/foo"
     )
 
-    # PyMySQL
-    assert (
-        PasswordMasker.mask_db_url(
-            f"mysql+pymysql://scott:tiger@{db_hostname}:65432/foo"
+    # PyMySQL (if installed in test environment)
+    try:
+        assert (
+            PasswordMasker.mask_db_url(
+                f"mysql+pymysql://scott:tiger@{db_hostname}:65432/foo"
+            )
+            == f"mysql+pymysql://scott:***@{db_hostname}:65432/foo"
         )
-        == f"mysql+pymysql://scott:***@{db_hostname}:65432/foo"
-    )
+    except ModuleNotFoundError:
+        pass
     assert (
         PasswordMasker.mask_db_url(
             f"mysql+pymysql://scott:tiger@{db_hostname}:65432/foo", use_urlparse=True
@@ -192,11 +202,14 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     )
 
     # Microsoft SQL Server
-    # pyodbc
-    assert (
-        PasswordMasker.mask_db_url("mssql+pyodbc://scott:tiger@mydsn")
-        == "mssql+pyodbc://scott:***@mydsn"
-    )
+    # pyodbc (if installed in test environment)
+    try:
+        assert (
+            PasswordMasker.mask_db_url("mssql+pyodbc://scott:tiger@mydsn")
+            == "mssql+pyodbc://scott:***@mydsn"
+        )
+    except ModuleNotFoundError:
+        pass
     assert (
         PasswordMasker.mask_db_url(
             "mssql+pyodbc://scott:tiger@mydsn", use_urlparse=True
@@ -417,6 +430,10 @@ class MockedSecretManagerServiceClient:
         return response
 
 
+@pytest.mark.skipif(
+    secretmanager is None,
+    reason="Could not import 'secretmanager' from google.cloud in data_context.util",
+)
 @pytest.mark.parametrize(
     "input_value,secret_response,raises,expected",
     [

@@ -69,11 +69,6 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 
 ### Tests are docs and docs are tests
 
-```diff
-! This feature is in beta
-```
-
-
 Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation.
 
 Since docs are rendered from tests, and tests are run against new data as it arrives, your documentation is guaranteed to never go stale. Additional renderers allow Great Expectations to generate other type of "documentation", including <!--[slack notifications](), [data dictionaries](), [customized notebooks]()--> slack notifications, data dictionaries, customized notebooks, etc.
@@ -90,12 +85,7 @@ Check out [Down with Documentation Rot!]() for more details.
 
 ### Automated data profiling
 
-```diff
-- This feature is experimental
-```
-
-
-Wouldn't it be great if your tests could write themselves? Run your data through one of Great Expectations' data profilers and it will automatically generate Expectations and data documentation. Profiling provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
+Wouldn't it be great if your tests could write themselves? Run your data through one of Great Expectations' data profilers and it will automatically generate Expectations and data documentation. Profiling, a beta feature of Great Expectations, provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
 
 <!--
 <<<pretty pics of profiled data>>>
@@ -122,6 +112,11 @@ Recent extensions include:
 * [BigQuery and GCS integration](https://github.com/great-expectations/great_expectations/pull/841)
 * [Notifications to MatterMost](https://github.com/great-expectations/great_expectations/issues/902)
 
+New deployment patterns include:
+* [How to Use Great Expectations with Google Cloud Platform and BigQuery](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery)
+* [How to Use Great Expectations in Databricks](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks/)
+* [How to Use Great Expectations in Flyte](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_flyte)
+
 We're very excited to see what other plugins the data community comes up with!
 
 Quick start
@@ -143,9 +138,9 @@ and then run
 great_expectations init
 ```
 
-(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](http://docs.greatexpectations.io/en/latest/reference/supporting_resources.html), which will teach you how to get up and running in minutes.)
+(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](https://docs.greatexpectations.io/docs/reference/supporting_resources), which will teach you how to get up and running in minutes.)
 
-For full documentation, visit [Great Expectations on readthedocs.io](http://great-expectations.readthedocs.io/en/latest/).
+For full documentation, visit [Great Expectations on readthedocs.io](https://docs.greatexpectations.io/docs/).
 
 If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there.
 
@@ -179,7 +174,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.snowflake.com/wp-content/themes/snowflake/img/snowflake-logo-blue@2x.png" /> </td><td style="width: 200px;">Snowflake                </td><td>Cloud-based data warehouse</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://raw.githubusercontent.com/apache/airflow/master/docs/apache-airflow/img/logos/wordmark_1.png" /></td><td style="width: 200px;">Apache Airflow           </td><td>An open source orchestration engine</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.sqlalchemy.org/img/sqla_logo.png" />                                         </td><td style="width: 200px;">Other SQL Relational DBs </td><td>Most RDBMS are supported via SQLalchemy</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://jupyter.org/assets/main-logo.svg" />                                             </td><td style="width: 200px;">Jupyter Notebooks        </td><td>The best way to build Expectations</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg" />                                             </td><td style="width: 200px;">Jupyter Notebooks        </td><td>The best way to build Expectations</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://cdn.brandfolder.io/5H442O3W/as/pl546j-7le8zk-5guop3/Slack_RGB.png" />            </td><td style="width: 200px;">Slack                    </td><td> Get automatic data quality notifications!</td></tr>
 	</tbody>
 </table>

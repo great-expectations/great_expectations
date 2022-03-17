@@ -2,20 +2,22 @@ from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from tests.test_utils import load_data_into_test_database
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
 # This utility is not for general use. It is only to support testing.
-from util import load_data_into_database
-
-load_data_into_database(
+load_data_into_test_database(
     table_name="taxi_data",
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=CONNECTION_STRING,
 )
 
+# <snippet>
 context = ge.get_context()
+# </snippet>
 
+# <snippet>
 datasource_config = {
     "name": "my_postgres_datasource",
     "class_name": "Datasource",
@@ -34,14 +36,19 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
+# <snippet>
 context.test_yaml_config(yaml.dump(datasource_config))
+# </snippet>
 
+# <snippet>
 context.add_datasource(**datasource_config)
+# </snippet>
 
 # Here is a RuntimeBatchRequest using a query
 batch_request = RuntimeBatchRequest(

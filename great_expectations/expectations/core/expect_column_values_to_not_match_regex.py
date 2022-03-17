@@ -1,31 +1,17 @@
-from typing import Dict, List, Optional, Union
-
-import numpy as np
-import pandas as pd
+from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    InvalidExpectationConfigurationError,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...core.batch import Batch
-from ...data_asset.util import parse_result_format
-from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
-)
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
 )
 
 try:
@@ -112,7 +98,9 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         "regex",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -155,6 +143,10 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 "schema": {"type": "number"},
                 "value": params.get("mostly"),
             },
+            "mostly_pct": {
+                "schema": {"type": "string"},
+                "value": params.get("mostly_pct"),
+            },
             "row_condition": {
                 "schema": {"type": "string"},
                 "value": params.get("row_condition"),
@@ -171,7 +163,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
             )
         else:
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
+                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
@@ -196,7 +188,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -252,7 +244,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [

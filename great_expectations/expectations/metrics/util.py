@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -64,39 +65,48 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import pybigquery.sqlalchemy_bigquery
+    import sqlalchemy_bigquery as sqla_bigquery
 
-    ###
-    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-    # to define an attribute "dialect". A PR has been submitted to fix this upstream
-    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-    # fix isn't present, add this "dialect" attribute here:
-    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
-        pybigquery.sqlalchemy_bigquery.dialect = (
-            pybigquery.sqlalchemy_bigquery.BigQueryDialect
-        )
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "dialect")
-    try:
-        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
-        bigquery_types_tuple = None
-    except AttributeError:
-        # In older versions of the pybigquery driver, types were not exported, so we use a hack
-        logger.warning(
-            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-        )
-        from collections import namedtuple
-
-        BigQueryTypes = namedtuple(
-            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
-        )
-        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
+    registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
     bigquery_types_tuple = None
-    pybigquery = None
-    namedtuple = None
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+
+        warnings.warn(
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning,
+        )
+        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
+        ###
+        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+        # to define an attribute "dialect". A PR has been submitted to fix this upstream
+        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+        # fix isn't present, add this "dialect" attribute here:
+        if not hasattr(sqla_bigquery, "dialect"):
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
+        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        try:
+            getattr(sqla_bigquery, "INTEGER")
+            bigquery_types_tuple = None
+        except AttributeError:
+            # In older versions of the pybigquery driver, types were not exported, so we use a hack
+            logger.warning(
+                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+            )
+            from collections import namedtuple
+
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+    except ImportError:
+        sqla_bigquery = None
+        bigquery_types_tuple = None
+        pybigquery = None
+        namedtuple = None
 
 try:
     import teradatasqlalchemy.dialect
@@ -219,7 +229,7 @@ def _get_dialect_type_module(dialect=None):
         if (
             isinstance(
                 dialect,
-                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+                sqla_bigquery.BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):
@@ -561,7 +571,7 @@ def validate_distribution_parameters(distribution, params):
         "chi2",
         "expon",
     ]:
-        raise AttributeError("Unsupported  distribution provided: %s" % distribution)
+        raise AttributeError(f"Unsupported  distribution provided: {distribution}")
 
     if isinstance(params, dict):
         # `params` is a dictionary
@@ -572,11 +582,11 @@ def validate_distribution_parameters(distribution, params):
         if distribution == "beta" and (
             params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0
         ):
-            raise ValueError("Invalid parameters: %s" % beta_msg)
+            raise ValueError(f"Invalid parameters: {beta_msg}")
 
         # alpha is required and positive
         elif distribution == "gamma" and params.get("alpha", -1) <= 0:
-            raise ValueError("Invalid parameters: %s" % gamma_msg)
+            raise ValueError(f"Invalid parameters: {gamma_msg}")
 
         # lambda is a required and positive
         # elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
@@ -584,7 +594,7 @@ def validate_distribution_parameters(distribution, params):
 
         # df is necessary and required to be positive
         elif distribution == "chi2" and params.get("df", -1) <= 0:
-            raise ValueError("Invalid parameters: %s:" % chi2_msg)
+            raise ValueError(f"Invalid parameters: {chi2_msg}:")
 
     elif isinstance(params, tuple) or isinstance(params, list):
         scale = None
@@ -592,29 +602,29 @@ def validate_distribution_parameters(distribution, params):
         # `params` is a tuple or a list
         if distribution == "beta":
             if len(params) < 2:
-                raise ValueError("Missing required parameters: %s" % beta_msg)
+                raise ValueError(f"Missing required parameters: {beta_msg}")
             if params[0] <= 0 or params[1] <= 0:
-                raise ValueError("Invalid parameters: %s" % beta_msg)
+                raise ValueError(f"Invalid parameters: {beta_msg}")
             if len(params) == 4:
                 scale = params[3]
             elif len(params) > 4:
-                raise ValueError("Too many parameters provided: %s" % beta_msg)
+                raise ValueError(f"Too many parameters provided: {beta_msg}")
 
         elif distribution == "norm":
             if len(params) > 2:
-                raise ValueError("Too many parameters provided: %s" % norm_msg)
+                raise ValueError(f"Too many parameters provided: {norm_msg}")
             if len(params) == 2:
                 scale = params[1]
 
         elif distribution == "gamma":
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" % gamma_msg)
+                raise ValueError(f"Missing required parameters: {gamma_msg}")
             if len(params) == 3:
                 scale = params[2]
             if len(params) > 3:
-                raise ValueError("Too many parameters provided: %s" % gamma_msg)
+                raise ValueError(f"Too many parameters provided: {gamma_msg}")
             elif params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" % gamma_msg)
+                raise ValueError(f"Invalid parameters: {gamma_msg}")
 
         # elif distribution == 'poisson':
         #    if len(params) < 1:
@@ -628,24 +638,24 @@ def validate_distribution_parameters(distribution, params):
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" % uniform_msg)
+                raise ValueError(f"Too many arguments provided: {uniform_msg}")
 
         elif distribution == "chi2":
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" % chi2_msg)
+                raise ValueError(f"Missing required parameters: {chi2_msg}")
             elif len(params) == 3:
                 scale = params[2]
             elif len(params) > 3:
-                raise ValueError("Too many arguments provided: %s" % chi2_msg)
+                raise ValueError(f"Too many arguments provided: {chi2_msg}")
             if params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" % chi2_msg)
+                raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
 
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" % expon_msg)
+                raise ValueError(f"Too many arguments provided: {expon_msg}")
 
         if scale is not None and scale <= 0:
             raise ValueError("std_dev and scale must be positive.")

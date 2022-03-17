@@ -1,38 +1,59 @@
 from typing import Iterable, List, Optional, Union
 
-from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.rule_based_profiler.helpers.util import (
+    build_simple_domains_from_column_names,
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 
 
-class SimpleColumnSuffixDomainBuilder(DomainBuilder):
+class SimpleColumnSuffixDomainBuilder(ColumnDomainBuilder):
     """
     This DomainBuilder uses a column suffix to identify domains.
     """
 
     def __init__(
         self,
-        data_context: DataContext,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
-        column_name_suffixes: Optional[List[str]] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
+        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
     ):
         """
         Args:
-            data_context: DataContext
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+            data_context: DataContext
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
         """
-
         super().__init__(
-            data_context=data_context,
+            batch_list=batch_list,
             batch_request=batch_request,
+            data_context=data_context,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
         )
 
         if column_name_suffixes is None:
             column_name_suffixes = []
+
         self._column_name_suffixes = column_name_suffixes
+
+    @property
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.COLUMN
+
+    @property
+    def column_name_suffixes(
+        self,
+    ) -> Optional[Union[str, Iterable, List[str]]]:
+        return self._column_name_suffixes
 
     def _get_domains(
         self,
@@ -41,30 +62,28 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         """
         Find the column suffix for each column and return all domains matching the specified suffix.
         """
+        table_column_names: List[str] = self.get_effective_column_names(
+            variables=variables,
+        )
+
+        # Obtain column_name_suffixes from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_name_suffixes: Union[
             str, Iterable, List[str]
-        ] = self._column_name_suffixes
+        ] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.column_name_suffixes,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
+        )
+
         if isinstance(column_name_suffixes, str):
             column_name_suffixes = [column_name_suffixes]
         else:
-            if not isinstance(column_name_suffixes, (Iterable, List)):
+            if not isinstance(column_name_suffixes, (Iterable, list)):
                 raise ValueError(
                     "Unrecognized column_name_suffixes directive -- must be a list or a string."
                 )
-
-        batch_id: str = self.get_batch_id(variables=variables)
-        table_column_names: List[str] = self.get_validator(
-            variables=variables
-        ).get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs={
-                    "batch_id": batch_id,
-                },
-                metric_value_kwargs=None,
-                metric_dependencies=None,
-            )
-        )
 
         candidate_column_names: List[str] = list(
             filter(
@@ -75,15 +94,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
             )
         )
 
-        column_name: str
-        domains: List[Domain] = [
-            Domain(
-                domain_type=MetricDomainTypes.COLUMN,
-                domain_kwargs={
-                    "column": column_name,
-                },
-            )
-            for column_name in candidate_column_names
-        ]
-
-        return domains
+        return build_simple_domains_from_column_names(
+            column_names=candidate_column_names,
+            domain_type=self.domain_type,
+        )

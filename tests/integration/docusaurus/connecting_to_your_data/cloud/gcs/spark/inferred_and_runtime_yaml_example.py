@@ -2,6 +2,7 @@ from typing import List
 
 from ruamel import yaml
 
+# <snippet>
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
@@ -9,6 +10,8 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+
+# </snippet>
 
 # NOTE: InMemoryStoreBackendDefaults SHOULD NOT BE USED in normal settings. You
 # may experience data loss as it persists nothing. It is used here for testing.
@@ -20,7 +23,8 @@ data_context_config = DataContextConfig(
 )
 context = BaseDataContext(project_config=data_context_config)
 
-datasource_yaml = fr"""
+# <snippet>
+datasource_yaml = rf"""
 name: my_gcs_datasource
 class_name: Datasource
 execution_engine:
@@ -39,21 +43,25 @@ data_connectors:
             group_names:
                 - data_asset_name
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<YOUR_GCS_BUCKET_HERE>", "superconductive-integration-tests"
-)
+datasource_yaml = datasource_yaml.replace("<YOUR_GCS_BUCKET_HERE>", "test_docs_data")
 datasource_yaml = datasource_yaml.replace(
     "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
 )
 
+# <snippet>
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
+# <snippet>
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
+# <snippet>
 batch_request = RuntimeBatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -61,13 +69,15 @@ batch_request = RuntimeBatchRequest(
     runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your GCS path here.
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters[
     "path"
-] = "gs://superconductive-public/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
+] = "gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
+# <snippet>
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
@@ -75,17 +85,21 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 
+
 # Here is a BatchRequest naming a data_asset
+# <snippet>
 batch_request = BatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
     batch_spec_passthrough={"reader_method": "csv", "reader_options": {"header": True}},
 )
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
@@ -93,6 +107,7 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
+# <snippet>
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
@@ -100,6 +115,7 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)

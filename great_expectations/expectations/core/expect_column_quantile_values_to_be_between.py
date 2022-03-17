@@ -18,9 +18,11 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
+    # noinspection PyUnresolvedReferences
     """Expect specific provided column quantiles to be between provided minimum and maximum values.
 
            ``quantile_ranges`` must be a dictionary with two keys:
@@ -78,7 +80,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                    The column name.
                quantile_ranges (dictionary): \
                    Quantiles and associated value ranges for the column. See above for details.
-               allow_relative_error (boolean): \
+               allow_relative_error (boolean or string): \
                    Whether to allow relative error in quantile communications on backends that support or require it.
 
            Other Parameters:
@@ -131,16 +133,92 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     success_keys = (
         "quantile_ranges",
         "allow_relative_error",
+        "auto",
+        "profiler_config",
     )
+
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        class_name="RuleBasedProfilerConfig",
+        module_name="great_expectations.rule_based_profiler",
+        variables={
+            "quantiles": [
+                0.25,
+                0.5,
+                0.75,
+            ],
+            "allow_relative_error": "linear",
+            "false_positive_rate": 0.05,
+            "estimator": "bootstrap",
+            "num_bootstrap_samples": 9999,
+            "bootstrap_random_seed": None,
+            "round_decimals": 1,
+            "truncate_values": {
+                "lower_bound": None,
+                "upper_bound": None,
+            },
+        },
+        rules={
+            "default_expect_column_quantile_values_to_be_between_rule": {
+                "domain_builder": {
+                    "class_name": "ColumnDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "parameter_builders": [
+                    {
+                        "name": "quantile_value_ranges",
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_name": "column.quantile_values",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": {
+                            "quantiles": "$variables.quantiles",
+                            "allow_relative_error": "$variables.allow_relative_error",
+                        },
+                        "enforce_numeric_metric": True,
+                        "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "estimator": "$variables.estimator",
+                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                        "round_decimals": "$variables.round_decimals",
+                        "truncate_values": "$variables.truncate_values",
+                        "json_serialize": True,
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_quantile_values_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "column": "$domain.domain_kwargs.column",
+                        "quantile_ranges": {
+                            "quantiles": "$variables.quantiles",
+                            "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                        },
+                        "allow_relative_error": "$variables.allow_relative_error",
+                        "meta": {
+                            "profiler_details": "$parameter.quantile_value_ranges.details"
+                        },
+                    }
+                ],
+            },
+        },
+    )
+
     default_kwarg_values = {
         "row_condition": None,
-        "allow_relative_error": None,
         "condition_parser": None,
         "quantile_ranges": None,
         "result_format": "BASIC",
         "allow_relative_error": False,
         "include_config": True,
         "catch_exceptions": False,
+        "meta": None,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "column",
@@ -148,7 +226,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "allow_relative_error",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -157,6 +237,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             assert isinstance(
                 configuration.kwargs["quantile_ranges"], dict
             ), "quantile_ranges should be a dictionary"
+
             assert all(
                 [
                     True if None in x or x == sorted(x) else False
@@ -171,10 +252,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         quantile_ranges = configuration.kwargs["quantile_ranges"]
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
-        if "allow_relative_error" in configuration.kwargs:
-            allow_relative_error = configuration.kwargs["allow_relative_error"]
-        else:
-            allow_relative_error = False
 
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(
@@ -218,7 +295,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         header_template_str = "quantiles must be within the following value ranges."
 
         if include_column_name:
-            header_template_str = "$column " + header_template_str
+            header_template_str = f"$column {header_template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -357,7 +434,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         template_str = "quantiles must be within the following value ranges."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
