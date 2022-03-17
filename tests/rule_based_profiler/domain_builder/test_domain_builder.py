@@ -6,7 +6,6 @@ from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
     DomainBuilder,
-    SimpleSemanticTypeColumnDomainBuilder,
     TableDomainBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
@@ -134,7 +133,7 @@ def test_column_domain_builder(
 
 
 # noinspection PyPep8Naming
-def test_simple_semantic_type_column_domain_builder(
+def test_column_domain_builder_with_simple_semantic_type_included(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
     column_Age_domain,
@@ -159,10 +158,10 @@ def test_simple_semantic_type_column_domain_builder(
         "data_connector_name": "alice_columnar_table_single_batch_data_connector",
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
-    domain_builder: DomainBuilder = SimpleSemanticTypeColumnDomainBuilder(
+    domain_builder: DomainBuilder = ColumnDomainBuilder(
         data_context=data_context,
         batch_request=batch_request,
-        semantic_types=[
+        include_semantic_types=[
             "numeric",
         ],
     )
