@@ -98,6 +98,11 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
                 SemanticDomainTypes.IDENTIFIER,
             ]
 
+        if exclude_column_names is None:
+            exclude_column_names = [
+                "id",
+            ]
+
         super().__init__(
             batch_list=batch_list,
             batch_request=batch_request,
