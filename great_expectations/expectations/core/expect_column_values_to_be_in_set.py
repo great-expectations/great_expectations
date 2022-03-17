@@ -161,7 +161,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     )
 
     default_kwarg_values = {
-        "value_set": None,
+        "value_set": [],
         "parse_strings_as_datetimes": False,
         "auto": False,
         "profiler_config": default_profiler_config,
@@ -411,15 +411,20 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration]
     ) -> bool:
         super().validate_configuration(configuration)
+        # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
+        value_set = configuration.kwargs.get(
+            "value_set"
+        ) or self.default_kwarg_values.get(
+            "value_set"
+        )  # raises if default_kwarg_values is not overridden & value_set not provided
         try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
-            assert (
-                isinstance(configuration.kwargs["value_set"], (list, set, dict))
-                or configuration.kwargs["value_set"] is None
-            ), "value_set must be a list, set, or None"
-            if isinstance(configuration.kwargs["value_set"], dict):
+            assert value_set != [] and value_set is not None, "value_set is required"
+            assert isinstance(
+                value_set, (list, set, dict)
+            ), "value_set must be a list, set, or dict"
+            if isinstance(value_set, dict):
                 assert (
-                    "$PARAMETER" in configuration.kwargs["value_set"]
+                    "$PARAMETER" in value_set
                 ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
