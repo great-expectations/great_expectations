@@ -31,8 +31,7 @@ def render_multiple_validation_result_pages_markdown(
         "rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result("
         "   validation_operator_result=validation_operator_result"
         ")"
-        'return " ".join(DefaultMarkdownPageView().render(rendered_document_content_list))'
-        "Please update code accordingly.",
+        'return " ".join(DefaultMarkdownPageView().render(rendered_document_content_list))',
         DeprecationWarning,
     )
 
