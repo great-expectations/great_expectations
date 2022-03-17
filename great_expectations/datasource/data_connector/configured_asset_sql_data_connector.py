@@ -175,6 +175,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return []
 
     def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):
+        sub_cache: dict
+
         self._validate_batch_request(batch_request=batch_request)
 
         if len(self._data_references_cache) == 0:
@@ -183,6 +185,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         batch_definition_list: List[BatchDefinition] = []
         try:
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
+        # if the batch_request is missing data_asset we need to add it to references cache for batch_definition
         except KeyError:
             self.add_data_asset(
                 batch_request.data_asset_name,
