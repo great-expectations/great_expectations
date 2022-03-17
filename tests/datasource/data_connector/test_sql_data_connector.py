@@ -1316,7 +1316,7 @@ def test_introspection_directives_schema_only_selects_schema_objects(
         )
 
 
-def test_update_configured_asset_sql_data_connector_missing_data_asset_persists(
+def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_to_data_context(
     sqlite_missing_data_asset_data_context,
 ):
     context: DataContext = sqlite_missing_data_asset_data_context
@@ -1349,6 +1349,13 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists(
     assert (
         data_asset_name
         in context.datasources[datasource_name]
+        .data_connectors[data_connector_name]
+        .assets.keys()
+    )
+
+    assert (
+        data_asset_name
+        in context.config.datasources[datasource_name]
         .data_connectors[data_connector_name]
         .assets.keys()
     )
