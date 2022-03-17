@@ -13,7 +13,10 @@ from great_expectations.core.batch import (
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import DataConnector
+from great_expectations.datasource.data_connector import (
+    ConfiguredAssetSqlDataConnector,
+    DataConnector,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -138,8 +141,12 @@ class BaseDatasource:
         """
         self._validate_batch_request(batch_request=batch_request)
 
-        # if the data_asset_name is missing from the data_connector config, add it as a table_name
-        if (
+        data_connector: DataConnector = self.data_connectors[
+            batch_request.data_connector_name
+        ]
+
+        # if the data_asset_name is missing from a ConfiguredAssetSqlDataConnector config, add it as a table_name
+        if (type(data_connector) == ConfiguredAssetSqlDataConnector) and (
             "assets"
             not in self._datasource_config["data_connectors"][
                 batch_request.data_connector_name
@@ -149,7 +156,7 @@ class BaseDatasource:
                 batch_request.data_connector_name
             ]["assets"] = {}
 
-        if (
+        if (type(data_connector) == ConfiguredAssetSqlDataConnector) and (
             batch_request.data_asset_name
             not in self._datasource_config["data_connectors"][
                 batch_request.data_connector_name
@@ -161,9 +168,9 @@ class BaseDatasource:
                 "table_name": batch_request.data_asset_name
             }
 
-        data_connector: DataConnector = self.data_connectors[
-            batch_request.data_connector_name
-        ]
+            data_connector: DataConnector = self.data_connectors[
+                batch_request.data_connector_name
+            ]
 
         batch_definition_list: List[
             BatchDefinition
