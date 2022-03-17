@@ -27,6 +27,8 @@ class ColumnDomainBuilder(DomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        semantic_type_filter_module_name: Optional[str] = None,
+        semantic_type_filter_class_name: Optional[str] = None,
         include_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
@@ -35,8 +37,6 @@ class ColumnDomainBuilder(DomainBuilder):
         ] = None,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        semantic_type_filter_module_name: Optional[str] = None,
-        semantic_type_filter_class_name: Optional[str] = None,
     ):
         """
         A semantic type is distinguished from the structured column type;
@@ -46,14 +46,14 @@ class ColumnDomainBuilder(DomainBuilder):
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
             data_context: DataContext
+            semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces
+            semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces
             include_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
-            semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces
-            semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces
 
         Inclusion/Exclusion Logic:
         (include_column_names|table_columns - exclude_column_names) + (include_semantic_types - exclude_semantic_types)

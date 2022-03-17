@@ -37,6 +37,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        semantic_type_filter_module_name: Optional[str] = None,
+        semantic_type_filter_class_name: Optional[str] = None,
         include_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
@@ -45,8 +47,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         ] = None,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        semantic_type_filter_module_name: Optional[str] = None,
-        semantic_type_filter_class_name: Optional[str] = None,
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
@@ -70,14 +70,14 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
+            semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces
+            semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces
             include_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
-            semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces
-            semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
@@ -107,12 +107,12 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
+            semantic_type_filter_module_name=semantic_type_filter_module_name,
+            semantic_type_filter_class_name=semantic_type_filter_class_name,
             include_semantic_types=include_semantic_types,
             exclude_semantic_types=exclude_semantic_types,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
-            semantic_type_filter_module_name=semantic_type_filter_module_name,
-            semantic_type_filter_class_name=semantic_type_filter_class_name,
         )
 
         self._limit_mode = limit_mode
