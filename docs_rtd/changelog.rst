@@ -23,6 +23,8 @@ Changelog
 * [BUGFIX] Remove `pytest-azurepiplines` usage from `test_cli` stages in Azure pipelines (#4432)
 * [BUGFIX] Updates or deletes broken and deprecated example notebooks (#4404)
 * [BUGFIX] Add any dependencies we import directly, but don't have as explicit requirements (#4447)
+* [BUGFIX] Removes potentially sensitive webhook URLs from logging (#4440)
+* [BUGFIX] Fix packaging test (#4452)
 * [DOCS] Fix typo in how_to_create_custom_metrics (#4379)
 * [DOCS] Add `snippet` tag to gcs data docs (#4383)
 * [DOCS] adjust lines for py reference (#4390)
