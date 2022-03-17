@@ -99,7 +99,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
