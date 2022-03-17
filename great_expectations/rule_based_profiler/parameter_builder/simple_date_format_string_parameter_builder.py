@@ -1,11 +1,12 @@
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder import (
     AttributedResolvedMetrics,
     MetricComputationResult,
     MetricValues,
@@ -90,7 +91,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        threshold: Union[float, str] = 1.0,
+        threshold: Union[str, float] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
@@ -184,9 +185,22 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
+        # This should never happen.
+        if not (
+            isinstance(metric_computation_result.metric_values, list)
+            and len(metric_computation_result.metric_values) == 1
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.metric_values} found).'
+            )
+
+        attributed_resolved_metrics: AttributedResolvedMetrics
+
+        attributed_resolved_metrics = metric_computation_result.metric_values[0]
+
         metric_values: MetricValues
 
-        metric_values = metric_computation_result.metric_values
+        metric_values = attributed_resolved_metrics.metric_values
 
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
@@ -225,7 +239,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             )
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
-        metric_computation_result: MetricComputationResult = self.get_metrics(
+        metric_computation_result = self.get_metrics(
             metric_name="column_values.match_strftime_format.unexpected_count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=match_strftime_metric_value_kwargs_list,
@@ -236,7 +250,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         format_string_success_ratios: dict = {}
 
-        attributed_resolved_metrics: AttributedResolvedMetrics
         for attributed_resolved_metrics in metric_computation_result.metric_values:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = attributed_resolved_metrics.metric_values[:, 0]

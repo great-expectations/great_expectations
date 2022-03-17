@@ -14,13 +14,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     get_batch_request_as_dict,
 )
-from great_expectations.core.usage_statistics.anonymizers.action_anonymizer import (
-    ActionAnonymizer,
-)
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
-    BatchRequestAnonymizer,
-)
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS,
 )
@@ -42,17 +36,9 @@ class CheckpointRunAnonymizer(Anonymizer):
         Traverse the entire Checkpoint configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
         """
-        batch_request_anonymizer: BatchRequestAnonymizer = BatchRequestAnonymizer(
-            self._salt
-        )
-        action_anonymizer: ActionAnonymizer = ActionAnonymizer(self._salt)
-
         attribute_name: str
         attribute_value: Optional[Union[str, dict]]
         validation_obj: dict
-        action_config_dict: dict
-        action_name: str
-        action_obj: dict
 
         checkpoint_optional_top_level_keys: List[str] = []
 
@@ -82,7 +68,7 @@ class CheckpointRunAnonymizer(Anonymizer):
 
         anonymized_batch_request: Optional[
             Dict[str, List[str]]
-        ] = batch_request_anonymizer.anonymize_batch_request(*(), **batch_request)
+        ] = self.anonymize_batch_request(*(), **batch_request)
 
         action_list: Optional[List[dict]] = kwargs.get("action_list")
         anonymized_action_list: Optional[List[dict]] = None
@@ -90,7 +76,7 @@ class CheckpointRunAnonymizer(Anonymizer):
             # noinspection PyBroadException
             try:
                 anonymized_action_list = [
-                    action_anonymizer.anonymize_action_info(
+                    self._anonymize_action_info(
                         action_name=action_config_dict["name"],
                         action_config=action_config_dict["action"],
                     )
@@ -117,9 +103,7 @@ class CheckpointRunAnonymizer(Anonymizer):
 
                 anonymized_validation_batch_request: Optional[
                     Optional[Dict[str, List[str]]]
-                ] = batch_request_anonymizer.anonymize_batch_request(
-                    *(), **validation_batch_request
-                )
+                ] = self.anonymize_batch_request(*(), **validation_batch_request)
 
                 validation_expectation_suite_name: Optional[str] = validation_obj.get(
                     "expectation_suite_name"
@@ -136,7 +120,7 @@ class CheckpointRunAnonymizer(Anonymizer):
                     # noinspection PyBroadException
                     try:
                         anonymized_validation_action_list = [
-                            action_anonymizer.anonymize_action_info(
+                            self._anonymize_action_info(
                                 action_name=action_config_dict["name"],
                                 action_config=action_config_dict["action"],
                             )

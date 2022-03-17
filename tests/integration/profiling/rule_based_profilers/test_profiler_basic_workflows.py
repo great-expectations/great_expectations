@@ -116,7 +116,7 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
     )
     domain_builder: DomainBuilder = SimpleColumnSuffixDomainBuilder(
         data_context=context,
-        batch_request=batch_request,
+        batch_request=batch_request.to_json_dict(),
         column_name_suffixes=["_amount"],
     )
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -155,14 +155,14 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     )
     domain_builder: DomainBuilder = SimpleColumnSuffixDomainBuilder(
         data_context=context,
-        batch_request=batch_request,
+        batch_request=batch_request.to_json_dict(),
         column_name_suffixes=["_amount"],
     )
     # parameter_builder
     numeric_range_parameter_builder: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
             data_context=context,
-            batch_request=batch_request,
+            batch_request=batch_request.to_json_dict(),
             metric_name="column.min",
             metric_domain_kwargs="$domain.domain_kwargs",
             name="my_column_min",
@@ -209,14 +209,14 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
     )
     domain_builder: DomainBuilder = SimpleColumnSuffixDomainBuilder(
         data_context=context,
-        batch_request=batch_request,
+        batch_request=batch_request.to_json_dict(),
         column_name_suffixes=["_amount"],
     )
     # parameter_builder
     numeric_range_parameter_builder: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
             data_context=context,
-            batch_request=batch_request,
+            batch_request=batch_request.to_json_dict(),
             metric_name="column.min",
             metric_domain_kwargs="$domain.domain_kwargs",
             name="my_column_min",
@@ -321,7 +321,7 @@ def test_profiler_run_with_expectation_suite_arg(
     )
     domain_builder: DomainBuilder = SimpleColumnSuffixDomainBuilder(
         data_context=context,
-        batch_request=batch_request,
+        batch_request=batch_request.to_json_dict(),
         column_name_suffixes=["_amount"],
     )
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(

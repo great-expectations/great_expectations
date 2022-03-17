@@ -13,7 +13,9 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
+    AttributedResolvedMetrics,
     MetricMultiBatchParameterBuilder,
+    MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
     Domain,
@@ -58,11 +60,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        sampling_method: str = "bootstrap",
         enforce_numeric_metric: Union[str, bool] = True,
         replace_nan_with_zero: Union[str, bool] = True,
         reduce_scalar_metric: Union[str, bool] = True,
         false_positive_rate: Union[str, float] = 5.0e-2,
+        estimator: str = "bootstrap",
         num_bootstrap_samples: Optional[Union[str, int]] = None,
         bootstrap_random_seed: Optional[int] = None,
         round_decimals: Optional[Union[str, int]] = None,
@@ -82,13 +84,13 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
-            sampling_method: choice of the sampling algorithm: "oneshot" (one observation) or "bootstrap" (default)
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
             replace_nan_with_zero: if False, then if the computed metric gives NaN, then exception is raised; otherwise,
             if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
             identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
+            estimator: choice of the estimation algorithm: "oneshot" (one observation) or "bootstrap" (default)
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
             9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
@@ -115,9 +117,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             data_context=data_context,
         )
 
-        self._sampling_method = sampling_method
-
         self._false_positive_rate = false_positive_rate
+
+        self._estimator = estimator
 
         self._num_bootstrap_samples = num_bootstrap_samples
 
@@ -151,12 +153,12 @@ detected.
     """
 
     @property
-    def sampling_method(self) -> str:
-        return self._sampling_method
-
-    @property
     def false_positive_rate(self) -> Union[str, float]:
         return self._false_positive_rate
+
+    @property
+    def estimator(self) -> str:
+        return self._estimator
 
     @property
     def num_bootstrap_samples(self) -> Optional[Union[str, int]]:
@@ -209,36 +211,49 @@ detected.
         11. Return [low, high] for the desired metric as estimated by the specified sampling method.
         12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
-        # Obtain sampling_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        sampling_method: str = get_parameter_value_and_validate_return_type(
+        # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self.sampling_method,
+            parameter_reference=self.false_positive_rate,
+            expected_return_type=(float, np.float64),
+            variables=variables,
+            parameters=parameters,
+        )
+        if not (0.0 <= false_positive_rate <= 1.0):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
+            )
+
+        # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        estimator: str = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.estimator,
             expected_return_type=str,
             variables=variables,
             parameters=parameters,
         )
         if (
-            sampling_method
+            estimator
             not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
         ):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "sampling_method" for {self.__class__.__name__} can be only one of
-{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{sampling_method}" was detected).
+                message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
+{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
 """
             )
 
-        estimator: Callable
+        estimator_func: Callable
         etimator_kwargs: dict
-        if sampling_method == "bootstrap":
-            estimator = self._get_bootstrap_estimate
+        if estimator == "bootstrap":
+            estimator_func = self._get_bootstrap_estimate
             estimator_kwargs = {
-                "false_positive_rate": self.false_positive_rate,
+                "false_positive_rate": false_positive_rate,
                 "num_bootstrap_samples": self.num_bootstrap_samples,
             }
         else:
-            estimator = self._get_deterministic_estimate
+            estimator_func = self._get_deterministic_estimate
             estimator_kwargs = {
-                "false_positive_rate": self.false_positive_rate,
+                "false_positive_rate": false_positive_rate,
             }
 
         # Compute metric value for each Batch object.
@@ -259,10 +274,24 @@ detected.
             variables=variables,
             parameters=parameters,
         )
+        metric_values: MetricValues
+        if isinstance(parameter_node.value, list):
+            num_parameter_node_value_elements: int = len(parameter_node.value)
+            if not (num_parameter_node_value_elements == 1):
+                raise ge_exceptions.ProfilerExecutionError(
+                    message=f'Length of "AttributedResolvedMetrics" list for {self.__class__.__name__} must be exactly 1 ({num_parameter_node_value_elements} elements found).'
+                )
+
+            attributed_resolved_metrics: AttributedResolvedMetrics = (
+                parameter_node.value[0]
+            )
+            metric_values = attributed_resolved_metrics.metric_values
+        else:
+            metric_values = parameter_node.value
 
         metric_value_range: np.ndarray = self._estimate_metric_value_range(
-            metric_values=cast(np.ndarray, parameter_node.value),
-            estimator=estimator,
+            metric_values=metric_values,
+            estimator_func=estimator_func,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -279,7 +308,7 @@ detected.
     def _estimate_metric_value_range(
         self,
         metric_values: np.ndarray,
-        estimator: Callable,
+        estimator_func: Callable,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -350,7 +379,7 @@ detected.
                 lower_quantile = upper_quantile = metric_value_vector[0]
             else:
                 # Compute low and high estimates for vector of samples for given element of multi-dimensional metric.
-                lower_quantile, upper_quantile = estimator(
+                lower_quantile, upper_quantile = estimator_func(
                     metric_values=metric_value_vector,
                     domain=domain,
                     variables=variables,
@@ -471,26 +500,15 @@ positive integer, or must be omitted (or set to None).
 
         return round_decimals
 
+    @staticmethod
     def _get_bootstrap_estimate(
-        self,
         metric_values: np.ndarray,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
     ) -> Tuple[Number, Number]:
-        # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=kwargs.get("false_positive_rate", 5.0e-2),
-            expected_return_type=(float, np.float64),
-            variables=variables,
-            parameters=parameters,
-        )
-        if not (0.0 <= false_positive_rate <= 1.0):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
-            )
+        false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
 
         # Obtain num_bootstrap_samples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         num_bootstrap_samples: Optional[
@@ -525,27 +543,12 @@ positive integer, or must be omitted (or set to None).
             random_seed=random_seed,
         )
 
+    @staticmethod
     def _get_deterministic_estimate(
-        self,
         metric_values: np.ndarray,
-        domain: Domain,
-        *,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
     ) -> Tuple[Number, Number]:
-        # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=kwargs.get("false_positive_rate", 5.0e-2),
-            expected_return_type=(float, np.float64),
-            variables=variables,
-            parameters=parameters,
-        )
-        if not (0.0 <= false_positive_rate <= 1.0):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
-            )
+        false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
 
         return compute_quantiles(
             metric_values=metric_values,
