@@ -112,6 +112,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameters=parameters,
         )
 
+        # This should never happen.
         if not (
             isinstance(parameter_node.value, list) and len(parameter_node.value) == 1
         ):
