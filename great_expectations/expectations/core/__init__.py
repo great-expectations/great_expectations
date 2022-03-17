@@ -86,6 +86,7 @@ from .expect_column_values_to_not_match_regex_list import (
 )
 from .expect_compound_columns_to_be_unique import ExpectCompoundColumnsToBeUnique
 from .expect_multicolumn_sum_to_equal import ExpectMulticolumnSumToEqual
+from .expect_multicolumn_sum_to_be_between import ExpectMulticolumnSumToBeBetween
 from .expect_multicolumn_values_to_be_unique import ExpectMulticolumnValuesToBeUnique
 from .expect_select_column_values_to_be_unique_within_record import (
     ExpectSelectColumnValuesToBeUniqueWithinRecord,
