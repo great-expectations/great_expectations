@@ -35,8 +35,8 @@ class ColumnDomainBuilder(DomainBuilder):
         ] = None,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        semantic_type_filter_module_name: str = "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
-        semantic_type_filter_class_name: str = "SimpleSemanticTypeFilter",
+        semantic_type_filter_module_name: Optional[str] = None,
+        semantic_type_filter_class_name: Optional[str] = None,
     ):
         """
         A semantic type is distinguished from the structured column type;
@@ -70,7 +70,14 @@ class ColumnDomainBuilder(DomainBuilder):
         self._include_column_names = include_column_names
         self._exclude_column_names = exclude_column_names
 
+        if semantic_type_filter_module_name is None:
+            semantic_type_filter_module_name = "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter"
+
         self._semantic_type_filter_module_name = semantic_type_filter_module_name
+
+        if semantic_type_filter_class_name is None:
+            semantic_type_filter_class_name = "SimpleSemanticTypeFilter"
+
         self._semantic_type_filter_class_name = semantic_type_filter_class_name
 
     @property

@@ -33,8 +33,8 @@ class SimpleColumnSuffixDomainBuilder(ColumnDomainBuilder):
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-        semantic_type_filter_module_name: str = "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
-        semantic_type_filter_class_name: str = "SimpleSemanticTypeFilter",
+        semantic_type_filter_module_name: Optional[str] = None,
+        semantic_type_filter_class_name: Optional[str] = None,
     ):
         """
         Args:
