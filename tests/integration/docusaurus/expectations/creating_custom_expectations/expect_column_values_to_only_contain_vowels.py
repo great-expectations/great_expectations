@@ -10,6 +10,7 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 )
 
 
+# <snippet>
 class ExpectColumnValuesToOnlyContainVowelsBasedColumnMap(
     RegexBasedColumnMapExpectation
 ):
@@ -142,6 +143,7 @@ class ExpectColumnValuesToOnlyContainVowelsBasedColumnMap(
     }
 
 
+# </snippet>
 if __name__ == "__main__":
     ExpectColumnValuesToOnlyContainVowelsBasedColumnMap().print_diagnostic_checklist()
 

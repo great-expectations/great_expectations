@@ -16,6 +16,7 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 )
 
 
+# <snippet>
 # This class defines the Expectation itself
 class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     """TODO: Add a docstring here"""
@@ -75,5 +76,6 @@ class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     }
 
 
+# </snippet>
 if __name__ == "__main__":
     ExpectColumnValuesToMatchSomeRegex().print_diagnostic_checklist()
