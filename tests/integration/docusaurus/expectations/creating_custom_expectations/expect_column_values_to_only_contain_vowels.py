@@ -5,17 +5,20 @@ from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.expectations.regex_based_column_map_expectation import (
-    ColumnMapRegexExpectation,
-    ColumnMapRegexMetricProvider,
+    RegexBasedColumnMapExpectation,
+    RegexColumnMapMetricProvider,
 )
 
 
-class ExpectColumnValuesToOnlyContainVowels(ColumnMapRegexExpectation):
+class ExpectColumnValuesToOnlyContainVowelsBasedColumnMap(
+    RegexBasedColumnMapExpectation
+):
     """Values in this column should only contain vowels"""
 
     regex_snake_name = "vowel"
     regex_camel_name = "Vowel"
     regex = "^[aeiouyAEIOUY]*$"
+    semantic_type_name_plural = "vowels"
 
     examples = [
         {
@@ -127,7 +130,7 @@ class ExpectColumnValuesToOnlyContainVowels(ColumnMapRegexExpectation):
         # Vacuously True as all parameter validation is inherited
         return True
 
-    map_metric = ColumnMapRegexExpectation._register_metric(
+    map_metric = RegexBasedColumnMapExpectation.register_metric(
         regex_snake_name=regex_snake_name,
         regex_camel_name=regex_camel_name,
         regex_=regex,
@@ -140,11 +143,11 @@ class ExpectColumnValuesToOnlyContainVowels(ColumnMapRegexExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToOnlyContainVowels().print_diagnostic_checklist()
+    ExpectColumnValuesToOnlyContainVowelsBasedColumnMap().print_diagnostic_checklist()
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
-diagnostics = ExpectColumnValuesToOnlyContainVowels().run_diagnostics()
+diagnostics = ExpectColumnValuesToOnlyContainVowelsBasedColumnMap().run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True

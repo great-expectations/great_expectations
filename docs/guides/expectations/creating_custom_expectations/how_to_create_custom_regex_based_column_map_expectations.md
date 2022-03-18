@@ -2,13 +2,14 @@
 title: How to create a Custom Regex-Based Column Map Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-**`ColumnMapRegexExpectations`** are a sub-type of [**ColumnMapExpectation**](../../../reference/expectations/expectations.md) that allow for highly-extensible, regex-powered validation of your data.
+**`RegexBasedColumnMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="ColumnMapExpectaion"/> that allow for highly-extensible, regex-powered validation of your data.
 
 They are evaluated for a single column and ask a yes/no, regex-based question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If that percentage meets a specified threshold (100% by default), the Expectation considers that data valid. 
-This threshold is configured via the `mostly` parameter, which can be passed as input to your Custom `ColumnMapRegexExpectation` as a `float` between 0 and 1.
+This threshold is configured via the `mostly` parameter, which can be passed as input to your Custom `RegexBasedColumnMapExpectation` as a `float` between 0 and 1.
 
-This guide will walk you through the process of creating a custom `ColumnMapRegexExpectation`.
+This guide will walk you through the process of creating a Custom `RegexBasedColumnMapExpectation`.
 
 <Prerequisites>
 
@@ -20,7 +21,7 @@ This guide will walk you through the process of creating a custom `ColumnMapRege
 
 ### 1. Choose a name for your Expectation
 
-First, decide on a name for your own Expectation. By convention, all `ColumnMapExpectations`, including `ColumnMapRegexExpectations`, start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](/docs/contributing/style_guides/code_style#expectations)  of the code Style Guide.
+First, decide on a name for your own Expectation. By convention, all `ColumnMapExpectations`, including `RegexBasedColumnMapExpectations`, start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](/docs/contributing/style_guides/code_style#expectations)  of the code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
@@ -31,7 +32,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [`ColumnMapRegexExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/regex_based_column_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
+You can find the template file for a custom [`RegexBasedColumnMapExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/regex_based_column_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
 cp regex_based_column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_only_contain_vowels.py
@@ -52,6 +53,9 @@ cp regex_based_column_map_expectation_template.py /SOME_DIRECTORY/expect_column_
             <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
         </ul>
     </p>
+	<p>
+		See our <a href="how_to_use_custom_expectations.md">guide on how to use a Custom Expectation</a> for more!
+	</p>
   </div>
 </details>
 
@@ -66,7 +70,7 @@ python expect_column_values_to_only_contain_vowels.py
 The template file is set up so that this will run the Expectation's `print_diagnostic_checklist()` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
 
 ```
-Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
+Completeness checklist for ExpectColumnValuesToMatchSomeRegex:
   ✔ Has a library_metadata object
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
@@ -103,11 +107,11 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L78
+```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L79
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L143
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L144
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -136,7 +140,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L20-L109
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L21-L110
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -156,7 +160,7 @@ However, you should see that the tests you've written are now being caught and r
 ```
 $ python expect_column_values_to_only_contain_vowels.py
 
-Completeness checklist for ExpectColumnValuesToEqualThree:
+Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
 ...
@@ -189,7 +193,7 @@ with something like this:
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L16-L18
 ```
 
-Great Expectations will use these values to tell your Custom Expectation to apply your specified regex as a [**Metric**](../../../reference/metrics.md) to be utilized in validating your data.
+Great Expectations will use these values to tell your Custom Expectation to apply your specified regex as a <TechnicalTag tag="metric" text="Metric"/> to be utilized in validating your data.
 
 This is all that you need to define for now. The `ColumnMapRegexExpectation` class has built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
@@ -219,14 +223,14 @@ Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
 
 <div style={{"text-align":"center"}}>  
 <p style={{"color":"#8784FF","font-size":"1.4em"}}><b>  
-Congratulations!<br/>&#127881; You've just built your first Custom Expectation! &#127881;  
+Congratulations!<br/>&#127881; You've just built your first Custom Regex-Based Column Map Expectation! &#127881;  
 </b></p>  
 </div>
 
 :::note
 If you've already built a [Custom Expectation](./overview.md) of a different type,
 you may notice that we didn't explicitly implement a `_validate` method or Metric class here. While we have to explicitly create these for other types of Custom Expectations,
-the `ColumnMapRegexExpectation` handles Metric creation and result validation implicitly; no extra work needed!
+the `RegexBasedColumnMapExpectation` class handles Metric creation and result validation implicitly; no extra work needed!
 :::
 
 ### 7. Contribution (Optional)

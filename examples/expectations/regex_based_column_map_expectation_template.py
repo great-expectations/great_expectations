@@ -1,5 +1,5 @@
 """
-This is a template for creating custom ColumnMapRegexExpectations.
+This is a template for creating custom RegexBasedColumnMapExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations
 """
@@ -11,19 +11,20 @@ from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.expectations.regex_based_column_map_expectation import (
-    ColumnMapRegexExpectation,
-    ColumnMapRegexMetricProvider,
+    RegexBasedColumnMapExpectation,
+    RegexColumnMapMetricProvider,
 )
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToMatchSomeRegex(ColumnMapRegexExpectation):
+class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     """TODO: Add a docstring here"""
 
     # These values will be used to configure the metric created by your expectation
     regex_snake_name = "vowel_name"
     regex_camel_name = "VowelName"
     regex = "regex pattern"
+    semantic_type_name_plural = None
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -59,7 +60,7 @@ class ExpectColumnValuesToMatchSomeRegex(ColumnMapRegexExpectation):
         return True
 
     # Here your regex is used to create a custom metric for this expectation
-    map_metric = ColumnMapRegexExpectation._register_metric(
+    map_metric = RegexBasedColumnMapExpectation.register_metric(
         regex_snake_name=regex_snake_name,
         regex_camel_name=regex_camel_name,
         regex_=regex,
