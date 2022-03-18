@@ -4,8 +4,9 @@ title: How to use a Custom Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-Custom [**Expectations**](../../../reference/expectations/expectations.md) are extensions to the core functionality of Great Expectations. Many Custom Expectations may be fit for a very specific purpose, 
+Custom <TechnicalTag tag="expectation" text="Expectations"/> are extensions to the core functionality of Great Expectations. Many Custom Expectations may be fit for a very specific purpose, 
 or be at lower levels of stability and feature maturity than the core library. 
 
 As such, they are not available for use from the core library, and require registration and import to become available.
@@ -14,7 +15,7 @@ This guide will walk you through the process of utilizing Custom Expectations, w
 
 <Prerequisites>
 
-- Created a [Custom Expectation](./overview.md) ***or*** identified a Custom Expectation for use from the [Great Expectations Experimental Library](https://github.com/great-expectations/great_expectations/tree/develop/contrib/experimental/great_expectations_experimental/expectations)
+- Created a <TechnicalTag tag="custom_expectation" text="Custom Expectation"/> ***or*** identified a Custom Expectation for use from the [Great Expectations Experimental Library](https://github.com/great-expectations/great_expectations/tree/develop/contrib/experimental/great_expectations_experimental/expectations)
 
 </Prerequisites>
 
@@ -35,9 +36,9 @@ This guide will walk you through the process of utilizing Custom Expectations, w
 If you're using a Custom Expectation you've built, 
 you'll need to place it in the `great_expectations/plugins/expectations` folder of your Great Expectations deployment. 
 
-When you instantiate your [**Data Context**](../../../reference/data_context.md), it will automatically make all plugins in the directory available for use, 
+When you instantiate your <TechnicalTag tag="data_context" text="Data Context"/>, it will automatically make all plugins in the directory available for use, 
 allowing you to import your Custom Expectation from that directory whenever and wherever it will be used. 
-This import will be needed when an [**Expectation Suite**](../../../reference/expectations/expectation_suite_operations.md) is created, *and* when a [**Checkpoint**](../../../reference/checkpoints_and_actions.md) is defined and run.
+This import will be needed when an <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> is created, *and* when a <TechnicalTag tag="checkpoint" text="Checkpoint"/> is defined and run.
 
 ### 2. Use in a Suite
 
@@ -129,7 +130,7 @@ Once that is done, you will be able to import directly from that package:
 from great_expectations_experimental.expectations.expect_column_values_to_be_alphabetical import ExpectColumnValuesToBeAlphabetical
 ```
 
-This import will be needed when an [**Expectation Suite**](../../../reference/expectations/expectation_suite_operations.md) is created, *and* when a [**Checkpoint**](../../../reference/checkpoints_and_actions.md) is defined and run.
+This import will be needed when an <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> is created, *and* when a <TechnicalTag tag="checkpoint" text="Checkpoint"/> is defined and run.
 
 ### 2. Use in a Suite
 
