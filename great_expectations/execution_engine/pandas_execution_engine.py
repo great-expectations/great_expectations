@@ -25,6 +25,7 @@ from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compr
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations.expectations.row_conditions import RowCondition, RowConditionParserType
 
 logger = logging.getLogger(__name__)
 
@@ -458,6 +459,17 @@ Please check your config."""
                 raise ge_exceptions.ValidationError(
                     f"Unable to find batch with batch_id {batch_id}"
                 )
+
+        filter_conditions: List[RowCondition] = domain_kwargs.get("filter_conditions", [])
+        # For PandasExecutionEngine only one filter condition is possible
+        if len(filter_conditions) == 1:
+            filter_condition = filter_conditions[0]
+            assert filter_condition.type_ == RowConditionParserType.GE, "filter_condition must be of type GE for PandasExecutionEngine"
+            data = data.query(filter_condition.condition, parser="pandas")
+        elif len(filter_conditions) > 1:
+            raise ge_exceptions.GreatExpectationsError(
+                "PandasExecutionEngine currently only supports a single filter condition."
+            )
 
         # Filtering by row condition.
         row_condition = domain_kwargs.get("row_condition", None)
