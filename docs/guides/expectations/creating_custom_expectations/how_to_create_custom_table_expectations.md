@@ -52,6 +52,9 @@ cp table_expectation_template.py /SOME_DIRECTORY/expect_table_columns_to_be_uniq
             <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
         </ul>
     </p>
+	<p>
+		See our <a href="how_to_use_custom_expectations.md">guide on how to use a Custom Expectation</a> for more!
+	</p>
   </div>
 </details>
 
