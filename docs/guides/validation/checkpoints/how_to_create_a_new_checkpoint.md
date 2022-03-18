@@ -1,12 +1,13 @@
 ---
 title: How to create a new Checkpoint
 ---
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you create a new Checkpoint, which allows you to couple an Expectation Suite with a data set to validate.
 
 Note: As of Great Expectations version 0.13.7, we have updated and improved the Checkpoints feature. You can continue to use your existing legacy Checkpoint workflows if you’re working with concepts from the Batch Kwargs (v2) API. If you’re using concepts from the BatchRequest (v3) API, please refer to the new Checkpoints guides.
 
-### Steps for Checkpoints (>=0.13.12)
+## Steps for Checkpoints (>=0.13.12)
 
 :::note Prerequisites: 
 
@@ -18,21 +19,21 @@ This how-to guide assumes you have already:
 
 :::
 
-##### 1. First, run the CLI command below.
+### 1. Use the CLI to open a Jupyter Notebook for creating a new Checkpoint
+
+To assist you with creating Checkpoints, our CLI has a convenience method that will open a Jupyter Notebook with all the scaffolding you need to easily configure and save your Checkpoint.  Simply run the following CLI command from your Data Context:
 
 ````console
 great_expectations checkpoint new my_checkpoint
 ````
 
-##### 2.  Next, you will be presented with a Jupyter Notebook which will guide you through the steps of creating a checkpoint.
+### 2. Configure and save your Checkpoint in the provided Jupyter Notebook
 
-### Additional Notes
+The Jupyter Notebook which was opened in the previous step will guide you through the steps of creating a Checkpoint.  It will also include a default configuration that you can edit to suite your use case. The following sections of this document walk you through an example of how to do this.
 
-Within this notebook, you will have the opportunity to create your own yaml Checkpoint configuration. The following text walks through an example.
+### 3. Configuring a SimpleCheckpoint (Example)
 
-#### SimpleCheckpoint Example
-
-##### 2a. Here is a simple example configuration. 
+#### 3a. Edit the configuration 
 
 For this example, we’ll demonstrate using a basic Checkpoint configuration with the `SimpleCheckpoint` class, which takes care of some defaults. Replace all names such as `my_datasource` with the respective DataSource, DataConnector, DataAsset, and Expectation Suite names you have configured in your `great_expectations.yml`.
 
@@ -54,7 +55,7 @@ validations:
 
 This is the minimum required to configure a Checkpoint that will run the Expectation Suite `my_suite` against the data asset `MyDataAsset`. See [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config) for advanced configuration options.
 
-##### 2b. Test your config using `context.test_yaml_config`.
+#### 3b. Test your config using `context.test_yaml_config`
 
 ````python
 context.test_yaml_config(yaml_config=config)
@@ -81,15 +82,15 @@ Checkpoint class name: SimpleCheckpoint
 
 If something about your configuration wasn’t set up correctly, `test_yaml_config` will raise an error.
 
-##### 2c. Store your Checkpoint config.
+#### 2c. Store your Checkpoint config
 
 After you are satisfied with your configuration, save it by running the appropriate cells in the Jupyter Notebook.
 
-##### 2d. (Optional:) Check your stored Checkpoint config.
+#### 2d. (Optional) Check your stored Checkpoint config
 
-If the Store Backend of your Checkpoint Store is on the local filesystem, you can navigate to the `checkpoints` store directory that is configured in `great_expectations.yml` and find the configuration files corresponding to the Checkpoints you created.
+If the Store backend of your Checkpoint Store is on the local filesystem, you can navigate to the `checkpoints` store directory that is configured in `great_expectations.yml` and find the configuration files corresponding to the Checkpoints you created.
 
-##### 2e. (Optional:) Test run the new Checkpoint and open Data Docs.
+#### 2e. (Optional) Test run the new Checkpoint and open Data Docs
 
 Now that you have stored your Checkpoint configuration to the Store backend configured for the Checkpoint Configuration store of your Data Context, you can also test `context.run_checkpoint`, right within your Jupyter Notebook by running the appropriate cells.
 
@@ -99,7 +100,7 @@ When `run_checkpoint` returns, the `checkpoint_run_result` can then be checked f
 
 For more advanced configurations of Checkpoints, please see [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config).
 
-### Additional Resources
+## Additional Resources
 
 * [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
 * [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)

@@ -5,21 +5,21 @@ title: How to pass an in-memory DataFrame to a Checkpoint
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you pass an in-memory DataFrame to an existing Checkpoint.
-This is especially useful if you already have your data in memory due to an existing process such as a pipeline runner.
+This guide will help you pass an in-memory DataFrame to an existing Checkpoint. This is especially useful if you already have your data in memory due to an existing process such as a pipeline runner.
 
 
 <Prerequisites>
 
-- Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
+- [Configured a Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
 
 </Prerequisites>
 
 ## Steps
 
-## 1. Setting up Great Expectations
-### Import the required libraries and load your DataContext
+### 1. Setting up Great Expectations
+#### Import the required libraries and load your DataContext
 
 
 
@@ -33,8 +33,8 @@ If you have an existing configured DataContext in your filesystem in the form of
 
 If you do not have a filesystem to work with, you can load your DataContext following the instructions in [How to instantiate a Data Context without a yml file](../../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md).
 
-## 2. Connecting to your data
-### Ensure your DataContext contains a Datasource with a RuntimeDataConnector
+### 2. Connecting to your data
+#### Ensure your DataContext contains a Datasource with a RuntimeDataConnector
 
 In order to pass in a DataFrame at runtime, your `great_expectations.yml` should contain a Datasource configured with a `RuntimeDataConnector`. If it does not, you can add a new Datasource using the code below:
 
@@ -68,8 +68,8 @@ After running the CLI command above, choose option 1 for "Files on a filesystem.
 </TabItem>
 </Tabs>
 
-## 3. Creating Expectations and validating your data
-### Create a Checkpoint and pass it the DataFrame at runtime
+### 3. Creating Expectations and validating your data
+#### Create a Checkpoint and pass it the DataFrame at runtime
 
 You will need an Expectation Suite to validate your data against. If you have not already created an Expectation Suite for your in-memory DataFrame, reference [How to create and edit Expectations with instant feedback from a sample Batch of data](../../expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) to create your suite.
 
