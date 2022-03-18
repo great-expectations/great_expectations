@@ -207,7 +207,7 @@ def test_alice_profiler_user_workflow_single_batch(
                     {
                         "anonymized_name": "116c25bb5cf9b84958846024fe1c2b7b",
                         "anonymized_domain_builder": {
-                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "parent_class": "ColumnDomainBuilder",
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
@@ -562,7 +562,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                     {
                         "anonymized_name": "716348d3985f11679de53ec2b6ce5987",
                         "anonymized_domain_builder": {
-                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "parent_class": "ColumnDomainBuilder",
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
@@ -602,7 +602,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                     {
                         "anonymized_name": "38f59421a7c7b59a45b547a73c7714f9",
                         "anonymized_domain_builder": {
-                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "parent_class": "ColumnDomainBuilder",
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
@@ -1689,7 +1689,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     {
                         "anonymized_name": "f54fc6b216560f2a56a3cced587fb6e3",
                         "anonymized_domain_builder": {
-                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "parent_class": "ColumnDomainBuilder",
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
