@@ -414,11 +414,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
         value_set = configuration.kwargs.get(
             "value_set"
-        ) or self.default_kwarg_values.get(
-            "value_set"
-        )  # raises if default_kwarg_values is not overridden & value_set not provided
+        ) or self.default_kwarg_values.get("value_set")
         try:
-            assert value_set != [] and value_set is not None, "value_set is required"
+            assert (
+                "value_set" in configuration.kwargs or value_set
+            ), "value_set is required"
             assert isinstance(
                 value_set, (list, set, dict)
             ), "value_set must be a list, set, or dict"
