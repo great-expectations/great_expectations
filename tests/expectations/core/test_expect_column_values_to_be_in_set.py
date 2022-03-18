@@ -11,12 +11,14 @@ from great_expectations.expectations.core.expect_column_values_to_be_in_set impo
 )
 
 
+# <snippet>
 class ExpectColumnValuesToBeTwoLetterCountryCode(ExpectColumnValuesToBeInSet):
     default_kwarg_values = {
         "value_set": ["FR", "DE", "CH", "ES", "IT", "BE", "NL", "PL"],
     }
 
 
+# </snippet>
 def test_expect_column_values_to_be_in_set_fail(
     data_context_with_datasource_pandas_engine,
 ):

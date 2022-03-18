@@ -28,19 +28,19 @@ As can be seen in the implementation below, we have chosen to keep our default m
 
 Notice that we do not need to set `default_kwarg_values` for all kwargs: it is sufficient to set them only for ones for which we would like to set a default value. To keep our implementation simple, we do not override the `metric_dependencies` or `success_keys`.
 
-```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L12-L18
+```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L13-L19
 ```
 
 We could also explicitly override our parent methods to modify the behavior of our new Expectation, for example by updating the configuration validation to require the values we set as defaults not be altered.
 
-```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L20-L25
+```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L21-L26
 ```
 
 Now for `expect_column_values_to_be_in_set`.
 
 In this case, we will only be changing our `value_set`:
 
-```python file=../../../../tests/expectations/core/test_expect_column_values_to_be_in_set.py#L14-L17
+```python file=../../../../tests/expectations/core/test_expect_column_values_to_be_in_set.py#L15-L18
 ```
 
 That's all there is to it - really!
@@ -55,7 +55,7 @@ Congratulations!<br/>&#127881; You've just built your first Parameterized Custom
 
 If you plan to contribute your Expectation to the public open source project, you should include a `library_metadata` object. For example:
 
-```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L27
+```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L28
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

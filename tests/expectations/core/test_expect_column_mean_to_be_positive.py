@@ -9,6 +9,7 @@ from great_expectations.expectations.core.expect_column_mean_to_be_between impor
 )
 
 
+# <snippet>
 class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
     """Expects the mean of values in this column to be positive"""
 
@@ -27,6 +28,7 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
     library_metadata = {"tags": ["basic stats"], "contributors": ["@joegargery"]}
 
 
+# </snippet>
 def test_expect_column_mean_to_be_positive(data_context_with_datasource_pandas_engine):
     context: DataContext = data_context_with_datasource_pandas_engine
 
