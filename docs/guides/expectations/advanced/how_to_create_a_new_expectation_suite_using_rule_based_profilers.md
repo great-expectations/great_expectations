@@ -111,7 +111,7 @@ Finally, you would use an `ExpectationConfigurationBuilder` to actually build yo
 You can see here that we use a special `$` syntax to reference `variables` and `parameters` that have been previously defined in our config. You can see a more thorough description of this syntax in the  docstring for [`ParameterContainer` here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/types/parameter_container.py).
 
 - When we put it all together, here is what our config with our single `row_count_rule` looks like:
-- 
+
 ```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L10-L44
 ```
 
