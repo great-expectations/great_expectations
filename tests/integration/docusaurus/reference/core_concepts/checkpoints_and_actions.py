@@ -1,5 +1,4 @@
 import os
-import warnings
 
 from ruamel import yaml
 
@@ -248,11 +247,11 @@ second_expectation_suite = second_validation_result["meta"]["expectation_suite_n
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
-# </snippet>
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "yellow_tripdata_sample_2019-01"
 assert second_expectation_suite == "my_expectation_suite"
 assert second_data_asset == "yellow_tripdata_sample_2019-02"
+# </snippet>
 
 # <snippet>
 documentation_results = """
@@ -334,11 +333,12 @@ second_expectation_suite = second_validation_result["meta"]["expectation_suite_n
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
-# </snippet>
+
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "yellow_tripdata_sample_2019-01"
 assert second_expectation_suite == "my_other_expectation_suite"
 assert second_data_asset == "yellow_tripdata_sample_2019-02"
+# </snippet>
 
 # <snippet>
 documentation_results = """
@@ -378,10 +378,10 @@ validations:
     expectation_suite_name: my_other_expectation_suite
 """
 # </snippet>
-
 context.add_checkpoint(**yaml.load(using_template))
 # <snippet>
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+# </snippet>
 assert results.success is True
 # <snippet>
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
@@ -395,11 +395,12 @@ second_expectation_suite = second_validation_result["meta"]["expectation_suite_n
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
-# </snippet>
+
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "yellow_tripdata_sample_2019-01"
 assert second_expectation_suite == "my_other_expectation_suite"
 assert second_data_asset == "yellow_tripdata_sample_2019-02"
+# </snippet>
 
 # <snippet>
 documentation_results = """
@@ -443,7 +444,22 @@ context.add_checkpoint(**yaml.load(using_simple_checkpoint))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
 assert results.success is True
+validation_result = list(results.run_results.items())[0][1]["validation_result"]
 
+# <snippet>
+expectation_suite = validation_result["meta"]["expectation_suite_name"]
+data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+
+assert expectation_suite == "my_expectation_suite"
+assert data_asset == "yellow_tripdata_sample_2019-01"
+# </snippet>
+
+# <snippet>
+documentation_results: str = """
+print(expectation_suite)
+my_expectation_suite
+"""
+# </snippet>
 
 # <snippet>
 equivalent_using_checkpoint = """
@@ -490,10 +506,10 @@ validation_result = list(results.run_results.items())[0][1]["validation_result"]
 # <snippet>
 expectation_suite = validation_result["meta"]["expectation_suite_name"]
 data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
-# </snippet>
 
 assert expectation_suite == "my_expectation_suite"
 assert data_asset == "yellow_tripdata_sample_2019-01"
+# </snippet>
 
 # <snippet>
 documentation_results: str = """
