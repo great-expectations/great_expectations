@@ -88,7 +88,7 @@ rules:
           profiler_details: $parameter.max_range.details
   my_rule_for_timestamps:
     domain_builder:
-      class_name: SimpleColumnSuffixDomainBuilder
+      class_name: ColumnDomainBuilder
       # BatchRequest yielding exactly one batch (March, 2019 trip data)
       batch_request:
         datasource_name: taxi_pandas
@@ -96,7 +96,7 @@ rules:
         data_asset_name: my_reports
         data_connector_query:
           index: -1
-      column_name_suffixes:
+      include_column_name_suffixes:
         - _datetime
     parameter_builders:
       - name: my_date_format
@@ -123,7 +123,7 @@ rules:
               - "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
   rule_for_regex:
     domain_builder:
-      class_name: SimpleColumnSuffixDomainBuilder
+      class_name: ColumnDomainBuilder
       # BatchRequest yielding exactly one batch (March, 2019 trip data)
       batch_request:
         datasource_name: taxi_pandas
@@ -131,7 +131,7 @@ rules:
         data_asset_name: my_reports
         data_connector_query:
           index: -1
-      column_name_suffixes:
+      include_column_name_suffixes:
         - ID
     parameter_builders:
       - name: my_regex
