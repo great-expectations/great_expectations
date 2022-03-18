@@ -1,12 +1,15 @@
 import itertools
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
+    AttributedResolvedMetrics,
     MetricMultiBatchParameterBuilder,
+    MetricValues,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.types.parameter_container import (
@@ -32,6 +35,15 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
            high cardinality could require a large amount of memory.
         2. This ParameterBuilder filters null values out from the unique value_set.
     """
+
+    exclude_field_names: Set[
+        str
+    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "metric_name",
+        "enforce_numeric_metric",
+        "replace_nan_with_zero",
+        "reduce_scalar_metric",
+    }
 
     def __init__(
         self,
@@ -82,7 +94,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
         """
-        # Build the list of unique values for each batch
+        # Build the list of unique values for each Batch object.
         super().build_parameters(
             parameter_container=parameter_container,
             domain=domain,
@@ -91,8 +103,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameter_computation_impl=super()._build_parameters,
         )
 
-        # Retrieve and replace the list of unique values for each batch with
-        # the set of unique values for all batches in the given domain.
+        # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.fully_qualified_parameter_name,
@@ -101,10 +112,19 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameters=parameters,
         )
 
+        # This should never happen.
+        if not (
+            isinstance(parameter_node.value, list) and len(parameter_node.value) == 1
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({parameter_node.value} found).'
+            )
+
+        attributed_resolved_metrics: AttributedResolvedMetrics = parameter_node.value[0]
+        metric_values: MetricValues = attributed_resolved_metrics.metric_values
+
         return (
-            _get_unique_values_from_nested_collection_of_sets(
-                collection=parameter_node.value
-            ),
+            _get_unique_values_from_nested_collection_of_sets(collection=metric_values),
             parameter_node.details,
         )
 

@@ -14,12 +14,12 @@ from great_expectations.marshmallow__shade import (
     post_load,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
+    convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types.parameter_container import (
-    VARIABLES_KEY,
+from great_expectations.rule_based_profiler.types import (
+    VARIABLES_PREFIX,
     ParameterContainer,
-    build_parameter_container_for_variables,
 )
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.util import (
@@ -128,14 +128,14 @@ class DomainBuilderConfigSchema(NotNullSchema):
 
     __config_class__ = DomainBuilderConfig
 
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
     module_name = fields.String(
         required=False,
         allow_none=True,
         missing="great_expectations.rule_based_profiler.domain_builder",
+    )
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
     )
     batch_request = fields.Raw(
         required=False,
@@ -176,14 +176,19 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=True,
         allow_none=False,
     )
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
     module_name = fields.String(
         required=False,
         allow_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
+    )
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
+    )
+    json_serialize = fields.Boolean(
+        required=False,
+        allow_none=True,
+        missing=True,
     )
     batch_request = fields.Raw(
         required=False,
@@ -220,14 +225,14 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
 
     __config_class__ = ExpectationConfigurationBuilderConfig
 
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
     module_name = fields.String(
         required=False,
         allow_none=True,
         missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
+    )
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
     )
     expectation_type = fields.Str(
         required=True,
@@ -410,8 +415,8 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     def resolve_config_using_acceptable_arguments(
         cls,
         profiler: "RuleBasedProfiler",  # noqa: F821
-        variables: Optional[dict] = None,
-        rules: Optional[Dict[str, dict]] = None,
+        variables: Optional[Dict[str, Any]] = None,
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
     ) -> "RuleBasedProfilerConfig":  # noqa: F821
         """Reconciles variables/rules by taking into account runtime overrides and variable substitution.
 
@@ -427,39 +432,44 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         Returns:
             An instance of RuleBasedProfilerConfig that represents the reconciled profiler.
         """
-        runtime_config: RuleBasedProfilerConfig = profiler.config
-
-        runtime_variables: dict = profiler.reconcile_profiler_variables_as_dict(
-            variables=variables
+        effective_variables: Optional[
+            ParameterContainer
+        ] = profiler.reconcile_profiler_variables(
+            variables=variables,
         )
-        variables_container: ParameterContainer = (
-            build_parameter_container_for_variables(variables_configs=runtime_variables)
+        runtime_variables: Optional[Dict[str, Any]] = convert_variables_to_dict(
+            variables=effective_variables
         )
 
-        effective_rules: Dict[
-            str, "Rule"  # noqa: F821
-        ] = profiler.reconcile_profiler_rules_as_dict(rules=rules)
-        runtime_rules: Dict[str, dict] = {}
-        for name, rule in effective_rules.items():
-            rule_with_substituted_vars: dict = (
-                RuleBasedProfilerConfig._substitute_variables_in_config(
-                    rule=rule, variables_container=variables_container
-                )
+        effective_rules: List["Rule"] = profiler.reconcile_profiler_rules(  # noqa: F821
+            rules=rules,
+        )
+
+        rule: "Rule"  # noqa: F821
+        effective_rules_dict: Dict[str, "Rule"] = {  # noqa: F821
+            rule.name: rule for rule in effective_rules
+        }
+        runtime_rules: Dict[str, dict] = {
+            name: RuleBasedProfilerConfig._substitute_variables_in_config(
+                rule=rule,
+                variables_container=effective_variables,
             )
-            runtime_rules[name] = rule_with_substituted_vars
+            for name, rule in effective_rules_dict.items()
+        }
 
         return cls(
             class_name=profiler.__class__.__name__,
             module_name=profiler.__class__.__module__,
-            name=runtime_config.name,
-            config_version=runtime_config.config_version,
+            name=profiler.config.name,
+            config_version=profiler.config.config_version,
             variables=runtime_variables,
             rules=runtime_rules,
         )
 
     @staticmethod
     def _substitute_variables_in_config(
-        rule: "Rule", variables_container: ParameterContainer
+        rule: "Rule",  # noqa: F821
+        variables_container: ParameterContainer,
     ) -> dict:
         """Recursively updates a given rule to substitute $variable references.
 
@@ -474,7 +484,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         def _traverse_and_substitute(node: Any) -> None:
             if isinstance(node, dict):
                 for key, val in node.copy().items():
-                    if isinstance(val, str) and val.startswith(VARIABLES_KEY):
+                    if isinstance(val, str) and val.startswith(VARIABLES_PREFIX):
                         node[key] = get_parameter_value_and_validate_return_type(
                             domain=None,
                             parameter_reference=val,
@@ -500,20 +510,19 @@ class RuleBasedProfilerConfigSchema(Schema):
 
     class Meta:
         unknown = INCLUDE
+        fields = (
+            "name",
+            "config_version",
+            "module_name",
+            "class_name",
+            "variables",
+            "rules",
+        )
+        ordered = True
 
     name = fields.String(
         required=True,
         allow_none=False,
-    )
-    class_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="RuleBasedProfiler",
-    )
-    module_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="great_expectations.rule_based_profiler",
     )
     config_version = fields.Float(
         required=True,
@@ -522,6 +531,16 @@ class RuleBasedProfilerConfigSchema(Schema):
         error_messages={
             "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
         },
+    )
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.rule_based_profiler",
+    )
+    class_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="RuleBasedProfiler",
     )
     variables = fields.Dict(
         keys=fields.String(

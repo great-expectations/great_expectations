@@ -12,7 +12,7 @@ variables:
     data_asset_name: my_reports
     data_connector_query:
       index: ":-1"
-  sampling_method: oneshot  # Choices: bootstrap (default) or oneshot (inaccurate -- should be used only for testing).
+  estimator: oneshot  # Choices: bootstrap (default) or oneshot (inaccurate -- should be used only for testing).
   false_positive_rate: 1.0e-2
   mostly: 1.0
 
@@ -25,7 +25,7 @@ rules:
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         metric_name: table.row_count
-        sampling_method: $variables.sampling_method
+        estimator: $variables.estimator
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 0
         truncate_values:
@@ -40,7 +40,7 @@ rules:
           profiler_details: $parameter.row_count_range.details
   column_ranges_rule:
     domain_builder:
-      class_name: SimpleSemanticTypeColumnDomainBuilder
+      class_name: ColumnDomainBuilder
       # BatchRequest yielding exactly one batch (March, 2019 trip data)
       batch_request:
         datasource_name: taxi_pandas
@@ -48,7 +48,7 @@ rules:
         data_asset_name: my_reports
         data_connector_query:
           index: -1
-      semantic_types:
+      include_semantic_types:
         - numeric
     parameter_builders:
       - name: min_range
@@ -56,7 +56,7 @@ rules:
         batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
-        sampling_method: $variables.sampling_method
+        estimator: $variables.estimator
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
       - name: max_range
@@ -64,7 +64,7 @@ rules:
         batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
-        sampling_method: $variables.sampling_method
+        estimator: $variables.estimator
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
     expectation_configuration_builders:
@@ -163,7 +163,7 @@ rules:
       module_name: great_expectations.rule_based_profiler.domain_builder
       batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
       limit_mode: VERY_FEW
-      exclude_columns: DOLocationID, RatecodeID, store_and_fwd_flag, payment_type, extra, mta_tax, improvement_surcharge, congestion_surcharge
+      exclude_column_names: DOLocationID, RatecodeID, store_and_fwd_flag, payment_type, extra, mta_tax, improvement_surcharge, congestion_surcharge
     parameter_builders:
       - name: my_pickup_location_id_value_set
         class_name: ValueSetMultiBatchParameterBuilder

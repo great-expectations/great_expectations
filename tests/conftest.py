@@ -7,6 +7,7 @@ import os
 import random
 import shutil
 import sys
+import warnings
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -70,7 +71,7 @@ from great_expectations.self_check.util import (
     get_dataset,
     get_sqlite_connection_url,
 )
-from great_expectations.util import is_library_loadable, probabilistic_test
+from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
 
 RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
@@ -119,10 +120,16 @@ def pytest_configure(config):
 
 
 def pytest_addoption(parser):
+    # note: --no-spark will be deprecated in favor of --spark
     parser.addoption(
         "--no-spark",
         action="store_true",
-        help="If set, suppress all tests against the spark test suite",
+        help="If set, suppress tests against the spark test suite",
+    )
+    parser.addoption(
+        "--spark",
+        action="store_true",
+        help="If set, execute tests against the spark test suite",
     )
     parser.addoption(
         "--no-sqlalchemy",
@@ -130,9 +137,15 @@ def pytest_addoption(parser):
         help="If set, suppress all tests using sqlalchemy",
     )
     parser.addoption(
+        "--postgresql",
+        action="store_true",
+        help="If set, execute tests against postgresql",
+    )
+    # note: --no-postgresql will be deprecated in favor of --postgresql
+    parser.addoption(
         "--no-postgresql",
         action="store_true",
-        help="If set, suppress all tests against postgresql",
+        help="If set, supress tests against postgresql",
     )
     parser.addoption(
         "--mysql",
@@ -185,10 +198,21 @@ def build_test_backends_list(metafunc):
 
 
 def build_test_backends_list_cfe(metafunc):
+    # adding deprecation warnings
+    if metafunc.config.getoption("--no-postgresql"):
+        warnings.warn(
+            "--no-sqlalchemy is deprecated as of v0.14 in favor of the --postgresql flag. It will be removed in v0.16. Please adjust your tests accordingly",
+            DeprecationWarning,
+        )
+    if metafunc.config.getoption("--no-spark"):
+        warnings.warn(
+            "--no-spark is deprecated as of v0.14 in favor of the --spark flag. It will be removed in v0.16. Please adjust your tests accordingly.",
+            DeprecationWarning,
+        )
     include_pandas: bool = True
-    include_spark: bool = not metafunc.config.getoption("--no-spark")
+    include_spark: bool = metafunc.config.getoption("--spark")
     include_sqlalchemy: bool = not metafunc.config.getoption("--no-sqlalchemy")
-    include_postgresql = not metafunc.config.getoption("--no-postgresql")
+    include_postgresql: bool = metafunc.config.getoption("--postgresql")
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
@@ -201,6 +225,7 @@ def build_test_backends_list_cfe(metafunc):
         include_mysql=include_mysql,
         include_mssql=include_mssql,
         include_bigquery=include_bigquery,
+        include_aws=include_aws,
     )
     return test_backend_names
 
@@ -229,15 +254,6 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_aws_integration)
         if "docs" in item.keywords:
             item.add_marker(skip_docs_integration)
-
-
-@pytest.fixture
-def always_failing_test():
-    @probabilistic_test
-    def failing_test_func():
-        assert False, "Executing 'test_method()' failed."
-
-    return failing_test_func
 
 
 @pytest.fixture(autouse=True)
@@ -4935,6 +4951,46 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
 
 
 @pytest.fixture
+def data_context_with_query_store(
+    empty_data_context, titanic_sqlite_db_connection_string
+):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: {titanic_sqlite_db_connection_string}
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+    """
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    store_config = yaml.load(
+        f"""
+    class_name: SqlAlchemyQueryStore
+    credentials:
+        connection_string: {titanic_sqlite_db_connection_string}
+    queries:
+        col_count:
+            query: "SELECT COUNT(*) FROM titanic;"
+            return_type: "scalar"
+        dist_col_count:
+            query: "SELECT COUNT(DISTINCT PClass) FROM titanic;"
+            return_type: "scalar"
+    """
+    )
+    context.add_store("my_query_store", store_config)
+    return context
+
+
+@pytest.fixture
 def ge_cloud_base_url():
     return "https://app.test.greatexpectations.io"
 
@@ -5562,7 +5618,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    my_row_count_range_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_row_count_range_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -5582,7 +5638,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_ranges_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_column_ranges_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -6187,7 +6243,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_column_timestamps_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -6243,7 +6299,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ),
     ]
-    my_column_regex_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_column_regex_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -6370,35 +6426,33 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
-        my_row_count_range_rule_expectation_configurations_oneshot_sampling_method
+        my_row_count_range_rule_expectation_configurations_oneshot_estimator
     )
     expectation_configurations.extend(
-        my_column_ranges_rule_expectation_configurations_oneshot_sampling_method
+        my_column_ranges_rule_expectation_configurations_oneshot_estimator
     )
     expectation_configurations.extend(
-        my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method
+        my_column_timestamps_rule_expectation_configurations_oneshot_estimator
     )
 
     expectation_configurations.extend(
-        my_column_regex_rule_expectation_configurations_oneshot_sampling_method
+        my_column_regex_rule_expectation_configurations_oneshot_estimator
     )
     expectation_configurations.extend(
         my_rule_for_very_few_cardinality_expectation_configurations
     )
-    expectation_suite_name_oneshot_sampling_method: str = (
-        "bobby_columnar_table_multi_batch_oneshot_sampling_method"
+    expectation_suite_name_oneshot_estimator: str = (
+        "bobby_columnar_table_multi_batch_oneshot_estimator"
     )
-    expected_expectation_suite_oneshot_sampling_method: ExpectationSuite = (
-        ExpectationSuite(
-            expectation_suite_name=expectation_suite_name_oneshot_sampling_method,
-            data_context=empty_data_context,
-        )
+    expected_expectation_suite_oneshot_estimator: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name_oneshot_estimator,
+        data_context=empty_data_context,
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
-        expected_expectation_suite_oneshot_sampling_method._add_expectation(
+        expected_expectation_suite_oneshot_estimator._add_expectation(
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
@@ -6413,16 +6467,16 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
-    expected_expectation_suite_oneshot_sampling_method.add_citation(
+    expected_expectation_suite_oneshot_estimator.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
         profiler_config=serialized_config,
     )
 
     return {
         "profiler_config": verbose_profiler_config,
-        "test_configuration_oneshot_sampling_method": {
-            "expectation_suite_name": expectation_suite_name_oneshot_sampling_method,
-            "expected_expectation_suite": expected_expectation_suite_oneshot_sampling_method,
+        "test_configuration_oneshot_estimator": {
+            "expectation_suite_name": expectation_suite_name_oneshot_estimator,
+            "expected_expectation_suite": expected_expectation_suite_oneshot_estimator,
         },
     }
 
@@ -6549,8 +6603,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    expectation_suite_name_bootstrap_sampling_method: str = (
-        "bobby_columnar_table_multi_batch_bootstrap_sampling_method"
+    expectation_suite_name_bootstrap_estimator: str = (
+        "bobby_columnar_table_multi_batch_bootstrap_estimator"
     )
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
@@ -6585,8 +6639,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
 
     return {
         "profiler_config": verbose_profiler_config,
-        "test_configuration_bootstrap_sampling_method": {
-            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
+        "test_configuration_bootstrap_estimator": {
+            "expectation_suite_name": expectation_suite_name_bootstrap_estimator,
             "expect_table_row_count_to_be_between_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value,
             "expect_table_row_count_to_be_between_min_value_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value,
             "expect_table_row_count_to_be_between_max_value_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value,
@@ -6703,14 +6757,14 @@ def quentin_columnar_table_multi_batch():
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    expectation_suite_name_bootstrap_sampling_method: str = (
+    expectation_suite_name_bootstrap_estimator: str = (
         "quentin_columnar_table_multi_batch"
     )
 
     return {
         "profiler_config": verbose_profiler_config,
         "test_configuration": {
-            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
+            "expectation_suite_name": expectation_suite_name_bootstrap_estimator,
             "expect_column_quantile_values_to_be_between_quantile_ranges_by_column": {
                 "tolls_amount": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
                 "fare_amount": [

@@ -124,6 +124,7 @@ class ParameterBuilder(Builder, ABC):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         parameter_computation_impl: Optional[Callable] = None,
+        json_serialize: Optional[bool] = None,
     ) -> None:
         computed_parameter_value: Any
         parameter_computation_details: dict
@@ -141,14 +142,15 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
-        # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        json_serialize: bool = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.json_serialize,
-            expected_return_type=bool,
-            variables=variables,
-            parameters=parameters,
-        )
+        if json_serialize is None:
+            # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            json_serialize = get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.json_serialize,
+                expected_return_type=bool,
+                variables=variables,
+                parameters=parameters,
+            )
 
         parameter_values: Dict[str, Any] = {
             self.fully_qualified_parameter_name: {
@@ -175,32 +177,6 @@ class ParameterBuilder(Builder, ABC):
     @property
     def json_serialize(self) -> Union[str, bool]:
         return self._json_serialize
-
-    @property
-    def data_context(self) -> "DataContext":  # noqa: F821
-        return self._data_context
-
-    """
-    Full getter/setter accessors for "batch_request" and "batch_list" are for configuring ParameterBuilder dynamically.
-    """
-
-    @property
-    def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
-        return self._batch_request
-
-    @batch_request.setter
-    def batch_request(
-        self, value: Union[BatchRequest, RuntimeBatchRequest, dict]
-    ) -> None:
-        self._batch_request = value
-
-    @property
-    def batch_list(self) -> Optional[List[Batch]]:
-        return self._batch_list
-
-    @batch_list.setter
-    def batch_list(self, value: List[Batch]) -> None:
-        self._batch_list = value
 
     @abstractmethod
     def _build_parameters(
@@ -302,7 +278,7 @@ class ParameterBuilder(Builder, ABC):
         Then, all "MetricConfiguration" objects, collected into list as container, are resolved simultaneously.
         """
 
-        # Fist: Gather "metric_domain_kwargs" (corresponding to "batch_ids").
+        # First: Gather "metric_domain_kwargs" (corresponding to "batch_ids").
 
         domain_kwargs: dict = build_metric_domain_kwargs(
             batch_id=None,
@@ -396,9 +372,14 @@ class ParameterBuilder(Builder, ABC):
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
-            attributed_resolved_metrics.add_resolved_metric(
-                value=resolved_metrics[metric_configuration.id]
-            )
+            resolved_metric_value: Union[
+                Tuple[str, str, str], None
+            ] = resolved_metrics.get(metric_configuration.id)
+            if resolved_metric_value is None:
+                raise ge_exceptions.ProfilerExecutionError(
+                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
+                )
+            attributed_resolved_metrics.add_resolved_metric(value=resolved_metric_value)
 
         metric_attributes_id: str
         metric_values: AttributedResolvedMetrics
@@ -427,7 +408,7 @@ class ParameterBuilder(Builder, ABC):
                 metric_values.metric_values = np.array(metric_values.metric_values)
                 attributed_resolved_metrics_map[metric_attributes_id] = metric_values
 
-        # Eigth: Apply numeric/hygiene directives (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+        # Eighth: Apply numeric/hygiene directives (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
         for (
             metric_attributes_id,
             metric_values,
@@ -442,13 +423,9 @@ class ParameterBuilder(Builder, ABC):
                 parameters=parameters,
             )
 
-        # Nineth: Compose and return result to receiver (apply simplications to cases of single "metric_value_kwargs").
+        # Ninth: Compose and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
         return MetricComputationResult(
-            metric_values=list(attributed_resolved_metrics_map.values())[
-                0
-            ].metric_values
-            if len(metric_value_kwargs) == 1
-            else list(attributed_resolved_metrics_map.values()),
+            list(attributed_resolved_metrics_map.values()),
             details={
                 "metric_configuration": {
                     "metric_name": metric_name,

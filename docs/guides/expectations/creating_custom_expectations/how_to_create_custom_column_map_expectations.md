@@ -3,7 +3,9 @@ title: How to create a Custom Column Map Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-**`ColumnMapExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+**`ColumnMapExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
+They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If that percentage meets a specified threshold (100% by default), the Expectation considers that data valid. 
+This threshold is configured via the `mostly` parameter, which can be passed as input to your Custom `ColumnMapExpectation` as a `float` between 0 and 1.
 
 This guide will walk you through the process of creating a custom `ColumnMapExpectation`.
 
@@ -106,7 +108,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L378
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L376
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -161,7 +163,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 		  Only 0 / 2 tests for pandas are passing
-		  Failing: basic_positive_test, basic_positive_test
+		  Failing: basic_positive_test, basic_negative_test
 ...
 ```
 
@@ -273,7 +275,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L371-L374
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L369-L372
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

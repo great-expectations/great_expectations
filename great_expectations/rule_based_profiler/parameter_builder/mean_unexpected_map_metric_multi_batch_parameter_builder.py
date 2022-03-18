@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -8,8 +8,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
@@ -25,6 +23,15 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
     """
     Compute mean unexpected count ratio (as a fraction) of a specified map-style metric across all specified batches.
     """
+
+    exclude_field_names: Set[
+        str
+    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "metric_name",
+        "enforce_numeric_metric",
+        "replace_nan_with_zero",
+        "reduce_scalar_metric",
+    }
 
     def __init__(
         self,
@@ -125,14 +132,14 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         total_count_values: MetricValues = total_count_parameter_node.value
 
         # Obtain null_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        null_count_parameter_builder_name: str = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.null_count_parameter_builder_name,
-                expected_return_type=str,
-                variables=variables,
-                parameters=parameters,
-            )
+        null_count_parameter_builder_name: Optional[
+            str
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.null_count_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
 
         batch_ids: Optional[List[str]] = self.get_batch_ids(
