@@ -30,7 +30,6 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
     domains: List[Domain] = domain_builder.get_domains()
 
     alice_all_column_names: List[str] = [
-        "id",
         "event_type",
         "user_id",
         "event_ts",
@@ -49,7 +48,7 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
         )
         for column_name in alice_all_column_names
     ]
-    assert len(domains) == 7
+    assert len(domains) == 6
     assert domains == alice_all_column_domains
 
 
