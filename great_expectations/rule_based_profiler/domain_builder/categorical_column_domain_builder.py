@@ -15,7 +15,11 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
+    SemanticDomainTypes,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -33,8 +37,16 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        include_semantic_types: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        ] = None,
+        exclude_semantic_types: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        ] = None,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        semantic_type_filter_module_name: Optional[str] = None,
+        semantic_type_filter_class_name: Optional[str] = None,
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
@@ -58,8 +70,14 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
+            include_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
+            to be included
+            exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
+            to be excluded
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
+            semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces
+            semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
@@ -68,12 +86,33 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
         """
+        if include_semantic_types is None:
+            include_semantic_types = [
+                SemanticDomainTypes.LOGIC,
+            ]
+
+        if exclude_semantic_types is None:
+            exclude_semantic_types = [
+                SemanticDomainTypes.BINARY,
+                SemanticDomainTypes.CURRENCY,
+                SemanticDomainTypes.IDENTIFIER,
+            ]
+
+        if exclude_column_names is None:
+            exclude_column_names = [
+                "id",
+            ]
+
         super().__init__(
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
+            include_semantic_types=include_semantic_types,
+            exclude_semantic_types=exclude_semantic_types,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
+            semantic_type_filter_module_name=semantic_type_filter_module_name,
+            semantic_type_filter_class_name=semantic_type_filter_class_name,
         )
 
         self._limit_mode = limit_mode
@@ -114,10 +153,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         Returns:
             List of domains that match the desired cardinality.
         """
-        table_column_names: List[str] = self.get_effective_column_names(
-            variables=variables,
-        )
-
         # Obtain limit_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         limit_mode: Optional[
             Union[CardinalityLimitMode, str]
@@ -163,13 +198,20 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
 
+        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
+
+        table_column_names: List[str] = self.get_effective_column_names(
+            batch_ids=batch_ids,
+            validator=validator,
+            variables=variables,
+        )
+
         metrics_for_cardinality_check: Dict[
             str, List[MetricConfiguration]
         ] = self._generate_metric_configurations_to_check_cardinality(
             batch_ids=batch_ids, column_names=table_column_names
         )
 
-        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
         candidate_column_names: List[
             str
         ] = self._column_names_meeting_cardinality_limit(
