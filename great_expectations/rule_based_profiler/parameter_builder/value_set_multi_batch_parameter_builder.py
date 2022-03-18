@@ -11,8 +11,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
     MetricValues,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.rule_based_profiler.types.parameter_container import (
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
     ParameterNode,
 )
 
