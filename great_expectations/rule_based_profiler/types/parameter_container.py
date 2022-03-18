@@ -408,7 +408,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
                 fully_qualified_parameter_name[
                     (
                         len(
-                            f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}"
+                            f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
                         )
                     ) :
                 ]
