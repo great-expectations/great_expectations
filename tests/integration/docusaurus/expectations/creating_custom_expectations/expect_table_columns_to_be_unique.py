@@ -52,27 +52,27 @@ class TableColumnsUnique(TableMetricProvider):
 
         return unique_columns
 
-    @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
-        cls,
-        execution_engine,
-        metric_domain_kwargs,
-        metric_value_kwargs,
-        metrics,
-        runtime_configuration,
-    ):
-        raise NotImplementedError
-
-    @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
-        cls,
-        execution_engine,
-        metric_domain_kwargs,
-        metric_value_kwargs,
-        metrics,
-        runtime_configuration,
-    ):
-        raise NotImplementedError
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
+    # def _sqlalchemy(
+    #     cls,
+    #     execution_engine,
+    #     metric_domain_kwargs,
+    #     metric_value_kwargs,
+    #     metrics,
+    #     runtime_configuration,
+    # ):
+    #     raise NotImplementedError
+    #
+    # @metric_value(engine=SparkDFExecutionEngine)
+    # def _spark(
+    #     cls,
+    #     execution_engine,
+    #     metric_domain_kwargs,
+    #     metric_value_kwargs,
+    #     metrics,
+    #     runtime_configuration,
+    # ):
+    #     raise NotImplementedError
 
     @classmethod
     def _get_evaluation_dependencies(
