@@ -259,6 +259,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         "rules": {
             "rule_with_no_variables_no_parameters": {
                 "domain_builder": {
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder",
                     "class_name": "SimpleColumnSuffixDomainBuilder",
                     "column_name_suffixes": ["_amount"],
                     "batch_request": {
@@ -269,7 +270,8 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "data_connector_query": {"index": -1},
                         "limit": None,
                     },
-                    "module_name": "great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder",
+                    "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
+                    "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
                 },
                 "parameter_builders": [
                     {
