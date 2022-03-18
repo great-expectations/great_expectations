@@ -491,7 +491,7 @@ class ExecutionEngine(ABC):
         else:
             column = domain_kwargs["column"]
         row_condition: RowCondition = RowCondition(condition=f'col("{column}").notnull()', type_=RowConditionParserType.GE)
-        new_domain_kwargs.setdefault("row_conditions", []).append(row_condition)
+        new_domain_kwargs.setdefault("filter_conditions", []).append(row_condition)
         return new_domain_kwargs
 
     def resolve_data_reference(

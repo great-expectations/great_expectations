@@ -61,6 +61,7 @@ class ConditionParserError(GreatExpectationsError):
 class RowConditionParserType(enum.Enum):
     GE = "ge"  # GE intermediate language
     SPARK = "spark"
+    SPARK_SQL = "spark_sql"
     PANDAS = "pandas"
     PYTHON = "python"
     SQL = "sql"

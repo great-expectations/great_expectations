@@ -401,6 +401,11 @@ Please check your config."""
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
+        filter_conditions: List[RowCondition] = domain_kwargs.get("filter_conditions", [])
+        if len(filter_conditions) > 0:
+            filter_condition = self._combine_row_conditions(filter_conditions)
+            data = data.filter(filter_condition.condition)
+
         # Filtering by row condition.
         row_condition = domain_kwargs.get("row_condition", None)
         if row_condition:
@@ -480,6 +485,21 @@ Please check your config."""
 
         return data
 
+    def _combine_row_conditions(self, row_conditions: List[RowCondition]) -> RowCondition:
+        """Combine row conditions using AND if type_ is SPARK_SQL
+
+        Args:
+            row_conditions: Row conditions of type Spark
+
+        Returns:
+            Single Row Condition combined
+        """
+        assert all([condition.type_ == RowConditionParserType.SPARK_SQL for condition in row_conditions]), "All row conditions must have type SPARK_SQL"
+        raw_conditions: List[str] = [row_condition.condition for row_condition in row_conditions]
+        joined_condition: str = " AND ".join(raw_conditions)
+        return RowCondition(condition=joined_condition, type_=RowConditionParserType.SPARK_SQL)
+
+
     def get_compute_domain(
         self,
         domain_kwargs: dict,
@@ -535,12 +555,12 @@ Please check your config."""
         if filter_null:
             row_conditions.append(RowCondition(
                 condition=f"{column} IS NOT NULL",
-                type_=RowConditionParserType.GE
+                type_=RowConditionParserType.SPARK_SQL
             ))
         if filter_nan:
             row_conditions.append(RowCondition(
                 condition=f"NOT isnan({column})",
-                type_=RowConditionParserType.GE
+                type_=RowConditionParserType.SPARK_SQL
             ))
 
         if not (filter_null or filter_nan):
@@ -548,8 +568,7 @@ Please check your config."""
                 "add_column_row_condition called without specifying a desired row condition"
             )
 
-        new_domain_kwargs["condition_parser"] = "spark"
-        new_domain_kwargs.setdefault("row_conditions", []).extend(row_conditions)
+        new_domain_kwargs.setdefault("filter_conditions", []).extend(row_conditions)
 
         return new_domain_kwargs
 
