@@ -145,12 +145,12 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 **YAML**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L145-L171
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L150-L176
 ```
 
 **runtime**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L174
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L181
 ```
 
 </TabItem>
@@ -159,20 +159,20 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 
 **YAML**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L190-L220
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L199-L229
 ```
 
 **Runtime**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L223
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L234
 ```
 
 **Results**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L225-L235
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L239-L249
 ```
 
-```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L241-L251
+```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L258-L268
 ```
 
 </TabItem>
@@ -181,20 +181,17 @@ This configuration omits the "validations" key from the YAML, which means a "val
 
 **YAML**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L256-L276
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L275-L295
 ```
 
 **Runtime**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L279-L299
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L301-L321
 ```
 
 **Results**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L301-L311
-```
-
-```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L317-L327
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L325-L335
 ```
 
 </TabItem>
