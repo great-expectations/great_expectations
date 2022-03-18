@@ -5,7 +5,7 @@ import logging
 import uuid
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, List
 
 from dateutil.parser import parse
 
@@ -28,7 +28,8 @@ from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
-from great_expectations.expectations.row_conditions import parse_condition_to_spark
+from great_expectations.expectations.row_conditions import parse_condition_to_spark, RowCondition, \
+    RowConditionParserType
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -522,10 +523,6 @@ Please check your config."""
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
         # We explicitly handle filter_nan & filter_null for spark using a spark-native condition
-        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
-            raise GreatExpectationsError(
-                "ExecutionEngine does not support updating existing row_conditions."
-            )
 
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
         assert "column" in domain_kwargs or column_name is not None
@@ -533,20 +530,27 @@ Please check your config."""
             column = column_name
         else:
             column = domain_kwargs["column"]
-        if filter_null and filter_nan:
-            new_domain_kwargs[
-                "row_condition"
-            ] = f"NOT isnan({column}) AND {column} IS NOT NULL"
-        elif filter_null:
-            new_domain_kwargs["row_condition"] = f"{column} IS NOT NULL"
-        elif filter_nan:
-            new_domain_kwargs["row_condition"] = f"NOT isnan({column})"
-        else:
+
+        row_conditions: List[RowCondition] = []
+        if filter_null:
+            row_conditions.append(RowCondition(
+                condition=f"{column} IS NOT NULL",
+                type_=RowConditionParserType.GE
+            ))
+        if filter_nan:
+            row_conditions.append(RowCondition(
+                condition=f"NOT isnan({column})",
+                type_=RowConditionParserType.GE
+            ))
+
+        if not (filter_null or filter_nan):
             logger.warning(
                 "add_column_row_condition called without specifying a desired row condition"
             )
 
         new_domain_kwargs["condition_parser"] = "spark"
+        new_domain_kwargs.setdefault("row_conditions", []).extend(row_conditions)
+
         return new_domain_kwargs
 
     def resolve_metric_bundle(
