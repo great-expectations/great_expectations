@@ -55,6 +55,7 @@ resources:
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
+  isManual: $[eq(variables['Build.Reason'], 'Schedule')]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
@@ -64,7 +65,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -87,7 +88,7 @@ stages:
 
     jobs:
       - job: compatibility_matrix
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
@@ -162,7 +163,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
 
         services:
           postgres: postgres
@@ -242,7 +243,7 @@ stages:
 
     jobs:
       - job: test_usage_stats_messages
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
         variables:
           python.version: '3.8'
 
@@ -274,7 +275,7 @@ stages:
 
     jobs:
       - job: mysql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
 
         services:
           mysql: mysql
@@ -317,7 +318,7 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
 
         services:
           mssql: mssql
@@ -355,7 +356,7 @@ stages:
 
     jobs:
       - job: test_cli
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
 
         services:
           postgres: postgres
