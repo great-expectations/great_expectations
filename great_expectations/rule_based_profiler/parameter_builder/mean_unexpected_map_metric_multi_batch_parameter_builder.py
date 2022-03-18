@@ -11,7 +11,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
-    PARAMETER_PREFIX,
+    PARAMETER_KEY,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -118,7 +118,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         )
 
         fully_qualified_total_count_parameter_builder_name: str = (
-            f"{PARAMETER_PREFIX}{total_count_parameter_builder_name}"
+            f"{PARAMETER_KEY}{total_count_parameter_builder_name}"
         )
         # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         total_count_parameter_node: ParameterNode = (
@@ -155,7 +155,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             null_count_values = np.zeros(shape=(num_batch_ids,))
         else:
             fully_qualified_null_count_parameter_builder_name: str = (
-                f"{PARAMETER_PREFIX}{null_count_parameter_builder_name}"
+                f"{PARAMETER_KEY}{null_count_parameter_builder_name}"
             )
             # Obtain null_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
             null_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
