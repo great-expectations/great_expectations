@@ -1,10 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
-from great_expectations.rule_based_profiler.types import (
-    InferredSemanticDomainType,
-    SemanticDomainTypes,
-)
+from great_expectations.rule_based_profiler.types import SemanticDomainTypes
 
 
 class SemanticTypeFilter(ABC):
@@ -17,10 +14,9 @@ class SemanticTypeFilter(ABC):
     ) -> List[SemanticDomainTypes]:
         pass
 
+    @property
     @abstractmethod
-    def infer_semantic_domain_type_from_table_column_type(
+    def table_column_name_to_inferred_semantic_domain_type_mapping(
         self,
-        column_types_dict_list: List[Dict[str, Any]],
-        column_name: str,
-    ) -> InferredSemanticDomainType:
+    ) -> Dict[str, SemanticDomainTypes]:
         pass
