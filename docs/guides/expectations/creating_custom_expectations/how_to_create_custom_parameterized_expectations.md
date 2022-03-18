@@ -2,6 +2,7 @@
 title: How to create Custom Parameterized Expectations
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will walk you through the process of creating Parameterized Expectations - very quickly. This method is only available using the new Modular Expectations API introduced in 0.13.
 
@@ -11,7 +12,7 @@ This guide will walk you through the process of creating Parameterized Expectati
 
 </Prerequisites>
 
-A Parameterized [**Expectation**](../../../reference/expectations/expectations.md) is a capability unlocked by Modular Expectations. Now that Expectations are structured in class form, it is easy to inherit from these classes and build similar Expectations that are adapted to your own needs.
+A Parameterized <TechnicalTag tag="expectation" text="Expectation"/> is a capability unlocked by Modular Expectations. Now that Expectations are structured in class form, it is easy to inherit from these classes and build similar Expectations that are adapted to your own needs.
 
 ## Steps
 
@@ -60,7 +61,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
 
-Additionally, you will need to implement some basic examples and test cases before your contribution can be accepted. For guidance on examples and testing, see our [guide on implementing examples and test cases](./docs/guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
+Additionally, you will need to implement some basic examples and test cases before your contribution can be accepted. For guidance on examples and testing, see our [guide on implementing examples and test cases](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 
 :::note
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
