@@ -195,6 +195,15 @@ if __name__ == "__main__":
     broken_refs: List[DocusaurusRef] = evaluate_snippet_validity(docusaurus_refs)
     if broken_refs:
         print_diagnostic_report(broken_refs)
-        # sys.exit(1) # TODO(cdkini): Enable once all errors are resolved
     else:
         print("[SUCCESS] All snippets are valid and referenced properly!")
+
+    # Chetan - 20220316 - While this number should be 0, getting the number of warnings down takes time
+    # and effort. In the meanwhile, we want to set an upper bound on warnings to ensure we're not introducing
+    # further regressions. As snippets are validated, developers should update this number.
+    broken_ref_threshold: int = 503
+    broken_ref_count: int = len(broken_refs)
+    assert (
+        broken_ref_count <= broken_ref_threshold
+    ), f"""A broken snippet reference was introduced; please resolve the matter before merging.
+                We expect there to be {broken_ref_threshold} or fewer broken references (actual: {broken_ref_count})"""
