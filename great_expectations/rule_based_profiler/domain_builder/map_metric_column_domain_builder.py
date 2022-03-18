@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
@@ -26,6 +26,10 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+        exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
         semantic_type_filter_module_name: Optional[str] = None,
         semantic_type_filter_class_name: Optional[str] = None,
         include_semantic_types: Optional[
@@ -34,8 +38,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
-        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         max_unexpected_values: Union[str, int] = 0,
         max_unexpected_ratio: Optional[Union[str, float]] = None,
         min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
@@ -50,14 +52,16 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
+            include_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to match.
+            exclude_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to not match.
             semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces
             semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces
             include_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
-            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
-            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             max_unexpected_values: maximum "unexpected_count" value of "map_metric_name" (intra-Batch)
             max_unexpected_ratio: maximum "unexpected_count" value of "map_metric_name" divided by number of records
             (intra-Batch); if both "max_unexpected_values" and "max_unexpected_ratio" are specified, then
@@ -92,12 +96,14 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+            include_column_name_suffixes=include_column_name_suffixes,
+            exclude_column_name_suffixes=exclude_column_name_suffixes,
             semantic_type_filter_module_name=semantic_type_filter_module_name,
             semantic_type_filter_class_name=semantic_type_filter_class_name,
             include_semantic_types=include_semantic_types,
             exclude_semantic_types=exclude_semantic_types,
-            include_column_names=include_column_names,
-            exclude_column_names=exclude_column_names,
         )
 
         self._map_metric_name = map_metric_name
