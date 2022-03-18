@@ -87,7 +87,7 @@ stages:
 
     jobs:
       - job: compatibility_matrix
-#        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
@@ -162,7 +162,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
-#        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
 
         services:
           postgres: postgres
@@ -242,7 +242,7 @@ stages:
 
     jobs:
       - job: test_usage_stats_messages
-#        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
         variables:
           python.version: '3.8'
 
@@ -274,7 +274,7 @@ stages:
 
     jobs:
       - job: mysql
-#        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
 
         services:
           mysql: mysql
@@ -317,7 +317,7 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
-#        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
 
         services:
           mssql: mssql
@@ -355,7 +355,7 @@ stages:
 
     jobs:
       - job: test_cli
-#        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
 
         services:
           postgres: postgres
