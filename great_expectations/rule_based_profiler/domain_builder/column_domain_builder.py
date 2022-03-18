@@ -307,7 +307,7 @@ class ColumnDomainBuilder(DomainBuilder):
             effective_column_names: List[str] = list(
                 filter(
                     lambda candidate_column_name: not candidate_column_name.endswith(
-                        tuple(include_column_name_suffixes)
+                        tuple(exclude_column_name_suffixes)
                     ),
                     effective_column_names,
                 )
