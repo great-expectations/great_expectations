@@ -151,9 +151,11 @@ def _get_unique_values_from_nested_collection_of_sets(
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
     """
     unique_values: Set[Any] = set(
-        filter(
-            lambda element: element is not None,
-            set().union(*flattened),
+        sorted(
+            filter(
+                lambda element: element is not None,
+                set().union(*flattened),
+            )
         )
     )
 
