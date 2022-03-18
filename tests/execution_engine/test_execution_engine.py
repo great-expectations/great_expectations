@@ -3,6 +3,10 @@ import pytest
 
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 # Testing ordinary process of adding column row condition
@@ -15,16 +19,22 @@ def test_add_column_row_condition():
     # Checking that adding a simple column row condition is functional
     new_domain_kwargs = e.add_column_row_condition({}, "a")
     assert new_domain_kwargs == {
-        "condition_parser": "great_expectations__experimental__",
-        "row_condition": 'col("a").notnull()',
+        "filter_conditions": [
+            RowCondition(
+                condition='col("a").notnull()', type_=RowConditionParserType.GE
+            )
+        ]
     }
 
     # Ensuring that this also works when formatted differently
     new_domain_kwargs = e.add_column_row_condition({"column": "a"})
     assert new_domain_kwargs == {
         "column": "a",
-        "condition_parser": "great_expectations__experimental__",
-        "row_condition": 'col("a").notnull()',
+        "filter_conditions": [
+            RowCondition(
+                condition='col("a").notnull()', type_=RowConditionParserType.GE
+            )
+        ],
     }
 
     # Ensuring that everything still works if a row condition of None given
@@ -34,13 +44,49 @@ def test_add_column_row_condition():
     assert new_domain_kwargs == {
         "column": "a",
         "row_condition": None,
-        "condition_parser": "great_expectations__experimental__",
-        "row_condition": 'col("a").notnull()',
+        "filter_conditions": [
+            RowCondition(
+                condition='col("a").notnull()', type_=RowConditionParserType.GE
+            )
+        ],
     }
 
     # Identity case
     new_domain_kwargs = e.add_column_row_condition({}, "a", filter_null=False)
     assert new_domain_kwargs == {}
+
+
+def test_add_column_row_condition_filter_null_pandas():
+    e = PandasExecutionEngine()
+
+    # Ensuring that we don't override if a row condition is present
+    new_domain_kwargs = e.add_column_row_condition(
+        {"column": "a", "row_condition": "some_row_condition"}, filter_null=True
+    )
+    assert new_domain_kwargs == {
+        "column": "a",
+        "row_condition": "some_row_condition",
+        "filter_conditions": [
+            RowCondition(
+                condition='col("a").notnull()', type_=RowConditionParserType.GE
+            )
+        ],
+    }
+
+    # Ensuring that we don't override if a row condition is present,
+    # with default filter_null value
+    new_domain_kwargs = e.add_column_row_condition(
+        {"column": "a", "row_condition": "some_row_condition"},
+    )
+    assert new_domain_kwargs == {
+        "column": "a",
+        "row_condition": "some_row_condition",
+        "filter_conditions": [
+            RowCondition(
+                condition='col("a").notnull()', type_=RowConditionParserType.GE
+            )
+        ],
+    }
 
 
 # Edge cases
