@@ -7,13 +7,11 @@ from .domain import (  # isort:skip
     InferredSemanticDomainType,
 )
 from .parameter_container import (  # isort:skip
-    DOMAIN_KWARGS_PARAMETER_NAME,
-    PARAMETER_NAME_ROOT_FOR_VARIABLES,
-    PARAMETER_NAME_ROOT_FOR_PARAMETERS,
-    VARIABLES_PREFIX,
-    VARIABLES_KEY,
-    PARAMETER_PREFIX,
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     PARAMETER_KEY,
+    VARIABLES_KEY,
+    VARIABLES_PREFIX,
     ParameterNode,
     ParameterContainer,
     build_parameter_container,
