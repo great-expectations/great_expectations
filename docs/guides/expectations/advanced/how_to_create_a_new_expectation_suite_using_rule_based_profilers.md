@@ -38,7 +38,7 @@ While the contents of this document accurately reflect the state of the feature,
 ### 3. Set up your Datasource
 
 - Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas.md). For the purpose of this tutorial, we will work from a `yaml` to set up your <TechnicalTag tag="datasource" text="Datasource" /> config. When you open up your notebook to create and test and save your Datasource config, replace the config docstring with the following docstring:
-- 
+
 ```python
 example_yaml = f"""
 name: taxi_pandas
