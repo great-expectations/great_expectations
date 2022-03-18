@@ -18,7 +18,7 @@ This guide will help you pass an in-memory DataFrame to an existing Checkpoint. 
 
 ## Steps
 
-### 1. Setting up Great Expectations
+### 1. Set up Great Expectations
 #### Import the required libraries and load your DataContext
 
 
@@ -33,7 +33,7 @@ If you have an existing configured DataContext in your filesystem in the form of
 
 If you do not have a filesystem to work with, you can load your DataContext following the instructions in [How to instantiate a Data Context without a yml file](../../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md).
 
-### 2. Connecting to your data
+### 2. Connect to your data
 #### Ensure your DataContext contains a Datasource with a RuntimeDataConnector
 
 In order to pass in a DataFrame at runtime, your `great_expectations.yml` should contain a Datasource configured with a `RuntimeDataConnector`. If it does not, you can add a new Datasource using the code below:
@@ -46,6 +46,7 @@ In order to pass in a DataFrame at runtime, your `great_expectations.yml` should
   {label: 'Python', value:'python'},
   {label: 'CLI', value:'cli'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L15-L28
@@ -68,7 +69,7 @@ After running the CLI command above, choose option 1 for "Files on a filesystem.
 </TabItem>
 </Tabs>
 
-### 3. Creating Expectations and validating your data
+### 3. Create Expectations and Validate your data
 #### Create a Checkpoint and pass it the DataFrame at runtime
 
 You will need an Expectation Suite to validate your data against. If you have not already created an Expectation Suite for your in-memory DataFrame, reference [How to create and edit Expectations with instant feedback from a sample Batch of data](../../expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) to create your suite.
@@ -91,6 +92,7 @@ If we configure a `SimpleCheckpoint` that contains a single `batch_request` in `
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L72-L83
@@ -125,6 +127,7 @@ If we configure a `SimpleCheckpoint` that does not contain any `validations`:
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L133-L139
@@ -149,6 +152,6 @@ df_2 = pd.read_csv("<PATH TO DATA 2>")
 ```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L169-L191
 ```
 
-### Additional Notes
+## Additional Notes
 To view the full script used in this page, see it on GitHub:
 - [how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py)
