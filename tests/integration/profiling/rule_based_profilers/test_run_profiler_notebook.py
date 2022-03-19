@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import nbformat
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
@@ -43,3 +44,6 @@ def test_run_rbp_notebook(tmp_path):
     finally:
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
+
+    # clean up Expectations directory after running tests
+    shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/"))
