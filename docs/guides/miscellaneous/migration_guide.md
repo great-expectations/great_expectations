@@ -3,7 +3,7 @@ import TabItem from '@theme/TabItem';
 
 # Migration Guide
 
-While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including [data docs](/docs/reference/data_docs) and [profilers](/docs/reference/profilers) as well as [validation](/docs/reference/validation).
+While we are committed to keeping Great Expectations as stable as possible, sometimes breaking changes are necessary to maintain our trajectory. This is especially true as the library has evolved from just a data quality tool to a more capable framework including [data docs](../../reference/data_docs.md) and [profilers](../../reference/profilers.md) as well as [validation](../../reference/validation.md).
 
 The Batch Request (V3) API was introduced as part of the 0.13 major release of Great Expectations, with an improved Checkpoints feature introduced as part of the 0.13.7 release. The Batch Request (V3) API includes a group of new features based on "new style" Datasources and Modular Expectations, as well as a deprecation of Validation Operators.  These offer a number of advantages including an improved experience around deploying and maintaining Great Expectations in production.
 
@@ -201,7 +201,7 @@ The V3-style Datasource has:
 
 </details>
 
-Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
+Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](../../guides/connecting_to_your_data/index.md) for examples on V3-style Datasource configurations that will suit your needs.
 
 </TabItem>
 <TabItem value="spark">
@@ -232,7 +232,7 @@ The V3-style Datasource has:
 
 </details>
 
-Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
+Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](../../guides/connecting_to_your_data/index.md) for examples on V3-style Datasource configurations that will suit your needs.
 
 </TabItem>
 
@@ -250,7 +250,7 @@ The V3-style Datasource has:
 
 :::note Note on Datasource in V3
 
-One exception to the datatype-agnostic Datasource in the V3 API is the <code>SimpleSqlalchemyDatasource</code>, which combines functionality of the <code>Datasource</code> and <code>ExecutionEngine</code> to enable [database introspection and partitioning](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql). More examples on using the <code>SimpleSqlalchemyDatasource</code> can be found [here](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
+One exception to the datatype-agnostic Datasource in the V3 API is the <code>SimpleSqlalchemyDatasource</code>, which combines functionality of the <code>Datasource</code> and <code>ExecutionEngine</code> to enable [database introspection and partitioning](../../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md). More examples on using the <code>SimpleSqlalchemyDatasource</code> can be found [here](../../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md).
 
 :::
 
@@ -273,12 +273,12 @@ Migrating Datasource configurations that contain connections to databases involv
 
 Please check out the following docs for examples of V3-style Datasource configurations that will suit your needs: 
 
-- [How to connect to a Athena database](/docs/guides/connecting_to_your_data/database/athena)
-- [How to connect to a BigQuery database](/docs/guides/connecting_to_your_data/database/bigquery)
-- [How to connect to a MySQL database](/docs/guides/connecting_to_your_data/database/mysql)
-- [How to connect to a Redshift database](/docs/guides/connecting_to_your_data/database/redshift)
-- [How to connect to a Snowflake database](/docs/guides/connecting_to_your_data/database/snowflake)
-- [How to connect to a SQLite database](/docs/guides/connecting_to_your_data/database/sqlite)
+- [How to connect to a Athena database](../../guides/connecting_to_your_data/database/athena.md)
+- [How to connect to a BigQuery database](../../guides/connecting_to_your_data/database/bigquery.md)
+- [How to connect to a MySQL database](../../guides/connecting_to_your_data/database/mysql.md)
+- [How to connect to a Redshift database](../../guides/connecting_to_your_data/database/redshift.md)
+- [How to connect to a Snowflake database](../../guides/connecting_to_your_data/database/snowflake.md)
+- [How to connect to a SQLite database](../../guides/connecting_to_your_data/database/sqlite.md)
 
 </TabItem>
 </Tabs>
@@ -291,7 +291,7 @@ Before doing the migration, we recommend that you create a backup of your V2 Che
 
 :::
 
-In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](/docs/guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource), [introspect and partition tables as batches](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into Checkpoint configurations. 
+In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](../..//guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.md), [introspect and partition tables as batches](../../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into Checkpoint configurations. 
 
 This means that, although Validation Operators were run directly from the DataContext in V2, they are now run by Checkpoints in V3 as part of `action_list` items. This change offers a convenient abstraction for running Validations and ensures that all actions associated with running validations are included in one place, rather than split up between the `great_expectations.yml` file and Checkpoint configuration.
 
@@ -317,7 +317,7 @@ The example V2-style Checkpoint contains:
 
 The example V3-style Checkpoint contains:
   - A `Checkpoint` class with `config_version` populated (`1.0` in our example below).
-  - A list of `validations`, which contain [BatchRequests](/docs/reference/datasources#batches) that will be used to run the Checkpoint.
+  - A list of `validations`, which contain [BatchRequests](../../reference/datasources.md#batches) that will be used to run the Checkpoint.
   - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
 
 :::note Migrating ExpectationSuites
@@ -349,8 +349,8 @@ Here is the equivalent configuration in V3-style. Notice that the Validation Ope
 
 For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
 
-- [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)
-- [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
+- [How to add validations data or suites to a Checkpoint](../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md)
+- [How to configure a new Checkpoint using test_yaml_config](../validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
 
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
@@ -397,7 +397,7 @@ The example V2-style Checkpoint contains:
 
 The example V3-style Checkpoint contains:
   - A `Checkpoint` class with `config_version` populated (`1.0` in our example below).
-  - A list of `validations`, which contain [BatchRequests](/docs/reference/datasources#batches) that will be used to run the Checkpoint.
+  - A list of `validations`, which contain [BatchRequests](../../reference/datasources.md#batches) that will be used to run the Checkpoint.
   - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
 
 :::note Migrating ExpectationSuites
@@ -429,8 +429,8 @@ Here is the equivalent configuration in V3-style. Notice that the Validation Ope
 
 For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
 
-- [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)
-- [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
+- [How to add validations data or suites to a Checkpoint](../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md)
+- [How to configure a new Checkpoint using test_yaml_config](../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
 
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
@@ -476,7 +476,7 @@ The example V2-style Checkpoint contains:
 
 The example V3-style Checkpoint contains:
   - A `Checkpoint` class with `config_version` populated (`1.0` in our example below).
-  - A list of `validations`, which contain [BatchRequests](/docs/reference/datasources#batches) that will be used to run the Checkpoint.
+  - A list of `validations`, which contain [BatchRequests](../../reference/datasources.md#batches) that will be used to run the Checkpoint.
   - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
 
 :::note Migrating ExpectationSuites
@@ -508,8 +508,8 @@ Here is the equivalent configuration in V3-style. Notice that the Validation Ope
 
 For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
 
-- [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)
-- [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
+- [How to add validations data or suites to a Checkpoint](../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md)
+- [How to configure a new Checkpoint using test_yaml_config](../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
 
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L35
@@ -556,7 +556,7 @@ Since each major version introduces breaking changes that can have unintended in
 
 ### Upgrading to 0.12.x
 
-The 0.12.0 release makes a small but breaking change to the `add_expectation`, `remove_expectation`, and `find_expectations` methods. To update your code, replace the `expectation_type`, `column`, or `kwargs` arguments with an Expectation Configuration object. For more information on the `match_type` parameter, see [Expectation Suite Operations](/docs/reference/expectation_suite_operations)
+The 0.12.0 release makes a small but breaking change to the `add_expectation`, `remove_expectation`, and `find_expectations` methods. To update your code, replace the `expectation_type`, `column`, or `kwargs` arguments with an Expectation Configuration object. For more information on the `match_type` parameter, see [Expectation Suite Operations](../../reference/expectation_suite_operations.md)
 
 For example, using the old API:
 
@@ -1029,9 +1029,9 @@ If you run into any issues, please ask for help on [Slack](https://greatexpectat
 
 In version 0.7, GE introduced several new features, and significantly changed the way DataContext objects work:
 
- - A [DataContext](/docs/reference/data_context) object manages access to expectation suites and other configuration in addition to data assets.
+ - A [DataContext](../../reference/data_context.md) object manages access to expectation suites and other configuration in addition to data assets.
    - It provides a flexible but opinionated structure for creating and storing configuration and expectations in version control.
 
- - When upgrading from prior versions, the new [datasource](/docs/reference/datasources) objects provide the same functionality that compute-environment-specific data context objects provided before, but with significantly more flexibility.
+ - When upgrading from prior versions, the new [datasource](../../reference/datasources.md) objects provide the same functionality that compute-environment-specific data context objects provided before, but with significantly more flexibility.
 
- - The term "autoinspect" is no longer used directly, having been replaced by a much more flexible [profiler](/docs/reference/profilers) feature.
+ - The term "autoinspect" is no longer used directly, having been replaced by a much more flexible [profiler](../../reference/profilers.md) feature.

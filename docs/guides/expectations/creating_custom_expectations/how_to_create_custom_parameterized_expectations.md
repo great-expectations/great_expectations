@@ -7,7 +7,7 @@ This guide will walk you through the process of creating Parameterized Expectati
 :::note Prerequisites 
 This how-to guide assumes you have already:
 
-* [Set up a working deployment of Great Expectations](/docs/tutorials/getting_started/intro)
+* [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 :::
 
 A Parameterized Expectation is a capability unlocked by Modular Expectations. Now that Expectations are structured in class form, it is easier than every before to inherit fromthese classes and build similar Expectations that are adapted to your own needs.

@@ -124,7 +124,7 @@ In particular, take a look at the Expectations that were created for the `passen
 
 ### How did we get those Expectations?
 
-You can create and edit Expectations using several different workflows. Using an automated [Profiler](/docs/reference/profilers) as we just did is one of the quickest options to get started with an Expectation Suite.
+You can create and edit Expectations using several different workflows. Using an automated [Profiler](../../reference/profilers.md) as we just did is one of the quickest options to get started with an Expectation Suite.
 
 This Profiler connected to your data (using the Datasource you configured in the previous step), took a quick look at the contents of the data, and produced an initial set of Expectations. The Profiler considers the following properties, amongst others:
 

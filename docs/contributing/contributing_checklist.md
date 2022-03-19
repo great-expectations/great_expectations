@@ -18,7 +18,7 @@ Once your code is ready, please go through the following checklist before submit
 
 #### 2. Have you followed the Style Guide for code and comments?
 
-* The [Style Guide](/docs/contributing/style_guides/code_style) is here.
+* The [Style Guide](./style_guides/code_style.md) is here.
 
 * Thanks for helping us keep the codebase and documentation clean and consistent, so that it’s easier to maintain it as a community!
 
@@ -48,9 +48,9 @@ Once your code is ready, please go through the following checklist before submit
 If your PR contains **only** changes to `contrib` directory (community contributed Expectations), please skip this step - the tests that you included in the Expectation itself are sufficient and you do not need to run pytest.
 :::
 
-* See [Writing unit and integration tests](/docs/contributing/contributing_test) for details on how to write unit tests in Great Expectations.
+* See [Writing unit and integration tests](../contributing/contributing_test.md) for details on how to write unit tests in Great Expectations.
 
-* Please make certain to run `pytest` to verify that all tests pass locally. See [Running tests](/docs/contributing/contributing_test) for details.
+* Please make certain to run `pytest` to verify that all tests pass locally. See [Running tests](../contributing/contributing_test.md) for details.
 
 #### 5. Have you documented all the changes in your PR?
 

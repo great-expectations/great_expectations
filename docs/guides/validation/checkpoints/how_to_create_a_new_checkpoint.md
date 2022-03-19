@@ -12,9 +12,9 @@ Note: As of Great Expectations version 0.13.7, we have updated and improved the 
 
 This how-to guide assumes you have already:
 
-* [Set up a working deployment of Great Expectations](/docs/tutorials/getting_started/intro)
-* [Configured a Datasource using the BatchRequest (v3) API](/docs/tutorials/getting_started/connect_to_data)
-* [Created an Expectation Suite](/docs/tutorials/getting_started/create_your_first_expectations)
+* [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
+* [Configured a Datasource using the BatchRequest (v3) API](../../../tutorials/getting_started/connect_to_data.md)
+* [Created an Expectation Suite](../../../tutorials/getting_started/create_your_first_expectations.md)
 
 :::
 
@@ -52,7 +52,7 @@ validations:
 """
 ````
 
-This is the minimum required to configure a Checkpoint that will run the Expectation Suite `my_suite` against the data asset `MyDataAsset`. See [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config) for advanced configuration options.
+This is the minimum required to configure a Checkpoint that will run the Expectation Suite `my_suite` against the data asset `MyDataAsset`. See [How to configure a new Checkpoint using test_yaml_config](../../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for advanced configuration options.
 
 ##### 2b. Test your config using `context.test_yaml_config`.
 
@@ -97,9 +97,9 @@ Before running a Checkpoint, make sure that all classes and Expectation Suites r
 
 When `run_checkpoint` returns, the `checkpoint_run_result` can then be checked for the value of the `success` field (all validations passed) and other information associated with running the specified actions.
 
-For more advanced configurations of Checkpoints, please see [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config).
+For more advanced configurations of Checkpoints, please see [How to configure a new Checkpoint using test_yaml_config](../../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md).
 
 ### Additional Resources
 
-* [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
-* [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)
+* [How to configure a new Checkpoint using test_yaml_config](../../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
+* [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md)

@@ -4,10 +4,10 @@ title: Data Discovery
 
 
 Profiling is a way of Rendering Validation Results to produce a summary of observed characteristics. When Validation
-Results are rendered as Profiling data, they create a new section in [Data Docs](/docs/reference/data_docs). By computing the
+Results are rendered as Profiling data, they create a new section in [Data Docs](../reference/data_docs.md). By computing the
 **observed** properties of data, Profiling helps to understand and reason about the data's **expected** properties.
 
-To produce a useful data overview, Great Expectations uses a [profiler](/docs/reference/profilers) to build a special Expectation
+To produce a useful data overview, Great Expectations uses a [profiler](../reference/profilers.md) to build a special Expectation
 Suite. Unlike the Expectations that are typically used for data validation, expectations for Profiling do not
 necessarily apply any constraints. They can simply identify statistics or other data characteristics that should be
 evaluated and made available in Great Expectations. For example, when the included `BasicDatasetProfiler`
@@ -28,4 +28,4 @@ Profiling is still a beta feature in Great Expectations. Over time, we plan to e
 Warning: `BasicDatasetProfiler` will evaluate the entire batch without limits or sampling, which may be very time
 consuming. As a rule of thumb, we recommend starting with small batches of data.
 
-See the docs on [Profilers](/docs/reference/profilers) for more information.
+See the docs on [Profilers](../reference/profilers.md) for more information.
