@@ -45,5 +45,8 @@ def test_run_rbp_notebook(tmp_path):
         with open(output_notebook_path, mode="w", encoding="utf-8") as f:
             nbformat.write(nb, f)
 
-    # clean up Expectations directory after running tests
-    shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/"))
+    # clean up Expectations directory after running test
+    shutil.rmtree(os.path.join(base_dir, "great_expectations/expectations/tmp"))
+    os.remove(
+        os.path.join(base_dir, "great_expectations/expectations/.ge_store_backend_id")
+    )
