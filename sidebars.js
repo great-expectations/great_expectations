@@ -312,6 +312,14 @@ module.exports = {
     },
     {
       type: 'category',
+      label: 'Integrations',
+      items: [
+        'integrations/contributing_integration',
+        { type: 'doc', id: 'integrations/index', label: 'Index' }
+      ]
+    },
+    {
+      type: 'category',
       label: 'Contributing',
       items: [
         {
