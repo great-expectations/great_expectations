@@ -1865,13 +1865,14 @@ class BaseDataContext(ConfigPeer):
         )
         validator.save_expectation_suite()
 
-        # changes that validator made to the batch_request datasource config
-        # (e.g. add data_asset_name) are saved to disk
+        # changes that validator made to the batch_request datasource config (e.g. add data_asset_name)
+        # are updated in project config and saved to disk
         self._instantiate_datasource_from_config_and_update_project_config(
             name=batch_request.datasource_name,
             config=validator.data_context.datasources[
                 batch_request.datasource_name
             ].config,
+            initialize=False,
         )
         self._save_project_config()
 
