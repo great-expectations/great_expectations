@@ -1020,8 +1020,10 @@ def test_batch_request_sql_with_schema(
         "data_asset_name": "main.table_1",
     }
     validator = context.get_validator(
-        batch_request=br,
-        expectation_suite=es,
+        batch_request=batch_request,
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
     )
     df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
     assert df_table_actual.equals(df_table_expected_my_first_data_asset)
