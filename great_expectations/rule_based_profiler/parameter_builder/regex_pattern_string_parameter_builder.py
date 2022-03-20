@@ -135,6 +135,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
+        # This should never happen.
         if not (
             isinstance(metric_computation_result.metric_values, list)
             and len(metric_computation_result.metric_values) == 1
