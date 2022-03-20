@@ -6999,7 +6999,7 @@ def sqlite_missing_data_asset_data_context(empty_data_context, db_file):
     data_connectors:
         default_configured_data_connector:
             class_name: ConfiguredAssetSqlDataConnector
-            module_name: great_expectations.datasource.data_connector
+            module_name: great_expectations.datasource.data_connectorf
         """,
     )
     context.add_datasource(

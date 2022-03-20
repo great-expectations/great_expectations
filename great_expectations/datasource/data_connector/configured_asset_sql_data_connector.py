@@ -183,17 +183,22 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = []
-        try:
+        if batch_request.data_asset_name in self._data_references_cache:
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
-        # if the batch_request is missing data_asset we need to add it to references cache for batch_definition and
-        # update the data_connector config to propagate this new asset to data_context config
-        except KeyError:
+        # if the batch_request is missing data_asset and the DataConnector is a ConfiguredAssetSqlDataConnector
+        # we need to add it to references cache for batch_definition and update the data_connector config to
+        # propagate this new asset to data_context config
+        elif isinstance(self, ConfiguredAssetSqlDataConnector):
             self.add_data_asset(
                 batch_request.data_asset_name,
                 {"table_name": batch_request.data_asset_name},
             )
             self._refresh_data_references_cache()
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
+        else:
+            raise KeyError(
+                f"data_asset_name {batch_request.data_asset_name} is not recognized."
+            )
 
         for batch_identifiers in sub_cache:
             batch_definition: BatchDefinition = BatchDefinition(
