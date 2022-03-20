@@ -75,6 +75,7 @@ class UsageStatisticsHandler:
 
         self._anonymizer = Anonymizer(data_context_id)
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
         self._profiler_run_anonymizer = ProfilerRunAnonymizer(data_context_id)
 

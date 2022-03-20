@@ -703,9 +703,8 @@ def test_map_column_values_increasing_pd():
         )
         metrics.update(results)
     assert len(record) == 1
-    assert (
-        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-        in str(record.list[0].message)
+    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+        record.list[0].message
     )
 
     unexpected_count_metric = MetricConfiguration(
@@ -806,9 +805,8 @@ def test_map_column_values_increasing_spark(spark_session):
         )
         metrics.update(results)
     assert len(record) == 1
-    assert (
-        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-        in str(record.list[0].message)
+    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+        record.list[0].message
     )
 
     unexpected_count_metric = MetricConfiguration(
@@ -894,9 +892,8 @@ def test_map_column_values_decreasing_pd():
         )
         metrics.update(results)
     assert len(record) == 1
-    assert (
-        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-        in str(record.list[0].message)
+    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+        record.list[0].message
     )
 
     unexpected_count_metric = MetricConfiguration(
@@ -997,9 +994,8 @@ def test_map_column_values_decreasing_spark(spark_session):
         )
         metrics.update(results)
     assert len(record) == 1
-    assert (
-        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-        in str(record.list[0].message)
+    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+        record.list[0].message
     )
 
     unexpected_count_metric = MetricConfiguration(
@@ -3046,9 +3042,8 @@ def test_batch_aggregate_metrics_pd():
         metrics.update(results)
     assert len(records) == 4
     for record in records:
-        assert (
-            'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-            in str(record.message)
+        assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+            record.message
         )
     end = datetime.datetime.now()
     print(end - start)
