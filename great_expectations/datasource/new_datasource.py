@@ -143,9 +143,12 @@ class BaseDatasource:
 
         # checks if the data_asset_name is missing from data_context config and
         # updates it if you are using a ConfiguredAssetSqlDataConnector
-        if isinstance(
-            self.data_connectors[batch_request.data_connector_name],
-            ConfiguredAssetSqlDataConnector,
+        if (
+            isinstance(
+                self.data_connectors[batch_request.data_connector_name],
+                ConfiguredAssetSqlDataConnector,
+            )
+            and "data_connectors" in self._datasource_config
         ):
             self._update_missing_data_asset_name_from_configured_data_connector(
                 batch_request=batch_request
