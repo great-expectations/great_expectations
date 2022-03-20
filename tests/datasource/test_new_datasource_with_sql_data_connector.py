@@ -1020,7 +1020,7 @@ def test_batch_request_sql_with_schema(
         "data_asset_name": "main.table_1",
     }
     validator = context.get_validator(
-        batch_request=batch_request,
+        batch_request=BatchRequest(**batch_request),
         expectation_suite=ExpectationSuite(
             "my_expectation_suite", data_context=context
         ),
