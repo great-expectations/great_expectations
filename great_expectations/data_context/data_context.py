@@ -4333,19 +4333,6 @@ class DataContext(BaseDataContext):
         config = response.json()
         return DataContextConfig(**config)
 
-    def _save_project_config(self):
-        """Save the current project to disk."""
-        if self.ge_cloud_mode:
-            logger.debug(
-                "ge_cloud_mode detected - skipping DataContect._save_project_config"
-            )
-            return
-        logger.debug("Starting DataContext._save_project_config")
-
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
-
     def _load_project_config(self):
         """
         Reads the project configuration from the project configuration file.
@@ -4386,6 +4373,19 @@ class DataContext(BaseDataContext):
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
+
+    def _save_project_config(self):
+        """Save the current project to disk."""
+        if self.ge_cloud_mode:
+            logger.debug(
+                "ge_cloud_mode detected - skipping DataContect._save_project_config"
+            )
+            return
+        logger.debug("Starting DataContext._save_project_config")
+
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+        with open(config_filepath, "w") as outfile:
+            self.config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")
