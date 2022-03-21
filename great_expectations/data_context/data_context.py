@@ -1883,9 +1883,6 @@ class BaseDataContext(ConfigPeer):
             batch_list=batch_list,
         )
 
-        # Saves any changes to the citation
-        validator.save_expectation_suite()
-
         # changes that validator made to the batch_request datasource config (e.g. add data_asset_name)
         # are updated in project config and saved to disk
         for datasource in validator.data_context.datasources:
