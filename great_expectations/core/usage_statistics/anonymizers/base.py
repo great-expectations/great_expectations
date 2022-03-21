@@ -482,30 +482,6 @@ class BaseAnonymizer(ABC):
         )
         return anonymized_info_dict
 
-    def _anonymize_execution_engine_info(self, name: str, config: dict) -> dict:
-        anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self.anonymize_string(name)
-
-        from great_expectations.data_context.types.base import (
-            ExecutionEngineConfig,
-            executionEngineConfigSchema,
-        )
-
-        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-        execution_engine_config: ExecutionEngineConfig = (
-            executionEngineConfigSchema.load(config)
-        )
-        execution_engine_config_dict: dict = executionEngineConfigSchema.dump(
-            execution_engine_config
-        )
-
-        self._anonymize_object_info(
-            anonymized_info_dict=anonymized_info_dict,
-            object_config=execution_engine_config_dict,
-        )
-
-        return anonymized_info_dict
-
     def anonymize_data_connector_info(self, name: str, config: dict) -> dict:
         """Anonymize DataConnector objs from the 'great_expectations.datasource.data_connector' module.
 
