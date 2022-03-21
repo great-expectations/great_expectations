@@ -359,7 +359,7 @@ def run_validation_operator_usage_statistics(
         try:
             anonymizer = data_context._usage_statistics_handler._anonymizer
             payload["anonymized_batches"] = [
-                anonymizer.anonymize_batch_info(batch) for batch in assets_to_validate
+                anonymizer.anonymize(obj=batch) for batch in assets_to_validate
             ]
         except Exception as e:
             logger.debug(

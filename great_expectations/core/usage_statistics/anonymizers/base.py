@@ -304,7 +304,7 @@ class BaseAnonymizer(ABC):
 
         return anonymized_batch_kwarg_keys
 
-    def anonymize_batch_info(
+    def _anonymize_batch_info(
         self, batch: Union[Tuple[dict, str], "DataAsset", "Validator"]  # noqa: F821
     ) -> dict:
         """Anonymize Batch objs - can be derived from a variety of types.

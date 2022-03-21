@@ -41,7 +41,18 @@ class Anonymizer(BaseAnonymizer):
         if isinstance(obj, str):
             payload: str = cast(str, self._anonymize_string(string_=obj))
             return payload
+        if self._is_batch_info(obj=obj):
+            return self._anonymize_batch_info(batch=obj)
         return {}
+
+    @staticmethod
+    def _is_batch_info(obj: object) -> bool:
+        from great_expectations.data_asset.data_asset import DataAsset
+        from great_expectations.validator.validator import Validator
+
+        return isinstance(obj, (Validator, DataAsset)) or (
+            isinstance(obj, tuple) and len(obj) == 2
+        )
 
     @staticmethod
     def can_handle(obj: object) -> bool:

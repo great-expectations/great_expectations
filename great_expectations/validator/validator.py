@@ -1708,7 +1708,7 @@ set as active.
                     # noinspection PyProtectedMember
                     handler.send_usage_message(
                         event="data_asset.validate",
-                        event_payload=handler.anonymizer.anonymize_batch_info(self),
+                        event_payload=handler.anonymizer.anonymize(obj=self),
                         success=False,
                     )
                 return ExpectationValidationResult(success=False)
@@ -1818,7 +1818,7 @@ set as active.
                 # noinspection PyProtectedMember
                 handler.send_usage_message(
                     event="data_asset.validate",
-                    event_payload=handler.anonymizer.anonymize_batch_info(self),
+                    event_payload=handler.anonymizer.anonymize(obj=self),
                     success=False,
                 )
             raise
@@ -1831,7 +1831,7 @@ set as active.
             # noinspection PyProtectedMember
             handler.send_usage_message(
                 event="data_asset.validate",
-                event_payload=handler.anonymizer.anonymize_batch_info(self),
+                event_payload=handler.anonymizer.anonymize(obj=self),
                 success=True,
             )
         return result
