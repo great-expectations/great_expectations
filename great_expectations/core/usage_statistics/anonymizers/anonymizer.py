@@ -1,4 +1,6 @@
 import logging
+import platform
+import sys
 from typing import List, Optional, Type, Union, cast
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
@@ -57,3 +59,50 @@ class Anonymizer(BaseAnonymizer):
     @staticmethod
     def can_handle(obj: object) -> bool:
         return isinstance(obj, object)
+
+    def build_init_payload(self, data_context: "DataContext") -> dict:  # noqa: F821
+        """Adds information that may be available only after full data context construction, but is useful to
+        calculate only one time (for example, anonymization)."""
+        expectation_suites = [
+            data_context.get_expectation_suite(expectation_suite_name)
+            for expectation_suite_name in data_context.list_expectation_suite_names()
+        ]
+
+        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
+            DatasourceAnonymizer,
+        )
+
+        datasource_anonymizer = DatasourceAnonymizer(salt=self._salt)
+
+        return {
+            "platform.system": platform.system(),
+            "platform.release": platform.release(),
+            "version_info": str(sys.version_info),
+            "anonymized_datasources": [
+                datasource_anonymizer._anonymize_datasource_info(
+                    datasource_name, datasource_config
+                )
+                for datasource_name, datasource_config in data_context.project_config_with_variables_substituted.datasources.items()
+            ],
+            "anonymized_stores": [
+                self._anonymize_store_info(store_name, store_obj)
+                for store_name, store_obj in data_context.stores.items()
+            ],
+            "anonymized_validation_operators": [
+                self._anonymize_validation_operator_info(
+                    validation_operator_name=validation_operator_name,
+                    validation_operator_obj=validation_operator_obj,
+                )
+                for validation_operator_name, validation_operator_obj in data_context.validation_operators.items()
+            ],
+            "anonymized_data_docs_sites": [
+                self._anonymize_data_docs_site_info(
+                    site_name=site_name, site_config=site_config
+                )
+                for site_name, site_config in data_context.project_config_with_variables_substituted.data_docs_sites.items()
+            ],
+            "anonymized_expectation_suites": [
+                self._anonymize_expectation_suite_info(expectation_suite)
+                for expectation_suite in expectation_suites
+            ],
+        }

@@ -4,9 +4,7 @@ import datetime
 import enum
 import json
 import logging
-import platform
 import signal
-import sys
 import threading
 import time
 from functools import wraps
@@ -120,49 +118,8 @@ class UsageStatisticsHandler:
     def build_init_payload(self) -> dict:
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
-        expectation_suites = [
-            self._data_context.get_expectation_suite(expectation_suite_name)
-            for expectation_suite_name in self._data_context.list_expectation_suite_names()
-        ]
-
-        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
-            DatasourceAnonymizer,
-        )
-
-        datasource_anonymizer = DatasourceAnonymizer(self._data_context_id)
-
-        return {
-            "platform.system": platform.system(),
-            "platform.release": platform.release(),
-            "version_info": str(sys.version_info),
-            "anonymized_datasources": [
-                datasource_anonymizer._anonymize_datasource_info(
-                    datasource_name, datasource_config
-                )
-                for datasource_name, datasource_config in self._data_context.project_config_with_variables_substituted.datasources.items()
-            ],
-            "anonymized_stores": [
-                self._anonymizer.anonymize_store_info(store_name, store_obj)
-                for store_name, store_obj in self._data_context.stores.items()
-            ],
-            "anonymized_validation_operators": [
-                self._anonymizer.anonymize_validation_operator_info(
-                    validation_operator_name=validation_operator_name,
-                    validation_operator_obj=validation_operator_obj,
-                )
-                for validation_operator_name, validation_operator_obj in self._data_context.validation_operators.items()
-            ],
-            "anonymized_data_docs_sites": [
-                self._anonymizer.anonymize_data_docs_site_info(
-                    site_name=site_name, site_config=site_config
-                )
-                for site_name, site_config in self._data_context.project_config_with_variables_substituted.data_docs_sites.items()
-            ],
-            "anonymized_expectation_suites": [
-                self._anonymizer.anonymize_expectation_suite_info(expectation_suite)
-                for expectation_suite in expectation_suites
-            ],
-        }
+        anonymizer: Anonymizer = self._anonymizer
+        return anonymizer.build_init_payload(data_context=self._data_context)
 
     def build_envelope(self, message: dict) -> dict:
         message["version"] = "1.0.0"

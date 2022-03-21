@@ -236,7 +236,7 @@ class BaseAnonymizer(ABC):
 
         return None
 
-    def anonymize_validation_operator_info(
+    def _anonymize_validation_operator_info(
         self,
         validation_operator_name: str,
         validation_operator_obj: object,
@@ -396,7 +396,7 @@ class BaseAnonymizer(ABC):
             )
         return anonymized_info_dict
 
-    def anonymize_data_docs_site_info(self, site_name: str, site_config: dict) -> dict:
+    def _anonymize_data_docs_site_info(self, site_name: str, site_config: dict) -> dict:
         """Anonymize details around a DataDocs depolyment.
 
         Args:
@@ -438,7 +438,7 @@ class BaseAnonymizer(ABC):
 
         return anonymized_info_dict
 
-    def anonymize_store_info(self, store_name: str, store_obj: object) -> dict:
+    def _anonymize_store_info(self, store_name: str, store_obj: object) -> dict:
         """Anonymize Store objs from the 'great_expectations.data_context.store' module.
 
         Args:
@@ -516,7 +516,7 @@ class BaseAnonymizer(ABC):
 
         return anonymized_info_dict
 
-    def anonymize_expectation_suite_info(
+    def _anonymize_expectation_suite_info(
         self, expectation_suite: "ExpectationSuite"  # noqa: F821
     ) -> dict:
         """Anonymize ExpectationSuite objs from the 'great_expectations.core' module.
