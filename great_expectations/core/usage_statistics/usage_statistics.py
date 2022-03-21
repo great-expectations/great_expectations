@@ -347,8 +347,8 @@ def run_validation_operator_usage_statistics(
         _anonymizers[data_context_id] = anonymizer
     payload = {}
     try:
-        payload["anonymized_operator_name"] = anonymizer.anonymize_string(
-            validation_operator_name
+        payload["anonymized_operator_name"] = anonymizer.anonymize(
+            obj=validation_operator_name
         )
     except TypeError as e:
         logger.debug(
@@ -395,8 +395,8 @@ def save_expectation_suite_usage_statistics(
 
     # noinspection PyBroadException
     try:
-        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize_string(
-            expectation_suite_name
+        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
+            obj=expectation_suite_name
         )
     except Exception as e:
         logger.debug(
@@ -427,8 +427,8 @@ def edit_expectation_suite_usage_statistics(
 
     # noinspection PyBroadException
     try:
-        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize_string(
-            expectation_suite_name
+        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
+            obj=expectation_suite_name
         )
     except Exception as e:
         logger.debug(

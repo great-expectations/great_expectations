@@ -36,22 +36,22 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
         checkpoint_optional_top_level_keys: List[str] = []
 
         name: Optional[str] = kwargs.get("name")
-        anonymized_name: Optional[str] = self.anonymize_string(name)
+        anonymized_name: Optional[str] = self._anonymize_string(name)
 
         config_version: Optional[Union[Number, str]] = kwargs.get("config_version")
         if config_version is None:
             config_version = 1.0
 
         template_name: Optional[str] = kwargs.get("template_name")
-        anonymized_template_name: Optional[str] = self.anonymize_string(template_name)
+        anonymized_template_name: Optional[str] = self._anonymize_string(template_name)
 
         run_name_template: Optional[str] = kwargs.get("run_name_template")
-        anonymized_run_name_template: Optional[str] = self.anonymize_string(
+        anonymized_run_name_template: Optional[str] = self._anonymize_string(
             run_name_template
         )
 
         expectation_suite_name: Optional[str] = kwargs.get("expectation_suite_name")
-        anonymized_expectation_suite_name: Optional[str] = self.anonymize_string(
+        anonymized_expectation_suite_name: Optional[str] = self._anonymize_string(
             expectation_suite_name
         )
 
@@ -105,7 +105,7 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
                 )
                 anonymized_validation_expectation_suite_name: Optional[
                     str
-                ] = self.anonymize_string(validation_expectation_suite_name)
+                ] = self._anonymize_string(validation_expectation_suite_name)
 
                 validation_action_list: Optional[List[dict]] = validation_obj.get(
                     "action_list"
@@ -158,21 +158,21 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
         if run_id is None:
             anonymized_run_id = None
         else:
-            anonymized_run_id = self.anonymize_string(str(run_id))
+            anonymized_run_id = self._anonymize_string(str(run_id))
 
         run_name: Optional[str] = kwargs.get("run_name")
         anonymized_run_name: Optional[str]
         if run_name is None:
             anonymized_run_name = None
         else:
-            anonymized_run_name = self.anonymize_string(run_name)
+            anonymized_run_name = self._anonymize_string(run_name)
 
         run_time: Optional[Union[str, datetime.datetime]] = kwargs.get("run_time")
         anonymized_run_time: Optional[str]
         if run_time is None:
             anonymized_run_time = None
         else:
-            anonymized_run_time = self.anonymize_string(str(run_time))
+            anonymized_run_time = self._anonymize_string(str(run_time))
 
         expectation_suite_ge_cloud_id: Optional[str] = kwargs.get(
             "expectation_suite_ge_cloud_id"
@@ -181,7 +181,7 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
         if expectation_suite_ge_cloud_id is None:
             anonymized_expectation_suite_ge_cloud_id = None
         else:
-            anonymized_expectation_suite_ge_cloud_id = self.anonymize_string(
+            anonymized_expectation_suite_ge_cloud_id = self._anonymize_string(
                 str(expectation_suite_ge_cloud_id)
             )
 
@@ -225,7 +225,7 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
         action_config: Optional[dict] = None,
     ) -> dict:
         anonymized_info_dict: dict = {
-            "anonymized_name": self.anonymize_string(action_name),
+            "anonymized_name": self._anonymize_string(action_name),
         }
 
         self._anonymize_object_info(

@@ -43,7 +43,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
     def _anonymize_datasource_info(self, name: str, config: dict) -> dict:
         anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self.anonymize_string(name)
+        anonymized_info_dict["anonymized_name"] = self._anonymize_string(name)
 
         # Legacy Datasources (<= v0.12 v2 BatchKwargs API)
         if self.get_parent_class_v2_api(config=config) is not None:
@@ -79,7 +79,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
         SimpleSqlalchemyDatasource requires a separate anonymization scheme.
         """
         anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self.anonymize_string(name)
+        anonymized_info_dict["anonymized_name"] = self._anonymize_string(name)
         if config.get("module_name") is None:
             config["module_name"] = "great_expectations.datasource"
         self._anonymize_object_info(
@@ -145,7 +145,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
     def _anonymize_execution_engine_info(self, name: str, config: dict) -> dict:
         anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self.anonymize_string(name)
+        anonymized_info_dict["anonymized_name"] = self._anonymize_string(name)
 
         from great_expectations.data_context.types.base import (
             ExecutionEngineConfig,
