@@ -128,10 +128,11 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"]
     )
 
-    assert mock_emit.call_count == 43
+    assert mock_emit.call_count == 64
 
     assert all(
-        payload[0][0]["event"] == "data_context.get_batch_list"
+        payload[0][0]["event"]
+        in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
         for payload in mock_emit.call_args_list[:-1]
     )
 
@@ -457,10 +458,11 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         ]
     )
 
-    assert mock_emit.call_count == 99
+    assert mock_emit.call_count == 148
 
     assert all(
-        payload[0][0]["event"] == "data_context.get_batch_list"
+        payload[0][0]["event"]
+        in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
         for payload in mock_emit.call_args_list[:-1]
     )
 
@@ -1468,10 +1470,11 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
 
-    assert mock_emit.call_count == 3
+    assert mock_emit.call_count == 4
 
     assert all(
-        payload[0][0]["event"] == "data_context.get_batch_list"
+        payload[0][0]["event"]
+        in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
         for payload in mock_emit.call_args_list[:-1]
     )
 
@@ -1672,10 +1675,11 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
                 )
 
-    assert mock_emit.call_count == 11
+    assert mock_emit.call_count == 16
 
     assert all(
-        payload[0][0]["event"] == "data_context.get_batch_list"
+        payload[0][0]["event"]
+        in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
         for payload in mock_emit.call_args_list[:-1]
     )
 

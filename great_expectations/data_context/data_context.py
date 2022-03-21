@@ -2387,6 +2387,22 @@ class BaseDataContext(ConfigPeer):
         self._evaluation_parameter_dependencies_compiled = False
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
+    def _save_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_suite_name: Optional[str] = None,
+        overwrite_existing: bool = True,
+        ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ):
+        return self.save_expectation_suite(
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            overwrite_existing=overwrite_existing,
+            ge_cloud_id=ge_cloud_id,
+            **kwargs,
+        )
+
     def _store_metrics(self, requested_metrics, validation_results, target_store_name):
         """
         requested_metrics is a dictionary like this:

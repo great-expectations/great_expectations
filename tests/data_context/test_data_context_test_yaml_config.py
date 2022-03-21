@@ -904,7 +904,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         )
 
         # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
-        assert mock_emit.call_count == 4
+        assert mock_emit.call_count == 5
 
         my_evr = my_validator.expect_column_values_to_be_between(
             column="d", min_value=1, max_value=31
@@ -917,7 +917,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
 
         # No other usage stats calls detected
         # assert mock_emit.call_count == 1
-        assert mock_emit.call_count == 4
+        assert mock_emit.call_count == 5
 
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
@@ -1123,13 +1123,13 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         assert my_evr.success
 
         # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
-        assert mock_emit.call_count == 4
+        assert mock_emit.call_count == 5
 
         # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
         # assert my_evr.success
 
         # No other usage stats calls detected
-        assert mock_emit.call_count == 4
+        assert mock_emit.call_count == 5
 
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
