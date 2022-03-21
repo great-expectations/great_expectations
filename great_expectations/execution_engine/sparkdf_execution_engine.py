@@ -5,7 +5,7 @@ import logging
 import uuid
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, List
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from dateutil.parser import parse
 
@@ -28,8 +28,11 @@ from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
-from great_expectations.expectations.row_conditions import parse_condition_to_spark, RowCondition, \
-    RowConditionParserType
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+    parse_condition_to_spark,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -401,7 +404,9 @@ Please check your config."""
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
-        filter_conditions: List[RowCondition] = domain_kwargs.get("filter_conditions", [])
+        filter_conditions: List[RowCondition] = domain_kwargs.get(
+            "filter_conditions", []
+        )
         if len(filter_conditions) > 0:
             filter_condition = self._combine_row_conditions(filter_conditions)
             data = data.filter(filter_condition.condition)
@@ -486,7 +491,9 @@ Please check your config."""
 
         return data
 
-    def _combine_row_conditions(self, row_conditions: List[RowCondition]) -> RowCondition:
+    def _combine_row_conditions(
+        self, row_conditions: List[RowCondition]
+    ) -> RowCondition:
         """Combine row conditions using AND if type_ is SPARK_SQL
 
         Args:
@@ -495,11 +502,19 @@ Please check your config."""
         Returns:
             Single Row Condition combined
         """
-        assert all([condition.type_ == RowConditionParserType.SPARK_SQL for condition in row_conditions]), "All row conditions must have type SPARK_SQL"
-        raw_conditions: List[str] = [row_condition.condition for row_condition in row_conditions]
+        assert all(
+            [
+                condition.type_ == RowConditionParserType.SPARK_SQL
+                for condition in row_conditions
+            ]
+        ), "All row conditions must have type SPARK_SQL"
+        raw_conditions: List[str] = [
+            row_condition.condition for row_condition in row_conditions
+        ]
         joined_condition: str = " AND ".join(raw_conditions)
-        return RowCondition(condition=joined_condition, type_=RowConditionParserType.SPARK_SQL)
-
+        return RowCondition(
+            condition=joined_condition, type_=RowConditionParserType.SPARK_SQL
+        )
 
     def get_compute_domain(
         self,
@@ -552,24 +567,28 @@ Please check your config."""
         else:
             column = domain_kwargs["column"]
 
-        row_conditions: List[RowCondition] = []
+        filter_conditions: List[RowCondition] = []
         if filter_null:
-            row_conditions.append(RowCondition(
-                condition=f"{column} IS NOT NULL",
-                type_=RowConditionParserType.SPARK_SQL
-            ))
+            filter_conditions.append(
+                RowCondition(
+                    condition=f"{column} IS NOT NULL",
+                    type_=RowConditionParserType.SPARK_SQL,
+                )
+            )
         if filter_nan:
-            row_conditions.append(RowCondition(
-                condition=f"NOT isnan({column})",
-                type_=RowConditionParserType.SPARK_SQL
-            ))
+            filter_conditions.append(
+                RowCondition(
+                    condition=f"NOT isnan({column})",
+                    type_=RowConditionParserType.SPARK_SQL,
+                )
+            )
 
         if not (filter_null or filter_nan):
             logger.warning(
                 "add_column_row_condition called without specifying a desired row condition"
             )
 
-        new_domain_kwargs.setdefault("filter_conditions", []).extend(row_conditions)
+        new_domain_kwargs.setdefault("filter_conditions", []).extend(filter_conditions)
 
         return new_domain_kwargs
 
