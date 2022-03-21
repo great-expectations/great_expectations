@@ -314,7 +314,7 @@ def run_validation_operator_usage_statistics(
     if data_context._usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            anonymizer = data_context._usage_statistics_handler._anonymizer
+            anonymizer = data_context._usage_statistics_handler.anonymizer
             payload["anonymized_batches"] = [
                 anonymizer.anonymize(obj=batch) for batch in assets_to_validate
             ]
@@ -405,17 +405,11 @@ def add_datasource_usage_statistics(
     except AttributeError:
         data_context_id = None
 
-    # noinspection PyBroadException
-    try:
-        datasource_anonymizer = (
-            data_context._usage_statistics_handler._datasource_anonymizer
-        )
-    except Exception:
-        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
-            DatasourceAnonymizer,
-        )
+    from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
+        DatasourceAnonymizer,
+    )
 
-        datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+    datasource_anonymizer = DatasourceAnonymizer(data_context_id)
 
     payload = {}
     # noinspection PyBroadException
@@ -447,7 +441,7 @@ def get_batch_list_usage_statistics(
         # noinspection PyBroadException
         try:
             anonymizer: Anonymizer = (  # noqa: F821
-                data_context._usage_statistics_handler._anonymizer
+                data_context._usage_statistics_handler.anonymizer
             )
             payload = anonymizer._anonymize_batch_request(*args, **kwargs)
         except Exception as e:

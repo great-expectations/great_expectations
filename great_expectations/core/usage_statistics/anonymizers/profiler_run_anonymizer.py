@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProfilerRunAnonymizer(BaseAnonymizer):
-    def anonymize(self, obj: object, **kwargs) -> dict:
+    def anonymize(self, obj: object, **kwargs) -> Any:
         assert self.can_handle(
             obj
         ), "ProfilerRunAnonymizer can only handle objects of type RuleBasedProfiler or RuleBasedProfilerConfig"

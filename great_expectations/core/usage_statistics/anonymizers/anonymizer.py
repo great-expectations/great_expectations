@@ -1,7 +1,7 @@
 import logging
 import platform
 import sys
-from typing import List, Optional, Type, Union, cast
+from typing import Any, List, Optional, Type
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
@@ -28,7 +28,7 @@ class Anonymizer(BaseAnonymizer):
             DatasourceAnonymizer,
         ]
 
-    def anonymize(self, obj: object = None, **kwargs) -> Union[str, dict]:
+    def anonymize(self, obj: object = None, **kwargs) -> Any:
         anonymizer: Optional[BaseAnonymizer] = None
         for anonymizer_cls in self.strategies:
             if anonymizer_cls.can_handle(obj=obj, **kwargs):
@@ -38,7 +38,9 @@ class Anonymizer(BaseAnonymizer):
         # If our specialized handlers cannot handle the object, default to base anonymizer strategies.
         return self._anonymize(obj=obj, **kwargs)
 
-    def _anonymize(self, obj: object, **kwargs) -> Union[str, dict]:
+    def _anonymize(self, obj: object, **kwargs) -> Any:
+        if self._is_batch_request_info(info=kwargs):
+            return self._anonymize_batch_request(**kwargs)
         if self._is_data_connector_info(obj=obj):
             return self._anonymize_data_connector_info(**kwargs)
         if self._is_batch_info(obj=obj):
@@ -46,10 +48,16 @@ class Anonymizer(BaseAnonymizer):
         if self._is_store_info(info=kwargs):
             return self._anonymize_store_info(**kwargs)
         if isinstance(obj, str):
-            payload: str = cast(str, self._anonymize_string(string_=obj))
-            return payload
+            return self._anonymize_string(string_=obj)
         raise TypeError(
             f"The type {type(obj)} cannot be handled by the Anonymizer; no suitable strategy found."
+        )
+
+    @staticmethod
+    def _is_batch_request_info(info: dict) -> bool:
+        return all(
+            attr in info
+            for attr in ("datasource_name", "data_connector_name", "data_asset_name")
         )
 
     @staticmethod

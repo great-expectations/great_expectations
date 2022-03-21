@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class CheckpointRunAnonymizer(BaseAnonymizer):
-    def anonymize(self, obj: object = None, **kwargs) -> dict:
+    def anonymize(self, obj: object = None, **kwargs) -> Any:
         assert self.can_handle(
             obj=obj
         ), "CheckpointRunAnonymizer can only handle objects of type Checkpoint or CheckpointConfig"

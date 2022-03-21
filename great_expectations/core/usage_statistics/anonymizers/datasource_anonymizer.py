@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.datasource import (
@@ -28,7 +28,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
         BaseDatasource,
     ]
 
-    def anonymize(self, obj: object, *args, **kwargs) -> dict:
+    def anonymize(self, obj: object, *args, **kwargs) -> Any:
         assert self.can_handle(
             obj=obj
         ), "DatasourceAnonymizer can only handle objects of type Datasource"
