@@ -404,13 +404,6 @@ Please check your config."""
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
-        filter_conditions: List[RowCondition] = domain_kwargs.get(
-            "filter_conditions", []
-        )
-        if len(filter_conditions) > 0:
-            filter_condition = self._combine_row_conditions(filter_conditions)
-            data = data.filter(filter_condition.condition)
-
         # Filtering by row condition.
         row_condition = domain_kwargs.get("row_condition", None)
         if row_condition:
@@ -425,9 +418,18 @@ Please check your config."""
                     f"unrecognized condition_parser {str(condition_parser)} for Spark execution engine"
                 )
 
+        # Filtering by filter_conditions
+        filter_conditions: List[RowCondition] = domain_kwargs.get(
+            "filter_conditions", []
+        )
+        if len(filter_conditions) > 0:
+            filter_condition = self._combine_row_conditions(filter_conditions)
+            data = data.filter(filter_condition.condition)
+
         if "column" in domain_kwargs:
             return data
 
+        # Filtering by ignore_row_if directive
         if (
             "column_A" in domain_kwargs
             and "column_B" in domain_kwargs

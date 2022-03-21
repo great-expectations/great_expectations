@@ -513,26 +513,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if TextClause and isinstance(selectable, TextClause):
             selectable = selectable.columns().subquery()
 
-        filter_conditions: List[RowCondition] = domain_kwargs.get(
-            "filter_conditions", []
-        )
-        # For SqlAlchemyExecutionEngine only one filter condition is allowed
-        if len(filter_conditions) == 1:
-            filter_condition = filter_conditions[0]
-            assert (
-                filter_condition.type_ == RowConditionParserType.GE
-            ), "filter_condition must be of type GE for SqlAlchemyExecutionEngine"
-
-            selectable = (
-                sa.select([sa.text("*")])
-                .select_from(selectable)
-                .where(parse_condition_to_sqlalchemy(filter_condition.condition))
-            )
-        elif len(filter_conditions) > 1:
-            raise GreatExpectationsError(
-                "SqlAlchemyExecutionEngine currently only supports a single filter condition."
-            )
-
         # Filtering by row condition.
         if (
             "row_condition" in domain_kwargs
@@ -553,9 +533,31 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
                 )
 
+        # Filtering by filter_conditions
+        filter_conditions: List[RowCondition] = domain_kwargs.get(
+            "filter_conditions", []
+        )
+        # For SqlAlchemyExecutionEngine only one filter condition is allowed
+        if len(filter_conditions) == 1:
+            filter_condition = filter_conditions[0]
+            assert (
+                filter_condition.type_ == RowConditionParserType.GE
+            ), "filter_condition must be of type GE for SqlAlchemyExecutionEngine"
+
+            selectable = (
+                sa.select([sa.text("*")])
+                .select_from(selectable)
+                .where(parse_condition_to_sqlalchemy(filter_condition.condition))
+            )
+        elif len(filter_conditions) > 1:
+            raise GreatExpectationsError(
+                "SqlAlchemyExecutionEngine currently only supports a single filter condition."
+            )
+
         if "column" in domain_kwargs:
             return selectable
 
+        # Filtering by ignore_row_if directive
         if (
             "column_A" in domain_kwargs
             and "column_B" in domain_kwargs
