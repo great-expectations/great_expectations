@@ -108,7 +108,7 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Add the variable containing your dataframe (`df` in this example) to the `batch_data` key under `runtime_parameters` in your `BatchRequest`.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L36-L42
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L49-L55
 ```
 
 :::note Note this guide uses a toy dataframe that looks like this.
