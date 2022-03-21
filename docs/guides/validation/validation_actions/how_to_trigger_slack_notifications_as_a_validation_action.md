@@ -1,12 +1,15 @@
 ---
-title: How to trigger Slack notifications as a Validation Action
+title: How to trigger Slack notifications as an Action
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you trigger Slack notifications as a [Validation Action](../../../reference/validation.md).
+This guide will help you trigger Slack notifications as an Action.
 It will allow you to send a Slack message including information about a Validation Result, including whether or not the Validation succeeded.
 
 Great Expectations is able to use a slack webhook or slack app to send notifications.
+
+## Prerequisites 
 
 ### For webhook
 
@@ -28,19 +31,22 @@ Great Expectations is able to use a slack webhook or slack app to send notificat
 
 </Prerequisites>
 
-Steps
------
+## Steps
 
-1. Open `uncommitted/config_variables.yml` file and add `validation_notification_slack_webhook` variable by adding the following line:
+### 1. Edit your configuration variables to include the Slack webhook
+
+Open `uncommitted/config_variables.yml` file and add `validation_notification_slack_webhook` variable by adding the following line:
 
 ```yaml
 validation_notification_slack_webhook: [address to web hook]
 ```
 
+### 2. Edit your `validation_operators` configuration to include the `send_slack_notification_on_validation_result` Action
 
-2. Open `great_expectations.yml` and add `send_slack_notification_on_validation_result` action to `validation_operators`. Make sure the following section exists in the `great_expectations.yml` file.
+Open `great_expectations.yml` and add `send_slack_notification_on_validation_result` Action to `validation_operators`. Make sure the following section exists in the `great_expectations.yml` file.
 
-### Webhook config
+#### Webhook config
+
 ```yaml
 validation_operators:
     action_list_operator:
@@ -63,7 +69,8 @@ validation_operators:
               class_name: SlackRenderer
 ```
 
-### Slack bot config
+#### Slack bot config
+
 ```yaml
 validation_operators:
     action_list_operator:
@@ -87,7 +94,9 @@ validation_operators:
               class_name: SlackRenderer
 ```
 
-3. Run your `action_list_operator`, to validate a batch of data and receive Slack notification on the success or failure of validation suite.  
+### 4. Test your Slack notifications
+
+Run your `action_list_operator`, to validate a batch of data and receive Slack notification on the success or failure of validation suite.  
 
 ```python
 context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="slack_test")

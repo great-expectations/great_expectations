@@ -1,8 +1,10 @@
 ---
-title: How to trigger Email as a Validation Action
+title: How to trigger Email as an Action
 ---
 
-This guide will help you trigger emails as a Validation Action . It will allow you to send an email including information about a Validation Result, including whether or not the Validation succeeded.
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+
+This guide will help you trigger emails as an Action . It will allow you to send an email including information about a Validation Result, including whether or not the Validation succeeded.
 
 :::note Prerequisites 
 This how-to guide assumes that you have already:
@@ -11,9 +13,11 @@ This how-to guide assumes that you have already:
 * Identified the email addresses that messages will be sent to.
 :::
 
-### Steps
+## Steps
 
-1. Open `uncommitted/config_variables.yml` file and add the following variables by adding the following lines:
+### 1. Edit your configuration variables with email related information
+
+Open `uncommitted/config_variables.yml` file and add the following variables by adding the following lines:
 
 ````yaml
 smtp_address: [address of the smtp server]
@@ -24,7 +28,9 @@ sender_alias: [optional alias used to send the email (default = sender_login)]
 receiver_emails: [addresses you want to send the email to]  # each address must be separated by commas
 ````
 
-2. Open `great_expectations.yml` and add `send_email_on_validation_result` action to `validation_operators`. Make sure the following section exists in the `great_expectations.yml` file.
+### 2. Update `validation_operators` in `great_expectations.yml`
+
+Open `great_expectations.yml` and add `send_email_on_validation_result` action to `validation_operators`. Make sure the following section exists in the `great_expectations.yml` file.
 
 ````python
 validation_operators:
@@ -57,14 +63,19 @@ validation_operators:
             receiver_emails: ${receiver_emails}  # string containing email addresses separated by commas
 ````
 
-3. Run your action_list_operator, to validate a batch of data and receive an email on the success or failure of validation suite.
+### 3. Test your updated Action list
+
+Run your action_list_operator, to validate a batch of data and receive an email on the success or failure of validation suite.
+
+```
 context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="email_test")
+```
 
 If successful, you should receive an email that looks like this:
 
 ![image](../../../../docs/images/email_example.png)
 
-### Additional notes
+## Additional notes
 
 If your `great_expectations.yml` contains multiple configurations for Data Docs sites, all of them will be included in the email by default. If you would like to be more specific, you can configure the `notify_with` variable in your `great_expectations.yml`.
 
