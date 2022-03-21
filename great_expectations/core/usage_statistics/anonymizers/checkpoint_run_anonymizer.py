@@ -27,7 +27,7 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
         assert self.can_handle(
             obj=obj
         ), "CheckpointRunAnonymizer can only handle objects of type Checkpoint or CheckpointConfig"
-        if isinstance(obj, Checkpoint):
+        if "config" in kwargs:
             return self._anonymize_checkpoint_info(**kwargs)
         return self._anonymize_checkpoint_run(obj=obj, **kwargs)
 
