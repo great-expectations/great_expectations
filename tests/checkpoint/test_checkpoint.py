@@ -822,6 +822,15 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         ),
         mock.call(
             {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
