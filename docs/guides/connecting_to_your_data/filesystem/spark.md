@@ -52,12 +52,12 @@ Using this example configuration, add in your path to a directory that contains 
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L20-L38
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L6-L25
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L44
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L31
 ```
 
 </TabItem>
@@ -92,7 +92,7 @@ Save the configuration into your <TechnicalTag tag="data_context" text="Data Con
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L46
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L33
 ```
 
 </TabItem>
@@ -118,10 +118,10 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Add the path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L49-L55
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L36-L42
 ```
 Then load data into the Validator.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L61-L67
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L48-L54
 ```
 
   </TabItem>
@@ -129,10 +129,10 @@ Then load data into the Validator.
 
 Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L73-L77
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L60-L64
 ```
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L83-L89
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L70-L76
 ```
 
   </TabItem>
