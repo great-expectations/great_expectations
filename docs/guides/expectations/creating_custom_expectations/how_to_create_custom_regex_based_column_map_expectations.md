@@ -94,7 +94,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L14-L16
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L14
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -102,7 +102,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L17
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L15
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -111,7 +111,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L148
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L146
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -140,7 +140,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L24-L113
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L22-L111
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -190,7 +190,7 @@ To do this, we replace these:
 
 with something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L19-L21
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L17-L19
 ```
 
 For more detail when rendering your Custom Expectation, you can optionally specify the plural form of a Semantic Type you're validating. 
@@ -202,7 +202,7 @@ For example:
 
 becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L22
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L20
 ```
 
 Great Expectations will use these values to tell your Custom Expectation to apply your specified regex as a <TechnicalTag tag="metric" text="Metric"/> to be utilized in validating your data.
@@ -256,7 +256,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L140-L143
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L138-L141
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
