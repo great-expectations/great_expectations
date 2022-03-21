@@ -204,7 +204,7 @@ becomes:
 
 Great Expectations will use these values to tell your Custom Expectation to apply your specified regex as a <TechnicalTag tag="metric" text="Metric"/> to be utilized in validating your data.
 
-This is all that you need to define for now. The `ColumnMapRegexExpectation` class has built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
+This is all that you need to define for now. The `RegexBasedColumnMapExpectation` class has built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
 <details>
   <summary>Other parameters</summary>
