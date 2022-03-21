@@ -5,7 +5,7 @@ import os
 import sys
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 
 import pkg_resources
 from ruamel.yaml import YAML
@@ -77,7 +77,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
     package_name: Optional[str] = None
     icon: Optional[str] = None
     description: Optional[str] = None
-    expectations: Optional[List[ExpectationDiagnostics]] = None
+    expectations: Optional[Dict[str, ExpectationDiagnostics]] = None
     expectation_count: Optional[int] = None
     dependencies: Optional[List[Dependency]] = None
     maturity: Optional[Maturity] = None
@@ -143,11 +143,12 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                 self.domain_experts.append(domain_expert)
 
     def _update_expectations(self, diagnostics: List[ExpectationDiagnostics]) -> None:
-        expectations = []
+        expectations = {}
         status = {maturity.name: 0 for maturity in Maturity}
 
         for diagnostic in diagnostics:
-            expectations.append(diagnostic)
+            name = diagnostic.description.snake_name
+            expectations[name] = diagnostic
             expectation_maturity = diagnostic.library_metadata.maturity
             status[expectation_maturity] += 1
 
