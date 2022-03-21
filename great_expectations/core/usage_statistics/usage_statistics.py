@@ -143,7 +143,7 @@ class UsageStatisticsHandler:
             "platform.release": platform.release(),
             "version_info": str(sys.version_info),
             "anonymized_datasources": [
-                self._datasource_anonymizer.anonymize_datasource_info(
+                self._datasource_anonymizer._anonymize_datasource_info(
                     datasource_name, datasource_config
                 )
                 for datasource_name, datasource_config in self._data_context.project_config_with_variables_substituted.datasources.items()
@@ -470,7 +470,7 @@ def add_datasource_usage_statistics(
     payload = {}
     # noinspection PyBroadException
     try:
-        payload = datasource_anonymizer.anonymize_datasource_info(name, kwargs)
+        payload = datasource_anonymizer._anonymize_datasource_info(name, kwargs)
     except Exception as e:
         logger.debug(
             f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"

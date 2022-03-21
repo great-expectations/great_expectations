@@ -3705,21 +3705,21 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ),
         )
 
-        datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
+        datasource_anonymizer = Anonymizer(self.data_context_id)
 
         if class_name == "SimpleSqlalchemyDatasource":
             # Use the raw config here, defaults will be added in the anonymizer
-            usage_stats_event_payload = (
-                datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
-                    name=datasource_name, config=config
-                )
+            usage_stats_event_payload = datasource_anonymizer.anonymize(
+                obj=instantiated_class, name=datasource_name, config=config
             )
         else:
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             datasource_config = datasourceConfigSchema.load(instantiated_class.config)
             full_datasource_config = datasourceConfigSchema.dump(datasource_config)
-            usage_stats_event_payload = datasource_anonymizer.anonymize_datasource_info(
-                name=datasource_name, config=full_datasource_config
+            usage_stats_event_payload = datasource_anonymizer.anonymize(
+                obj=instantiated_class,
+                name=datasource_name,
+                config=full_datasource_config,
             )
         return instantiated_class, usage_stats_event_payload
 
@@ -3858,9 +3858,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         # If a subclass of a supported type, find the parent class and anonymize
         anonymizer: Anonymizer = Anonymizer(self.data_context_id)
-        datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
-            self.data_context_id
-        )
 
         parent_class_from_object = anonymizer.get_parent_class(
             object_=instantiated_class
@@ -3879,7 +3876,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "Datasource"
         ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
-            if datasource_anonymizer.get_parent_class_v3_api(config=config):
+            if DatasourceAnonymizer.get_parent_class_v3_api(config=config):
                 # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
                 datasource_config = datasourceConfigSchema.load(
                     instantiated_class.config
@@ -3890,16 +3887,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 full_datasource_config = config
             if parent_class_from_config == "SimpleSqlalchemyDatasource":
                 # Use the raw config here, defaults will be added in the anonymizer
-                usage_stats_event_payload = (
-                    datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
-                        name=datasource_name, config=config
-                    )
+                usage_stats_event_payload = anonymizer.anonymize(
+                    obj=instantiated_class, name=datasource_name, config=config
                 )
             else:
-                usage_stats_event_payload = (
-                    datasource_anonymizer.anonymize_datasource_info(
-                        name=datasource_name, config=full_datasource_config
-                    )
+                usage_stats_event_payload = anonymizer.anonymize(
+                    obj=instantiated_class,
+                    name=datasource_name,
+                    config=full_datasource_config,
                 )
 
         elif parent_class_from_config is not None and parent_class_from_config.endswith(

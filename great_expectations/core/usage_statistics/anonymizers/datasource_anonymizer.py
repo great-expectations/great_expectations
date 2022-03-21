@@ -13,32 +13,35 @@ from great_expectations.datasource import (
 
 
 class DatasourceAnonymizer(BaseAnonymizer):
-    def __init__(self, salt=None):
-        super().__init__(salt=salt)
+    # ordered bottom up in terms of inheritance order
+    _legacy_ge_classes = [
+        PandasDatasource,
+        SqlAlchemyDatasource,
+        SparkDFDatasource,
+        LegacyDatasource,
+    ]
 
-        # ordered bottom up in terms of inheritance order
-        self._legacy_ge_classes = [
-            PandasDatasource,
-            SqlAlchemyDatasource,
-            SparkDFDatasource,
-            LegacyDatasource,
-        ]
-
-        # ordered bottom up in terms of inheritance order
-        self._ge_classes = [
-            SimpleSqlalchemyDatasource,
-            Datasource,
-            BaseDatasource,
-        ]
+    # ordered bottom up in terms of inheritance order
+    _ge_classes = [
+        SimpleSqlalchemyDatasource,
+        Datasource,
+        BaseDatasource,
+    ]
 
     def anonymize(self, obj: object, *args, **kwargs) -> dict:
-        raise NotImplementedError
+        assert isinstance(
+            obj, Datasource
+        ), "DatasourceAnonymizer can only handle objects of type Datasource"
+
+        if isinstance(obj, SimpleSqlalchemyDatasource):
+            return self._anonymize_simple_sqlalchemy_datasource(*args, **kwargs)
+        return self._anonymize_datasource_info(*args, **kwargs)
 
     @staticmethod
     def can_handle(obj: object, *args, **kwargs) -> bool:
-        raise NotImplementedError
+        return isinstance(obj, Datasource)
 
-    def anonymize_datasource_info(self, name, config):
+    def _anonymize_datasource_info(self, name: str, config: dict) -> dict:
         anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize_string(name)
 
@@ -71,7 +74,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
         return anonymized_info_dict
 
-    def anonymize_simple_sqlalchemy_datasource(self, name, config):
+    def _anonymize_simple_sqlalchemy_datasource(self, name: str, config: dict) -> dict:
         """
         SimpleSqlalchemyDatasource requires a separate anonymization scheme.
         """
@@ -140,20 +143,24 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
         return anonymized_info_dict
 
-    def get_parent_class(self, config) -> Optional[str]:
-        return super().get_parent_class(
-            classes_to_check=self._ge_classes + self._legacy_ge_classes,
+    @staticmethod
+    def get_parent_class(config: dict) -> Optional[str]:
+        return BaseAnonymizer.get_parent_class(
+            classes_to_check=DatasourceAnonymizer._ge_classes
+            + DatasourceAnonymizer._legacy_ge_classes,
             object_config=config,
         )
 
-    def get_parent_class_v2_api(self, config) -> Optional[str]:
-        return super().get_parent_class(
-            classes_to_check=self._legacy_ge_classes,
+    @staticmethod
+    def get_parent_class_v2_api(config: dict) -> Optional[str]:
+        return BaseAnonymizer.get_parent_class(
+            classes_to_check=DatasourceAnonymizer._legacy_ge_classes,
             object_config=config,
         )
 
-    def get_parent_class_v3_api(self, config) -> Optional[str]:
-        return super().get_parent_class(
-            classes_to_check=self._ge_classes,
+    @staticmethod
+    def get_parent_class_v3_api(config: dict) -> Optional[str]:
+        return BaseAnonymizer.get_parent_class(
+            classes_to_check=DatasourceAnonymizer._ge_classes,
             object_config=config,
         )

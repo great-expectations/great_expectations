@@ -17,7 +17,7 @@ class CustomDatasource(PandasDatasource):
 
 def test_datasource_anonymizer():
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    n1 = datasource_anonymizer.anonymize_datasource_info(
+    n1 = datasource_anonymizer._anonymize_datasource_info(
         name="test_datasource",
         config={
             "name": "test_datasource",
@@ -29,7 +29,7 @@ def test_datasource_anonymizer():
         "anonymized_name": "04bf89e1fb7495b0904bbd5ae478fbe0",
         "parent_class": "PandasDatasource",
     }
-    n2 = datasource_anonymizer.anonymize_datasource_info(
+    n2 = datasource_anonymizer._anonymize_datasource_info(
         name="test_datasource",
         config={
             "name": "test_datasource",
@@ -38,7 +38,7 @@ def test_datasource_anonymizer():
         },
     )
     datasource_anonymizer_2 = DatasourceAnonymizer()
-    n3 = datasource_anonymizer_2.anonymize_datasource_info(
+    n3 = datasource_anonymizer_2._anonymize_datasource_info(
         name="test_datasource",
         config={
             "name": "test_datasource",
@@ -53,7 +53,7 @@ def test_datasource_anonymizer():
     assert n2["anonymized_class"] != n3["anonymized_class"]
 
     # Same anonymizer *does* produce the same result
-    n4 = datasource_anonymizer.anonymize_datasource_info(
+    n4 = datasource_anonymizer._anonymize_datasource_info(
         name="test_datasource",
         config={
             "name": "test_datasource",
@@ -84,7 +84,7 @@ def test_anonymize_datasource_info_v2_api_core_ge_class():
     }
 
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
+    anonymized_datasource = datasource_anonymizer._anonymize_datasource_info(
         name=name, config=config
     )
     assert anonymized_datasource == {
@@ -110,7 +110,7 @@ data_connectors:
 """
     config: CommentedMap = yaml.load(yaml_config)
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
+    anonymized_datasource = datasource_anonymizer._anonymize_datasource_info(
         name=name, config=config
     )
     assert anonymized_datasource == {
@@ -143,7 +143,7 @@ class_name: MyCustomV2ApiDatasource
 """
     config: CommentedMap = yaml.load(yaml_config)
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
+    anonymized_datasource = datasource_anonymizer._anonymize_datasource_info(
         name=name, config=config
     )
     assert anonymized_datasource == {
@@ -170,7 +170,7 @@ data_connectors:
 """
     config: CommentedMap = yaml.load(yaml_config)
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
+    anonymized_datasource = datasource_anonymizer._anonymize_datasource_info(
         name=name, config=config
     )
     assert anonymized_datasource == {
@@ -205,7 +205,7 @@ introspection:
     config: CommentedMap = yaml.load(yaml_config)
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     anonymized_datasource = (
-        datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+        datasource_anonymizer._anonymize_simple_sqlalchemy_datasource(
             name=name, config=config
         )
     )
@@ -236,7 +236,7 @@ introspection:
     config: CommentedMap = yaml.load(yaml_config)
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     anonymized_datasource = (
-        datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+        datasource_anonymizer._anonymize_simple_sqlalchemy_datasource(
             name=name, config=config
         )
     )
@@ -276,9 +276,8 @@ def test_get_parent_class_yes():
         }
         for parent_class in parent_classes
     ]
-    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.get_parent_class(config=configs[idx])
+        parent_class = DatasourceAnonymizer.get_parent_class(config=configs[idx])
         assert parent_class == parent_classes[idx]
 
 
@@ -287,16 +286,14 @@ def test_is_custom_parent_class_recognized_yes():
         "module_name": "tests.data_context.fixtures.plugins.my_custom_v3_api_datasource",
         "class_name": "MyCustomV3ApiDatasource",
     }
-    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    parent_class = datasource_anonymizer.get_parent_class(config=config)
+    parent_class = DatasourceAnonymizer.get_parent_class(config=config)
     assert parent_class == "Datasource"
 
     config = {
         "module_name": "tests.data_context.fixtures.plugins.my_custom_v2_api_datasource",
         "class_name": "MyCustomV2ApiDatasource",
     }
-    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    parent_class = datasource_anonymizer.get_parent_class(config=config)
+    parent_class = DatasourceAnonymizer.get_parent_class(config=config)
     assert parent_class == "PandasDatasource"
 
 
@@ -310,9 +307,8 @@ def test_get_parent_class_no():
         }
         for parent_class in parent_classes
     ]
-    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.get_parent_class(config=configs[idx])
+        parent_class = DatasourceAnonymizer.get_parent_class(config=configs[idx])
         assert parent_class != parent_classes[idx]
         assert parent_class is None
 
@@ -333,11 +329,8 @@ def test_get_parent_class_v2_api_yes():
         }
         for parent_class in parent_classes
     ]
-    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.get_parent_class_v2_api(
-            config=configs[idx]
-        )
+        parent_class = DatasourceAnonymizer.get_parent_class_v2_api(config=configs[idx])
         assert parent_class == parent_classes[idx]
 
 
@@ -346,8 +339,7 @@ def test_is_custom_parent_class_recognized_v2_api_yes():
         "module_name": "tests.data_context.fixtures.plugins.my_custom_v2_api_datasource",
         "class_name": "MyCustomV2ApiDatasource",
     }
-    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    parent_class = datasource_anonymizer.get_parent_class_v2_api(config=config)
+    parent_class = DatasourceAnonymizer.get_parent_class_v2_api(config=config)
     assert parent_class == "PandasDatasource"
 
 
@@ -370,11 +362,8 @@ def test_get_parent_class_v2_api_no():
         }
         for parent_class in parent_classes
     ]
-    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.get_parent_class_v2_api(
-            config=configs[idx]
-        )
+        parent_class = DatasourceAnonymizer.get_parent_class_v2_api(config=configs[idx])
         assert parent_class != parent_classes[idx]
         assert parent_class is None
 
@@ -394,11 +383,8 @@ def test_get_parent_class_v3_api_yes():
         }
         for parent_class in parent_classes
     ]
-    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.get_parent_class_v3_api(
-            config=configs[idx]
-        )
+        parent_class = DatasourceAnonymizer.get_parent_class_v3_api(config=configs[idx])
         assert parent_class == parent_classes[idx]
 
 
@@ -407,8 +393,7 @@ def test_is_custom_parent_class_recognized_v3_api_yes():
         "module_name": "tests.data_context.fixtures.plugins.my_custom_v3_api_datasource",
         "class_name": "MyCustomV3ApiDatasource",
     }
-    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
-    parent_class = datasource_anonymizer.get_parent_class_v3_api(config=config)
+    parent_class = DatasourceAnonymizer.get_parent_class_v3_api(config=config)
     assert parent_class == "Datasource"
 
 
@@ -432,10 +417,7 @@ def test_get_parent_class_v3_api_no():
         }
         for parent_class in parent_classes
     ]
-    datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     for idx in range(len(configs)):
-        parent_class = datasource_anonymizer.get_parent_class_v3_api(
-            config=configs[idx]
-        )
+        parent_class = DatasourceAnonymizer.get_parent_class_v3_api(config=configs[idx])
         assert parent_class != parent_classes[idx]
         assert parent_class is None
