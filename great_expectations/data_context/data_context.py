@@ -3824,8 +3824,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload: dict = anonymizer._anonymize_profiler_info(
-            name=profiler_name, config=profiler_config
+        usage_stats_event_payload: dict = anonymizer.anonymize(
+            obj=instantiated_class, name=profiler_name, config=profiler_config
         )
 
         return instantiated_class, usage_stats_event_payload

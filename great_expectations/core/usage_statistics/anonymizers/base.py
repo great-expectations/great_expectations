@@ -463,25 +463,6 @@ class BaseAnonymizer(ABC):
 
         return anonymized_info_dict
 
-    def _anonymize_profiler_info(self, name: str, config: dict) -> dict:
-        """Anonymize RuleBasedProfiler objs from the 'great_expectations.rule_based_profiler' module.
-
-        Args:
-            name (str): The name of the given profiler.
-            config (dict): The dictionary configuration of the given profiler.
-
-        Returns:
-            An anonymized dictionary payload that obfuscates user-specific details.
-        """
-        anonymized_info_dict: dict = {
-            "anonymized_name": self._anonymize_string(name),
-        }
-        self._anonymize_object_info(
-            anonymized_info_dict=anonymized_info_dict,
-            object_config=config,
-        )
-        return anonymized_info_dict
-
     def _anonymize_data_connector_info(self, name: str, config: dict) -> dict:
         """Anonymize DataConnector objs from the 'great_expectations.datasource.data_connector' module.
 
