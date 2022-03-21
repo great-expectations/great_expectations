@@ -1256,10 +1256,13 @@ class GeCloudConfig(DictDot):
         return self.organization_id
 
     def to_json_dict(self):
+        # postpone importing to avoid circular imports
+        from great_expectations.data_context.util import PasswordMasker
+
         return {
             "base_url": self.base_url,
             "organization_id": self.organization_id,
-            "access_token": "xxx",  # self.access_token,
+            "access_token": PasswordMasker.MASKED_PASSWORD_STRING,  # self.access_token,
             "account_id": self.account_id,  # TODO: remove when account_id is deprecated
         }
 
