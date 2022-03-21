@@ -3,7 +3,7 @@ title: How to create a new Checkpoint
 ---
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you create a new Checkpoint, which allows you to couple an Expectation Suite with a data set to validate.
+This guide will help you create a new <TechnicalTag tag="checkpoint" text="Checkpoint" />, which allows you to couple an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> with a data set to <TechnicalTag tag="validation" text="Validate" />.
 
 Note: As of Great Expectations version 0.13.7, we have updated and improved the Checkpoints feature. You can continue to use your existing legacy Checkpoint workflows if you’re working with concepts from the Batch Kwargs (v2) API. If you’re using concepts from the BatchRequest (v3) API, please refer to the new Checkpoints guides.
 
@@ -21,7 +21,7 @@ This how-to guide assumes you have already:
 
 ### 1. Use the CLI to open a Jupyter Notebook for creating a new Checkpoint
 
-To assist you with creating Checkpoints, our CLI has a convenience method that will open a Jupyter Notebook with all the scaffolding you need to easily configure and save your Checkpoint.  Simply run the following CLI command from your Data Context:
+To assist you with creating Checkpoints, our <TechnicalTag tag="cli" text="CLI" /> has a convenience method that will open a Jupyter Notebook with all the scaffolding you need to easily configure and save your Checkpoint.  Simply run the following CLI command from your <TechnicalTag tag="data_context" text="Data Context" />:
 
 ````console
 great_expectations checkpoint new my_checkpoint
@@ -35,7 +35,7 @@ The Jupyter Notebook which was opened in the previous step will guide you throug
 
 #### 3a. Edit the configuration 
 
-For this example, we’ll demonstrate using a basic Checkpoint configuration with the `SimpleCheckpoint` class, which takes care of some defaults. Replace all names such as `my_datasource` with the respective DataSource, DataConnector, DataAsset, and Expectation Suite names you have configured in your `great_expectations.yml`.
+For this example, we’ll demonstrate using a basic Checkpoint configuration with the `SimpleCheckpoint` class, which takes care of some defaults. Replace all names such as `my_datasource` with the respective <TechnicalTag tag="datasource" text="Datasource" />, <TechnicalTag tag="data_connector" text="Data Connector" />, <TechnicalTag tag="data_asset" text="Data Asset" />, and Expectation Suite names you have configured in your `great_expectations.yml`.
 
 ````yaml
 config = """
@@ -53,7 +53,7 @@ validations:
 """
 ````
 
-This is the minimum required to configure a Checkpoint that will run the Expectation Suite `my_suite` against the data asset `MyDataAsset`. See [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config) for advanced configuration options.
+This is the minimum required to configure a Checkpoint that will run the Expectation Suite `my_suite` against the Data Asset `MyDataAsset`. See [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config) for advanced configuration options.
 
 #### 3b. Test your config using `context.test_yaml_config`
 
@@ -88,7 +88,7 @@ After you are satisfied with your configuration, save it by running the appropri
 
 #### 2d. (Optional) Check your stored Checkpoint config
 
-If the Store backend of your Checkpoint Store is on the local filesystem, you can navigate to the `checkpoints` store directory that is configured in `great_expectations.yml` and find the configuration files corresponding to the Checkpoints you created.
+If the <TechnicalTag tag="store" text="Store" /> backend of your <TechnicalTag tag="checkpoint_store" text="Checkpoint Store" /> is on the local filesystem, you can navigate to the `checkpoints` store directory that is configured in `great_expectations.yml` and find the configuration files corresponding to the Checkpoints you created.
 
 #### 2e. (Optional) Test run the new Checkpoint and open Data Docs
 
@@ -96,7 +96,7 @@ Now that you have stored your Checkpoint configuration to the Store backend conf
 
 Before running a Checkpoint, make sure that all classes and Expectation Suites referred to in the configuration exist.
 
-When `run_checkpoint` returns, the `checkpoint_run_result` can then be checked for the value of the `success` field (all validations passed) and other information associated with running the specified actions.
+When `run_checkpoint` returns, the `checkpoint_run_result` can then be checked for the value of the `success` field (all validations passed) and other information associated with running the specified <TechnicalTag tag="action" text="Actions" />.
 
 For more advanced configurations of Checkpoints, please see [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config).
 
