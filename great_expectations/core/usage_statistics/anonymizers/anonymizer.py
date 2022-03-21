@@ -48,7 +48,7 @@ class Anonymizer:
     def salt(self) -> str:
         return self._salt
 
-    def anonymize(self, string_: Optional[str]) -> Optional[str]:
+    def anonymize_string(self, string_: Optional[str]) -> Optional[str]:
         """Obsfuscates a given string using an MD5 hash.
 
         Utilized to anonymize user-specific/sensitive strings in usage statistics payloads.
@@ -144,20 +144,22 @@ class Anonymizer:
                         cls for cls in parent_class_list
                     )
                     anonymized_info_dict["parent_class"] = concatenated_parent_classes
-                    anonymized_info_dict["anonymized_class"] = self.anonymize(
+                    anonymized_info_dict["anonymized_class"] = self.anonymize_string(
                         object_class_name
                     )
 
             # Catch-all to prevent edge cases from slipping past
             if not anonymized_info_dict.get("parent_class"):
                 anonymized_info_dict["parent_class"] = "__not_recognized__"
-                anonymized_info_dict["anonymized_class"] = self.anonymize(
+                anonymized_info_dict["anonymized_class"] = self.anonymize_string(
                     object_class_name
                 )
 
         except AttributeError:
             anonymized_info_dict["parent_class"] = "__not_recognized__"
-            anonymized_info_dict["anonymized_class"] = self.anonymize(object_class_name)
+            anonymized_info_dict["anonymized_class"] = self.anonymize_string(
+                object_class_name
+            )
 
         return anonymized_info_dict
 
@@ -230,7 +232,7 @@ class Anonymizer:
         action_config: Optional[dict] = None,
     ) -> dict:
         anonymized_info_dict: dict = {
-            "anonymized_name": self.anonymize(action_name),
+            "anonymized_name": self.anonymize_string(action_name),
         }
 
         self._anonymize_object_info(
@@ -257,7 +259,7 @@ class Anonymizer:
             An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict: dict = {
-            "anonymized_name": self.anonymize(validation_operator_name)
+            "anonymized_name": self.anonymize_string(validation_operator_name)
         }
         actions_dict: dict = validation_operator_obj.actions
 
@@ -304,7 +306,9 @@ class Anonymizer:
             if batch_kwarg_key in ge_batch_kwarg_keys:
                 anonymized_batch_kwarg_keys.append(batch_kwarg_key)
             else:
-                anonymized_batch_kwarg_keys.append(self.anonymize(batch_kwarg_key))
+                anonymized_batch_kwarg_keys.append(
+                    self.anonymize_string(batch_kwarg_key)
+                )
 
         return anonymized_batch_kwarg_keys
 
@@ -347,13 +351,13 @@ class Anonymizer:
         else:
             anonymized_info_dict["anonymized_batch_kwarg_keys"] = []
         if expectation_suite_name:
-            anonymized_info_dict["anonymized_expectation_suite_name"] = self.anonymize(
-                expectation_suite_name
-            )
+            anonymized_info_dict[
+                "anonymized_expectation_suite_name"
+            ] = self.anonymize_string(expectation_suite_name)
         else:
             anonymized_info_dict["anonymized_expectation_suite_name"] = "__not_found__"
         if datasource_name:
-            anonymized_info_dict["anonymized_datasource_name"] = self.anonymize(
+            anonymized_info_dict["anonymized_datasource_name"] = self.anonymize_string(
                 datasource_name
             )
         else:
@@ -419,7 +423,7 @@ class Anonymizer:
         anonymized_info_dict = self._anonymize_site_builder_info(
             site_builder_config=site_config,
         )
-        anonymized_info_dict["anonymized_name"] = self.anonymize(site_name)
+        anonymized_info_dict["anonymized_name"] = self.anonymize_string(site_name)
 
         store_backend_config = site_config.get("store_backend")
         anonymized_info_dict[
@@ -453,7 +457,7 @@ class Anonymizer:
             An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self.anonymize(store_name)
+        anonymized_info_dict["anonymized_name"] = self.anonymize_string(store_name)
         store_backend_obj = store_obj.store_backend
 
         self._anonymize_object_info(
@@ -478,7 +482,7 @@ class Anonymizer:
             An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict: dict = {
-            "anonymized_name": self.anonymize(name),
+            "anonymized_name": self.anonymize_string(name),
         }
         self._anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
@@ -488,7 +492,7 @@ class Anonymizer:
 
     def _anonymize_execution_engine_info(self, name: str, config: dict) -> dict:
         anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self.anonymize(name)
+        anonymized_info_dict["anonymized_name"] = self.anonymize_string(name)
 
         from great_expectations.data_context.types.base import (
             ExecutionEngineConfig,
@@ -521,7 +525,7 @@ class Anonymizer:
             An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict = {
-            "anonymized_name": self.anonymize(name),
+            "anonymized_name": self.anonymize_string(name),
         }
 
         # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
@@ -567,7 +571,7 @@ class Anonymizer:
             self.anonymize_expectation(expectation_type, expectation_info)
             anonymized_expectation_counts.append(expectation_info)
 
-        anonymized_info_dict["anonymized_name"] = self.anonymize(
+        anonymized_info_dict["anonymized_name"] = self.anonymize_string(
             expectation_suite.expectation_suite_name
         )
         anonymized_info_dict["expectation_count"] = len(expectations)
@@ -589,7 +593,9 @@ class Anonymizer:
         if expectation_type in self.CORE_GE_EXPECTATION_TYPES:
             info_dict["expectation_type"] = expectation_type
         else:
-            info_dict["anonymized_expectation_type"] = self.anonymize(expectation_type)
+            info_dict["anonymized_expectation_type"] = self.anonymize_string(
+                expectation_type
+            )
 
     def anonymize_batch_request(
         self, *args, **kwargs
@@ -689,7 +695,7 @@ class Anonymizer:
                             source=value
                         )
                 else:
-                    anonymized_key: str = self.anonymize(key)
+                    anonymized_key: str = self.anonymize_string(key)
                     source_copy[
                         anonymized_key
                     ] = self._anonymize_batch_request_properties(source=value)
@@ -700,7 +706,7 @@ class Anonymizer:
 
             return source_copy
 
-        return self.anonymize(str(source))
+        return self.anonymize_string(str(source))
 
     def _build_anonymized_batch_request(
         self,
@@ -749,7 +755,7 @@ class Anonymizer:
             An anonymized dictionary payload that obfuscates user-specific details.
         """
         anonymized_info_dict: dict = {
-            "anonymized_name": self.anonymize(name),
+            "anonymized_name": self.anonymize_string(name),
         }
 
         # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.

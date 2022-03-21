@@ -25,7 +25,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
         """
         name: str = profiler_config.name
-        anonymized_name: Optional[str] = self.anonymize(name)
+        anonymized_name: Optional[str] = self.anonymize_string(name)
 
         config_version: float = profiler_config.config_version
 
@@ -64,7 +64,7 @@ class ProfilerRunAnonymizer(Anonymizer):
 
     def _anonymize_rule(self, name: str, rule: dict) -> dict:
         anonymized_rule: dict = {}
-        anonymized_rule["anonymized_name"] = self.anonymize(name)
+        anonymized_rule["anonymized_name"] = self.anonymize_string(name)
 
         domain_builder: Optional[dict] = rule.get("domain_builder")
         if domain_builder is not None:
@@ -131,7 +131,7 @@ class ProfilerRunAnonymizer(Anonymizer):
             },
         )
 
-        anonymized_parameter_builder["anonymized_name"] = self.anonymize(
+        anonymized_parameter_builder["anonymized_name"] = self.anonymize_string(
             parameter_builder.get("name")
         )
 
@@ -186,7 +186,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         if condition:
             anonymized_expectation_configuration_builder[
                 "anonymized_condition"
-            ] = self.anonymize(condition)
+            ] = self.anonymize_string(condition)
             logger.debug("Anonymized condition in ExpectationConfigurationBuilder")
 
         return anonymized_expectation_configuration_builder
