@@ -1168,7 +1168,9 @@ class BaseDataContext(ConfigPeer):
         if datasource_name is None:
             raise ValueError("Datasource names must be a datasource name")
         else:
-            datasource = self.get_datasource(datasource_name=datasource_name)
+            datasource: Optional[
+                Union[LegacyDatasource, BaseDatasource]
+            ] = self.get_datasource(datasource_name=datasource_name)
             if datasource:
                 # remove key until we have a delete method on project_config
                 # self.project_config_with_variables_substituted.datasources[
