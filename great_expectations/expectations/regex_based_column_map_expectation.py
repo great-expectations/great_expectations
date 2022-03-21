@@ -195,7 +195,6 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
                 template_str += ", at least $mostly_pct % of the time."
             else:
                 template_str += "."

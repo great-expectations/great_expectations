@@ -11,9 +11,7 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 
 
 # <snippet>
-class ExpectColumnValuesToOnlyContainVowelsBasedColumnMap(
-    RegexBasedColumnMapExpectation
-):
+class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
     """Values in this column should only contain vowels"""
 
     regex_snake_name = "vowel"
@@ -145,11 +143,11 @@ class ExpectColumnValuesToOnlyContainVowelsBasedColumnMap(
 
 # </snippet>
 if __name__ == "__main__":
-    ExpectColumnValuesToOnlyContainVowelsBasedColumnMap().print_diagnostic_checklist()
+    ExpectColumnValuesToOnlyContainVowels().print_diagnostic_checklist()
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
-diagnostics = ExpectColumnValuesToOnlyContainVowelsBasedColumnMap().run_diagnostics()
+diagnostics = ExpectColumnValuesToOnlyContainVowels().run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
