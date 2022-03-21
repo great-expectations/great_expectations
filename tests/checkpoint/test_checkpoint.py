@@ -788,7 +788,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     assert len(data_context.validations_store.list_keys()) == 1
     assert result.success
 
-    assert mock_emit.call_count == 6
+    assert mock_emit.call_count == 7
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -819,6 +819,15 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
                 },
                 "success": True,
             },
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1634,7 +1643,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert len(context.validations_store.list_keys()) == 2
     assert result["success"]
 
-    assert mock_emit.call_count == 8
+    assert mock_emit.call_count == 10
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -1739,6 +1748,15 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ),
         mock.call(
             {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
@@ -1765,6 +1783,15 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                     }
                 },
                 "event": "data_context.get_batch_list",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6"
+                },
+                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
