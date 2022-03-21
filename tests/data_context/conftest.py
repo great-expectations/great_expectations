@@ -177,6 +177,14 @@ def conn_string_password():
 
 
 @pytest.fixture
+def conn_string_with_embedded_password(conn_string_password):
+    """
+    A mock connection string with the `conn_string_password` fixture embedded.
+    """
+    return f"redshift+psycopg2://no_user:{conn_string_password}@111.11.1.1:1111/foo"
+
+
+@pytest.fixture
 def data_context_config_with_datasources(conn_string_password):
     return DataContextConfig(
         **{
