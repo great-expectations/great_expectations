@@ -288,7 +288,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
                 handler.send_usage_message(
                     event="datasource.sqlalchemy.connect",
                     event_payload={
-                        "anonymized_name": handler._datasource_anonymizer.anonymize(
+                        "anonymized_name": handler.anonymizer.anonymize_string(
                             self.name
                         ),
                         "sqlalchemy_dialect": self.engine.name,

@@ -64,21 +64,7 @@ class UsageStatisticsHandler:
         # the risk of cyclic import issues. If these anonymizers have been imported at any earlier point
         # in the program's lifetime, retrieval of the import will be O(1) and not impact performance.
 
-        from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
-            CheckpointRunAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
-            DatasourceAnonymizer,
-        )
-        from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
-            ProfilerRunAnonymizer,
-        )
-
         self._anonymizer = Anonymizer(data_context_id)
-        self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
-
-        self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
-        self._profiler_run_anonymizer = ProfilerRunAnonymizer(data_context_id)
 
         try:
             self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
@@ -138,12 +124,19 @@ class UsageStatisticsHandler:
             self._data_context.get_expectation_suite(expectation_suite_name)
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
+
+        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
+            DatasourceAnonymizer,
+        )
+
+        datasource_anonymizer = DatasourceAnonymizer(self._data_context_id)
+
         return {
             "platform.system": platform.system(),
             "platform.release": platform.release(),
             "version_info": str(sys.version_info),
             "anonymized_datasources": [
-                self._datasource_anonymizer._anonymize_datasource_info(
+                datasource_anonymizer._anonymize_datasource_info(
                     datasource_name, datasource_config
                 )
                 for datasource_name, datasource_config in self._data_context.project_config_with_variables_substituted.datasources.items()
