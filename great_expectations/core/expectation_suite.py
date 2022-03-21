@@ -88,7 +88,7 @@ class ExpectationSuite(SerializableDictDot):
     def add_citation(
         self,
         comment: str,
-        batch_list: Optional[
+        batch_request_list: Optional[
             List[Union[str, Dict[str, Union[str, Dict[str, Any]]]]]
         ] = None,
         batch_request: Optional[
@@ -113,7 +113,7 @@ class ExpectationSuite(SerializableDictDot):
             "citation_date": get_datetime_string_from_strftime_format(
                 format_str="%Y-%m-%dT%H:%M:%S.%fZ", datetime_obj=citation_date
             ),
-            "batch_list": batch_list,
+            "batch_request_list": batch_request_list,
             "batch_request": batch_request,
             "batch_definition": batch_definition,
             "batch_spec": batch_spec,
