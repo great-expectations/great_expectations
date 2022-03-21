@@ -575,9 +575,7 @@ def get_profiler_run_usage_statistics(
     if usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            profiler_run_anonymizer: "ProfilerRunAnonymizer" = (  # noqa: F821
-                usage_statistics_handler._profiler_run_anonymizer
-            )
+            anonymizer = usage_statistics_handler.anonymizer
 
             resolved_runtime_config: "RuleBasedProfilerConfig" = (  # noqa: F821
                 RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
@@ -587,9 +585,7 @@ def get_profiler_run_usage_statistics(
                 )
             )
 
-            payload: dict = profiler_run_anonymizer.anonymize_profiler_run(
-                profiler_config=resolved_runtime_config
-            )
+            payload: dict = anonymizer.anonymize(obj=resolved_runtime_config)
         except Exception as e:
             logger.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_profiler_run_usage_statistics: Unable to create anonymized_profiler_run payload field"

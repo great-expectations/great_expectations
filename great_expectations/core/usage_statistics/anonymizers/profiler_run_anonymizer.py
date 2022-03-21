@@ -20,17 +20,15 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
         self._salt = salt
 
     def anonymize(self, obj: object) -> dict:
-        raise NotImplementedError
-
-    @staticmethod
-    def can_handle(obj: object) -> bool:
-        raise NotImplementedError
-
-    def anonymize_profiler_run(self, profiler_config: RuleBasedProfilerConfig) -> dict:
         """
         Traverse the entire RuleBasedProfiler configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
         """
+        assert isinstance(
+            obj, RuleBasedProfilerConfig
+        ), "ProfilerRunAnonymizer can only handle objects of type RuleBasedProfilerConfig"
+        profiler_config: RuleBasedProfilerConfig = obj
+
         name: str = profiler_config.name
         anonymized_name: Optional[str] = self.anonymize_string(name)
 
@@ -58,6 +56,10 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
         )
 
         return anonymized_profiler_run_properties_dict
+
+    @staticmethod
+    def can_handle(obj: object) -> bool:
+        return isinstance(obj, RuleBasedProfilerConfig)
 
     def _anonymize_rules(self, rules: Dict[str, dict]) -> List[dict]:
         anonymized_rules: List[dict] = []
