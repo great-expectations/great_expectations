@@ -30,7 +30,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
     def anonymize(self, obj: object, *args, **kwargs) -> dict:
         assert isinstance(
-            obj, Datasource
+            obj, BaseDatasource
         ), "DatasourceAnonymizer can only handle objects of type Datasource"
 
         if isinstance(obj, SimpleSqlalchemyDatasource):
@@ -39,7 +39,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
     @staticmethod
     def can_handle(obj: object, *args, **kwargs) -> bool:
-        return isinstance(obj, Datasource)
+        return isinstance(obj, BaseDatasource)
 
     def _anonymize_datasource_info(self, name: str, config: dict) -> dict:
         anonymized_info_dict = {}
