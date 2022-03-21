@@ -28,16 +28,16 @@ class Anonymizer(BaseAnonymizer):
             DatasourceAnonymizer,
         ]
 
-    def anonymize(self, obj: object) -> dict:
+    def anonymize(self, obj: object, *args, **kwargs) -> dict:
         anonymizer: Optional[BaseAnonymizer] = None
         for anonymizer_cls in self.strategies:
-            if anonymizer_cls.can_handle(obj):
+            if anonymizer_cls.can_handle(obj, *args, **kwargs):
                 anonymizer = anonymizer_cls(salt=self._salt)
-                return anonymizer.anonymize(obj)
+                return anonymizer.anonymize(obj, *args, **kwargs)
 
-        return self._anonymize(obj)
+        return self._anonymize(obj, *args, **kwargs)
 
-    def _anonymize(self, obj: object) -> dict:
+    def _anonymize(self, obj: object, *args, **kwargs) -> dict:
         pass
 
     @staticmethod
