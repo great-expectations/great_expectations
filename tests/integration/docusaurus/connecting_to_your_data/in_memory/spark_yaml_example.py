@@ -2,6 +2,11 @@ from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    InMemoryStoreBackendDefaults,
+)
 
 # Set up a basic spark session
 spark = ge.core.util.get_or_create_spark_application()
@@ -14,7 +19,15 @@ data = [
 ]
 df = spark.createDataFrame(data)
 
-context = ge.get_context()
+# NOTE: InMemoryStoreBackendDefaults SHOULD NOT BE USED in normal settings. You
+# may experience data loss as it persists nothing. It is used here for testing.
+# Please refer to docs to learn how to instantiate your DataContext.
+store_backend_defaults = InMemoryStoreBackendDefaults()
+data_context_config = DataContextConfig(
+    store_backend_defaults=store_backend_defaults,
+    checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
+)
+context = BaseDataContext(project_config=data_context_config)
 
 datasource_yaml = f"""
 name: my_spark_dataframe
