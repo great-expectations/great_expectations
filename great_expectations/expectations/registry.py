@@ -269,9 +269,10 @@ def get_expectation_impl(expectation_name):
         "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",
     }
     if expectation_name in renamed:
+        # deprecated-v0.14.12
         warnings.warn(
             f"Expectation {expectation_name} was renamed to {renamed['expectation_name']} as of v0.14.12 "
-            "Please update usage in your pipeline(s) before the v0.15 release",
+            "Please update usage in your pipeline(s) before the v0.17 release",
             DeprecationWarning,
         )
         expectation_name = renamed[expectation_name]
