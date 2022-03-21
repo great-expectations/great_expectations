@@ -1,3 +1,4 @@
 azure-identity>=1.0.0
 azure-keyvault-secrets>=4.0.0
 azure-storage-blob>=12.5.0
+cryptography>=3.2,<4.0.0
