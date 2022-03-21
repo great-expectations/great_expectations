@@ -131,8 +131,7 @@ def test_alice_profiler_user_workflow_single_batch(
     assert mock_emit.call_count == 43
 
     assert all(
-        payload[0][0]["event"]
-        in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
+        payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
     )
 
@@ -461,8 +460,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     assert mock_emit.call_count == 99
 
     assert all(
-        payload[0][0]["event"]
-        in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
+        payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
     )
 
@@ -1473,8 +1471,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     assert mock_emit.call_count == 3
 
     assert all(
-        payload[0][0]["event"]
-        in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
+        payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
     )
 
@@ -1678,8 +1675,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     assert mock_emit.call_count == 11
 
     assert all(
-        payload[0][0]["event"]
-        in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
+        payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
     )
 

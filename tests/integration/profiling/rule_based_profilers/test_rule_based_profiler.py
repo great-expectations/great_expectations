@@ -163,8 +163,7 @@ def test_profile_includes_citations(
     assert mock_emit.call_count == 43
 
     assert all(
-        payload[0][0]["event"]
-        in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
+        payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
     )
     assert mock_emit.call_args_list[-1][0][0]["event"] == "profiler.run"
@@ -212,8 +211,7 @@ def test_profile_excludes_citations(
 
     assert mock_emit.call_count == 43
     assert all(
-        payload[0][0]["event"]
-        in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
+        payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
     )
     assert mock_emit.call_args_list[-1][0][0]["event"] == "profiler.run"
