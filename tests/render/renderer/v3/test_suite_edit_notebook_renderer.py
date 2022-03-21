@@ -990,6 +990,8 @@ def test_notebook_execution_with_pandas_backend(
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
+    suite["meta"]["citations"][0].pop("citation_date")
+    original_suite["meta"]["citations"][0].pop("citation_date")
     assert suite == original_suite
 
 
