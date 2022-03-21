@@ -3757,7 +3757,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = anonymizer.anonymize_checkpoint_info(
+        usage_stats_event_payload = anonymizer._anonymize_checkpoint_info(
             name=checkpoint_name, config=checkpoint_config
         )
 
@@ -3791,7 +3791,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = anonymizer.anonymize_data_connector_info(
+        usage_stats_event_payload = anonymizer._anonymize_data_connector_info(
             name=data_connector_name, config=config
         )
         return instantiated_class, usage_stats_event_payload
@@ -3824,7 +3824,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload: dict = anonymizer.anonymize_profiler_info(
+        usage_stats_event_payload: dict = anonymizer._anonymize_profiler_info(
             name=profiler_name, config=profiler_config
         )
 
@@ -3908,7 +3908,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             checkpoint_config = checkpoint_config.to_json_dict()
             checkpoint_config.update({"name": checkpoint_name})
-            usage_stats_event_payload = anonymizer.anonymize_checkpoint_info(
+            usage_stats_event_payload = anonymizer._anonymize_checkpoint_info(
                 name=checkpoint_name, config=checkpoint_config
             )
 
@@ -3918,7 +3918,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             data_connector_name: str = (
                 name or config.get("name") or "my_temp_data_connector"
             )
-            usage_stats_event_payload = anonymizer.anonymize_data_connector_info(
+            usage_stats_event_payload = anonymizer._anonymize_data_connector_info(
                 name=data_connector_name, config=config
             )
 

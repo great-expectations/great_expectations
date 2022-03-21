@@ -66,7 +66,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
             )
             data_connector_configs = config.get("data_connectors")
             anonymized_info_dict["anonymized_data_connectors"] = [
-                self.anonymize_data_connector_info(
+                self._anonymize_data_connector_info(
                     name=data_connector_name, config=data_connector_config
                 )
                 for data_connector_name, data_connector_config in data_connector_configs.items()
@@ -111,7 +111,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
                         "module_name"
                     ] = "great_expectations.datasource.data_connector"
                 introspection_data_connector_anonymized_configs.append(
-                    self.anonymize_data_connector_info(
+                    self._anonymize_data_connector_info(
                         name=data_connector_name, config=data_connector_config
                     )
                 )
@@ -131,7 +131,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
                         "module_name"
                     ] = "great_expectations.datasource.data_connector"
                 tables_data_connector_anonymized_configs.append(
-                    self.anonymize_data_connector_info(
+                    self._anonymize_data_connector_info(
                         name=data_connector_name, config=data_connector_config
                     )
                 )

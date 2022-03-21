@@ -63,7 +63,7 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
 
         anonymized_batch_request: Optional[
             Dict[str, List[str]]
-        ] = self.anonymize_batch_request(*(), **batch_request)
+        ] = self._anonymize_batch_request(*(), **batch_request)
 
         action_list: Optional[List[dict]] = kwargs.get("action_list")
         anonymized_action_list: Optional[List[dict]] = None
@@ -98,7 +98,7 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
 
                 anonymized_validation_batch_request: Optional[
                     Optional[Dict[str, List[str]]]
-                ] = self.anonymize_batch_request(*(), **validation_batch_request)
+                ] = self._anonymize_batch_request(*(), **validation_batch_request)
 
                 validation_expectation_suite_name: Optional[str] = validation_obj.get(
                     "expectation_suite_name"

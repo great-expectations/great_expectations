@@ -98,7 +98,7 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
 
         batch_request: Optional[dict] = domain_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[dict] = self.anonymize_batch_request(
+            anonymized_batch_request: Optional[dict] = self._anonymize_batch_request(
                 **batch_request
             )
             anonymized_domain_builder[
@@ -136,7 +136,7 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
 
         batch_request: Optional[dict] = parameter_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[dict] = self.anonymize_batch_request(
+            anonymized_batch_request: Optional[dict] = self._anonymize_batch_request(
                 **batch_request
             )
             anonymized_parameter_builder[
@@ -177,7 +177,7 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
         expectation_type: Optional[str] = expectation_configuration_builder.get(
             "expectation_type"
         )
-        self.anonymize_expectation(
+        self._anonymize_expectation(
             expectation_type, anonymized_expectation_configuration_builder
         )
 

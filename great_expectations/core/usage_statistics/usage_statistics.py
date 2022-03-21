@@ -449,7 +449,7 @@ def get_batch_list_usage_statistics(
             anonymizer: Anonymizer = (  # noqa: F821
                 data_context._usage_statistics_handler._anonymizer
             )
-            payload = anonymizer.anonymize_batch_request(*args, **kwargs)
+            payload = anonymizer._anonymize_batch_request(*args, **kwargs)
         except Exception as e:
             logger.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"

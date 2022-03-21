@@ -57,6 +57,64 @@ class BaseAnonymizer(ABC):
     def can_handle(obj: object, *args, **kwargs) -> bool:
         raise NotImplementedError
 
+    @staticmethod
+    def get_parent_class(
+        classes_to_check: Optional[List[type]] = None,
+        object_: Optional[object] = None,
+        object_class: Optional[type] = None,
+        object_config: Optional[dict] = None,
+    ) -> Optional[str]:
+        """Check if the parent class is a subclass of any core GE class.
+
+        These anonymizers define and provide an optional list of core GE classes_to_check.
+        If not provided, the object's inheritance hierarchy is traversed.
+
+        Args:
+            classes_to_check: An optinal list of candidate parent classes to iterate through.
+            object_: The specific object to analyze.
+            object_class: The class of the specific object to analyze.
+            object_config: The dictionary configuration of the specific object to analyze.
+
+        Returns:
+            The name of the parent class found, or None if no parent class was found.
+
+        Raises:
+            AssertionError if no object_, object_class, or object_config is provided.
+        """
+        assert (
+            object_ or object_class or object_config
+        ), "Must pass either object_ or object_class or object_config."
+        try:
+            if object_class is None and object_ is not None:
+                object_class = object_.__class__
+            elif object_class is None and object_config is not None:
+                object_class_name = object_config.get("class_name")
+                object_module_name = object_config.get("module_name")
+                object_class = load_class(object_class_name, object_module_name)
+
+            object_class_name = object_class.__name__
+            object_module_name = object_class.__module__
+
+            # Utilize candidate list if provided.
+            if classes_to_check:
+                for class_to_check in classes_to_check:
+                    if issubclass(object_class, class_to_check):
+                        return class_to_check.__name__
+                return None
+
+            # Otherwise, iterate through parents in inheritance hierarchy.
+            parents: Tuple[type, ...] = object_class.__bases__
+            parent_class: type
+            for parent_class in parents:
+                parent_module_name: str = parent_class.__module__
+                if BaseAnonymizer._is_core_great_expectations_class(parent_module_name):
+                    return parent_class.__name__
+
+        except AttributeError:
+            pass
+
+        return None
+
     def _anonymize_string(self, string_: Optional[str]) -> Optional[str]:
         """Obsfuscates a given string using an MD5 hash.
 
@@ -177,64 +235,6 @@ class BaseAnonymizer(ABC):
     @staticmethod
     def _is_core_great_expectations_class(class_name: str) -> bool:
         return class_name.startswith(BaseAnonymizer.CORE_GE_OBJECT_MODULE_PREFIX)
-
-    @staticmethod
-    def get_parent_class(
-        classes_to_check: Optional[List[type]] = None,
-        object_: Optional[object] = None,
-        object_class: Optional[type] = None,
-        object_config: Optional[dict] = None,
-    ) -> Optional[str]:
-        """Check if the parent class is a subclass of any core GE class.
-
-        These anonymizers define and provide an optional list of core GE classes_to_check.
-        If not provided, the object's inheritance hierarchy is traversed.
-
-        Args:
-            classes_to_check: An optinal list of candidate parent classes to iterate through.
-            object_: The specific object to analyze.
-            object_class: The class of the specific object to analyze.
-            object_config: The dictionary configuration of the specific object to analyze.
-
-        Returns:
-            The name of the parent class found, or None if no parent class was found.
-
-        Raises:
-            AssertionError if no object_, object_class, or object_config is provided.
-        """
-        assert (
-            object_ or object_class or object_config
-        ), "Must pass either object_ or object_class or object_config."
-        try:
-            if object_class is None and object_ is not None:
-                object_class = object_.__class__
-            elif object_class is None and object_config is not None:
-                object_class_name = object_config.get("class_name")
-                object_module_name = object_config.get("module_name")
-                object_class = load_class(object_class_name, object_module_name)
-
-            object_class_name = object_class.__name__
-            object_module_name = object_class.__module__
-
-            # Utilize candidate list if provided.
-            if classes_to_check:
-                for class_to_check in classes_to_check:
-                    if issubclass(object_class, class_to_check):
-                        return class_to_check.__name__
-                return None
-
-            # Otherwise, iterate through parents in inheritance hierarchy.
-            parents: Tuple[type, ...] = object_class.__bases__
-            parent_class: type
-            for parent_class in parents:
-                parent_module_name: str = parent_class.__module__
-                if BaseAnonymizer._is_core_great_expectations_class(parent_module_name):
-                    return parent_class.__name__
-
-        except AttributeError:
-            pass
-
-        return None
 
     def _anonymize_validation_operator_info(
         self,
@@ -463,7 +463,7 @@ class BaseAnonymizer(ABC):
 
         return anonymized_info_dict
 
-    def anonymize_profiler_info(self, name: str, config: dict) -> dict:
+    def _anonymize_profiler_info(self, name: str, config: dict) -> dict:
         """Anonymize RuleBasedProfiler objs from the 'great_expectations.rule_based_profiler' module.
 
         Args:
@@ -482,7 +482,7 @@ class BaseAnonymizer(ABC):
         )
         return anonymized_info_dict
 
-    def anonymize_data_connector_info(self, name: str, config: dict) -> dict:
+    def _anonymize_data_connector_info(self, name: str, config: dict) -> dict:
         """Anonymize DataConnector objs from the 'great_expectations.datasource.data_connector' module.
 
         Args:
@@ -536,7 +536,7 @@ class BaseAnonymizer(ABC):
         ]
         for expectation_type in set(expectation_types):
             expectation_info = {"count": expectation_types.count(expectation_type)}
-            self.anonymize_expectation(expectation_type, expectation_info)
+            self._anonymize_expectation(expectation_type, expectation_info)
             anonymized_expectation_counts.append(expectation_info)
 
         anonymized_info_dict["anonymized_name"] = self._anonymize_string(
@@ -549,7 +549,7 @@ class BaseAnonymizer(ABC):
 
         return anonymized_info_dict
 
-    def anonymize_expectation(
+    def _anonymize_expectation(
         self, expectation_type: Optional[str], info_dict: dict
     ) -> None:
         """Anonymize Expectation objs from 'great_expectations.expectations'.
@@ -565,7 +565,7 @@ class BaseAnonymizer(ABC):
                 expectation_type
             )
 
-    def anonymize_batch_request(
+    def _anonymize_batch_request(
         self, *args, **kwargs
     ) -> Optional[Dict[str, List[str]]]:
         """Construct a BatchRequest from given args and anonymize user-specificy details.
@@ -712,7 +712,7 @@ class BaseAnonymizer(ABC):
             GETTING_STARTED_CHECKPOINT_NAME,
         ]
 
-    def anonymize_checkpoint_info(self, name: str, config: dict) -> dict:
+    def _anonymize_checkpoint_info(self, name: str, config: dict) -> dict:
         """Anonymize Checkpoint objs from the 'great_expectations.checkpoint' module.
 
         Args:
