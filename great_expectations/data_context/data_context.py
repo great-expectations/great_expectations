@@ -1828,6 +1828,9 @@ class BaseDataContext(ConfigPeer):
             expectation_suite = self.create_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name
             )
+            expectation_suite.add_citation(
+                comment="Created suite via context.get_validator",
+            )
 
         if (
             sum(
@@ -1870,14 +1873,15 @@ class BaseDataContext(ConfigPeer):
                 )
             )
 
-        expectation_suite.add_citation(
-            comment="Created suite added via context.get_validator",
-        )
         validator: Validator = self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
             batch_list=batch_list,
         )
-        validator.save_expectation_suite()
+
+        # if we created the expectation_suite with this validator and added a citation,
+        # save the expectation_suite
+        if create_expectation_suite_with_name is not None:
+            validator.save_expectation_suite()
 
         # changes that validator made to the batch_request datasource config (e.g. add data_asset_name)
         # are updated in project config and saved to disk
