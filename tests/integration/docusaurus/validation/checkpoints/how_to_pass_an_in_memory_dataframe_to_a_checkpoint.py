@@ -1,6 +1,8 @@
 # <snippet>
 import pandas as pd
-from ruamel import yaml
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
 
 import great_expectations as ge
 from great_expectations.core.batch import RuntimeBatchRequest
@@ -25,7 +27,7 @@ data_connectors:
     batch_identifiers:
       - default_identifier_name
 """
-context.add_datasource(**yaml.safe_load(datasource_yaml))
+context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
@@ -80,7 +82,7 @@ validations:
       data_asset_name: taxi_data
     expectation_suite_name: my_expectation_suite
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_checkpoint(**yaml.load(checkpoint_yaml))
 # </snippet>
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
@@ -136,7 +138,7 @@ config_version: 1
 class_name: SimpleCheckpoint
 expectation_suite_name: my_expectation_suite
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_checkpoint(**yaml.load(checkpoint_yaml))
 # </snippet>
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")

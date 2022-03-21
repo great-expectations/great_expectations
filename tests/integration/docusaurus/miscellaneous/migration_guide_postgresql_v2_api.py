@@ -1,6 +1,8 @@
 import os
 
-from ruamel import yaml
+from ruamel.yaml import YAML
+
+yaml = YAML(typ="safe")
 
 import great_expectations as ge
 
@@ -23,7 +25,7 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 
 actual_datasource = great_expectations_yaml["datasources"]
 
@@ -38,7 +40,7 @@ expected_existing_datasource_yaml = r"""
     connection_string: postgresql+psycopg2://postgres:@localhost/test_ci
 """
 
-assert actual_datasource == yaml.safe_load(expected_existing_datasource_yaml)
+assert actual_datasource == yaml.load(expected_existing_datasource_yaml)
 
 actual_validation_operators = great_expectations_yaml["validation_operators"]
 
@@ -57,7 +59,7 @@ expected_existing_validation_operators_yaml = """
         action:
           class_name: UpdateDataDocsAction
 """
-assert actual_validation_operators == yaml.safe_load(
+assert actual_validation_operators == yaml.load(
     expected_existing_validation_operators_yaml
 )
 
@@ -67,7 +69,7 @@ checkpoint_yaml_file_path = os.path.join(
     context.root_directory, "checkpoints/test_v2_checkpoint.yml"
 )
 with open(checkpoint_yaml_file_path) as f:
-    actual_checkpoint_yaml = yaml.safe_load(f)
+    actual_checkpoint_yaml = yaml.load(f)
 
 expected_checkpoint_yaml = """
 name: test_v2_checkpoint
@@ -83,7 +85,7 @@ batches:
       - Titanic.profiled
 """
 
-assert actual_checkpoint_yaml == yaml.safe_load(expected_checkpoint_yaml)
+assert actual_checkpoint_yaml == yaml.load(expected_checkpoint_yaml)
 
 # run checkpoint
 results = context.run_checkpoint(checkpoint_name="test_v2_checkpoint")
