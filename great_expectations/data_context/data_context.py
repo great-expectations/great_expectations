@@ -2087,7 +2087,7 @@ class BaseDataContext(ConfigPeer):
         ) in self.project_config_with_variables_substituted.datasources.items():
             datasource_config = copy.deepcopy(value)
             datasource_config["name"] = name
-            masked_config = PasswordMasker.sanitize_datasource_config(datasource_config)
+            masked_config = PasswordMasker.sanitize_config(datasource_config)
             datasources.append(masked_config)
         return datasources
 
@@ -2101,7 +2101,7 @@ class BaseDataContext(ConfigPeer):
         ) in self.project_config_with_variables_substituted.stores.items():
             store_config = copy.deepcopy(value)
             store_config["name"] = name
-            masked_config = PasswordMasker.sanitize_store_config(store_config)
+            masked_config = PasswordMasker.sanitize_config(store_config)
             stores.append(masked_config)
         return stores
 

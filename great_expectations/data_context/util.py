@@ -8,7 +8,7 @@ import re
 import warnings
 from collections import OrderedDict
 from functools import lru_cache
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 
 from great_expectations.types import safe_deep_copy
@@ -520,8 +520,15 @@ class PasswordMasker:
 
     """
 
-    MASKED_PASSWORD_STRING = "***"
-    MASKED_UUID = "********************************"
+    MASKED_PASSWORD_STRING = "************"
+
+    # values with the following keys will be processed with cls.mask_db_url:
+    URL_KEYS = {"connection_string", "url"}
+
+    # values with these keys will be directly replaced with cls.MASKED_PASSWORD_STRING:
+    PASSWORD_KEYS = {
+        "access_token",
+    }
 
     @classmethod
     def mask_db_url(cls, url: str, use_urlparse: bool = False, **kwargs) -> str:
@@ -572,77 +579,35 @@ class PasswordMasker:
             return masked_url
 
     @classmethod
-    def sanitize_data_context_config(cls, config: dict) -> dict:
+    def sanitize_config(cls, config: dict) -> dict:
         """
-        Mask sensitive fields in a DataContextConfig Dict.
+        Mask sensitive fields in a Dict.
         """
 
         # be defensive, since it would be logical to expect this method works with DataContextConfig
         if not isinstance(config, dict):
             raise TypeError(
-                f"PasswordMasker.sanitize_datasource_config expects param `config` "
+                f"PasswordMasker.sanitize_config expects param `config` "
                 + f"to be of type Dict, not of type {type(config)}"
             )
 
         config_copy = safe_deep_copy(config)  # be immutable
 
-        # mask cloud token in stores config
-        if "stores" in config_copy and isinstance(config_copy["stores"], dict):
-            for store_name, store_config in config_copy["stores"].items():
-                config_copy["stores"][store_name] = cls.sanitize_store_config(
-                    store_config
-                )
+        def recursive_cleaner_method(config: Any) -> None:
+            if isinstance(config, dict):
+                for key, val in config.items():
+                    if not isinstance(val, str):
+                        recursive_cleaner_method(val)
+                    elif key in cls.URL_KEYS:
+                        config[key] = cls.mask_db_url(val)
+                    elif key in cls.PASSWORD_KEYS:
+                        config[key] = cls.MASKED_PASSWORD_STRING
+                    else:
+                        pass  # this string is not sensitive
+            elif isinstance(config, list):
+                for val in config:
+                    recursive_cleaner_method(val)
 
-        # mask connection creds in datasources
-        if "datasources" in config_copy and isinstance(
-            config_copy["datasources"], dict
-        ):
-            for datasource_name, datasource_config in config_copy[
-                "datasources"
-            ].items():
-                config_copy["datasources"][
-                    datasource_name
-                ] = cls.sanitize_datasource_config(datasource_config)
+        recursive_cleaner_method(config_copy)  # Perform anonymization in place
 
         return config_copy
-
-    @classmethod
-    def sanitize_datasource_config(cls, config: dict) -> dict:
-        """
-        Given a datasource config dict, replace sensitive fields and return
-        a sanitized config.
-        """
-
-        # does the Datasource have a credentials field?
-        if "credentials" in config:
-            if "password" in config["credentials"]:
-                config["credentials"]["password"] = cls.MASKED_PASSWORD_STRING
-            if "url" in config["credentials"]:
-                config["credentials"]["url"] = cls.mask_db_url(
-                    config["credentials"]["url"]
-                )
-
-        # does the Datasource's Execution Engine have a connection string?
-        if "execution_engine" in config:
-            if "connection_string" in config["execution_engine"]:
-                config["execution_engine"]["connection_string"] = cls.mask_db_url(
-                    config["execution_engine"]["connection_string"]
-                )
-
-        return config
-
-    @classmethod
-    def sanitize_store_config(cls, config: dict) -> dict:
-        """
-        Given a Store config dict, replace sensitive fields inplace and return
-        the sanitized config.
-        """
-
-        if "store_backend" in config:
-            if "ge_cloud_credentials" in config["store_backend"]:
-                if "access_token" in config["store_backend"]["ge_cloud_credentials"]:
-                    config["store_backend"]["ge_cloud_credentials"][
-                        "access_token"
-                    ] = cls.MASKED_UUID
-
-        return config

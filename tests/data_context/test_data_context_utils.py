@@ -287,35 +287,35 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     assert PasswordMasker.mask_db_url("sqlite://", use_urlparse=True) == "sqlite://"
 
 
-def test_sanitize_data_context_config_raises_exception_with_bad_input(
+def test_sanitize_config_raises_exception_with_bad_input(
     basic_data_context_config,
 ):
-    """Test case for PasswordMasker.sanitize_data_context_config"""
+    """Test case for PasswordMasker.sanitize_config"""
 
     # expect that an Exception is raised if something other than a dict is passed
     with pytest.raises(TypeError):
-        PasswordMasker.sanitize_data_context_config(basic_data_context_config)
+        PasswordMasker.sanitize_config(basic_data_context_config)
 
 
-def test_sanitize_data_context_config_doesnt_change_config_without_datasources(
+def test_sanitize_config_doesnt_change_config_without_datasources(
     basic_data_context_config_dict,
 ):
-    """Test case for PasswordMasker.sanitize_data_context_config"""
+    """Test case for PasswordMasker.sanitize_config"""
 
     # expect no change without datasources
-    config_without_creds = PasswordMasker.sanitize_data_context_config(
+    config_without_creds = PasswordMasker.sanitize_config(
         basic_data_context_config_dict
     )
     assert config_without_creds == basic_data_context_config_dict
 
 
-def test_sanitize_data_context_config_masks_cloud_store_backend_access_tokens(
+def test_sanitize_config_masks_cloud_store_backend_access_tokens(
     data_context_config_dict_with_cloud_backed_stores, ge_cloud_access_token
 ):
-    """Test case for PasswordMasker.sanitize_data_context_config"""
+    """Test case for PasswordMasker.sanitize_config"""
 
     # test that cloud store backend tokens have been properly masked
-    config_with_creds_in_stores = PasswordMasker.sanitize_data_context_config(
+    config_with_creds_in_stores = PasswordMasker.sanitize_config(
         data_context_config_dict_with_cloud_backed_stores
     )
     for name, store_config in config_with_creds_in_stores["stores"].items():
@@ -341,14 +341,14 @@ def test_sanitize_data_context_config_masks_cloud_store_backend_access_tokens(
             )
 
 
-def test_sanitize_data_context_config_masks_execution_engine_connection_strings(
+def test_sanitize_config_masks_execution_engine_connection_strings(
     data_context_config_dict_with_datasources, conn_string_password
 ):
-    """Test case for PasswordMasker.sanitize_data_context_config"""
+    """Test case for PasswordMasker.sanitize_config"""
 
     # test that datasource credentials have been properly masked
     unaltered_datasources = data_context_config_dict_with_datasources["datasources"]
-    config_with_creds_masked = PasswordMasker.sanitize_data_context_config(
+    config_with_creds_masked = PasswordMasker.sanitize_config(
         data_context_config_dict_with_datasources
     )
     masked_datasources = config_with_creds_masked["datasources"]
@@ -382,8 +382,8 @@ def test_sanitize_data_context_config_masks_execution_engine_connection_strings(
             assert processed_config == unaltered_datasources[name]
 
 
-def test_sanitize_datasource_config_with_no_sensitive_keys():
-    """Test case for PasswordPasker.sanitize_datasource_config"""
+def test_sanitize_config_with_no_sensitive_keys():
+    """Test case for PasswordPasker.sanitize_config"""
 
     # base case - this config should pass through unaffected
     config = {
@@ -391,57 +391,57 @@ def test_sanitize_datasource_config_with_no_sensitive_keys():
         "some_other_field": {"password": "but this won't be found"},
     }
     config_copy = safe_deep_copy(config)
-    assert PasswordMasker.sanitize_datasource_config(config_copy) == config
+    assert PasswordMasker.sanitize_config(config_copy) == config
 
 
-def test_sanitize_datasource_config_with_password_field():
-    """Test case for PasswordPasker.sanitize_datasource_config"""
+def test_sanitize_config_with_password_field():
+    """Test case for PasswordPasker.sanitize_config"""
 
     # this case has a password field inside a credentials dict - expect it to be masked
     config = {"credentials": {"password": "my-super-duper-secure-passphrase-123"}}
     config_copy = safe_deep_copy(config)
-    res = PasswordMasker.sanitize_datasource_config(config_copy)
+    res = PasswordMasker.sanitize_config(config_copy)
     assert res != config
     assert res["credentials"]["password"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
-def test_sanitize_datasource_config_with_url_field(
+def test_sanitize_config_with_url_field(
     conn_string_with_embedded_password, conn_string_password
 ):
-    """Test case for PasswordPasker.sanitize_datasource_config"""
+    """Test case for PasswordPasker.sanitize_config"""
 
     # this case has a url field inside a credentials dict - expect the password inside
     # of it to be masked
     config = {"credentials": {"url": conn_string_with_embedded_password}}
     config_copy = safe_deep_copy(config)
-    res = PasswordMasker.sanitize_datasource_config(config_copy)
+    res = PasswordMasker.sanitize_config(config_copy)
     assert res != config
     assert conn_string_password not in res["credentials"]["url"]
     assert PasswordMasker.MASKED_PASSWORD_STRING in res["credentials"]["url"]
 
 
-def test_sanitize_datasource_config_with_non_sensitive_url_field():
-    """Test case for PasswordPasker.sanitize_datasource_config"""
+def test_sanitize_config_with_non_sensitive_url_field():
+    """Test case for PasswordPasker.sanitize_config"""
 
     # this case has a BigQuery url field inside a credentials dict, which doesn't have a
     # password - expect it to be untouched
     config = {"credentials": {"url": "bigquery://foo/bar"}}
     config_copy = safe_deep_copy(config)
-    res = PasswordMasker.sanitize_datasource_config(config_copy)
+    res = PasswordMasker.sanitize_config(config_copy)
     assert res == config
 
 
-def test_sanitize_datasource_config_with_nested_url_field(
+def test_sanitize_config_with_nested_url_field(
     conn_string_password, conn_string_with_embedded_password
 ):
-    """Test case for PasswordPasker.sanitize_datasource_config"""
+    """Test case for PasswordPasker.sanitize_config"""
 
     # this case has a connection string in an execution_engine dict
     config = {
         "execution_engine": {"connection_string": conn_string_with_embedded_password}
     }
     config_copy = safe_deep_copy(config)
-    res = PasswordMasker.sanitize_datasource_config(config_copy)
+    res = PasswordMasker.sanitize_config(config_copy)
     assert res != config
     assert conn_string_password not in res["execution_engine"]["connection_string"]
     assert (
@@ -450,31 +450,35 @@ def test_sanitize_datasource_config_with_nested_url_field(
     )
 
 
-def test_sanitize_datasource_config_with_nested_non_sensitive_url_field():
-    """Test case for PasswordPasker.sanitize_datasource_config"""
+def test_sanitize_config_with_nested_non_sensitive_url_field():
+    """Test case for PasswordPasker.sanitize_config"""
 
     # this case has a BigQuery url inside the execution_engine dict, which doesn't have a
     # password - expect it to be untouched
     config = {"execution_engine": {"connection_string": "bigquery://foo/bar"}}
     config_copy = safe_deep_copy(config)
-    res = PasswordMasker.sanitize_datasource_config(config_copy)
+    res = PasswordMasker.sanitize_config(config_copy)
     assert res == config
 
 
-def test_sanitize_store_config_only_affects_ge_cloud_credentials():
-    """Test case for PasswordPasker.sanitize_store_config"""
+def test_sanitize_config_regardless_of_parent_key():
+    """Test case for PasswordPasker.sanitize_config"""
 
-    # base case - expect this config not to be changed
+    # expect this config still be masked
     config = {
         "some_field": "and a value",
         "some_other_field": {"access_token": "but this won't be found"},
     }
     config_copy = safe_deep_copy(config)
-    assert PasswordMasker.sanitize_store_config(config_copy) == config
+    res = PasswordMasker.sanitize_config(config_copy)
+    assert res != config
+    assert (
+        res["some_other_field"]["access_token"] == PasswordMasker.MASKED_PASSWORD_STRING
+    )
 
 
-def test_sanitize_store_config_masks_cloud_access_token(ge_cloud_access_token):
-    """Test case for PasswordPasker.sanitize_store_config"""
+def test_sanitize_config_masks_cloud_access_token(ge_cloud_access_token):
+    """Test case for PasswordPasker.sanitize_config"""
 
     # expect the access token to be found and masked
     config = {
@@ -483,12 +487,20 @@ def test_sanitize_store_config_masks_cloud_access_token(ge_cloud_access_token):
         }
     }
     config_copy = safe_deep_copy(config)
-    res = PasswordMasker.sanitize_store_config(config_copy)
+    res = PasswordMasker.sanitize_config(config_copy)
     assert res != config
     assert (
         res["store_backend"]["ge_cloud_credentials"]["access_token"]
-        == PasswordMasker.MASKED_UUID
+        == PasswordMasker.MASKED_PASSWORD_STRING
     )
+
+
+def test_sanitize_config_works_with_list():
+    config = {"some_key": [{"access_token": "12345"}]}
+    config_copy = safe_deep_copy(config)
+    res = PasswordMasker.sanitize_config(config_copy)
+    assert res != config
+    assert res["some_key"][0]["access_token"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
 def test_parse_substitution_variable():
