@@ -17,6 +17,10 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+)
 from great_expectations.self_check.util import build_spark_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
@@ -168,6 +172,151 @@ def test_get_domain_records_with_column_domain(
     )
 
     expected_column_pd_df = pd_df.iloc[:3]
+    expected_column_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_column_pd_df.to_records(index=False)
+        ],
+        expected_column_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_column_df
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_column_domain_and_filter_conditions(
+    spark_session, basic_spark_df_execution_engine
+):
+    pd_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": 'col("b")<5',
+            "condition_parser": "great_expectations__experimental__",
+            "filter_conditions": [
+                RowCondition(
+                    condition=f'col("b").notnull()', type_=RowConditionParserType.GE
+                )
+            ],
+        }
+    )
+
+    expected_column_pd_df = pd_df.iloc[:3]
+    expected_column_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_column_pd_df.to_records(index=False)
+        ],
+        expected_column_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_column_df
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_different_column_domain_and_filter_conditions(
+    spark_session, basic_spark_df_execution_engine
+):
+    pd_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": 'col("a")<2',
+            "condition_parser": "great_expectations__experimental__",
+            "filter_conditions": [
+                RowCondition(
+                    condition=f'col("b").notnull()', type_=RowConditionParserType.GE
+                )
+            ],
+        }
+    )
+
+    expected_column_pd_df = pd_df.iloc[:1]
+    expected_column_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_column_pd_df.to_records(index=False)
+        ],
+        expected_column_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_column_df
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_different_column_domain_and_multiple_filter_conditions(
+    spark_session, basic_spark_df_execution_engine
+):
+    pd_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": 'col("a")<5',
+            "condition_parser": "great_expectations__experimental__",
+            "filter_conditions": [
+                RowCondition(
+                    condition=f'col("b").notnull()', type_=RowConditionParserType.GE
+                ),
+                RowCondition(condition=f'col("c")<3', type_=RowConditionParserType.GE),
+            ],
+        }
+    )
+
+    expected_column_pd_df = pd_df.iloc[:2]
     expected_column_df = spark_session.createDataFrame(
         [
             tuple(
@@ -1145,7 +1294,11 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=False
     )
-    assert new_domain_kwargs["row_condition"] == "foo IS NOT NULL"
+    assert new_domain_kwargs["filter_conditions"] == [
+        RowCondition(
+            condition="foo IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
+        )
+    ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
@@ -1153,7 +1306,14 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=True
     )
-    assert new_domain_kwargs["row_condition"] == "NOT isnan(foo) AND foo IS NOT NULL"
+    assert new_domain_kwargs["filter_conditions"] == [
+        RowCondition(
+            condition="foo IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
+        ),
+        RowCondition(
+            condition="NOT isnan(foo)", type_=RowConditionParserType.SPARK_SQL
+        ),
+    ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
@@ -1161,7 +1321,9 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=False, filter_nan=True
     )
-    assert new_domain_kwargs["row_condition"] == "NOT isnan(foo)"
+    assert new_domain_kwargs["filter_conditions"] == [
+        RowCondition(condition="NOT isnan(foo)", type_=RowConditionParserType.SPARK_SQL)
+    ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (None,), (2,), (3,), (4,), (5,), (6,)]
@@ -1175,7 +1337,9 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=False, filter_nan=True
     )
-    assert new_domain_kwargs["row_condition"] == "NOT isnan(foo)"
+    assert new_domain_kwargs["filter_conditions"] == [
+        RowCondition(condition="NOT isnan(foo)", type_=RowConditionParserType.SPARK_SQL)
+    ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
@@ -1183,7 +1347,11 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=False
     )
-    assert new_domain_kwargs["row_condition"] == "foo IS NOT NULL"
+    assert new_domain_kwargs["filter_conditions"] == [
+        RowCondition(
+            condition="foo IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
+        ),
+    ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     expected = [(1,), (2,), (3,), (3,), (np.nan,), (2,), (3,), (4,), (5,), (6,)]
