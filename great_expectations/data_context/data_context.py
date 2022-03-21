@@ -783,19 +783,6 @@ class BaseDataContext(ConfigPeer):
             )
         return site_builder
 
-    def _save_project_config(self):
-        """Save the current project to disk."""
-        if self.ge_cloud_mode:
-            logger.debug(
-                "ge_cloud_mode detected - skipping DataContect._save_project_config"
-            )
-            return
-        logger.debug("Starting DataContext._save_project_config")
-
-        config_filepath = os.path.join(self.root_directory, self.GE_YML)
-        with open(config_filepath, "w") as outfile:
-            self.config.to_yaml(outfile)
-
     @usage_statistics_enabled_method(
         event_name="data_context.open_data_docs",
     )
@@ -4345,6 +4332,19 @@ class DataContext(BaseDataContext):
             )
         config = response.json()
         return DataContextConfig(**config)
+
+    def _save_project_config(self):
+        """Save the current project to disk."""
+        if self.ge_cloud_mode:
+            logger.debug(
+                "ge_cloud_mode detected - skipping DataContect._save_project_config"
+            )
+            return
+        logger.debug("Starting DataContext._save_project_config")
+
+        config_filepath = os.path.join(self.root_directory, self.GE_YML)
+        with open(config_filepath, "w") as outfile:
+            self.config.to_yaml(outfile)
 
     def _load_project_config(self):
         """
