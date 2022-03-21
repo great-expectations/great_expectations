@@ -97,12 +97,6 @@ def test_add_column_row_condition_with_unsupported_conditions():
     with pytest.raises(GreatExpectationsError) as error:
         new_domain_kwargs = e.add_column_row_condition({}, "a", filter_nan=True)
 
-    # Having a pre-existing row condition should result in an error, as we should not be updating it
-    with pytest.raises(GreatExpectationsError) as error:
-        new_domain_kwargs = e.add_column_row_condition(
-            {"column": "a", "row_condition": "col(a) == 2"}
-        )
-
     # Testing that error raised when column not given
     with pytest.raises(AssertionError) as error:
         new_domain_kwargs = e.add_column_row_condition({})
