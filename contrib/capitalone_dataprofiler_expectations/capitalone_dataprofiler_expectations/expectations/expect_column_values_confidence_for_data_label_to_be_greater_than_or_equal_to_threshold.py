@@ -73,7 +73,7 @@ class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
         return data_label_conf >= threshold
 
 
-class ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold(
+class ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
     ColumnMapExpectation
 ):
     """
@@ -192,6 +192,6 @@ class ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold(
 
 if __name__ == "__main__":
     diagnostics_report = (
-        ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold().run_diagnostics()
+        ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold().run_diagnostics()
     )
     print(diagnostics_report.generate_checklist())
