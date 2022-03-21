@@ -508,8 +508,8 @@ Here is the equivalent configuration in V3-style. Notice that the Validation Ope
 
 For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
 
-- [How to add validations data or suites to a Checkpoint](../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md)
-- [How to configure a new Checkpoint using test_yaml_config](../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
+- [How to add validations data or suites to a Checkpoint](../validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md)
+- [How to configure a new Checkpoint using test_yaml_config](../validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
 
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L35
