@@ -1368,3 +1368,59 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
         .data_connectors[data_connector_name]
         .assets.keys()
     )
+
+
+def test_update_runtime_data_connector_missing_data_asset_persists_to_data_context(
+    sqlite_missing_data_asset_data_context,
+):
+    context: DataContext = sqlite_missing_data_asset_data_context
+
+    datasource_name: str = "my_datasource"
+    data_connector_name: str = "default_runtime_data_connector"
+    data_asset_name: str = "table_containing_id_spacers_for_D"
+    query: str = f"SELECT * FROM {data_asset_name}"
+    batch_identifier_name: str = "default_identifier_name"
+    batch_identifier: str = "default"
+
+    batch_request: dict[str, Any] = {
+        "datasource_name": datasource_name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        "runtime_parameters": {"query": query},
+        "batch_identifiers": {batch_identifier_name: batch_identifier},
+    }
+
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    expectation_suite_name: str = "test"
+    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+    validator: Validator = context.get_validator(
+        batch_request=batch_request, expectation_suite_name=expectation_suite_name
+    )
+
+    validator.expect_column_values_to_not_be_null(column="date")
+
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    # context.get_validator should add the new citation
+    assert (
+        validator.expectation_suite.meta["citations"][0]["batch_request_list"][
+            0
+        ].data_asset_name
+        == data_asset_name
+    )
+
+    assert (
+        validator.expectation_suite.meta["citations"][0]["batch_request_list"][
+            0
+        ].runtime_parameters["query"]
+        == query
+    )
+
+    assert (
+        validator.expectation_suite.meta["citations"][0]["batch_request_list"][
+            0
+        ].batch_identifiers[batch_identifier_name]
+        == batch_identifier
+    )
