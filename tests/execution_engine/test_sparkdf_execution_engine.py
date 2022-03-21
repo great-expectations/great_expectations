@@ -213,7 +213,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()', type_=RowConditionParserType.GE
+                    condition="b IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
                 )
             ],
         }
@@ -261,7 +261,7 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()', type_=RowConditionParserType.GE
+                    condition="b IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
                 )
             ],
         }
@@ -305,18 +305,20 @@ def test_get_domain_records_with_different_column_domain_and_multiple_filter_con
     data = engine.get_domain_records(
         domain_kwargs={
             "column": "a",
-            "row_condition": 'col("a")<5',
+            "row_condition": 'col("a")<10',
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()', type_=RowConditionParserType.GE
+                    condition="b IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
                 ),
-                RowCondition(condition=f'col("c")<3', type_=RowConditionParserType.GE),
+                RowCondition(
+                    condition="NOT isnan(b)", type_=RowConditionParserType.SPARK_SQL
+                ),
             ],
         }
     )
 
-    expected_column_pd_df = pd_df.iloc[:2]
+    expected_column_pd_df = pd_df.iloc[:4]
     expected_column_df = spark_session.createDataFrame(
         [
             tuple(
