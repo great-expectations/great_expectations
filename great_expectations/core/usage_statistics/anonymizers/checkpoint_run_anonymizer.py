@@ -14,7 +14,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     get_batch_request_as_dict,
 )
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS,
 )
@@ -24,11 +24,18 @@ from great_expectations.util import deep_filter_properties_iterable
 logger = logging.getLogger(__name__)
 
 
-class CheckpointRunAnonymizer(Anonymizer):
+class CheckpointRunAnonymizer(BaseAnonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
 
         self._salt = salt
+
+    def anonymize(self, obj: object) -> dict:
+        raise NotImplementedError
+
+    @staticmethod
+    def can_handle(obj: object) -> bool:
+        raise NotImplementedError
 
     # noinspection PyUnusedLocal
     def anonymize_checkpoint_run(self, *args, **kwargs) -> Dict[str, List[str]]:

@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List, Optional
 
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.core.usage_statistics.util import (
     aggregate_all_core_expectation_types,
 )
@@ -11,13 +11,20 @@ from great_expectations.util import deep_filter_properties_iterable
 logger = logging.getLogger(__name__)
 
 
-class ProfilerRunAnonymizer(Anonymizer):
+class ProfilerRunAnonymizer(BaseAnonymizer):
     def __init__(self, salt: Optional[str] = None) -> None:
         super().__init__(salt=salt)
 
         self._ge_expectation_types = aggregate_all_core_expectation_types()
 
         self._salt = salt
+
+    def anonymize(self, obj: object) -> dict:
+        raise NotImplementedError
+
+    @staticmethod
+    def can_handle(obj: object) -> bool:
+        raise NotImplementedError
 
     def anonymize_profiler_run(self, profiler_config: RuleBasedProfilerConfig) -> dict:
         """

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.datasource import (
     BaseDatasource,
     Datasource,
@@ -12,7 +12,7 @@ from great_expectations.datasource import (
 )
 
 
-class DatasourceAnonymizer(Anonymizer):
+class DatasourceAnonymizer(BaseAnonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
 
@@ -30,6 +30,13 @@ class DatasourceAnonymizer(Anonymizer):
             Datasource,
             BaseDatasource,
         ]
+
+    def anonymize(self, obj: object) -> dict:
+        raise NotImplementedError
+
+    @staticmethod
+    def can_handle(obj: object) -> bool:
+        raise NotImplementedError
 
     def anonymize_datasource_info(self, name, config):
         anonymized_info_dict = {}
