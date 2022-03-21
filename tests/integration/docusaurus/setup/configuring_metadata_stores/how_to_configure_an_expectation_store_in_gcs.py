@@ -98,7 +98,7 @@ great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
-    yaml.dump(great_expectations_yaml, f, default_flow_style=False)
+    yaml.dump(great_expectations_yaml, f)
 
 expectation_suite_name = "my_expectation_suite"
 context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
