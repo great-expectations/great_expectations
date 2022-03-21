@@ -160,7 +160,7 @@ def test_profile_includes_citations(
 
     assert len(expectation_suite.meta["citations"]) > 0
 
-    assert mock_emit.call_count == 64
+    assert mock_emit.call_count == 43
 
     assert all(
         payload[0][0]["event"]
@@ -210,7 +210,7 @@ def test_profile_excludes_citations(
 
     assert expectation_suite.meta.get("citations") is None
 
-    assert mock_emit.call_count == 64
+    assert mock_emit.call_count == 43
     assert all(
         payload[0][0]["event"]
         in ["data_context.get_batch_list", "data_context.save_expectation_suite"]
