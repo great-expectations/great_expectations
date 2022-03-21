@@ -11,12 +11,14 @@ from great_expectations.data_context.types.base import (
 # NOTE: InMemoryStoreBackendDefaults SHOULD NOT BE USED in normal settings. You
 # may experience data loss as it persists nothing. It is used here for testing.
 # Please refer to docs to learn how to instantiate your DataContext.
-store_backend_defaults = InMemoryStoreBackendDefaults()
-data_context_config = DataContextConfig(
-    store_backend_defaults=store_backend_defaults,
-    checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
-)
-context = BaseDataContext(project_config=data_context_config)
+# store_backend_defaults = InMemoryStoreBackendDefaults()
+# data_context_config = DataContextConfig(
+#     store_backend_defaults=store_backend_defaults,
+#     checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
+# )
+# context = BaseDataContext(project_config=data_context_config)
+
+context = ge.get_context()
 
 datasource_yaml = rf"""
 name: my_filesystem_datasource
