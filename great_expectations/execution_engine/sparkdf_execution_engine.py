@@ -505,15 +505,13 @@ Please check your config."""
             Single Row Condition combined
         """
         assert all(
-            [
-                condition.type_ == RowConditionParserType.SPARK_SQL
-                for condition in row_conditions
-            ]
+            condition.type_ == RowConditionParserType.SPARK_SQL
+            for condition in row_conditions
         ), "All row conditions must have type SPARK_SQL"
-        raw_conditions: List[str] = [
+        conditions: List[str] = [
             row_condition.condition for row_condition in row_conditions
         ]
-        joined_condition: str = " AND ".join(raw_conditions)
+        joined_condition: str = " AND ".join(conditions)
         return RowCondition(
             condition=joined_condition, type_=RowConditionParserType.SPARK_SQL
         )
