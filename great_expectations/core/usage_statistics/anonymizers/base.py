@@ -236,25 +236,6 @@ class BaseAnonymizer(ABC):
 
         return None
 
-    def _anonymize_action_info(
-        self,
-        action_name: str,
-        action_obj: Optional[object] = None,
-        action_config: Optional[dict] = None,
-    ) -> dict:
-        anonymized_info_dict: dict = {
-            "anonymized_name": self.anonymize_string(action_name),
-        }
-
-        self._anonymize_object_info(
-            object_=action_obj,
-            object_config=action_config,
-            anonymized_info_dict=anonymized_info_dict,
-            runtime_environment={"module_name": "great_expectations.checkpoint"},
-        )
-
-        return anonymized_info_dict
-
     def anonymize_validation_operator_info(
         self,
         validation_operator_name: str,
