@@ -256,4 +256,4 @@ flow.run(parameters={"checkpoint_name": "my_checkpoint"})
 
 The flexibility that Prefect and the `RunGreatExpectationsValidation` task offer makes it easy to incorporate data validation into your dataflows with Great Expectations. 
 
-For more info about the `RunGreatExpectationsValidation` task, refer to the (Prefect documentation)[https://docs.prefect.io/api/latest/tasks/great_expectations.html#rungreatexpectationsvalidation].
+For more info about the `RunGreatExpectationsValidation` task, refer to the [Prefect documentation](https://docs.prefect.io/api/latest/tasks/great_expectations.html#rungreatexpectationsvalidation).
