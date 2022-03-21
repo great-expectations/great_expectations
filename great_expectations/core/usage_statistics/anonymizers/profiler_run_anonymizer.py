@@ -10,14 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 class ProfilerRunAnonymizer(BaseAnonymizer):
-    def anonymize(self, obj: object, *args, **kwargs) -> dict:
+    def anonymize(self, obj: object, **kwargs) -> dict:
         assert self.can_handle(
             obj
         ), "ProfilerRunAnonymizer can only handle objects of type RuleBasedProfiler or RuleBasedProfilerConfig"
         if isinstance(obj, RuleBasedProfiler):
             return self._anonymize_profiler_info(**kwargs)
         else:
-            return self._anonymize_profiler_run(obj, *args, **kwargs)
+            return self._anonymize_profiler_run(obj, **kwargs)
 
     def _anonymize_profiler_info(self, name: str, config: dict) -> dict:
         """Anonymize RuleBasedProfiler objs from the 'great_expectations.rule_based_profiler' module.
@@ -38,7 +38,7 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
         )
         return anonymized_info_dict
 
-    def _anonymize_profiler_run(self, obj: object, *args, **kwargs) -> dict:
+    def _anonymize_profiler_run(self, obj: object, **kwargs) -> dict:
         """
         Traverse the entire RuleBasedProfiler configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
@@ -75,10 +75,6 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
         )
 
         return anonymized_profiler_run_properties_dict
-
-    @staticmethod
-    def can_handle(obj: object, *args, **kwargs) -> bool:
-        return isinstance(obj, (RuleBasedProfilerConfig, RuleBasedProfiler))
 
     def _anonymize_rules(self, rules: Dict[str, dict]) -> List[dict]:
         anonymized_rules: List[dict] = []
@@ -218,3 +214,7 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
             logger.debug("Anonymized condition in ExpectationConfigurationBuilder")
 
         return anonymized_expectation_configuration_builder
+
+    @staticmethod
+    def can_handle(obj: object, **kwargs) -> bool:
+        return isinstance(obj, (RuleBasedProfilerConfig, RuleBasedProfiler))

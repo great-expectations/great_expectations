@@ -20,13 +20,13 @@ logger = logging.getLogger(__name__)
 
 
 class CheckpointRunAnonymizer(BaseAnonymizer):
-    def anonymize(self, obj: object, *args, **kwargs) -> dict:
+    def anonymize(self, obj: object, **kwargs) -> dict:
         """
         Traverse the entire Checkpoint configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
         """
-        assert isinstance(
-            obj, Checkpoint
+        assert self.can_handle(
+            obj=obj
         ), "CheckpointRunAnonymizer can only handle objects of type Checkpoint"
 
         attribute_name: str
@@ -214,10 +214,6 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
 
         return anonymized_checkpoint_run_properties_dict
 
-    @staticmethod
-    def can_handle(obj: object, *args, **kwargs) -> bool:
-        return isinstance(obj, Checkpoint)
-
     def _anonymize_action_info(
         self,
         action_name: str,
@@ -236,3 +232,7 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
         )
 
         return anonymized_info_dict
+
+    @staticmethod
+    def can_handle(obj: object, **kwargs) -> bool:
+        return isinstance(obj, Checkpoint)

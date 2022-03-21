@@ -30,18 +30,16 @@ class Anonymizer(BaseAnonymizer):
             DatasourceAnonymizer,
         ]
 
-    def anonymize(
-        self, obj: Optional[object] = None, *args, **kwargs
-    ) -> Union[str, dict]:
+    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Union[str, dict]:
         anonymizer: Optional[BaseAnonymizer] = None
         for anonymizer_cls in self.strategies:
-            if anonymizer_cls.can_handle(obj, *args, **kwargs):
+            if anonymizer_cls.can_handle(obj, **kwargs):
                 anonymizer = anonymizer_cls(salt=self._salt)
-                return anonymizer.anonymize(obj, *args, **kwargs)
+                return anonymizer.anonymize(obj, **kwargs)
 
-        return self._anonymize(obj, *args, **kwargs)
+        return self._anonymize(obj, **kwargs)
 
-    def _anonymize(self, obj: object, *args, **kwargs) -> Union[str, dict]:
+    def _anonymize(self, obj: object, **kwargs) -> Union[str, dict]:
         if self._is_data_connector_info(obj=obj):
             return self._anonymize_data_connector_info(**kwargs)
         if self._is_batch_info(obj=obj):
@@ -75,7 +73,7 @@ class Anonymizer(BaseAnonymizer):
         return "store_name" in info or "store_obj" in info
 
     @staticmethod
-    def can_handle(obj: object) -> bool:
+    def can_handle(obj: object, **kwargs) -> bool:
         return isinstance(obj, object)
 
     def build_init_payload(self, data_context: "DataContext") -> dict:  # noqa: F821

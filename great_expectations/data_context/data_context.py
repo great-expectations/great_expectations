@@ -3705,18 +3705,18 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ),
         )
 
-        datasource_anonymizer = Anonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self.data_context_id)
 
         if class_name == "SimpleSqlalchemyDatasource":
             # Use the raw config here, defaults will be added in the anonymizer
-            usage_stats_event_payload = datasource_anonymizer.anonymize(
+            usage_stats_event_payload = anonymizer.anonymize(
                 obj=instantiated_class, name=datasource_name, config=config
             )
         else:
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             datasource_config = datasourceConfigSchema.load(instantiated_class.config)
             full_datasource_config = datasourceConfigSchema.dump(datasource_config)
-            usage_stats_event_payload = datasource_anonymizer.anonymize(
+            usage_stats_event_payload = anonymizer.anonymize(
                 obj=instantiated_class,
                 name=datasource_name,
                 config=full_datasource_config,
