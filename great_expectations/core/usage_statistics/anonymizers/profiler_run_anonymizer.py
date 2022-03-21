@@ -2,9 +2,6 @@ import logging
 from typing import Dict, List, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
-from great_expectations.core.usage_statistics.util import (
-    aggregate_all_core_expectation_types,
-)
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -12,13 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class ProfilerRunAnonymizer(BaseAnonymizer):
-    def __init__(self, salt: Optional[str] = None) -> None:
-        super().__init__(salt=salt)
-
-        self._ge_expectation_types = aggregate_all_core_expectation_types()
-
-        self._salt = salt
-
     def anonymize(self, obj: object) -> dict:
         """
         Traverse the entire RuleBasedProfiler configuration structure (as per its formal, validated Marshmallow schema) and
