@@ -16,8 +16,7 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
         ), "ProfilerRunAnonymizer can only handle objects of type RuleBasedProfiler or RuleBasedProfilerConfig"
         if isinstance(obj, RuleBasedProfiler):
             return self._anonymize_profiler_info(**kwargs)
-        else:
-            return self._anonymize_profiler_run(obj=obj, **kwargs)
+        return self._anonymize_profiler_run(obj=obj, **kwargs)
 
     def _anonymize_profiler_info(self, name: str, config: dict) -> dict:
         """Anonymize RuleBasedProfiler objs from the 'great_expectations.rule_based_profiler' module.
