@@ -30,7 +30,7 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L1-L4
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L1-L9
 ```
 
 <SparkDataContextNote />
@@ -49,12 +49,12 @@ Using this example configuration add in the path to a directory that contains so
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L15-L29
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L32-L42
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L41
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L44
 ```
 
 </TabItem>
@@ -89,7 +89,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L33
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L46
 ```
 
 </TabItem>
@@ -113,12 +113,12 @@ Add the variable containing your dataframe (`df` in this example) to the `batch_
 
 :::note Note this guide uses a toy dataframe that looks like this.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L10-L14
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L15-L19
 ```
 :::
 
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L44-L50
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L57-L63
 ```
 
 <Congratulations />
