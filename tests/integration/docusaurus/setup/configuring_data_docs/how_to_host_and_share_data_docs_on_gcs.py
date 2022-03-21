@@ -100,7 +100,7 @@ def index(path):
     bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
     try:
         blob = bucket.get_blob(path)
-        content = blob.download_as_string()
+        content = Blob.download_as_bytes()
         if blob.content_encoding:
             resource = content.decode(blob.content_encoding)
         else:
