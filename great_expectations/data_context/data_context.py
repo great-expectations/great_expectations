@@ -1878,8 +1878,7 @@ class BaseDataContext(ConfigPeer):
                 config=validator.data_context.datasources[datasource].config,
                 initialize=False,
             )
-            if isinstance(self, DataContext):
-                self._save_project_config()
+            self._save_project_config()
 
         return validator
 
