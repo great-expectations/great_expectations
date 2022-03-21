@@ -1,6 +1,4 @@
 # <snippet>
-import sys
-
 import pandas as pd
 from ruamel import yaml
 
@@ -51,7 +49,6 @@ datasource_config = {
 context.add_datasource(**datasource_config)
 # </snippet>
 
-print(yaml.dump(datasource_config))
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config), return_mode="report_object"
 )
