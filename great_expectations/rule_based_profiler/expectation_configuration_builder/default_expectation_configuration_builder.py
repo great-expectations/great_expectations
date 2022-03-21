@@ -95,7 +95,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         return self._expectation_type
 
     @property
-    def condition(self) -> str:
+    def condition(self) -> Optional[str]:
         return self._condition
 
     @property

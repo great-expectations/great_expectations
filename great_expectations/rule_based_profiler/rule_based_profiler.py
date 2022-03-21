@@ -601,7 +601,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
         :return: reconciled domain builder configuration, returned in dictionary (configuration) form
         """
-        domain_builder_as_dict: dict = domain_builder.to_dict()
+        domain_builder_as_dict: dict = domain_builder.to_json_dict()
         domain_builder_as_dict["class_name"] = domain_builder.__class__.__name__
         domain_builder_as_dict["module_name"] = domain_builder.__class__.__module__
 
@@ -664,7 +664,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             parameter_builder_name,
             parameter_builder,
         ) in current_parameter_builders.items():
-            parameter_builder_as_dict = parameter_builder.to_dict()
+            parameter_builder_as_dict = parameter_builder.to_json_dict()
             parameter_builder_as_dict[
                 "class_name"
             ] = parameter_builder.__class__.__name__
@@ -747,7 +747,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             expectation_configuration_builder,
         ) in current_expectation_configuration_builders.items():
             expectation_configuration_builder_as_dict = (
-                expectation_configuration_builder.to_dict()
+                expectation_configuration_builder.to_json_dict()
             )
             expectation_configuration_builder_as_dict[
                 "class_name"
@@ -848,7 +848,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         rule: Rule
         rules: Dict[str, Dict[str, Any]] = {
-            rule.name: rule.to_dict() for rule in profiler.rules
+            rule.name: rule.to_json_dict() for rule in profiler.rules
         }
 
         result: ExpectationSuite = profiler.run(
