@@ -18,9 +18,11 @@ from great_expectations.core.batch import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
+    VARIABLES_PREFIX,
     Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
+    is_fully_qualified_parameter_name_literal_string_format,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -224,7 +226,11 @@ def get_parameter_value(
                 variables=variables,
                 parameters=parameters,
             )
-    elif isinstance(parameter_reference, str) and parameter_reference.startswith("$"):
+    elif isinstance(
+        parameter_reference, str
+    ) and is_fully_qualified_parameter_name_literal_string_format(
+        fully_qualified_parameter_name=parameter_reference
+    ):
         parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=parameter_reference,
             domain=domain,
@@ -239,6 +245,17 @@ def get_parameter_value(
                     variables=variables,
                     parameters=parameters,
                 )
+        elif isinstance(
+            parameter_reference, str
+        ) and is_fully_qualified_parameter_name_literal_string_format(
+            fully_qualified_parameter_name=parameter_reference
+        ):
+            parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
+                fully_qualified_parameter_name=parameter_reference,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
 
     return parameter_reference
 
@@ -360,23 +377,17 @@ def build_simple_domains_from_column_names(
 
 
 def convert_variables_to_dict(
-    variables: Optional[ParameterContainer],
-) -> Optional[Dict[str, Any]]:
-    if variables is None:
-        return {}
+    variables: Optional[ParameterContainer] = None,
+) -> Dict[str, Any]:
+    variables: Optional[Dict[str, Any]] = get_parameter_value_and_validate_return_type(
+        domain=None,
+        parameter_reference=VARIABLES_PREFIX,
+        expected_return_type=None,
+        variables=variables,
+        parameters=None,
+    )
 
-    variables_dict: Optional[Dict[str, Any]] = None
-    try:
-        variables_dict = variables.to_dict()["parameter_nodes"]["variables"][
-            "variables"
-        ]
-    except (TypeError, KeyError) as e:
-        logger.warning("Could not convert existing variables to dict: %s", e)
-
-    if variables_dict is None:
-        variables_dict = {}
-
-    return variables_dict
+    return variables or {}
 
 
 def compute_quantiles(

@@ -8,9 +8,10 @@ import Congratulations from '../components/congratulations.md'
 import DatabaseCredentials from '../components/adding_database_credentials.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you connect to data in a BigQuery database.
-This will allow you to validate and explore your data.
+This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
 <Prerequisites>
 
@@ -64,28 +65,35 @@ Load your DataContext into memory using the `get_context()` method.
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 Put your connection string in this template:
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L22-L36
 ```
+
 Run this code to test your configuration.
+
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L45
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 Put your connection string in this template:
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L22-L39
 ```
+
 Run this code to test your configuration.
+
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L44
 ```
 
 </TabItem>
+
 </Tabs>
 
 You will see your database tables listed as `Available data_asset_names` in the output of `test_yaml_config()`.
@@ -96,7 +104,6 @@ Feel free to adjust your configuration and re-run `test_yaml_config` as needed.
 
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
-
 <Tabs
   groupId="yaml-or-python"
   defaultValue='yaml'
@@ -104,23 +111,26 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L47
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L45
 ```
 
 </TabItem>
+
 </Tabs>
 
 ### 7. Test your new Datasource
 
-Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
+Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a `BatchRequest`.
 
 <Tabs
   defaultValue='runtime_batch_request'
@@ -128,7 +138,8 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
   {label: 'Using a SQL query', value:'runtime_batch_request'},
   {label: 'Using a table name', value:'batch_request'},
   ]}>
-  <TabItem value="runtime_batch_request">
+
+<TabItem value="runtime_batch_request">
 
 Here is an example of loading data by specifying a SQL query.
 
@@ -139,9 +150,9 @@ Currently BigQuery does not allow for the creation of temporary tables as the re
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L50-L67
 ```
 
-  </TabItem>
+</TabItem>
 
-  <TabItem value="batch_request">
+<TabItem value="batch_request">
 
 Here is an example of loading data by specifying an existing table name.
 
@@ -152,8 +163,8 @@ Currently BigQuery does not allow for the creation of temporary tables as the re
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py#L71-L85
 ```
 
+</TabItem>
 
-  </TabItem>
 </Tabs>
 
 <Congratulations />

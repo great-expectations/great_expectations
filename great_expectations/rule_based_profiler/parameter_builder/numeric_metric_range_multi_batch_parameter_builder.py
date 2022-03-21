@@ -13,7 +13,9 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
+    AttributedResolvedMetrics,
     MetricMultiBatchParameterBuilder,
+    MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
     Domain,
@@ -240,16 +242,16 @@ detected.
 """
             )
 
-        estimator: Callable
+        estimator_func: Callable
         etimator_kwargs: dict
         if estimator == "bootstrap":
-            estimator = self._get_bootstrap_estimate
+            estimator_func = self._get_bootstrap_estimate
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
                 "num_bootstrap_samples": self.num_bootstrap_samples,
             }
         else:
-            estimator = self._get_deterministic_estimate
+            estimator_func = self._get_deterministic_estimate
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
             }
@@ -272,10 +274,24 @@ detected.
             variables=variables,
             parameters=parameters,
         )
+        metric_values: MetricValues
+        if isinstance(parameter_node.value, list):
+            num_parameter_node_value_elements: int = len(parameter_node.value)
+            if not (num_parameter_node_value_elements == 1):
+                raise ge_exceptions.ProfilerExecutionError(
+                    message=f'Length of "AttributedResolvedMetrics" list for {self.__class__.__name__} must be exactly 1 ({num_parameter_node_value_elements} elements found).'
+                )
+
+            attributed_resolved_metrics: AttributedResolvedMetrics = (
+                parameter_node.value[0]
+            )
+            metric_values = attributed_resolved_metrics.metric_values
+        else:
+            metric_values = parameter_node.value
 
         metric_value_range: np.ndarray = self._estimate_metric_value_range(
-            metric_values=cast(np.ndarray, parameter_node.value),
-            estimator=estimator,
+            metric_values=metric_values,
+            estimator_func=estimator_func,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -292,7 +308,7 @@ detected.
     def _estimate_metric_value_range(
         self,
         metric_values: np.ndarray,
-        estimator: Callable,
+        estimator_func: Callable,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -363,7 +379,7 @@ detected.
                 lower_quantile = upper_quantile = metric_value_vector[0]
             else:
                 # Compute low and high estimates for vector of samples for given element of multi-dimensional metric.
-                lower_quantile, upper_quantile = estimator(
+                lower_quantile, upper_quantile = estimator_func(
                     metric_values=metric_value_vector,
                     domain=domain,
                     variables=variables,

@@ -29,8 +29,9 @@ from great_expectations.util import deep_filter_properties_iterable
 def sample_rule_dict():
     return {
         "domain_builder": {
-            "column_names": None,
-            "module_name": "great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder",
+            "include_column_names": None,
+            "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+            "class_name": "ColumnDomainBuilder",
             "batch_request": {
                 "datasource_name": "my_sample_datasource",
                 "data_connector_name": "default_inferred_data_connector_name",
@@ -39,8 +40,7 @@ def sample_rule_dict():
                 "data_connector_query": {"index": -1},
                 "limit": None,
             },
-            "column_name_suffixes": ["_amount"],
-            "class_name": "SimpleColumnSuffixDomainBuilder",
+            "include_column_name_suffixes": ["_amount"],
         },
         "parameter_builders": [],
         "expectation_configuration_builders": [
@@ -104,8 +104,8 @@ def test_reconcile_profiler_rules_new_rule_override(
     rules: Dict[str, Dict[str, Any]] = {
         "rule_0": {
             "domain_builder": {
-                "class_name": "ColumnDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
@@ -158,8 +158,10 @@ def test_reconcile_profiler_rules_new_rule_override(
     expected_rules: Dict[str, dict] = {
         "rule_0": {
             "domain_builder": {
-                "class_name": "ColumnDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "class_name": "ColumnDomainBuilder",
+                "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
+                "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
             },
             "parameter_builders": [
                 {
@@ -218,8 +220,8 @@ def test_reconcile_profiler_rules_new_rule_override(
         },
         "rule_1": {
             "domain_builder": {
-                "class_name": "TableDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                "class_name": "TableDomainBuilder",
             },
             "parameter_builders": [
                 {
@@ -272,9 +274,9 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
     rules: Dict[str, Dict[str, Any]] = {
         "rule_1": {
             "domain_builder": {
-                "class_name": "SimpleColumnSuffixDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                "column_name_suffixes": [
+                "class_name": "ColumnDomainBuilder",
+                "include_column_name_suffixes": [
                     "_ts",
                 ],
             },
@@ -284,9 +286,11 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
     expected_rules: Dict[str, dict] = {
         "rule_1": {
             "domain_builder": {
-                "class_name": "SimpleColumnSuffixDomainBuilder",
-                "module_name": "great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder",
-                "column_name_suffixes": [
+                "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "class_name": "ColumnDomainBuilder",
+                "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
+                "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
+                "include_column_name_suffixes": [
                     "_ts",
                 ],
             },
@@ -369,8 +373,8 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
     expected_rules: Dict[str, dict] = {
         "rule_1": {
             "domain_builder": {
-                "class_name": "TableDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                "class_name": "TableDomainBuilder",
             },
             "parameter_builders": [
                 {
@@ -470,8 +474,8 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
     expected_rules: Dict[str, dict] = {
         "rule_1": {
             "domain_builder": {
-                "class_name": "TableDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                "class_name": "TableDomainBuilder",
             },
             "parameter_builders": [
                 {
@@ -536,8 +540,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
     rules: Dict[str, Dict[str, Any]] = {
         "rule_1": {
             "domain_builder": {
-                "class_name": "ColumnDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
@@ -590,8 +594,10 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
     expected_rules: Dict[str, dict] = {
         "rule_1": {
             "domain_builder": {
-                "class_name": "ColumnDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "class_name": "ColumnDomainBuilder",
+                "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
+                "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
             },
             "parameter_builders": [
                 {
@@ -678,8 +684,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
     rules: Dict[str, Dict[str, Any]] = {
         "rule_1": {
             "domain_builder": {
-                "class_name": "ColumnDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
@@ -711,8 +717,10 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
     expected_rules: Dict[str, Dict] = {
         "rule_1": {
             "domain_builder": {
-                "class_name": "ColumnDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "class_name": "ColumnDomainBuilder",
+                "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
+                "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
             },
             "parameter_builders": [
                 {
@@ -773,8 +781,8 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
     rules: Dict[str, Dict[str, Any]] = {
         "rule_1": {
             "domain_builder": {
-                "class_name": "ColumnDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                "class_name": "ColumnDomainBuilder",
             },
             "parameter_builders": [
                 {
@@ -827,8 +835,10 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
     expected_rules: Dict[str, dict] = {
         "rule_1": {
             "domain_builder": {
-                "class_name": "ColumnDomainBuilder",
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                "class_name": "ColumnDomainBuilder",
+                "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
+                "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
             },
             "parameter_builders": [
                 {
@@ -1232,9 +1242,7 @@ def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch(
-    "great_expectations.rule_based_profiler.domain_builder.SimpleColumnSuffixDomainBuilder"
-)
+@mock.patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
 @mock.patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
@@ -1269,9 +1277,7 @@ def test_add_single_rule(
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch(
-    "great_expectations.rule_based_profiler.domain_builder.SimpleColumnSuffixDomainBuilder"
-)
+@mock.patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
 @mock.patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )
@@ -1298,9 +1304,7 @@ def test_add_rule_overwrite_first_rule(
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch(
-    "great_expectations.rule_based_profiler.domain_builder.SimpleColumnSuffixDomainBuilder"
-)
+@mock.patch("great_expectations.rule_based_profiler.domain_builder.ColumnDomainBuilder")
 @mock.patch(
     "great_expectations.rule_based_profiler.expectation_configuration_builder.DefaultExpectationConfigurationBuilder"
 )

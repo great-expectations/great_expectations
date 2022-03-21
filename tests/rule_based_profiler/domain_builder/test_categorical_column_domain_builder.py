@@ -25,14 +25,13 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         batch_request=batch_request,
         data_context=data_context,
+        exclude_column_name_suffixes="_id",
         limit_mode="very_few",
     )
     domains: List[Domain] = domain_builder.get_domains()
 
     alice_all_column_names: List[str] = [
-        "id",
         "event_type",
-        "user_id",
         "event_ts",
         "server_ts",
         "device_ts",
@@ -49,7 +48,7 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
         )
         for column_name in alice_all_column_names
     ]
-    assert len(domains) == 7
+    assert len(domains) == 5
     assert domains == alice_all_column_domains
 
 
@@ -144,7 +143,7 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
         batch_request=batch_request,
         data_context=data_context,
         limit_mode="VERY_FEW",
-        exclude_columns=[
+        exclude_column_names=[
             "id",
             "event_type",
             "user_id",
@@ -186,7 +185,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
         batch_request=batch_request,
         data_context=data_context,
         limit_mode="VERY_FEW",
-        exclude_columns=[],
+        exclude_column_names=[],
     )
     domains: List[Domain] = domain_builder.get_domains()
 
