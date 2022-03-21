@@ -77,6 +77,7 @@ actual_existing_validations_store["validations_store_name"] = great_expectations
     "validations_store_name"
 ]
 
+# <snippet>
 expected_existing_validations_store_yaml = """
 stores:
   validations_store:
@@ -87,11 +88,13 @@ stores:
 
 validations_store_name: validations_store
 """
+# </snippet>
 
 assert actual_existing_validations_store == yaml.load(
     expected_existing_validations_store_yaml
 )
 
+# <snippet>
 configured_validations_store_yaml = """
 stores:
   validations_GCS_store:
@@ -104,6 +107,7 @@ stores:
 
 validations_store_name: validations_GCS_store
 """
+# </snippet>
 
 # replace example code with integration test configuration
 configured_validations_store = yaml.load(configured_validations_store_yaml)
@@ -146,10 +150,12 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # try gsutil cp command
+# <snippet>
 copy_validation_command = """
 gsutil cp uncommitted/validations/my_expectation_suite/validation_1.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_1.json
 gsutil cp uncommitted/validations/my_expectation_suite/validation_2.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_2.json
 """
+# </snippet>
 
 validation_files = glob.glob(
     f"{context.root_directory}/uncommitted/validations/my_expectation_suite/__none__/*/*.json"
@@ -202,14 +208,18 @@ stderr = result.stderr.decode("utf-8")
 
 assert "Operation completed over 1 objects" in stderr
 
+# <snippet>
 copy_validation_output = """
 Operation completed over 2 objects
 """
+# </snippet>
 
 # list validation stores
+# <snippet>
 list_validation_stores_command = """
 great_expectations store list
 """
+# </snippet>
 
 result = subprocess.run(
     list_validation_stores_command.strip().split(),
@@ -218,6 +228,7 @@ result = subprocess.run(
 )
 stdout = result.stdout.decode("utf-8")
 
+# <snippet>
 list_validation_stores_output = """
   - name: validations_GCS_store
     class_name: ValidationsStore
@@ -227,6 +238,7 @@ list_validation_stores_output = """
       bucket: <YOUR GCS BUCKET NAME>
       prefix: <YOUR GCS PREFIX NAME>
 """
+# </snippet>
 
 assert "validations_GCS_store" in list_validation_stores_output
 assert "validations_GCS_store" in stdout

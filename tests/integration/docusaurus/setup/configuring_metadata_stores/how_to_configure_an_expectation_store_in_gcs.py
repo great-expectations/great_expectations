@@ -36,6 +36,7 @@ actual_existing_expectations_store["expectations_store_name"] = great_expectatio
     "expectations_store_name"
 ]
 
+# <snippet>
 expected_existing_expectations_store_yaml = """
 stores:
   expectations_store:
@@ -46,11 +47,13 @@ stores:
 
 expectations_store_name: expectations_store
 """
+# </snippet>
 
 assert actual_existing_expectations_store == yaml.load(
     expected_existing_expectations_store_yaml
 )
 
+# <snippet>
 configured_expectations_store_yaml = """
 stores:
   expectations_GCS_store:
@@ -63,6 +66,7 @@ stores:
 
 expectations_store_name: expectations_GCS_store
 """
+# </snippet>
 
 # replace example code with integration test configuration
 configured_expectations_store = yaml.load(configured_expectations_store_yaml)
@@ -104,9 +108,11 @@ expectation_suite_name = "my_expectation_suite"
 context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 # try gsutil cp command
+# <snippet>
 copy_expectation_command = """
 gsutil cp expectations/my_expectation_suite.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/my_expectation_suite.json
 """
+# </snippet>
 
 local_expectation_suite_file_path = os.path.join(
     context.root_directory, "expectations", f"{expectation_suite_name}.json"
@@ -135,9 +141,11 @@ result = subprocess.run(
 )
 stderr = result.stderr.decode("utf-8")
 
+# <snippet>
 copy_expectation_output = """
 Operation completed over 1 objects
 """
+# </snippet>
 
 assert copy_expectation_output.strip() in stderr
 
@@ -153,6 +161,7 @@ result = subprocess.run(
 )
 stdout = result.stdout.decode("utf-8")
 
+# <snippet>
 list_expectation_stores_output = """
   - name: expectations_GCS_store
     class_name: ExpectationsStore
@@ -162,6 +171,7 @@ list_expectation_stores_output = """
       bucket: <YOUR GCS BUCKET NAME>
       prefix: <YOUR GCS PREFIX NAME>
 """
+# </snippet>
 
 assert "expectations_GCS_store" in list_expectation_stores_output
 assert "expectations_GCS_store" in stdout
@@ -169,9 +179,11 @@ assert "TupleGCSStoreBackend" in list_expectation_stores_output
 assert "TupleGCSStoreBackend" in stdout
 
 # list expectation suites
+# <snippet>
 list_expectation_suites_command = """
 great_expectations suite list
 """
+# </snippet>
 
 result = subprocess.run(
     list_expectation_suites_command.strip().split(),
@@ -180,10 +192,12 @@ result = subprocess.run(
 )
 stdout = result.stdout.decode("utf-8")
 
+# <snippet>
 list_expectation_suites_output = """
 1 Expectation Suite found:
  - my_expectation_suite
 """
+# </snippet>
 
 assert "1 Expectation Suite found:" in list_expectation_suites_output
 assert "1 Expectation Suite found:" in stdout
