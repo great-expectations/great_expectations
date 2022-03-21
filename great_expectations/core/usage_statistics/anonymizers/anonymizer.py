@@ -41,15 +41,25 @@ class Anonymizer(BaseAnonymizer):
 
         return self._anonymize(obj, *args, **kwargs)
 
-    def _anonymize(self, obj: Optional[object], *args, **kwargs) -> Union[str, dict]:
-        if isinstance(obj, str):
-            payload: str = cast(str, self._anonymize_string(string_=obj))
-            return payload
+    def _anonymize(self, obj: object, *args, **kwargs) -> Union[str, dict]:
+        if self._is_data_connector_info(obj=obj):
+            return self._anonymize_data_connector_info(**kwargs)
         if self._is_batch_info(obj=obj):
             return self._anonymize_batch_info(batch=obj)
         if self._is_store_info(kwargs):
             return self._anonymize_store_info(**kwargs)
+        if isinstance(obj, str):
+            payload: str = cast(str, self._anonymize_string(string_=obj))
+            return payload
         return {}
+
+    @staticmethod
+    def _is_data_connector_info(obj: object) -> bool:
+        from great_expectations.datasource.data_connector.data_connector import (
+            DataConnector,
+        )
+
+        return isinstance(obj, DataConnector)
 
     @staticmethod
     def _is_batch_info(obj: object) -> bool:
