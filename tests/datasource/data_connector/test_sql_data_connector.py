@@ -1347,8 +1347,8 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
 
     # context.get_validator should add the new citation
     assert (
-        validator.expectation_suite.meta["citations"][0][
-            "batch_request"
+        validator.expectation_suite.meta["citations"][0]["batch_request_list"][
+            0
         ].data_asset_name
         == data_asset_name
     )

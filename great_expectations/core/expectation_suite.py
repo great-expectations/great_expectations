@@ -88,6 +88,9 @@ class ExpectationSuite(SerializableDictDot):
     def add_citation(
         self,
         comment: str,
+        batch_list: Optional[
+            List[Union[str, Dict[str, Union[str, Dict[str, Any]]]]]
+        ] = None,
         batch_request: Optional[
             Union[str, Dict[str, Union[str, Dict[str, Any]]]]
         ] = None,
@@ -110,6 +113,7 @@ class ExpectationSuite(SerializableDictDot):
             "citation_date": get_datetime_string_from_strftime_format(
                 format_str="%Y-%m-%dT%H:%M:%S.%fZ", datetime_obj=citation_date
             ),
+            "batch_list": batch_list,
             "batch_request": batch_request,
             "batch_definition": batch_definition,
             "batch_spec": batch_spec,
@@ -123,6 +127,52 @@ class ExpectationSuite(SerializableDictDot):
             properties=citation, clean_falsy=True, inplace=True
         )
         self.meta["citations"].append(citation)
+
+    def update_last_citation(
+        self,
+        comment: str,
+        batch_request_list: Optional[
+            List[Union[str, Dict[str, Union[str, Dict[str, Any]]]]]
+        ] = None,
+        batch_request: Optional[
+            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+        ] = None,
+        batch_definition: Optional[dict] = None,
+        batch_spec: Optional[dict] = None,
+        batch_kwargs: Optional[dict] = None,
+        batch_markers: Optional[dict] = None,
+        batch_parameters: Optional[dict] = None,
+        profiler_config: Optional[dict] = None,
+        citation_date: Optional[Union[str, datetime.datetime]] = None,
+    ):
+        if "citations" not in self.meta:
+            self.meta["citations"] = []
+
+        if isinstance(citation_date, str):
+            citation_date = parse_string_to_datetime(datetime_string=citation_date)
+
+        citation_date = citation_date or datetime.datetime.now(datetime.timezone.utc)
+        citation: Dict[str, Any] = {
+            "citation_date": get_datetime_string_from_strftime_format(
+                format_str="%Y-%m-%dT%H:%M:%S.%fZ", datetime_obj=citation_date
+            ),
+            "batch_request_list": batch_request_list,
+            "batch_request": batch_request,
+            "batch_definition": batch_definition,
+            "batch_spec": batch_spec,
+            "batch_kwargs": batch_kwargs,
+            "batch_markers": batch_markers,
+            "batch_parameters": batch_parameters,
+            "profiler_config": profiler_config,
+            "comment": comment,
+        }
+        ge.util.filter_properties_dict(
+            properties=citation, clean_falsy=True, inplace=True
+        )
+        if len(self.meta["citations"]) > 0:
+            self.meta["citations"][-1] = citation
+        else:
+            self.meta["citations"].append(citation)
 
     def isEquivalentTo(self, other):
         """
