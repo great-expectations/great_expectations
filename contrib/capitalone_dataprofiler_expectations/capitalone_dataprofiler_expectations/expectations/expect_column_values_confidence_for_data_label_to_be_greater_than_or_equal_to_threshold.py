@@ -73,7 +73,7 @@ class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
         return data_label_conf >= threshold
 
 
-class ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold(
+class ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
     ColumnMapExpectation
 ):
     """
@@ -84,7 +84,7 @@ class ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold
         data_label(str): The data label for which you want to check confidences against the threshold value
         threshold (float): The value, usually as a decimal (e.g. .32), you want to use to flag low confidence predictions
 
-    df.expect_column_values_to_probabilistically_match_data_label(
+    df.expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold(
         column,
         data_label=<>,
         threshold=float(0<=1)
@@ -192,6 +192,6 @@ class ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold
 
 if __name__ == "__main__":
     diagnostics_report = (
-        ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold().run_diagnostics()
+        ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold().run_diagnostics()
     )
     print(diagnostics_report.generate_checklist())
