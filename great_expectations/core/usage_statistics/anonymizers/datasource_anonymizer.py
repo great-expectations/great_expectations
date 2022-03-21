@@ -31,11 +31,11 @@ class DatasourceAnonymizer(BaseAnonymizer):
             BaseDatasource,
         ]
 
-    def anonymize(self, obj: object) -> dict:
+    def anonymize(self, obj: object, *args, **kwargs) -> dict:
         raise NotImplementedError
 
     @staticmethod
-    def can_handle(obj: object) -> bool:
+    def can_handle(obj: object, *args, **kwargs) -> bool:
         raise NotImplementedError
 
     def anonymize_datasource_info(self, name, config):

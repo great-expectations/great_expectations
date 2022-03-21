@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProfilerRunAnonymizer(BaseAnonymizer):
-    def anonymize(self, obj: object) -> dict:
+    def anonymize(self, obj: object, *args, **kwargs) -> dict:
         """
         Traverse the entire RuleBasedProfiler configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
@@ -48,7 +48,7 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
         return anonymized_profiler_run_properties_dict
 
     @staticmethod
-    def can_handle(obj: object) -> bool:
+    def can_handle(obj: object, *args, **kwargs) -> bool:
         return isinstance(obj, RuleBasedProfilerConfig)
 
     def _anonymize_rules(self, rules: Dict[str, dict]) -> List[dict]:

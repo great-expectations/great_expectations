@@ -50,11 +50,11 @@ class BaseAnonymizer(ABC):
         return self._salt
 
     @abstractmethod
-    def anonymize(self, obj: object) -> dict:
+    def anonymize(self, obj: object, *args, **kwargs) -> dict:
         raise NotImplementedError
 
     @abstractstaticmethod
-    def can_handle(obj: object) -> bool:
+    def can_handle(obj: object, *args, **kwargs) -> bool:
         raise NotImplementedError
 
     def anonymize_string(self, string_: Optional[str]) -> Optional[str]:

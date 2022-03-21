@@ -27,6 +27,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 STOP_SIGNAL = object()
@@ -513,33 +514,35 @@ def get_checkpoint_run_usage_statistics(
     *args,
     **kwargs,
 ) -> dict:
+    usage_statistics_handler: Optional[
+        UsageStatisticsHandler
+    ] = checkpoint._usage_statistics_handler
+
     data_context_id: Optional[str] = None
     try:
         data_context_id = checkpoint.data_context.data_context_id
     except AttributeError:
         data_context_id = None
 
-    anonymizer: Anonymizer = _anonymizers.get(data_context_id, None)
+    anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
 
     payload: dict = {}
 
-    if checkpoint._usage_statistics_handler:
+    if usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            checkpoint_run_anonymizer: "CheckpointRunAnonymizer" = (  # noqa: F821
-                checkpoint._usage_statistics_handler._checkpoint_run_anonymizer
-            )
+            anonymizer = usage_statistics_handler.anonymizer  # noqa: F821
 
             resolved_runtime_kwargs: dict = (
-                checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(
+                CheckpointConfig.resolve_config_using_acceptable_arguments(
                     *(checkpoint,), **kwargs
                 )
             )
 
-            payload = checkpoint_run_anonymizer.anonymize_checkpoint_run(
+            payload: dict = anonymizer.anonymize(
                 *(checkpoint,), **resolved_runtime_kwargs
             )
         except Exception as e:
