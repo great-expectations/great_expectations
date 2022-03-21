@@ -150,7 +150,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                         "strict_min": "$variables.strict_min",
                         "strict_max": "$variables.strict_max",
                         "meta": {
-                            "details": {
+                            "profiler_details": {
                                 "min_estimator": "$parameter.min_estimator.details",
                                 "max_estimator": "$parameter.max_estimator.details",
                             },
