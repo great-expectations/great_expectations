@@ -31,23 +31,26 @@ class Anonymizer(BaseAnonymizer):
     def anonymize(self, obj: object = None, **kwargs) -> Union[str, dict]:
         anonymizer: Optional[BaseAnonymizer] = None
         for anonymizer_cls in self.strategies:
-            if anonymizer_cls.can_handle(obj, **kwargs):
+            if anonymizer_cls.can_handle(obj=obj, **kwargs):
                 anonymizer = anonymizer_cls(salt=self._salt)
-                return anonymizer.anonymize(obj, **kwargs)
+                return anonymizer.anonymize(obj=obj, **kwargs)
 
-        return self._anonymize(obj, **kwargs)
+        # If our specialized handlers cannot handle the object, default to base anonymizer strategies.
+        return self._anonymize(obj=obj, **kwargs)
 
     def _anonymize(self, obj: object, **kwargs) -> Union[str, dict]:
         if self._is_data_connector_info(obj=obj):
             return self._anonymize_data_connector_info(**kwargs)
         if self._is_batch_info(obj=obj):
             return self._anonymize_batch_info(batch=obj)
-        if self._is_store_info(kwargs):
+        if self._is_store_info(info=kwargs):
             return self._anonymize_store_info(**kwargs)
         if isinstance(obj, str):
             payload: str = cast(str, self._anonymize_string(string_=obj))
             return payload
-        return {}
+        raise TypeError(
+            f"The type {type(obj)} cannot be handled by the Anonymizer; no suitable strategy found."
+        )
 
     @staticmethod
     def _is_data_connector_info(obj: object) -> bool:
