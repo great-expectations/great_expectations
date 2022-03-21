@@ -201,7 +201,7 @@ The V3-style Datasource has:
 
 </details>
 
-Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](../../guides/connecting_to_your_data/index.md) for examples on V3-style Datasource configurations that will suit your needs.
+Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](../connecting_to_your_data/index.md) for examples on V3-style Datasource configurations that will suit your needs.
 
 </TabItem>
 <TabItem value="spark">
@@ -232,7 +232,7 @@ The V3-style Datasource has:
 
 </details>
 
-Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](../../guides/connecting_to_your_data/index.md) for examples on V3-style Datasource configurations that will suit your needs.
+Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](../connecting_to_your_data/index.md) for examples on V3-style Datasource configurations that will suit your needs.
 
 </TabItem>
 
@@ -250,7 +250,7 @@ The V3-style Datasource has:
 
 :::note Note on Datasource in V3
 
-One exception to the datatype-agnostic Datasource in the V3 API is the <code>SimpleSqlalchemyDatasource</code>, which combines functionality of the <code>Datasource</code> and <code>ExecutionEngine</code> to enable [database introspection and partitioning](../../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md). More examples on using the <code>SimpleSqlalchemyDatasource</code> can be found [here](../../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md).
+One exception to the datatype-agnostic Datasource in the V3 API is the <code>SimpleSqlalchemyDatasource</code>, which combines functionality of the <code>Datasource</code> and <code>ExecutionEngine</code> to enable [database introspection and partitioning](../connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md). More examples on using the <code>SimpleSqlalchemyDatasource</code> can be found [here](../connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md).
 
 :::
 
@@ -273,12 +273,12 @@ Migrating Datasource configurations that contain connections to databases involv
 
 Please check out the following docs for examples of V3-style Datasource configurations that will suit your needs: 
 
-- [How to connect to a Athena database](../../guides/connecting_to_your_data/database/athena.md)
-- [How to connect to a BigQuery database](../../guides/connecting_to_your_data/database/bigquery.md)
-- [How to connect to a MySQL database](../../guides/connecting_to_your_data/database/mysql.md)
-- [How to connect to a Redshift database](../../guides/connecting_to_your_data/database/redshift.md)
-- [How to connect to a Snowflake database](../../guides/connecting_to_your_data/database/snowflake.md)
-- [How to connect to a SQLite database](../../guides/connecting_to_your_data/database/sqlite.md)
+- [How to connect to a Athena database](../connecting_to_your_data/database/athena.md)
+- [How to connect to a BigQuery database](../connecting_to_your_data/database/bigquery.md)
+- [How to connect to a MySQL database](../connecting_to_your_data/database/mysql.md)
+- [How to connect to a Redshift database](../connecting_to_your_data/database/redshift.md)
+- [How to connect to a Snowflake database](../connecting_to_your_data/database/snowflake.md)
+- [How to connect to a SQLite database](../connecting_to_your_data/database/sqlite.md)
 
 </TabItem>
 </Tabs>
@@ -291,7 +291,7 @@ Before doing the migration, we recommend that you create a backup of your V2 Che
 
 :::
 
-In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](../..//guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.md), [introspect and partition tables as batches](../../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into Checkpoint configurations. 
+In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](../connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.md), [introspect and partition tables as batches](../connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into Checkpoint configurations. 
 
 This means that, although Validation Operators were run directly from the DataContext in V2, they are now run by Checkpoints in V3 as part of `action_list` items. This change offers a convenient abstraction for running Validations and ensures that all actions associated with running validations are included in one place, rather than split up between the `great_expectations.yml` file and Checkpoint configuration.
 
@@ -349,7 +349,7 @@ Here is the equivalent configuration in V3-style. Notice that the Validation Ope
 
 For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
 
-- [How to add validations data or suites to a Checkpoint](../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md)
+- [How to add validations data or suites to a Checkpoint](../validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md)
 - [How to configure a new Checkpoint using test_yaml_config](../validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
 
 
@@ -429,8 +429,8 @@ Here is the equivalent configuration in V3-style. Notice that the Validation Ope
 
 For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
 
-- [How to add validations data or suites to a Checkpoint](../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md)
-- [How to configure a new Checkpoint using test_yaml_config](../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
+- [How to add validations data or suites to a Checkpoint](../validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md)
+- [How to configure a new Checkpoint using test_yaml_config](../validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
 
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33

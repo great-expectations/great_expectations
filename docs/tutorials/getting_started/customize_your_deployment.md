@@ -41,7 +41,7 @@ Alternatively, you can treat Expectations like configs, and store them in a blob
 
 * [How to configure an Expectation store in Amazon S3](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.md)
 * [How to configure an Expectation store in GCS](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md)
-* [How to configure an Expectation store in Azure Blob Storage](../..//guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md)
+* [How to configure an Expectation store in Azure Blob Storage](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md)
 * [How to configure an Expectation store to PostgreSQL](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.md)
 * [How to configure an Expectation store on a filesystem](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.md)
 
