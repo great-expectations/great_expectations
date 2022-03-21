@@ -3,6 +3,8 @@ import logging
 from numbers import Number
 from typing import Any, Dict, List, Optional, Union
 
+from ruamel.yaml.comments import CommentedMap
+
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core import RunIdentifier
 from great_expectations.core.batch import (
@@ -14,13 +16,49 @@ from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonym
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS,
 )
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import deep_filter_properties_iterable
 
 logger = logging.getLogger(__name__)
 
 
 class CheckpointRunAnonymizer(BaseAnonymizer):
-    def anonymize(self, obj: object, **kwargs) -> dict:
+    def anonymize(self, obj: object = None, **kwargs) -> dict:
+        assert self.can_handle(
+            obj=obj
+        ), "CheckpointRunAnonymizer can only handle objects of type Checkpoint or CheckpointConfig"
+        if isinstance(obj, Checkpoint):
+            return self._anonymize_checkpoint_info(**kwargs)
+        else:
+            return self._anonymize_checkpoint_run(obj=obj, **kwargs)
+
+    def _anonymize_checkpoint_info(self, name: str, config: dict) -> dict:
+        """Anonymize Checkpoint objs from the 'great_expectations.checkpoint' module.
+
+        Args:
+            name (str): The name of the checkpoint.
+            config (dict): The dictionary configuration corresponding to the checkpoint.
+
+        Returns:
+            An anonymized dictionary payload that obfuscates user-specific details.
+        """
+        anonymized_info_dict: dict = {
+            "anonymized_name": self._anonymize_string(name),
+        }
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        from great_expectations.data_context.types.base import checkpointConfigSchema
+
+        checkpoint_config: dict = checkpointConfigSchema.load(CommentedMap(**config))
+        checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
+
+        self._anonymize_object_info(
+            anonymized_info_dict=anonymized_info_dict,
+            object_config=checkpoint_config_dict,
+        )
+        return anonymized_info_dict
+
+    def _anonymize_checkpoint_run(self, obj: object, **kwargs) -> dict:
         """
         Traverse the entire Checkpoint configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
@@ -235,4 +273,4 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
 
     @staticmethod
     def can_handle(obj: object, **kwargs) -> bool:
-        return isinstance(obj, Checkpoint)
+        return object is not None and isinstance(obj, (Checkpoint, CheckpointConfig))

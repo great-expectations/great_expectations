@@ -4,8 +4,6 @@ from abc import ABC, abstractmethod, abstractstaticmethod
 from hashlib import md5
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from ruamel.yaml.comments import CommentedMap
-
 from great_expectations.core.usage_statistics.util import (
     aggregate_all_core_expectation_types,
 )
@@ -692,29 +690,3 @@ class BaseAnonymizer(ABC):
             GETTING_STARTED_EXPECTATION_SUITE_NAME,
             GETTING_STARTED_CHECKPOINT_NAME,
         ]
-
-    def _anonymize_checkpoint_info(self, name: str, config: dict) -> dict:
-        """Anonymize Checkpoint objs from the 'great_expectations.checkpoint' module.
-
-        Args:
-            name (str): The name of the checkpoint.
-            config (dict): The dictionary configuration corresponding to the checkpoint.
-
-        Returns:
-            An anonymized dictionary payload that obfuscates user-specific details.
-        """
-        anonymized_info_dict: dict = {
-            "anonymized_name": self._anonymize_string(name),
-        }
-
-        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-        from great_expectations.data_context.types.base import checkpointConfigSchema
-
-        checkpoint_config: dict = checkpointConfigSchema.load(CommentedMap(**config))
-        checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
-
-        self._anonymize_object_info(
-            anonymized_info_dict=anonymized_info_dict,
-            object_config=checkpoint_config_dict,
-        )
-        return anonymized_info_dict

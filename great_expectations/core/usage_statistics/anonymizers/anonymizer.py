@@ -9,8 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class Anonymizer(BaseAnonymizer):
-    """Anonymize string names in an optionally-consistent way."""
-
     def __init__(self, salt: Optional[str] = None) -> None:
         super().__init__(salt=salt)
 
@@ -30,7 +28,7 @@ class Anonymizer(BaseAnonymizer):
             DatasourceAnonymizer,
         ]
 
-    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Union[str, dict]:
+    def anonymize(self, obj: object = None, **kwargs) -> Union[str, dict]:
         anonymizer: Optional[BaseAnonymizer] = None
         for anonymizer_cls in self.strategies:
             if anonymizer_cls.can_handle(obj, **kwargs):
@@ -57,12 +55,15 @@ class Anonymizer(BaseAnonymizer):
             DataConnector,
         )
 
-        return isinstance(obj, DataConnector)
+        return obj is not None and isinstance(obj, DataConnector)
 
     @staticmethod
     def _is_batch_info(obj: object) -> bool:
         from great_expectations.data_asset.data_asset import DataAsset
         from great_expectations.validator.validator import Validator
+
+        if object is None:
+            return False
 
         return isinstance(obj, (Validator, DataAsset)) or (
             isinstance(obj, tuple) and len(obj) == 2

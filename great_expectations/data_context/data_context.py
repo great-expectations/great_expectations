@@ -3757,8 +3757,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = anonymizer._anonymize_checkpoint_info(
-            name=checkpoint_name, config=checkpoint_config
+        usage_stats_event_payload = anonymizer.anonymize(
+            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config
         )
 
         return instantiated_class, usage_stats_event_payload
@@ -3908,8 +3908,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             checkpoint_config = checkpoint_config.to_json_dict()
             checkpoint_config.update({"name": checkpoint_name})
-            usage_stats_event_payload = anonymizer._anonymize_checkpoint_info(
-                name=checkpoint_name, config=checkpoint_config
+            usage_stats_event_payload = anonymizer.anonymize(
+                obj=checkpoint_config, name=checkpoint_name, config=checkpoint_config
             )
 
         elif parent_class_from_config is not None and parent_class_from_config.endswith(

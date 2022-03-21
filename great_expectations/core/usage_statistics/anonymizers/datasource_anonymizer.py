@@ -165,7 +165,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
     @staticmethod
     def can_handle(obj: object, **kwargs) -> bool:
-        return isinstance(obj, BaseDatasource)
+        return obj is not None and isinstance(obj, BaseDatasource)
 
     @staticmethod
     def get_parent_class(config: dict) -> Optional[str]:
