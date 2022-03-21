@@ -270,8 +270,6 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "data_connector_query": {"index": -1},
                         "limit": None,
                     },
-                    "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
-                    "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
                 },
                 "parameter_builders": [
                     {
