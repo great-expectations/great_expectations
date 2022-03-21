@@ -2,7 +2,7 @@
 title: Optional - Customize your deployment
 ---
 
-At this point, you have your first, working local deployment of Great Expectations. You’ve also been introduced to the foundational concepts in the library: [Data Contexts](../../reference/data_context.md), [Datasources](../../reference/datasources.md), [Expectations](../../reference/expectations/expectations.md), [Profilers](../../reference/profilers.md), [Data Docs](../../reference/data_docs.md), [Validation](../../docs/reference/validation.md), and [Checkpoints](../../reference/checkpoints_and_actions.md).
+At this point, you have your first, working local deployment of Great Expectations. You’ve also been introduced to the foundational concepts in the library: [Data Contexts](../../reference/data_context.md), [Datasources](../../reference/datasources.md), [Expectations](../../reference/expectations/expectations.md), [Profilers](../../reference/profilers.md), [Data Docs](../../reference/data_docs.md), [Validation](../../reference/validation.md), and [Checkpoints](../../reference/checkpoints_and_actions.md).
 
 Congratulations! You’re off to a very good start.
 

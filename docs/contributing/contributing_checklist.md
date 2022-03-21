@@ -48,9 +48,9 @@ Once your code is ready, please go through the following checklist before submit
 If your PR contains **only** changes to `contrib` directory (community contributed Expectations), please skip this step - the tests that you included in the Expectation itself are sufficient and you do not need to run pytest.
 :::
 
-* See [Writing unit and integration tests](../contributing/contributing_test.md) for details on how to write unit tests in Great Expectations.
+* See [Writing unit and integration tests](./contributing_test.md) for details on how to write unit tests in Great Expectations.
 
-* Please make certain to run `pytest` to verify that all tests pass locally. See [Running tests](../contributing/contributing_test.md) for details.
+* Please make certain to run `pytest` to verify that all tests pass locally. See [Running tests](./contributing_test.md) for details.
 
 #### 5. Have you documented all the changes in your PR?
 

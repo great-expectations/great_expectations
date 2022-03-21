@@ -136,7 +136,7 @@ Once a draft of your guide is written, you can see it rendered on a `localhost` 
 
 4. Decide whether you’re writing a code-heavy or process-heavy guide, and adjust your formatting appropriately.
 
-5. Fill out the Prerequisites info box (see [How-to guide template file](../../guides/miscellaneous/how_to_template.md)). The header of the info box says: “This how-to guide assumes you have already:”. Place each prerequisite under its own bullet and phrase it using the style in the template: “done something” (e.g. "Configured a Datasource").
+5. Fill out the Prerequisites info box (see [How-to guide template file](./how_to_template.md)). The header of the info box says: “This how-to guide assumes you have already:”. Place each prerequisite under its own bullet and phrase it using the style in the template: “done something” (e.g. "Configured a Datasource").
 
 6. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
     - These will typically be included in a separate file that is in the `great_expectations/test/integrations` folder and can be referenced in the how-to-doc. For additional details, please see the "Structure of a How-to-guide" section below.  
