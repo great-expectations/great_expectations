@@ -8,6 +8,7 @@ from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymi
     CheckpointRunAnonymizer,
 )
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.types.base import CheckpointConfig
 
 DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
 
@@ -60,9 +61,6 @@ def checkpoint(
 
 
 def test_resolve_config_using_acceptable_arguments(checkpoint):
-
-    checkpoint_run_anonymizer = CheckpointRunAnonymizer(salt=DATA_CONTEXT_ID)
-
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
     batch_request_param = {
@@ -79,7 +77,7 @@ def test_resolve_config_using_acceptable_arguments(checkpoint):
 
     # Matching how this is called in usage_statistics.py (parameter style)
     resolved_runtime_kwargs: dict = (
-        checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(
+        CheckpointConfig.resolve_config_using_acceptable_arguments(
             *(checkpoint,), **kwargs
         )
     )
