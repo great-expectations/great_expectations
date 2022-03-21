@@ -533,7 +533,7 @@ def test_validator_default_expectation_args__sql(
             expectation_suite_name=1,
         )
 
-    with pytest.raises(TypeError):
+    with pytest.raises(AttributeError):
         # expectation_suite is a string not an ExpectationSuite
         # noinspection PyUnusedLocal
         my_validator = context.get_validator(
