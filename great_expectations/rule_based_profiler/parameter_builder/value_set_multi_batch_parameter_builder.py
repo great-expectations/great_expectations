@@ -11,8 +11,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
     MetricValues,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.rule_based_profiler.types.parameter_container import (
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
     ParameterNode,
 )
 
@@ -112,6 +113,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameters=parameters,
         )
 
+        # This should never happen.
         if not (
             isinstance(parameter_node.value, list) and len(parameter_node.value) == 1
         ):
@@ -149,9 +151,11 @@ def _get_unique_values_from_nested_collection_of_sets(
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
     """
     unique_values: Set[Any] = set(
-        filter(
-            lambda element: element is not None,
-            set().union(*flattened),
+        sorted(
+            filter(
+                lambda element: element is not None,
+                set().union(*flattened),
+            )
         )
     )
 
