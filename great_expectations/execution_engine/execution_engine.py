@@ -12,7 +12,10 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.expectations.registry import get_metric_provider
-from great_expectations.expectations.row_conditions import RowCondition, RowConditionParserType
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+)
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -490,7 +493,9 @@ class ExecutionEngine(ABC):
             column = column_name
         else:
             column = domain_kwargs["column"]
-        row_condition: RowCondition = RowCondition(condition=f'col("{column}").notnull()', type_=RowConditionParserType.GE)
+        row_condition: RowCondition = RowCondition(
+            condition=f'col("{column}").notnull()', type_=RowConditionParserType.GE
+        )
         new_domain_kwargs.setdefault("filter_conditions", []).append(row_condition)
         return new_domain_kwargs
 
