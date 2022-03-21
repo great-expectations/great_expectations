@@ -12,10 +12,7 @@ from pyparsing import (
     alphas,
 )
 
-from great_expectations.exceptions import (
-    GreatExpectationsError,
-    GreatExpectationsTypeError,
-)
+import great_expectations.exceptions as ge_exceptions
 
 try:
     import pyspark.sql.functions as F
@@ -57,7 +54,7 @@ condition = (column_name + not_null).setParseAction(_set_notnull) ^ (
 )
 
 
-class ConditionParserError(GreatExpectationsError):
+class ConditionParserError(ge_exceptions.GreatExpectationsError):
     pass
 
 
@@ -92,7 +89,7 @@ class RowCondition:
 
     def __eq__(self, other: "RowCondition"):
         if not isinstance(other, self.__class__):
-            raise GreatExpectationsTypeError(
+            raise ge_exceptions.GreatExpectationsTypeError(
                 "Only comparison of the same type of object is supported."
             )
         return all([self.condition == other.condition, self.type_ == other.type_])
