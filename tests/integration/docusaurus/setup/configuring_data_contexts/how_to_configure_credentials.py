@@ -7,6 +7,7 @@ yaml = YAML(typ="safe")
 import great_expectations as ge
 from great_expectations.datasource.new_datasource import Datasource
 
+# <snippet>
 config_variables_yaml = """
 my_postgres_db_yaml_creds:
   drivername: postgresql
@@ -16,7 +17,9 @@ my_postgres_db_yaml_creds:
   password: ${MY_DB_PW}
   database: postgres
 """
+# </snippet>
 
+# <snippet>
 export_env_vars = """
 export POSTGRES_DRIVERNAME=postgresql
 export POSTGRES_HOST=localhost
@@ -26,11 +29,15 @@ export POSTGRES_PW=
 export POSTGRES_DB=postgres
 export MY_DB_PW=password
 """
+# </snippet>
 
+# <snippet>
 config_variables_file_path = """
 config_variables_file_path: uncommitted/config_variables.yml
 """
+# </snippet>
 
+# <snippet>
 datasources_yaml = """
 datasources:
   my_postgres_db:
@@ -60,6 +67,7 @@ datasources:
       default_inferred_data_connector_name:
         class_name: InferredAssetSqlDataConnector
 """
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 env_vars = []
