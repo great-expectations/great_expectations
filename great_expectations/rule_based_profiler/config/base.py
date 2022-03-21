@@ -195,6 +195,16 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         allow_none=True,
     )
 
+    evaluation_parameter_builders = fields.List(
+        cls_or_instance=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
+
 
 class ExpectationConfigurationBuilderConfig(DictDot):
     def __init__(
@@ -242,6 +252,16 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     )
     meta = fields.Dict(
         keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
+
+    validation_parameter_builders = fields.List(
+        cls_or_instance=fields.Nested(
+            ParameterBuilderConfigSchema,
             required=True,
             allow_none=False,
         ),
