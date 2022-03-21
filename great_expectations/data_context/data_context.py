@@ -3682,7 +3682,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self.config["stores"][store_name] = config
 
         anonymizer = Anonymizer(self.data_context_id)
-        usage_stats_event_payload = anonymizer._anonymize_store_info(
+        usage_stats_event_payload = anonymizer.anonymize(
             store_name=store_name, store_obj=instantiated_class
         )
         return instantiated_class, usage_stats_event_payload
@@ -3869,7 +3869,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ):
             store_name: str = name or config.get("name") or "my_temp_store"
             store_name = instantiated_class.store_name or store_name
-            usage_stats_event_payload = anonymizer._anonymize_store_info(
+            usage_stats_event_payload = anonymizer.anonymize(
                 store_name=store_name, store_obj=instantiated_class
             )
         elif parent_class_from_config is not None and parent_class_from_config.endswith(

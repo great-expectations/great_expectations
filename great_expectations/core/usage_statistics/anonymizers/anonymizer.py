@@ -30,7 +30,9 @@ class Anonymizer(BaseAnonymizer):
             DatasourceAnonymizer,
         ]
 
-    def anonymize(self, obj: object, *args, **kwargs) -> Union[str, dict]:
+    def anonymize(
+        self, obj: Optional[object] = None, *args, **kwargs
+    ) -> Union[str, dict]:
         anonymizer: Optional[BaseAnonymizer] = None
         for anonymizer_cls in self.strategies:
             if anonymizer_cls.can_handle(obj, *args, **kwargs):
@@ -39,12 +41,14 @@ class Anonymizer(BaseAnonymizer):
 
         return self._anonymize(obj, *args, **kwargs)
 
-    def _anonymize(self, obj: object, *args, **kwargs) -> Union[str, dict]:
+    def _anonymize(self, obj: Optional[object], *args, **kwargs) -> Union[str, dict]:
         if isinstance(obj, str):
             payload: str = cast(str, self._anonymize_string(string_=obj))
             return payload
         if self._is_batch_info(obj=obj):
             return self._anonymize_batch_info(batch=obj)
+        if self._is_store_info(kwargs):
+            return self._anonymize_store_info(**kwargs)
         return {}
 
     @staticmethod
@@ -55,6 +59,10 @@ class Anonymizer(BaseAnonymizer):
         return isinstance(obj, (Validator, DataAsset)) or (
             isinstance(obj, tuple) and len(obj) == 2
         )
+
+    @staticmethod
+    def _is_store_info(info: dict):
+        return "store_name" in info or "store_obj" in info
 
     @staticmethod
     def can_handle(obj: object) -> bool:
