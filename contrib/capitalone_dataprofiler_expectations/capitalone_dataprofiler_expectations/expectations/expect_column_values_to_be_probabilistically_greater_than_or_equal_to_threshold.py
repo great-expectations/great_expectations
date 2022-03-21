@@ -53,7 +53,9 @@ class ColumnValuesConfidenceToBeGreaterThanOrEqualToThreshold(ColumnMapMetricPro
         )
 
 
-class ExpectColumnValuesToBeGreaterThanOrEqualToThreshold(ColumnMapExpectation):
+class ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold(
+    ColumnMapExpectation
+):
     """
     This function builds upon the custom column map expectations of Great Expectations. This function asks a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
 
@@ -61,7 +63,7 @@ class ExpectColumnValuesToBeGreaterThanOrEqualToThreshold(ColumnMapExpectation):
         column (str): The column name that you want to check.
         threshold (float): The value, usually as a decimal (e.g. .32), you want to use to flag low confidence predictions
 
-    df.expect_column_values_to_probabilistically_match_data_label(
+    df.expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold(
         column,
         threshold=float(0<=1)
     )
@@ -170,6 +172,6 @@ class ExpectColumnValuesToBeGreaterThanOrEqualToThreshold(ColumnMapExpectation):
 
 if __name__ == "__main__":
     diagnostics_report = (
-        ExpectColumnValuesToBeGreaterThanOrEqualToThreshold().run_diagnostics()
+        ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold().run_diagnostics()
     )
     print(diagnostics_report.generate_checklist())
