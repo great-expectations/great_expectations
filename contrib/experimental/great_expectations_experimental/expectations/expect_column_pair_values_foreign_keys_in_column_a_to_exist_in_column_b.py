@@ -55,7 +55,7 @@ class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
+class ExpectColumnPairValuesForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
     """Ensure that values in the column of interest (ColumnA) are in a valueset provided as a dataframe (df parameter) + column (column_B parameter) or as a list of elements supported by pandas.DataFrame() (e.g. list of dicts [{"col_name": value},], list of tuples [(value, value), (value, value)]. This is a very experimental implementation to describe the functionality, but this expectation should be revisited once cross-table expectation templates are available."""
 
     examples = [
@@ -257,4 +257,4 @@ class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
 #     }
 
 if __name__ == "__main__":
-    ExpectForeignKeysInColumnAToExistInColumnB().print_diagnostic_checklist()
+    ExpectColumnPairValuesForeignKeysInColumnAToExistInColumnB().print_diagnostic_checklist()
