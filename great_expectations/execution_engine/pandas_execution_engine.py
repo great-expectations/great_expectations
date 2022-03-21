@@ -25,10 +25,6 @@ from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compr
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
-from great_expectations.expectations.row_conditions import (
-    RowCondition,
-    RowConditionParserType,
-)
 
 logger = logging.getLogger(__name__)
 
