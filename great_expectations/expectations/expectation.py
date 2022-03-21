@@ -2,7 +2,6 @@ import glob
 import json
 import logging
 import os
-import re
 import traceback
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
@@ -80,15 +79,11 @@ from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
-from great_expectations.util import is_parseable_date
+from great_expectations.util import camel_to_snake, is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-
-p1 = re.compile(r"(.)([A-Z][a-z]+)")
-p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
 _TEST_DEFS_DIR = os.path.join(
@@ -98,11 +93,6 @@ _TEST_DEFS_DIR = os.path.join(
     "tests",
     "test_definitions",
 )
-
-
-def camel_to_snake(name):
-    name = p1.sub(r"\1_\2", name)
-    return p2.sub(r"\1_\2", name).lower()
 
 
 class MetaExpectation(ABCMeta):
@@ -1546,6 +1536,7 @@ class Expectation(metaclass=MetaExpectation):
                 tests
             )
         )
+        experimental_checks.append(ExpectationDiagnostics._check_linting(self))
 
         beta_checks.append(
             ExpectationDiagnostics._check_input_validation(self, examples)
@@ -1557,7 +1548,6 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
 
-        production_checks.append(ExpectationDiagnostics._check_linting(self))
         production_checks.append(
             ExpectationDiagnostics._check_full_test_suite(library_metadata)
         )
