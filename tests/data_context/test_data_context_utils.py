@@ -65,7 +65,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
             PasswordMasker.mask_db_url(
                 f"postgresql://scott:tiger@{db_hostname}:65432/mydatabase"
             )
-            == f"postgresql://scott:***@{db_hostname}:65432/mydatabase"
+            == f"postgresql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/mydatabase"
         )
     except ModuleNotFoundError:
         pass
@@ -74,14 +74,14 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
             f"postgresql://scott:tiger@{db_hostname}:65432/mydatabase",
             use_urlparse=True,
         )
-        == f"postgresql://scott:***@{db_hostname}:65432/mydatabase"
+        == f"postgresql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/mydatabase"
     )
     # missing port number, using urlparse
     assert (
         PasswordMasker.mask_db_url(
             f"postgresql://scott:tiger@{db_hostname}/mydatabase", use_urlparse=True
         )
-        == f"postgresql://scott:***@{db_hostname}/mydatabase"
+        == f"postgresql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}/mydatabase"
     )
 
     # psycopg2 (if installed in test environment)
@@ -90,7 +90,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
             PasswordMasker.mask_db_url(
                 f"postgresql+psycopg2://scott:tiger@{db_hostname}:65432/mydatabase"
             )
-            == f"postgresql+psycopg2://scott:***@{db_hostname}:65432/mydatabase"
+            == f"postgresql+psycopg2://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/mydatabase"
         )
     except ModuleNotFoundError:
         pass
@@ -99,7 +99,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
             f"postgresql+psycopg2://scott:tiger@{db_hostname}:65432/mydatabase",
             use_urlparse=True,
         )
-        == f"postgresql+psycopg2://scott:***@{db_hostname}:65432/mydatabase"
+        == f"postgresql+psycopg2://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/mydatabase"
     )
 
     # pg8000 (if installed in test environment)
@@ -108,7 +108,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
             PasswordMasker.mask_db_url(
                 f"postgresql+pg8000://scott:tiger@{db_hostname}:65432/mydatabase"
             )
-            == f"postgresql+pg8000://scott:***@{db_hostname}:65432/mydatabase"
+            == f"postgresql+pg8000://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/mydatabase"
         )
     except ModuleNotFoundError:
         pass
@@ -117,7 +117,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
             f"postgresql+pg8000://scott:tiger@{db_hostname}:65432/mydatabase",
             use_urlparse=True,
         )
-        == f"postgresql+pg8000://scott:***@{db_hostname}:65432/mydatabase"
+        == f"postgresql+pg8000://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/mydatabase"
     )
 
     # MySQL
@@ -125,7 +125,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     try:
         assert (
             PasswordMasker.mask_db_url(f"mysql://scott:tiger@{db_hostname}:65432/foo")
-            == f"mysql://scott:***@{db_hostname}:65432/foo"
+            == f"mysql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
         )
     except ModuleNotFoundError:
         pass
@@ -134,7 +134,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
         PasswordMasker.mask_db_url(
             f"mysql://scott:tiger@{db_hostname}:65432/foo", use_urlparse=True
         )
-        == f"mysql://scott:***@{db_hostname}:65432/foo"
+        == f"mysql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
     )
 
     # mysqlclient (a maintained fork of MySQL-Python) (if installed in test environment)
@@ -143,7 +143,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
             PasswordMasker.mask_db_url(
                 f"mysql+mysqldb://scott:tiger@{db_hostname}:65432/foo"
             )
-            == f"mysql+mysqldb://scott:***@{db_hostname}:65432/foo"
+            == f"mysql+mysqldb://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
         )
     except ModuleNotFoundError:
         pass
@@ -151,7 +151,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
         PasswordMasker.mask_db_url(
             f"mysql+mysqldb://scott:tiger@{db_hostname}:65432/foo", use_urlparse=True
         )
-        == f"mysql+mysqldb://scott:***@{db_hostname}:65432/foo"
+        == f"mysql+mysqldb://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
     )
 
     # PyMySQL (if installed in test environment)
@@ -160,7 +160,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
             PasswordMasker.mask_db_url(
                 f"mysql+pymysql://scott:tiger@{db_hostname}:65432/foo"
             )
-            == f"mysql+pymysql://scott:***@{db_hostname}:65432/foo"
+            == f"mysql+pymysql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
         )
     except ModuleNotFoundError:
         pass
@@ -168,7 +168,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
         PasswordMasker.mask_db_url(
             f"mysql+pymysql://scott:tiger@{db_hostname}:65432/foo", use_urlparse=True
         )
-        == f"mysql+pymysql://scott:***@{db_hostname}:65432/foo"
+        == f"mysql+pymysql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
     )
 
     # Oracle (if installed in test environment)
@@ -185,13 +185,13 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
         PasswordMasker.mask_db_url(
             f"oracle://scott:tiger@{url_host}:1521/sidname", use_urlparse=True
         )
-        == f"oracle://scott:***@{url_host}:1521/sidname"
+        == f"oracle://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{url_host}:1521/sidname"
     )
 
     try:
         assert (
             PasswordMasker.mask_db_url("oracle+cx_oracle://scott:tiger@tnsname")
-            == "oracle+cx_oracle://scott:***@tnsname"
+            == f"oracle+cx_oracle://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@tnsname"
         )
     except ModuleNotFoundError:
         pass
@@ -199,7 +199,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
         PasswordMasker.mask_db_url(
             "oracle+cx_oracle://scott:tiger@tnsname", use_urlparse=True
         )
-        == "oracle+cx_oracle://scott:***@tnsname"
+        == f"oracle+cx_oracle://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@tnsname"
     )
 
     # Microsoft SQL Server
@@ -215,7 +215,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
         PasswordMasker.mask_db_url(
             "mssql+pyodbc://scott:tiger@mydsn", use_urlparse=True
         )
-        == "mssql+pyodbc://scott:***@mydsn"
+        == f"mssql+pyodbc://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@mydsn"
     )
 
     # pymssql (if installed in test environment)
@@ -224,7 +224,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
             PasswordMasker.mask_db_url(
                 f"mssql+pymssql://scott:tiger@{db_hostname}:12345/dbname"
             )
-            == f"mssql+pymssql://scott:***@{db_hostname}:12345/dbname"
+            == f"mssql+pymssql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:12345/dbname"
         )
     except ModuleNotFoundError:
         pass
@@ -232,7 +232,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
         PasswordMasker.mask_db_url(
             f"mssql+pymssql://scott:tiger@{db_hostname}:12345/dbname", use_urlparse=True
         )
-        == f"mssql+pymssql://scott:***@{db_hostname}:12345/dbname"
+        == f"mssql+pymssql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:12345/dbname"
     )
 
     # SQLite

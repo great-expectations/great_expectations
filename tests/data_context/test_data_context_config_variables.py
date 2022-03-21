@@ -14,6 +14,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.util import (
     file_relative_path,
     substitute_config_variable,
+    PasswordMasker
 )
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
 from tests.data_context.conftest import create_data_context_files
@@ -807,7 +808,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
         "database": "DB_NAME",
         "username": "DB_USER",
         # Note masking of "password" field
-        "password": "***",
+        "password": PasswordMasker.MASKED_PASSWORD_STRING,
     }
 
     # Check context substitutes escaped variables appropriately
