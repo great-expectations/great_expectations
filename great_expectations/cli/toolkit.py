@@ -127,7 +127,10 @@ def get_default_expectation_suite_name(
     if data_asset_name:
         suite_name = f"{data_asset_name}.warning"
     else:
-        suite_name = "warning"
+        try:
+            suite_name = f"batch-{BatchRequest(**batch_request).id}"
+        except TypeError:
+            suite_name = "warning"
     return suite_name
 
 

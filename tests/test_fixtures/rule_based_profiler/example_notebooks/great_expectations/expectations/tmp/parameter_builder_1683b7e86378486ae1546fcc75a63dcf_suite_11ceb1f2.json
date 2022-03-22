@@ -1,0 +1,15 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "tmp.parameter_builder_1683b7e86378486ae1546fcc75a63dcf_suite_11ceb1f2",
+  "expectations": [],
+  "ge_cloud_id": null,
+  "meta": {
+    "citations": [
+      {
+        "citation_date": "2022-03-21T15:35:26.887895Z",
+        "comment": "Created suite added via context.get_validator"
+      }
+    ],
+    "great_expectations_version": "0.14.11+67.g9b412baef.dirty"
+  }
+}
