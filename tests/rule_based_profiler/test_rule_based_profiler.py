@@ -160,8 +160,6 @@ def test_reconcile_profiler_rules_new_rule_override(
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                 "class_name": "ColumnDomainBuilder",
-                "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
-                "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
             },
             "parameter_builders": [
                 {
@@ -288,8 +286,6 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                 "class_name": "ColumnDomainBuilder",
-                "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
-                "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
                 "include_column_name_suffixes": [
                     "_ts",
                 ],
@@ -596,8 +592,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                 "class_name": "ColumnDomainBuilder",
-                "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
-                "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
             },
             "parameter_builders": [
                 {
@@ -719,8 +713,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                 "class_name": "ColumnDomainBuilder",
-                "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
-                "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
             },
             "parameter_builders": [
                 {
@@ -837,8 +829,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                 "class_name": "ColumnDomainBuilder",
-                "semantic_type_filter_module_name": "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter",
-                "semantic_type_filter_class_name": "SimpleSemanticTypeFilter",
             },
             "parameter_builders": [
                 {

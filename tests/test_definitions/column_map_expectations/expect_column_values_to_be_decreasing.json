@@ -9,6 +9,7 @@
     },
     "tests" : [{
       "title" : "positive_test_with_mostly",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -21,6 +22,7 @@
       }
     },{
       "title" : "basic_negative_test",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "y"
