@@ -488,7 +488,9 @@ class ExecutionEngine(ABC):
             )
 
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
-        assert "column" in domain_kwargs or column_name is not None
+        assert (
+            "column" in domain_kwargs or column_name is not None
+        ), "No column provided: A column must be provided in domain_kwargs or in the column_name parameter"
         if column_name is not None:
             column = column_name
         else:

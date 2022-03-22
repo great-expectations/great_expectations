@@ -146,16 +146,28 @@ def test_add_column_row_condition_filter_null_row_condition_none(test_execution_
 
 
 # Edge cases
-def test_add_column_row_condition_with_unsupported_conditions(test_execution_engine):
+def test_add_column_row_condition_with_unsupported_filter_nan_true(
+    test_execution_engine,
+):
     e = test_execution_engine
 
     # Ensuring that an attempt to filter nans within base class yields an error
     with pytest.raises(ge_exceptions.GreatExpectationsError) as error:
-        new_domain_kwargs = e.add_column_row_condition({}, "a", filter_nan=True)
+        _ = e.add_column_row_condition({}, "a", filter_nan=True)
+    assert (
+        "Base ExecutionEngine does not support adding nan condition filters"
+        in error.value.message
+    )
+
+
+def test_add_column_row_condition_with_unsupported_no_column_provided(
+    test_execution_engine,
+):
+    e = test_execution_engine
 
     # Testing that error raised when column not given
-    with pytest.raises(AssertionError) as error:
-        new_domain_kwargs = e.add_column_row_condition({})
+    with pytest.raises(AssertionError):
+        _ = e.add_column_row_condition({})
 
 
 def test_resolve_metrics_with_aggregates_and_column_map():
