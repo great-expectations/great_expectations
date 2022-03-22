@@ -90,6 +90,7 @@
       "tests": [
         {
           "title": "basic_positive",
+          "include_in_gallery": true,
           "only_for": ["sqlalchemy"],
           "exact_match_out": false,
           "in": {
@@ -105,6 +106,7 @@
         },
         {
           "title": "basic_negative",
+          "include_in_gallery": true,
           "only_for": ["sqlalchemy"],
           "exact_match_out": false,
           "in": {
