@@ -104,11 +104,11 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L81
+```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L52
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L146
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L127
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -146,7 +146,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 * `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
 	* `include_in_gallery`: This must be set to `True` if you want this test case to be visible in the Gallery as an example.
-	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mixed", "mostly": .1}` in the example above is equivalent to `expect_column_values_to_only_contain_vowels(column="mixed", mostly=0.6)`
+	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mixed", "mostly": .1}` in the example above is equivalent to `expect_column_values_to_only_contain_vowels(column="mixed", mostly=0.1)`
 	* `out` is based on the Validation Result returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
@@ -248,12 +248,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L71-L76
+```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L42-L47
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L138-L141
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L119-L122
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
