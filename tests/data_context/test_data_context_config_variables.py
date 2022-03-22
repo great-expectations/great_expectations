@@ -12,9 +12,9 @@ from great_expectations.data_context.types.base import (
     DatasourceConfigSchema,
 )
 from great_expectations.data_context.util import (
+    PasswordMasker,
     file_relative_path,
     substitute_config_variable,
-    PasswordMasker,
 )
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
 from tests.data_context.conftest import create_data_context_files
