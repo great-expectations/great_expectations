@@ -2,10 +2,9 @@
 title: How to create a Custom Column Map Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-**`ColumnMapExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
-They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If that percentage meets a specified threshold (100% by default), the Expectation considers that data valid. 
-This threshold is configured via the `mostly` parameter, which can be passed as input to your Custom `ColumnMapExpectation` as a `float` between 0 and 1.
+**`ColumnMapExpectations`** are one of the most common types of <TechnicalTag tag="expectation" text="Expectation" />. They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
 This guide will walk you through the process of creating a custom `ColumnMapExpectation`.
 
@@ -47,10 +46,13 @@ cp column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_eq
     </p>
     <p>
         <ul>
-            <li>If you're building a Custom Expectation for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all plugins in the directory available for use.</li>
+            <li>If you're building a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all <TechnicalTag tag="plugin" text="Plugins" /> in the directory available for use.</li>
             <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
         </ul>
     </p>
+	<p>
+		See our <a href="how_to_use_custom_expectations"> guide on how to use a Custom Expectation</a> for more!
+	</p>
   </div>
 </details>
 
@@ -82,7 +84,7 @@ When in doubt, the next step to implement is the first one that doesn't have a â
 
 ### 4. Change the Expectation class name and add a docstring
 
-By convention, your [**Metric**](../../../reference/metrics.md) class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
+By convention, your <TechnicalTag tag="metric" text="Metric" /> class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
 
 Let's start by updating your Expectation's name and docstring.
 
@@ -143,11 +145,11 @@ Your examples will look something like this:
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
 
 * `data`: defines the input data of the example as a table/data frame. In this example the table has one column named `all_threes` and a second column named `some_zeroes`. Both columns have 5 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
-* `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
+* `tests`: a list of test cases to <TechnicalTag tag="validation" text="Validate" /> against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
 	* `include_in_gallery`: This must be set to `True` if you want this test case to be visible in the Gallery as an example.
 	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mostly_threes", "mostly": 0.6}` in the example above is equivalent to `expect_column_values_to_equal_three(column=mostly_threes, mostly=0.6)`
-	* `out` is based on the Validation Result returned when executing the Expectation.
+	* `out` is based on the <TechnicalTag tag="validation_result" text="Validation Result" /> returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you donâ€™t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
 
@@ -175,8 +177,9 @@ see our guide on [how to create example cases for a Custom Expectation](../featu
 ### 6. Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation.   
-To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your Expectation.  
-By the time your Expectation is complete, your Metric will have functions for all three Execution Engines (Pandas, Spark, & SQLAlchemy) supported by Great Expectations. For now, we're only going to define one.  
+
+To do so, you'll need to implement a function within a Metric, and link it to your Expectation.  
+By the time your Expectation is complete, your Metric will have functions for all three <TechnicalTag tag="execution_engine" text="Execution Engines" /> (Pandas, Spark, & SQLAlchemy) supported by Great Expectations. For now, we're only going to define one.  
   
 :::note  
 Metrics answer questions about your data posed by your Expectation, <br/> and allow your Expectation to judge whether your data meets ***your*** expectations.  
