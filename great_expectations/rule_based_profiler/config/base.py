@@ -109,9 +109,15 @@ class DomainBuilderConfig(DictDot):
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
-        self.class_name = class_name
-        self.module_name = module_name
-        self.batch_request = batch_request
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -153,9 +159,16 @@ class ParameterBuilderConfig(DictDot):
         **kwargs,
     ):
         self.name = name
-        self.class_name = class_name
-        self.module_name = module_name
-        self.batch_request = batch_request
+
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -203,12 +216,23 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         meta: Optional[dict] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
         self.expectation_type = expectation_type
-        self.class_name = class_name
-        self.module_name = module_name
-        self.meta = meta
+
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        if meta is not None:
+            self.meta = meta
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -245,6 +269,10 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
             required=True,
             allow_none=False,
         ),
+        required=False,
+        allow_none=True,
+    )
+    batch_request = fields.Raw(
         required=False,
         allow_none=True,
     )
