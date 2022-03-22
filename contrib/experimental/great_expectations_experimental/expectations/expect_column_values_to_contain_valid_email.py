@@ -214,7 +214,6 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
             "@sophiarawlings",
             "@vtdangg",
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
