@@ -177,14 +177,14 @@ def test_expectation_self_check():
                         }
                     ],
                 },
-            ],
-            "production": [
                 {
                     "doc_url": None,
                     "message": "Passes all linting checks",
-                    "passed": False,
+                    "passed": True,
                     "sub_messages": [],
                 },
+            ],
+            "production": [
                 {
                     "doc_url": None,
                     "message": "Has a full suite of tests, as determined by a code owner",
