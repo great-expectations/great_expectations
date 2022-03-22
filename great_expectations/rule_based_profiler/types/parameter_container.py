@@ -406,7 +406,11 @@ def get_parameter_value_by_fully_qualified_parameter_name(
             # Supports the "$domain.domain_kwargs.column" style syntax.
             return domain[DOMAIN_KWARGS_PARAMETER_NAME].get(
                 fully_qualified_parameter_name[
-                    (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1) :
+                    (
+                        len(
+                            f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
+                        )
+                    ) :
                 ]
             )
 

@@ -220,7 +220,8 @@ module.exports = {
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations',
-                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
                 {
                   type: 'category',
@@ -304,6 +305,8 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
+        'deployment_patterns/how_to_use_great_expectations_with_prefect',
+
         { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
       ]
     },
