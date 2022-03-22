@@ -192,7 +192,7 @@ with something like this:
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L10-L34
 ```
 
-For more detail when rendering your Custom Expectation, you can optionally specify the plural form of a Semantic Type you're validating. 
+For more detail when rendering your Custom Expectation, you can optionally specify the semantic name of the set you're validating. 
 
 For example:
 
