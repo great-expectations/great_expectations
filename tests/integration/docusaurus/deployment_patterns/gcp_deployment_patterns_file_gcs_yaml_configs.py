@@ -1,3 +1,4 @@
+# <snippet>
 import os
 
 from ruamel.yaml import YAML
@@ -6,9 +7,13 @@ import great_expectations as ge
 from great_expectations.core.batch import BatchRequest
 from great_expectations.validator.validator import Validator
 
+# </snippet>
+
 yaml = YAML(typ="safe")
 
+# <snippet>
 context = ge.get_context()
+# </snippet>
 
 # NOTE: The following code is only for testing and depends on an environment
 # variable to set the gcp_project. You can replace the value with your own
@@ -210,6 +215,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # adding datasource
+# <snippet>
 datasource_yaml = rf"""
 name: my_gcs_datasource
 class_name: Datasource
@@ -229,6 +235,7 @@ data_connectors:
             group_names:
                 - data_asset_name
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -238,14 +245,18 @@ datasource_yaml = datasource_yaml.replace(
 )
 
 context.test_yaml_config(datasource_yaml)
+# <snippet>
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 
 # adding datasource
+# <snippet>
 batch_request = BatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
 )
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
@@ -253,6 +264,7 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
+# <snippet>
 context.create_expectation_suite(
     expectation_suite_name="test_gcs_suite", overwrite_existing=True
 )
@@ -260,6 +272,7 @@ context.create_expectation_suite(
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_gcs_suite"
 )
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)
@@ -274,14 +287,19 @@ assert set(
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03",
 }
 
+# <snippet>
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
+# </snippet>
 
+# <snippet>
 validator.save_expectation_suite(discard_failed_expectations=False)
+# </snippet>
 
+# <snippet>
 my_checkpoint_name = "gcs_checkpoint"
 checkpoint_config = f"""
 name: {my_checkpoint_name}
@@ -295,12 +313,20 @@ validations:
       data_asset_name: <YOUR_DATA_ASSET_NAME>
     expectation_suite_name: test_gcs_suite
 """
+# </snippet>
+
 checkpoint_config = checkpoint_config.replace(
     "<YOUR_DATA_ASSET_NAME>",
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
 )
+
+# <snippet>
 context.add_checkpoint(**yaml.load(checkpoint_config))
+# </snippet>
+
+# <snippet>
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )
+# </snippet>
 assert checkpoint_result.success is True
