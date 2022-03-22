@@ -9,9 +9,14 @@ class YamlHandler:
     """
     Facade class designed to be a lightweight wrapper around YAML serialization.
     For all YAML-related activities in Great Expectations, this is the entry point.
+
+    Note that this is meant to be library agnostic - the underlying implementation does not
+    matter as long as we fulfill the following contract:
+        * load
+        * dump
     """
 
-    _handler = YAML(typ="safe")
+    _handler: YAML = YAML(typ="safe")
 
     @staticmethod
     def load(stream: Union[io.TextIOWrapper, str]) -> dict:
@@ -23,7 +28,7 @@ class YamlHandler:
         Returns:
             The deserialized dictionary form of the input stream.
         """
-        return YamlHandler._handler.load(stream)
+        return YamlHandler._handler.load(stream=stream)
 
     @staticmethod
     def dump(
@@ -41,15 +46,21 @@ class YamlHandler:
             stream: The output stream to modify. If not provided, we default to io.StringIO.
 
         Returns:
-            For StringIO streams, the str that results from _handler.dump(), None otherwise, as the _handler.dump()
-            will exercise the handler accordingly.
+            If no stream argument is provided, the str that results from _handler.dump().
+            Otherwise, None as the _handler.dump() works in place and will exercise the handler accordingly.
         """
-        inefficient = False
-        if stream is None:
-            inefficient = True
-            stream = io.StringIO()
+        if stream:
+            return YamlHandler._dump(data=data, stream=stream, **kwargs)
+        return YamlHandler._dump_and_return_value(data=data, **kwargs)
 
-        YamlHandler._handler.dump(data, stream, **kwargs)
+    @staticmethod
+    def _dump(data: dict, stream, **kwargs) -> None:
+        """If an input stream has been provided, modify it in place."""
+        YamlHandler._handler.dump(data=data, stream=stream, **kwargs)
 
-        if inefficient:
-            return stream.getvalue()
+    @staticmethod
+    def _dump_and_return_value(data: dict, **kwargs) -> str:
+        """If an input stream hasn't been provided, generate one and return the value."""
+        stream = io.StringIO()
+        YamlHandler._handler.dump(data=data, stream=stream, **kwargs)
+        return stream.getvalue()
