@@ -2096,7 +2096,7 @@ class DataContextConfig(BaseYamlConfig):
         from great_expectations.data_context.util import PasswordMasker
 
         serializeable_dict = self.to_json_dict()
-        return PasswordMasker.sanitize_data_context_config(serializeable_dict)
+        return PasswordMasker.sanitize_config(serializeable_dict)
 
     def __repr__(self) -> str:
         """
