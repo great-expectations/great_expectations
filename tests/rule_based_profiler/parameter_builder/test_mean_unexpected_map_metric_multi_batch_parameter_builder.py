@@ -91,9 +91,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric(
         metric_name="table.row_count",
         metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
         metric_value_kwargs=None,
+        json_serialize=False,
         batch_list=None,
         batch_request=batch_request,
-        json_serialize=False,
         data_context=data_context,
     )
     my_null_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
@@ -101,9 +101,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric(
         metric_name="column_values.nonnull.unexpected_count",
         metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
         metric_value_kwargs=None,
+        json_serialize=False,
         batch_list=None,
         batch_request=batch_request,
-        json_serialize=False,
         data_context=data_context,
     )
 
@@ -114,9 +114,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric(
         null_count_parameter_builder_name="my_null_count",
         metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
         metric_value_kwargs=None,
+        json_serialize=False,
         batch_list=None,
         batch_request=batch_request,
-        json_serialize=False,
         data_context=data_context,
     )
 
@@ -195,9 +195,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         metric_name="table.row_count",
         metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
         metric_value_kwargs=None,
+        json_serialize=False,
         batch_list=None,
         batch_request=batch_request,
-        json_serialize=False,
         data_context=data_context,
     )
     my_null_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
@@ -205,9 +205,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         metric_name="column_values.nonnull.unexpected_count",
         metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
         metric_value_kwargs=None,
+        json_serialize=False,
         batch_list=None,
         batch_request=batch_request,
-        json_serialize=False,
         data_context=data_context,
     )
 
@@ -218,9 +218,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         null_count_parameter_builder_name="my_null_count",
         metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
         metric_value_kwargs=None,
+        json_serialize=False,
         batch_list=None,
         batch_request=batch_request,
-        json_serialize=False,
         data_context=data_context,
     )
 
@@ -301,9 +301,9 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         null_count_parameter_builder_name="my_null_count",
         metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
         metric_value_kwargs=None,
+        json_serialize=False,
         batch_list=None,
         batch_request=batch_request,
-        json_serialize=False,
         data_context=data_context,
     )
 
@@ -318,6 +318,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         "null_count_parameter_builder_name",
         "metric_domain_kwargs",
         "metric_value_kwargs",
-        "batch_request",
         "json_serialize",
+        "batch_request",
     }
