@@ -155,7 +155,7 @@ class ParameterBuilderConfig(DictDot):
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
-        json_serialize: Optional[bool] = False,
+        json_serialize: bool = True,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
@@ -167,8 +167,7 @@ class ParameterBuilderConfig(DictDot):
         if class_name is not None:
             self.class_name = class_name
 
-        if json_serialize is not None:
-            self.json_serialize = json_serialize
+        self.json_serialize = json_serialize
 
         if batch_request is not None:
             self.batch_request = batch_request
