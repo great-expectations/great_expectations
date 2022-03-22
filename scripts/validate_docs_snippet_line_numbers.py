@@ -201,6 +201,9 @@ if __name__ == "__main__":
     # Chetan - 20220316 - While this number should be 0, getting the number of warnings down takes time
     # and effort. In the meanwhile, we want to set an upper bound on warnings to ensure we're not introducing
     # further regressions. As snippets are validated, developers should update this number.
+    broken_ref_threshold: int = 502
+    broken_ref_count: int = len(broken_refs)
     assert (
-        len(broken_refs) <= 485
-    ), "A broken snippet reference was introduced; please resolve the matter before merging."
+        broken_ref_count <= broken_ref_threshold
+    ), f"""A broken snippet reference was introduced; please resolve the matter before merging.
+                We expect there to be {broken_ref_threshold} or fewer broken references (actual: {broken_ref_count})"""

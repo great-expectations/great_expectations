@@ -71,9 +71,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         json_serialize: Union[str, bool] = True,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -98,9 +100,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -111,9 +113,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             enforce_numeric_metric=enforce_numeric_metric,
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -277,7 +279,7 @@ detected.
         metric_values: MetricValues
         if isinstance(parameter_node.value, list):
             num_parameter_node_value_elements: int = len(parameter_node.value)
-            if num_parameter_node_value_elements != 1:
+            if not (num_parameter_node_value_elements == 1):
                 raise ge_exceptions.ProfilerExecutionError(
                     message=f'Length of "AttributedResolvedMetrics" list for {self.__class__.__name__} must be exactly 1 ({num_parameter_node_value_elements} elements found).'
                 )

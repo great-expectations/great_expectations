@@ -169,7 +169,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "parse_strings_as_datetimes": {

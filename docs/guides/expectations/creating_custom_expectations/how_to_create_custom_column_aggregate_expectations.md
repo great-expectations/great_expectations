@@ -53,6 +53,9 @@ cp column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to
             <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
         </ul>
     </p>
+	<p>
+		See our <a href="how_to_use_custom_expectations">guide on how to use a Custom Expectation</a> for more!
+	</p>
   </div>
 </details>
 
@@ -163,7 +166,7 @@ Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 		  Only 0 / 2 tests for pandas are passing
-		  Failing: basic_positive_test, basic_positive_test
+		  Failing: basic_positive_test, basic_negative_test
 ...
 ```
 
@@ -187,8 +190,8 @@ Your Metric function will have the `@column_aggregate_value` decorator, with the
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L41-L44
 ```
 
-This is all that you need to define for now. 
-The `ColumnAggregateMetricProvider` and `ColumnExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
+This is all that you need to define for now. In the next step, we will implement the method to validate the results of this Metric.
+
 
 <details>
   <summary>Other parameters</summary>

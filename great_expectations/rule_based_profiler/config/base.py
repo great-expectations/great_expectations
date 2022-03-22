@@ -17,8 +17,8 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types.parameter_container import (
-    VARIABLES_KEY,
+from great_expectations.rule_based_profiler.types import (
+    VARIABLES_PREFIX,
     ParameterContainer,
 )
 from great_expectations.types import DictDot, SerializableDictDot
@@ -109,9 +109,15 @@ class DomainBuilderConfig(DictDot):
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
-        self.class_name = class_name
-        self.module_name = module_name
-        self.batch_request = batch_request
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -149,13 +155,23 @@ class ParameterBuilderConfig(DictDot):
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
+        json_serialize: bool = True,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
         self.name = name
-        self.class_name = class_name
-        self.module_name = module_name
-        self.batch_request = batch_request
+
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        self.json_serialize = json_serialize
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -203,12 +219,23 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         meta: Optional[dict] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
         self.expectation_type = expectation_type
-        self.class_name = class_name
-        self.module_name = module_name
-        self.meta = meta
+
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        if meta is not None:
+            self.meta = meta
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -245,6 +272,10 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
             required=True,
             allow_none=False,
         ),
+        required=False,
+        allow_none=True,
+    )
+    batch_request = fields.Raw(
         required=False,
         allow_none=True,
     )
@@ -484,7 +515,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         def _traverse_and_substitute(node: Any) -> None:
             if isinstance(node, dict):
                 for key, val in node.copy().items():
-                    if isinstance(val, str) and val.startswith(VARIABLES_KEY):
+                    if isinstance(val, str) and val.startswith(VARIABLES_PREFIX):
                         node[key] = get_parameter_value_and_validate_return_type(
                             domain=None,
                             parameter_reference=val,

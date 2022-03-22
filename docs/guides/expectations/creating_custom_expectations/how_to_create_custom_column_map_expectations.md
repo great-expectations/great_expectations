@@ -50,6 +50,9 @@ cp column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_eq
             <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
         </ul>
     </p>
+	<p>
+		See our <a href="how_to_use_custom_expectations">guide on how to use a Custom Expectation</a> for more!
+	</p>
   </div>
 </details>
 
@@ -107,7 +110,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L378
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L376
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -162,7 +165,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 		  Only 0 / 2 tests for pandas are passing
-		  Failing: basic_positive_test, basic_positive_test
+		  Failing: basic_positive_test, basic_negative_test
 ...
 ```
 
@@ -275,7 +278,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L371-L374
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L369-L372
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

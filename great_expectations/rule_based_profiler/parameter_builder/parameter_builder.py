@@ -90,9 +90,11 @@ class ParameterBuilder(Builder, ABC):
     def __init__(
         self,
         name: str,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         json_serialize: Union[str, bool] = True,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -102,9 +104,9 @@ class ParameterBuilder(Builder, ABC):
             name: the name of this parameter builder -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -278,7 +280,7 @@ class ParameterBuilder(Builder, ABC):
         Then, all "MetricConfiguration" objects, collected into list as container, are resolved simultaneously.
         """
 
-        # Fist: Gather "metric_domain_kwargs" (corresponding to "batch_ids").
+        # First: Gather "metric_domain_kwargs" (corresponding to "batch_ids").
 
         domain_kwargs: dict = build_metric_domain_kwargs(
             batch_id=None,
@@ -372,9 +374,14 @@ class ParameterBuilder(Builder, ABC):
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
-            attributed_resolved_metrics.add_resolved_metric(
-                value=resolved_metrics[metric_configuration.id]
-            )
+            resolved_metric_value: Union[
+                Tuple[str, str, str], None
+            ] = resolved_metrics.get(metric_configuration.id)
+            if resolved_metric_value is None:
+                raise ge_exceptions.ProfilerExecutionError(
+                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
+                )
+            attributed_resolved_metrics.add_resolved_metric(value=resolved_metric_value)
 
         metric_attributes_id: str
         metric_values: AttributedResolvedMetrics
@@ -403,7 +410,7 @@ class ParameterBuilder(Builder, ABC):
                 metric_values.metric_values = np.array(metric_values.metric_values)
                 attributed_resolved_metrics_map[metric_attributes_id] = metric_values
 
-        # Eigth: Apply numeric/hygiene directives (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+        # Eighth: Apply numeric/hygiene directives (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
         for (
             metric_attributes_id,
             metric_values,
@@ -418,7 +425,7 @@ class ParameterBuilder(Builder, ABC):
                 parameters=parameters,
             )
 
-        # Nineth: Compose and return result to receiver (apply simplications to cases of single "metric_value_kwargs").
+        # Ninth: Compose and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
         return MetricComputationResult(
             list(attributed_resolved_metrics_map.values()),
             details={
@@ -509,6 +516,6 @@ class ParameterBuilder(Builder, ABC):
 """
                         )
 
-                    np.nan_to_num(metric_value_vector, copy=True, nan=0.0)
+                    np.nan_to_num(metric_value_vector, copy=False, nan=0.0)
 
         return metric_values
