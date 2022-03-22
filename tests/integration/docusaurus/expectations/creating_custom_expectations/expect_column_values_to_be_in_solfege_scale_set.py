@@ -30,7 +30,6 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
         "LA",
         "TI",
     ]
-    set_snake_name = "solfege_scale"
     set_camel_name = "SolfegeScale"
     set_semantic_name = "the Solfege scale"
 
@@ -117,7 +116,6 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
     ]
 
     map_metric = SetBasedColumnMapExpectation.register_metric(
-        set_snake_name=set_snake_name,
         set_camel_name=set_camel_name,
         set_=set_,
     )

@@ -28,6 +28,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.util import camel_to_snake
 
 logger = logging.getLogger(__name__)
 
@@ -51,10 +52,10 @@ class SetColumnMapMetricProvider(ColumnMapMetricProvider):
 class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     @staticmethod
     def register_metric(
-        set_snake_name: str,
         set_camel_name: str,
         set_: str,
     ):
+        set_snake_name = camel_to_snake(set_camel_name)
         map_metric = "column_values.match_" + set_snake_name + "_set"
 
         # Define the class using `type`. This allows us to name it dynamically.

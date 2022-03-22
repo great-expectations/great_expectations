@@ -17,7 +17,6 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     # These values will be used to configure the metric created by your expectation
     set_ = []
 
-    set_snake_name = "set_name"
     set_camel_name = "SetName"
     set_semantic_name = None
 
@@ -27,7 +26,6 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
 
     # Here your regex is used to create a custom metric for this expectation
     map_metric = SetBasedColumnMapExpectation.register_metric(
-        set_snake_name=set_snake_name,
         set_camel_name=set_camel_name,
         set_=set_,
     )

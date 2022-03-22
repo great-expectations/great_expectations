@@ -106,11 +106,11 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L46
+```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L44
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L133
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L131
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -139,7 +139,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L37-L117
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L36-L116
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -180,28 +180,28 @@ see our guide on [how to create example cases for a Custom Expectation](../featu
 
 This is the stage where you implement the actual business logic for your Expectation.   
 
-In the case of your Custom `SetBasedColumnMapExpectation`, Great Expectations will handle the actual validation of your data against you set. 
+In the case of your Custom `SetBasedColumnMapExpectation`, Great Expectations will handle the actual validation of your data against your set. 
 
 To do this, we replace these:
 
-```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L18-L21
+```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L18-L20
 ```
 
 with something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L10-L34
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L10-L33
 ```
 
 For more detail when rendering your Custom Expectation, you can optionally specify the semantic name of the set you're validating. 
 
 For example:
 
-```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L22
+```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L21
 ```
 
 becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L35
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L34
 ```
 
 Great Expectations will use these values to tell your Custom Expectation to apply your specified set as a <TechnicalTag tag="metric" text="Metric"/> to be utilized in validating your data.
@@ -250,12 +250,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L36-L41
+```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L34-L39
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L125-L128
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L123-L126
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
