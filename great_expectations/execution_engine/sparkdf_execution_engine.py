@@ -498,6 +498,10 @@ Please check your config."""
     ) -> RowCondition:
         """Combine row conditions using AND if condition_type is SPARK_SQL
 
+        Note, although this method does not currently use `self` internally we
+        are not marking as @staticmethod since it is meant to only be called
+        internally in this class.
+
         Args:
             row_conditions: Row conditions of type Spark
 
