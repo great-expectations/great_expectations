@@ -273,9 +273,15 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                 },
                 "parameter_builders": [
                     {
+                        "name": "my_column_min",
+                        "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                         "class_name": "MetricMultiBatchParameterBuilder",
+                        "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
+                        "reduce_scalar_metric": True,
+                        "json_serialize": True,
                         "batch_request": {
                             "datasource_name": "taxi_multibatch_datasource_other_possibility",
                             "data_connector_name": "default_inferred_data_connector_name",
@@ -284,12 +290,6 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                             "data_connector_query": {"index": -1},
                             "limit": None,
                         },
-                        "enforce_numeric_metric": False,
-                        "json_serialize": True,
-                        "metric_name": "column.min",
-                        "reduce_scalar_metric": True,
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                        "name": "my_column_min",
                     }
                 ],
                 "expectation_configuration_builders": [
