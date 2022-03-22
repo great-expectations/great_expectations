@@ -2,14 +2,33 @@ from great_expectations.expectations.set_based_column_map_expectation import (
     SetBasedColumnMapExpectation,
 )
 
+
 # <snippet>
 class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
     """Values in this column should be valid members of the Solfege scale: do, re, mi, etc."""
 
     set_ = [
-        "do", "re", "mi", "fa", "so", "la", "ti",
-        "Do", "Re", "Mi", "Fa", "So", "La", "Ti",
-        "DO", "RE", "MI", "FA", "SO", "LA", "TI",
+        "do",
+        "re",
+        "mi",
+        "fa",
+        "so",
+        "la",
+        "ti",
+        "Do",
+        "Re",
+        "Mi",
+        "Fa",
+        "So",
+        "La",
+        "Ti",
+        "DO",
+        "RE",
+        "MI",
+        "FA",
+        "SO",
+        "LA",
+        "TI",
     ]
     set_snake_name = "solfege_scale"
     set_camel_name = "SolfegeScale"
@@ -18,8 +37,26 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
     examples = [
         {
             "data": {
-                "lowercase_solfege_scale": ["do", "re", "mi", "fa", "so", "la", "ti", "do"],
-                "uppercase_solfege_scale": ["DO", "RE", "MI", "FA", "SO", "LA", "TI", "DO"],
+                "lowercase_solfege_scale": [
+                    "do",
+                    "re",
+                    "mi",
+                    "fa",
+                    "so",
+                    "la",
+                    "ti",
+                    "do",
+                ],
+                "uppercase_solfege_scale": [
+                    "DO",
+                    "RE",
+                    "MI",
+                    "FA",
+                    "SO",
+                    "LA",
+                    "TI",
+                    "DO",
+                ],
                 "mixed": ["do", "od", "re", "er", "mi", "im", "fa", "af"],
             },
             "tests": [
@@ -67,22 +104,22 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
                     "backend": "pandas",
                     "dialects": None,
                 },
-                # {
-                #     "backend": "sqlalchemy",
-                #     "dialects": ["sqlite", "postgresql"],
-                # },
-                # {
-                #     "backend": "spark",
-                #     "dialects": None,
-                # },
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["sqlite", "postgresql"],
+                },
+                {
+                    "backend": "spark",
+                    "dialects": None,
+                },
             ],
         }
     ]
 
     map_metric = SetBasedColumnMapExpectation.register_metric(
-        set_snake_name = set_snake_name,
-        set_camel_name = set_camel_name,
-        set_ = set_,
+        set_snake_name=set_snake_name,
+        set_camel_name=set_camel_name,
+        set_=set_,
     )
 
     library_metadata = {
@@ -100,7 +137,6 @@ if __name__ == "__main__":
 diagnostics = ExpectColumnValuesToBeInSolfegeScaleSet().run_diagnostics()
 
 for check in diagnostics["tests"]:
-    print(check)
     assert check["test_passed"] is True
     assert check["error_message"] is None
     assert check["stack_trace"] is None
