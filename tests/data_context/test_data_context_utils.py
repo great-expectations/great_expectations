@@ -396,7 +396,8 @@ def test_sanitize_config_with_no_sensitive_keys():
     res = PasswordMasker.sanitize_config(config_copy)
     assert res != config
     assert (
-        config["some_other_field"]["password"] == PasswordMasker.MASKED_PASSWORD_STRING
+        config_copy["some_other_field"]["password"]
+        == PasswordMasker.MASKED_PASSWORD_STRING
     )
 
 
