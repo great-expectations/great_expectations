@@ -95,6 +95,9 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "rendered_data_docs": "rendered_data_doc",
 }
 
+p1 = re.compile(r"(.)([A-Z][a-z]+)")
+p2 = re.compile(r"([a-z0-9])([A-Z])")
+
 
 def pluralize(singular_ge_noun):
     """
@@ -120,6 +123,11 @@ def singularize(plural_ge_noun):
             f"Unable to singularize '{plural_ge_noun}'. Please update "
             f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
         )
+
+
+def camel_to_snake(name):
+    name = p1.sub(r"\1_\2", name)
+    return p2.sub(r"\1_\2", name).lower()
 
 
 def underscore(word: str) -> str:

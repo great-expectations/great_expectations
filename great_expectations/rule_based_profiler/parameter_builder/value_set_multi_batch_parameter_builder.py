@@ -51,9 +51,11 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         json_serialize: Union[str, bool] = True,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -63,9 +65,9 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -76,9 +78,9 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
