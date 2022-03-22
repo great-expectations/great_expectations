@@ -2,10 +2,11 @@ import os
 
 from ruamel.yaml import YAML
 
-yaml = YAML(typ="safe")
-
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest
+from great_expectations.validator.validator import Validator
+
+yaml = YAML(typ="safe")
 
 context = ge.get_context()
 
@@ -261,7 +262,7 @@ validator = context.get_validator(
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_gcs_datasource"][
