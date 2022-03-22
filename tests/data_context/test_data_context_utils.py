@@ -385,7 +385,7 @@ def test_sanitize_config_masks_execution_engine_connection_strings(
             assert processed_config == unaltered_datasources[name]
 
 
-def test_sanitize_config_with_no_sensitive_keys():
+def test_sanitize_config_with_arbitrarily_nested_sensitive_keys():
 
     # base case - this config should pass through unaffected
     config = {
@@ -395,10 +395,7 @@ def test_sanitize_config_with_no_sensitive_keys():
     config_copy = safe_deep_copy(config)
     res = PasswordMasker.sanitize_config(config_copy)
     assert res != config
-    assert (
-        config_copy["some_other_field"]["password"]
-        == PasswordMasker.MASKED_PASSWORD_STRING
-    )
+    assert res["some_other_field"]["password"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
 def test_sanitize_config_with_password_field():
@@ -425,16 +422,6 @@ def test_sanitize_config_with_url_field(
     assert PasswordMasker.MASKED_PASSWORD_STRING in res["credentials"]["url"]
 
 
-def test_sanitize_config_with_non_sensitive_url_field():
-
-    # this case has a BigQuery url field inside a credentials dict, which doesn't have a
-    # password - expect it to be untouched
-    config = {"credentials": {"url": "bigquery://foo/bar"}}
-    config_copy = safe_deep_copy(config)
-    res = PasswordMasker.sanitize_config(config_copy)
-    assert res == config
-
-
 def test_sanitize_config_with_nested_url_field(
     conn_string_password, conn_string_with_embedded_password
 ):
@@ -451,16 +438,6 @@ def test_sanitize_config_with_nested_url_field(
         PasswordMasker.MASKED_PASSWORD_STRING
         in res["execution_engine"]["connection_string"]
     )
-
-
-def test_sanitize_config_with_nested_non_sensitive_url_field():
-
-    # this case has a BigQuery url inside the execution_engine dict, which doesn't have a
-    # password - expect it to be untouched
-    config = {"execution_engine": {"connection_string": "bigquery://foo/bar"}}
-    config_copy = safe_deep_copy(config)
-    res = PasswordMasker.sanitize_config(config_copy)
-    assert res == config
 
 
 def test_sanitize_config_regardless_of_parent_key():
