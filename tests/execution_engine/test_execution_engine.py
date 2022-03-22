@@ -1,8 +1,12 @@
+from typing import Tuple
+
 import pandas as pd
 import pytest
 
+from great_expectations.core.batch import BatchMarkers
 from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine.execution_engine import BatchData
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
@@ -13,8 +17,25 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from tests.expectations.test_util import get_table_columns_metric
 
 
-def test_add_column_row_condition():
-    e = PandasExecutionEngine()
+@pytest.fixture
+def test_execution_engine():
+    """
+    This fixture is for mocking the abstract ExecutionEngine class to test method functionality.
+    Instead of using it's child classes in tests, which could override the parent mehods,
+    we create a subclass that implements abstract methods and use it in tests.
+    """
+
+    class TestExecutionEngine(ExecutionEngine):
+        def get_batch_data_and_markers(
+            self, batch_spec
+        ) -> Tuple[BatchData, BatchMarkers]:
+            raise NotImplementedError
+
+    return TestExecutionEngine()
+
+
+def test_add_column_row_condition(test_execution_engine):
+    e = test_execution_engine
 
     # Checking that adding a simple column row condition is functional
     new_domain_kwargs = e.add_column_row_condition({}, "a")
@@ -56,8 +77,8 @@ def test_add_column_row_condition():
     assert new_domain_kwargs == {}
 
 
-def test_add_column_row_condition_filter_null_pandas():
-    e = PandasExecutionEngine()
+def test_add_column_row_condition_filter_null_pandas(test_execution_engine):
+    e = test_execution_engine
 
     # Ensuring that we don't override if a row condition is present
     new_domain_kwargs = e.add_column_row_condition(
@@ -90,8 +111,8 @@ def test_add_column_row_condition_filter_null_pandas():
 
 
 # Edge cases
-def test_add_column_row_condition_with_unsupported_conditions():
-    e = PandasExecutionEngine()
+def test_add_column_row_condition_with_unsupported_conditions(test_execution_engine):
+    e = test_execution_engine
 
     # Ensuring that an attempt to filter nans within base class yields an error
     with pytest.raises(GreatExpectationsError) as error:
