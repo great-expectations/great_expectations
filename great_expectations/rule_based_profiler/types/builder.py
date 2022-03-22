@@ -26,7 +26,9 @@ class Builder(SerializableDictDot):
     def __init__(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
