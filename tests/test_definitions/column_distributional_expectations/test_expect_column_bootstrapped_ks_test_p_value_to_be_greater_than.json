@@ -10,6 +10,7 @@
     },
     "tests" : [{
       "title": "positive_norm_0_1_auto_partition",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in": {
         "column": "norm_0_1",
@@ -70,6 +71,7 @@
     },
     {
       "title": "negative_norm_0_1_auto_partition_norm_1_1_column",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in": {
         "column": "norm_1_1",
