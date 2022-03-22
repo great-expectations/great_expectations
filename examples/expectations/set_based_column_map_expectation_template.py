@@ -16,7 +16,7 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
 
     # These values will be used to configure the metric created by your expectation
     set_ = []
-    
+
     set_snake_name = "set_name"
     set_camel_name = "SetName"
     set_semantic_name = None
