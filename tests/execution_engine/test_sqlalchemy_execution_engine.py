@@ -277,7 +277,8 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()', type_=RowConditionParserType.GE
+                    condition=f'col("b").notnull()',
+                    condition_type=RowConditionParserType.GE,
                 )
             ],
         }
@@ -307,7 +308,8 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()', type_=RowConditionParserType.GE
+                    condition=f'col("b").notnull()',
+                    condition_type=RowConditionParserType.GE,
                 )
             ],
         }
@@ -340,10 +342,12 @@ def test_get_domain_records_with_column_domain_and_filter_conditions_raises_erro
                 "condition_parser": "great_expectations__experimental__",
                 "filter_conditions": [
                     RowCondition(
-                        condition=f'col("b").notnull()', type_=RowConditionParserType.GE
+                        condition=f'col("b").notnull()',
+                        condition_type=RowConditionParserType.GE,
                     ),
                     RowCondition(
-                        condition=f'col("c").notnull()', type_=RowConditionParserType.GE
+                        condition=f'col("c").notnull()',
+                        condition_type=RowConditionParserType.GE,
                     ),
                 ],
             }

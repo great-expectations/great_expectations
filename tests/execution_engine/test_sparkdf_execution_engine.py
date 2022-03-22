@@ -213,7 +213,8 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition="b IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
+                    condition="b IS NOT NULL",
+                    condition_type=RowConditionParserType.SPARK_SQL,
                 )
             ],
         }
@@ -261,7 +262,8 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition="b IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
+                    condition="b IS NOT NULL",
+                    condition_type=RowConditionParserType.SPARK_SQL,
                 )
             ],
         }
@@ -309,10 +311,12 @@ def test_get_domain_records_with_different_column_domain_and_multiple_filter_con
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition="b IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
+                    condition="b IS NOT NULL",
+                    condition_type=RowConditionParserType.SPARK_SQL,
                 ),
                 RowCondition(
-                    condition="NOT isnan(b)", type_=RowConditionParserType.SPARK_SQL
+                    condition="NOT isnan(b)",
+                    condition_type=RowConditionParserType.SPARK_SQL,
                 ),
             ],
         }
@@ -1298,7 +1302,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     )
     assert new_domain_kwargs["filter_conditions"] == [
         RowCondition(
-            condition="foo IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
+            condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL
         )
     ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
@@ -1310,10 +1314,10 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     )
     assert new_domain_kwargs["filter_conditions"] == [
         RowCondition(
-            condition="foo IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
+            condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL
         ),
         RowCondition(
-            condition="NOT isnan(foo)", type_=RowConditionParserType.SPARK_SQL
+            condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL
         ),
     ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
@@ -1324,7 +1328,9 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
         domain_kwargs, filter_null=False, filter_nan=True
     )
     assert new_domain_kwargs["filter_conditions"] == [
-        RowCondition(condition="NOT isnan(foo)", type_=RowConditionParserType.SPARK_SQL)
+        RowCondition(
+            condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL
+        )
     ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
@@ -1340,7 +1346,9 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
         domain_kwargs, filter_null=False, filter_nan=True
     )
     assert new_domain_kwargs["filter_conditions"] == [
-        RowCondition(condition="NOT isnan(foo)", type_=RowConditionParserType.SPARK_SQL)
+        RowCondition(
+            condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL
+        )
     ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
@@ -1351,7 +1359,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     )
     assert new_domain_kwargs["filter_conditions"] == [
         RowCondition(
-            condition="foo IS NOT NULL", type_=RowConditionParserType.SPARK_SQL
+            condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL
         ),
     ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")

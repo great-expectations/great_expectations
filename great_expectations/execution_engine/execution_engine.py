@@ -494,7 +494,8 @@ class ExecutionEngine(ABC):
         else:
             column = domain_kwargs["column"]
         row_condition: RowCondition = RowCondition(
-            condition=f'col("{column}").notnull()', type_=RowConditionParserType.GE
+            condition=f'col("{column}").notnull()',
+            condition_type=RowConditionParserType.GE,
         )
         new_domain_kwargs.setdefault("filter_conditions", []).append(row_condition)
         return new_domain_kwargs

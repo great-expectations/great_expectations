@@ -1,4 +1,5 @@
 import enum
+from dataclasses import dataclass
 
 from pyparsing import (
     CaselessLiteral,
@@ -67,32 +68,17 @@ class RowConditionParserType(enum.Enum):
     SQL = "sql"
 
 
+@dataclass
 class RowCondition:
     """Condition that can be used to filter rows in a data set.
 
     Attributes:
         condition: String of the condition
-        type_: Format of the condition e.g. for parsing
+        condition_type: Format of the condition e.g. for parsing
     """
 
-    def __init__(self, condition: str, type_: RowConditionParserType):
-        self._condition = condition
-        self._type_ = type_
-
-    @property
-    def condition(self):
-        return self._condition
-
-    @property
-    def type_(self):
-        return self._type_
-
-    def __eq__(self, other: "RowCondition"):
-        if not isinstance(other, self.__class__):
-            raise ge_exceptions.GreatExpectationsTypeError(
-                "Only comparison of the same type of object is supported."
-            )
-        return all([self.condition == other.condition, self.type_ == other.type_])
+    condition: str
+    condition_type: RowConditionParserType
 
 
 def _parse_great_expectations_condition(row_condition: str):

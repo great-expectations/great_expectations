@@ -21,7 +21,7 @@ def test_add_column_row_condition():
     assert new_domain_kwargs == {
         "filter_conditions": [
             RowCondition(
-                condition='col("a").notnull()', type_=RowConditionParserType.GE
+                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
             )
         ]
     }
@@ -32,7 +32,7 @@ def test_add_column_row_condition():
         "column": "a",
         "filter_conditions": [
             RowCondition(
-                condition='col("a").notnull()', type_=RowConditionParserType.GE
+                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
             )
         ],
     }
@@ -46,7 +46,7 @@ def test_add_column_row_condition():
         "row_condition": None,
         "filter_conditions": [
             RowCondition(
-                condition='col("a").notnull()', type_=RowConditionParserType.GE
+                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
             )
         ],
     }
@@ -68,7 +68,7 @@ def test_add_column_row_condition_filter_null_pandas():
         "row_condition": "some_row_condition",
         "filter_conditions": [
             RowCondition(
-                condition='col("a").notnull()', type_=RowConditionParserType.GE
+                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
             )
         ],
     }
@@ -83,7 +83,7 @@ def test_add_column_row_condition_filter_null_pandas():
         "row_condition": "some_row_condition",
         "filter_conditions": [
             RowCondition(
-                condition='col("a").notnull()', type_=RowConditionParserType.GE
+                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
             )
         ],
     }

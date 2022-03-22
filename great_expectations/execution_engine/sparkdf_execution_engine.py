@@ -496,7 +496,7 @@ Please check your config."""
     def _combine_row_conditions(
         self, row_conditions: List[RowCondition]
     ) -> RowCondition:
-        """Combine row conditions using AND if type_ is SPARK_SQL
+        """Combine row conditions using AND if condition_type is SPARK_SQL
 
         Args:
             row_conditions: Row conditions of type Spark
@@ -505,7 +505,7 @@ Please check your config."""
             Single Row Condition combined
         """
         assert all(
-            condition.type_ == RowConditionParserType.SPARK_SQL
+            condition.condition_type == RowConditionParserType.SPARK_SQL
             for condition in row_conditions
         ), "All row conditions must have type SPARK_SQL"
         conditions: List[str] = [
@@ -513,7 +513,7 @@ Please check your config."""
         ]
         joined_condition: str = " AND ".join(conditions)
         return RowCondition(
-            condition=joined_condition, type_=RowConditionParserType.SPARK_SQL
+            condition=joined_condition, condition_type=RowConditionParserType.SPARK_SQL
         )
 
     def get_compute_domain(
@@ -572,14 +572,14 @@ Please check your config."""
             filter_conditions.append(
                 RowCondition(
                     condition=f"{column} IS NOT NULL",
-                    type_=RowConditionParserType.SPARK_SQL,
+                    condition_type=RowConditionParserType.SPARK_SQL,
                 )
             )
         if filter_nan:
             filter_conditions.append(
                 RowCondition(
                     condition=f"NOT isnan({column})",
-                    type_=RowConditionParserType.SPARK_SQL,
+                    condition_type=RowConditionParserType.SPARK_SQL,
                 )
             )
 
