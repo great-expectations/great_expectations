@@ -476,7 +476,9 @@ class ExpectationDiagnostics(SerializableDictDot):
                 )
             else:
                 black_ok = True
-            isort_ok = isort.check_code(code, **isort.profiles.black, ignore_whitespace=True)
+            isort_ok = isort.check_code(
+                code, **isort.profiles.black, ignore_whitespace=True
+            )
             if not isort_ok:
                 sub_messages.append(
                     {
