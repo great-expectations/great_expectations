@@ -1,5 +1,5 @@
 import inspect
-import os.path
+import os
 import re
 from collections import defaultdict
 from dataclasses import asdict, dataclass
@@ -34,8 +34,6 @@ try:
     import isort
 except ImportError:
     isort = None
-
-rx_expectation_instance_repr = re.compile(r"<.*\.([^\.]*) object at .*")
 
 # from pydantic.dataclasses import dataclass
 
@@ -395,15 +393,31 @@ class ExpectationDiagnostics(SerializableDictDot):
     @staticmethod
     def _check_linting(expectation_instance) -> ExpectationDiagnosticCheckMessage:
         """Check if linting checks pass for Expectation"""
-        sub_messages = []
-        passed = False
-        black_ok = False
-        isort_ok = False
-        file_and_class_names_ok = False
+        sub_messages: List[dict] = []
+        message: str = "Passes all linting checks"
+        passed: bool = False
+        black_ok: bool = False
+        isort_ok: bool = False
+        file_and_class_names_ok: bool = False
+        rx_expectation_instance_repr = re.compile(r"<.*\.([^\.]*) object at .*")
 
-        expectation_camel_name = rx_expectation_instance_repr.match(
-            repr(expectation_instance)
-        ).group(1)
+        try:
+            expectation_camel_name = rx_expectation_instance_repr.match(
+                repr(expectation_instance)
+            ).group(1)
+        except AttributeError:
+            sub_messages.append(
+                {
+                    "message": "Arg passed to _check_linting was not an instance of an Expectation, so cannot check linting",
+                    "passed": False,
+                }
+            )
+            return ExpectationDiagnosticCheckMessage(
+                message=message,
+                passed=passed,
+                sub_messages=sub_messages,
+            )
+
         impl = get_expectation_impl(camel_to_snake(expectation_camel_name))
         source_file_path = inspect.getfile(impl)
         snaked_impl_name = camel_to_snake(impl.__name__)
@@ -459,7 +473,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         passed = black_ok and isort_ok and file_and_class_names_ok
         return ExpectationDiagnosticCheckMessage(
-            message="Passes all linting checks",
+            message=message,
             passed=passed,
             sub_messages=sub_messages,
         )
