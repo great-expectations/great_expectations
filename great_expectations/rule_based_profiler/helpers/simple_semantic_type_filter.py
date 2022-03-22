@@ -9,12 +9,33 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.types.semantic_type_filter import (
     SemanticTypeFilter,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class SimpleSemanticTypeFilter(SemanticTypeFilter):
     """
     This class provides default implementation methods, any of which can be overwritten with different mechanisms.
     """
+
+    def __init__(
+        self,
+        batch_ids: Optional[List[str]] = None,
+        validator: Optional["Validator"] = None,  # noqa: F821
+        column_names: Optional[List[str]] = None,
+    ):
+        self._table_column_name_to_inferred_semantic_domain_type_mapping = (
+            self._get_table_column_name_to_inferred_semantic_domain_type_mapping(
+                batch_ids=batch_ids,
+                validator=validator,
+                column_names=column_names,
+            )
+        )
+
+    @property
+    def table_column_name_to_inferred_semantic_domain_type_mapping(
+        self,
+    ) -> Dict[str, SemanticDomainTypes]:
+        return self._table_column_name_to_inferred_semantic_domain_type_mapping
 
     def parse_semantic_domain_type_argument(
         self,
@@ -58,8 +79,36 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         else:
             raise ValueError("Unrecognized semantic_types directive.")
 
-    def infer_semantic_domain_type_from_table_column_type(
+    def _get_table_column_name_to_inferred_semantic_domain_type_mapping(
         self,
+        batch_ids: List[str],
+        validator: "Validator",  # noqa: F821
+        column_names: List[str],
+    ) -> Dict[str, SemanticDomainTypes]:
+        column_types_dict_list: List[Dict[str, Any]] = validator.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.column_types",
+                metric_domain_kwargs={
+                    "batch_id": batch_ids[-1],  # active_batch_id
+                },
+                metric_value_kwargs={
+                    "include_nested": True,
+                },
+                metric_dependencies=None,
+            )
+        )
+
+        column_name: str
+        return {
+            column_name: self._infer_semantic_domain_type_from_table_column_type(
+                column_types_dict_list=column_types_dict_list,
+                column_name=column_name,
+            ).semantic_domain_type
+            for column_name in column_names
+        }
+
+    @staticmethod
+    def _infer_semantic_domain_type_from_table_column_type(
         column_types_dict_list: List[Dict[str, Any]],
         column_name: str,
     ) -> InferredSemanticDomainType:

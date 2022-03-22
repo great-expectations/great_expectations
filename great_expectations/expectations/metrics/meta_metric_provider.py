@@ -24,6 +24,7 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
     """
 
     # TODO: <Alex>All logging/warning directives should be placed into a common module to be imported as needed.</Alex>
+    # deprecated-v0.13.12
     warnings.simplefilter("default", category=DeprecationWarning)
 
     # Arguments: True -- suppresses the warnings; False -- outputs the warnings (to stderr).
@@ -38,9 +39,10 @@ class DeprecatedMetaMetricProvider(MetaMetricProvider):
                 alias = getattr(cls, "_DeprecatedMetaMetricProvider__alias")
 
                 if alias is not None:
+                    # deprecated-v0.13.12
                     warnings.warn(
-                        f"""{cls.__name__} has been renamed to {alias} -- the alias {cls.__name__} will be \
-deprecated in the future.
+                        f"""{cls.__name__} has been renamed to {alias} -- the alias {cls.__name__} is \
+deprecated as of v0.13.12 and will be removed in v0.16.
 """,
                         DeprecationWarning,
                         stacklevel=2,
@@ -57,9 +59,10 @@ deprecated in the future.
             alias = getattr(b, "_DeprecatedMetaMetricProvider__alias", None)
 
             if alias is not None:
+                # deprecated-v0.13.12
                 warnings.warn(
-                    f"""{b.__name__} has been renamed to {alias.__name__} -- the alias {b.__name__} will be deprecated \
-in the future.
+                    f"""{b.__name__} has been renamed to {alias.__name__} -- the alias {b.__name__} is deprecated \
+as of v0.13.12 and will be removed in v0.16.
 """,
                     DeprecationWarning,
                     stacklevel=2,
