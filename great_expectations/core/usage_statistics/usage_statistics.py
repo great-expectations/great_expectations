@@ -58,10 +58,6 @@ class UsageStatisticsHandler:
         self._worker = threading.Thread(target=self._requests_worker, daemon=True)
         self._worker.start()
 
-        # As usage stats are central to many core GE features, dynamically importing at runtime reduces
-        # the risk of cyclic import issues. If these anonymizers have been imported at any earlier point
-        # in the program's lifetime, retrieval of the import will be O(1) and not impact performance.
-
         self._anonymizer = Anonymizer(data_context_id)
 
         try:

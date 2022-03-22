@@ -28,10 +28,10 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
             obj=obj
         ), "CheckpointRunAnonymizer can only handle objects of type Checkpoint or CheckpointConfig"
         if "config" in kwargs:
-            return self._anonymize_checkpoint_info(**kwargs)
+            return self._anonymize_checkpoint_config(**kwargs)
         return self._anonymize_checkpoint_run(obj=obj, **kwargs)
 
-    def _anonymize_checkpoint_info(self, name: str, config: dict) -> dict:
+    def _anonymize_checkpoint_config(self, name: str, config: dict) -> dict:
         """Anonymize Checkpoint objs from the 'great_expectations.checkpoint' module.
 
         Args:
