@@ -3,9 +3,9 @@ import importlib
 import json
 import logging
 import os
+import re
 import sys
 import traceback
-import re
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, run
 from typing import Dict
@@ -225,8 +225,10 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
                 f"\n\n----------------\n{expectation} ({group})\n"
             )
             expectation_checklists.write(f"{checklist_string}\n")
-            if diagnostics['description']['docstring']:
-                diagnostics['description']['docstring'] = format_docstring_to_markdown(diagnostics['description']['docstring'])
+            if diagnostics["description"]["docstring"]:
+                diagnostics["description"]["docstring"] = format_docstring_to_markdown(
+                    diagnostics["description"]["docstring"]
+                )
             gallery_info[expectation] = diagnostics.to_json_dict()
         except Exception:
             logger.error(f"Failed to run diagnostics for: {expectation}")
@@ -319,20 +321,26 @@ def format_docstring_to_markdown(docstr: str) -> str:
     for original_line in docstr.split("\n"):
         # Remove excess spaces from lines formed by concatenated docstring lines.
         line = r.sub(" ", original_line)
-        if line.strip() == '::':  # In some old docstrings, this indicates the start of an example block.
+        # In some old docstrings, this indicates the start of an example block.
+        if line.strip() == "::":
             in_code_block = True
             clean_docstr_list.append("```")
-        elif line.strip().endswith(":"):  # All of our parameter/arg/etc lists start after a line ending in ':'.
+
+        # All of our parameter/arg/etc lists start after a line ending in ':'.
+        elif line.strip().endswith(":"):
             in_param = True
-            if prev_line != '': # This adds a blank line before the header if one doesn't already exist.
-                clean_docstr_list.append('')
-            clean_docstr_list.append(f"#### {line.strip()}")  # Turn the line into an H4 header
-        elif line.strip() == '' and prev_line != '::':
+            # This adds a blank line before the header if one doesn't already exist.
+            if prev_line != "":
+                clean_docstr_list.append("")
+            # Turn the line into an H4 header
+            clean_docstr_list.append(f"#### {line.strip()}")
+        elif line.strip() == "" and prev_line != "::":
             # All of our parameter groups end with a line break, but we don't want to exit a parameter block due to a
             # line break in a code block.  However, some code blocks start with a blank first line, so we want to make
             # sure we aren't immediately exiting the code block (hence the test for '::' on the previous line.
             in_param = False
-            if in_code_block:  # Add the markdown indicator to close a code block, since we aren't in one now.
+            # Add the markdown indicator to close a code block, since we aren't in one now.
+            if in_code_block:
                 clean_docstr_list.append("```")
             in_code_block = False
             first_code_indentation = None
@@ -341,15 +349,17 @@ def format_docstring_to_markdown(docstr: str) -> str:
             if in_code_block:
                 # Determine the number of spaces indenting the first line of code so they can be removed from all lines
                 # in the code block without wrecking the hierarchical indentation levels of future lines.
-                if first_code_indentation == None and line.strip() != '':
-                    first_code_indentation = len(re.match(r"\s*", original_line, re.UNICODE).group(0))
-                if line.strip() == '' and prev_line == '::':
+                if first_code_indentation == None and line.strip() != "":
+                    first_code_indentation = len(
+                        re.match(r"\s*", original_line, re.UNICODE).group(0)
+                    )
+                if line.strip() == "" and prev_line == "::":
                     # If the first line of the code block is a blank one, just skip it.
                     pass
                 else:
                     # Append the line of code, minus the extra indentation from being written in an indented docstring.
                     clean_docstr_list.append(original_line[first_code_indentation:])
-            elif ":" in line.replace(':ref:', '') and in_param:
+            elif ":" in line.replace(":ref:", "") and in_param:
                 # This indicates a parameter. arg. or other definition.
                 clean_docstr_list.append(f"- {line.strip()}")
             else:
