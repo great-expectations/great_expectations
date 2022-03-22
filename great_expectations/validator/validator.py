@@ -501,10 +501,6 @@ class Validator:
             len(rules) == 1
         ), "A Rule-Based Profiler for an Expectation can have exactly one rule."
 
-        rule: Rule
-
-        rule = rules[0]
-
         domain_type: MetricDomainTypes
 
         if override_profiler_config is None:
@@ -550,10 +546,8 @@ class Validator:
             )
             profiler.rules = effective_rules
 
-            rule = profiler.rules[0]
-
-        self._validate_rule_and_update_rule_properties(
-            rule=rule,
+        self._validate_profiler_and_update_rules_properties(
+            profiler=profiler,
             expectation_type=expectation_type,
             expectation_kwargs=expectation_kwargs,
             success_keys=success_keys,
@@ -561,30 +555,25 @@ class Validator:
 
         return profiler
 
-    def _validate_rule_and_update_rule_properties(
+    def _validate_profiler_and_update_rules_properties(
         self,
-        rule: Rule,
+        profiler: BaseRuleBasedProfiler,
         expectation_type: str,
         expectation_kwargs: dict,
         success_keys: Tuple[str],
     ) -> None:
+        rule: Rule = profiler.rules[0]
         assert (
             rule.expectation_configuration_builders[0].expectation_type
             == expectation_type
         ), "ExpectationConfigurationBuilder in profiler used to build an ExpectationConfiguration must have the same expectation_type as the expectation being invoked."
 
-        domain_type: MetricDomainTypes = rule.domain_builder.domain_type
-        # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
-        if domain_type == MetricDomainTypes.COLUMN:
-            column_name = expectation_kwargs["column"]
-            rule.domain_builder.column_names = [column_name]
-            if rule.domain_builder.batch_request is None:
-                # A DomainBuilder that emits MetricDomainTypes.COLUMN type Domain object needs exactly 1 Batch of data.
-                rule.domain_builder.batch_list = [self.active_batch]
-        elif domain_type == MetricDomainTypes.TABLE:
-            pass  # No action is needed.
-        else:
-            pass  # No action is needed.
+        rule = profiler.generate_rule_overrides_from_batch_request(
+            rules=[rule],
+            batch_list=list(self.batches.values()),
+            batch_request=None,
+            force_batch_data=False,
+        )[0]
 
         # TODO: <Alex>Add "metric_domain_kwargs_override" when "Expectation" defines "domain_keys" separately.</Alex>
         key: str
@@ -595,15 +584,19 @@ class Validator:
             if key in success_keys
             and key not in BaseRuleBasedProfiler.EXPECTATION_SUCCESS_KEYS
         }
-        for parameter_builder in rule.parameter_builders:
-            if parameter_builder.batch_request is None:
-                """
-                Despite potentially having access to all loaded Batch objects, in general, a ParameterBuilder should
-                exclude using active Batch (in order to avoid estimation bias).  However, when ParameterBuilder is part
-                of RuleBasedProfiler used to estimate arguments of an Expectation class, all Batch objects must be used.
-                """
-                parameter_builder.batch_list = list(self.batches.values())
 
+        domain_type: MetricDomainTypes = rule.domain_builder.domain_type
+        if domain_type not in MetricDomainTypes:
+            raise ValueError(
+                f'Domain type declaration "{domain_type}" in "MetricDomainTypes" does not exist.'
+            )
+
+        # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
+        if domain_type == MetricDomainTypes.COLUMN:
+            column_name = expectation_kwargs["column"]
+            rule.domain_builder.include_column_names = [column_name]
+
+        for parameter_builder in rule.parameter_builders:
             if hasattr(parameter_builder, "metric_name") and hasattr(
                 parameter_builder, "metric_value_kwargs"
             ):
@@ -1170,8 +1163,9 @@ aborting graph resolution.
 
     def append_expectation(self, expectation_config: ExpectationConfiguration) -> None:
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
+        # deprecated-v0.13.0
         warnings.warn(
-            "append_expectation is deprecated, and will be removed in a future release. "
+            "append_expectation is deprecated as of v0.13.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.add_expectation instead.",
             DeprecationWarning,
         )
@@ -1183,8 +1177,9 @@ aborting graph resolution.
         match_type: str = "domain",
     ) -> List[int]:
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
+        # deprecated-v0.13.0
         warnings.warn(
-            "find_expectation_indexes is deprecated, and will be removed in a future release. "
+            "find_expectation_indexes is deprecated as of v0.13.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
@@ -1199,8 +1194,9 @@ aborting graph resolution.
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
+        # deprecated-v0.13.0
         warnings.warn(
-            "find_expectations is deprecated, and will be removed in a future release. "
+            "find_expectations is deprecated as of v0.13.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
@@ -1315,7 +1311,7 @@ set as active.
                     expectation_configuration=item.expectation_config,
                     match_type="runtime",
                 )
-            warnings.warn("Removed %s expectations that were 'False'" % len(res))
+            warnings.warn(f"Removed {len(res)} expectations that were 'False'")
 
     def get_default_expectation_arguments(self) -> dict:
         """Fetch default expectation arguments for this data_asset
@@ -1379,8 +1375,9 @@ set as active.
         Returns an expectation configuration, providing an option to discard failed expectation and discard/ include'
         different result aspects, such as exceptions and result format.
         """
+        # deprecated-v0.13.0
         warnings.warn(
-            "get_expectations_config is deprecated, and will be removed in a future release. "
+            "get_expectations_config is deprecated as of v0.13.0 and will be removed in v0.16. "
             + "Please use get_expectation_suite instead.",
             DeprecationWarning,
         )
@@ -1425,7 +1422,7 @@ set as active.
              copy of _expectation_suite, not the original object.
         """
 
-        expectation_suite = copy.deepcopy(self._expectation_suite)
+        expectation_suite = copy.deepcopy(self.expectation_suite)
         expectations = expectation_suite.expectations
 
         discards = defaultdict(int)
@@ -1445,9 +1442,7 @@ set as active.
 
             expectations = new_expectations
 
-        message = "\t%d expectation(s) included in expectation_suite." % len(
-            expectations
-        )
+        message = f"\t{len(expectations)} expectation(s) included in expectation_suite."
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (
@@ -1656,8 +1651,9 @@ set as active.
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
             if isinstance(run_id, str) and not run_name:
+                # deprecated-v0.13.0
                 warnings.warn(
-                    "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                    "String run_ids are deprecated as of v0.13.0 and support will be removed in v0.16. Please provide a run_id of type "
                     "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                     "and run_time (both optional). Instead of providing a run_id, you may also provide"
                     "run_name and run_time separately.",
@@ -1712,9 +1708,7 @@ set as active.
                     # noinspection PyProtectedMember
                     handler.send_usage_message(
                         event="data_asset.validate",
-                        event_payload=handler._batch_anonymizer.anonymize_batch_info(
-                            self
-                        ),
+                        event_payload=handler.anonymizer.anonymize_batch_info(self),
                         success=False,
                     )
                 return ExpectationValidationResult(success=False)
@@ -1824,7 +1818,7 @@ set as active.
                 # noinspection PyProtectedMember
                 handler.send_usage_message(
                     event="data_asset.validate",
-                    event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
+                    event_payload=handler.anonymizer.anonymize_batch_info(self),
                     success=False,
                 )
             raise
@@ -1837,7 +1831,7 @@ set as active.
             # noinspection PyProtectedMember
             handler.send_usage_message(
                 event="data_asset.validate",
-                event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
+                event_payload=handler.anonymizer.anonymize_batch_info(self),
                 success=True,
             )
         return result
@@ -1893,6 +1887,10 @@ set as active.
             batch_definition=batch_definition,
             citation_date=citation_date,
         )
+
+    @property
+    def expectation_suite(self) -> ExpectationSuite:
+        return self._expectation_suite
 
     @property
     def expectation_suite_name(self) -> str:
@@ -2136,7 +2134,7 @@ class BridgeValidator:
             determined by the type of data within the given batch
         """
         self.batch = batch
-        self.expectation_suite = expectation_suite
+        self._expectation_suite = expectation_suite
 
         if isinstance(expectation_engine, dict):
             expectation_engine = ClassConfig(**expectation_engine)
@@ -2190,7 +2188,7 @@ class BridgeValidator:
 
             return self.expectation_engine(
                 self.batch.data,
-                expectation_suite=self.expectation_suite,
+                expectation_suite=self._expectation_suite,
                 batch_kwargs=self.batch.batch_kwargs,
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,
@@ -2212,7 +2210,7 @@ class BridgeValidator:
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,
                 data_context=self.batch.data_context,
-                expectation_suite=self.expectation_suite,
+                expectation_suite=self._expectation_suite,
                 **init_kwargs,
                 **self.batch.batch_kwargs.get("dataset_options", {}),
             )
@@ -2227,7 +2225,7 @@ class BridgeValidator:
 
             return self.expectation_engine(
                 spark_df=self.batch.data,
-                expectation_suite=self.expectation_suite,
+                expectation_suite=self._expectation_suite,
                 batch_kwargs=self.batch.batch_kwargs,
                 batch_parameters=self.batch.batch_parameters,
                 batch_markers=self.batch.batch_markers,

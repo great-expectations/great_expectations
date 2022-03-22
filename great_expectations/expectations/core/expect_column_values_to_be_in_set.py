@@ -128,7 +128,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             "mostly": 1.0,
         },
         rules={
-            "default_column_values_between_rule": {
+            "default_expect_column_values_to_be_in_set_rule": {
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
@@ -139,6 +139,8 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                         "class_name": "ValueSetMultiBatchParameterBuilder",
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "json_serialize": True,
                     },
                 ],
                 "expectation_configuration_builders": [
@@ -159,7 +161,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     )
 
     default_kwarg_values = {
-        "value_set": None,
+        "value_set": [],
         "parse_strings_as_datetimes": False,
         "auto": False,
         "profiler_config": default_profiler_config,
@@ -199,7 +201,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "parse_strings_as_datetimes": {
@@ -220,13 +222,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
 
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-        template_str = "values must belong to this set: " + values_string
+        template_str = f"values must belong to this set: {values_string}"
 
         if params["mostly"] is not None:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
@@ -241,7 +243,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -250,7 +252,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
@@ -294,13 +296,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
 
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-        template_str = "values must belong to this set: " + values_string
+        template_str = f"values must belong to this set: {values_string}"
 
         if params["mostly"] is not None:
             params["mostly_pct"] = num_to_str(
@@ -315,14 +317,14 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -409,15 +411,20 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration]
     ) -> bool:
         super().validate_configuration(configuration)
+        # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
+        value_set = configuration.kwargs.get(
+            "value_set"
+        ) or self.default_kwarg_values.get("value_set")
         try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
             assert (
-                isinstance(configuration.kwargs["value_set"], (list, set, dict))
-                or configuration.kwargs["value_set"] is None
-            ), "value_set must be a list, set, or None"
-            if isinstance(configuration.kwargs["value_set"], dict):
+                "value_set" in configuration.kwargs or value_set
+            ), "value_set is required"
+            assert isinstance(
+                value_set, (list, set, dict)
+            ), "value_set must be a list, set, or dict"
+            if isinstance(value_set, dict):
                 assert (
-                    "$PARAMETER" in configuration.kwargs["value_set"]
+                    "$PARAMETER" in value_set
                 ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

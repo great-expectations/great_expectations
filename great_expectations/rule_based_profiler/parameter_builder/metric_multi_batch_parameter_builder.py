@@ -4,13 +4,17 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (  # isort:skip
+from great_expectations.rule_based_profiler.parameter_builder import (
+    AttributedResolvedMetrics,
+    MetricComputationDetails,
     MetricComputationResult,
     MetricValues,
-    MetricComputationDetails,
     ParameterBuilder,
+)
+from great_expectations.rule_based_profiler.types import (
+    PARAMETER_KEY,
+    Domain,
+    ParameterContainer,
 )
 
 
@@ -29,8 +33,11 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
+        json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -45,15 +52,17 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
             otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
         """
         super().__init__(
             name=name,
-            data_context=data_context,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
+            data_context=data_context,
         )
 
         self._metric_name = metric_name
@@ -67,7 +76,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
 
     @property
     def fully_qualified_parameter_name(self) -> str:
-        return f"$parameter.{self.name}"
+        return f"{PARAMETER_KEY}{self.name}"
 
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
@@ -137,8 +146,14 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         )
 
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
-        if reduce_scalar_metric and metric_values.shape[1] == 1:
-            metric_values = metric_values[:, 0]
+        if (
+            reduce_scalar_metric
+            and isinstance(metric_values, list)
+            and len(metric_values) == 1
+            and isinstance(metric_values[0], AttributedResolvedMetrics)
+            and metric_values[0].metric_values.shape[1] == 1
+        ):
+            metric_values = metric_values[0].metric_values[:, 0]
 
         return (
             metric_values,

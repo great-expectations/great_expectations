@@ -13,7 +13,14 @@ from great_expectations.marshmallow__shade import (
     post_dump,
     post_load,
 )
-from great_expectations.rule_based_profiler.types import ParameterContainer
+from great_expectations.rule_based_profiler.helpers.util import (
+    convert_variables_to_dict,
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.types import (
+    VARIABLES_PREFIX,
+    ParameterContainer,
+)
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -102,9 +109,15 @@ class DomainBuilderConfig(DictDot):
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
-        self.class_name = class_name
-        self.module_name = module_name
-        self.batch_request = batch_request
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -121,14 +134,14 @@ class DomainBuilderConfigSchema(NotNullSchema):
 
     __config_class__ = DomainBuilderConfig
 
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
     module_name = fields.String(
         required=False,
         allow_none=True,
         missing="great_expectations.rule_based_profiler.domain_builder",
+    )
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
     )
     batch_request = fields.Raw(
         required=False,
@@ -142,13 +155,23 @@ class ParameterBuilderConfig(DictDot):
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
+        json_serialize: bool = True,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
         self.name = name
-        self.class_name = class_name
-        self.module_name = module_name
-        self.batch_request = batch_request
+
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        self.json_serialize = json_serialize
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -169,14 +192,19 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=True,
         allow_none=False,
     )
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
     module_name = fields.String(
         required=False,
         allow_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
+    )
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
+    )
+    json_serialize = fields.Boolean(
+        required=False,
+        allow_none=True,
+        missing=True,
     )
     batch_request = fields.Raw(
         required=False,
@@ -191,12 +219,23 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         meta: Optional[dict] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
         self.expectation_type = expectation_type
-        self.class_name = class_name
-        self.module_name = module_name
-        self.meta = meta
+
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        if meta is not None:
+            self.meta = meta
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -213,14 +252,14 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
 
     __config_class__ = ExpectationConfigurationBuilderConfig
 
-    class_name = fields.String(
-        required=True,
-        allow_none=False,
-    )
     module_name = fields.String(
         required=False,
         allow_none=True,
         missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
+    )
+    class_name = fields.String(
+        required=True,
+        allow_none=False,
     )
     expectation_type = fields.Str(
         required=True,
@@ -233,6 +272,10 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
             required=True,
             allow_none=False,
         ),
+        required=False,
+        allow_none=True,
+    )
+    batch_request = fields.Raw(
         required=False,
         allow_none=True,
     )
@@ -403,36 +446,91 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     def resolve_config_using_acceptable_arguments(
         cls,
         profiler: "RuleBasedProfiler",  # noqa: F821
-        variables: Optional[dict] = None,
-        rules: Optional[Dict[str, dict]] = None,
+        variables: Optional[Dict[str, Any]] = None,
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
     ) -> "RuleBasedProfilerConfig":  # noqa: F821
-        runtime_config: RuleBasedProfilerConfig = profiler.config
+        """Reconciles variables/rules by taking into account runtime overrides and variable substitution.
 
-        runtime_variables: Optional[
+        Utilized in usage statistics to interact with the args provided in `RuleBasedProfiler.run()`.
+        NOTE: This is a lightweight version of the RBP's true reconiliation logic - see
+        `reconcile_profiler_variables` and `reconcile_profiler_rules`.
+
+        Args:
+            profiler: The profiler used to invoke `run()`.
+            variables: Any runtime override variables.
+            rules: Any runtime override rules.
+
+        Returns:
+            An instance of RuleBasedProfilerConfig that represents the reconciled profiler.
+        """
+        effective_variables: Optional[
             ParameterContainer
-        ] = profiler.reconcile_profiler_variables(variables)
-        runtime_variables_configs: dict = (
-            runtime_variables.to_dict()["parameter_nodes"]["variables"]["variables"]
-            or {}
+        ] = profiler.reconcile_profiler_variables(
+            variables=variables,
+        )
+        runtime_variables: Optional[Dict[str, Any]] = convert_variables_to_dict(
+            variables=effective_variables
         )
 
         effective_rules: List["Rule"] = profiler.reconcile_profiler_rules(  # noqa: F821
-            rules=rules
+            rules=rules,
         )
 
         rule: "Rule"  # noqa: F821
+        effective_rules_dict: Dict[str, "Rule"] = {  # noqa: F821
+            rule.name: rule for rule in effective_rules
+        }
         runtime_rules: Dict[str, dict] = {
-            rule.name: rule.to_json_dict() for rule in effective_rules
+            name: RuleBasedProfilerConfig._substitute_variables_in_config(
+                rule=rule,
+                variables_container=effective_variables,
+            )
+            for name, rule in effective_rules_dict.items()
         }
 
         return cls(
             class_name=profiler.__class__.__name__,
             module_name=profiler.__class__.__module__,
-            name=runtime_config.name,
-            config_version=runtime_config.config_version,
-            variables=runtime_variables_configs,
+            name=profiler.config.name,
+            config_version=profiler.config.config_version,
+            variables=runtime_variables,
             rules=runtime_rules,
         )
+
+    @staticmethod
+    def _substitute_variables_in_config(
+        rule: "Rule",  # noqa: F821
+        variables_container: ParameterContainer,
+    ) -> dict:
+        """Recursively updates a given rule to substitute $variable references.
+
+        Args:
+            rule: The Rule object to update.
+            variables_container: Keeps track of $variable values to be substituted.
+
+        Returns:
+            The dictionary representation of the rule with all $variable references substituted.
+        """
+
+        def _traverse_and_substitute(node: Any) -> None:
+            if isinstance(node, dict):
+                for key, val in node.copy().items():
+                    if isinstance(val, str) and val.startswith(VARIABLES_PREFIX):
+                        node[key] = get_parameter_value_and_validate_return_type(
+                            domain=None,
+                            parameter_reference=val,
+                            variables=variables_container,
+                            parameters=None,
+                        )
+                    _traverse_and_substitute(node=val)
+            elif isinstance(node, list):
+                for val in node:
+                    _traverse_and_substitute(node=val)
+
+        rule_dict: dict = rule.to_json_dict()
+        _traverse_and_substitute(node=rule_dict)
+
+        return rule_dict
 
 
 class RuleBasedProfilerConfigSchema(Schema):
@@ -443,20 +541,19 @@ class RuleBasedProfilerConfigSchema(Schema):
 
     class Meta:
         unknown = INCLUDE
+        fields = (
+            "name",
+            "config_version",
+            "module_name",
+            "class_name",
+            "variables",
+            "rules",
+        )
+        ordered = True
 
     name = fields.String(
         required=True,
         allow_none=False,
-    )
-    class_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="RuleBasedProfiler",
-    )
-    module_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="great_expectations.rule_based_profiler",
     )
     config_version = fields.Float(
         required=True,
@@ -465,6 +562,16 @@ class RuleBasedProfilerConfigSchema(Schema):
         error_messages={
             "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
         },
+    )
+    module_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="great_expectations.rule_based_profiler",
+    )
+    class_name = fields.String(
+        required=False,
+        allow_none=True,
+        missing="RuleBasedProfiler",
     )
     variables = fields.Dict(
         keys=fields.String(

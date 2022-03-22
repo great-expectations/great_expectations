@@ -149,16 +149,18 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 0.75,
             ],
             "allow_relative_error": "linear",
-            "num_bootstrap_samples": 9999,
             "false_positive_rate": 0.05,
+            "estimator": "bootstrap",
+            "num_bootstrap_samples": 9999,
+            "bootstrap_random_seed": None,
+            "round_decimals": 1,
             "truncate_values": {
                 "lower_bound": None,
                 "upper_bound": None,
             },
-            "round_decimals": 1,
         },
         rules={
-            "column_quantiles_rule": {
+            "default_expect_column_quantile_values_to_be_between_rule": {
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
@@ -174,9 +176,16 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                             "quantiles": "$variables.quantiles",
                             "allow_relative_error": "$variables.allow_relative_error",
                         },
-                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "enforce_numeric_metric": True,
+                        "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
                         "false_positive_rate": "$variables.false_positive_rate",
+                        "estimator": "$variables.estimator",
+                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                         "round_decimals": "$variables.round_decimals",
+                        "truncate_values": "$variables.truncate_values",
+                        "json_serialize": True,
                     }
                 ],
                 "expectation_configuration_builders": [
@@ -286,7 +295,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         header_template_str = "quantiles must be within the following value ranges."
 
         if include_column_name:
-            header_template_str = "$column " + header_template_str
+            header_template_str = f"$column {header_template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -425,7 +434,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         template_str = "quantiles must be within the following value ranges."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (

@@ -1,15 +1,19 @@
 import itertools
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
+    AttributedResolvedMetrics,
     MetricMultiBatchParameterBuilder,
+    MetricValues,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.rule_based_profiler.types.parameter_container import (
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
     ParameterNode,
 )
 
@@ -33,13 +37,25 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         2. This ParameterBuilder filters null values out from the unique value_set.
     """
 
+    exclude_field_names: Set[
+        str
+    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "metric_name",
+        "enforce_numeric_metric",
+        "replace_nan_with_zero",
+        "reduce_scalar_metric",
+    }
+
     def __init__(
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -49,6 +65,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
@@ -61,6 +78,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
@@ -79,7 +97,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
 
         return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
         """
-        # Build the list of unique values for each batch
+        # Build the list of unique values for each Batch object.
         super().build_parameters(
             parameter_container=parameter_container,
             domain=domain,
@@ -88,8 +106,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameter_computation_impl=super()._build_parameters,
         )
 
-        # Retrieve and replace the list of unique values for each batch with
-        # the set of unique values for all batches in the given domain.
+        # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.fully_qualified_parameter_name,
@@ -98,10 +115,19 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameters=parameters,
         )
 
+        # This should never happen.
+        if not (
+            isinstance(parameter_node.value, list) and len(parameter_node.value) == 1
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({parameter_node.value} found).'
+            )
+
+        attributed_resolved_metrics: AttributedResolvedMetrics = parameter_node.value[0]
+        metric_values: MetricValues = attributed_resolved_metrics.metric_values
+
         return (
-            _get_unique_values_from_nested_collection_of_sets(
-                collection=parameter_node.value
-            ),
+            _get_unique_values_from_nested_collection_of_sets(collection=metric_values),
             parameter_node.details,
         )
 
@@ -127,9 +153,11 @@ def _get_unique_values_from_nested_collection_of_sets(
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
     """
     unique_values: Set[Any] = set(
-        filter(
-            lambda element: element is not None,
-            set().union(*flattened),
+        sorted(
+            filter(
+                lambda element: element is not None,
+                set().union(*flattened),
+            )
         )
     )
 

@@ -45,7 +45,7 @@ def num_to_str(f, precision=DEFAULT_PRECISION, use_locale=False, no_scientific=F
     # So, if it's not already a float, we will append a decimal point to the string representation
     s = repr(f)
     if not isinstance(f, float):
-        s += locale.localeconv().get("decimal_point") + "0"
+        s += f"{locale.localeconv().get('decimal_point')}0"
     d = local_context.create_decimal(s)
     if no_scientific:
         result = format(d, "f")
@@ -56,7 +56,7 @@ def num_to_str(f, precision=DEFAULT_PRECISION, use_locale=False, no_scientific=F
     if f != locale.atof(result):
         # result = '≈' + result
         #  ≈  # \u2248
-        result = "≈" + result
+        result = f"≈{result}"
     decimal_char = locale.localeconv().get("decimal_point")
     if "e" not in result and "E" not in result and decimal_char in result:
         result = result.rstrip("0").rstrip(decimal_char)
@@ -99,14 +99,16 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
         regex_match = re.search(regex, run_name)
         return False if regex_match is None else True
     elif run_name_filter.get("eq"):
+        # deprecated-v0.11.9
         warnings.warn(
-            "The 'eq' key will be deprecated and renamed 'equals' - please update your code accordingly.",
+            "The 'eq' key will is deprecated as of v0.11.9 and will be removed in v0.16. Please use the renamed 'equals' key.",
             DeprecationWarning,
         )
         return run_name_filter.get("eq") == run_name
     elif run_name_filter.get("ne"):
+        # deprecated-v0.11.9
         warnings.warn(
-            "The 'ne' key will be deprecated and renamed 'not_equals' - please update your code accordingly.",
+            "The 'ne' key will is deprecated as of v0.11.9 and will be removed in v0.16. Please use the renamed 'not_equals' key.",
             DeprecationWarning,
         )
         return run_name_filter.get("ne") != run_name
@@ -171,14 +173,14 @@ def parse_row_condition_string_pandas_engine(
         param_value = condition.replace(" NOT ", " not ")
 
         if with_schema:
-            params["row_condition__" + str(i)] = {
+            params[f"row_condition__{str(i)}"] = {
                 "schema": {"type": "string"},
                 "value": param_value,
             }
         else:
-            params["row_condition__" + str(i)] = param_value
+            params[f"row_condition__{str(i)}"] = param_value
             condition_string = condition_string.replace(
-                condition, "$row_condition__" + str(i)
+                condition, f"$row_condition__{str(i)}"
             )
 
     template_str += condition_string.lower()

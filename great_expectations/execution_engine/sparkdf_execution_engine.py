@@ -249,7 +249,7 @@ Please check your config."""
                         "org.apache.hadoop.fs.azure.NativeAzureFileSystem",
                     )
                     self.spark.conf.set(
-                        "fs.azure.account.key." + storage_account_url, credential
+                        f"fs.azure.account.key.{storage_account_url}", credential
                     )
                 reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
@@ -332,7 +332,7 @@ Please check your config."""
             return "parquet"
 
         raise ExecutionEngineError(
-            "Unable to determine reader method from path: %s" % path
+            f"Unable to determine reader method from path: {path}"
         )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):
@@ -362,7 +362,7 @@ Please check your config."""
             return getattr(reader, reader_method_op)
         except AttributeError:
             raise ExecutionEngineError(
-                "Unable to find reader_method %s in spark." % reader_method,
+                f"Unable to find reader_method {reader_method} in spark.",
             )
 
     def get_domain_records(
@@ -445,9 +445,10 @@ Please check your config."""
                     )
 
                 if ignore_row_if == "never":
+                    # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
 """,
                         DeprecationWarning,
                     )
@@ -504,89 +505,19 @@ Please check your config."""
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
-        data = self.get_domain_records(
-            domain_kwargs=domain_kwargs,
-        )
-        # Extracting value from enum if it is given for future computation
-        domain_type = MetricDomainTypes(domain_type)
+        data = self.get_domain_records(domain_kwargs)
 
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = {}
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
-        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
-        if (
-            domain_type != MetricDomainTypes.TABLE
-            and accessor_keys is not None
-            and len(list(accessor_keys)) > 0
-        ):
-            logger.warning(
-                'Accessor keys ignored since Metric Domain Type is not "table"'
-            )
+        split_domain_kwargs = self._split_domain_kwargs(
+            domain_kwargs, domain_type, accessor_keys
+        )
 
-        if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(list(accessor_keys)) > 0:
-                for key in accessor_keys:
-                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
-            if len(compute_domain_kwargs.keys()) > 0:
-                # Warn user if kwarg not "normal".
-                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
-                    {
-                        "batch_id",
-                        "table",
-                        "row_condition",
-                        "condition_parser",
-                    }
-                )
-                if len(unexpected_keys) > 0:
-                    unexpected_keys_str: str = ", ".join(
-                        map(lambda element: f'"{element}"', unexpected_keys)
-                    )
-                    logger.warning(
-                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
-                    )
-            return data, compute_domain_kwargs, accessor_domain_kwargs
-
-        elif domain_type == MetricDomainTypes.COLUMN:
-            if "column" not in compute_domain_kwargs:
-                raise GreatExpectationsError(
-                    "Column not provided in compute_domain_kwargs"
-                )
-
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
-
-        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            if not (
-                "column_A" in compute_domain_kwargs
-                and "column_B" in compute_domain_kwargs
-            ):
-                raise GreatExpectationsError(
-                    "column_A or column_B not found within compute_domain_kwargs"
-                )
-
-            accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
-            accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
-
-        elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "column_list" not in domain_kwargs:
-                raise ge_exceptions.GreatExpectationsError(
-                    "column_list not found within domain_kwargs"
-                )
-
-            column_list = compute_domain_kwargs.pop("column_list")
-
-            if len(column_list) < 2:
-                raise ge_exceptions.GreatExpectationsError(
-                    "column_list must contain at least 2 columns"
-                )
-
-            accessor_domain_kwargs["column_list"] = column_list
-
-        return data, compute_domain_kwargs, accessor_domain_kwargs
+        return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False

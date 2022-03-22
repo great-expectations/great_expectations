@@ -291,8 +291,9 @@ class ActionListValidationOperator(ValidationOperator):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional). Instead of providing a run_id, you may also provide"
                 "run_name and run_time separately.",
@@ -429,9 +430,7 @@ class ActionListValidationOperator(ValidationOperator):
         batch_actions_results = {}
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
-            logger.debug(
-                "Processing validation action with name {}".format(action["name"])
-            )
+            logger.debug(f"Processing validation action with name {action['name']}")
 
             if hasattr(batch, "active_batch_id"):
                 batch_identifier = batch.active_batch_id
@@ -463,9 +462,7 @@ class ActionListValidationOperator(ValidationOperator):
                 ]
 
             except Exception as e:
-                logger.exception(
-                    "Error running action with name {}".format(action["name"])
-                )
+                logger.exception(f"Error running action with name {action['name']}")
                 raise e
 
         return batch_actions_results
@@ -723,9 +720,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*Failed Batches:* {}".format(
-                        failed_data_assets_msg_strings
-                    ),
+                    "text": f"*Failed Batches:* {failed_data_assets_msg_strings}",
                 },
             }
             query["blocks"].append(failed_data_assets_element)
@@ -774,8 +769,9 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional). Instead of providing a run_id, you may also provide"
                 "run_name and run_time separately.",

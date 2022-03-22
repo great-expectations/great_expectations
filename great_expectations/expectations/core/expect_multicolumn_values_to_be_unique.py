@@ -123,7 +123,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
                 "value": params.get("mostly"),
             },
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
         }
@@ -140,12 +140,12 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
         template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
-            template_str += "$column_list_" + str(idx) + ", "
-            params["column_list_" + str(idx)] = params["column_list"][idx]
+            template_str += f"$column_list_{str(idx)}, "
+            params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
         last_idx = len(params["column_list"]) - 1
-        template_str += "$column_list_" + str(last_idx)
-        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+        template_str += f"$column_list_{str(last_idx)}"
+        params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
 
         if params["row_condition"] is not None:
             (
@@ -213,12 +213,12 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
         template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
-            template_str += "$column_list_" + str(idx) + ", "
-            params["column_list_" + str(idx)] = params["column_list"][idx]
+            template_str += f"$column_list_{str(idx)}, "
+            params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
         last_idx = len(params["column_list"]) - 1
-        template_str += "$column_list_" + str(last_idx)
-        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+        template_str += f"$column_list_{str(last_idx)}"
+        params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
 
         if params["row_condition"] is not None:
             (

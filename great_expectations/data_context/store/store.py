@@ -74,8 +74,7 @@ class Store:
             return
         elif not isinstance(key, self.key_class):
             raise TypeError(
-                "key must be an instance of %s, not %s"
-                % (self.key_class.__name__, type(key))
+                f"key must be an instance of {self.key_class.__name__}, not {type(key)}"
             )
 
     @property

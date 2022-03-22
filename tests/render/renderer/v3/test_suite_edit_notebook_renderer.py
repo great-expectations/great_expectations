@@ -432,7 +432,7 @@ def test_render_with_no_column_cells_without_batch_request(
             {
                 "id": "strategic-exhibit",
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\n\nYou are adding Expectation configurations to the suite. Since you selected manual mode, there is no sample batch of data and no validation happens during this process. See our documentation for more info and examples: **[How to create a new Expectation Suite without a sample batch](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_a_sample_batch.html)**.\n\nNote that if you do use interactive mode you may specify a sample batch of data to use when creating your Expectation Suite. You can then use a `validator` to get immediate feedback on your Expectations against your specified sample batch.\n\n\nYou can see all the available expectations in the **[expectation gallery](https://greatexpectations.io/expectations)**.",
+                "source": "## Create & Edit Expectations\n\n\nYou are adding Expectation configurations to the suite. Since you selected manual mode, there is no sample batch of data and no validation happens during this process. See our documentation for more info and examples: **[How to create a new Expectation Suite without a sample batch](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly)**.\n\nNote that if you do use interactive mode you may specify a sample batch of data to use when creating your Expectation Suite. You can then use a `validator` to get immediate feedback on your Expectations against your specified sample batch.\n\n\nYou can see all the available expectations in the **[expectation gallery](https://greatexpectations.io/expectations)**.",
                 "metadata": {},
             },
             {
@@ -462,7 +462,7 @@ def test_render_with_no_column_cells_without_batch_request(
             {
                 "id": "bigger-clone",
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -517,7 +517,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
             {
                 "id": "banned-television",
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\n\nAdd expectations by calling specific expectation methods on the `validator` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nBecause you selected interactive mode, you are now creating or editing an Expectation Suite with validator feedback from the sample batch of data that you specified (see `batch_request`).\n\nNote that if you select manual mode you may still create or edit an Expectation Suite directly, without feedback from the `validator`. See our documentation for more info and examples: [How to create a new Expectation Suite without a sample batch](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_a_sample_batch.html).\n\n\n\nYou can see all the available expectations in the **[expectation gallery](https://greatexpectations.io/expectations)**.",
+                "source": "## Create & Edit Expectations\n\n\nAdd expectations by calling specific expectation methods on the `validator` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nBecause you selected interactive mode, you are now creating or editing an Expectation Suite with validator feedback from the sample batch of data that you specified (see `batch_request`).\n\nNote that if you select manual mode you may still create or edit an Expectation Suite directly, without feedback from the `validator`. See our documentation for more info and examples: [How to create a new Expectation Suite without a sample batch](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly).\n\n\n\nYou can see all the available expectations in the **[expectation gallery](https://greatexpectations.io/expectations)**.",
                 "metadata": {},
             },
             {
@@ -803,7 +803,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
             {
                 "id": "provincial-termination",
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -1096,7 +1096,7 @@ def test_notebook_execution_with_custom_notebooks(
             {
                 "id": "scheduled-freeware",
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {

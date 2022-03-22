@@ -23,6 +23,12 @@ from tests.conftest import skip_if_python_below_minimum_version
 yaml = YAML()
 
 
+# Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
+# (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+RTOL: float = 1.0e-7
+ATOL: float = 5.0e-2
+
+
 @pytest.fixture
 def pandas_test_df():
     skip_if_python_below_minimum_version()

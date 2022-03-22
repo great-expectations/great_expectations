@@ -2,7 +2,6 @@ import glob
 import json
 import logging
 import os
-import re
 import traceback
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
@@ -81,15 +80,11 @@ from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
-from great_expectations.util import is_parseable_date
+from great_expectations.util import camel_to_snake, is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-
-p1 = re.compile(r"(.)([A-Z][a-z]+)")
-p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
 _TEST_DEFS_DIR = os.path.join(
@@ -99,11 +94,6 @@ _TEST_DEFS_DIR = os.path.join(
     "tests",
     "test_definitions",
 )
-
-
-def camel_to_snake(name):
-    name = p1.sub(r"\1_\2", name)
-    return p2.sub(r"\1_\2", name).lower()
 
 
 class MetaExpectation(ABCMeta):
@@ -515,7 +505,7 @@ class Expectation(metaclass=MetaExpectation):
                 result_dict["unexpected_count"], use_locale=True, precision=20
             )
             unexpected_percent = (
-                num_to_str(result_dict["unexpected_percent"], precision=4) + "%"
+                f"{num_to_str(result_dict['unexpected_percent'], precision=4)}%"
             )
             element_count = num_to_str(
                 result_dict["element_count"], use_locale=True, precision=20
@@ -917,6 +907,7 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
+        return_only_gallery_examples: bool = False,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -944,9 +935,11 @@ class Expectation(metaclass=MetaExpectation):
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
         )
-        gallery_examples: List[ExpectationTestDataCases] = self._get_examples()
+        gallery_examples: List[ExpectationTestDataCases] = self._get_examples(
+            return_only_gallery_examples=True
+        )
         examples: List[ExpectationTestDataCases] = self._get_examples(
-            return_only_gallery_examples=False
+            return_only_gallery_examples=return_only_gallery_examples
         )
         description_diagnostics: ExpectationDescriptionDiagnostics = (
             self._get_description_diagnostics()
@@ -1026,7 +1019,7 @@ class Expectation(metaclass=MetaExpectation):
                 if test.test_passed is False:
                     print(f"=== {test.test_title} ({test.backend}) ===\n")
                     print(test.stack_trace)
-                    print(80 * "=" + "\n")
+                    print(f"{80 * '='}\n")
 
         checklist: str = diagnostics.generate_checklist()
         print(checklist)
@@ -1057,13 +1050,11 @@ class Expectation(metaclass=MetaExpectation):
         :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
         :return: list of examples or [], if no examples exist
         """
-        is_core_expectation = False
         try:
             # Currently, only community contrib expectations have an examples attribute
             all_examples = self.examples
         except AttributeError:
             all_examples = self._get_examples_from_json()
-            is_core_expectation = True
             if all_examples == []:
                 return []
 
@@ -1080,7 +1071,6 @@ class Expectation(metaclass=MetaExpectation):
                 if (
                     test.get("include_in_gallery") == True
                     or return_only_gallery_examples == False
-                    or is_core_expectation == True
                 ):
                     copied_test = deepcopy(test)
                     if top_level_only_for and "only_for" not in copied_test:
@@ -1317,7 +1307,7 @@ class Expectation(metaclass=MetaExpectation):
             return rendered_result.__str__()
 
         elif isinstance(rendered_result, RenderedAtomicContent):
-            return "(RenderedAtomicContent) " + repr(rendered_result.to_json_dict())
+            return f"(RenderedAtomicContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, RenderedContentBlockContainer):
             return "(RenderedContentBlockContainer) " + repr(
@@ -1325,16 +1315,16 @@ class Expectation(metaclass=MetaExpectation):
             )
 
         elif isinstance(rendered_result, RenderedTableContent):
-            return "(RenderedTableContent) " + repr(rendered_result.to_json_dict())
+            return f"(RenderedTableContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, RenderedGraphContent):
-            return "(RenderedGraphContent) " + repr(rendered_result.to_json_dict())
+            return f"(RenderedGraphContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, ValueListContent):
-            return "(ValueListContent) " + repr(rendered_result.to_json_dict())
+            return f"(ValueListContent) {repr(rendered_result.to_json_dict())}"
 
         elif isinstance(rendered_result, dict):
-            return "(dict) " + repr(rendered_result)
+            return f"(dict) {repr(rendered_result)}"
 
         elif isinstance(rendered_result, int):
             return repr(rendered_result)
@@ -1547,6 +1537,7 @@ class Expectation(metaclass=MetaExpectation):
                 tests
             )
         )
+        experimental_checks.append(ExpectationDiagnostics._check_linting(self))
 
         beta_checks.append(
             ExpectationDiagnostics._check_input_validation(self, examples)
@@ -1558,7 +1549,6 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
 
-        production_checks.append(ExpectationDiagnostics._check_linting(self))
         production_checks.append(
             ExpectationDiagnostics._check_full_test_suite(library_metadata)
         )
@@ -1675,9 +1665,11 @@ class TableExpectation(Expectation, ABC):
         )
 
         if parse_strings_as_datetimes:
+            # deprecated-v0.13.41
             warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
-future release.  Please update code accordingly.
+                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
+v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
+please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
 """,
                 DeprecationWarning,
             )
@@ -1821,14 +1813,14 @@ class ColumnMapExpectation(TableExpectation, ABC):
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
         metric_kwargs = get_metric_kwargs(
-            metric_name=self.map_metric + ".unexpected_count",
+            metric_name=f"{self.map_metric}.unexpected_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         metric_dependencies[
-            self.map_metric + ".unexpected_count"
+            f"{self.map_metric}.unexpected_count"
         ] = MetricConfiguration(
-            self.map_metric + ".unexpected_count",
+            f"{self.map_metric}.unexpected_count",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -1853,28 +1845,28 @@ class ColumnMapExpectation(TableExpectation, ABC):
             return dependencies
 
         metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_values",
+            f"{self.map_metric}.unexpected_values",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         metric_dependencies[
-            self.map_metric + ".unexpected_values"
+            f"{self.map_metric}.unexpected_values"
         ] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_values",
+            metric_name=f"{self.map_metric}.unexpected_values",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
 
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
-                self.map_metric + ".unexpected_rows",
+                f"{self.map_metric}.unexpected_rows",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_dependencies[
-                self.map_metric + ".unexpected_rows"
+                f"{self.map_metric}.unexpected_rows"
             ] = MetricConfiguration(
-                metric_name=self.map_metric + ".unexpected_rows",
+                metric_name=f"{self.map_metric}.unexpected_rows",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
@@ -1884,28 +1876,28 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
-                self.map_metric + ".unexpected_rows",
+                f"{self.map_metric}.unexpected_rows",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_dependencies[
-                self.map_metric + ".unexpected_rows"
+                f"{self.map_metric}.unexpected_rows"
             ] = MetricConfiguration(
-                metric_name=self.map_metric + ".unexpected_rows",
+                metric_name=f"{self.map_metric}.unexpected_rows",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
-                self.map_metric + ".unexpected_index_list",
+                f"{self.map_metric}.unexpected_index_list",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_dependencies[
-                self.map_metric + ".unexpected_index_list"
+                f"{self.map_metric}.unexpected_index_list"
             ] = MetricConfiguration(
-                metric_name=self.map_metric + ".unexpected_index_list",
+                metric_name=f"{self.map_metric}.unexpected_index_list",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
@@ -1929,12 +1921,12 @@ class ColumnMapExpectation(TableExpectation, ABC):
         )
         total_count = metrics.get("table.row_count")
         null_count = metrics.get("column_values.nonnull.unexpected_count")
-        unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
-        unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
-        unexpected_index_list = metrics.get(self.map_metric + ".unexpected_index_list")
+        unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
+        unexpected_values = metrics.get(f"{self.map_metric}.unexpected_values")
+        unexpected_index_list = metrics.get(f"{self.map_metric}.unexpected_index_list")
         unexpected_rows = None
         if include_unexpected_rows:
-            unexpected_rows = metrics.get(self.map_metric + ".unexpected_rows")
+            unexpected_rows = metrics.get(f"{self.map_metric}.unexpected_rows")
 
         if total_count is None or null_count is None:
             total_count = nonnull_count = 0
@@ -2025,14 +2017,14 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         metric_dependencies = dependencies["metrics"]
 
         metric_kwargs = get_metric_kwargs(
-            metric_name=self.map_metric + ".unexpected_count",
+            metric_name=f"{self.map_metric}.unexpected_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         metric_dependencies[
-            self.map_metric + ".unexpected_count"
+            f"{self.map_metric}.unexpected_count"
         ] = MetricConfiguration(
-            self.map_metric + ".unexpected_count",
+            f"{self.map_metric}.unexpected_count",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -2049,14 +2041,14 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         )
 
         metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".filtered_row_count",
+            f"{self.map_metric}.filtered_row_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         metric_dependencies[
-            self.map_metric + ".filtered_row_count"
+            f"{self.map_metric}.filtered_row_count"
         ] = MetricConfiguration(
-            metric_name=self.map_metric + ".filtered_row_count",
+            metric_name=f"{self.map_metric}.filtered_row_count",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -2070,14 +2062,14 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             return dependencies
 
         metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_values",
+            f"{self.map_metric}.unexpected_values",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         metric_dependencies[
-            self.map_metric + ".unexpected_values"
+            f"{self.map_metric}.unexpected_values"
         ] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_values",
+            metric_name=f"{self.map_metric}.unexpected_values",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -2087,28 +2079,28 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
 
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
-                self.map_metric + ".unexpected_rows",
+                f"{self.map_metric}.unexpected_rows",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_dependencies[
-                self.map_metric + ".unexpected_rows"
+                f"{self.map_metric}.unexpected_rows"
             ] = MetricConfiguration(
-                metric_name=self.map_metric + ".unexpected_rows",
+                metric_name=f"{self.map_metric}.unexpected_rows",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
-                self.map_metric + ".unexpected_index_list",
+                f"{self.map_metric}.unexpected_index_list",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_dependencies[
-                self.map_metric + ".unexpected_index_list"
+                f"{self.map_metric}.unexpected_index_list"
             ] = MetricConfiguration(
-                metric_name=self.map_metric + ".unexpected_index_list",
+                metric_name=f"{self.map_metric}.unexpected_index_list",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
@@ -2129,10 +2121,10 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             "mostly", self.default_kwarg_values.get("mostly")
         )
         total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
-        unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
-        unexpected_index_list = metrics.get(self.map_metric + ".unexpected_index_list")
-        filtered_row_count = metrics.get(self.map_metric + ".filtered_row_count")
+        unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
+        unexpected_values = metrics.get(f"{self.map_metric}.unexpected_values")
+        unexpected_index_list = metrics.get(f"{self.map_metric}.unexpected_index_list")
+        filtered_row_count = metrics.get(f"{self.map_metric}.filtered_row_count")
 
         if (
             total_count is None
@@ -2214,14 +2206,14 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         metric_dependencies = dependencies["metrics"]
 
         metric_kwargs = get_metric_kwargs(
-            metric_name=self.map_metric + ".unexpected_count",
+            metric_name=f"{self.map_metric}.unexpected_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         metric_dependencies[
-            self.map_metric + ".unexpected_count"
+            f"{self.map_metric}.unexpected_count"
         ] = MetricConfiguration(
-            self.map_metric + ".unexpected_count",
+            f"{self.map_metric}.unexpected_count",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -2238,14 +2230,14 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
 
         metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".filtered_row_count",
+            f"{self.map_metric}.filtered_row_count",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         metric_dependencies[
-            self.map_metric + ".filtered_row_count"
+            f"{self.map_metric}.filtered_row_count"
         ] = MetricConfiguration(
-            metric_name=self.map_metric + ".filtered_row_count",
+            metric_name=f"{self.map_metric}.filtered_row_count",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -2259,14 +2251,14 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             return dependencies
 
         metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_values",
+            f"{self.map_metric}.unexpected_values",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         metric_dependencies[
-            self.map_metric + ".unexpected_values"
+            f"{self.map_metric}.unexpected_values"
         ] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_values",
+            metric_name=f"{self.map_metric}.unexpected_values",
             metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
@@ -2276,28 +2268,28 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
 
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
-                self.map_metric + ".unexpected_rows",
+                f"{self.map_metric}.unexpected_rows",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_dependencies[
-                self.map_metric + ".unexpected_rows"
+                f"{self.map_metric}.unexpected_rows"
             ] = MetricConfiguration(
-                metric_name=self.map_metric + ".unexpected_rows",
+                metric_name=f"{self.map_metric}.unexpected_rows",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
-                self.map_metric + ".unexpected_index_list",
+                f"{self.map_metric}.unexpected_index_list",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_dependencies[
-                self.map_metric + ".unexpected_index_list"
+                f"{self.map_metric}.unexpected_index_list"
             ] = MetricConfiguration(
-                metric_name=self.map_metric + ".unexpected_index_list",
+                metric_name=f"{self.map_metric}.unexpected_index_list",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             )
@@ -2315,10 +2307,10 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             configuration=configuration, runtime_configuration=runtime_configuration
         )
         total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
-        unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
-        unexpected_index_list = metrics.get(self.map_metric + ".unexpected_index_list")
-        filtered_row_count = metrics.get(self.map_metric + ".filtered_row_count")
+        unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
+        unexpected_values = metrics.get(f"{self.map_metric}.unexpected_values")
+        unexpected_index_list = metrics.get(f"{self.map_metric}.unexpected_index_list")
+        filtered_row_count = metrics.get(f"{self.map_metric}.filtered_row_count")
 
         if (
             total_count is None
@@ -2420,6 +2412,16 @@ def _format_map_output(
     if result_format["result_format"] == "BASIC":
         return return_obj
 
+    if len(unexpected_list) and isinstance(unexpected_list[0], dict):
+        # in the case of multicolumn map expectations `unexpected_list` contains dicts,
+        # which will throw an exception when we hash it to count unique members.
+        # As a workaround, we flatten the values out to tuples.
+        immutable_unexpected_list = [
+            tuple([val for val in item.values()]) for item in unexpected_list
+        ]
+    else:
+        immutable_unexpected_list = unexpected_list
+
     # Try to return the most common values, if possible.
     partial_unexpected_counts = None
     if 0 < result_format.get("partial_unexpected_count"):
@@ -2427,7 +2429,7 @@ def _format_map_output(
             partial_unexpected_counts = [
                 {"value": key, "count": value}
                 for key, value in sorted(
-                    Counter(unexpected_list).most_common(
+                    Counter(immutable_unexpected_list).most_common(
                         result_format["partial_unexpected_count"]
                     ),
                     key=lambda x: (-x[1], x[0]),
@@ -2435,7 +2437,7 @@ def _format_map_output(
             ]
         except TypeError:
             partial_unexpected_counts = [
-                "partial_exception_counts requires a hashable type"
+                {"error": "partial_exception_counts requires a hashable type"}
             ]
         finally:
             return_obj["result"].update(
@@ -2462,4 +2464,4 @@ def _format_map_output(
     if result_format["result_format"] == "COMPLETE":
         return return_obj
 
-    raise ValueError("Unknown result_format {}.".format(result_format["result_format"]))
+    raise ValueError(f"Unknown result_format {result_format['result_format']}.")

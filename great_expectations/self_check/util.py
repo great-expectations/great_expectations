@@ -140,8 +140,10 @@ except ImportError:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
         import pybigquery.sqlalchemy_bigquery as BigQueryDialect
 
+        # deprecated-v0.14.7
         warnings.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
+            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
@@ -566,7 +568,7 @@ def get_dataset(
         # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
         # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
         # rather than referring the table by name.
-        custom_sql = "SELECT * FROM " + table_name
+        custom_sql = f"SELECT * FROM {table_name}"
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
@@ -768,7 +770,7 @@ def get_dataset(
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
     else:
-        raise ValueError("Unknown dataset_type " + str(dataset_type))
+        raise ValueError(f"Unknown dataset_type {str(dataset_type)}")
 
 
 def get_test_validator_with_data(
@@ -942,7 +944,7 @@ def get_test_validator_with_data(
         return build_spark_validator_with_data(df=spark_df, spark=spark)
 
     else:
-        raise ValueError("Unknown dataset_type " + str(execution_engine))
+        raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
 
 
 def build_pandas_validator_with_data(
@@ -1366,13 +1368,14 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
 
 def build_test_backends_list(
     include_pandas=True,
-    include_spark=True,
+    include_spark=False,
     include_sqlalchemy=True,
     include_sqlite=True,
     include_postgresql=False,
     include_mysql=False,
     include_mssql=False,
     include_bigquery=False,
+    include_aws=False,
     raise_exceptions_for_backends: bool = True,
 ) -> List[str]:
     """Attempts to identify supported backends by checking which imports are available."""
@@ -1502,6 +1505,20 @@ def build_test_backends_list(
             else:
                 test_backends += ["bigquery"]
 
+        if include_aws:
+            # TODO need to come up with a better way to do this check.
+            # currently this checks the 3 default EVN variables that boto3 looks for
+            aws_access_key_id: Optional[str] = os.getenv("AWS_ACCESS_KEY_ID")
+            aws_secret_access_key: Optional[str] = os.getenv("AWS_SECRET_ACCESS_KEY")
+            aws_session_token: Optional[str] = os.getenv("AWS_SESSION_TOKEN")
+            if (
+                not aws_access_key_id
+                and not aws_secret_access_key
+                and not aws_session_token
+            ):
+                logger.warning(
+                    f"AWS tests are requested, but credentials were not set up"
+                )
     return test_backends
 
 
@@ -1948,7 +1965,7 @@ def check_json_test_result(test, result, data_asset=None):
                         )
                 else:
                     raise ValueError(
-                        "Invalid test specification: unknown key " + key + " in 'out'"
+                        f"Invalid test specification: unknown key {key} in 'out'"
                     )
 
             elif key == "traceback_substring":
@@ -1996,7 +2013,7 @@ def check_json_test_result(test, result, data_asset=None):
 
             else:
                 raise ValueError(
-                    "Invalid test specification: unknown key " + key + " in 'out'"
+                    f"Invalid test specification: unknown key {key} in 'out'"
                 )
 
 
