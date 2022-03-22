@@ -419,7 +419,21 @@ class ExpectationDiagnostics(SerializableDictDot):
             )
 
         impl = get_expectation_impl(camel_to_snake(expectation_camel_name))
-        source_file_path = inspect.getfile(impl)
+        try:
+            source_file_path = inspect.getfile(impl)
+        except TypeError:
+            sub_messages.append(
+                {
+                    "message": "inspect.getfile(impl) raised a TypeError (impl is a built-in class)",
+                    "passed": False,
+                }
+            )
+            return ExpectationDiagnosticCheckMessage(
+                message=message,
+                passed=passed,
+                sub_messages=sub_messages,
+            )
+
         snaked_impl_name = camel_to_snake(impl.__name__)
         source_file_base_no_ext = os.path.basename(source_file_path).rsplit(".", 1)[0]
         with open(source_file_path) as fp:
