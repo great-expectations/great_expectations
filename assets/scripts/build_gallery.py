@@ -247,12 +247,12 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
         great_expectations.expectations.registry.list_registered_expectation_implementations()
     )
     non_matched_filenames = expectation_filenames_set - registered_expectations_set
-    if non_matched_filenames != set():
+    if non_matched_filenames:
         expectation_tracebacks.write(f"\n\n----------------\n(Not a traceback)\n")
         expectation_tracebacks.write(
             "Expectation filenames that don't match their defined Expectation name:\n"
         )
-        for fname in sorted(list(non_matched_filenames)):
+        for fname in sorted(non_matched_filenames):
             expectation_tracebacks.write(f"- {fname}\n")
 
         bad_names = sorted(
@@ -283,12 +283,12 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
         core_expectations_not_in_gallery = core_expectations_filename_set - set(
             core_expectations
         )
-        if core_expectations_not_in_gallery != set():
+        if core_expectations_not_in_gallery:
             expectation_tracebacks.write(f"\n\n----------------\n(Not a traceback)\n")
             expectation_tracebacks.write(
                 f"Core Expectation files not included in core_expectations:\n"
             )
-            for exp_name in sorted(list(core_expectations_not_in_gallery)):
+            for exp_name in sorted(core_expectations_not_in_gallery):
                 expectation_tracebacks.write(f"- {exp_name}\n")
 
     return gallery_info
