@@ -211,23 +211,7 @@ def data_context_config_with_datasources(conn_string_password):
                     },
                     "module_name": "great_expectations.datasource",
                 },
-                "Datasource 2: BigQuery": {
-                    # bigquery creds are stored in a config file
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector_bigquery": {
-                            "assets": {},
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": "bigquery://foo/bar",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 3: Postgres": {
+                "Datasource 2: Postgres": {
                     "class_name": "Datasource",
                     "data_connectors": {
                         "default_configured_asset_sql_data_connector_sqlalchemy": {
