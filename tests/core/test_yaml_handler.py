@@ -4,7 +4,7 @@ from typing import Optional
 
 import pytest
 
-from great_expectations.core.yaml_handler import YamlHandler
+from great_expectations.core.yaml_handler import YAMLHandler
 
 
 @pytest.fixture
@@ -28,14 +28,14 @@ def simple_dict() -> dict:
 
 
 def test_load_correct(simple_yaml: str, simple_dict: dict) -> None:
-    res: dict = YamlHandler.load(simple_yaml)
+    res: dict = YAMLHandler.load(simple_yaml)
 
     assert res == simple_dict
 
 
 def test_load_incorrect_input() -> None:
     with pytest.raises(TypeError):
-        YamlHandler.load(12345)
+        YAMLHandler.load(12345)
 
 
 def test_file_output(tmp_path: Path) -> None:
@@ -43,13 +43,13 @@ def test_file_output(tmp_path: Path) -> None:
     test_file: str = os.path.join(tmp_path, "out.yaml")
     out: Path = Path(test_file)
 
-    data: dict = YamlHandler.load(simplest_yaml)
-    YamlHandler.dump(data, out)
+    data: dict = YAMLHandler.load(simplest_yaml)
+    YAMLHandler.dump(data, out)
 
     # check the output
     with open(test_file) as f:
         line = f.readline().strip()
-        data_from_file: dict = YamlHandler.load(line)
+        data_from_file: dict = YAMLHandler.load(line)
 
     assert data_from_file == data
 
@@ -57,6 +57,6 @@ def test_file_output(tmp_path: Path) -> None:
 def test_dump_correct_from_dict_default_stream() -> None:
     # when we specify no stream, then StringIO
     simplest_dict: dict = dict(abc=1)
-    dumped: Optional[str] = YamlHandler.dump(simplest_dict)
+    dumped: Optional[str] = YAMLHandler.dump(simplest_dict)
 
     assert dumped == "{abc: 1}\n"

@@ -5,7 +5,7 @@ from typing import Optional, Union
 from ruamel.yaml import YAML
 
 
-class YamlHandler:
+class YAMLHandler:
     """
     Facade class designed to be a lightweight wrapper around YAML serialization.
     For all YAML-related activities in Great Expectations, this is the entry point.
@@ -28,7 +28,7 @@ class YamlHandler:
         Returns:
             The deserialized dictionary form of the input stream.
         """
-        return YamlHandler._handler.load(stream=stream)
+        return YAMLHandler._handler.load(stream=stream)
 
     @staticmethod
     def dump(
@@ -50,17 +50,17 @@ class YamlHandler:
             Otherwise, None as the _handler.dump() works in place and will exercise the handler accordingly.
         """
         if stream:
-            return YamlHandler._dump(data=data, stream=stream, **kwargs)
-        return YamlHandler._dump_and_return_value(data=data, **kwargs)
+            return YAMLHandler._dump(data=data, stream=stream, **kwargs)
+        return YAMLHandler._dump_and_return_value(data=data, **kwargs)
 
     @staticmethod
     def _dump(data: dict, stream, **kwargs) -> None:
         """If an input stream has been provided, modify it in place."""
-        YamlHandler._handler.dump(data=data, stream=stream, **kwargs)
+        YAMLHandler._handler.dump(data=data, stream=stream, **kwargs)
 
     @staticmethod
     def _dump_and_return_value(data: dict, **kwargs) -> str:
         """If an input stream hasn't been provided, generate one and return the value."""
         stream = io.StringIO()
-        YamlHandler._handler.dump(data=data, stream=stream, **kwargs)
+        YAMLHandler._handler.dump(data=data, stream=stream, **kwargs)
         return stream.getvalue()
