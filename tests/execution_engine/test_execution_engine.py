@@ -3,8 +3,8 @@ from typing import Tuple
 import pandas as pd
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers
-from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import BatchData
 from great_expectations.expectations.row_conditions import (
@@ -21,8 +21,9 @@ from tests.expectations.test_util import get_table_columns_metric
 def test_execution_engine():
     """
     This fixture is for mocking the abstract ExecutionEngine class to test method functionality.
-    Instead of using it's child classes in tests, which could override the parent mehods,
-    we create a subclass that implements abstract methods and use it in tests.
+    Instead of using it's child classes in tests, which could override the parent methods,
+    we create a subclass that implements abstract methods (raising exceptions if used)
+    and use that fixture in tests.
     """
 
     class TestExecutionEngine(ExecutionEngine):
@@ -34,11 +35,15 @@ def test_execution_engine():
     return TestExecutionEngine()
 
 
-def test_add_column_row_condition(test_execution_engine):
+def test_add_column_row_condition_filter_null_row_condition_not_present(
+    test_execution_engine,
+):
     e = test_execution_engine
 
     # Checking that adding a simple column row condition is functional
-    new_domain_kwargs = e.add_column_row_condition({}, "a")
+    # default of add_column_row_condition is to apply filter_null=True
+    domain_kwargs: dict = {}
+    new_domain_kwargs = e.add_column_row_condition(domain_kwargs, "a")
     assert new_domain_kwargs == {
         "filter_conditions": [
             RowCondition(
@@ -48,6 +53,7 @@ def test_add_column_row_condition(test_execution_engine):
     }
 
     # Ensuring that this also works when formatted differently
+    # default of add_column_row_condition is to apply filter_null=True
     new_domain_kwargs = e.add_column_row_condition({"column": "a"})
     assert new_domain_kwargs == {
         "column": "a",
@@ -58,32 +64,44 @@ def test_add_column_row_condition(test_execution_engine):
         ],
     }
 
-    # Ensuring that everything still works if a row condition of None given
-    new_domain_kwargs = e.add_column_row_condition(
-        {"column": "a", "row_condition": None}
-    )
-    assert new_domain_kwargs == {
-        "column": "a",
-        "row_condition": None,
-        "filter_conditions": [
-            RowCondition(
-                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
-            )
-        ],
-    }
+
+def test_add_column_row_condition_filter_null_false_row_condition_not_present(
+    test_execution_engine,
+):
+    e = test_execution_engine
 
     # Identity case
-    new_domain_kwargs = e.add_column_row_condition({}, "a", filter_null=False)
-    assert new_domain_kwargs == {}
+    # default of add_column_row_condition is to apply filter_null=True
+    domain_kwargs: dict = {}
+    new_domain_kwargs = e.add_column_row_condition(
+        domain_kwargs, "a", filter_null=False
+    )
+    assert new_domain_kwargs == domain_kwargs
 
 
-def test_add_column_row_condition_filter_null_pandas(test_execution_engine):
+def test_add_column_row_condition_filter_null_false_row_condition_present(
+    test_execution_engine,
+):
+    e = test_execution_engine
+
+    # Identity case
+    # default of add_column_row_condition is to apply filter_null=True
+    domain_kwargs: dict = {"row_condition": "some_condition"}
+    new_domain_kwargs = e.add_column_row_condition(
+        domain_kwargs, "a", filter_null=False
+    )
+    assert new_domain_kwargs == domain_kwargs
+
+
+def test_add_column_row_condition_filter_null_row_condition_present(
+    test_execution_engine,
+):
     e = test_execution_engine
 
     # Ensuring that we don't override if a row condition is present
-    new_domain_kwargs = e.add_column_row_condition(
-        {"column": "a", "row_condition": "some_row_condition"}, filter_null=True
-    )
+    # default of add_column_row_condition is to apply filter_null=True
+    domain_kwargs: dict = {"column": "a", "row_condition": "some_row_condition"}
+    new_domain_kwargs = e.add_column_row_condition(domain_kwargs, filter_null=True)
     assert new_domain_kwargs == {
         "column": "a",
         "row_condition": "some_row_condition",
@@ -95,13 +113,30 @@ def test_add_column_row_condition_filter_null_pandas(test_execution_engine):
     }
 
     # Ensuring that we don't override if a row condition is present,
-    # with default filter_null value
-    new_domain_kwargs = e.add_column_row_condition(
-        {"column": "a", "row_condition": "some_row_condition"},
-    )
+    # default of add_column_row_condition is to apply filter_null=True
+    domain_kwargs: dict = {"column": "a", "row_condition": "some_row_condition"}
+    new_domain_kwargs = e.add_column_row_condition(domain_kwargs)
     assert new_domain_kwargs == {
         "column": "a",
         "row_condition": "some_row_condition",
+        "filter_conditions": [
+            RowCondition(
+                condition='col("a").notnull()', condition_type=RowConditionParserType.GE
+            )
+        ],
+    }
+
+
+def test_add_column_row_condition_filter_null_row_condition_none(test_execution_engine):
+    e = test_execution_engine
+
+    # Ensuring that everything still works if a row condition of None given
+    # default of add_column_row_condition is to apply filter_null=True
+    domain_kwargs: dict = {"column": "a", "row_condition": None}
+    new_domain_kwargs = e.add_column_row_condition(domain_kwargs)
+    assert new_domain_kwargs == {
+        "column": "a",
+        "row_condition": None,
         "filter_conditions": [
             RowCondition(
                 condition='col("a").notnull()', condition_type=RowConditionParserType.GE
@@ -115,7 +150,7 @@ def test_add_column_row_condition_with_unsupported_conditions(test_execution_eng
     e = test_execution_engine
 
     # Ensuring that an attempt to filter nans within base class yields an error
-    with pytest.raises(GreatExpectationsError) as error:
+    with pytest.raises(ge_exceptions.GreatExpectationsError) as error:
         new_domain_kwargs = e.add_column_row_condition({}, "a", filter_nan=True)
 
     # Testing that error raised when column not given
@@ -272,5 +307,5 @@ def test_resolve_metrics_with_incomplete_metric_input():
     )
 
     # Ensuring that incomplete metrics given raises a GreatExpectationsError
-    with pytest.raises(GreatExpectationsError) as error:
+    with pytest.raises(ge_exceptions.GreatExpectationsError) as error:
         engine.resolve_metrics(metrics_to_resolve=(desired_metric,), metrics={})
