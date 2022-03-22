@@ -17,6 +17,8 @@ class YAMLHandler:
     """
 
     _handler: YAML = YAML(typ="safe")
+    _handler.indent(mapping=2, sequence=4, offset=2)
+    _handler.default_flow_style = False
 
     @staticmethod
     def load(stream: Union[io.TextIOWrapper, str]) -> dict:
