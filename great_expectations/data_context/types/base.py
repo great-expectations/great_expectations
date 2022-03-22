@@ -7,13 +7,7 @@ import uuid
 from typing import Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
-from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
-from ruamel.yaml.compat import StringIO
-
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.marshmallow__shade import (
+from marshmallow import (
     INCLUDE,
     Schema,
     ValidationError,
@@ -23,7 +17,13 @@ from great_expectations.marshmallow__shade import (
     pre_dump,
     validates_schema,
 )
-from great_expectations.marshmallow__shade.validate import OneOf
+from marshmallow.validate import OneOf
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
+from ruamel.yaml.compat import StringIO
+
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable

@@ -5,6 +5,8 @@ import random
 import uuid
 from typing import Dict, List, Optional, Union
 
+from marshmallow import ValidationError
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import (
@@ -16,7 +18,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
-from great_expectations.marshmallow__shade import ValidationError
 
 logger = logging.getLogger(__name__)
 

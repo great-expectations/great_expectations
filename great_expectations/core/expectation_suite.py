@@ -5,6 +5,8 @@ import uuid
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from marshmallow import Schema, ValidationError, fields, pre_dump
+
 import great_expectations as ge
 from great_expectations import __version__ as ge_version
 from great_expectations.core.evaluation_parameters import (
@@ -25,12 +27,6 @@ from great_expectations.core.util import (
 from great_expectations.exceptions import (
     DataContextError,
     InvalidExpectationConfigurationError,
-)
-from great_expectations.marshmallow__shade import (
-    Schema,
-    ValidationError,
-    fields,
-    pre_dump,
 )
 from great_expectations.types import SerializableDictDot
 

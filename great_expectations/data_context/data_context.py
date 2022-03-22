@@ -32,6 +32,8 @@ except ImportError:
     # Fallback for python < 3.8
     from typing_extensions import Literal
 
+from marshmallow import ValidationError
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -110,7 +112,6 @@ from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.exceptions import DataContextError
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import RuleBasedProfiler

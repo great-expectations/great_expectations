@@ -11,6 +11,7 @@ from collections.abc import Hashable
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse
+from marshmallow import ValidationError
 from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
@@ -48,7 +49,6 @@ from great_expectations.expectations.registry import (
     get_metric_provider,
     list_registered_expectation_implementations,
 )
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (

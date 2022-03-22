@@ -2,17 +2,11 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Type, Union
 
+from marshmallow import INCLUDE, Schema, fields, post_dump, post_load
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import BaseYamlConfig
-from great_expectations.marshmallow__shade import (
-    INCLUDE,
-    Schema,
-    fields,
-    post_dump,
-    post_load,
-)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,

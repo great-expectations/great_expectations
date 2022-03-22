@@ -1,11 +1,11 @@
 from unittest import mock
 
 import pytest
+from marshmallow import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 

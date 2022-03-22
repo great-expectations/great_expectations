@@ -3,7 +3,8 @@ from copy import deepcopy
 from string import Template as pTemplate
 from typing import List, Optional
 
-from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
+from marshmallow import INCLUDE, Schema, fields, post_load
+
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 

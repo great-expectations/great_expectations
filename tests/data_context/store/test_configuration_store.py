@@ -11,15 +11,11 @@ except ImportError:
 
 import logging
 
+from marshmallow import INCLUDE, Schema, fields, validates_schema
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import BaseYamlConfig
-from great_expectations.marshmallow__shade import (
-    INCLUDE,
-    Schema,
-    fields,
-    validates_schema,
-)
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import (
     delete_config_from_filesystem,
