@@ -12,6 +12,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfigSchema,
 )
 from great_expectations.data_context.util import (
+    PasswordMasker,
     file_relative_path,
     substitute_config_variable,
 )
@@ -807,7 +808,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
         "database": "DB_NAME",
         "username": "DB_USER",
         # Note masking of "password" field
-        "password": "***",
+        "password": PasswordMasker.MASKED_PASSWORD_STRING,
     }
 
     # Check context substitutes escaped variables appropriately
