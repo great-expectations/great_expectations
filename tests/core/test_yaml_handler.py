@@ -27,7 +27,7 @@ def simple_dict() -> dict:
     return simple_dict
 
 
-def test_load_correct(simple_yaml: str, simple_dict: dict) -> None:
+def test_load_correct_input(simple_yaml: str, simple_dict: dict) -> None:
     res: dict = YAMLHandler.load(simple_yaml)
 
     assert res == simple_dict
@@ -59,4 +59,4 @@ def test_dump_correct_from_dict_default_stream() -> None:
     simplest_dict: dict = dict(abc=1)
     dumped: Optional[str] = YAMLHandler.dump(simplest_dict)
 
-    assert dumped == "{abc: 1}\n"
+    assert dumped == "abc: 1\n"
