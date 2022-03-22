@@ -42,11 +42,11 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         null_count_parameter_builder_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
             Union[str, BatchRequest, RuntimeBatchRequest, dict]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -60,9 +60,9 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             null_count_parameter_builder_name: name of parameter that computes null_count (of domain values in Batch).
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -73,9 +73,9 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             enforce_numeric_metric=True,
             replace_nan_with_zero=True,
             reduce_scalar_metric=True,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
