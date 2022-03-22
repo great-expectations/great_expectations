@@ -290,7 +290,6 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
 def test_sanitize_config_raises_exception_with_bad_input(
     basic_data_context_config,
 ):
-    """Test case for PasswordMasker.sanitize_config"""
 
     # expect that an Exception is raised if something other than a dict is passed
     with pytest.raises(TypeError):
@@ -300,7 +299,6 @@ def test_sanitize_config_raises_exception_with_bad_input(
 def test_sanitize_config_doesnt_change_config_without_datasources(
     basic_data_context_config_dict,
 ):
-    """Test case for PasswordMasker.sanitize_config"""
 
     # expect no change without datasources
     config_without_creds = PasswordMasker.sanitize_config(
@@ -312,7 +310,6 @@ def test_sanitize_config_doesnt_change_config_without_datasources(
 def test_sanitize_config_masks_cloud_store_backend_access_tokens(
     data_context_config_dict_with_cloud_backed_stores, ge_cloud_access_token
 ):
-    """Test case for PasswordMasker.sanitize_config"""
 
     # test that cloud store backend tokens have been properly masked
     config_with_creds_in_stores = PasswordMasker.sanitize_config(
@@ -344,7 +341,6 @@ def test_sanitize_config_masks_cloud_store_backend_access_tokens(
 def test_sanitize_config_masks_execution_engine_connection_strings(
     data_context_config_dict_with_datasources, conn_string_password
 ):
-    """Test case for PasswordMasker.sanitize_config"""
 
     # test that datasource credentials have been properly masked
     unaltered_datasources = data_context_config_dict_with_datasources["datasources"]
@@ -383,7 +379,6 @@ def test_sanitize_config_masks_execution_engine_connection_strings(
 
 
 def test_sanitize_config_with_no_sensitive_keys():
-    """Test case for PasswordPasker.sanitize_config"""
 
     # base case - this config should pass through unaffected
     config = {
@@ -395,7 +390,6 @@ def test_sanitize_config_with_no_sensitive_keys():
 
 
 def test_sanitize_config_with_password_field():
-    """Test case for PasswordPasker.sanitize_config"""
 
     # this case has a password field inside a credentials dict - expect it to be masked
     config = {"credentials": {"password": "my-super-duper-secure-passphrase-123"}}
@@ -408,7 +402,6 @@ def test_sanitize_config_with_password_field():
 def test_sanitize_config_with_url_field(
     conn_string_with_embedded_password, conn_string_password
 ):
-    """Test case for PasswordPasker.sanitize_config"""
 
     # this case has a url field inside a credentials dict - expect the password inside
     # of it to be masked
@@ -421,7 +414,6 @@ def test_sanitize_config_with_url_field(
 
 
 def test_sanitize_config_with_non_sensitive_url_field():
-    """Test case for PasswordPasker.sanitize_config"""
 
     # this case has a BigQuery url field inside a credentials dict, which doesn't have a
     # password - expect it to be untouched
@@ -434,7 +426,6 @@ def test_sanitize_config_with_non_sensitive_url_field():
 def test_sanitize_config_with_nested_url_field(
     conn_string_password, conn_string_with_embedded_password
 ):
-    """Test case for PasswordPasker.sanitize_config"""
 
     # this case has a connection string in an execution_engine dict
     config = {
@@ -451,7 +442,6 @@ def test_sanitize_config_with_nested_url_field(
 
 
 def test_sanitize_config_with_nested_non_sensitive_url_field():
-    """Test case for PasswordPasker.sanitize_config"""
 
     # this case has a BigQuery url inside the execution_engine dict, which doesn't have a
     # password - expect it to be untouched
@@ -462,7 +452,6 @@ def test_sanitize_config_with_nested_non_sensitive_url_field():
 
 
 def test_sanitize_config_regardless_of_parent_key():
-    """Test case for PasswordPasker.sanitize_config"""
 
     # expect this config still be masked
     config = {
@@ -478,7 +467,6 @@ def test_sanitize_config_regardless_of_parent_key():
 
 
 def test_sanitize_config_masks_cloud_access_token(ge_cloud_access_token):
-    """Test case for PasswordPasker.sanitize_config"""
 
     # expect the access token to be found and masked
     config = {
