@@ -316,7 +316,21 @@ def test_sanitize_config_masks_cloud_store_backend_access_tokens(
         data_context_config_dict_with_cloud_backed_stores
     )
     for name, store_config in config_with_creds_in_stores["stores"].items():
-        try:
+
+        if (
+            not store_config.get("store_backend")
+            or not store_config["store_backend"].get("ge_cloud_credentials")
+            or not store_config["store_backend"]["ge_cloud_credentials"].get(
+                "access_token"
+            )
+        ):
+            # a field in store_config["store_backend"]["ge_cloud_credentials"]["access_token"]
+            # doesn't exist, so we expect this config to be unchanged
+            assert (
+                store_config
+                == data_context_config_dict_with_cloud_backed_stores["stores"][name]
+            )
+        else:
             # check that the original token exists
             assert (
                 data_context_config_dict_with_cloud_backed_stores["stores"][name][
@@ -328,13 +342,6 @@ def test_sanitize_config_masks_cloud_store_backend_access_tokens(
             assert (
                 store_config["store_backend"]["ge_cloud_credentials"]["access_token"]
                 != ge_cloud_access_token
-            )
-        except KeyError:
-            # a field in store_config["store_backend"]["ge_cloud_credentials"]["access_token"]
-            # doesn't exist, so we expect this config to be unchanged
-            assert (
-                store_config
-                == data_context_config_dict_with_cloud_backed_stores["stores"][name]
             )
 
 
@@ -383,10 +390,14 @@ def test_sanitize_config_with_no_sensitive_keys():
     # base case - this config should pass through unaffected
     config = {
         "some_field": "and a value",
-        "some_other_field": {"password": "but this won't be found"},
+        "some_other_field": {"password": "expect this to be found"},
     }
     config_copy = safe_deep_copy(config)
-    assert PasswordMasker.sanitize_config(config_copy) == config
+    res = PasswordMasker.sanitize_config(config_copy)
+    assert res != config
+    assert (
+        config["some_other_field"]["password"] == PasswordMasker.MASKED_PASSWORD_STRING
+    )
 
 
 def test_sanitize_config_with_password_field():
