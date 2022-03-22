@@ -24,7 +24,6 @@
     "tests": [
     {
       "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
-      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -40,7 +39,6 @@
     },
     {
       "title": "positive_test_exact_mostly_w_one_non_matching_value",
-      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -175,6 +173,7 @@
     },
     {
       "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "a",
@@ -190,6 +189,7 @@
     },
     {
       "title": "positive_test_exact_mostly_w_one_non_matching_value",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "a",
