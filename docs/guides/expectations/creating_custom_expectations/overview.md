@@ -2,23 +2,24 @@
 title: Overview
 ---
 import Prerequisites from './components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-You can extend the functionality of Great Expectations by creating your own Custom [**Expectations**](../../../reference/expectations/expectations.md). You can also enrich Great Expectations as a shared standard for data quality by contributing new Expectations to the open source project.
+You can extend the functionality of Great Expectations by creating your own <TechnicalTag tag="custom_expectation" text="Custom Expectations" />. You can also enrich Great Expectations as a shared standard for data quality by contributing new <TechnicalTag tag="expectation" text="Expectations" /> to the open source project.
 
-These processes compliment each other and their steps are streamlined so that one flows into the other. Once you have created a custom Expectation, it is simple to contribute it to the open source project. This section will teach you how to do both.
+These processes compliment each other and their steps are streamlined so that one flows into the other. Once you have created a Custom Expectation, it is simple to contribute it to the open source project. This section will teach you how to do both.
 
 <Prerequisites>
 </Prerequisites>
 
-## Creating Custom Expectation
+## Creating Custom Expectations
 
 A fully-developed, Production-ready Expectation needs to do a lot of things:
 * Execute consistently across many types of data infrastructure
-* Render itself and its Validation Results into several formats
-* Support Profiling against new data
+* Render itself and its <TechnicalTag tag="validation_result" text="Validation Results" /> into several formats
+* Support <TechnicalTag tag="profiling" text="Profiling" /> against new data
 * Be maintainable, with good tests, documentation, linting, type hints, etc.
 
-In order to make development of Expectations as easy as possible, we've broken up the steps to create custom Expectations into a series of bite-sized steps. Each step can be completed in minutes. They can be completed (and contributed) incrementally, unlocking value at each step along the way.
+In order to make development of Expectations as easy as possible, we've broken up the steps to create Custom Expectations into a series of bite-sized steps. Each step can be completed in minutes. They can be completed (and contributed) incrementally, unlocking value at each step along the way.
 
 Grouped together, they constitute a Definition of Done for Expectations at each [Level of Maturity](../../../contributing/contributing_maturity.md).
 
@@ -28,7 +29,7 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 * Has a `library_metadata` object
 * Has a docstring, including a one-line short description
 * Has at least one positive and negative example case, and all test cases pass
-* Has core logic and passes tests on at least one [**Execution Engine**](../../../reference/execution_engine.md)
+* Has core logic and passes tests on at least one <TechnicalTag tag="execution_engine" text="Execution Engine" />
 
 <i class="fas fa-circle" style={{color: "#ffc107"}}></i> A Beta Expectation...
 
@@ -79,3 +80,7 @@ If you believe your Custom Expectation is otherwise ready for contribution at a 
 ### Publishing your Expectation as an open source contribution
 
 You can find more detailed instructions in our guide on [contributing Custom Expectations](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md).
+
+### Utilizing your Expectation
+
+You can find more detailed instructions on utilizing your Custom Expectations in our guide on [how to use a Custom Expectation](./how_to_use_custom_expectations.md).
