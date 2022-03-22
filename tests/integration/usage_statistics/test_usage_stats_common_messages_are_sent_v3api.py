@@ -4,7 +4,7 @@ from typing import List
 
 import pandas as pd
 import pytest
-from ruamel import yaml
+from ruamel.yaml import YAML
 
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
@@ -19,6 +19,8 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
 
 USAGE_STATISTICS_URL = USAGE_STATISTICS_QA_URL
 DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
+
+yaml = YAML(typ="safe")
 
 
 @pytest.fixture
@@ -157,7 +159,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     expected_events.append("data_context.test_yaml_config")
 
     # Note: add_checkpoint is not instrumented as of 20211215
-    context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+    context.add_checkpoint(**yaml.load(checkpoint_yaml))
 
     context.run_checkpoint(
         checkpoint_name="my_checkpoint",
