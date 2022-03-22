@@ -6985,7 +6985,9 @@ data_connectors:
 
 
 @pytest.fixture
-def sqlite_missing_data_asset_data_context(empty_data_context, db_file):
+def sqlite_configured_data_connector_missing_data_asset_data_context(
+    empty_data_context, db_file
+):
 
     context: DataContext = empty_data_context
 
@@ -7000,6 +7002,30 @@ def sqlite_missing_data_asset_data_context(empty_data_context, db_file):
         default_configured_data_connector:
             class_name: ConfiguredAssetSqlDataConnector
             module_name: great_expectations.datasource.data_connector
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def sqlite_runtime_data_connector_missing_data_asset_data_context(
+    empty_data_context, db_file
+):
+
+    context: DataContext = empty_data_context
+
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        connection_string: sqlite:///{db_file}
+        class_name: SqlAlchemyExecutionEngine
+        module_name: great_expectations.execution_engine
+    data_connectors:
         default_runtime_data_connector:
             module_name: great_expectations.datasource.data_connector
             class_name: RuntimeDataConnector

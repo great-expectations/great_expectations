@@ -1203,9 +1203,11 @@ def test_ConfiguredAssetSqlDataConnector_with_sorting(
 
 
 def test_update_configured_asset_sql_data_connector_missing_data_asset(
-    sqlite_missing_data_asset_data_context,
+    sqlite_configured_data_connector_missing_data_asset_data_context,
 ):
-    context: DataContext = sqlite_missing_data_asset_data_context
+    context: DataContext = (
+        sqlite_configured_data_connector_missing_data_asset_data_context
+    )
 
     data_asset_name: str = "table_containing_id_spacers_for_D"
 
@@ -1317,9 +1319,11 @@ def test_introspection_directives_schema_only_selects_schema_objects(
 
 
 def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_to_data_context(
-    sqlite_missing_data_asset_data_context,
+    sqlite_configured_data_connector_missing_data_asset_data_context,
 ):
-    context: DataContext = sqlite_missing_data_asset_data_context
+    context: DataContext = (
+        sqlite_configured_data_connector_missing_data_asset_data_context
+    )
 
     datasource_name: str = "my_datasource"
     data_connector_name: str = "default_configured_data_connector"
@@ -1371,9 +1375,9 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
 
 
 def test_update_runtime_data_connector_missing_data_asset_persists_to_data_context(
-    sqlite_missing_data_asset_data_context,
+    sqlite_runtime_data_connector_missing_data_asset_data_context,
 ):
-    context: DataContext = sqlite_missing_data_asset_data_context
+    context: DataContext = sqlite_runtime_data_connector_missing_data_asset_data_context
 
     datasource_name: str = "my_datasource"
     data_connector_name: str = "default_runtime_data_connector"
