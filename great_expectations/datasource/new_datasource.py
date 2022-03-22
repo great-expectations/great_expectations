@@ -222,7 +222,7 @@ class BaseDatasource:
 
     def _update_missing_data_asset_name_from_configured_data_connector(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ):
+    ) -> None:
         # if the data_asset_name is missing from a ConfiguredAssetSqlDataConnector config,
         # add it as a table_name
         if (
