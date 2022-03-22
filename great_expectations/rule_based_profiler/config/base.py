@@ -109,9 +109,15 @@ class DomainBuilderConfig(DictDot):
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
-        self.class_name = class_name
-        self.module_name = module_name
-        self.batch_request = batch_request
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -150,12 +156,23 @@ class ParameterBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         batch_request: Optional[Union[dict, str]] = None,
+        parameter_builders: Optional[dict] = None,
         **kwargs,
     ):
         self.name = name
-        self.class_name = class_name
-        self.module_name = module_name
-        self.batch_request = batch_request
+
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
+        if parameter_builders:
+            self.parameter_builders = parameter_builders
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -195,6 +212,20 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         allow_none=True,
     )
 
+    parameter_builders = fields.Dict(
+        keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        values=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
+
 
 class ExpectationConfigurationBuilderConfig(DictDot):
     def __init__(
@@ -203,12 +234,27 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         meta: Optional[dict] = None,
+        batch_request: Optional[Union[dict, str]] = None,
+        parameter_builders: Optional[dict] = None,
         **kwargs,
     ):
         self.expectation_type = expectation_type
-        self.class_name = class_name
-        self.module_name = module_name
-        self.meta = meta
+
+        if module_name is not None:
+            self.module_name = module_name
+
+        if class_name is not None:
+            self.class_name = class_name
+
+        if meta is not None:
+            self.meta = meta
+
+        if batch_request is not None:
+            self.batch_request = batch_request
+
+        if parameter_builders:
+            self.parameter_builders = parameter_builders
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -242,6 +288,24 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     )
     meta = fields.Dict(
         keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
+    batch_request = fields.Raw(
+        required=False,
+        allow_none=True,
+    )
+
+    parameter_builders = fields.Dict(
+        keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        values=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
             required=True,
             allow_none=False,
         ),

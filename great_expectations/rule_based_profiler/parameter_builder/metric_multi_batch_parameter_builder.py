@@ -28,13 +28,16 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         self,
         name: str,
         metric_name: str,
+        parameter_builders: Optional[Dict[str, dict]] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
@@ -57,6 +60,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         """
         super().__init__(
             name=name,
+            parameter_builders=parameter_builders,
             batch_list=batch_list,
             batch_request=batch_request,
             json_serialize=json_serialize,
