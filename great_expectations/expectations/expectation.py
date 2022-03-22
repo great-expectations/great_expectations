@@ -906,6 +906,7 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
+        return_only_gallery_examples: bool = False,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -933,9 +934,11 @@ class Expectation(metaclass=MetaExpectation):
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
         )
-        gallery_examples: List[ExpectationTestDataCases] = self._get_examples()
+        gallery_examples: List[ExpectationTestDataCases] = self._get_examples(
+            return_only_gallery_examples=True
+        )
         examples: List[ExpectationTestDataCases] = self._get_examples(
-            return_only_gallery_examples=False
+            return_only_gallery_examples=return_only_gallery_examples
         )
         description_diagnostics: ExpectationDescriptionDiagnostics = (
             self._get_description_diagnostics()
@@ -1046,13 +1049,11 @@ class Expectation(metaclass=MetaExpectation):
         :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
         :return: list of examples or [], if no examples exist
         """
-        is_core_expectation = False
         try:
             # Currently, only community contrib expectations have an examples attribute
             all_examples = self.examples
         except AttributeError:
             all_examples = self._get_examples_from_json()
-            is_core_expectation = True
             if all_examples == []:
                 return []
 
@@ -1069,7 +1070,6 @@ class Expectation(metaclass=MetaExpectation):
                 if (
                     test.get("include_in_gallery") == True
                     or return_only_gallery_examples == False
-                    or is_core_expectation == True
                 ):
                     copied_test = deepcopy(test)
                     if top_level_only_for and "only_for" not in copied_test:
