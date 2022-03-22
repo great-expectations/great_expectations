@@ -1004,7 +1004,7 @@ def test_profiler_all_expectation_types_spark(
     assert profiler.column_info.get("rate_code_id")
     suite = profiler.build_suite()
 
-    assert len(suite.expectations) == 45
+    assert len(suite.expectations) == 40
     (
         columns_with_expectations,
         expectations_from_suite,
@@ -1014,6 +1014,7 @@ def test_profiler_all_expectation_types_spark(
         "expect_column_values_to_be_unique",
         "expect_column_values_to_be_null",
         "expect_compound_columns_to_be_unique",
+        "expect_column_values_to_be_between",
     }
     assert expectations_from_suite == {
         i for i in possible_expectations_set if i not in unexpected_expectations
@@ -1068,7 +1069,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
 
     assert profiler.column_info.get("rate_code_id")
     suite = profiler.build_suite()
-    assert len(suite.expectations) == 45
+    assert len(suite.expectations) == 40
     (
         columns_with_expectations,
         expectations_from_suite,
@@ -1078,6 +1079,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
         "expect_column_values_to_be_unique",
         "expect_column_values_to_be_null",
         "expect_compound_columns_to_be_unique",
+        "expect_column_values_to_be_between",
     }
     assert expectations_from_suite == {
         i for i in possible_expectations_set if i not in unexpected_expectations
