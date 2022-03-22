@@ -1,0 +1,129 @@
+=============================== warnings summary ===============================
+ ../../../../../opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/snowflake/connector/options.py:94
+   /opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/snowflake/connector/options.py:94: UserWarning: You have an incompatible version of 'pyarrow' installed (7.0.0), please install a version that adheres to: 'pyarrow<3.1.0,>=3.0.0; extra == "pandas"'
+     warn_incompatible_dep(
+
+ tests/test_definitions/test_expectations_cfe.py::test_case_runner_cfe[pandas/column_map_expectations/expect_column_value_lengths_to_be_between:positive_test_exact_min_and_max]
+ tests/test_definitions/test_expectations_cfe.py::test_case_runner_cfe[pandas/column_map_expectations/expect_column_value_lengths_to_be_between:negative_test_matching_min_max_too_small]
+ tests/test_definitions/test_expectations_cfe.py::test_case_runner_cfe[pandas/column_map_expectations/expect_column_value_lengths_to_be_between:negative_test_matching_max_min_too_large]
+ tests/test_definitions/test_expectations_cfe.py::test_case_runner_cfe[pandas/column_map_expectations/expect_column_value_lengths_to_be_between:negative_test_with_max_lt_min]
+ tests/test_definitions/test_expectations_cfe.py::test_case_runner_cfe[pandas/column_map_expectations/expect_column_value_lengths_to_be_between:positive_test_with_missing_value_in_column]
+ tests/test_definitions/test_expectations_cfe.py::test_case_runner_cfe[pandas/column_map_expectations/expect_column_value_lengths_to_be_between:test_error_handling_values_are_integers]
+ tests/test_definitions/test_expectations_cfe.py::test_case_runner_cfe[pandas/column_map_expectations/expect_column_value_lengths_to_be_between:test_conditional_expectation_passes]
+ tests/test_definitions/test_expectations_cfe.py::test_case_runner_cfe[pandas/column_map_expectations/expect_column_value_lengths_to_be_between:test_conditional_expectation_fails]
+   great_expectations/expectations/metrics/column_map_metrics/column_value_lengths.py:113: FutureWarning: Boolean inputs to the `inclusive` argument are deprecated in favour of `both` or `neither`.
+     metric_series = column_lengths.between(
+
+ tests/test_definitions/test_expectations_cfe.py::test_case_runner_cfe[spark/column_aggregate_expectations/expect_column_median_to_be_between:test_empty_column_should_be_false_no_observed_value_with_which_to_compare]
+ tests/test_definitions/test_expectations.py::test_case_runner[SparkDFDataset/column_aggregate_expectations/expect_column_median_to_be_between:test_empty_column_should_be_false_no_observed_value_with_which_to_compare]
+   /opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/numpy/core/fromnumeric.py:3474: RuntimeWarning: Mean of empty slice.
+     return _methods._mean(a, axis=axis, dtype=dtype,
+
+ tests/test_definitions/test_expectations_cfe.py::test_case_runner_cfe[spark/column_aggregate_expectations/expect_column_median_to_be_between:test_empty_column_should_be_false_no_observed_value_with_which_to_compare]
+ tests/test_definitions/test_expectations.py::test_case_runner[SparkDFDataset/column_aggregate_expectations/expect_column_median_to_be_between:test_empty_column_should_be_false_no_observed_value_with_which_to_compare]
+   /opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/numpy/core/_methods.py:189: RuntimeWarning: invalid value encountered in double_scalars
+     ret = ret.dtype.type(ret / rcount)
+
+ tests/test_definitions/test_expectations.py::test_case_runner[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:basic_positive_test_without_nulls]
+ tests/test_definitions/test_expectations.py::test_case_runner[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:positive_test_with_nulls_and_ignore_row_if_either_value_is_missing]
+ tests/test_definitions/test_expectations.py::test_case_runner[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:negative_test_with_nulls]
+ tests/test_definitions/test_expectations.py::test_case_runner[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:another_positive_test_with_nulls]
+   /opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/pyspark/sql/context.py:77: FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
+     warnings.warn(
+
+ tests/test_definitions/test_expectations.py::test_case_runner[PandasDataset/column_distributional_expectations/expect_column_chisquare_test_p_value_to_be_greater_than:categorical_fixed_alternate_new_categorical_vals_no_holdout]
+ tests/test_definitions/test_expectations.py::test_case_runner[SparkDFDataset/column_distributional_expectations/expect_column_chisquare_test_p_value_to_be_greater_than:categorical_fixed_alternate_new_categorical_vals_no_holdout]
+ tests/test_definitions/test_expectations.py::test_case_runner[sqlite/column_distributional_expectations/expect_column_chisquare_test_p_value_to_be_greater_than:categorical_fixed_alternate_new_categorical_vals_no_holdout]
+ tests/test_definitions/test_expectations.py::test_case_runner[postgresql/column_distributional_expectations/expect_column_chisquare_test_p_value_to_be_greater_than:categorical_fixed_alternate_new_categorical_vals_no_holdout]
+   /opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/scipy/stats/_stats_py.py:6766: RuntimeWarning: divide by zero encountered in true_divide
+     terms = (f_obs_float - f_exp)**2 / f_exp
+
+ tests/test_great_expectations.py::TestIO::test_read_excel
+ tests/test_great_expectations.py::TestIO::test_read_excel
+ tests/test_great_expectations.py::TestIO::test_read_excel
+ tests/test_great_expectations.py::TestIO::test_read_excel
+   /opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/openpyxl/worksheet/_reader.py:312: UserWarning: Unknown extension is not supported and will be removed
+     warn(msg)
+
+ tests/data_context/test_data_context_ge_cloud_mode.py::test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error
+ tests/data_context/test_data_context_ge_cloud_mode.py::test_datasource_initialization_error_thrown_in_cloud_mode
+   tests/data_context/test_data_context_ge_cloud_mode.py:117: PendingDeprecationWarning:
+   load will be removed, use
+
+     yaml=YAML(typ='unsafe', pure=True)
+     yaml.load(...)
+
+   instead
+     config = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
+
+ tests/data_context/test_data_context_ge_cloud_mode.py::test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error
+ tests/data_context/test_data_context_ge_cloud_mode.py::test_datasource_initialization_error_thrown_in_cloud_mode
+   tests/data_context/test_data_context_ge_cloud_mode.py:117: UnsafeLoaderWarning:
+   The default 'Loader' for 'load(stream)' without further arguments can be unsafe.
+   Use 'load(stream, Loader=ruamel.yaml.Loader)' explicitly if that is OK.
+   Alternatively include the following in your code:
+
+     import warnings
+     warnings.simplefilter('ignore', ruamel.yaml.error.UnsafeLoaderWarning)
+
+   In most other cases you should consider using 'safe_load(stream)'
+     config = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
+
+ tests/data_context/test_data_context_test_yaml_config.py::test_golden_path_sql_datasource_configuration[test_backends0]
+    tests/conftest.py:4498: SADeprecationWarning: Calling URL() directly is deprecated and will be disabled in a future release.  The public constructor for URL is now the URL.create() method.
+     url = sa.engine.url.URL(
+
+ tests/data_context/test_data_context_test_yaml_config.py: 5 warnings
+ tests/data_context/test_data_context_v013.py: 8 warnings
+   great_expectations/data_context/data_context.py:1439: DeprecationWarning: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please useget_batch_list instead.
+     warnings.warn(
+
+ tests/data_context/store/test_expectations_store.py::test_ExpectationsStore_with_DatabaseStoreBackend[test_backends0]
+ tests/data_context/store/test_validations_store.py::test_ValidationsStore_with_DatabaseStoreBackend[test_backends0]
+   /opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/sqlalchemy/sql/elements.py:2456: SADeprecationWarning: Invoking and_() without arguments is deprecated, and will be disallowed in a future release.   For an empty and_() construct, use and_(True, *args).
+     return cls._construct(
+
+ tests/dataset/test_dataset_util_legacy.py::TestUtilMethods::test_kde_partition_data_bimodal
+ tests/dataset/test_dataset_util_legacy.py::TestUtilMethods::test_kde_partition_data_norm_0_1
+   great_expectations/dataset/util.py:128: DeprecationWarning: Please use `gaussian_kde` from the `scipy.stats` namespace, the `scipy.stats.kde` namespace is deprecated.
+     kde = stats.kde.gaussian_kde(data)
+
+ tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py::test_domain_builder
+ tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py::test_add_rule_and_run_profiler
+ tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py::test_profiler_parameter_builder_added
+ tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py::test_profiler_save_and_load
+ tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py::test_profiler_run_with_expectation_suite_arg
+   tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py:62: PendingDeprecationWarning:
+   dump will be removed, use
+
+     yaml=YAML(typ='unsafe', pure=True)
+     yaml.dump(...)
+
+   instead
+     context.test_yaml_config(yaml.dump(datasource_config))
+
+ tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py::test_domain_builder
+ tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py::test_add_rule_and_run_profiler
+ tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py::test_profiler_parameter_builder_added
+ tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py::test_profiler_save_and_load
+ tests/integration/profiling/rule_based_profilers/test_profiler_basic_workflows.py::test_profiler_run_with_expectation_suite_arg
+   /opt/hostedtoolcache/Python/3.8.12/x64/lib/python3.8/site-packages/ruamel/yaml/main.py:1364: PendingDeprecationWarning:
+   dump_all will be removed, use
+
+     yaml=YAML(typ='unsafe', pure=True)
+     yaml.dump_all(...)
+
+   instead
+     return dump_all(
+
+ tests/integration/profiling/rule_based_profilers/test_profiler_user_workflows.py::test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule
+ tests/integration/profiling/rule_based_profilers/test_profiler_user_workflows.py::test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes
+ Publishing test results to test run '255882'.
+ TestResults To Publish 6384, Test run id:255882
+ tests/integration/profiling/rule_based_profilers/test_profiler_user_workflows.py::test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes
+   great_expectations/rule_based_profiler/helpers/util.py:587: RuntimeWarning: invalid value encountered in double_scalars
+     if bootstrap_upper_quantile_bias / bootstrap_upper_quantile_standard_error <= 0.25:
+
+ tests/rule_based_profiler/parameter_builder/test_regex_pattern_string_parameter_builder.py::test_regex_pattern_string_parameter_builder_bobby_no_match
+   great_expectations/expectations/metrics/column_map_metrics/column_values_match_regex.py:23: UserWarning: This pattern is interpreted as a regular expression, and has match groups. To actually get the groups, use str.extract.
+     return column.astype(str).str.contains(regex)
