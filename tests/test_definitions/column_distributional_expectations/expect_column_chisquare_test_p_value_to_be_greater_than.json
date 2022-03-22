@@ -6,6 +6,7 @@
     },
     "tests" : [{
       "title": "categorical_fixed_partition_object",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in": {
         "column": "categorical_fixed",
@@ -22,6 +23,7 @@
     },
     {
       "title": "categorical_fixed_alternate_partition_object",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in": {
         "column": "categorical_fixed",

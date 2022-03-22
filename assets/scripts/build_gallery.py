@@ -113,9 +113,7 @@ def get_contrib_requirements(filepath: str) -> Dict:
     return requirements_info
 
 
-def build_gallery(
-    include_core: bool = True, include_contrib_experimental: bool = True
-) -> Dict:
+def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Dict:
     """
     Build the gallery object by running diagnostics for each Expectation and returning the resulting reports.
 
@@ -128,7 +126,7 @@ def build_gallery(
 
     """
     gallery_info = dict()
-    built_expectations = set()
+    requirements_dict = {}
     logger.info("Loading great_expectations library.")
     installed_packages = pkg_resources.working_set
     installed_packages_txt = sorted(f"{i.key}=={i.version}" for i in installed_packages)
@@ -136,125 +134,178 @@ def build_gallery(
 
     import great_expectations
 
-    logger.info("Getting base registered expectations list")
-    core_expectations = (
-        great_expectations.expectations.registry.list_registered_expectation_implementations()
-    )
     if include_core:
+        print("\n\n\n=== (Core) ===")
+        logger.info("Getting base registered expectations list")
+        core_expectations = (
+            great_expectations.expectations.registry.list_registered_expectation_implementations()
+        )
+        logger.debug(f"Found the following expectations: {sorted(core_expectations)}")
         for expectation in core_expectations:
-            logger.debug(f"Running diagnostics for expectation: {expectation}")
-            impl = great_expectations.expectations.registry.get_expectation_impl(
-                expectation
-            )
-            try:
-                diagnostics = impl().run_diagnostics()
-                checklist_string = diagnostics.generate_checklist()
-                expectation_checklists.write(f"\n\n----------------\n{expectation}\n")
-                expectation_checklists.write(f"{checklist_string}\n")
-                gallery_info[expectation] = diagnostics.to_json_dict()
-                built_expectations.add(expectation)
-            except Exception:
-                logger.error(f"Failed to run diagnostics for: {expectation}")
-                print(traceback.format_exc())
-                expectation_tracebacks.write(f"\n\n----------------\n{expectation}\n")
-                expectation_tracebacks.write(traceback.format_exc())
-    else:
-        built_expectations = set(core_expectations)
+            requirements_dict[expectation] = {"group": "core"}
 
-    if include_contrib_experimental:
+    just_installed = set()
+
+    if include_contrib:
+        print("\n\n\n=== (Contrib) ===")
         logger.info("Finding contrib modules")
-        contrib_experimental_dir = os.path.join(
+        skip_dirs = ("cli", "tests")
+        contrib_dir = os.path.join(
             os.path.dirname(__file__),
             "..",
             "..",
             "contrib",
-            "experimental",
-            "great_expectations_experimental",
         )
-        sys.path.append(contrib_experimental_dir)
-        expectations_module = importlib.import_module(
-            "expectations", "great_expectations_experimental"
-        )
-        requirements_dict = {}
-        for root, dirs, files in os.walk(contrib_experimental_dir):
-            for file in files:
-                if file.endswith(".py") and not file == "__init__.py":
-                    logger.debug(f"Getting requirements for module {file}")
-                    requirements_dict[file[:-3]] = get_contrib_requirements(
-                        os.path.join(root, file)
-                    )
 
-        # Use a brute-force approach: install all requirements for each module as we import it
-        for expectation_module in expectations_module.__all__:
-            just_installed = set()
-            if expectation_module in requirements_dict:
-                logger.info(f"Loading dependencies for module {expectation_module}")
-                requirements = requirements_dict[expectation_module].get(
-                    "requirements", []
-                )
-                parsed_requirements = pkg_resources.parse_requirements(requirements)
-                for req in parsed_requirements:
-                    is_satisfied = any(
-                        [installed_pkg in req for installed_pkg in installed_packages]
+        for root, dirs, files in os.walk(contrib_dir):
+            for dirname in skip_dirs:
+                if dirname in dirs:
+                    dirs.remove(dirname)
+            if "expectations" in dirs:
+                if root.endswith("great_expectations_experimental"):
+                    sys.path.append(root)
+                else:
+                    # A package in contrib that may contain more Expectations
+                    sys.path.append(os.path.dirname(root))
+            for filename in files:
+                if filename.endswith(".py") and filename.startswith("expect_"):
+                    logger.debug(f"Getting requirements for module {filename}")
+                    contrib_subdir_name = os.path.basename(os.path.dirname(root))
+                    requirements_dict[filename[:-3]] = get_contrib_requirements(
+                        os.path.join(root, filename)
                     )
-                    if is_satisfied:
-                        continue
-                    just_installed.add(req)
-                    logger.debug(f"Executing command: 'pip install \"{req}\"'")
-                    execute_shell_command(f'pip install "{req}"')
-            logger.debug(f"Importing {expectation_module}")
-            importlib.import_module(
-                f"expectations.{expectation_module}", "great_expectations_experimental"
+                    requirements_dict[filename[:-3]]["group"] = contrib_subdir_name
+
+    for expectation in sorted(requirements_dict):
+        group = requirements_dict[expectation]["group"]
+        print(f"\n\n\n=== {expectation} ({group}) ===")
+        requirements = requirements_dict[expectation].get("requirements", [])
+        parsed_requirements = pkg_resources.parse_requirements(requirements)
+        for req in parsed_requirements:
+            is_satisfied = any(
+                [installed_pkg in req for installed_pkg in installed_packages]
             )
-            available_expectations = (
-                great_expectations.expectations.registry.list_registered_expectation_implementations()
-            )
-            new_expectations = set(available_expectations) - built_expectations
-            for expectation in new_expectations:
-                logger.debug(f"Running diagnostics for expectation: {expectation}")
-                impl = great_expectations.expectations.registry.get_expectation_impl(
-                    expectation
+            if is_satisfied or req in just_installed:
+                continue
+            logger.debug(f"Executing command: 'pip install \"{req}\"'")
+            status_code = execute_shell_command(f'pip install "{req}"')
+            if status_code == 0:
+                just_installed.add(req)
+            else:
+                expectation_tracebacks.write(
+                    f"\n\n----------------\n{expectation} ({group})\n"
                 )
-                try:
-                    diagnostics = impl().run_diagnostics()
-                    checklist_string = diagnostics.generate_checklist()
-                    expectation_checklists.write(
-                        f"\n\n----------------\n(contrib) {expectation}\n"
-                    )
-                    expectation_checklists.write(f"{checklist_string}\n")
-                    gallery_info[expectation] = diagnostics.to_json_dict()
-                    built_expectations.add(expectation)
-                except Exception:
-                    logger.error(f"Failed to run diagnostics for: {expectation}")
-                    print(traceback.format_exc())
-                    expectation_tracebacks.write(
-                        f"\n\n----------------\n{expectation}\n"
-                    )
-                    expectation_tracebacks.write(traceback.format_exc())
+                expectation_tracebacks.write(f"Failed to pip install {req}\n\n")
 
-            logger.info(f"Unloading just-installed for module {expectation_module}")
-            for req in just_installed:
-                logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")
-                execute_shell_command(f'pip uninstall -y "{req}"')
+        if group != "core":
+            logger.debug(f"Importing {expectation}")
+            try:
+                if group == "great_expectations_experimental":
+                    importlib.import_module(f"expectations.{expectation}", group)
+                else:
+                    importlib.import_module(f"{group}.expectations")
+            except ModuleNotFoundError as e:
+                logger.error(f"Failed to load expectation: {expectation}")
+                print(traceback.format_exc())
+                expectation_tracebacks.write(
+                    f"\n\n----------------\n{expectation} ({group})\n"
+                )
+                expectation_tracebacks.write(traceback.format_exc())
+                continue
 
-        metrics_module = importlib.import_module(
-            "metrics", "great_expectations_experimental"
+        logger.debug(f"Running diagnostics for expectation: {expectation}")
+        impl = great_expectations.expectations.registry.get_expectation_impl(
+            expectation
         )
-        for metrics_module in metrics_module.__all__:
-            if metrics_module in requirements_dict:
-                logger.warning(
-                    f"Independent metrics module {metrics_module} not being processed."
-                )
+        try:
+            diagnostics = impl().run_diagnostics(return_only_gallery_examples=True)
+            checklist_string = diagnostics.generate_checklist()
+            expectation_checklists.write(
+                f"\n\n----------------\n{expectation} ({group})\n"
+            )
+            expectation_checklists.write(f"{checklist_string}\n")
+            gallery_info[expectation] = diagnostics.to_json_dict()
+        except Exception:
+            logger.error(f"Failed to run diagnostics for: {expectation}")
+            print(traceback.format_exc())
+            expectation_tracebacks.write(
+                f"\n\n----------------\n{expectation} ({group})\n"
+            )
+            expectation_tracebacks.write(traceback.format_exc())
+
+    if just_installed:
+        print("\n\n\n=== (Uninstalling) ===")
+        logger.info(
+            f"Uninstalling packages that were installed while running this script..."
+        )
+        for req in just_installed:
+            logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")
+            execute_shell_command(f'pip uninstall -y "{req}"')
+
+    expectation_filenames_set = set(requirements_dict.keys())
+    registered_expectations_set = set(
+        great_expectations.expectations.registry.list_registered_expectation_implementations()
+    )
+    non_matched_filenames = expectation_filenames_set - registered_expectations_set
+    if non_matched_filenames:
+        expectation_tracebacks.write(f"\n\n----------------\n(Not a traceback)\n")
+        expectation_tracebacks.write(
+            "Expectation filenames that don't match their defined Expectation name:\n"
+        )
+        for fname in sorted(non_matched_filenames):
+            expectation_tracebacks.write(f"- {fname}\n")
+
+        bad_names = sorted(
+            list(registered_expectations_set - expectation_filenames_set)
+        )
+        expectation_tracebacks.write(
+            f"\nRegistered Expectation names that don't match:\n"
+        )
+        for exp_name in bad_names:
+            expectation_tracebacks.write(f"- {exp_name}\n")
+
+    if include_core:
+        core_dir = os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "great_expectations",
+            "expectations",
+            "core",
+        )
+        core_expectations_filename_set = set(
+            [
+                fname.rsplit(".", 1)[0]
+                for fname in os.listdir(core_dir)
+                if fname.startswith("expect_")
+            ]
+        )
+        core_expectations_not_in_gallery = core_expectations_filename_set - set(
+            core_expectations
+        )
+        if core_expectations_not_in_gallery:
+            expectation_tracebacks.write(f"\n\n----------------\n(Not a traceback)\n")
+            expectation_tracebacks.write(
+                f"Core Expectation files not included in core_expectations:\n"
+            )
+            for exp_name in sorted(core_expectations_not_in_gallery):
+                expectation_tracebacks.write(f"- {exp_name}\n")
 
     return gallery_info
 
 
 if __name__ == "__main__":
-    gallery_info = build_gallery(include_core=True, include_contrib_experimental=True)
+    gallery_info = build_gallery(include_core=True, include_contrib=True)
     tracebacks = expectation_tracebacks.getvalue()
     checklists = expectation_checklists.getvalue()
     if tracebacks != "":
+        print("\n\n\n" + "#" * 30 + "   T R A C E B A C K S   " + "#" * 30 + "\n")
         print(tracebacks)
+        print(
+            "\n\n" + "#" * 30 + "   E N D   T R A C E B A C K S   " + "#" * 30 + "\n\n"
+        )
+        with open("./gallery-errors.txt", "w") as outfile:
+            outfile.write(tracebacks)
     if checklists != "":
         print(checklists)
         with open("./checklists.txt", "w") as outfile:
