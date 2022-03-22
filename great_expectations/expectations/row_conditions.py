@@ -60,12 +60,20 @@ class ConditionParserError(ge_exceptions.GreatExpectationsError):
 
 
 class RowConditionParserType(enum.Enum):
+    """Type of condition or parser to be used to interpret a RowCondition
+
+    Note that many of these are forward looking and are not yet implemented.
+    In the future `GE` can replace the `great_expectations__experimental__`
+    name for the condition_parser and this enum can be used internally
+    instead of strings for the condition_parser user input.
+    """
+
     GE = "ge"  # GE intermediate language
-    SPARK = "spark"
-    SPARK_SQL = "spark_sql"
-    PANDAS = "pandas"
-    PYTHON = "python"
-    SQL = "sql"
+    SPARK = "spark"  # Spark pyspark.sql.Column type
+    SPARK_SQL = "spark_sql"  # String type
+    PANDAS = "pandas"  # pandas parser for pandas DataFrame.query()
+    PYTHON = "python"  # python parser for DataFrame.query()
+    SQL = "sql"  # Selectable type
 
 
 @dataclass
