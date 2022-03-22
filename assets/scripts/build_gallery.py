@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import traceback
+import re
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, run
 from typing import Dict
@@ -224,6 +225,8 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
                 f"\n\n----------------\n{expectation} ({group})\n"
             )
             expectation_checklists.write(f"{checklist_string}\n")
+            if diagnostics['description']['docstring']:
+                diagnostics['description']['docstring'] = format_docstring_to_markdown(diagnostics['description']['docstring'])
             gallery_info[expectation] = diagnostics.to_json_dict()
         except Exception:
             logger.error(f"Failed to run diagnostics for: {expectation}")
@@ -292,6 +295,69 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
                 expectation_tracebacks.write(f"- {exp_name}\n")
 
     return gallery_info
+
+
+def format_docstring_to_markdown(docstr: str) -> str:
+    """
+    Add markdown formatting to a provided docstring
+
+    Args:
+        docstr: the original docstring that needs to be converted to markdown.
+
+    Returns:
+        str of Docstring formatted as markdown
+
+    """
+    r = re.compile(r"\s\s+", re.MULTILINE)
+    clean_docstr_list = []
+    prev_line = None
+    in_code_block = False
+    in_param = False
+    first_code_indentation = None
+
+    # Parse each line to determine if it needs formatting
+    for original_line in docstr.split("\n"):
+        # Remove excess spaces from lines formed by concatenated docstring lines.
+        line = r.sub(" ", original_line)
+        if line.strip() == '::':  # In some old docstrings, this indicates the start of an example block.
+            in_code_block = True
+            clean_docstr_list.append("```")
+        elif line.strip().endswith(":"):  # All of our parameter/arg/etc lists start after a line ending in ':'.
+            in_param = True
+            if prev_line != '': # This adds a blank line before the header if one doesn't already exist.
+                clean_docstr_list.append('')
+            clean_docstr_list.append(f"#### {line.strip()}")  # Turn the line into an H4 header
+        elif line.strip() == '' and prev_line != '::':
+            # All of our parameter groups end with a line break, but we don't want to exit a parameter block due to a
+            # line break in a code block.  However, some code blocks start with a blank first line, so we want to make
+            # sure we aren't immediately exiting the code block (hence the test for '::' on the previous line.
+            in_param = False
+            if in_code_block:  # Add the markdown indicator to close a code block, since we aren't in one now.
+                clean_docstr_list.append("```")
+            in_code_block = False
+            first_code_indentation = None
+            clean_docstr_list.append(line)
+        else:
+            if in_code_block:
+                # Determine the number of spaces indenting the first line of code so they can be removed from all lines
+                # in the code block without wrecking the hierarchical indentation levels of future lines.
+                if first_code_indentation == None and line.strip() != '':
+                    first_code_indentation = len(re.match(r"\s*", original_line, re.UNICODE).group(0))
+                if line.strip() == '' and prev_line == '::':
+                    # If the first line of the code block is a blank one, just skip it.
+                    pass
+                else:
+                    # Append the line of code, minus the extra indentation from being written in an indented docstring.
+                    clean_docstr_list.append(original_line[first_code_indentation:])
+            elif ":" in line.replace(':ref:', '') and in_param:
+                # This indicates a parameter. arg. or other definition.
+                clean_docstr_list.append(f"- {line.strip()}")
+            else:
+                # This indicates a regular line of text.
+                clean_docstr_list.append(f"{line.strip()}")
+        prev_line = line.strip()
+    clean_docstr = "\n".join(clean_docstr_list)
+    return clean_docstr
 
 
 if __name__ == "__main__":
