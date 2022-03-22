@@ -58,7 +58,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         self,
         name: str,
         metric_name: str,
-        parameter_builders: Optional[Dict[str, dict]] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = True,
@@ -109,7 +108,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         super().__init__(
             name=name,
             metric_name=metric_name,
-            parameter_builders=parameter_builders,
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
             enforce_numeric_metric=enforce_numeric_metric,

@@ -48,7 +48,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        parameter_builders: Optional[Dict[str, dict]] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[float, str] = 1.0,
@@ -75,7 +74,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         """
         super().__init__(
             name=name,
-            parameter_builders=parameter_builders,
             batch_list=batch_list,
             batch_request=batch_request,
             json_serialize=json_serialize,

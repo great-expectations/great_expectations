@@ -29,7 +29,7 @@ class DomainBuilder(Builder, ABC):
         self,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
-            Union[BatchRequest, RuntimeBatchRequest, dict, str]
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
         ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):

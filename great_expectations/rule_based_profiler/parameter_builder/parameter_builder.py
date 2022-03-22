@@ -90,7 +90,6 @@ class ParameterBuilder(Builder, ABC):
     def __init__(
         self,
         name: str,
-        parameter_builders: Optional[Dict[str, dict]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
             Union[str, BatchRequest, RuntimeBatchRequest, dict]

@@ -156,7 +156,6 @@ class ParameterBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         batch_request: Optional[Union[dict, str]] = None,
-        parameter_builders: Optional[dict] = None,
         **kwargs,
     ):
         self.name = name
@@ -169,9 +168,6 @@ class ParameterBuilderConfig(DictDot):
 
         if batch_request is not None:
             self.batch_request = batch_request
-
-        if parameter_builders:
-            self.parameter_builders = parameter_builders
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -212,20 +208,6 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         allow_none=True,
     )
 
-    parameter_builders = fields.Dict(
-        keys=fields.String(
-            required=True,
-            allow_none=False,
-        ),
-        values=fields.Nested(
-            lambda: ParameterBuilderConfigSchema(),
-            required=True,
-            allow_none=False,
-        ),
-        required=False,
-        allow_none=True,
-    )
-
 
 class ExpectationConfigurationBuilderConfig(DictDot):
     def __init__(
@@ -235,7 +217,6 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         module_name: Optional[str] = None,
         meta: Optional[dict] = None,
         batch_request: Optional[Union[dict, str]] = None,
-        parameter_builders: Optional[dict] = None,
         **kwargs,
     ):
         self.expectation_type = expectation_type
@@ -251,9 +232,6 @@ class ExpectationConfigurationBuilderConfig(DictDot):
 
         if batch_request is not None:
             self.batch_request = batch_request
-
-        if parameter_builders:
-            self.parameter_builders = parameter_builders
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -295,20 +273,6 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
         allow_none=True,
     )
     batch_request = fields.Raw(
-        required=False,
-        allow_none=True,
-    )
-
-    parameter_builders = fields.Dict(
-        keys=fields.String(
-            required=True,
-            allow_none=False,
-        ),
-        values=fields.Nested(
-            lambda: ParameterBuilderConfigSchema(),
-            required=True,
-            allow_none=False,
-        ),
         required=False,
         allow_none=True,
     )

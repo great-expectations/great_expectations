@@ -63,7 +63,6 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     def __init__(
         self,
         expectation_type: str,
-        parameter_builders: Optional[Dict[str, dict]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
             Union[str, BatchRequest, RuntimeBatchRequest, dict]
@@ -75,7 +74,6 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     ):
         super().__init__(
             expectation_type=expectation_type,
-            parameter_builders=parameter_builders,
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,
