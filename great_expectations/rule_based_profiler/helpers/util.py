@@ -37,7 +37,7 @@ def get_validator(
     *,
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
+    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -92,7 +92,7 @@ def get_validator(
 def get_batch_ids(
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
+    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -124,7 +124,7 @@ def get_batch_ids(
 
 
 def build_batch_request(
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
+    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
