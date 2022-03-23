@@ -50,6 +50,7 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
@@ -596,13 +597,39 @@ class Validator:
             column_name = expectation_kwargs["column"]
             rule.domain_builder.include_column_names = [column_name]
 
-        for parameter_builder in rule.parameter_builders:
-            if hasattr(parameter_builder, "metric_name") and hasattr(
-                parameter_builder, "metric_value_kwargs"
-            ):
-                metric_value_kwargs: dict = parameter_builder.metric_value_kwargs or {}
-                metric_value_kwargs.update(metric_value_kwargs_override)
-                parameter_builder.metric_value_kwargs = metric_value_kwargs
+        parameter_builders: List[ParameterBuilder] = rule.parameter_builders or []
+        parameter_builder: ParameterBuilder
+
+        for parameter_builder in parameter_builders:
+            self._update_metric_value_kwargs_for_success_keys(
+                parameter_builder=parameter_builder,
+                metric_value_kwargs=metric_value_kwargs_override,
+            )
+
+    @staticmethod
+    def _update_metric_value_kwargs_for_success_keys(
+        parameter_builder: ParameterBuilder,
+        metric_value_kwargs: Optional[dict] = None,
+    ):
+        if metric_value_kwargs is None:
+            metric_value_kwargs = {}
+
+        if hasattr(parameter_builder, "metric_name") and hasattr(
+            parameter_builder, "metric_value_kwargs"
+        ):
+            parameter_builder_metric_value_kwargs: dict = (
+                parameter_builder.metric_value_kwargs or {}
+            )
+
+            key: str
+            value: Any
+            parameter_builder_metric_value_kwargs = {
+                key: metric_value_kwargs.get(key) or value
+                for key, value in parameter_builder_metric_value_kwargs.items()
+            }
+            parameter_builder.metric_value_kwargs = (
+                parameter_builder_metric_value_kwargs
+            )
 
     @property
     def execution_engine(self) -> ExecutionEngine:
