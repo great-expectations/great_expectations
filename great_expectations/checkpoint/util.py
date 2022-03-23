@@ -518,4 +518,4 @@ def send_sns_notification(
     except sns.exceptions.InvalidParameterException:
         logger.error(f"Received invalid for message: {validation_results}")
     else:
-        return f"Successfully posted results to {response['MessageId']}"
+        return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"

@@ -1141,19 +1141,17 @@ class CloudNotificationAction(ValidationAction):
         return send_cloud_notification(url=ge_cloud_url, headers=auth_headers)
 
 
-# TODO: Should this be done in batches?
 class SNSNotificationAction(ValidationAction):
     """
     Action that pushes validations results to an SNS topic with a subject of passed or failed.
     """
 
     def __init__(
-        self,
-        data_context: "DataContext",
-        sns_topic_arn: str,
+        self, data_context: "DataContext", sns_topic_arn: str, sns_message_subject
     ):
         super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn
+        self.sns_message_subject = sns_message_subject
 
     def _run(
         self,
@@ -1161,8 +1159,9 @@ class SNSNotificationAction(ValidationAction):
         validation_result_suite_identifier: ValidationResultIdentifier,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
+        data_asset=None,
         **kwargs,
-    ):
+    ) -> str:
         logger.debug("SNSNotificationAction.run")
 
         if validation_result_suite is None:
@@ -1170,8 +1169,21 @@ class SNSNotificationAction(ValidationAction):
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
             )
 
+        if self.sns_message_subject is None:
+            logger.warning(
+                f"No message subject was checking for expectation_suite_name"
+            )
+            if expectation_suite_identifier is None:
+                subject = validation_result_suite_identifier.run_id
+                logger.warning(
+                    f"No expectation_suite_identifier was passed. Defaulting to validation run_id."
+                )
+            else:
+                subject = expectation_suite_identifier.expectation_suite_name
+                logger.info(f"Using expectation_suite_name: {subject}")
+        else:
+            subject = self.sns_message_subject
+
         return send_sns_notification(
-            self.sns_topic_arn,
-            validation_result_suite.success,
-            validation_result_suite.__str__(),
+            self.sns_topic_arn, subject, validation_result_suite.__str__(), **kwargs
         )

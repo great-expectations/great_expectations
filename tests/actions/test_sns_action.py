@@ -22,4 +22,5 @@ def test_send_sns_notification(sns, aws_credentials):
     response = send_sns_notification(
         created.get("TopicArn"), str(result.success), str(result.results)
     )
+
     assert response.startswith("Successfully")

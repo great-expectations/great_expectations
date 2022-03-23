@@ -7,6 +7,7 @@ import pytest
 from freezegun import freeze_time
 from requests import Session
 
+from great_expectations.checkpoint.actions import SNSNotificationAction
 from great_expectations.checkpoint.util import smtplib
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -686,3 +687,28 @@ def test_cloud_notification_action_bad_response(
     mock_post_method.assert_called_with(
         url=expected_ge_cloud_url, headers=expected_headers
     )
+
+
+from .conftest import aws_credentials, sns
+
+
+def test_cloud_sns_notification_action(
+    sns,
+    validation_result_suite,
+    cloud_data_context_with_datasource_pandas_engine,
+    validation_result_suite_id,
+    aws_credentials,
+):
+    subj_topic = "test-subj"
+    created_subj = sns.create_topic(Name=subj_topic)
+    arn = created_subj.get("TopicArn")
+    sns_action = SNSNotificationAction(
+        sns_topic_arn=arn,
+        sns_message_subject="Subject",
+        data_context=cloud_data_context_with_datasource_pandas_engine,
+    )
+    assert sns_action.run(
+        validation_result_suite=validation_result_suite,
+        validation_result_suite_identifier=validation_result_suite_id,
+        data_asset=None,
+    ).endswith("Subject")
