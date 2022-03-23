@@ -257,7 +257,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@edjoesu",
         ],
-        "package": "experimental_expectations",
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
