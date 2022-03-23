@@ -324,8 +324,8 @@ We will now take the local GE configuration from [Part 1](#part-1-local-configur
 
 There are a number of ways that Great Expectations can be run in Cloud Composer or Airflow.
 
-1. [Running a Checkpoint in Airflow using a `bash operator`](./how_to_use_great_expectations_with_airflow#option-1-running-a-checkpoint-with-a-bashoperator.md)
-2. [Running a Checkpoint in Airflow using a `python operator`](./how_to_use_great_expectations_with_airflow#option-2-running-the-checkpoint-script-output-with-a-pythonoperator.md)
+1. [Running a Checkpoint in Airflow using a `bash operator`](./how_to_use_great_expectations_with_airflow.md#option-1-running-a-checkpoint-with-a-bashoperator)
+2. [Running a Checkpoint in Airflow using a `python operator`](./how_to_use_great_expectations_with_airflow.md#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
 3. [Running a Checkpoint in Airflow using a `Airflow operator`](https://github.com/great-expectations/airflow-provider-great-expectations)
 
 For our example, we are going to use the `bash operator` to run the Checkpoint. This portion of the guide can also be found in the following [Walkthrough Video](https://drive.google.com/file/d/1YhEMqSRkp5JDIQA_7fleiKTTlEmYx2K8/view?usp=sharing).
@@ -451,7 +451,7 @@ You've successfully migrated your Great Expectations configuration to Cloud Comp
 
 There are many ways to iterate and improve this initial version, which used a `bash operator` for simplicity. For information on more sophisticated ways of triggering Checkpoints, building our DAGs, and dividing our Data Assets into Batches using DataConnectors, please refer to the following documentation: 
 
-- [How to run a Checkpoint in Airflow using a `python operator`](./how_to_use_great_expectations_with_airflow#option-2-running-the-checkpoint-script-output-with-a-pythonoperator.md).
+- [How to run a Checkpoint in Airflow using a `python operator`](./how_to_use_great_expectations_with_airflow.md#option-2-running-the-checkpoint-script-output-with-a-pythonoperator).
 - [How to run a Checkpoint in Airflow using a `Great Expectations Airflow operator`](https://github.com/great-expectations/airflow-provider-great-expectations)(recommended).
 - [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule).
 - [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule).
