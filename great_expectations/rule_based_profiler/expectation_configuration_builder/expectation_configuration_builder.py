@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Set, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -25,6 +25,17 @@ class ExpectationConfigurationBuilder(Builder, ABC):
         data_context: Optional["DataContext"] = None,  # noqa: F821
         **kwargs
     ):
+        """
+        The ExpectationConfigurationBuilder will build ExpectationConfiguration objects for a Domain from the Rule.
+
+        Args:
+            expectation_type: the "expectation_type" argument of "ExpectationConfiguration" object to be emitted.
+            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            data_context: DataContext
+            kwargs: additional arguments
+        """
+
         super().__init__(
             batch_list=batch_list,
             batch_request=batch_request,
@@ -49,6 +60,7 @@ class ExpectationConfigurationBuilder(Builder, ABC):
 
     def build_expectation_configuration(
         self,
+        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,

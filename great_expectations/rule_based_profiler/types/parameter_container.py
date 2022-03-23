@@ -541,7 +541,7 @@ def get_fully_qualified_parameter_names(
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> List[str]:
     fully_qualified_parameter_names: List[str] = []
-    if variables is not None:
+    if not (variables is None or variables.parameter_nodes is None):
         fully_qualified_parameter_names.extend(
             _get_parameter_node_attribute_names(
                 parameter_name_root=PARAMETER_NAME_ROOT_FOR_VARIABLES,
@@ -554,18 +554,21 @@ def get_fully_qualified_parameter_names(
     if parameters is not None:
         parameter_container: ParameterContainer = parameters[domain.id]
 
-        parameter_name_root: str
-        parameter_node: ParameterNode
-        for (
-            parameter_name_root,
-            parameter_node,
-        ) in parameter_container.parameter_nodes.items():
-            fully_qualified_parameter_names.extend(
-                _get_parameter_node_attribute_names(
-                    parameter_name_root=PARAMETER_NAME_ROOT_FOR_PARAMETERS,
-                    parameter_node=parameter_node,
+        if not (
+            parameter_container is None or parameter_container.parameter_nodes is None
+        ):
+            parameter_name_root: str
+            parameter_node: ParameterNode
+            for (
+                parameter_name_root,
+                parameter_node,
+            ) in parameter_container.parameter_nodes.items():
+                fully_qualified_parameter_names.extend(
+                    _get_parameter_node_attribute_names(
+                        parameter_name_root=PARAMETER_NAME_ROOT_FOR_PARAMETERS,
+                        parameter_node=parameter_node,
+                    )
                 )
-            )
 
     return fully_qualified_parameter_names
 
