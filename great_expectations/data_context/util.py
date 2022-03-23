@@ -40,10 +40,8 @@ from great_expectations.util import load_class, verify_dynamic_loading_support
 
 try:
     import sqlalchemy as sa
-    from sqlalchemy.exc import NoSuchModuleError
 except ImportError:
     sa = None
-    NoSuchModuleError = None
 
 logger = logging.getLogger(__name__)
 
@@ -548,9 +546,9 @@ class PasswordMasker:
                 engine = sa.create_engine(url, **kwargs)
                 return engine.url.__repr__()
             # Account for the edge case where we have SQLAlchemy in our env but haven't installed the appropriate dialect to match the input URL
-            except NoSuchModuleError as e:
+            except Exception as e:
                 logger.warning(
-                    f"Something went wrong when trying to use SQLAlchemy to obfuscate URL; could not find dialect {e}"
+                    f"Something went wrong when trying to use SQLAlchemy to obfuscate URL: {e}"
                 )
         else:
             warnings.warn(
