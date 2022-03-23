@@ -1,7 +1,7 @@
 # This file is responsible for configuring the `dependency_graph` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
 #
 # The pipeline is run under the following conditions:
-#   - On the develop branch whenever a commit is made to an open PR.
+#   - On the develop branch whenever a commit is made to an open PR
 #
 # `dependency_graph` runs a subset of test suite, aiming to only test what's relevant to attain coverage over a given set of changes.
 # The pipeline aims to balance both performance and safety to improve the developer experience but is innately less thorough than `great_expectations`.
@@ -74,6 +74,8 @@ stages:
                 tests/**
                 /*.txt
                 /*.yml
+                requirements*
+                azure-pipelines*
 
   - stage: lint
     dependsOn: scope_check
