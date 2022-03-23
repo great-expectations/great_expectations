@@ -334,7 +334,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         expectation_instance,
         examples: List[ExpectationTestDataCases],
     ) -> ExpectationDiagnosticCheckMessage:
-        """Check that the validate_configuration method returns True"""
+        """Check that the validate_configuration exists and doesn't raise a config error"""
         passed = False
         sub_messages = []
         try:
