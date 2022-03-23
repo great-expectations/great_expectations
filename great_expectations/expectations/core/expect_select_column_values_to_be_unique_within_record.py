@@ -54,7 +54,6 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         "tags": [
             "core expectation",
             "table expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": [
             "@great_expectations",
