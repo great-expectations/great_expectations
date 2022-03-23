@@ -14,7 +14,6 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
     """Values in this column should only contain vowels"""
 
-    regex_snake_name = "vowel"
     regex_camel_name = "Vowel"
     regex = "^[aeiouyAEIOUY]*$"
     semantic_type_name_plural = "vowels"
@@ -111,7 +110,6 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
     ]
 
     map_metric = RegexBasedColumnMapExpectation.register_metric(
-        regex_snake_name=regex_snake_name,
         regex_camel_name=regex_camel_name,
         regex_=regex,
     )
