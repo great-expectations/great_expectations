@@ -51,6 +51,18 @@ class ActionDicts:
             },
         }
 
+    @staticmethod
+    def build_sns_action(sns_topic_arn, sns_message_subject, notify_with):
+        return {
+            "name": "publish_sns_message",
+            "action": {
+                "class_name": "SNSNotificationAction",
+                "sns_topic_arn": sns_topic_arn,
+                "sns_message_subject": sns_message_subject,
+                "notify_with": notify_with,
+            },
+        }
+
 
 class SimpleCheckpointConfigurator:
     """

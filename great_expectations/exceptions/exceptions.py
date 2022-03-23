@@ -184,6 +184,8 @@ class StoreError(DataContextError):
 class InvalidKeyError(StoreError):
     pass
 
+class InvalidValidationResultIdentifierError(GreatExpectationsError):
+    pass
 
 class InvalidCacheValueError(GreatExpectationsError):
     def __init__(self, result_dict):

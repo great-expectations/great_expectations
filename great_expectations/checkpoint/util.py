@@ -17,6 +17,8 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+from inspect import signature
+from functools import wraps
 
 logger = logging.getLogger(__name__)
 
@@ -550,3 +552,32 @@ def send_sns_notification(
         logger.error(f"Received invalid for message: {validation_results}")
     else:
         return f"Successfully posted results to {response['MessageId']}"
+
+
+def validate_run(*run_args,**run_kwargs):
+    '''
+    Validates an ValidationAction Run config
+
+    :param run_args: Args passed to the ValidationAction
+    :param run_kwargs: Keyw-word Arguments
+
+    '''
+    def decorate(func):
+        sig = signature(func)
+        bound_types =  sig.bind_partial(*run_args,**run_kwargs).arguments
+        @wraps(func)
+        def wrapper(*args,**kwargs):
+            bound_values =  sig.bind_partial(*args,**kwargs)
+            for name,val in bound_values.arguments.items():
+                if name in bound_types:
+                    if not isinstance(val,bound_types[name]):
+                        raise TypeError('Argument {} must be {}'.format(name,bound_types[name]))
+            return func
+        return wrapper
+    return decorate
+
+
+
+
+
+

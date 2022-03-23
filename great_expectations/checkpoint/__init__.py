@@ -12,6 +12,7 @@ from .actions import (
     StoreValidationResultAction,
     UpdateDataDocsAction,
     ValidationAction,
+    SNSNotificationAction,
 )
 from .checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from .configurator import SimpleCheckpointConfigurator
