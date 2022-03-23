@@ -411,12 +411,10 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         commented_map: Optional[CommentedMap] = None,
     ):
         self.name = name
+        self.module_name = module_name
+        self.class_name = class_name
         self.config_version = config_version
         self.rules = rules
-        if class_name is not None:
-            self.class_name = class_name
-        if module_name is not None:
-            self.module_name = module_name
         self.variables = variables
 
         super().__init__(commented_map=commented_map)
