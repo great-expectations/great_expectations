@@ -14,7 +14,7 @@
 
 general:
   package_name: CapitalOne DataProfiler Expectations
-  icon: https://1000logos.net/wp-content/uploads/2018/11/Capital-One-Logo.png
+  icon: assets/logo.png
   description: Data Profiler is an [open source solution](https://www.capitalone.com/tech/open-source/) from Capital One that uses [machine learning](https://www.capitalone.com/tech/machine-learning/)
     to help companies monitor big data and detect private customer information so that it can be protected. [Data Profiler](https://www.capitalone.com/tech/open-source/basics-of-data-profiler/)
     provides a pre-trained deep learning model to efficiently identify sensitive information, components to conduct statistical analysis of the dataset, and an API to build data labelers.
