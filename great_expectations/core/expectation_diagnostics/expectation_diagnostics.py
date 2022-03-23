@@ -477,7 +477,10 @@ class ExpectationDiagnostics(SerializableDictDot):
             else:
                 black_ok = True
             isort_ok = isort.check_code(
-                code, **isort.profiles.black, ignore_whitespace=True
+                code,
+                **isort.profiles.black,
+                ignore_whitespace=True,
+                known_local_folder=["great_expectations"],
             )
             if not isort_ok:
                 sub_messages.append(
