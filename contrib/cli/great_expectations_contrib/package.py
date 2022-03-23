@@ -139,15 +139,19 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         if domain_experts:
             self.domain_experts = []
             for expert in domain_experts:
-                picture = expert.get("picture")
-                if picture and os.path.exists(picture):
+
+                # If the user has provided a picture, we need to check if it is a relative URL.
+                # If it is, we need to convert to the HTTPS path that will show up when merged into `develop`.
+                picture_path: Optional[str] = expert.get("picture")
+                if picture_path and os.path.exists(picture_path):
                     package_name: str = os.path.basename(os.getcwd())
-                    url = os.path.join(
+                    url: str = os.path.join(
                         "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
                         package_name,
-                        picture,
+                        picture_path,
                     )
                     expert["picture"] = url
+
                 domain_expert = DomainExpert(**expert)
                 self.domain_experts.append(domain_expert)
 
