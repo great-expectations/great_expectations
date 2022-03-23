@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import pytest
 
@@ -31,7 +31,7 @@ def test_meta_not_dict_exception(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -53,7 +53,7 @@ def test_meta_not_dict_exception(
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
-    value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters={domain.id: parameter_container},
@@ -63,10 +63,11 @@ def test_meta_not_dict_exception(
     max_user_id: int = 999999999999
 
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
+        # noinspection PyTypeChecker
         DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_between",
             condition=condition,
-            min_value=value.value[0],
+            min_value=parameter_value.value[0],
             max_value=max_user_id,
             meta="Strings are not acceptable",
         )
@@ -88,7 +89,7 @@ def test_condition_not_string_exception(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -110,7 +111,7 @@ def test_condition_not_string_exception(
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
-    value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters={domain.id: parameter_container},
@@ -120,10 +121,11 @@ def test_condition_not_string_exception(
     max_user_id: int = 999999999999
 
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
+        # noinspection PyTypeChecker
         DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_between",
             condition=condition,
-            min_value=value.value[0],
+            min_value=parameter_value.value[0],
             max_value=max_user_id,
         )
 
@@ -144,7 +146,7 @@ def test_default_expectation_configuration_builder_alice_null_condition(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -170,19 +172,19 @@ def test_default_expectation_configuration_builder_alice_null_condition(
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
-    value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
     )
 
-    condition = None
+    condition: Optional[str] = None
     max_user_id: int = 999999999999
 
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        min_value=value.value[0],
+        min_value=parameter_value.value[0],
         max_value=max_user_id,
     )
 
@@ -208,7 +210,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -234,7 +236,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
-    value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -246,7 +248,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        min_value=value.value[0],
+        min_value=parameter_value.value[0],
         max_value=max_user_id,
     )
 
@@ -272,7 +274,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -299,7 +301,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
-    value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -311,7 +313,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     default_expectation_configuration_builder: DefaultExpectationConfigurationBuilder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        min_value=value.value[0],
+        min_value=parameter_value.value[0],
         max_value=max_user_id,
     )
 
@@ -337,7 +339,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -366,7 +368,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
-    parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -405,7 +407,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -434,7 +436,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
-    parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -473,7 +475,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -502,7 +504,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
-    parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -541,7 +543,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -570,7 +572,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
-    parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -609,7 +611,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -638,7 +640,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
-    parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -677,7 +679,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -706,7 +708,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
-    parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -745,7 +747,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -774,7 +776,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
-    parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -813,7 +815,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -842,7 +844,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
-    parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -881,7 +883,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -910,7 +912,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
-    parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -949,7 +951,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    metric_domain_kwargs = {"column": "user_id"}
+    metric_domain_kwargs: dict = {"column": "user_id"}
 
     min_user_id_parameter: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
@@ -978,7 +980,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
-    parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
+    parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
