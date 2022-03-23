@@ -31,7 +31,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.data_context.util import PasswordMasker, file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     Datasource,
@@ -365,7 +365,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
                     "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "65432",
                     "username": "username_str",
-                    "password": "***",
+                    "password": PasswordMasker.MASKED_PASSWORD_STRING,
                     "database": "database_str",
                 },
             },
@@ -378,7 +378,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
                     "module_name": "great_expectations.dataset",
                 },
                 "credentials": {
-                    "url": "postgresql+psycopg2://username:***@host:65432/database",
+                    "url": f"postgresql+psycopg2://username:{PasswordMasker.MASKED_PASSWORD_STRING}@host:65432/database",
                 },
             },
         ]

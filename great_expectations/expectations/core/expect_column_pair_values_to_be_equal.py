@@ -46,7 +46,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "multi-column expectation",
@@ -54,6 +53,8 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_pair_values.equal"

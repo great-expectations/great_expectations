@@ -286,7 +286,6 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
             "@bragleg",
             "@rexboyce",
         ],
-        "package": "experimental_expectations",
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\

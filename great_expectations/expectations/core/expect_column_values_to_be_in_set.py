@@ -98,10 +98,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.in_set"
@@ -161,7 +162,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     )
 
     default_kwarg_values = {
-        "value_set": None,
+        "value_set": [],
         "parse_strings_as_datetimes": False,
         "auto": False,
         "profiler_config": default_profiler_config,
@@ -411,15 +412,20 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration]
     ) -> bool:
         super().validate_configuration(configuration)
+        # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
+        value_set = configuration.kwargs.get(
+            "value_set"
+        ) or self.default_kwarg_values.get("value_set")
         try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
             assert (
-                isinstance(configuration.kwargs["value_set"], (list, set, dict))
-                or configuration.kwargs["value_set"] is None
-            ), "value_set must be a list, set, or None"
-            if isinstance(configuration.kwargs["value_set"], dict):
+                "value_set" in configuration.kwargs or value_set
+            ), "value_set is required"
+            assert isinstance(
+                value_set, (list, set, dict)
+            ), "value_set must be a list, set, or dict"
+            if isinstance(value_set, dict):
                 assert (
-                    "$PARAMETER" in configuration.kwargs["value_set"]
+                    "$PARAMETER" in value_set
                 ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
