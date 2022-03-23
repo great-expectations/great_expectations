@@ -547,6 +547,7 @@ class PasswordMasker:
             try:
                 engine = sa.create_engine(url, **kwargs)
                 return engine.url.__repr__()
+            # Account for the edge case where we have SQLAlchemy in our env but haven't installed the appropriate dialect to match the input URL
             except NoSuchModuleError as e:
                 logger.warning(
                     f"Something went wrong when trying to use SQLAlchemy to obfuscate URL; could not find dialect {e}"
