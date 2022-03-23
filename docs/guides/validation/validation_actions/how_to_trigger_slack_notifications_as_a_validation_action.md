@@ -4,10 +4,10 @@ title: How to trigger Slack notifications as an Action
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you trigger Slack notifications as an Action.
-It will allow you to send a Slack message including information about a Validation Result, including whether or not the Validation succeeded.
+This guide will help you trigger Slack notifications as an <TechnicalTag tag="action" text="Action" />.
+It will allow you to send a Slack message including information about a <TechnicalTag tag="validation_result" text="Validation Result" />, including whether or not the <TechnicalTag tag="validation" text="Validation" /> succeeded.
 
-Great Expectations is able to use a slack webhook or slack app to send notifications.
+Great Expectations is able to use a Slack webhook or Slack app to send notifications.
 
 ## Prerequisites 
 
@@ -21,7 +21,7 @@ Great Expectations is able to use a slack webhook or slack app to send notificat
 
 </Prerequisites>
 
-### For slack app
+### For Slack app
 
 <Prerequisites>
 
@@ -96,7 +96,7 @@ validation_operators:
 
 ### 4. Test your Slack notifications
 
-Run your `action_list_operator`, to validate a batch of data and receive Slack notification on the success or failure of validation suite.  
+Run your `action_list_operator`, to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and receive Slack notification on the success or failure of the <TechnicalTag tag="expectation_suite" text="Expectation Suite's" /> Validation.  
 
 ```python
 context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="slack_test")
@@ -110,7 +110,7 @@ context.run_validation_operator('action_list_operator', assets_to_validate=batch
 Additional notes
 --------------------
 
-- If your `great_expectations.yml` contains multiple configurations for Data Docs sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the `notify_with` variable in your `great_expectations.yml`.
+- If your `great_expectations.yml` contains multiple configurations for <TechnicalTag tag="data_docs" text="Data Docs" /> sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the `notify_with` variable in your `great_expectations.yml`.
 - The following example will configure the Slack message to include links Data Docs at `local_site` and `s3_site`.
 
 ```yaml

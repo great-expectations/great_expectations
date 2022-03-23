@@ -4,7 +4,7 @@ title: How to trigger Opsgenie notifications as an Action
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you set up Opsgenie alert notifications when running Great Expectations. This is useful as it can provide alerting when Great Expectations is run, or certain Expectations begin failing (or passing!).
+This guide will help you set up Opsgenie alert notifications when running Great Expectations. This is useful as it can provide alerting when Great Expectations is run, or certain <TechnicalTag tag="expectation" text="Expectations" /> begin failing (or passing!).
 
 <Prerequisites>
 
@@ -39,7 +39,7 @@ opsgenie_api_key: YOUR-API-KEY
 
 ### 3. Add `send_opsgenie_alert_on_validation_result` operator to `great_expectations.yml`
 
-Next, update your Great Expectations configuration file to add a new operator to the Actions list in great_expectations.yml
+Next, update your Great Expectations configuration file to add a new operator to the <TechnicalTag tag="action" text="Actions" /> list in great_expectations.yml
 
  ```yaml
  validation_operators:
@@ -63,7 +63,7 @@ Next, update your Great Expectations configuration file to add a new operator to
 
 ### 4. Validate a Batch of data to test your alerts
 
-Run your action_list_operator, to Validate a Batch of data and receive an Opsgenie alert on the success or failure of the Validation.
+Run your `action_list_operator`, to <TechnicalTag tag="validate" text="Validate" /> a <TechnicalTag tag="batch" text="Batch" /> of data and receive an Opsgenie alert on the success or failure of the Validation.
 
 ```
 context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="opsgenie_test")

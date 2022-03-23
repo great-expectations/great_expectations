@@ -1,16 +1,16 @@
 ---
-title: How to update Data Docs after validating a Checkpoint
+title: How to update Data Docs after Validating a Checkpoint
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will explain how to use an Action to update Data Docs sites with new Validation Results from running a Checkpoint.
+This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new <TechnicalTag tag="validation_result" text="Validation Results" /> from running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
 <Prerequisites>
 
- - Created at least one Expectation Suite.
- - Created at least one [Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md).
+ - [Created at least one Expectation Suite](../../expectations/index.md#core-skills)
+ - [Created at least one Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md).
 
 </Prerequisites>
 
@@ -18,15 +18,16 @@ This guide will explain how to use an Action to update Data Docs sites with new 
 
 ### 1. Update your Checkpoint
 
-A Checkpoint's ``action_list`` contains a list of Actions.
-After the checkpoint is validated, these actions are called in order. 
+A Checkpoint's ``action_list`` contains a list of Actions.  After the Checkpoint is <TechnicalTag tag="validation" text="Validated" />, these Actions are called in order. 
+
 Add an Action to the end of the ``action_list`` and name it ``update_data_docs``.
-Actions are required to have a single field, ``action``. 
-Inside of the ``action`` field, a ``class_name`` field must be defined, which determines which class will be instantiated to execute this action. 
-Add ``class_name: UpdateDataDocsAction`` to the action.
+
+Actions are required to have a single field, ``action``.  Inside the ``action`` field, a ``class_name`` field must be defined, which determines which class will be instantiated to execute this Action. 
+
+Add ``class_name: UpdateDataDocsAction`` to the Action.
 
 :::note Note:
-The ``StoreValidationResultAction`` action must appear before  ``UpdateDataDocsAction`` action, since Data Docs are rendered from Validation Results from the store.
+The ``StoreValidationResultAction`` Action must appear before  ``UpdateDataDocsAction`` Action, since Data Docs are rendered from Validation Results from the <TechnicalTag tag="store" text="Store" />.
 :::
 
 ```yaml
@@ -67,7 +68,7 @@ The ``StoreValidationResultAction`` action must appear before  ``UpdateDataDocsA
 
 Test that your new Action is configured correctly:
 
-Run the Checkpoint from your code or the CLI and verify that no errors are thrown.
+Run the Checkpoint from your code or the <TechnicalTag tag="cli" text="CLI" /> and verify that no errors are thrown.
 
 ```python
 import great_expectations as ge
@@ -83,7 +84,7 @@ Finally, check your Data Docs sites to confirm that a new Validation Result has 
 
 ## Additional notes
 
-The ``UpdateDataDocsAction`` generates an HTML file for the latest Validation Result and updates the index page to link to the new file, and re-renders pages for the suite used for that validation. It does not perform a full rebuild of Data Docs sites. This means that if you wish to render older Validation Results, you should run full Data Docs rebuild (via CLI's ``great_expectations docs build`` command or by calling ``context.build_data_docs()``).
+The ``UpdateDataDocsAction`` generates an HTML file for the latest Validation Result and updates the index page to link to the new file, and re-renders pages for the <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> used for that Validation. It does not perform a full rebuild of Data Docs sites. This means that if you wish to render older Validation Results, you should run full Data Docs rebuild (via CLI's ``great_expectations docs build`` command or by calling ``context.build_data_docs()``).
 
 
 ## Additional resources
