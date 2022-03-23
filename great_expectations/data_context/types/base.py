@@ -1266,10 +1266,13 @@ class GeCloudConfig(DictDot):
         return self.organization_id
 
     def to_json_dict(self):
+        # postpone importing to avoid circular imports
+        from great_expectations.data_context.util import PasswordMasker
+
         return {
             "base_url": self.base_url,
             "organization_id": self.organization_id,
-            "access_token": self.access_token,
+            "access_token": PasswordMasker.MASKED_PASSWORD_STRING,
             "account_id": self.account_id,  # TODO: remove when account_id is deprecated
         }
 
@@ -2095,6 +2098,16 @@ class DataContextConfig(BaseYamlConfig):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+    def to_sanitized_json_dict(self) -> dict:
+        """
+        Wrapper for `to_json_dict` which ensures sensitive fields are properly masked.
+        """
+        # postpone importing to avoid circular imports
+        from great_expectations.data_context.util import PasswordMasker
+
+        serializeable_dict = self.to_json_dict()
+        return PasswordMasker.sanitize_config(serializeable_dict)
+
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -2103,7 +2116,7 @@ class DataContextConfig(BaseYamlConfig):
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
         """
-        json_dict: dict = self.to_json_dict()
+        json_dict: dict = self.to_sanitized_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
             inplace=True,
