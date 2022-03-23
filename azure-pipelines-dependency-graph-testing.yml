@@ -74,8 +74,6 @@ stages:
                 tests/**
                 /*.txt
                 /*.yml
-                requirements*
-                azure-pipelines*
 
   - stage: lint
     dependsOn: scope_check
