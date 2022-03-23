@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional
 
 import pytest
 
@@ -165,11 +165,15 @@ def test_default_expectation_configuration_builder_alice_null_condition(
         parameter_container=parameter_container, domain=domain
     )
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition = None
@@ -185,7 +189,9 @@ def test_default_expectation_configuration_builder_alice_null_condition(
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}
+        parameter_container=parameter_container,
+        domain=domain,
+        parameters=parameters,
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -223,11 +229,15 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         parameter_container=parameter_container, domain=domain
     )
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "$parameter.my_min_user_id.value[0]>0"
@@ -243,7 +253,9 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}
+        parameter_container=parameter_container,
+        domain=domain,
+        parameters=parameters,
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -282,11 +294,15 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         parameter_container=parameter_container, domain=domain
     )
 
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "$parameter.my_min_user_id.value[0]<0"
@@ -302,7 +318,9 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}
+        parameter_container=parameter_container,
+        domain=domain,
+        parameters=parameters,
     )
 
     assert expectation_configuration is None
@@ -343,12 +361,15 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "$variables.max_user_id>0"
@@ -364,7 +385,10 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}, variables=variables
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -405,12 +429,15 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "$variables.max_user_id<0"
@@ -426,7 +453,10 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}, variables=variables
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert expectation_configuration is None
@@ -467,12 +497,15 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "$variables.max_user_id>0 & $parameter.my_min_user_id.value[0]>0"
@@ -488,7 +521,10 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}, variables=variables
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -529,12 +565,15 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "$variables.max_user_id<0 & $parameter.my_min_user_id.value[0]<0"
@@ -550,7 +589,10 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}, variables=variables
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert expectation_configuration is None
@@ -591,12 +633,15 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "$variables.max_user_id>0 | $parameter.my_min_user_id.value[0]<0"
@@ -612,7 +657,10 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}, variables=variables
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -653,12 +701,15 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999}
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "$variables.max_user_id<0 | $parameter.my_min_user_id.value[0]<0"
@@ -674,7 +725,10 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}, variables=variables
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert expectation_configuration is None
@@ -715,12 +769,15 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999, "answer": 42}
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "$variables.max_user_id>0 & $variables.answer==42 | $parameter.my_min_user_id.value[0]<0"
@@ -736,7 +793,10 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}, variables=variables
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -777,12 +837,15 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999, "answer": 42}
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "$variables.max_user_id<0 | $variables.answer!=42 | $parameter.my_min_user_id.value[0]<0"
@@ -798,7 +861,10 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}, variables=variables
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert expectation_configuration is None
@@ -839,12 +905,15 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999, "answer": 42}
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "($variables.max_user_id>0 & $variables.answer==42) | $parameter.my_min_user_id.value[0]<0"
@@ -860,7 +929,10 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}, variables=variables
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -901,12 +973,15 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     variables: ParameterContainer = build_parameter_container_for_variables(
         {"max_user_id": 999999999999, "answer": 42}
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: str = "($variables.max_user_id<0 | $variables.answer!=42) | $parameter.my_min_user_id.value[0]<0"
@@ -922,7 +997,10 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain, parameters={domain.id: parameter_container}, variables=variables
+        parameter_container=parameter_container,
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
     )
 
     assert expectation_configuration is None
