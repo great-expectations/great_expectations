@@ -107,7 +107,7 @@ stages:
 
     jobs:
       - job: compatibility_matrix
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
