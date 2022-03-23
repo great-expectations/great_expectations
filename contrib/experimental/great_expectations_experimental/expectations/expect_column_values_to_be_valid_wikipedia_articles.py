@@ -119,7 +119,6 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
             "@annaliuu",
             "@wangzhongyi0510",
         ],
-        "package": "experimental_expectations",
         "requirements": ["requests"],
     }
 
