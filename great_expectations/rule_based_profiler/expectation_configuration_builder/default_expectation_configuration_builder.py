@@ -67,6 +67,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         expectation_type: str,
         meta: Optional[Dict[str, Any]] = None,
         condition: Optional[str] = None,
+        validation_parameter_builder_configs: Optional[List[dict]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
             Union[str, BatchRequest, RuntimeBatchRequest, dict]
@@ -80,6 +81,8 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             meta: the "meta" argument of "ExpectationConfiguration" object to be emitted.
             condition: Boolean statement (expressed as string and following specified grammar), which controls whether
             or not underlying logic should be executed and thus resulting "ExpectationConfiguration" emitted.
+            validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
+            fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
@@ -88,6 +91,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
         super().__init__(
             expectation_type=expectation_type,
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
             batch_list=batch_list,
             batch_request=batch_request,
             data_context=data_context,

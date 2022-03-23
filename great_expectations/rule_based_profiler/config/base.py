@@ -155,6 +155,7 @@ class ParameterBuilderConfig(DictDot):
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
+        evaluation_parameter_builder_configs: Optional[list] = None,
         json_serialize: bool = True,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
@@ -166,6 +167,11 @@ class ParameterBuilderConfig(DictDot):
 
         if class_name is not None:
             self.class_name = class_name
+
+        if evaluation_parameter_builder_configs:
+            self.evaluation_parameter_builder_configs = (
+                evaluation_parameter_builder_configs
+            )
 
         self.json_serialize = json_serialize
 
@@ -201,6 +207,15 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=True,
         allow_none=False,
     )
+    evaluation_parameter_builder_configs = fields.List(
+        cls_or_instance=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
     json_serialize = fields.Boolean(
         required=False,
         allow_none=True,
@@ -219,6 +234,7 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         meta: Optional[dict] = None,
+        validation_parameter_builder_configs: Optional[list] = None,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
@@ -232,6 +248,11 @@ class ExpectationConfigurationBuilderConfig(DictDot):
 
         if meta is not None:
             self.meta = meta
+
+        if validation_parameter_builder_configs:
+            self.validation_parameter_builder_configs = (
+                validation_parameter_builder_configs
+            )
 
         if batch_request is not None:
             self.batch_request = batch_request
@@ -269,6 +290,15 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     )
     meta = fields.Dict(
         keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
+    validation_parameter_builder_configs = fields.List(
+        cls_or_instance=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
             required=True,
             allow_none=False,
         ),

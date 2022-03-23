@@ -19,10 +19,12 @@ from great_expectations.core.batch import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
+    PARAMETER_KEY,
     VARIABLES_PREFIX,
     Builder,
     Domain,
     ParameterContainer,
+    get_fully_qualified_parameter_names,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
@@ -459,6 +461,58 @@ def init_expectation_configuration_builder(
         },
     )
     return expectation_configuration_builder
+
+
+def resolve_evaluation_dependencies(
+    parameter_builder: "ParameterBuilder",  # noqa: F821
+    parameter_container: ParameterContainer,
+    domain: Domain,
+    variables: Optional[ParameterContainer] = None,
+    parameters: Optional[Dict[str, ParameterContainer]] = None,
+) -> None:
+    evaluation_parameter_builders: List[
+        "ParameterBuilder"  # noqa: F821
+    ] = parameter_builder.evaluation_parameter_builders
+    if not evaluation_parameter_builders:
+        return
+
+    fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
+    )
+
+    evaluation_parameter_builder: "ParameterBuilder"  # noqa: F821
+    for evaluation_parameter_builder in evaluation_parameter_builders:
+        fully_qualified_evaluation_parameter_builder_name: str = (
+            f"{PARAMETER_KEY}{evaluation_parameter_builder.name}"
+        )
+
+        if (
+            fully_qualified_evaluation_parameter_builder_name
+            not in fully_qualified_parameter_names
+        ):
+            set_batch_list_or_batch_request_on_builder(
+                builder=evaluation_parameter_builder,
+                batch_list=parameter_builder.batch_list,
+                batch_request=parameter_builder.batch_request,
+                force_batch_data=False,
+            )
+
+            evaluation_parameter_builder.build_parameters(
+                parameter_container=parameter_container,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
+
+            resolve_evaluation_dependencies(
+                parameter_builder=evaluation_parameter_builder,
+                parameter_container=parameter_container,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
 
 
 def set_batch_list_or_batch_request_on_builder(
