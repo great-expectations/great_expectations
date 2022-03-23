@@ -184,7 +184,7 @@ def test_default_expectation_configuration_builder_alice_null_condition(
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
         condition=condition,
-        min_valueparameter_=parameter_value.value[0],
+        min_value=parameter_value.value[0],
         max_value=max_user_id,
     )
 
