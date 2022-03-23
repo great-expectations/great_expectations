@@ -10,8 +10,6 @@ from typing import Dict, Optional, Union
 from urllib.parse import urljoin
 
 from great_expectations.checkpoint import Checkpoint
-
-
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 
@@ -30,9 +28,9 @@ from great_expectations.checkpoint.util import (
 )
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
     GeCloudIdentifier,
     ValidationResultIdentifier,
-    ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
