@@ -3,13 +3,13 @@ import pytest
 from great_expectations.checkpoint.util import send_sns_notification
 from great_expectations.core import ExpectationSuiteValidationResult
 
-from .conftest import sns
+from .conftest import aws_credentials, sns
 
 
-def test_send_sns_notification(sns):
+def test_send_sns_notification(sns, aws_credentials):
     results = {
         "success": True,
-        "result": {
+        "results": {
             "observed_value": 5.0,
             "element_count": 5,
             "missing_count": None,
@@ -18,6 +18,8 @@ def test_send_sns_notification(sns):
     }
     result = ExpectationSuiteValidationResult(**results)
     topic = "test"
-    sns.create_topic({"Name": topic})
-    response = send_sns_notification(topic, result.success, result.results)
+    created = sns.create_topic(Name=topic)
+    response = send_sns_notification(
+        created.get("TopicArn"), str(result.success), str(result.results)
+    )
     assert response.startswith("Successfully")

@@ -9,7 +9,6 @@ import warnings
 from typing import Dict, Optional, Union
 from urllib.parse import urljoin
 
-from great_expectations.checkpoint import Checkpoint
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 
@@ -57,7 +56,7 @@ class ValidationAction:
         ],
         data_asset,
         expectation_suite_identifier: ExpectationSuiteIdentifier = None,
-        checkpoint_identifier: Checkpoint = None,
+        checkpoint_identifier=None,
         **kwargs,
     ):
         """

@@ -1,4 +1,5 @@
 import copy
+import json
 import logging
 import smtplib
 import ssl
@@ -504,11 +505,11 @@ def send_sns_notification(
     message_dict = {
         "TopicArn": sns_topic_arn,
         "Subject": sns_subject,  # Fail or success so consumers can filter.
-        "Message": validation_results,
+        "Message": json.dumps(validation_results),
         "MessageAttributes": {
             "string": {"DataType": "String.Array"},
-            "MessageStructure": "json",
         },
+        "MessageStructure": "json",
     }
     session = boto3.Session(**kwargs)
     sns = session.client("sns")
