@@ -47,7 +47,6 @@ def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_obj
         library_metadata_passed_checks=False,
         has_full_test_suite=False,
         manually_reviewed_code=False,
-        package=None,
     )
 
 
@@ -63,7 +62,6 @@ def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadat
         library_metadata_passed_checks=True,
         has_full_test_suite=False,
         manually_reviewed_code=False,
-        package=None,
     )
 
 
@@ -71,7 +69,6 @@ def test__get_augmented_library_metadata_on_a_class_with_a_package_in_its_librar
     class MyExpectation(ExpectColumnValuesToEqualThree__SecondIteration):
         library_metadata = {
             "maturity": "EXPERIMENTAL",
-            "package": "whatsit_expectations",
             "tags": ["tag", "other_tag"],
             "contributors": [
                 "@abegong",
@@ -87,7 +84,6 @@ def test__get_augmented_library_metadata_on_a_class_with_a_package_in_its_librar
         library_metadata_passed_checks=True,
         has_full_test_suite=False,
         manually_reviewed_code=False,
-        package="whatsit_expectations",
     )
 
 

@@ -26,7 +26,9 @@ class Builder(SerializableDictDot):
     def __init__(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -36,14 +38,7 @@ class Builder(SerializableDictDot):
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
         self._batch_list = batch_list
-        self._batch_request = None
-        self.batch_request = batch_request
-
-        if data_context is None:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"{self.__class__.__name__} requires a data_context, but none was provided."
-            )
-
+        self._batch_request = batch_request
         self._data_context = data_context
 
     """
@@ -64,7 +59,7 @@ class Builder(SerializableDictDot):
 
     @batch_request.setter
     def batch_request(
-        self, value: Union[BatchRequest, RuntimeBatchRequest, dict]
+        self, value: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]
     ) -> None:
         if not (value is None or isinstance(value, dict)):
             value = get_batch_request_as_dict(batch_request=value)
@@ -72,7 +67,7 @@ class Builder(SerializableDictDot):
         self._batch_request = value
 
     @property
-    def data_context(self) -> "DataContext":  # noqa: F821
+    def data_context(self) -> Optional["DataContext"]:  # noqa: F821
         return self._data_context
 
     def set_batch_data(
