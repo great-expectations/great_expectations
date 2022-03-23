@@ -648,14 +648,15 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return key_list
 
     def get_url_for_key(self, key, protocol=None):
-        location = self._create_client().get_bucket_location(Bucket=self.bucket)[
-            "LocationConstraint"
-        ]
+        location = None
         if self.boto3_options.get("endpoint_url"):
             location = self.boto3_options.get("endpoint_url")
         elif location is None:
             location = "https://s3.amazonaws.com"
         else:
+            location = self._create_client().get_bucket_location(Bucket=self.bucket)[
+                "LocationConstraint"
+            ]
             location = f"https://s3-{location}.amazonaws.com"
 
         s3_key = self._convert_key_to_filepath(key)
