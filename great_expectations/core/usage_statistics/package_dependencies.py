@@ -6,58 +6,83 @@ to safely upgrade package dependencies to gain access to features of new package
     Typical usage example:
     # TODO AJB 20220322: Fill me in
 """
-import abc
 import enum
-import importlib
 import os
 import re
 from dataclasses import dataclass
-from types import ModuleType
-from typing import List, Optional
+from importlib import metadata
+from typing import List, Optional, Set, Tuple
 
 from packaging import version
-from packaging.version import Version
 
 
 class GEDependencies:
-    @staticmethod
-    def get_required_dependency_names():
-        # Parse requirements.txt
-        requirements_txt_path: str = os.path.join("../../../", "requirements.txt")
-        with open(requirements_txt_path) as f:
-            required_with_versions = f.read().splitlines()
-        required_dependency_names = [
-            re.search(r"([\w\-.]*)", s).group(0) for s in required_with_versions
+    def __init__(self):
+        self._requirements_relative_base_dir = "../../../"
+        self._dev_requirements_prefix: str = "requirements-dev"
+
+    def get_required_dependency_names(self):
+        return sorted(
+            self._get_dependency_names_from_requirements_file(
+                self.required_requirements_path
+            )
+        )
+
+    def get_dev_dependency_names(self) -> List[str]:
+        """
+        Get unique names of dependencies
+        Returns:
+
+        """
+        dev_dependency_names: Set[str] = set()
+        for dev_dependency_filename in self.dev_requirements_paths:
+            dependency_names: List[
+                str
+            ] = self._get_dependency_names_from_requirements_file(
+                os.path.join(
+                    self._requirements_relative_base_dir, dev_dependency_filename
+                )
+            )
+            dev_dependency_names.update(dependency_names)
+        return sorted(list(dev_dependency_names))
+
+    @property
+    def required_requirements_path(self) -> str:
+        return os.path.join(self._requirements_relative_base_dir, "requirements.txt")
+
+    @property
+    def dev_requirements_paths(self) -> List[str]:
+        """
+        Get all paths for requirements-dev files with dependencies in them
+        Returns:
+
+        """
+        return [
+            filename
+            for filename in os.listdir(self._requirements_relative_base_dir)
+            if filename.startswith(self._dev_requirements_prefix)
         ]
-        return required_dependency_names
+
+    @staticmethod
+    def _get_dependency_names_from_requirements_file(filepath: str):
+        with open(filepath) as f:
+            dependencies_with_versions = f.read().splitlines()
+        dependency_matches = [
+            re.search(r"^(?!--requirement)([\w\-.]+)", s)
+            for s in dependencies_with_versions
+        ]
+        dependency_names: List[str] = []
+        for match in dependency_matches:
+            if match is not None:
+                dependency_names.append(match.group(0))
+        return dependency_names
 
 
-class PackageVersion(abc.ABC):
-
+@dataclass
+class PackageInfo:
     package_name: str
-    version: Version
-
-    @abc.abstractmethod
-    def get_version(self) -> Version:
-        raise NotImplementedError
-
-
-class PandasPackageVersion(PackageVersion):
-
-    package_name = "pandas"
-
-    def get_version(self) -> Version:
-        try:
-            import pandas
-
-            return version.parse(pandas.__version__)
-        except Exception:
-            pass
-
-
-def get_version_from_package_name(package_name: str) -> PackageVersion:
-    package: ModuleType = importlib.import_module(package_name)
-    print(package)
+    installed: bool
+    version: Optional[version.Version]
 
 
 class ExecutionEnvironmentType(enum.Enum):
@@ -69,25 +94,125 @@ class ExecutionEnvironmentType(enum.Enum):
 @dataclass
 class ExecutionEnvironment:
     environment_name: str
-    version: Optional[Version]
+    version: Optional[version.Version]
     environment_type: ExecutionEnvironmentType
 
 
-@dataclass
 class GEExecutionEnvironment:
     """The list of installed GE dependencies with name/version along with the likely execution environment.
 
     Note we may not be able to uniquely determine the execution environment so we track all possibilities in a list.
 
-    Attributes:
-         installed_dependencies: The installed package dependencies in the environment where GE is executing.
-         execution_environments: The likely execution environments GE is executing in.
+    Attributes: None
     """
 
-    installed_dependencies: List[PackageVersion]
-    execution_environments: List[ExecutionEnvironment]
+    def __init__(self):
+        self._ge_dependencies: GEDependencies = GEDependencies()
 
+        self._installed_required_dependencies = None
+        self._not_installed_required_dependencies = None
+        self.build_required_dependencies()
 
-class GEExecutionEnvironmentBuilder:
-    def build_environement(self):
-        pass
+        self._installed_dev_dependencies = None
+        self._not_installed_dev_dependencies = None
+        self.build_dev_dependencies()
+
+        # if execution_environments is None:
+        #     self._execution_environments = self.build_execution_environments()
+        # else:
+        #     self._execution_environments = execution_environments
+
+    def build_required_dependencies(self) -> None:
+        dependency_list: List[PackageInfo] = self._build_dependency_list(
+            self._ge_dependencies.get_required_dependency_names()
+        )
+        (
+            installed_dependencies,
+            not_installed_dependencies,
+        ) = self._split_dependencies_installed_vs_not(dependency_list)
+        self._installed_required_dependencies = installed_dependencies
+        self._not_installed_required_dependencies = not_installed_dependencies
+
+    def build_dev_dependencies(self) -> None:
+        dependency_list: List[PackageInfo] = self._build_dependency_list(
+            self._ge_dependencies.get_dev_dependency_names()
+        )
+        (
+            installed_dependencies,
+            not_installed_dependencies,
+        ) = self._split_dependencies_installed_vs_not(dependency_list)
+        self._installed_dev_dependencies = installed_dependencies
+        self._not_installed_dev_dependencies = not_installed_dependencies
+
+    @staticmethod
+    def _split_dependencies_installed_vs_not(
+        dependency_list: List[PackageInfo],
+    ) -> Tuple[List[PackageInfo], List[PackageInfo]]:
+        installed_dependencies: List[PackageInfo] = [
+            d for d in dependency_list if d.installed
+        ]
+        not_installed_dependencies: List[PackageInfo] = [
+            d for d in dependency_list if not d.installed
+        ]
+        return installed_dependencies, not_installed_dependencies
+
+    def _build_dependency_list(self, dependency_names: List[str]) -> List[PackageInfo]:
+        dependencies: List[PackageInfo] = []
+        for dependency_name in dependency_names:
+            try:
+                package_version: version.Version = self._get_version_from_package_name(
+                    dependency_name
+                )
+                dependencies.append(
+                    PackageInfo(
+                        package_name=dependency_name,
+                        version=package_version,
+                        installed=True,
+                    )
+                )
+            except metadata.PackageNotFoundError:
+                dependencies.append(
+                    PackageInfo(
+                        package_name=dependency_name, version=None, installed=False
+                    )
+                )
+        return dependencies
+
+    @staticmethod
+    def _get_version_from_package_name(package_name: str) -> version.Version:
+        """Get version information from package name.
+
+        Args:
+            package_name: str
+
+        Returns:
+            packaging.version.Version for the package
+
+        Raises:
+            importlib.metadata.PackageNotFoundError
+        """
+        package_version: version.Version = version.parse(metadata.version(package_name))
+        return package_version
+
+    # def build_execution_environments(self):
+    #     raise NotImplementedError
+
+    @property
+    def installed_required_dependencies(self):
+        return self._installed_required_dependencies
+
+    @property
+    def installed_dev_dependencies(self):
+        return self._installed_dev_dependencies
+
+    @property
+    def not_installed_required_dependencies(self):
+        return self._not_installed_required_dependencies
+
+    @property
+    def not_installed_dev_dependencies(self):
+        return self._not_installed_dev_dependencies
+
+    # @property
+    # def execution_environments(self):
+    #     return self._execution_environments
