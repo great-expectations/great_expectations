@@ -488,15 +488,11 @@ def send_sns_notification(
     sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs
 ) -> str:
     """
-    Sen=ds JSON Results to an SNS topic with a schema of:
+    Send JSON results to an SNS topic with a schema of:
 
-    {
-        "passed": validation_passed
-        "results": validation_results
-    }
 
     :param sns_topic_arn:  The SNS Arn to publish messages to
-    :param sns_subject: : The SNS Message Subject - [passed or failed]
+    :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
     :param validation_results:  The results of the validation ran
     :param kwargs:  Keyword arguments to pass to the boto3 Session
     :return:  Message ID that was published
@@ -504,7 +500,7 @@ def send_sns_notification(
     """
     message_dict = {
         "TopicArn": sns_topic_arn,
-        "Subject": sns_subject,  # Fail or success so consumers can filter.
+        "Subject": sns_subject,
         "Message": json.dumps(validation_results),
         "MessageAttributes": {
             "String": {"DataType": "String.Array", "StringValue": "ValidationResults"},
