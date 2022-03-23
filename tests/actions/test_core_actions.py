@@ -689,9 +689,6 @@ def test_cloud_notification_action_bad_response(
     )
 
 
-from .conftest import aws_credentials, sns
-
-
 def test_cloud_sns_notification_action(
     sns,
     validation_result_suite,
