@@ -150,7 +150,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                         "strict_min": "$variables.strict_min",
                         "strict_max": "$variables.strict_max",
                         "meta": {
-                            "details": {
+                            "profiler_details": {
                                 "min_estimator": "$parameter.min_estimator.details",
                                 "max_estimator": "$parameter.max_estimator.details",
                             },
@@ -256,7 +256,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
