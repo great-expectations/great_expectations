@@ -7,7 +7,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     init_rule_parameter_builders,
-    resolve_evaluation_dependencies,
+    set_batch_list_or_batch_request_on_builder,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.types import (
@@ -109,12 +109,12 @@ class ExpectationConfigurationBuilder(Builder, ABC):
 
         validation_parameter_builder: ParameterBuilder
         for validation_parameter_builder in validation_parameter_builders:
-            if validation_parameter_builder.batch_request is None:
-                validation_parameter_builder.set_batch_data(
-                    batch_list=self.batch_list,
-                    batch_request=self.batch_request,
-                )
-
+            set_batch_list_or_batch_request_on_builder(
+                builder=validation_parameter_builder,
+                batch_list=self.batch_list,
+                batch_request=self.batch_request,
+                force_batch_data=False,
+            )
             validation_parameter_builder.build_parameters(
                 parameter_container=parameter_container,
                 domain=domain,
