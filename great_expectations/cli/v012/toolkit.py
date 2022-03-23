@@ -6,8 +6,6 @@ import warnings
 from typing import Optional, Union
 
 import click
-from ruamel.yaml import YAML
-from ruamel.yaml.compat import StringIO
 
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
@@ -38,24 +36,6 @@ EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
     "</cyan>.\n"
 )
-
-
-class MyYAML(YAML):
-    # copied from https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
-    def dump(self, data, stream=None, **kw):
-        inefficient = False
-        if stream is None:
-            inefficient = True
-            stream = StringIO()
-        YAML.dump(self, data, stream, **kw)
-        if inefficient:
-            return stream.getvalue()
-
-
-yaml = MyYAML()  # or typ='safe'/'unsafe' etc
-
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
 
 
 def create_expectation_suite(

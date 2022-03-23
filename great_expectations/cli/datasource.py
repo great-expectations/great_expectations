@@ -11,7 +11,7 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
 from great_expectations.core.usage_statistics.util import send_usage_message
-from great_expectations.data_context.templates import YAMLToString
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
@@ -26,10 +26,6 @@ except ImportError:
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sqlalchemy = None
-
-yaml = YAMLToString()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
 
 
 class SupportedDatabaseBackends(enum.Enum):
@@ -319,7 +315,7 @@ data_connectors:
     class_name: InferredAssetFilesystemDataConnector
     base_directory: {self.base_path}
     default_regex:
-      group_names: 
+      group_names:
         - data_asset_name
       pattern: (.*)
   default_runtime_data_connector_name:
@@ -791,7 +787,7 @@ def sanitize_yaml_and_save_datasource(
         raise ValueError("Please verify the yaml and try again.")
     if not isinstance(datasource_yaml, str):
         raise TypeError("Please pass in a valid yaml string.")
-    config = yaml.load(datasource_yaml)
+    config = YAMLHandler.load(datasource_yaml)
     try:
         datasource_name = config.pop("name")
     except KeyError:

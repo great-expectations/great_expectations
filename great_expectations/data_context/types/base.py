@@ -7,12 +7,11 @@ import uuid
 from typing import Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
-from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -28,9 +27,6 @@ from great_expectations.types import DictDot, SerializableDictDot, safe_deep_cop
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
 
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -44,11 +40,7 @@ DEFAULT_USAGE_STATISTICS_URL = (
 
 
 def object_to_yaml_str(obj):
-    output_str: str
-    with StringIO() as string_stream:
-        yaml.dump(obj, string_stream)
-        output_str = string_stream.getvalue()
-    return output_str
+    return YAMLHandler.dump(obj)
 
 
 class BaseYamlConfig(SerializableDictDot):
@@ -108,7 +100,7 @@ class BaseYamlConfig(SerializableDictDot):
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
-        yaml.dump(self.commented_map, outfile)
+        YAMLHandler.dump(self.commented_map, outfile)
 
     def to_yaml_str(self) -> str:
         """
