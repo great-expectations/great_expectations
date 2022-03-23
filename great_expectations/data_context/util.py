@@ -542,46 +542,39 @@ class PasswordMasker:
             url with password masked e.g. "postgresql+psycopg2://username:***@host:65432/database"
         """
         if sa is not None and use_urlparse is False:
-            try:
-                engine = sa.create_engine(url, **kwargs)
-                return engine.url.__repr__()
-            # Account for the edge case where we have SQLAlchemy in our env but haven't installed the appropriate dialect to match the input URL
-            except Exception as e:
-                logger.warning(
-                    f"Something went wrong when trying to use SQLAlchemy to obfuscate URL: {e}"
-                )
+            engine = sa.create_engine(url, **kwargs)
+            return engine.url.__repr__()
         else:
             warnings.warn(
                 "SQLAlchemy is not installed, using urlparse to mask database url password which ignores **kwargs."
             )
-        return cls._mask_db_url_no_sa(url=url)
 
-    @classmethod
-    def _mask_db_url_no_sa(cls, url: str) -> str:
-        # oracle+cx_oracle does not parse well using urlparse, parse as oracle then swap back
-        replace_prefix = None
-        if url.startswith("oracle+cx_oracle"):
-            replace_prefix = {"original": "oracle+cx_oracle", "temporary": "oracle"}
-            url = url.replace(replace_prefix["original"], replace_prefix["temporary"])
+            # oracle+cx_oracle does not parse well using urlparse, parse as oracle then swap back
+            replace_prefix = None
+            if url.startswith("oracle+cx_oracle"):
+                replace_prefix = {"original": "oracle+cx_oracle", "temporary": "oracle"}
+                url = url.replace(
+                    replace_prefix["original"], replace_prefix["temporary"]
+                )
 
-        parsed_url = urlparse(url)
+            parsed_url = urlparse(url)
 
-        # Do not parse sqlite
-        if parsed_url.scheme == "sqlite":
-            return url
+            # Do not parse sqlite
+            if parsed_url.scheme == "sqlite":
+                return url
 
-        colon = ":" if parsed_url.port is not None else ""
-        masked_url = (
-            f"{parsed_url.scheme}://{parsed_url.username}:{cls.MASKED_PASSWORD_STRING}"
-            f"@{parsed_url.hostname}{colon}{parsed_url.port or ''}{parsed_url.path or ''}"
-        )
-
-        if replace_prefix is not None:
-            masked_url = masked_url.replace(
-                replace_prefix["temporary"], replace_prefix["original"]
+            colon = ":" if parsed_url.port is not None else ""
+            masked_url = (
+                f"{parsed_url.scheme}://{parsed_url.username}:{cls.MASKED_PASSWORD_STRING}"
+                f"@{parsed_url.hostname}{colon}{parsed_url.port or ''}{parsed_url.path or ''}"
             )
 
-        return masked_url
+            if replace_prefix is not None:
+                masked_url = masked_url.replace(
+                    replace_prefix["temporary"], replace_prefix["original"]
+                )
+
+            return masked_url
 
     @classmethod
     def sanitize_config(cls, config: dict) -> dict:
