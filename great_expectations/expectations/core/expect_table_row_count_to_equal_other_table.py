@@ -47,7 +47,6 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "table expectation", "multi-table expectation"],
         "contributors": [
             "@great_expectations",

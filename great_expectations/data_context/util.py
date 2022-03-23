@@ -8,8 +8,10 @@ import re
 import warnings
 from collections import OrderedDict
 from functools import lru_cache
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
+
+from great_expectations.types import safe_deep_copy
 
 try:
     from azure.identity import DefaultAzureCredential
@@ -520,8 +522,14 @@ class PasswordMasker:
 
     MASKED_PASSWORD_STRING = "***"
 
-    @staticmethod
-    def mask_db_url(url: str, use_urlparse: bool = False, **kwargs) -> str:
+    # values with the following keys will be processed with cls.mask_db_url:
+    URL_KEYS = {"connection_string", "url"}
+
+    # values with these keys will be directly replaced with cls.MASKED_PASSWORD_STRING:
+    PASSWORD_KEYS = {"access_token", "password"}
+
+    @classmethod
+    def mask_db_url(cls, url: str, use_urlparse: bool = False, **kwargs) -> str:
         """
         Mask password in database url.
         Uses sqlalchemy engine parsing if sqlalchemy is installed, otherwise defaults to using urlparse from the stdlib which does not handle kwargs.
@@ -557,7 +565,7 @@ class PasswordMasker:
 
             colon = ":" if parsed_url.port is not None else ""
             masked_url = (
-                f"{parsed_url.scheme}://{parsed_url.username}:{PasswordMasker.MASKED_PASSWORD_STRING}"
+                f"{parsed_url.scheme}://{parsed_url.username}:{cls.MASKED_PASSWORD_STRING}"
                 f"@{parsed_url.hostname}{colon}{parsed_url.port or ''}{parsed_url.path or ''}"
             )
 
@@ -567,3 +575,37 @@ class PasswordMasker:
                 )
 
             return masked_url
+
+    @classmethod
+    def sanitize_config(cls, config: dict) -> dict:
+        """
+        Mask sensitive fields in a Dict.
+        """
+
+        # be defensive, since it would be logical to expect this method works with DataContextConfig
+        if not isinstance(config, dict):
+            raise TypeError(
+                f"PasswordMasker.sanitize_config expects param `config` "
+                + f"to be of type Dict, not of type {type(config)}"
+            )
+
+        config_copy = safe_deep_copy(config)  # be immutable
+
+        def recursive_cleaner_method(config: Any) -> None:
+            if isinstance(config, dict):
+                for key, val in config.items():
+                    if not isinstance(val, str):
+                        recursive_cleaner_method(val)
+                    elif key in cls.URL_KEYS:
+                        config[key] = cls.mask_db_url(val)
+                    elif key in cls.PASSWORD_KEYS:
+                        config[key] = cls.MASKED_PASSWORD_STRING
+                    else:
+                        pass  # this string is not sensitive
+            elif isinstance(config, list):
+                for val in config:
+                    recursive_cleaner_method(val)
+
+        recursive_cleaner_method(config_copy)  # Perform anonymization in place
+
+        return config_copy
