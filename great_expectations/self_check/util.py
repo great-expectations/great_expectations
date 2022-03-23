@@ -5,7 +5,6 @@ import os
 import platform
 import random
 import string
-import tempfile
 import threading
 import warnings
 from functools import wraps
