@@ -507,7 +507,7 @@ def send_sns_notification(
         "Subject": sns_subject,  # Fail or success so consumers can filter.
         "Message": json.dumps(validation_results),
         "MessageAttributes": {
-            "string": {"DataType": "String.Array"},
+            "String": {"DataType": "String.Array"},
         },
         "MessageStructure": "json",
     }
