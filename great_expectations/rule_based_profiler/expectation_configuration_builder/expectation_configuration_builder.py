@@ -1,7 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Set, Union
 
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.rule_based_profiler.types import (
     Builder,
@@ -14,11 +15,37 @@ logger.setLevel(logging.INFO)
 
 
 class ExpectationConfigurationBuilder(Builder, ABC):
-    def __init__(self, expectation_type: str, **kwargs):
+    def __init__(
+        self,
+        expectation_type: str,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
+        **kwargs
+    ):
+        """
+        The ExpectationConfigurationBuilder will build ExpectationConfiguration objects for a Domain from the Rule.
+
+        Args:
+            expectation_type: the "expectation_type" argument of "ExpectationConfiguration" object to be emitted.
+            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            data_context: DataContext
+            kwargs: additional arguments
+        """
+
+        super().__init__(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            data_context=data_context,
+        )
+
         self._expectation_type = expectation_type
 
         """
-        Since ExpectationConfigurationBuilderConfigSchema allow arbitrary fields (as ExpectationConfiguration kwargs)
+        Since ExpectationConfigurationBuilderConfigSchema allows arbitrary fields (as ExpectationConfiguration kwargs)
         to be provided, they must be all converted to public property accessors and/or public fields in order for all
         provisions by Builder, SerializableDictDot, and DictDot to operate properly in compliance with their interfaces.
         """
@@ -33,6 +60,7 @@ class ExpectationConfigurationBuilder(Builder, ABC):
 
     def build_expectation_configuration(
         self,
+        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,

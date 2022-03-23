@@ -1,3 +1,4 @@
+import inspect
 import logging
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Type, Union
@@ -2043,6 +2044,15 @@ def _sqlalchemy_column_map_condition_values(
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
+    elif (
+        result_format["result_format"] == "COMPLETE"
+        and "bigquery" in execution_engine.engine.dialect.name
+    ):
+        logger.warning(
+            "BigQuery imposes a limit of 10000 parameters on individual queries; "
+            "if your data contains more than 10000 columns your results will be truncated."
+        )
+        query = query.limit(10000)  # BigQuery upper bound on query parameters
 
     return [
         val.unexpected_values
@@ -2723,7 +2733,7 @@ class MapMetricProvider(MetricProvider):
         ):
             return
 
-        for attr, candidate_metric_fn in cls.__dict__.items():
+        for attr, candidate_metric_fn in inspect.getmembers(cls):
             if not hasattr(candidate_metric_fn, "metric_engine"):
                 # This is not a metric
                 continue

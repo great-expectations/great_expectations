@@ -39,20 +39,14 @@ def send_slack_notification(
     try:
         response = session.post(url=url, headers=headers, json=query)
     except requests.ConnectionError:
-        logger.warning(
-            f"Failed to connect to Slack webhook at {slack_webhook} after {10} retries."
-        )
+        logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:
             logger.warning(
-                "Request to Slack webhook at {url} "
-                "returned error {status_code}: {text}".format(
-                    url=slack_webhook,
-                    status_code=response.status_code,
-                    text=response.text,
-                )
+                "Request to Slack webhook "
+                f"returned error {response.status_code}: {response.text}"
             )
 
         else:
@@ -63,9 +57,7 @@ def send_slack_notification(
 def send_opsgenie_alert(query, suite_name, settings):
     """Creates an alert in Opsgenie."""
     if settings["region"] is not None:
-        url = "https://api.{region}.opsgenie.com/v2/alerts".format(
-            region=settings["region"]
-        )  # accommodate for Europeans
+        url = f"https://api.{settings['region']}.opsgenie.com/v2/alerts"  # accommodate for Europeans
     else:
         url = "https://api.opsgenie.com/v2/alerts"
 
@@ -87,12 +79,8 @@ def send_opsgenie_alert(query, suite_name, settings):
     else:
         if response.status_code != 202:
             logger.warning(
-                "Request to Opsgenie API at {url} "
-                "returned error {status_code}: {text}".format(
-                    url=url,
-                    status_code=response.status_code,
-                    text=response.text,
-                )
+                "Request to Opsgenie API "
+                f"returned error {response.status_code}: {response.text}"
             )
         else:
             return "success"
@@ -104,23 +92,15 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
     try:
         response = session.post(url=microsoft_teams_webhook, json=query)
     except requests.ConnectionError:
-        logger.warning(
-            "Failed to connect to Microsoft Teams webhook at {url} "
-            "after {max_retries} retries.".format(
-                url=microsoft_teams_webhook, max_retries=10
-            )
-        )
+        logger.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
+
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:
             logger.warning(
-                "Request to Microsoft Teams webhook at {url} "
-                "returned error {status_code}: {text}".format(
-                    url=microsoft_teams_webhook,
-                    status_code=response.status_code,
-                    text=response.text,
-                )
+                "Request to Microsoft Teams webhook "
+                f"returned error {response.status_code}: {response.text}"
             )
             return
         else:
@@ -133,25 +113,15 @@ def send_webhook_notifications(query, webhook, target_platform):
         response = session.post(url=webhook, json=query)
     except requests.ConnectionError:
         logger.warning(
-            "Failed to connect to {target_platform} webhook at {url} "
-            "after {max_retries} retries.".format(
-                url=webhook,
-                max_retries=10,
-                target_platform=target_platform,
-            )
+            f"Failed to connect to {target_platform} webhook after 10 retries."
         )
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:
             logger.warning(
-                "Request to {target_platform} webhook at {url} "
-                "returned error {status_code}: {text}".format(
-                    url=webhook,
-                    status_code=response.status_code,
-                    target_platform=target_platform,
-                    text=response.text,
-                )
+                f"Request to {target_platform} webhook "
+                f"returned error {response.status_code}: {response.text}"
             )
         else:
             return f"{target_platform} notification succeeded."
@@ -503,14 +473,12 @@ def send_cloud_notification(url: str, headers: dict):
     try:
         response = session.post(url=url, headers=headers)
     except requests.ConnectionError:
-        logger.error(
-            f"Failed to connect to Cloud backend at {url} " f"after {10} retries."
-        )
+        logger.error(f"Failed to connect to Cloud backend after {10} retries.")
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:
-            message = f"Cloud Notification request at {url} returned error {response.status_code}: {response.text}"
+            message = f"Cloud Notification request returned error {response.status_code}: {response.text}"
             logger.error(message)
             return {"cloud_notification_result": message}
         else:

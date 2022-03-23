@@ -68,10 +68,11 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.decreasing"
@@ -130,6 +131,10 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
                 "value": params.get("strictly"),
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "string"},
+                "value": params.get("mostly_pct"),
+            },
             "parse_strings_as_datetimes": {
                 "schema": {"type": "boolean"},
                 "value": params.get("parse_strings_as_datetimes"),
@@ -150,7 +155,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
             template_str = "values must be less than or equal to previous values"
 
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")

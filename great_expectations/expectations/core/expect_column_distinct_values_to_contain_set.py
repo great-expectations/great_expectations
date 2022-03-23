@@ -27,10 +27,11 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": False,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -234,10 +235,12 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         value_set = self.get_success_kwargs(configuration).get("value_set")
 
         if parse_strings_as_datetimes:
+            # deprecated-v0.13.41
             warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
-            future release.  Please update code accordingly.
-            """,
+                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
+v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
+please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
+""",
                 DeprecationWarning,
             )
             parsed_value_set = parse_value_set(value_set)

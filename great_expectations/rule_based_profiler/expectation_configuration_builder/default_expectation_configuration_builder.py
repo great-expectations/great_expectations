@@ -16,6 +16,7 @@ from pyparsing import (
 )
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -55,23 +56,48 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     ExpectationConfigurations can be optionally filtered if a supplied condition is met.
     """
 
-    exclude_field_names: Set[str] = {
+    exclude_field_names: Set[
+        str
+    ] = ExpectationConfigurationBuilder.exclude_field_names | {
         "kwargs",
     }
 
     def __init__(
         self,
         expectation_type: str,
-        condition: Optional[str] = None,
         meta: Optional[Dict[str, Any]] = None,
+        condition: Optional[str] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
         **kwargs,
     ):
-        super().__init__(expectation_type=expectation_type, **kwargs)
+        """
+        Args:
+            expectation_type: the "expectation_type" argument of "ExpectationConfiguration" object to be emitted.
+            meta: the "meta" argument of "ExpectationConfiguration" object to be emitted.
+            condition: Boolean statement (expressed as string and following specified grammar), which controls whether
+            or not underlying logic should be executed and thus resulting "ExpectationConfiguration" emitted.
+            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            data_context: DataContext
+            kwargs: additional arguments
+        """
 
-        self._kwargs = kwargs
+        super().__init__(
+            expectation_type=expectation_type,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            data_context=data_context,
+            **kwargs,
+        )
 
         if meta is None:
             meta = {}
+
+        self._meta = meta
 
         if not isinstance(meta, dict):
             raise ge_exceptions.ProfilerExecutionError(
@@ -88,14 +114,15 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             )
 
         self._condition = condition
-        self._meta = meta
+
+        self._kwargs = kwargs
 
     @property
     def expectation_type(self) -> str:
         return self._expectation_type
 
     @property
-    def condition(self) -> str:
+    def condition(self) -> Optional[str]:
         return self._condition
 
     @property
