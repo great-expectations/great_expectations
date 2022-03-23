@@ -11,7 +11,11 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricValues,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.types import (
+    PARAMETER_KEY,
+    Domain,
+    ParameterContainer,
+)
 
 
 class MetricMultiBatchParameterBuilder(ParameterBuilder):
@@ -29,9 +33,11 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         json_serialize: Union[str, bool] = True,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -46,16 +52,16 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
             otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
             name=name,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -70,7 +76,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
 
     @property
     def fully_qualified_parameter_name(self) -> str:
-        return f"$parameter.{self.name}"
+        return f"{PARAMETER_KEY}{self.name}"
 
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.

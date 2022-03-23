@@ -74,6 +74,8 @@ stages:
                 tests/**
                 /*.txt
                 /*.yml
+                requirements*
+                azure-pipelines*
 
   - stage: lint
     dependsOn: scope_check
@@ -104,6 +106,88 @@ stages:
       vmImage: 'ubuntu-18.04'
 
     jobs:
+      - job: compatibility_matrix
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        variables:
+          GE_pytest_opts: '--no-sqlalchemy'
+        strategy:
+          matrix:
+            Python36-Pandas023:
+              python.version: '3.6'
+              numpy.version: '1.14.1'
+              pandas.version: '0.23.4'
+              scipy.version: '0.19.0'
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
+            Python37-Pandas025:
+              python.version: '3.7'
+              numpy.version: '1.14.1'
+              pandas.version: '0.25.3'
+              # numpy 1.20 and pandas 0.25.3 do not coexist happily
+              scipy.version: '0.19.0'
+              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-test.txt --constraint constraints-dev.txt'
+            Python38-PandasLatest:
+              python.version: '3.8'
+              numpy.version: 'latest'
+              pandas.version: 'latest'
+              scipy.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - bash: pip install numpy
+            condition: eq(variables['scipy.version'], 'numpy')
+            displayName: 'Install numpy latest'
+
+          - bash: pip install pandas
+            condition: eq(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas latest'
+
+          - bash: pip install scipy
+            condition: eq(variables['scipy.version'], 'latest')
+            displayName: 'Install scipy latest'
+
+          - bash: pip install pandas==$(pandas.version)
+            condition: ne(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas - $(pandas.version)'
+
+          - script: |
+              pip install --requirement requirements.txt
+              echo "about to run pip install $(GE_pytest_pip_opts)"
+              pip install $(GE_pytest_pip_opts)
+              pip install  .
+            displayName: 'Install dependencies'
+
+          - script: |
+              # Install dependencies
+              pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
+
+              # Run dgtest
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+            displayName: 'dgtest'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
       - job: comprehensive
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
 
