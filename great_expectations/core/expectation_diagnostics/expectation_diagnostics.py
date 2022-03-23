@@ -21,6 +21,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationTestDiagnostics,
 )
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import camel_to_snake, lint_code
@@ -333,7 +334,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         expectation_instance,
         examples: List[ExpectationTestDataCases],
     ) -> ExpectationDiagnosticCheckMessage:
-        """Check that the validate_configuration method returns True"""
+        """Check that the validate_configuration exists and doesn't raise a config error"""
         passed = False
         sub_messages = []
         try:
@@ -358,7 +359,12 @@ class ExpectationDiagnostics(SerializableDictDot):
                     expectation_type=expectation_instance.expectation_type,
                     kwargs=first_test.input,
                 )
-                passed = expectation_instance.validate_configuration(expectation_config)
+                try:
+                    expectation_instance.validate_configuration(expectation_config)
+                except InvalidExpectationConfigurationError:
+                    pass
+                else:
+                    passed = True
 
         return ExpectationDiagnosticCheckMessage(
             message="Has basic input validation and type checking",
@@ -476,7 +482,12 @@ class ExpectationDiagnostics(SerializableDictDot):
                 )
             else:
                 black_ok = True
-            isort_ok = isort.check_code(code, **isort.profiles.black)
+            isort_ok = isort.check_code(
+                code,
+                **isort.profiles.black,
+                ignore_whitespace=True,
+                known_local_folder=["great_expectations"],
+            )
             if not isort_ok:
                 sub_messages.append(
                     {

@@ -1500,7 +1500,6 @@ class Expectation(metaclass=MetaExpectation):
                     "tags",
                     "contributors",
                     "requirements",
-                    "package",
                     "has_full_test_suite",
                     "manually_reviewed_code",
                 }
