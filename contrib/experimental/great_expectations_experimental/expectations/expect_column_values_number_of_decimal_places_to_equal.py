@@ -128,7 +128,6 @@ class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
             "@BladderBoy",
             "@Rim921",
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
