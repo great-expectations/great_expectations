@@ -139,6 +139,15 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         if domain_experts:
             self.domain_experts = []
             for expert in domain_experts:
+                picture = expert.get("picture")
+                if picture and os.path.exists(picture):
+                    package_name: str = os.path.basename(os.getcwd())
+                    url = os.path.join(
+                        "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
+                        package_name,
+                        picture,
+                    )
+                    expert["picture"] = url
                 domain_expert = DomainExpert(**expert)
                 self.domain_experts.append(domain_expert)
 
