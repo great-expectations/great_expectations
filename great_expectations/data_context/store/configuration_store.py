@@ -1,10 +1,10 @@
 import logging
 from typing import Optional, Union
 
+from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -17,6 +17,11 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
+
+yaml = YAML()
+
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +100,7 @@ class ConfigurationStore(Store):
     def deserialize(self, key, value):
         config = value
         if isinstance(value, str):
-            config: CommentedMap = YAMLHandler.load(value)
+            config: CommentedMap = yaml.load(value)
         try:
             return self._configuration_class.from_commented_map(commented_map=config)
         except ge_exceptions.InvalidBaseYamlConfigError:

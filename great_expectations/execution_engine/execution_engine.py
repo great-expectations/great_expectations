@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
 import pandas as pd
+from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
@@ -15,6 +16,8 @@ from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
+yaml = YAML()
+yaml.default_flow_style = False
 
 
 class NoOpDict:

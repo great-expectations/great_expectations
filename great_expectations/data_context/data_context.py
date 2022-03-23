@@ -16,12 +16,11 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import requests
 from dateutil.parser import parse
-from ruamel.yaml import YAMLError
+from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 from great_expectations.core.config_peer import ConfigPeer
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -130,6 +129,9 @@ except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 logger = logging.getLogger(__name__)
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 class BaseDataContext(ConfigPeer):
@@ -1011,7 +1013,7 @@ class BaseDataContext(ConfigPeer):
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
-                    return YAMLHandler.load(config_variables_file) or {}
+                    return yaml.load(config_variables_file) or {}
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
@@ -1153,7 +1155,7 @@ class BaseDataContext(ConfigPeer):
                 template.write(CONFIG_VARIABLES_TEMPLATE)
 
         with open(config_variables_filepath, "w") as config_variables_file:
-            YAMLHandler.dump(config_variables, config_variables_file)
+            yaml.dump(config_variables, config_variables_file)
 
     def delete_datasource(self, datasource_name: str):
         """Delete a data source
@@ -3637,9 +3639,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             raise e
 
         try:
-            config: CommentedMap = YAMLHandler.load(
-                config_str_with_substituted_variables
-            )
+            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
             return config
 
         except Exception as e:
@@ -4038,7 +4038,7 @@ class DataContext(BaseDataContext):
 
         # TODO this is so brittle and gross
         with open(path_to_yml) as f:
-            config = YAMLHandler.load(f)
+            config = yaml.load(f)
         config_var_path = config.get("config_variables_file_path")
         config_var_path = os.path.join(ge_dir, config_var_path)
         return os.path.isfile(config_var_path)
@@ -4306,7 +4306,7 @@ class DataContext(BaseDataContext):
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
-                config_commented_map_from_yaml = YAMLHandler.load(data)
+                config_commented_map_from_yaml = yaml.load(data)
 
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
@@ -4396,7 +4396,7 @@ class DataContext(BaseDataContext):
             return
 
         with open(yml_path) as f:
-            config_commented_map_from_yaml = YAMLHandler.load(f)
+            config_commented_map_from_yaml = yaml.load(f)
 
         config_version = config_commented_map_from_yaml.get("config_version")
         return float(config_version) if config_version else None
@@ -4429,11 +4429,11 @@ class DataContext(BaseDataContext):
             return False
 
         with open(yml_path) as f:
-            config_commented_map_from_yaml = YAMLHandler.load(f)
+            config_commented_map_from_yaml = yaml.load(f)
             config_commented_map_from_yaml["config_version"] = float(config_version)
 
         with open(yml_path, "w") as f:
-            YAMLHandler.dump(config_commented_map_from_yaml, f)
+            yaml.dump(config_commented_map_from_yaml, f)
 
         return True
 

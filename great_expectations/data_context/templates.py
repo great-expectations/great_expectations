@@ -1,8 +1,30 @@
 import os
 import uuid
 
-from great_expectations.core.yaml_handler import YAMLHandler
+from ruamel.yaml import YAML
+from ruamel.yaml.compat import StringIO
+
 from great_expectations.data_context.types.base import DataContextConfigDefaults
+
+
+class YAMLToString(YAML):
+    """
+    Get yaml dump as a string: https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
+    """
+
+    def dump(self, data, stream=None, **kw):
+        inefficient = False
+        if not stream:
+            inefficient = True
+            stream = StringIO()
+        YAML.dump(self, data, stream, **kw)
+        if inefficient:
+            return stream.getvalue()
+
+
+yaml = YAMLToString()
+yaml.indent(mapping=2, sequence=4, offset=4)
+yaml.default_flow_style = False
 
 # TODO: maybe bring params in via f-strings from base.ConfigDefaults or whatever
 #  I end up using for the base level configs. Specifically PROJECT_OPTIONAL_CONFIG_COMMENT
@@ -54,31 +76,31 @@ CONFIG_VARIABLES_TEMPLATE = (
 # Create yaml strings
 # NOTE: .replace("\n", "\n  ")[:-2] is a hack to indent all lines two spaces,
 # and remove the inserted final two spaces.
-EXPECTATIONS_STORE_STRING = YAMLHandler.dump(
+EXPECTATIONS_STORE_STRING = yaml.dump(
     {
         "expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
             "expectations_store"
         ]
     }
 ).replace("\n", "\n  ")[:-2]
-VALIDATIONS_STORE_STRING = YAMLHandler.dump(
+VALIDATIONS_STORE_STRING = yaml.dump(
     {
         "validations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
             "validations_store"
         ]
     }
 ).replace("\n", "\n  ")[:-2]
-EVALUATION_PARAMETER_STORE_STRING = YAMLHandler.dump(
+EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
     DataContextConfigDefaults.DEFAULT_STORES.value["evaluation_parameter_store"]
 )
-CHECKPOINT_STORE_STRING = YAMLHandler.dump(
+CHECKPOINT_STORE_STRING = yaml.dump(
     {
         "checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value[
             "checkpoint_store"
         ]
     }
 ).replace("\n", "\n  ")[:-2]
-PROFILER_STORE_STRING = YAMLHandler.dump(
+PROFILER_STORE_STRING = yaml.dump(
     {"profiler_store": DataContextConfigDefaults.DEFAULT_STORES.value["profiler_store"]}
 ).replace("\n", "\n  ")[:-2]
 

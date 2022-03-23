@@ -3,6 +3,7 @@ import sys
 from typing import Dict
 
 import click
+from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
@@ -11,7 +12,6 @@ from great_expectations.cli.v012.mark import Mark as mark
 from great_expectations.cli.v012.util import cli_message, cli_message_list
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.util import send_usage_message
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
@@ -30,6 +30,9 @@ try:
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     SQLAlchemyError = RuntimeError
+
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 """
@@ -155,7 +158,7 @@ def _write_checkpoint_to_disk(
     checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
     os.makedirs(checkpoint_dir, exist_ok=True)
     with open(checkpoint_file, "w") as f:
-        YAMLHandler.dump(checkpoint, f)
+        yaml.dump(checkpoint, f)
     return checkpoint_file
 
 
@@ -165,7 +168,7 @@ def _load_checkpoint_yml_template() -> dict:
         __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
     )
     with open(template_file) as f:
-        template = YAMLHandler.load(f)
+        template = yaml.load(f)
     return template
 
 
