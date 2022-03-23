@@ -1,8 +1,10 @@
 import os.path
+import sys
 from pathlib import Path
-from typing import Optional
+from typing import AnyStr, Optional
 
 import pytest
+from _pytest.capture import CaptureResult
 
 from great_expectations.core.yaml_handler import YAMLHandler
 
@@ -54,9 +56,16 @@ def test_file_output(tmp_path: Path) -> None:
     assert data_from_file == data
 
 
-def test_dump_correct_from_dict_default_stream() -> None:
-    # when we specify no stream, then StringIO
+def test_dump_default_behavior_with_no_stream_specified() -> None:
+    # when we specify no stream, then StringIO is used by default
     simplest_dict: dict = dict(abc=1)
     dumped: Optional[str] = YAMLHandler.dump(simplest_dict)
-
     assert dumped == "abc: 1\n"
+
+
+def test_dump_stdout_specified(capsys) -> None:
+    # ruamel documentation recommends that we specify the stream as stdout when we are using YAML to return a string.
+    simplest_dict: dict = dict(abc=1)
+    YAMLHandler.dump(simplest_dict, stream=sys.stdout)
+    captured: CaptureResult[AnyStr] = capsys.readouterr()
+    assert captured.out == "abc: 1\n"

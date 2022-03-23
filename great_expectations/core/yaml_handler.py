@@ -23,9 +23,10 @@ class YAMLHandler:
     @staticmethod
     def load(stream: Union[io.TextIOWrapper, str]) -> dict:
         """Converts a YAML input stream into a Python dictionary.
-
         Args:
-            stream: The input stream to read in.
+            stream: The input stream to read in. Although this function calls ruamel's load(), we
+                use a slightly more restrictive type-hint than ruamel (which uses Any). This is in order to tightly
+                bind the behavior of the YamlHandler class with expected YAML-related activities of Great Expectations.
 
         Returns:
             The deserialized dictionary form of the input stream.
