@@ -1,15 +1,14 @@
 ---
-title: How to create a Custom Regex-Based Column Map Expectation
+title: How to create a Custom Set-Based Column Map Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-**`RegexBasedColumnMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="ColumnMapExpectaion"/> that allow for highly-extensible, regex-powered validation of your data.
+**`SetBasedColumnMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="ColumnMapExpectaion"/>. They are evaluated for a single column and ask whether each row in that column belongs to the specified set.
 
-They are evaluated for a single column and ask a yes/no, regex-based question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If that percentage meets a specified threshold (100% by default), the Expectation considers that data valid. 
-This threshold is configured via the `mostly` parameter, which can be passed as input to your Custom `RegexBasedColumnMapExpectation` as a `float` between 0 and 1.
+Based on the result, they then calculate the percentage of rows that gave a positive answer. If that percentage meets a specified threshold (100% by default), the Expectation considers that data valid.  This threshold is configured via the `mostly` parameter, which can be passed as input to your Custom `SetBasedColumnMapExpectation` as a `float` between 0 and 1.
 
-This guide will walk you through the process of creating a Custom `RegexBasedColumnMapExpectation`.
+This guide will walk you through the process of creating a Custom `SetBasedColumnMapExpectation`.
 
 <Prerequisites>
 
@@ -21,21 +20,21 @@ This guide will walk you through the process of creating a Custom `RegexBasedCol
 
 ### 1. Choose a name for your Expectation
 
-First, decide on a name for your own Expectation. By convention, all `ColumnMapExpectations`, including `RegexBasedColumnMapExpectations`, start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](/docs/contributing/style_guides/code_style#expectations)  of the code Style Guide.
+First, decide on a name for your own Expectation. By convention, all `ColumnMapExpectations`, including `SetBasedColumnMapExpectations`, start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](/docs/contributing/style_guides/code_style#expectations)  of the code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
-- `ExpectColumnValuesToOnlyContainVowels`
-- `expect_column_values_to_only_contain_vowels`
+- `ExpectColumnValuesToBeInSolfegeScaleSet`
+- `expect_column_values_to_be_in_solfege_scale_set`
 
 ### 2. Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [`RegexBasedColumnMapExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/regex_based_column_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
+You can find the template file for a custom [`SetBasedColumnMapExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/set_based_column_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
-cp regex_based_column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_only_contain_vowels.py
+cp set_based_column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_be_in_solfege_scale_set.py
 ```
 
 <details>
@@ -64,13 +63,13 @@ cp regex_based_column_map_expectation_template.py /SOME_DIRECTORY/expect_column_
 Once you've copied and renamed the template file, you can execute it as follows.
 
 ```bash
-python expect_column_values_to_only_contain_vowels.py
+python expect_column_values_to_be_in_solfege_scale_set.py
 ```
 
 The template file is set up so that this will run the Expectation's `print_diagnostic_checklist()` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
 
 ```
-Completeness checklist for ExpectColumnValuesToMatchSomeRegex:
+Completeness checklist for ExpectColumnValuesToBeInSomeSet:
   ✔ Has a library_metadata object
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
@@ -90,37 +89,37 @@ When in doubt, the next step to implement is the first one that doesn't have a �
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L21
+```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L14
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L14
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L7
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L22
+```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L15
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L15
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L8
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L50
+```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L44
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L125
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L131
 ```
 
 Later, you can go back and write a more thorough docstring.
 
 At this point you can re-run your diagnostic checklist. You should see something like this:
 ```
-$ python expect_column_values_to_only_contain_vowels.py
+$ python expect_column_values_to_be_in_solfege_scale_set.py
 
-Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
+Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
@@ -140,16 +139,16 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L21-L110
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L36-L116
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
 
-* `data`: defines the input data of the example as a table/data frame. In this example the table has columns named `only_vowels`, `mixed`, `longer_vowels`, and `contains_vowels_but_also_other_stuff`. All of these columns have 7 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
+* `data`: defines the input data of the example as a table/data frame. In this example the table has columns named `lowercase_solfege_scale`, `uppercase_solfege_scale`, and `mixed`. All of these columns have 8 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
 * `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
 	* `include_in_gallery`: This must be set to `True` if you want this test case to be visible in the Gallery as an example.
-	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mixed", "mostly": .1}` in the example above is equivalent to `expect_column_values_to_only_contain_vowels(column="mixed", mostly=0.1)`
+	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mixed", "mostly": .1}` in the example above is equivalent to `expect_column_values_to_be_in_solfege_scale_set(column="mixed", mostly=0.1)`
 	* `out` is based on the Validation Result returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
@@ -158,9 +157,9 @@ If you run your Expectation file again, you won't see any new checkmarks, as the
 However, you should see that the tests you've written are now being caught and reported in your checklist:
 
 ```
-$ python expect_column_values_to_only_contain_vowels.py
+$ python expect_column_values_to_be_in_solfege_scale_set.py
 
-Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
+Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
 ...
@@ -177,37 +176,37 @@ For more information on tests and example cases, <br/>
 see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-### 6. Define your regex and connect it to your Expectation
+### 6. Define your set and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation.   
 
-In the case of your Custom `RegexBasedColumnMapExpectation`, Great Expectations will handle the actual application of the regex to your data. 
+In the case of your Custom `SetBasedColumnMapExpectation`, Great Expectations will handle the actual validation of your data against your set. 
 
 To do this, we replace these:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L25-L26
+```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L18-L20
 ```
 
 with something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L17-L18
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L10-L33
 ```
 
-For more detail when rendering your Custom Expectation, you can optionally specify the plural form of a Semantic Type you're validating. 
+For more detail when rendering your Custom Expectation, you can optionally specify the semantic name of the set you're validating. 
 
 For example:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L27
+```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L21
 ```
 
 becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L19
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L34
 ```
 
-Great Expectations will use these values to tell your Custom Expectation to apply your specified regex as a <TechnicalTag tag="metric" text="Metric"/> to be utilized in validating your data.
+Great Expectations will use these values to tell your Custom Expectation to apply your specified set as a <TechnicalTag tag="metric" text="Metric"/> to be utilized in validating your data.
 
-This is all that you need to define for now. The `RegexBasedColumnMapExpectation` class has built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
+This is all that you need to define for now. The `SetBasedColumnMapExpectation` class has built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
 <details>
   <summary>Other parameters</summary>
@@ -223,9 +222,9 @@ This is all that you need to define for now. The `RegexBasedColumnMapExpectation
 
 Running your diagnostic checklist at this point should return something like this:
 ```
-$ python expect_column_values_to_only_contain_vowels.py
+$ python expect_column_values_to_be_in_solfege_scale_set.py
 
-Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
+Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
   ✔ Has at least one positive and negative example case, and all test cases pass
@@ -235,14 +234,14 @@ Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
 
 <div style={{"text-align":"center"}}>  
 <p style={{"color":"#8784FF","font-size":"1.4em"}}><b>  
-Congratulations!<br/>&#127881; You've just built your first Custom Regex-Based Column Map Expectation! &#127881;  
+Congratulations!<br/>&#127881; You've just built your first Custom Set-Based Column Map Expectation! &#127881;  
 </b></p>  
 </div>
 
 :::note
 If you've already built a [Custom Expectation](./overview.md) of a different type,
 you may notice that we didn't explicitly implement a `_validate` method or Metric class here. While we have to explicitly create these for other types of Custom Expectations,
-the `RegexBasedColumnMapExpectation` class handles Metric creation and result validation implicitly; no extra work needed!
+the `SetBasedColumnMapExpectation` class handles Metric creation and result validation implicitly; no extra work needed!
 :::
 
 ### 7. Contribution (Optional)
@@ -251,12 +250,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L40-L45
+```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L34-L39
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L117-L120
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L123-L126
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
@@ -265,5 +264,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_column_values_to_only_contain_vowels.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py)
+- [expect_column_values_to_be_in_solfege_scale_set.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py)
 :::

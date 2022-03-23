@@ -175,7 +175,6 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
 
     library_metadata = {
         "maturity": "experimental",
-        "package": "great_expectations_experimental",
         "tags": [],
         "contributors": [
             "rexboyce",
