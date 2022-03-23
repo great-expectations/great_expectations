@@ -14,14 +14,29 @@ class YAMLHandler:
     matter as long as we fulfill the following contract:
         * load
         * dump
+
+    Typical usage example:
+
+        simple_yaml: str = f\"""
+            name: test
+            class_name: test_class
+            module_name: test.test_class
+        \"""
+        yaml_handler: YAMLHandler = YAMLHandler()
+        res: dict = yaml_handler.load(simple_yaml)
+
+        example_dict: dict = dict(abc=1)
+        yaml_handler: YAMLHandler = YAMLHandler()
+        yaml_handler.dump(example_dict)
+
     """
 
-    _handler: YAML = YAML(typ="safe")
-    _handler.indent(mapping=2, sequence=4, offset=2)
-    _handler.default_flow_style = False
+    def __init__(self):
+        self._handler: YAML = YAML(typ="safe")
+        self._handler.indent(mapping=2, sequence=4, offset=2)
+        self._handler.default_flow_style = False
 
-    @staticmethod
-    def load(stream: Union[io.TextIOWrapper, str]) -> dict:
+    def load(self, stream: Union[io.TextIOWrapper, str]) -> dict:
         """Converts a YAML input stream into a Python dictionary.
         Args:
             stream: The input stream to read in. Although this function calls ruamel's load(), we
@@ -31,10 +46,10 @@ class YAMLHandler:
         Returns:
             The deserialized dictionary form of the input stream.
         """
-        return YAMLHandler._handler.load(stream=stream)
+        return self._handler.load(stream=stream)
 
-    @staticmethod
     def dump(
+        self,
         data: dict,
         stream: Optional[Union[io.TextIOWrapper, io.StringIO, Path]] = None,
         **kwargs
@@ -53,17 +68,15 @@ class YAMLHandler:
             Otherwise, None as the _handler.dump() works in place and will exercise the handler accordingly.
         """
         if stream:
-            return YAMLHandler._dump(data=data, stream=stream, **kwargs)
-        return YAMLHandler._dump_and_return_value(data=data, **kwargs)
+            return self._dump(data=data, stream=stream, **kwargs)
+        return self._dump_and_return_value(data=data, **kwargs)
 
-    @staticmethod
-    def _dump(data: dict, stream, **kwargs) -> None:
+    def _dump(self, data: dict, stream, **kwargs) -> None:
         """If an input stream has been provided, modify it in place."""
-        YAMLHandler._handler.dump(data=data, stream=stream, **kwargs)
+        self._handler.dump(data=data, stream=stream, **kwargs)
 
-    @staticmethod
-    def _dump_and_return_value(data: dict, **kwargs) -> str:
+    def _dump_and_return_value(self, data: dict, **kwargs) -> str:
         """If an input stream hasn't been provided, generate one and return the value."""
         stream = io.StringIO()
-        YAMLHandler._handler.dump(data=data, stream=stream, **kwargs)
+        self._handler.dump(data=data, stream=stream, **kwargs)
         return stream.getvalue()
