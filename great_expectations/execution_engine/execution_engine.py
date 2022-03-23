@@ -11,6 +11,10 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+)
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -480,19 +484,19 @@ class ExecutionEngine(ABC):
                 "Base ExecutionEngine does not support adding nan condition filters"
             )
 
-        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
-            raise ge_exceptions.GreatExpectationsError(
-                "ExecutionEngine does not support updating existing row_conditions."
-            )
-
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
-        assert "column" in domain_kwargs or column_name is not None
+        assert (
+            "column" in domain_kwargs or column_name is not None
+        ), "No column provided: A column must be provided in domain_kwargs or in the column_name parameter"
         if column_name is not None:
             column = column_name
         else:
             column = domain_kwargs["column"]
-        new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
-        new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
+        row_condition: RowCondition = RowCondition(
+            condition=f'col("{column}").notnull()',
+            condition_type=RowConditionParserType.GE,
+        )
+        new_domain_kwargs.setdefault("filter_conditions", []).append(row_condition)
         return new_domain_kwargs
 
     def resolve_data_reference(
