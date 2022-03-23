@@ -609,14 +609,14 @@ class Validator:
                 metric_value_kwargs=metric_value_kwargs_override,
             )
 
-        expectation_configuraiton_builders: List[ExpectationConfigurationBuilder] = (
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
             rule.expectation_configuration_builders or []
         )
 
-        expectation_configuraiton_builder: ExpectationConfigurationBuilder
-        for expectation_configuraiton_builder in expectation_configuraiton_builders:
+        expectation_configuration_builder: ExpectationConfigurationBuilder
+        for expectation_configuration_builder in expectation_configuration_builders:
             validation_parameter_builders: List[ParameterBuilder] = (
-                expectation_configuraiton_builder.validation_parameter_builders or []
+                expectation_configuration_builder.validation_parameter_builders or []
             )
             for parameter_builder in validation_parameter_builders:
                 self._update_metric_value_kwargs_for_success_keys(
