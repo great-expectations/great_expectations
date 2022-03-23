@@ -39,7 +39,6 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         "tags": [
             "core expectation",
             "column aggregate expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],
