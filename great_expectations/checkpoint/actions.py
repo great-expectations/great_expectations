@@ -1171,12 +1171,12 @@ class SNSNotificationAction(ValidationAction):
 
         if self.sns_message_subject is None:
             logger.warning(
-                f"No message subject was checking for expectation_suite_name"
+                f"No message subject was passed checking for expectation_suite_name"
             )
             if expectation_suite_identifier is None:
                 subject = validation_result_suite_identifier.run_id
                 logger.warning(
-                    f"No expectation_suite_identifier was passed. Defaulting to validation run_id."
+                    f"No expectation_suite_identifier was passed. Defaulting to validation run_id: {subject}."
                 )
             else:
                 subject = expectation_suite_identifier.expectation_suite_name
