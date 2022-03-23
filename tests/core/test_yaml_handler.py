@@ -1,10 +1,9 @@
 import os.path
 import sys
 from pathlib import Path
-from typing import AnyStr, Optional
+from typing import Any, AnyStr, Optional
 
 import pytest
-from _pytest.capture import CaptureResult
 
 from great_expectations.core.yaml_handler import YAMLHandler
 
@@ -67,5 +66,5 @@ def test_dump_stdout_specified(capsys) -> None:
     # ruamel documentation recommends that we specify the stream as stdout when we are using YAML to return a string.
     simplest_dict: dict = dict(abc=1)
     YAMLHandler.dump(simplest_dict, stream=sys.stdout)
-    captured: CaptureResult[AnyStr] = capsys.readouterr()
+    captured: Any = capsys.readouterr()
     assert captured.out == "abc: 1\n"
