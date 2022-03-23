@@ -19,8 +19,8 @@ class Builder(SerializableDictDot):
     """
 
     exclude_field_names: Set[str] = {
-        "data_context",
         "batch_list",
+        "data_context",
     }
 
     def __init__(
