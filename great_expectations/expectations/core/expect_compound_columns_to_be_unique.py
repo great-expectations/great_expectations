@@ -16,7 +16,6 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         "tags": [
             "core expectation",
             "multi-column expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": [
             "@great_expectations",
