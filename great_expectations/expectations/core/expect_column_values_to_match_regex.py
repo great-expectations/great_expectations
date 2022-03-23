@@ -91,6 +91,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
+        "regex": "(?s).*",
     }
     args_keys = (
         "column",
@@ -103,14 +104,18 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
+
+        # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
+        regex = configuration.kwargs.get("regex") or self.default_kwarg_values.get(
+            "regex"
+        )
+
         try:
-            assert "regex" in configuration.kwargs, "regex is required"
-            assert isinstance(
-                configuration.kwargs["regex"], (str, dict)
-            ), "regex must be a string"
-            if isinstance(configuration.kwargs["regex"], dict):
+            assert "regex" in configuration.kwargs or regex, "regex is required"
+            assert isinstance(regex, (str, dict)), "regex must be a string"
+            if isinstance(regex, dict):
                 assert (
-                    "$PARAMETER" in configuration.kwargs["regex"]
+                    "$PARAMETER" in regex
                 ), 'Evaluation Parameter dict for regex kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
