@@ -5,7 +5,6 @@ import os
 import platform
 import random
 import string
-import tempfile
 import threading
 import warnings
 from functools import wraps
@@ -57,9 +56,6 @@ expectationSuiteSchema = ExpectationSuiteSchema()
 
 
 logger = logging.getLogger(__name__)
-
-tmp_dir = str(tempfile.mkdtemp())
-
 
 try:
     import sqlalchemy as sqlalchemy
