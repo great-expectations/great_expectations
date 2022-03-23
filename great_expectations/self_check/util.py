@@ -58,9 +58,6 @@ expectationSuiteSchema = ExpectationSuiteSchema()
 
 logger = logging.getLogger(__name__)
 
-tmp_dir = str(tempfile.mkdtemp())
-
-
 try:
     import sqlalchemy as sqlalchemy
     from sqlalchemy import create_engine
