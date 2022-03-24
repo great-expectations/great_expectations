@@ -101,7 +101,6 @@ class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
             "help_wanted",
         ],  # Tags for this Expectation in the gallery
         "contributors": ["@robertparker"],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
