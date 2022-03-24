@@ -66,7 +66,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         false_positive_rate: Union[str, float] = 5.0e-2,
         estimator: str = "bootstrap",
         num_bootstrap_samples: Optional[Union[str, int]] = None,
-        bootstrap_random_seed: Optional[int] = None,
+        bootstrap_random_seed: Optional[Union[str, int]] = None,
         round_decimals: Optional[Union[str, int]] = None,
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]

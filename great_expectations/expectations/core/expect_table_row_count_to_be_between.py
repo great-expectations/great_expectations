@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
@@ -78,6 +78,28 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "profiler_config",
     )
 
+    row_count_range_estimator_parameter_builder_config: dict = {
+        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+        "name": "row_count_range_estimator",
+        "metric_name": "table.row_count",
+        "metric_domain_kwargs": None,
+        "metric_value_kwargs": None,
+        "enforce_numeric_metric": True,
+        "replace_nan_with_zero": True,
+        "reduce_scalar_metric": True,
+        "false_positive_rate": f"{VARIABLES_KEY}false_positive_rate",
+        "estimator": f"{VARIABLES_KEY}estimator",
+        "num_bootstrap_samples": f"{VARIABLES_KEY}num_bootstrap_samples",
+        "bootstrap_random_seed": f"{VARIABLES_KEY}bootstrap_random_seed",
+        "round_decimals": f"{VARIABLES_KEY}round_decimals",
+        "truncate_values": f"{VARIABLES_KEY}truncate_values",
+        "evaluation_parameter_builder_configs": None,
+        "json_serialize": True,
+    }
+    validation_parameter_builder_configs: List[dict] = [
+        row_count_range_estimator_parameter_builder_config,
+    ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -105,31 +127,11 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                         "expectation_type": "expect_table_row_count_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": [
-                            {
-                                "name": "row_count_range",
-                                "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                                "metric_name": "table.row_count",
-                                "metric_domain_kwargs": None,
-                                "metric_value_kwargs": None,
-                                "enforce_numeric_metric": True,
-                                "replace_nan_with_zero": True,
-                                "reduce_scalar_metric": True,
-                                "false_positive_rate": f"{VARIABLES_KEY}false_positive_rate",
-                                "estimator": f"{VARIABLES_KEY}estimator",
-                                "num_bootstrap_samples": f"{VARIABLES_KEY}num_bootstrap_samples",
-                                "bootstrap_random_seed": f"{VARIABLES_KEY}bootstrap_random_seed",
-                                "round_decimals": f"{VARIABLES_KEY}round_decimals",
-                                "truncate_values": f"{VARIABLES_KEY}truncate_values",
-                                "evaluation_parameter_builder_configs": None,
-                                "json_serialize": True,
-                            },
-                        ],
-                        "min_value": "$parameter.row_count_range.value.value_range[0]",
-                        "max_value": "$parameter.row_count_range.value.value_range[1]",
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "min_value": "$parameter.row_count_range_estimator.value.value_range[0]",
+                        "max_value": "$parameter.row_count_range_estimator.value.value_range[1]",
                         "meta": {
-                            "profiler_details": "$parameter.row_count_range.details",
+                            "profiler_details": "$parameter.row_count_range_estimator.details",
                         },
                     }
                 ],

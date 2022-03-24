@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 
@@ -141,6 +141,31 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
+    quantile_value_ranges_estimator_parameter_builder_config: dict = {
+        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+        "name": "quantile_value_ranges_estimator",
+        "metric_name": "column.quantile_values",
+        "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        "metric_value_kwargs": {
+            "quantiles": f"{VARIABLES_KEY}quantiles",
+            "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
+        },
+        "enforce_numeric_metric": True,
+        "replace_nan_with_zero": True,
+        "reduce_scalar_metric": True,
+        "false_positive_rate": f"{VARIABLES_KEY}false_positive_rate",
+        "estimator": f"{VARIABLES_KEY}estimator",
+        "num_bootstrap_samples": f"{VARIABLES_KEY}num_bootstrap_samples",
+        "bootstrap_random_seed": f"{VARIABLES_KEY}bootstrap_random_seed",
+        "round_decimals": f"{VARIABLES_KEY}round_decimals",
+        "truncate_values": f"{VARIABLES_KEY}truncate_values",
+        "evaluation_parameter_builder_configs": None,
+        "json_serialize": True,
+    }
+    validation_parameter_builder_configs: List[dict] = [
+        quantile_value_ranges_estimator_parameter_builder_config,
+    ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -174,38 +199,15 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                         "expectation_type": "expect_column_quantile_values_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": [
-                            {
-                                "name": "quantile_value_ranges",
-                                "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                                "metric_name": "column.quantile_values",
-                                "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                                "metric_value_kwargs": {
-                                    "quantiles": f"{VARIABLES_KEY}quantiles",
-                                    "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
-                                },
-                                "enforce_numeric_metric": True,
-                                "replace_nan_with_zero": True,
-                                "reduce_scalar_metric": True,
-                                "false_positive_rate": f"{VARIABLES_KEY}false_positive_rate",
-                                "estimator": f"{VARIABLES_KEY}estimator",
-                                "num_bootstrap_samples": f"{VARIABLES_KEY}num_bootstrap_samples",
-                                "bootstrap_random_seed": f"{VARIABLES_KEY}bootstrap_random_seed",
-                                "round_decimals": f"{VARIABLES_KEY}round_decimals",
-                                "truncate_values": f"{VARIABLES_KEY}truncate_values",
-                                "evaluation_parameter_builder_configs": None,
-                                "json_serialize": True,
-                            },
-                        ],
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
                         "quantile_ranges": {
                             "quantiles": "$variables.quantiles",
-                            "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                            "value_ranges": "$parameter.quantile_value_ranges_estimator.value.value_range",
                         },
                         "allow_relative_error": "$variables.allow_relative_error",
                         "meta": {
-                            "profiler_details": "$parameter.quantile_value_ranges.details"
+                            "profiler_details": "$parameter.quantile_value_ranges_estimator.details"
                         },
                     }
                 ],

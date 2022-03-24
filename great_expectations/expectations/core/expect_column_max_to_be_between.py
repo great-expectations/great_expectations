@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
@@ -109,6 +109,28 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
+    max_range_estimator_parameter_builder_config: dict = {
+        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+        "name": "max_range_estimator",
+        "metric_name": "column.max",
+        "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        "metric_value_kwargs": None,
+        "enforce_numeric_metric": True,
+        "replace_nan_with_zero": True,
+        "reduce_scalar_metric": True,
+        "false_positive_rate": f"{VARIABLES_KEY}false_positive_rate",
+        "estimator": f"{VARIABLES_KEY}estimator",
+        "num_bootstrap_samples": f"{VARIABLES_KEY}num_bootstrap_samples",
+        "bootstrap_random_seed": f"{VARIABLES_KEY}bootstrap_random_seed",
+        "round_decimals": f"{VARIABLES_KEY}round_decimals",
+        "truncate_values": f"{VARIABLES_KEY}truncate_values",
+        "evaluation_parameter_builder_configs": None,
+        "json_serialize": True,
+    }
+    validation_parameter_builder_configs: List[dict] = [
+        max_range_estimator_parameter_builder_config,
+    ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_max_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -138,27 +160,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                         "expectation_type": "expect_column_max_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": [
-                            {
-                                "name": "max_range_estimator",
-                                "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                                "metric_name": "column.max",
-                                "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                                "metric_value_kwargs": None,
-                                "enforce_numeric_metric": True,
-                                "replace_nan_with_zero": True,
-                                "reduce_scalar_metric": True,
-                                "false_positive_rate": f"{VARIABLES_KEY}false_positive_rate",
-                                "estimator": f"{VARIABLES_KEY}estimator",
-                                "num_bootstrap_samples": f"{VARIABLES_KEY}num_bootstrap_samples",
-                                "bootstrap_random_seed": f"{VARIABLES_KEY}bootstrap_random_seed",
-                                "round_decimals": f"{VARIABLES_KEY}round_decimals",
-                                "truncate_values": f"{VARIABLES_KEY}truncate_values",
-                                "evaluation_parameter_builder_configs": None,
-                                "json_serialize": True,
-                            },
-                        ],
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
                         "min_value": "$parameter.max_range_estimator.value.value_range[0]",
                         "max_value": "$parameter.max_range_estimator.value.value_range[1]",

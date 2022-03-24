@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.expectation import (
@@ -125,6 +125,18 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "profiler_config",
     )
 
+    value_set_estimator_parameter_builder_config: dict = {
+        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+        "class_name": "ValueSetMultiBatchParameterBuilder",
+        "name": "value_set_estimator",
+        "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        "metric_value_kwargs": None,
+        "evaluation_parameter_builder_configs": None,
+        "json_serialize": True,
+    }
+    validation_parameter_builder_configs: List[dict] = [
+        value_set_estimator_parameter_builder_config,
+    ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_in_set",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -144,22 +156,12 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                         "expectation_type": "expect_column_values_to_be_in_set",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": [
-                            {
-                                "name": "value_set",
-                                "class_name": "ValueSetMultiBatchParameterBuilder",
-                                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                                "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                                "metric_value_kwargs": None,
-                                "evaluation_parameter_builder_configs": None,
-                                "json_serialize": True,
-                            },
-                        ],
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "value_set": "$parameter.value_set.value",
+                        "value_set": "$parameter.value_set_estimator.value",
                         "mostly": f"{VARIABLES_KEY}mostly",
                         "meta": {
-                            "profiler_details": "$parameter.value_set.details",
+                            "profiler_details": "$parameter.value_set_estimator.details",
                         },
                     },
                 ],
