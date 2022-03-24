@@ -332,16 +332,6 @@ def spark_session_v012(test_backends):
 
 
 @pytest.fixture
-def empty_expectation_suite():
-    expectation_suite = {
-        "expectation_suite_name": "default",
-        "meta": {},
-        "expectations": [],
-    }
-    return expectation_suite
-
-
-@pytest.fixture
 def basic_expectation_suite(empty_data_context_stats_enabled):
     context: DataContext = empty_data_context_stats_enabled
     expectation_suite = ExpectationSuite(
@@ -366,16 +356,6 @@ def basic_expectation_suite(empty_data_context_stats_enabled):
         data_context=context,
     )
     return expectation_suite
-
-
-@pytest.fixture
-def file_data_asset(tmp_path):
-    tmp_path = str(tmp_path)
-    path = os.path.join(tmp_path, "file_data_asset.txt")
-    with open(path, "w+") as file:
-        file.write(json.dumps([0, 1, 2, 3, 4]))
-
-    return ge.data_asset.FileDataAsset(file_path=path)
 
 
 @pytest.fixture
@@ -466,91 +446,6 @@ def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
 
 
 @pytest.fixture
-def datetime_dataset(test_backend):
-    data = {
-        "datetime": [
-            str(datetime.datetime(2020, 2, 4, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 5, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 6, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 7, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 8, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 9, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 10, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 11, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 12, 22, 12, 5, 943152)),
-            str(datetime.datetime(2020, 2, 13, 22, 12, 5, 943152)),
-        ]
-    }
-
-    schemas = {
-        "pandas": {
-            "datetime": "datetime64",
-        },
-        "postgresql": {
-            "datetime": "TIMESTAMP",
-        },
-        "sqlite": {
-            "datetime": "TIMESTAMP",
-        },
-        "mysql": {
-            "datetime": "TIMESTAMP",
-        },
-        "mssql": {
-            "datetime": "DATETIME",
-        },
-        "spark": {
-            "datetime": "TimestampType",
-        },
-    }
-    return get_dataset(test_backend, data, schemas=schemas)
-
-
-@pytest.fixture
-def non_numeric_low_card_dataset(test_backend):
-    """Provide dataset fixtures that have special values and/or are otherwise useful outside
-    the standard json testing framework"""
-
-    # fmt: off
-    data = {
-        "lowcardnonnum": [
-            "a", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
-            "b", "b", "b", "b", "b",
-        ]
-    }
-    # fmt: on
-    schemas = {
-        "pandas": {
-            "lowcardnonnum": "str",
-        },
-        "postgresql": {
-            "lowcardnonnum": "TEXT",
-        },
-        "sqlite": {
-            "lowcardnonnum": "VARCHAR",
-        },
-        "mysql": {
-            "lowcardnonnum": "TEXT",
-        },
-        "mssql": {
-            "lowcardnonnum": "VARCHAR",
-        },
-        "spark": {
-            "lowcardnonnum": "StringType",
-        },
-    }
-    return get_dataset(test_backend, data, schemas=schemas)
-
-
-@pytest.fixture
 def non_numeric_high_card_dataset(test_backend):
     """Provide dataset fixtures that have special values and/or are otherwise useful outside
     the standard json testing framework"""
@@ -636,27 +531,6 @@ def non_numeric_high_card_dataset(test_backend):
         },
     }
     return get_dataset(test_backend, data, schemas=schemas)
-
-
-@pytest.fixture
-def periodic_table_of_elements():
-    # fmt: off
-    data = [
-        "Hydrogen", "Helium", "Lithium", "Beryllium", "Boron", "Carbon", "Nitrogen", "Oxygen", "Fluorine", "Neon",
-        "Sodium", "Magnesium", "Aluminum", "Silicon", "Phosphorus", "Sulfur", "Chlorine", "Argon", "Potassium", "Calcium",
-        "Scandium", "Titanium", "Vanadium", "Chromium", "Manganese", "Iron", "Cobalt", "Nickel", "Copper", "Zinc",
-        "Gallium", "Germanium", "Arsenic", "Selenium", "Bromine", "Krypton", "Rubidium", "Strontium", "Yttrium", "Zirconium",
-        "Niobium", "Molybdenum", "Technetium", "Ruthenium", "Rhodium", "Palladium", "Silver", "Cadmium", "Indium", "Tin",
-        "Antimony", "Tellurium", "Iodine", "Xenon", "Cesium", "Barium", "Lanthanum", "Cerium", "Praseodymium", "Neodymium",
-        "Promethium", "Samarium", "Europium", "Gadolinium", "Terbium", "Dysprosium", "Holmium", "Erbium", "Thulium", "Ytterbium",
-        "Lutetium", "Hafnium", "Tantalum", "Tungsten", "Rhenium", "Osmium", "Iridium", "Platinum", "Gold", "Mercury",
-        "Thallium", "Lead", "Bismuth", "Polonium", "Astatine", "Radon", "Francium", "Radium", "Actinium", "Thorium",
-        "Protactinium", "Uranium", "Neptunium", "Plutonium", "Americium", "Curium", "Berkelium", "Californium", "Einsteinium", "Fermium",
-        "Mendelevium", "Nobelium", "Lawrencium", "Rutherfordium", "Dubnium", "Seaborgium", "Bohrium", "Hassium", "Meitnerium", "Darmstadtium",
-        "Roentgenium", "Copernicium", "Nihomium", "Flerovium", "Moscovium", "Livermorium", "Tennessine", "Oganesson",
-    ]
-    # fmt: on
-    return data
 
 
 def dataset_sample_data(test_backend):
@@ -1100,57 +974,6 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
 
 
 @pytest.fixture
-def assetless_dataconnector_context(
-    tmp_path_factory,
-    monkeypatch,
-):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data", "titanic")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            "./test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-    context = ge.data_context.DataContext(context_path)
-    assert context.root_directory == context_path
-
-    datasource_config = f"""
-            class_name: Datasource
-
-            execution_engine:
-                class_name: PandasExecutionEngine
-
-            data_connectors:
-                my_other_data_connector:
-                    class_name: ConfiguredAssetFilesystemDataConnector
-                    base_directory: {data_path}
-                    glob_directive: "*.csv"
-
-                    default_regex:
-                        pattern: (.+)\\.csv
-                        group_names:
-                            - name
-                    assets:
-                        {{}}
-            """
-
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
-    context._save_project_config()
-    return context
-
-
-@pytest.fixture
 def deterministic_asset_dataconnector_context(
     tmp_path_factory,
     monkeypatch,
@@ -1502,24 +1325,6 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
 
 @pytest.fixture
-def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
-    monkeypatch.setenv("FOO", "BAR")
-    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
-    root_dir = empty_data_context.root_directory
-    ge_config_path = file_relative_path(
-        __file__,
-        "./test_fixtures/great_expectations_basic_with_variables.yml",
-    )
-    shutil.copy(ge_config_path, os.path.join(root_dir, "great_expectations.yml"))
-    config_variables_path = file_relative_path(
-        __file__,
-        "./test_fixtures/config_variables.yml",
-    )
-    shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
-    return DataContext(context_root_dir=root_dir)
-
-
-@pytest.fixture
 def empty_context_with_checkpoint(empty_data_context):
     context = empty_data_context
     root_dir = empty_data_context.root_directory
@@ -1530,19 +1335,6 @@ def empty_context_with_checkpoint(empty_data_context):
     checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
     shutil.copy(fixture_path, checkpoints_file)
     assert os.path.isfile(checkpoints_file)
-    return context
-
-
-@pytest.fixture
-def empty_context_with_checkpoint_stats_enabled(empty_data_context_stats_enabled):
-    context = empty_data_context_stats_enabled
-    root_dir = context.root_directory
-    fixture_name = "my_checkpoint.yml"
-    fixture_path = file_relative_path(
-        __file__, f"./data_context/fixtures/contexts/{fixture_name}"
-    )
-    checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
-    shutil.copy(fixture_path, checkpoints_file)
     return context
 
 
@@ -1558,45 +1350,6 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     return context
 
 
-@pytest.fixture(scope="module")
-def empty_data_context_module_scoped(tmp_path_factory):
-    # Re-enable GE_USAGE_STATS
-    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
-    context = ge.data_context.DataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
-    return context
-
-
-@pytest.fixture
-def empty_context_with_checkpoint_v1_stats_enabled(
-    empty_data_context_stats_enabled, monkeypatch
-):
-    try:
-        monkeypatch.delenv("VAR")
-        monkeypatch.delenv("MY_PARAM")
-        monkeypatch.delenv("OLD_PARAM")
-    except:
-        pass
-
-    monkeypatch.setenv("VAR", "test")
-    monkeypatch.setenv("MY_PARAM", "1")
-    monkeypatch.setenv("OLD_PARAM", "2")
-
-    context = empty_data_context_stats_enabled
-    root_dir = context.root_directory
-    fixture_name = "my_v1_checkpoint.yml"
-    fixture_path = file_relative_path(
-        __file__, f"./data_context/fixtures/contexts/{fixture_name}"
-    )
-    checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
-    shutil.copy(fixture_path, checkpoints_file)
-    # # noinspection PyProtectedMember
-    context._save_project_config()
-    return context
-
-
 @pytest.fixture
 def titanic_data_context(
     tmp_path_factory,
@@ -1609,29 +1362,6 @@ def titanic_data_context(
     os.makedirs(os.path.join(data_path), exist_ok=True)
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
-    )
-    shutil.copy(
-        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
-    )
-    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
-    shutil.copy(
-        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
-    )
-    return ge.data_context.DataContext(context_path)
-
-
-@pytest.fixture
-def titanic_data_context_clean(
-    tmp_path_factory,
-) -> DataContext:
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
-    titanic_yml_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_v013clean_titanic.yml"
     )
     shutil.copy(
         titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
