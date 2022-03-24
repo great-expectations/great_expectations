@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import Any, List, Optional, Type
+from typing import Any, Callable, List, Optional, Type
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
@@ -104,7 +104,7 @@ class Anonymizer(BaseAnonymizer):
 
         anonymized_init_payload = defaultdict(list)
         for key, val in init_payload.items():
-            anonymizer_func = anonymizer_funcs.get(key)
+            anonymizer_func: Optional[Callable] = anonymizer_funcs.get(key)
             if anonymizer_func:
                 anonymized_key: str = f"anonymized_{key}"
                 if isinstance(val, list):
