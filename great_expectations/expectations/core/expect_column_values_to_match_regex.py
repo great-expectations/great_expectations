@@ -291,38 +291,38 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             )
         ]
 
-    examples = [
-        {
-            "data": {
-                "a": ["aaa", "abb", "acc", "add", "bee"],
-                "b": ["aaa", "abb", "acc", "bdd", None],
-                "column_name with space": ["aaa", "abb", "acc", "add", "bee"],
-            },
-            "tests": [
-                {
-                    "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
-                    "exact_match_out": False,
-                    "in": {"column": "a", "regex": "^a", "mostly": 0.9},
-                    "out": {
-                        "success": False,
-                        "unexpected_index_list": [4],
-                        "unexpected_list": ["bee"],
-                    },
-                    "include_in_gallery": True,
-                    "suppress_test_for": ["sqlite", "mssql"],
-                },
-                {
-                    "title": "positive_test_exact_mostly_w_one_non_matching_value",
-                    "exact_match_out": False,
-                    "in": {"column": "a", "regex": "^a", "mostly": 0.8},
-                    "out": {
-                        "success": True,
-                        "unexpected_index_list": [4],
-                        "unexpected_list": ["bee"],
-                    },
-                    "include_in_gallery": True,
-                    "suppress_test_for": ["sqlite", "mssql"],
-                },
-            ],
-        }
-    ]
+    # examples = [
+    #     {
+    #         "data": {
+    #             "a": ["aaa", "abb", "acc", "add", "bee"],
+    #             "b": ["aaa", "abb", "acc", "bdd", None],
+    #             "column_name with space": ["aaa", "abb", "acc", "add", "bee"],
+    #         },
+    #         "tests": [
+    #             {
+    #                 "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
+    #                 "exact_match_out": False,
+    #                 "in": {"column": "a", "regex": "^a", "mostly": 0.9},
+    #                 "out": {
+    #                     "success": False,
+    #                     "unexpected_index_list": [4],
+    #                     "unexpected_list": ["bee"],
+    #                 },
+    #                 "include_in_gallery": True,
+    #                 "suppress_test_for": ["sqlite", "mssql"],
+    #             },
+    #             {
+    #                 "title": "positive_test_exact_mostly_w_one_non_matching_value",
+    #                 "exact_match_out": False,
+    #                 "in": {"column": "a", "regex": "^a", "mostly": 0.8},
+    #                 "out": {
+    #                     "success": True,
+    #                     "unexpected_index_list": [4],
+    #                     "unexpected_list": ["bee"],
+    #                 },
+    #                 "include_in_gallery": True,
+    #                 "suppress_test_for": ["sqlite", "mssql"],
+    #             },
+    #         ],
+    #     }
+    # ]
