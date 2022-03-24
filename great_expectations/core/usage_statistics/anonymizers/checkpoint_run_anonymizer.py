@@ -13,6 +13,9 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
+    BatchRequestAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS,
 )
@@ -23,6 +26,11 @@ logger = logging.getLogger(__name__)
 
 
 class CheckpointRunAnonymizer(BaseAnonymizer):
+    def __init__(self, salt: Optional[str] = None) -> None:
+        super().__init__(salt=salt)
+
+        self._batch_request_anonymizer = BatchRequestAnonymizer(salt=salt)
+
     def anonymize(self, obj: object = None, **kwargs) -> Any:
         assert self.can_handle(
             obj=obj
@@ -100,7 +108,7 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
 
         anonymized_batch_request: Optional[
             Dict[str, List[str]]
-        ] = self._anonymize_batch_request(*(), **batch_request)
+        ] = self._batch_request_anonymizer.anonymize(*(), **batch_request)
 
         action_list: Optional[List[dict]] = kwargs.get("action_list")
         anonymized_action_list: Optional[List[dict]] = None
@@ -135,7 +143,9 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
 
                 anonymized_validation_batch_request: Optional[
                     Optional[Dict[str, List[str]]]
-                ] = self._anonymize_batch_request(*(), **validation_batch_request)
+                ] = self._batch_request_anonymizer.anonymize(
+                    *(), **validation_batch_request
+                )
 
                 validation_expectation_suite_name: Optional[str] = validation_obj.get(
                     "expectation_suite_name"

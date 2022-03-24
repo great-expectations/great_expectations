@@ -2,6 +2,9 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
+    BatchRequestAnonymizer,
+)
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import deep_filter_properties_iterable
@@ -10,6 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 class ProfilerRunAnonymizer(BaseAnonymizer):
+    def __init__(self, salt: Optional[str] = None) -> None:
+        super().__init__(salt=salt)
+
+        self._batch_request_anonymizer = BatchRequestAnonymizer(salt=salt)
+
     def anonymize(self, obj: object, **kwargs) -> Any:
         assert self.can_handle(
             obj
@@ -122,9 +130,9 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
 
         batch_request: Optional[dict] = domain_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[dict] = self._anonymize_batch_request(
-                **batch_request
-            )
+            anonymized_batch_request: Optional[
+                dict
+            ] = self._batch_request_anonymizer.anonymize(**batch_request)
             anonymized_domain_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
@@ -160,9 +168,9 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
 
         batch_request: Optional[dict] = parameter_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[dict] = self._anonymize_batch_request(
-                **batch_request
-            )
+            anonymized_batch_request: Optional[
+                dict
+            ] = self._batch_request_anonymizer.anonymize(**batch_request)
             anonymized_parameter_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
