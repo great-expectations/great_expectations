@@ -38,7 +38,7 @@ title: Changelog
 * [DOCS] Update README.md (#4533) (thanks @andyjessen)
 * [HACKATHON] ExpectColumnValuesToBeValidIPv4 (#4457) (thanks @voidforall)
 * [HACKATHON] ExpectColumnValuesToBeValidIanaTimezone (#4532) (thanks @lucasasmith)
-* [MAINTENANCE] Clean up `Checkpoints` documentation and add `<snippet>`  (#4474)
+* [MAINTENANCE] Clean up `Checkpoints` documentation and add `snippet`  (#4474)
 * [MAINTENANCE] Finalize Great Expectations contrib JSON structure (#4482)
 * [MAINTENANCE] Update expectation filenames to match snake_case of their defined Expectations (#4484)
 * [MAINTENANCE] Clean Up Types and Rely on "to_json_dict()" where appropriate (#4489)
