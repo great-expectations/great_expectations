@@ -2,6 +2,7 @@
 
 This module contains utilities for tracking installed package dependencies to help enable the core team
 to safely upgrade package dependencies to gain access to features of new package versions.
+It contains a
 
     Typical usage example:
         ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
@@ -11,11 +12,7 @@ to safely upgrade package dependencies to gain access to features of new package
 """
 import os
 import re
-from dataclasses import dataclass
-from importlib import metadata
-from typing import List, Optional, Set, Tuple
-
-from packaging import version
+from typing import List, Set
 
 
 class GEDependencies:
@@ -172,132 +169,6 @@ class GEDependencies:
             if match is not None:
                 dependency_names.append(match.group(0))
         return dependency_names
-
-
-@dataclass
-class PackageInfo:
-    package_name: str
-    installed: bool
-    version: Optional[version.Version]
-
-
-class GEExecutionEnvironment:
-    """The list of installed GE dependencies with name/version along with the likely execution environment.
-
-    Note we may not be able to uniquely determine the execution environment so we track all possibilities in a list.
-
-    Attributes: None
-    """
-
-    def __init__(self):
-        self._ge_dependencies: GEDependencies = GEDependencies()
-        self._all_installed_packages = None
-        self.get_all_installed_packages()
-
-        self._installed_required_dependencies = None
-        self._not_installed_required_dependencies = None
-        self.build_required_dependencies()
-
-        self._installed_dev_dependencies = None
-        self._not_installed_dev_dependencies = None
-        self.build_dev_dependencies()
-
-    def get_all_installed_packages(self) -> List[str]:
-        if self._all_installed_packages is None:
-            # Only retrieve once
-            self._all_installed_packages = [
-                item.metadata.get("Name") for item in metadata.distributions()
-            ]
-        return self._all_installed_packages
-
-    def build_required_dependencies(self) -> None:
-        dependency_list: List[PackageInfo] = self._build_dependency_list(
-            self._ge_dependencies.get_required_dependency_names()
-        )
-        (
-            installed_dependencies,
-            not_installed_dependencies,
-        ) = self._split_dependencies_installed_vs_not(dependency_list)
-        self._installed_required_dependencies = installed_dependencies
-        self._not_installed_required_dependencies = not_installed_dependencies
-
-    def build_dev_dependencies(self) -> None:
-        dependency_list: List[PackageInfo] = self._build_dependency_list(
-            self._ge_dependencies.get_dev_dependency_names()
-        )
-        (
-            installed_dependencies,
-            not_installed_dependencies,
-        ) = self._split_dependencies_installed_vs_not(dependency_list)
-        self._installed_dev_dependencies = installed_dependencies
-        self._not_installed_dev_dependencies = not_installed_dependencies
-
-    @staticmethod
-    def _split_dependencies_installed_vs_not(
-        dependency_list: List[PackageInfo],
-    ) -> Tuple[List[PackageInfo], List[PackageInfo]]:
-        installed_dependencies: List[PackageInfo] = [
-            d for d in dependency_list if d.installed
-        ]
-        not_installed_dependencies: List[PackageInfo] = [
-            d for d in dependency_list if not d.installed
-        ]
-        return installed_dependencies, not_installed_dependencies
-
-    def _build_dependency_list(self, dependency_names: List[str]) -> List[PackageInfo]:
-        dependencies: List[PackageInfo] = []
-        for dependency_name in dependency_names:
-
-            if dependency_name in self.get_all_installed_packages():
-                package_version: version.Version = self._get_version_from_package_name(
-                    dependency_name
-                )
-                dependencies.append(
-                    PackageInfo(
-                        package_name=dependency_name,
-                        version=package_version,
-                        installed=True,
-                    )
-                )
-            else:
-                dependencies.append(
-                    PackageInfo(
-                        package_name=dependency_name, version=None, installed=False
-                    )
-                )
-        return dependencies
-
-    @staticmethod
-    def _get_version_from_package_name(package_name: str) -> version.Version:
-        """Get version information from package name.
-
-        Args:
-            package_name: str
-
-        Returns:
-            packaging.version.Version for the package
-
-        Raises:
-            importlib.metadata.PackageNotFoundError
-        """
-        package_version: version.Version = version.parse(metadata.version(package_name))
-        return package_version
-
-    @property
-    def installed_required_dependencies(self):
-        return self._installed_required_dependencies
-
-    @property
-    def installed_dev_dependencies(self):
-        return self._installed_dev_dependencies
-
-    @property
-    def not_installed_required_dependencies(self):
-        return self._not_installed_required_dependencies
-
-    @property
-    def not_installed_dev_dependencies(self):
-        return self._not_installed_dev_dependencies
 
 
 if __name__ == "__main__":
