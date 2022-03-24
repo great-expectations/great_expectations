@@ -13,6 +13,8 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 
+yaml = yaml.YAML(typ="safe")
+
 context = ge.get_context()
 
 # Add datasource for all tests
@@ -80,7 +82,7 @@ validation_result_id = results.run_results[[k for k in results.run_results.keys(
 assert (
     type(validation_result_id["validation_result"]) == ExpectationSuiteValidationResult
 )
-assert isinstance(results.checkpoint_config, dict)
+assert isinstance(results.checkpoint_config, CheckpointConfig)
 
 typed_results = {
     "run_id": run_id_type,
@@ -98,6 +100,7 @@ typed_results = {
     "success": True,
 }
 
+# <snippet>
 results = {
     "run_id": RunIdentifier,
     "run_results": {
@@ -113,6 +116,7 @@ results = {
     "checkpoint_config": CheckpointConfig,
     "success": True,
 }
+# </snippet>
 
 assert typed_results == results
 
@@ -141,6 +145,7 @@ validator.expect_table_row_count_to_be_between(
 )
 validator.save_expectation_suite(discard_failed_expectations=False)
 
+# <snippet>
 no_nesting = f"""
 name: my_checkpoint
 config_version: 1
@@ -170,8 +175,11 @@ runtime_configuration:
     result_format: BASIC
     partial_unexpected_count: 20
 """
+# </snippet>
 context.add_checkpoint(**yaml.load(no_nesting))
+# <snippet>
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+# </snippet>
 assert results.success is True
 assert (
     list(results.run_results.items())[0][1]["validation_result"]["results"][0][
@@ -186,6 +194,7 @@ assert (
     == 1000
 )
 
+# <snippet>
 nesting_with_defaults = """
 name: my_checkpoint
 config_version: 1
@@ -219,9 +228,14 @@ runtime_configuration:
     result_format: BASIC
     partial_unexpected_count: 20
 """
+# </snippet>
 context.add_checkpoint(**yaml.load(nesting_with_defaults))
+# <snippet>
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+# </snippet>
 assert results.success is True
+
+# <snippet>
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
@@ -237,6 +251,9 @@ assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "yellow_tripdata_sample_2019-01"
 assert second_expectation_suite == "my_expectation_suite"
 assert second_data_asset == "yellow_tripdata_sample_2019-02"
+# </snippet>
+
+# <snippet>
 documentation_results = """
 print(first_expectation_suite)
 my_expectation_suite
@@ -250,8 +267,10 @@ my_expectation_suite
 print(second_data_asset)
 yellow_tripdata_sample_2019-02
 """
+# </snippet>
 
 
+# <snippet>
 keys_passed_at_runtime = """
 name: my_base_checkpoint
 config_version: 1
@@ -275,7 +294,10 @@ runtime_configuration:
     result_format: BASIC
     partial_unexpected_count: 20
 """
+# </snippet>
 context.add_checkpoint(**yaml.load(keys_passed_at_runtime))
+
+# <snippet>
 results = context.run_checkpoint(
     checkpoint_name="my_base_checkpoint",
     validations=[
@@ -297,7 +319,9 @@ results = context.run_checkpoint(
         },
     ],
 )
+# </snippet>
 assert results.success is True
+# <snippet>
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
@@ -309,14 +333,33 @@ second_expectation_suite = second_validation_result["meta"]["expectation_suite_n
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "yellow_tripdata_sample_2019-01"
 assert second_expectation_suite == "my_other_expectation_suite"
 assert second_data_asset == "yellow_tripdata_sample_2019-02"
+# </snippet>
+
+# <snippet>
+documentation_results = """
+print(first_expectation_suite)
+my_expectation_suite
+
+print(first_data_asset)
+yellow_tripdata_sample_2019-01
+
+print(second_expectation_suite)
+my_other_expectation_suite
+
+print(second_data_asset)
+yellow_tripdata_sample_2019-02
+"""
+# </snippet>
 
 context.create_expectation_suite("my_expectation_suite", overwrite_existing=True)
 context.create_expectation_suite("my_other_expectation_suite", overwrite_existing=True)
 
+# <snippet>
 using_template = """
 name: my_checkpoint
 config_version: 1
@@ -334,9 +377,13 @@ validations:
       data_asset_name: yellow_tripdata_sample_2019-02
     expectation_suite_name: my_other_expectation_suite
 """
+# </snippet>
 context.add_checkpoint(**yaml.load(using_template))
+# <snippet>
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+# </snippet>
 assert results.success is True
+# <snippet>
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
@@ -348,11 +395,31 @@ second_expectation_suite = second_validation_result["meta"]["expectation_suite_n
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "yellow_tripdata_sample_2019-01"
 assert second_expectation_suite == "my_other_expectation_suite"
 assert second_data_asset == "yellow_tripdata_sample_2019-02"
+# </snippet>
 
+# <snippet>
+documentation_results = """
+print(first_expectation_suite)
+my_expectation_suite
+
+print(first_data_asset)
+yellow_tripdata_sample_2019-01"
+
+print(second_expectation_suite)
+my_other_expectation_suite
+
+print(second_data_asset)
+yellow_tripdata_sample_2019-02
+"""
+# </snippet>
+
+
+# <snippet>
 using_simple_checkpoint = """
 name: my_checkpoint
 config_version: 1
@@ -368,13 +435,33 @@ slack_webhook: <YOUR SLACK WEBHOOK URL>
 notify_on: failure
 notify_with: all
 """
+# </snippet>
 using_simple_checkpoint = using_simple_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
 context.add_checkpoint(**yaml.load(using_simple_checkpoint))
+# <snippet>
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+# </snippet>
 assert results.success is True
+validation_result = list(results.run_results.items())[0][1]["validation_result"]
 
+# <snippet>
+expectation_suite = validation_result["meta"]["expectation_suite_name"]
+data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+
+assert expectation_suite == "my_expectation_suite"
+assert data_asset == "yellow_tripdata_sample_2019-01"
+# </snippet>
+
+# <snippet>
+documentation_results: str = """
+print(expectation_suite)
+my_expectation_suite
+"""
+# </snippet>
+
+# <snippet>
 equivalent_using_checkpoint = """
 name: my_checkpoint
 config_version: 1
@@ -405,15 +492,31 @@ action_list:
         module_name: great_expectations.render.renderer.slack_renderer
         class_name: SlackRenderer
 """
+# </snippet>
 equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
 context.add_checkpoint(**yaml.load(equivalent_using_checkpoint))
+# <snippet>
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+# </snippet>
 assert results.success is True
 validation_result = list(results.run_results.items())[0][1]["validation_result"]
 
+# <snippet>
 expectation_suite = validation_result["meta"]["expectation_suite_name"]
 data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+
 assert expectation_suite == "my_expectation_suite"
 assert data_asset == "yellow_tripdata_sample_2019-01"
+# </snippet>
+
+# <snippet>
+documentation_results: str = """
+print(expectation_suite)
+my_expectation_suite
+
+print(data_asset)
+yellow_tripdata_sample_2019-01"
+"""
+# </snippet>

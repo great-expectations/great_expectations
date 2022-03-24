@@ -214,7 +214,6 @@ class ExpectValueAtIndex(ColumnMapExpectation):
             # Github handles for all contributors to this Expectation.
             #         "@your_name_here", # Don't forget to add your github handle here!
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
@@ -317,5 +316,4 @@ class ExpectValueAtIndex(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectValueAtIndex().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectValueAtIndex().print_diagnostic_checklist()

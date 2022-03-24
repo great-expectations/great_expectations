@@ -13,12 +13,13 @@ from great_expectations.render.util import substitute_none_for_missing
 class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": False,
     }
 
     map_metric = "column_values.match_like_pattern_list"
@@ -38,7 +39,9 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         "like_pattern_list",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert (

@@ -114,7 +114,6 @@ class ExpectColumnValuesToBeXmlParseable(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["xml", "glam"],
         "contributors": ["@mielvds"],
-        "package": "experimental_expectations",
         "requirements": ["lxml"],
     }
 
@@ -190,3 +189,7 @@ class ExpectColumnValuesToBeXmlParseable(ColumnMapExpectation):
                 }
             )
         ]
+
+
+if __name__ == "__main__":
+    ExpectColumnValuesToBeXmlParseable().print_diagnostic_checklist()

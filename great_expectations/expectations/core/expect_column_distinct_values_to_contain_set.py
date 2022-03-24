@@ -27,10 +27,11 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": False,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -53,7 +54,9 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         "value_set",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
 
@@ -119,19 +122,19 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
 
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-        template_str = "distinct values must contain this set: " + values_string + "."
+        template_str = f"distinct values must contain this set: {values_string}."
 
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -140,7 +143,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
@@ -183,26 +186,26 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
             values_string = "[ ]"
         else:
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
 
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
-        template_str = "distinct values must contain this set: " + values_string + "."
+        template_str = f"distinct values must contain this set: {values_string}."
 
         if params.get("parse_strings_as_datetimes"):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -232,10 +235,12 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         value_set = self.get_success_kwargs(configuration).get("value_set")
 
         if parse_strings_as_datetimes:
+            # deprecated-v0.13.41
             warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
-            future release.  Please update code accordingly.
-            """,
+                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
+v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
+please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
+""",
                 DeprecationWarning,
             )
             parsed_value_set = parse_value_set(value_set)

@@ -7,6 +7,7 @@ import os
 import random
 import shutil
 import sys
+import warnings
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -23,9 +24,13 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.core.usage_statistics.usage_statistics import (
+    UsageStatisticsHandler,
+)
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
+    AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     GeCloudConfig,
@@ -53,6 +58,9 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
+)
+from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
+    DEFAULT_CANDIDATE_STRINGS,
 )
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
@@ -112,10 +120,16 @@ def pytest_configure(config):
 
 
 def pytest_addoption(parser):
+    # note: --no-spark will be deprecated in favor of --spark
     parser.addoption(
         "--no-spark",
         action="store_true",
-        help="If set, suppress all tests against the spark test suite",
+        help="If set, suppress tests against the spark test suite",
+    )
+    parser.addoption(
+        "--spark",
+        action="store_true",
+        help="If set, execute tests against the spark test suite",
     )
     parser.addoption(
         "--no-sqlalchemy",
@@ -123,9 +137,15 @@ def pytest_addoption(parser):
         help="If set, suppress all tests using sqlalchemy",
     )
     parser.addoption(
+        "--postgresql",
+        action="store_true",
+        help="If set, execute tests against postgresql",
+    )
+    # note: --no-postgresql will be deprecated in favor of --postgresql
+    parser.addoption(
         "--no-postgresql",
         action="store_true",
-        help="If set, suppress all tests against postgresql",
+        help="If set, supress tests against postgresql",
     )
     parser.addoption(
         "--mysql",
@@ -178,10 +198,21 @@ def build_test_backends_list(metafunc):
 
 
 def build_test_backends_list_cfe(metafunc):
+    # adding deprecation warnings
+    if metafunc.config.getoption("--no-postgresql"):
+        warnings.warn(
+            "--no-sqlalchemy is deprecated as of v0.14 in favor of the --postgresql flag. It will be removed in v0.16. Please adjust your tests accordingly",
+            DeprecationWarning,
+        )
+    if metafunc.config.getoption("--no-spark"):
+        warnings.warn(
+            "--no-spark is deprecated as of v0.14 in favor of the --spark flag. It will be removed in v0.16. Please adjust your tests accordingly.",
+            DeprecationWarning,
+        )
     include_pandas: bool = True
-    include_spark: bool = not metafunc.config.getoption("--no-spark")
+    include_spark: bool = metafunc.config.getoption("--spark")
     include_sqlalchemy: bool = not metafunc.config.getoption("--no-sqlalchemy")
-    include_postgresql = not metafunc.config.getoption("--no-postgresql")
+    include_postgresql: bool = metafunc.config.getoption("--postgresql")
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
@@ -194,6 +225,7 @@ def build_test_backends_list_cfe(metafunc):
         include_mysql=include_mysql,
         include_mssql=include_mssql,
         include_bigquery=include_bigquery,
+        include_aws=include_aws,
     )
     return test_backend_names
 
@@ -3277,6 +3309,20 @@ def titanic_sqlite_db(sa):
 
 
 @pytest.fixture
+def titanic_sqlite_db_connection_string(sa):
+    try:
+        import sqlalchemy as sa
+        from sqlalchemy import create_engine
+
+        titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
+        engine = create_engine(f"sqlite:////{titanic_db_path}")
+        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        return f"sqlite:///{titanic_db_path}"
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
+
+
+@pytest.fixture
 def titanic_expectation_suite(empty_data_context_stats_enabled):
     data_context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
@@ -4905,6 +4951,46 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
 
 
 @pytest.fixture
+def data_context_with_query_store(
+    empty_data_context, titanic_sqlite_db_connection_string
+):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: {titanic_sqlite_db_connection_string}
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+    """
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    store_config = yaml.load(
+        f"""
+    class_name: SqlAlchemyQueryStore
+    credentials:
+        connection_string: {titanic_sqlite_db_connection_string}
+    queries:
+        col_count:
+            query: "SELECT COUNT(*) FROM titanic;"
+            return_type: "scalar"
+        dist_col_count:
+            query: "SELECT COUNT(DISTINCT PClass) FROM titanic;"
+            return_type: "scalar"
+    """
+    )
+    context.add_store("my_query_store", store_config)
+    return context
+
+
+@pytest.fixture
 def ge_cloud_base_url():
     return "https://app.test.greatexpectations.io"
 
@@ -5070,6 +5156,7 @@ def profiler_config_with_placeholder_args(
 
     return RuleBasedProfilerConfig(
         name=profiler_name,
+        class_name="RuleBasedProfiler",
         config_version=1.0,
         variables={
             "false_positive_threshold": 1.0e-2,
@@ -5090,6 +5177,16 @@ def profiler_config_with_placeholder_args(
                     {
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "column_A": "$domain.domain_kwargs.column_A",
+                        "column_B": "$domain.domain_kwargs.column_B",
+                        "my_arg": "$parameter.my_parameter.value[0]",
+                        "my_other_arg": "$parameter.my_parameter.value[1]",
+                        "meta": {
+                            "details": {
+                                "my_parameter_estimator": "$parameter.my_parameter.details",
+                                "note": "Important remarks about estimation algorithm.",
+                            },
+                        },
                     },
                 ],
             },
@@ -5133,8 +5230,18 @@ def populated_profiler_store(
 ) -> ProfilerStore:
     skip_if_python_below_minimum_version()
 
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(
+        profiler_config_with_placeholder_args
+    )
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(serialized_config)
+
+    profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        **deserialized_config
+    )
+
     profiler_store = empty_profiler_store
-    profiler_store.set(key=profiler_key, value=profiler_config_with_placeholder_args)
+    profiler_store.set(key=profiler_key, value=profiler_config)
     return profiler_store
 
 
@@ -5180,34 +5287,38 @@ def alice_columnar_table_single_batch(empty_data_context):
 
     my_rule_for_user_ids_expectation_configurations: List[ExpectationConfiguration] = [
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_of_type",
-                "kwargs": {
-                    "column": "user_id",
-                    "type_": "INTEGER",
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_be_of_type",
+            kwargs={
+                "column": "user_id",
+                "type_": "INTEGER",
+            },
+            meta={},
         ),
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_between",
-                "kwargs": {
-                    "min_value": 397433,  # From the data
-                    "max_value": 999999999999,
-                    "column": "user_id",
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_be_between",
+            kwargs={
+                "min_value": 1000,
+                "max_value": 999999999999,
+                "column": "user_id",
+            },
+            meta={},
         ),
         ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_not_be_null",
-                "kwargs": {
-                    "column": "user_id",
-                },
-                "meta": {},
-            }
+            expectation_type="expect_column_values_to_not_be_null",
+            kwargs={
+                "column": "user_id",
+            },
+            meta={},
+        ),
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_less_than",
+            meta={},
+            kwargs={"value": 9488404, "column": "user_id"},
+        ),
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_greater_than",
+            meta={},
+            kwargs={"value": 397433, "column": "user_id"},
         ),
     ]
 
@@ -5236,100 +5347,109 @@ def alice_columnar_table_single_batch(empty_data_context):
         my_rule_for_timestamps_expectation_configurations.extend(
             [
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_of_type",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "type_": "TIMESTAMP",
-                        },
-                        "meta": {},
-                    }
+                    expectation_type="expect_column_values_to_be_of_type",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "type_": "TIMESTAMP",
+                    },
+                    meta={},
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_increasing",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                        },
-                        "meta": {},
-                    }
+                    expectation_type="expect_column_values_to_be_increasing",
+                    kwargs={
+                        "column": column_data["column_name"],
+                    },
+                    meta={},
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                        },
-                        "meta": {},
-                    }
+                    expectation_type="expect_column_values_to_be_dateutil_parseable",
+                    kwargs={
+                        "column": column_data["column_name"],
+                    },
+                    meta={},
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_min_to_be_between",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "min_value": "2004-10-19T10:23:54",  # From variables
-                            "max_value": "2004-10-19T10:23:54",  # From variables
-                        },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
-                                ],
-                            }
-                        },
-                    }
+                    expectation_type="expect_column_min_to_be_between",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "min_value": "2004-10-19T10:23:54",  # From variables
+                        "max_value": "2004-10-19T10:23:54",  # From variables
+                    },
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
+                            ],
+                        }
+                    },
                 ),
                 ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_max_to_be_between",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "min_value": "2004-10-19T10:23:54",  # From variables
-                            "max_value": event_ts_column_data[
-                                "observed_max_time_str"
+                    expectation_type="expect_column_max_to_be_between",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "min_value": "2004-10-19T10:23:54",  # From variables
+                        "max_value": event_ts_column_data[
+                            "observed_max_time_str"
+                        ],  # Pin to event_ts column
+                    },
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+                            ],
+                        }
+                    },
+                ),
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_match_strftime_format",
+                    kwargs={
+                        "column": column_data["column_name"],
+                        "strftime_format": {
+                            "value": event_ts_column_data[
+                                "observed_strftime_format"
                             ],  # Pin to event_ts column
-                        },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
-                                ],
-                            }
-                        },
-                    }
-                ),
-                ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_match_strftime_format",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "strftime_format": {
-                                "value": event_ts_column_data[
-                                    "observed_strftime_format"
-                                ],  # Pin to event_ts column
-                                "details": {"success_ratio": 1.0},
+                            "details": {
+                                "success_ratio": 1.0,
+                                "candidate_strings": sorted(DEFAULT_CANDIDATE_STRINGS),
                             },
                         },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
-                                ],
-                            }
-                        },
-                    }
+                    },
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                            ],
+                        }
+                    },
                 ),
             ]
         )
+
+    my_rule_for_one_cardinality_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "user_agent",
+                "value_set": [
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+                ],
+            },
+            meta={},
+        ),
+    ]
 
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)
     expectation_configurations.extend(my_rule_for_timestamps_expectation_configurations)
+    expectation_configurations.extend(
+        my_rule_for_one_cardinality_expectation_configurations
+    )
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
     expected_expectation_suite: ExpectationSuite = ExpectationSuite(
@@ -5374,12 +5494,16 @@ def alice_columnar_table_single_batch(empty_data_context):
 @pytest.fixture
 def alice_columnar_table_single_batch_context(
     monkeypatch,
-    empty_data_context,
+    empty_data_context_stats_enabled,
     alice_columnar_table_single_batch,
 ):
     skip_if_python_below_minimum_version()
 
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
+    # We need our salt to be consistent between runs to ensure idempotent anonymized values
+    context._usage_statistics_handler = UsageStatisticsHandler(
+        context, "00000000-0000-0000-0000-00000000a004", "N/A"
+    )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
     data_path: str = os.path.join(context.root_directory, data_relative_path)
@@ -5494,7 +5618,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    my_row_count_range_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_row_count_range_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -5514,7 +5638,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_ranges_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_column_ranges_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -6119,7 +6243,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
-    my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method: List[
+    my_column_timestamps_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
         ExpectationConfiguration(
@@ -6129,7 +6253,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "column": "pickup_datetime",
                     "strftime_format": {
                         "value": "%Y-%m-%d %H:%M:%S",
-                        "details": {"success_ratio": 1.0},
+                        "details": {
+                            "success_ratio": 1.0,
+                            "candidate_strings": [
+                                "%Y-%m-%d %H:%M:%S",
+                                "%y-%m-%d",
+                            ],
+                        },
                     },
                 },
                 "meta": {
@@ -6149,7 +6279,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "column": "dropoff_datetime",
                     "strftime_format": {
                         "value": "%Y-%m-%d %H:%M:%S",
-                        "details": {"success_ratio": 1.0},
+                        "details": {
+                            "success_ratio": 1.0,
+                            "candidate_strings": [
+                                "%Y-%m-%d %H:%M:%S",
+                                "%y-%m-%d",
+                            ],
+                        },
                     },
                 },
                 "meta": {
@@ -6163,33 +6299,160 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ),
     ]
+    my_column_regex_rule_expectation_configurations_oneshot_estimator: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_regex",
+                "kwargs": {
+                    "column": "VendorID",
+                    "regex": {
+                        "value": [r"^\d{1}$"],
+                        "details": {
+                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                            "threshold": 0.9,
+                        },
+                    },
+                },
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+                        ],
+                    }
+                },
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_regex",
+                "meta": {"notes": {"format": "markdown", "content": None}},
+                "kwargs": {
+                    "column": "RatecodeID",
+                    "regex": {
+                        "value": [r"^\d{1}$"],
+                        "details": {
+                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                            "threshold": 0.9,
+                        },
+                    },
+                },
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+                        ],
+                    }
+                },
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_regex",
+                "meta": {"notes": {"format": "markdown", "content": None}},
+                "kwargs": {
+                    "column": "PULocationID",
+                    "regex": {
+                        "value": [r"^\d{1}$"],
+                        "details": {
+                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                            "threshold": 0.9,
+                        },
+                    },
+                },
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+                        ],
+                    }
+                },
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_regex",
+                "meta": {"notes": {"format": "markdown", "content": None}},
+                "kwargs": {
+                    "column": "DOLocationID",
+                    "regex": {
+                        "value": [r"^\d{1}$"],
+                        "details": {
+                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                            "threshold": 0.9,
+                        },
+                    },
+                },
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+                        ],
+                    }
+                },
+            }
+        ),
+    ]
 
+    my_rule_for_very_few_cardinality_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_in_set",
+                "kwargs": {
+                    "column": "VendorID",
+                    "value_set": [1, 2, 4],
+                },
+                "meta": {},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_in_set",
+                "kwargs": {
+                    "column": "passenger_count",
+                    "value_set": [0, 1, 2, 3, 4, 5, 6],
+                },
+                "meta": {},
+            }
+        ),
+    ]
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
-        my_row_count_range_rule_expectation_configurations_oneshot_sampling_method
+        my_row_count_range_rule_expectation_configurations_oneshot_estimator
     )
     expectation_configurations.extend(
-        my_column_ranges_rule_expectation_configurations_oneshot_sampling_method
+        my_column_ranges_rule_expectation_configurations_oneshot_estimator
     )
     expectation_configurations.extend(
-        my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method
+        my_column_timestamps_rule_expectation_configurations_oneshot_estimator
     )
 
-    expectation_suite_name_oneshot_sampling_method: str = (
-        "bobby_columnar_table_multi_batch_oneshot_sampling_method"
+    expectation_configurations.extend(
+        my_column_regex_rule_expectation_configurations_oneshot_estimator
     )
-    expected_expectation_suite_oneshot_sampling_method: ExpectationSuite = (
-        ExpectationSuite(
-            expectation_suite_name=expectation_suite_name_oneshot_sampling_method,
-            data_context=empty_data_context,
-        )
+    expectation_configurations.extend(
+        my_rule_for_very_few_cardinality_expectation_configurations
+    )
+    expectation_suite_name_oneshot_estimator: str = (
+        "bobby_columnar_table_multi_batch_oneshot_estimator"
+    )
+    expected_expectation_suite_oneshot_estimator: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name_oneshot_estimator,
+        data_context=empty_data_context,
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
-        expected_expectation_suite_oneshot_sampling_method._add_expectation(
+        expected_expectation_suite_oneshot_estimator._add_expectation(
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
@@ -6204,16 +6467,16 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     serialized_config.pop("class_name")
     serialized_config.pop("module_name")
 
-    expected_expectation_suite_oneshot_sampling_method.add_citation(
+    expected_expectation_suite_oneshot_estimator.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
         profiler_config=serialized_config,
     )
 
     return {
         "profiler_config": verbose_profiler_config,
-        "test_configuration_oneshot_sampling_method": {
-            "expectation_suite_name": expectation_suite_name_oneshot_sampling_method,
-            "expected_expectation_suite": expected_expectation_suite_oneshot_sampling_method,
+        "test_configuration_oneshot_estimator": {
+            "expectation_suite_name": expectation_suite_name_oneshot_estimator,
+            "expected_expectation_suite": expected_expectation_suite_oneshot_estimator,
         },
     }
 
@@ -6227,6 +6490,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -6339,8 +6603,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    expectation_suite_name_bootstrap_sampling_method: str = (
-        "bobby_columnar_table_multi_batch_bootstrap_sampling_method"
+    expectation_suite_name_bootstrap_estimator: str = (
+        "bobby_columnar_table_multi_batch_bootstrap_estimator"
     )
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
@@ -6375,8 +6639,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
 
     return {
         "profiler_config": verbose_profiler_config,
-        "test_configuration_bootstrap_sampling_method": {
-            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
+        "test_configuration_bootstrap_estimator": {
+            "expectation_suite_name": expectation_suite_name_bootstrap_estimator,
             "expect_table_row_count_to_be_between_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value,
             "expect_table_row_count_to_be_between_min_value_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value,
             "expect_table_row_count_to_be_between_max_value_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value,
@@ -6397,6 +6661,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -6463,239 +6728,6 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
 
 
 @pytest.fixture
-@freeze_time("09/26/2019 13:42:41")
-def alice_columnar_table_single_batch(empty_data_context):
-    """
-    About the "Alice" User Workflow Fixture
-
-    Alice has a single table of columnar data called user_events (DataAsset) that she wants to check periodically as new
-    data is added.
-
-      - She knows what some of the columns mean, but not all - and there are MANY of them (only a subset currently shown
-        in examples and fixtures).
-
-      - She has organized other tables similarly so that for example column name suffixes indicate which are for user
-        ids (_id) and which timestamps are for versioning (_ts).
-
-    She wants to use a configurable profiler to generate a description (ExpectationSuite) about table so that she can:
-
-        1. use it to validate the user_events table periodically and set up alerts for when things change
-
-        2. have a place to add her domain knowledge of the data (that can also be validated against new data)
-
-        3. if all goes well, generalize some of the Profiler to use on her other tables
-
-    Alice configures her Profiler using the YAML configurations and data file locations captured in this fixture.
-    """
-    skip_if_python_below_minimum_version()
-
-    verbose_profiler_config_file_path: str = file_relative_path(
-        __file__,
-        os.path.join(
-            "test_fixtures",
-            "rule_based_profiler",
-            "alice_user_workflow_verbose_profiler_config.yml",
-        ),
-    )
-
-    verbose_profiler_config: str
-    with open(verbose_profiler_config_file_path) as f:
-        verbose_profiler_config = f.read()
-
-    my_rule_for_user_ids_expectation_configurations: List[ExpectationConfiguration] = [
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_of_type",
-                "kwargs": {
-                    "column": "user_id",
-                    "type_": "INTEGER",
-                },
-                "meta": {},
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_be_between",
-                "kwargs": {
-                    "min_value": 397433,  # From the data
-                    "max_value": 999999999999,
-                    "column": "user_id",
-                },
-                "meta": {},
-            }
-        ),
-        ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_not_be_null",
-                "kwargs": {
-                    "column": "user_id",
-                },
-                "meta": {},
-            }
-        ),
-    ]
-
-    event_ts_column_data: Dict[str, str] = {
-        "column_name": "event_ts",
-        "observed_max_time_str": "2004-10-19 11:05:20",
-        "observed_strftime_format": "%Y-%m-%d %H:%M:%S",
-    }
-
-    my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
-        event_ts_column_data,
-        {
-            "column_name": "server_ts",
-            "observed_max_time_str": "2004-10-19 11:05:20",
-        },
-        {
-            "column_name": "device_ts",
-            "observed_max_time_str": "2004-10-19 11:05:22",
-        },
-    ]
-    my_rule_for_timestamps_expectation_configurations: List[
-        ExpectationConfiguration
-    ] = []
-    column_data: Dict[str, str]
-    for column_data in my_rule_for_timestamps_column_data:
-        my_rule_for_timestamps_expectation_configurations.extend(
-            [
-                ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_of_type",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "type_": "TIMESTAMP",
-                        },
-                        "meta": {},
-                    }
-                ),
-                ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_increasing",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                        },
-                        "meta": {},
-                    }
-                ),
-                ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                        },
-                        "meta": {},
-                    }
-                ),
-                ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_min_to_be_between",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "min_value": "2004-10-19T10:23:54",  # From variables
-                            "max_value": "2004-10-19T10:23:54",  # From variables
-                        },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
-                                ],
-                            }
-                        },
-                    }
-                ),
-                ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_max_to_be_between",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "min_value": "2004-10-19T10:23:54",  # From variables
-                            "max_value": event_ts_column_data[
-                                "observed_max_time_str"
-                            ],  # Pin to event_ts column
-                        },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
-                                ],
-                            }
-                        },
-                    }
-                ),
-                ExpectationConfiguration(
-                    **{
-                        "expectation_type": "expect_column_values_to_match_strftime_format",
-                        "kwargs": {
-                            "column": column_data["column_name"],
-                            "strftime_format": {
-                                "value": event_ts_column_data[
-                                    "observed_strftime_format"
-                                ],  # Pin to event_ts column
-                                "details": {"success_ratio": 1.0},
-                            },
-                        },
-                        "meta": {
-                            "notes": {
-                                "format": "markdown",
-                                "content": [
-                                    "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
-                                ],
-                            }
-                        },
-                    }
-                ),
-            ]
-        )
-
-    expectation_configurations: List[ExpectationConfiguration] = []
-
-    expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)
-    expectation_configurations.extend(my_rule_for_timestamps_expectation_configurations)
-
-    expectation_suite_name: str = "alice_columnar_table_single_batch"
-    expected_expectation_suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name, data_context=empty_data_context
-    )
-    expectation_configuration: ExpectationConfiguration
-    for expectation_configuration in expectation_configurations:
-        # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
-        # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
-        # _add_expectation().
-        expected_expectation_suite._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
-        )
-
-    # NOTE that this expectation suite should fail when validated on the data in "sample_data_relative_path"
-    # because the device_ts is ahead of the event_ts for the latest event
-    sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
-
-    profiler_config: dict = yaml.load(verbose_profiler_config)
-
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
-    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
-
-    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    serialized_config.pop("class_name")
-    serialized_config.pop("module_name")
-    expected_expectation_suite.add_citation(
-        comment="Suite created by Rule-Based Profiler with the configuration included.",
-        profiler_config=serialized_config,
-    )
-
-    return {
-        "profiler_config": verbose_profiler_config,
-        "expected_expectation_suite_name": expectation_suite_name,
-        "expected_expectation_suite": expected_expectation_suite,
-        "sample_data_relative_path": sample_data_relative_path,
-    }
-
-
-@pytest.fixture
 def quentin_columnar_table_multi_batch():
     """
     About the "Quentin" User Workflow Fixture
@@ -6725,20 +6757,20 @@ def quentin_columnar_table_multi_batch():
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
 
-    expectation_suite_name_bootstrap_sampling_method: str = (
+    expectation_suite_name_bootstrap_estimator: str = (
         "quentin_columnar_table_multi_batch"
     )
 
     return {
         "profiler_config": verbose_profiler_config,
         "test_configuration": {
-            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
+            "expectation_suite_name": expectation_suite_name_bootstrap_estimator,
             "expect_column_quantile_values_to_be_between_quantile_ranges_by_column": {
                 "tolls_amount": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
                 "fare_amount": [
                     [5.842754275, 6.5],
-                    [8.675167517, 9.661311131],
-                    [13.344354435, 15.815389039],
+                    [8.675167517, 9.5750000000],
+                    [13.344354435, 15.650000000],
                 ],
                 "tip_amount": [
                     [0.0, 0.0],
@@ -6747,7 +6779,7 @@ def quentin_columnar_table_multi_batch():
                 ],
                 "total_amount": [
                     [8.2740033, 11.422183043],
-                    [11.358555106, 14.959993149],
+                    [11.2955000, 14.875000000],
                     [16.746263451, 21.327684643],
                 ],
             },
@@ -6768,6 +6800,7 @@ def quentin_columnar_table_multi_batch_data_context(
 
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")

@@ -8,7 +8,7 @@
 #  from `dependency_graph`. Additionally, it is responsible for deployment during the weekly release cut.
 
 schedules:
-- cron: 0 */4 * * *
+- cron: 0 */3 * * *
   displayName: Scheduled Runs
   branches:
     include:
@@ -55,6 +55,7 @@ resources:
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
+  isManual: $[eq(variables['Build.Reason'], 'Manual')]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
@@ -64,7 +65,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -87,9 +88,9 @@ stages:
 
     jobs:
       - job: compatibility_matrix
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
         variables:
-          GE_pytest_opts: '--no-sqlalchemy --no-spark'
+          GE_pytest_opts: '--no-sqlalchemy'
         strategy:
           matrix:
             Python36-Pandas023:
@@ -97,20 +98,20 @@ stages:
               numpy.version: '1.14.1'
               pandas.version: '0.23.4'
               scipy.version: '0.19.0'
-              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
             Python37-Pandas025:
               python.version: '3.7'
               numpy.version: '1.14.1'
               pandas.version: '0.25.3'
               # numpy 1.20 and pandas 0.25.3 do not coexist happily
               scipy.version: '0.19.0'
-              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-test.txt --constraint constraints-dev.txt'
             Python38-PandasLatest:
               python.version: '3.8'
               numpy.version: 'latest'
               pandas.version: 'latest'
               scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
@@ -162,13 +163,13 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
 
         services:
           postgres: postgres
 
         variables:
-          GE_pytest_opts: ''
+          GE_pytest_opts: '--postgresql --spark'
 
         strategy:
           matrix:
@@ -242,7 +243,7 @@ stages:
 
     jobs:
       - job: test_usage_stats_messages
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
         variables:
           python.version: '3.8'
 
@@ -256,14 +257,14 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt
+              pip install --requirement requirements-dev-test.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
   - stage: db_integration
@@ -274,7 +275,7 @@ stages:
 
     jobs:
       - job: mysql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
 
         services:
           mysql: mysql
@@ -305,7 +306,7 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
@@ -313,11 +314,11 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
       - job: mssql
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
 
         services:
           mssql: mssql
@@ -338,14 +339,14 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
   - stage: cli_integration
@@ -355,7 +356,7 @@ stages:
 
     jobs:
       - job: test_cli
-        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
 
         services:
           postgres: postgres
@@ -378,28 +379,33 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
-              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-azurepipelines
-              pytest --aws-integration -v tests/cli
+              pip install pytest
+              pytest --postgresql --spark --aws-integration -v tests/cli
             displayName: 'pytest'
 
   - stage: deploy_gallery
     condition: and(succeeded(), eq(variables.isMain, true))
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-18.04'
     dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
       - job: build_gallery
         variables:
           python.version: '3.7'
-          GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+          GE_pytest_pip_opts: '"pyspark<3.0.0" "cookiecutter==1.7.3" "google-cloud-bigquery-storage" --requirement requirements-dev.txt --constraint constraints-dev.txt'
           GE_pytest_opts: ''
+
+        services:
+          postgres: postgres
+          mysql: mysql
+          mssql: mssql
 
         steps:
           - task: UsePythonVersion@0
@@ -418,12 +424,45 @@ stages:
           - script: |
               pip install $(GE_pytest_pip_opts)
               pip install --requirement requirements.txt
-              pip install  .
+              pip install  --editable .
             displayName: 'Install dependencies'
+
+          - script: |
+              printf 'Waiting for MySQL database to accept connections'
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+            displayName: 'Wait for MySQL database to initialise'
+
+          - script: |
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+            displayName: 'Configure mysql'
+
+          - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+            displayName: 'Configure mssql'
+
+#         - task: DownloadSecureFile@1
+#           name: gcp_authkey
+#           displayName: 'Download Google Service Account'
+#           inputs:
+#             secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+#             retryCount: '2'
 
           - bash: python ./build_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
+#           env:
+#             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+#             GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+#             GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+#             GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
+
+          - bash: python ./build_package_gallery.py
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Build Package Gallery'
 
           - task: S3Upload@1
             inputs:

@@ -154,7 +154,6 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     library_metadata = {
         "maturity": "experimental",
         "tags": ["experimental", "column map expectation"],
-        "package": "experimental_expectations",
         "contributors": [
             "@spencerhardwick",
             "@aworld1",
@@ -288,3 +287,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
             ],
         }
     ]
+
+
+if __name__ == "__main__":
+    ExpectColumnValuesToBeSecurePasswords().print_diagnostic_checklist()

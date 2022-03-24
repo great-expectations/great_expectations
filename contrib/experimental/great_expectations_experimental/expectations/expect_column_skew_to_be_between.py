@@ -376,7 +376,6 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
             "@rexboyce",
             "@bragleg",
         ],
-        "package": "experimental_expectations",
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -491,6 +490,4 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnSkewToBeBetween().run_diagnostics()
-
-    print(json.dumps(self_check_report, indent=2))
+    ExpectColumnSkewToBeBetween().print_diagnostic_checklist()

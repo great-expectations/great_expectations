@@ -104,10 +104,11 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -176,20 +177,18 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         else:
 
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
             if include_column_name:
                 template_str = (
-                    "$column distinct values must belong to this set: "
-                    + values_string
-                    + "."
+                    f"$column distinct values must belong to this set: {values_string}."
                 )
             else:
                 template_str = (
-                    "distinct values must belong to this set: " + values_string + "."
+                    f"distinct values must belong to this set: {values_string}."
                 )
 
         if params["row_condition"] is not None:
@@ -199,7 +198,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
@@ -243,20 +242,18 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         else:
 
             for i, v in enumerate(params["value_set"]):
-                params["v__" + str(i)] = v
+                params[f"v__{str(i)}"] = v
             values_string = " ".join(
-                ["$v__" + str(i) for i, v in enumerate(params["value_set"])]
+                [f"$v__{str(i)}" for i, v in enumerate(params["value_set"])]
             )
 
             if include_column_name:
                 template_str = (
-                    "$column distinct values must belong to this set: "
-                    + values_string
-                    + "."
+                    f"$column distinct values must belong to this set: {values_string}."
                 )
             else:
                 template_str = (
-                    "distinct values must belong to this set: " + values_string + "."
+                    f"distinct values must belong to this set: {values_string}."
                 )
 
         if params["row_condition"] is not None:
@@ -264,7 +261,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -354,14 +351,16 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
                 ),
                 "graph": chart,
                 "styling": {
-                    "classes": ["col-" + str(chart_container_col_width), "mt-1"],
+                    "classes": [f"col-{str(chart_container_col_width)}", "mt-1"],
                 },
             }
         )
 
         return new_block
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
 

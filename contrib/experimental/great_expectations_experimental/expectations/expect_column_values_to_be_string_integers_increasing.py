@@ -183,7 +183,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",
-        "package": "experimental_expectation",
         "tags": ["experimental", "column map expectation"],
         "contributors": ["@austiezr"],
     }
@@ -318,7 +317,4 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = (
-        ExpectColumnValuesToBeStringIntegersIncreasing().run_diagnostics()
-    )
-    print(json.dumps(self_check_report, indent=2))
+    ExpectColumnValuesToBeStringIntegersIncreasing().print_diagnostic_checklist()

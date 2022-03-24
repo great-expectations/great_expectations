@@ -9,6 +9,7 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import ProfilerError
@@ -21,7 +22,6 @@ from great_expectations.expectations.metrics.util import attempt_allowing_relati
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
     ProfilerSemanticTypes,
-    ProfilerTypeMapping,
     profiler_data_types_with_mapping,
 )
 from great_expectations.util import is_nan
@@ -634,9 +634,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             )
         except KeyError:  # if observed_value value is not set
             logger.error(
-                "Failed to get cardinality of column {:s} - continuing...".format(
-                    column
-                )
+                f"Failed to get cardinality of column {column:s} - continuing..."
             )
         # Previously, if we had 25 possible categories out of 1000 rows, this would comes up as many, because of its
         #  percentage, so it was tweaked here, but is still experimental.

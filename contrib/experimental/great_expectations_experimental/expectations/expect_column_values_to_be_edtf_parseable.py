@@ -370,7 +370,6 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["edtf", "datetime", "glam"],
         "contributors": ["@mielvds"],
-        "package": "experimental_expectations",
         "requirements": ["edtf_validate"],
     }
 
@@ -449,5 +448,4 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToBeEdtfParseable().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToBeEdtfParseable().print_diagnostic_checklist()

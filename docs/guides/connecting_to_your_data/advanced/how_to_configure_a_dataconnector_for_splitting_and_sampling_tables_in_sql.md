@@ -2,6 +2,7 @@
 title: How to configure a DataConnector for splitting and sampling tables in SQL
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you configure `Splitting` and `Sampling` for working with tables in an SQL database using
 `SimpleSqlalchemyDatasource`, which operates as a proxy to `InferredAssetSqlDataConnector` and
@@ -14,7 +15,7 @@ configuration, which exercises the `InferredAssetSqlDataConnector`).
 
 The `Splitting` and `Sampling` mechanisms provided by Great Expectations serve as additional tools for `Partitioning`
 your data at various levels of granularity:
-- `Splitting` provides the means of focusing the batch data on the values of certain dimensions of the data of interest.
+- `Splitting` provides the means of focusing the <TechnicalTag tag="batch" text="Batch" /> data on the values of certain dimensions of the data of interest.
 - `Sampling` provides a means for reducing the amount of data in the retrieved batch to facilitate data analysis.
 
 <Prerequisites>
@@ -28,7 +29,7 @@ your data at various levels of granularity:
 This guide will use the `tables` section that is part of the following `SimpleSqlalchemyDatasource` configuration as an
 example:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L9-L71
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L9-L77
 ```
 
 ## Preliminary Steps
@@ -50,7 +51,7 @@ Load your `DataContext` into memory using the `get_context()` method.
 Using the above example configuration, specify the connection string for your database.  Then run this code to test your
 configuration:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L80
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L86
 ```
 
 Feel free to adjust your configuration and re-run `test_yaml_config()` as needed.
@@ -59,13 +60,13 @@ Feel free to adjust your configuration and re-run `test_yaml_config()` as needed
 
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L82
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L88
 ```
 
 ## Splitting and Sampling
 
 To configure `Splitting`, specify a dimension (i.e., `column_name` or `column_names`), the method of `Splitting`, and
-parameters to be used by the specified `Splitting` method.  In the present example, the `Data Connectors` named
+parameters to be used by the specified `Splitting` method.  In the present example, the <TechnicalTag tag="data_connector" text="Data Connectors" /> named
 `by_num_riders` and `by_num_riders_random_sample` split the table `yellow_tripdata_sample_2019_01` on the column name
 `passenger_count` using the `_split_on_column_value` method of `Splitting`.
 
@@ -76,12 +77,12 @@ the rows sampled at random, which is specified by the parameter `p` (stands for 
 
 Finally, confirm the expected number of batches was retrieved and the reduced size of a batch (due to `Sampling`):
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L164-L168
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L169-L173
 ```
 
 (set `data_asset_name` to `"taxi__yellow_tripdata_sample_2019_01__asset"` for the present example).
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L174-L181
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L179-L186
 ```
 
 ## Additional Notes

@@ -46,14 +46,14 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "multi-column expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_pair_values.equal"
@@ -77,7 +77,9 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "column_B",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -129,7 +131,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {

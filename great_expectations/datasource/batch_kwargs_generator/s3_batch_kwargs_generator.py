@@ -141,7 +141,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 "limit": limit,
             }
             raise BatchKwargsError(
-                "Unknown asset_name %s" % data_asset_name, batch_kwargs
+                f"Unknown asset_name {data_asset_name}", batch_kwargs
             )
 
         if data_asset_name not in self._iterators:
@@ -180,7 +180,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 asset_config = self._assets[data_asset_name]
             except KeyError:
                 raise GreatExpectationsError(
-                    "No asset config found for asset %s" % data_asset_name
+                    f"No asset config found for asset {data_asset_name}"
                 )
             if data_asset_name not in self._iterators:
                 self._iterators[data_asset_name] = {}
@@ -225,7 +225,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         limit=None,
     ):
         batch_kwargs = {
-            "s3": "s3a://" + self.bucket + "/" + key,
+            "s3": f"s3a://{self.bucket}/{key}",
             "reader_options": self.reader_options,
         }
         if asset_config.get("reader_options"):
@@ -260,7 +260,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             )
 
         logger.debug(
-            "Fetching objects from S3 with query options: %s" % str(query_options)
+            f"Fetching objects from S3 with query options: {str(query_options)}"
         )
         asset_options = self._s3.list_objects_v2(**query_options)
         if directory_assets:
@@ -334,9 +334,10 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
+                "Please use 'data_asset_name' instead.",
                 DeprecationWarning,
             )
             data_asset_name = generator_asset
@@ -358,7 +359,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
             # So, we'll add a *sortable* id
             if matches is None:
-                logger.warning("No match found for key: %s" % key)
+                logger.warning(f"No match found for key: {key}")
                 return (
                     datetime.datetime.now(datetime.timezone.utc).strftime(
                         "%Y%m%dT%H%M%S.%fZ"

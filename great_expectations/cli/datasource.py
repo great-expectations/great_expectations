@@ -319,7 +319,7 @@ data_connectors:
     class_name: InferredAssetFilesystemDataConnector
     base_directory: {self.base_path}
     default_regex:
-      group_names: 
+      group_names:
         - data_asset_name
       pattern: (.*)
   default_runtime_data_connector_name:
@@ -648,15 +648,21 @@ class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
     def credentials_snippet(self) -> str:
         return '''\
 # The SQLAlchemy url/connection string for the BigQuery connection
-# (reference: https://github.com/mxmzdlv/pybigquery#connection-string-parameters)"""
+# (reference: https://github.com/googleapis/python-bigquery-sqlalchemy#connection-string-parameters)"""
 connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
 
     def verify_libraries_installed(self) -> bool:
-        return verify_library_dependent_modules(
+        pybigquery_ok = verify_library_dependent_modules(
             python_import_name="pybigquery.sqlalchemy_bigquery",
             pip_library_name="pybigquery",
             module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
         )
+        sqlalchemy_bigquery_ok = verify_library_dependent_modules(
+            python_import_name="sqlalchemy_bigquery",
+            pip_library_name="sqlalchemy_bigquery",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        return pybigquery_ok or sqlalchemy_bigquery_ok
 
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"

@@ -198,7 +198,6 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
             "@rexboyce",
             "@bragleg",
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
@@ -301,5 +300,4 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToBeAscii().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToBeAscii().print_diagnostic_checklist()

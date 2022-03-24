@@ -65,10 +65,11 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.unique"
@@ -85,7 +86,9 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     }
     args_keys = ("column",)
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -124,7 +127,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
@@ -158,7 +161,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -204,7 +207,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [

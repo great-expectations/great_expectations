@@ -18,12 +18,13 @@ except ImportError:
 class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": False,
     }
 
     map_metric = "column_values.match_like_pattern"
@@ -45,7 +46,9 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         "like_pattern",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert "like_pattern" in configuration.kwargs, "Must provide like_pattern"

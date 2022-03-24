@@ -1,25 +1,25 @@
-# A lot of Great Expectations' codebase and tests are tied to specific databases, cloud providers, etc.
-# In this file, comments on each row indicate which tests that package is used for.
-# To run tests for smaller subsets of infrastructure, please look at other requirements-dev-*.txt files.
-# Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
-
-altair>=4.0.0,<5  # package
-Click>=7.1.2  # package
-importlib-metadata>=1.7.0 # package (included in Python 3.8 by default.)
-ipywidgets>=7.5.1  # package
-jinja2>=2.10  # package
-jsonpatch>=1.22  # package
-jsonschema>=2.5.1  # package
-mistune>=0.8.4,<2.0.0  # package
-numpy>=1.14.1  # package
-pandas>=0.23.0  # package
-pyparsing>=2.4,<3  # package
-python-dateutil>=2.8.1  # package
-pytz>=2015.6  # package
-requests>=2.20  # package
-ruamel.yaml>=0.16,<0.17.18  # package
-scipy>=0.19.0  # package
-termcolor>=1.1.0  # package
-tqdm>=4.59.0  # package
+altair>=4.0.0,<5
+Click>=7.1.2
+colorama>=0.4.3
+cryptography>=3.2,<4.0.0
+importlib-metadata>=1.7.0 # (included in Python 3.8 by default.)
+ipywidgets>=7.5.1
+jinja2>=2.10
+jsonpatch>=1.22
+jsonschema>=2.5.1
+mistune>=0.8.4,<2.0.0
+nbformat>=5.0
+numpy>=1.14.1
+packaging
+pandas>=0.23.0
+pyparsing>=2.4,<3
+python-dateutil>=2.8.1
+pytz>=2021.3
+requests>=2.20
+ruamel.yaml>=0.16,<0.17.18
+scipy>=0.19.0
+termcolor>=1.1.0
+tqdm>=4.59.0
 typing-extensions>=3.10.0.0 # Leverage type annotations from recent Python releases
-tzlocal>=1.2  # package
+tzlocal>=1.2
+urllib3>=1.25.4,<1.27

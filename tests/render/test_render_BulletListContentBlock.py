@@ -114,6 +114,7 @@ def test_all_expectations_using_test_definitions():
                     continue
 
                 # Attempt to render it
+                print(fake_expectation)
                 render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
                     [fake_expectation]
                 )

@@ -10,6 +10,7 @@
     "tests" : [
       {
         "title": "basic_positive_test",
+        "include_in_gallery": true,
         "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "tolerance": 0.000000000001,
@@ -52,6 +53,7 @@
     },
       {
         "title": "basic_negative_test",
+        "include_in_gallery": true,
         "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "tolerance": 0.000000000001,

@@ -8,6 +8,7 @@ from typing import Any
 from dateutil.parser import parse
 
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.dataset import Dataset
@@ -106,127 +107,6 @@ class ProfilerCardinality(Enum):
     MANY = "many"
     VERY_MANY = "very many"
     UNIQUE = "unique"
-
-
-class ProfilerTypeMapping:
-    """Useful backend type mapping for building profilers."""
-
-    INT_TYPE_NAMES = [
-        "INTEGER",
-        "integer",
-        "int",
-        "int_",
-        "int8",
-        "int16",
-        "int32",
-        "int64",
-        "uint8",
-        "uint16",
-        "uint32",
-        "uint64",
-        "Int8Dtype",
-        "Int16Dtype",
-        "Int32Dtype",
-        "Int64Dtype",
-        "UInt8Dtype",
-        "UInt16Dtype",
-        "UInt32Dtype",
-        "UInt64Dtype",
-        "INT",
-        "INTEGER",
-        "INT64",
-        "TINYINT",
-        "BYTEINT",
-        "SMALLINT",
-        "BIGINT",
-        "IntegerType",
-        "LongType",
-    ]
-    FLOAT_TYPE_NAMES = [
-        "FLOAT",
-        "FLOAT4",
-        "FLOAT8",
-        "FLOAT64",
-        "DOUBLE",
-        "DOUBLE_PRECISION",
-        "NUMERIC",
-        "FloatType",
-        "DoubleType",
-        "float",
-        "float_",
-        "float16",
-        "float32",
-        "float64",
-        "number",
-        "DECIMAL",
-        "REAL",
-    ]
-    STRING_TYPE_NAMES = [
-        "CHAR",
-        "NCHAR",
-        "VARCHAR",
-        "NVARCHAR",
-        "TEXT",
-        "NTEXT",
-        "STRING",
-        "StringType",
-        "string",
-        "str",
-        "object",
-        "dtype('O')",
-    ]
-    BOOLEAN_TYPE_NAMES = [
-        "BOOLEAN",
-        "boolean",
-        "BOOL",
-        "TINYINT",
-        "BIT",
-        "bool",
-        "BooleanType",
-    ]
-    DATETIME_TYPE_NAMES = [
-        "DATE",
-        "TIME",
-        "DATETIME",
-        "DATETIME2",
-        "DATETIME64",
-        "SMALLDATETIME",
-        "DATETIMEOFFSET",
-        "TIMESTAMP",
-        "Timestamp",
-        "TimestampType",
-        "DateType",
-        "datetime64",
-        "datetime64[ns]",
-        "timedelta[ns]",
-        "<M8[ns]",
-    ]
-    BINARY_TYPE_NAMES = [
-        "BINARY",
-        "binary",
-        "VARBINARY",
-        "varbinary",
-        "IMAGE",
-        "image",
-    ]
-    CURRENCY_TYPE_NAMES = [
-        "MONEY",
-        "money",
-        "SMALLMONEY",
-        "smallmoney",
-    ]
-    IDENTIFIER_TYPE_NAMES = [
-        "UNIQUEIDENTIFIER",
-        "uniqueidentifier",
-    ]
-    MISCELLANEOUS_TYPE_NAMES = [
-        "SQL_VARIANT",
-        "sql_variant",
-    ]
-    RECORD_TYPE_NAMES = [
-        "JSON",
-        "json",
-    ]
 
 
 profiler_data_types_with_mapping = {
@@ -339,8 +219,9 @@ class DatasetProfiler(DataAssetProfiler):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional). Instead of providing a run_id, you may also provide"
                 "run_name and run_time separately.",
@@ -370,7 +251,7 @@ class DatasetProfiler(DataAssetProfiler):
             expectation_suite, run_id=run_id, result_format="SUMMARY"
         )
         expectation_suite.add_citation(
-            comment=str(cls.__name__) + " added a citation based on the current batch.",
+            comment=f"{str(cls.__name__)} added a citation based on the current batch.",
             batch_kwargs=data_asset.batch_kwargs,
             batch_markers=data_asset.batch_markers,
             batch_parameters=data_asset.batch_parameters,

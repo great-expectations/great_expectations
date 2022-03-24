@@ -257,7 +257,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@edjoesu",
         ],
-        "package": "experimental_expectations",
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -378,5 +377,4 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnDiscreteEntropyToBeBetween().run_diagnostics()
-    print(json.dumps(self_check_report, indent=2))
+    ExpectColumnDiscreteEntropyToBeBetween().print_diagnostic_checklist()

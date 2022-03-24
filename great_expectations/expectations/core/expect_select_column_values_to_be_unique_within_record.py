@@ -1,3 +1,6 @@
+from typing import Optional
+
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
@@ -48,16 +51,16 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "table expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "select_column_values.unique.within_record"
@@ -71,6 +74,24 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         "catch_exceptions": False,
     }
     args_keys = ("column_list",)
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            True if the configuration has been validated successfully. Otherwise, raises an exception
+        """
+        super().validate_configuration(configuration)
+        self.validate_metric_value_between_configuration(configuration=configuration)
+
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -119,10 +140,14 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
                 "schema": {"type": "number"},
                 "value": params.get("mostly", 1),
             },
+            "mostly_pct": {
+                "schema": {"type": "string"},
+                "value": params.get("mostly_pct"),
+            },
         }
 
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
         mostly_str = (
@@ -207,12 +232,12 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
 
         template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
-            template_str += "$column_list_" + str(idx) + ", "
-            params["column_list_" + str(idx)] = params["column_list"][idx]
+            template_str += f"$column_list_{str(idx)}, "
+            params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
         last_idx = len(params["column_list"]) - 1
-        template_str += "$column_list_" + str(last_idx)
-        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+        template_str += f"$column_list_{str(last_idx)}"
+        params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
 
         if params["row_condition"] is not None:
             (

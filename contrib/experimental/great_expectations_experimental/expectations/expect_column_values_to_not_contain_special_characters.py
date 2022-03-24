@@ -58,13 +58,8 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
         column (str): \
             The column name
     Keyword Args:
-<<<<<<< HEAD
         mostly (None or a float value between 0 and 1): \
             Return `"success": True` if at least mostly fraction of values match the expectation \
-=======
-        mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
->>>>>>> 79801c4c22670f79946030865f2f9c89b989752e
     Returns:
         An ExpectationSuiteValidationResult
     """
@@ -107,7 +102,6 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             "special characters",
         ],
         "contributors": ["@jaibirsingh"],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
@@ -181,7 +175,4 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    diagnostics_report = (
-        ExpectColumnValuesToNotContainSpecialCharacters().run_diagnostics()
-    )
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToNotContainSpecialCharacters().print_diagnostic_checklist()

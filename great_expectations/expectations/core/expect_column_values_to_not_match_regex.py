@@ -72,12 +72,13 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.not_match_regex"
@@ -98,7 +99,9 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         "regex",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -141,6 +144,10 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 "schema": {"type": "number"},
                 "value": params.get("mostly"),
             },
+            "mostly_pct": {
+                "schema": {"type": "string"},
+                "value": params.get("mostly_pct"),
+            },
             "row_condition": {
                 "schema": {"type": "string"},
                 "value": params.get("row_condition"),
@@ -157,7 +164,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
             )
         else:
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
+                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
@@ -182,7 +189,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -238,7 +245,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [

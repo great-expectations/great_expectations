@@ -133,7 +133,6 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["xml", "glam"],
         "contributors": ["@mielvds"],
-        "package": "experimental_expectations",
         "requirements": ["lxml"],
     }
 
@@ -221,3 +220,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
                 }
             )
         ]
+
+
+if __name__ == "__main__":
+    ExpectColumnValuesToMatchXmlSchema().print_diagnostic_checklist()

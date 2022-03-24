@@ -123,7 +123,6 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["experimental"],  # Tags for this Expectation in the gallery
         "contributors": ["@ktshannon"],
-        "package": "experimental_expectations",
         "requirements": ["user_agents"],
     }
 
@@ -227,5 +226,4 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToBeANonBotUserAgent().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToBeANonBotUserAgent().print_diagnostic_checklist()

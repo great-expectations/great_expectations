@@ -1,5 +1,6 @@
 import inspect
 import logging
+import warnings
 from typing import Dict, Optional
 
 import numpy as np
@@ -23,6 +24,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.util import get_pyathena_potential_type
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -51,39 +53,57 @@ try:
 except ImportError:
     sqlalchemy_redshift = None
 
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
+BIGQUERY_GEO_SUPPORT = False
 try:
-    import pybigquery.sqlalchemy_bigquery
+    import sqlalchemy_bigquery as sqla_bigquery
 
-    ###
-    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-    # to define an attribute "dialect". A PR has been submitted to fix this upstream
-    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-    # fix isn't present, add this "dialect" attribute here:
-    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
-        pybigquery.sqlalchemy_bigquery.dialect = (
-            pybigquery.sqlalchemy_bigquery.BigQueryDialect
-        )
-
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "dialect")
-    try:
-        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
-        bigquery_types_tuple = None
-    except AttributeError:
-        # In older versions of the pybigquery driver, types were not exported, so we use a hack
-        logger.warning(
-            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-        )
-        from collections import namedtuple
-
-        BigQueryTypes = namedtuple(
-            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
-        )
-        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
+    registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
     bigquery_types_tuple = None
-    pybigquery = None
+    try:
+        from sqlalchemy_bigquery import GEOGRAPHY
+
+        BIGQUERY_GEO_SUPPORT = True
+    except ImportError:
+        BIGQUERY_GEO_SUPPORT = False
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+
+        # deprecated-v0.14.7
+        warnings.warn(
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
+            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
+            DeprecationWarning,
+        )
+        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
+        ###
+        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+        # to define an attribute "dialect". A PR has been submitted to fix this upstream
+        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+        # fix isn't present, add this "dialect" attribute here:
+        if not hasattr(sqla_bigquery, "dialect"):
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
+
+        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        try:
+            getattr(sqla_bigquery, "INTEGER")
+            bigquery_types_tuple = None
+        except AttributeError:
+            # In older versions of the pybigquery driver, types were not exported, so we use a hack
+            logger.warning(
+                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+            )
+            from collections import namedtuple
+
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+    except ImportError:
+        sqla_bigquery = None
+        bigquery_types_tuple = None
+        pybigquery = None
 
 try:
     import teradatasqlalchemy.dialect
@@ -150,10 +170,11 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.of_type"
@@ -173,7 +194,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "type_",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert "type_" in configuration.kwargs, "type_ is required"
@@ -206,7 +229,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             "type_": {"schema": {"type": "string"}, "value": params.get("type_")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
@@ -220,7 +243,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         }
 
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
@@ -231,7 +254,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             template_str = "values must be of type $type_."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -240,7 +263,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -280,14 +303,14 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             template_str = "values must be of type $type_."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -357,16 +380,33 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             types = []
             type_module = _get_dialect_type_module(execution_engine=execution_engine)
             try:
-                potential_type = getattr(type_module, expected_type)
-                # In the case of the PyAthena dialect we need to verify that
-                # the type returned is indeed a type and not an instance.
-                if not inspect.isclass(potential_type):
-                    type_class = type(potential_type)
+                # bigquery geography requires installing an extra package
+                if (
+                    expected_type.lower() == "geography"
+                    and execution_engine.engine.dialect.name.lower() == "bigquery"
+                    and not BIGQUERY_GEO_SUPPORT
+                ):
+                    logger.warning(
+                        "BigQuery GEOGRAPHY type is not supported by default. "
+                        + "To install support, please run:"
+                        + "  $ pip install 'sqlalchemy-bigquery[geography]'"
+                    )
+                elif type_module.__name__ == "pyathena.sqlalchemy_athena":
+                    potential_type = get_pyathena_potential_type(
+                        type_module, expected_type
+                    )
+                    # In the case of the PyAthena dialect we need to verify that
+                    # the type returned is indeed a type and not an instance.
+                    if not inspect.isclass(potential_type):
+                        real_type = type(potential_type)
+                    else:
+                        real_type = potential_type
+                    types.append(real_type)
                 else:
-                    type_class = potential_type
-                types.append(type_class)
+                    potential_type = getattr(type_module, expected_type)
+                    types.append(potential_type)
             except AttributeError:
-                logger.debug("Unrecognized type: %s" % expected_type)
+                logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
                 logger.warning(
                     "No recognized sqlalchemy types in type_list for current dialect."
@@ -392,7 +432,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 type_class = getattr(sparktypes, expected_type)
                 types.append(type_class)
             except AttributeError:
-                logger.debug("Unrecognized type: %s" % expected_type)
+                logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
                 raise ValueError("No recognized spark types in expected_types_list")
             types = tuple(types)
@@ -437,19 +477,27 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             actual_column_types_list = execution_engine.resolve_metrics(
                 [table_column_types_configuration]
             )[table_column_types_configuration.id]
-            actual_column_type = [
-                type_dict["type"]
-                for type_dict in actual_column_types_list
-                if type_dict["name"] == column_name
-            ][0]
+            try:
+                actual_column_type = [
+                    type_dict["type"]
+                    for type_dict in actual_column_types_list
+                    if type_dict["name"] == column_name
+                ][0]
+            except IndexError:
+                actual_column_type = None
 
             # only use column map version if column dtype is object
-            if actual_column_type.type.__name__ == "object_" and expected_type not in [
-                "object",
-                "object_",
-                "O",
-                None,
-            ]:
+            if (
+                actual_column_type
+                and actual_column_type.type.__name__ == "object_"
+                and expected_type
+                not in [
+                    "object",
+                    "object_",
+                    "O",
+                    None,
+                ]
+            ):
                 # this resets dependencies using  ColumnMapExpectation.get_validation_dependencies
                 dependencies = super().get_validation_dependencies(
                     configuration, execution_engine, runtime_configuration
@@ -536,7 +584,7 @@ def _get_dialect_type_module(
         if (
             isinstance(
                 execution_engine.dialect_module,
-                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+                sqla_bigquery.BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):

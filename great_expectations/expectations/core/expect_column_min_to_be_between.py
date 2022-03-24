@@ -11,6 +11,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 
 class ExpectColumnMinToBeBetween(ColumnExpectation):
@@ -77,10 +78,11 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -91,6 +93,71 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         "max_value",
         "strict_max",
         "parse_strings_as_datetimes",
+        "auto",
+        "profiler_config",
+    )
+
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_min_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        class_name="RuleBasedProfilerConfig",
+        module_name="great_expectations.rule_based_profiler",
+        variables={
+            "strict_min": False,
+            "strict_max": False,
+            "false_positive_rate": 0.05,
+            "estimator": "bootstrap",
+            "num_bootstrap_samples": 9999,
+            "bootstrap_random_seed": None,
+            "round_decimals": None,
+            "truncate_values": {
+                "lower_bound": None,
+                "upper_bound": None,
+            },
+        },
+        rules={
+            "default_expect_column_min_to_be_between_rule": {
+                "domain_builder": {
+                    "class_name": "ColumnDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "parameter_builders": [
+                    {
+                        "name": "min_range_estimator",
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_name": "column.min",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": True,
+                        "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "estimator": "$variables.estimator",
+                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
+                        "round_decimals": "$variables.round_decimals",
+                        "truncate_values": "$variables.truncate_values",
+                        "json_serialize": True,
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_min_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "column": "$domain.domain_kwargs.column",
+                        "min_value": "$parameter.min_range_estimator.value.value_range[0]",
+                        "max_value": "$parameter.min_range_estimator.value.value_range[1]",
+                        "strict_min": "$variables.strict_min",
+                        "strict_max": "$variables.strict_max",
+                        "meta": {
+                            "profiler_details": "$parameter.min_range_estimator.details",
+                        },
+                    },
+                ],
+            },
+        },
     )
 
     # Default values
@@ -103,6 +170,8 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "parse_strings_as_datetimes": False,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "column",
@@ -112,7 +181,9 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         "strict_max",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -125,6 +196,8 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         """
         super().validate_configuration(configuration=configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
+
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -204,7 +277,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -213,7 +286,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -267,14 +340,14 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
             template_str += " Values should be parsed as datetimes."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -309,7 +382,7 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                     "tooltip": {"content": "expect_column_min_to_be_between"},
                 },
             },
-            "{:.2f}".format(result.result["observed_value"]),
+            f"{result.result['observed_value']:.2f}",
         ]
 
     def _validate(

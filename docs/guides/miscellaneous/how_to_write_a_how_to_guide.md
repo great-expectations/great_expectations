@@ -71,7 +71,7 @@ Each integration test is defined by a dictionary entry similar to the one below:
 
 Once the appropriate steps have been added, the tests can be run using the following pytest command:
 
-`pytest -v --docs-tests -m docs -no-postgresql --no-spark tests/integration/test_script_runner.py`
+`pytest -v --docs-tests -m docs tests/integration/test_script_runner.py`
 
 # How to write a how-to-guide
 
