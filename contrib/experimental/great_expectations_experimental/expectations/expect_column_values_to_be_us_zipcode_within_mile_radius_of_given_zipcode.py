@@ -241,7 +241,6 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
             "@maximetokman",
             "@talagluck",
         ],
-        "package": "experimental_expectations",
         "requirements": ["uszipcode", "sqlalchemy"],
     }
 

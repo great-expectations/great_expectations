@@ -18,7 +18,7 @@ This guide will walk you through the process of creating a custom `ColumnMapExpe
 
 ### 1. Choose a name for your Expectation
 
-First, decide on a name for your own Expectation. By convention, `ColumnMapExpectations` always start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](/docs/contributing/style_guides/code_style#expectations)  of the code Style Guide.
+First, decide on a name for your own Expectation. By convention, `ColumnMapExpectations` always start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](../../../contributing/style_guides/code_style.md#expectations)  of the code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
@@ -51,7 +51,7 @@ cp column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_eq
         </ul>
     </p>
 	<p>
-		See our <a href="how_to_use_custom_expectations">guide on how to use a Custom Expectation</a> for more!
+		See our <a href="how_to_use_custom_expectations"> guide on how to use a Custom Expectation</a> for more!
 	</p>
   </div>
 </details>

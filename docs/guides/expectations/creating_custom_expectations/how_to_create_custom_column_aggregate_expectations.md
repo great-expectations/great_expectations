@@ -54,7 +54,7 @@ cp column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to
         </ul>
     </p>
 	<p>
-		See our <a href="how_to_use_custom_expectations">guide on how to use a Custom Expectation</a> for more!
+		See our <a href="how_to_use_custom_expectations"> guide on how to use a Custom Expectation</a> for more!
 	</p>
   </div>
 </details>

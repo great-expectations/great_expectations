@@ -5,7 +5,7 @@ title: Setting up your Dev Environment
 :::note Prerequisites
 In order to contribute to Great Expectations, you will need the following:
 
-* A GitHub account—this is sufficient if you [only want to contribute to the documentation](/docs/contributing/contributing_github).
+* A GitHub account—this is sufficient if you [only want to contribute to the documentation](./contributing_github.md).
 
 * If you want to contribute code, you will also need a working version of Git on your computer. Please refer to the [Git setup instructions](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) for your environment.
 
@@ -191,7 +191,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 ## Run tests to confirm that everything is working
 
-* You can run all tests by running `pytest` in the great_expectations directory root. Please see [Testing](/docs/contributing/contributing_test) for testing options and details.
+* You can run all tests by running `pytest` in the great_expectations directory root. Please see [Testing](./contributing_test.md) for testing options and details.
 
 ## Start coding!
 At this point, you have everything you need to start coding!
