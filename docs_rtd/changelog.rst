@@ -24,6 +24,7 @@ Changelog
 * [BUGFIX] Add pin to Jinja 2 due to API changes in v3.1.0 release (#4537)
 * [BUGFIX] Fixes broken links in How To Write A How-To Guide (#4536)
 * [BUGFIX] Removes cryptography upper bound for general reqs (#4487)
+* [BUGFIX] Don't assume boto3 is installed (#4542)
 * [DOCS] Update tutorial_review.md (#3981)
 * [DOCS] Update AUTHORING_INTRO.md (#4470) (thanks @andyjessen)
 * [DOCS] Add clarification (#4477) (thanks @strickvl)
