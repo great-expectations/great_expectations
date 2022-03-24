@@ -69,7 +69,7 @@ These Expectations aren't included in the default set, but could be very useful 
 
 Fear not! Great Expectations is designed for customization and extensibility.
 
-Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the [guides on creating custom Expectations](/docs/guides/expectations/index#creating-custom-expectations) for more information on building Expectations and updating <TechnicalTag relative="../" tag="data_context" text="Data Context" /> configurations to automatically load <TechnicalTag relative="../" tag="batch" text="Batches" /> of data with custom <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.
+Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the [guides on creating custom Expectations](../guides/expectations/index.md#creating-custom-expectations) for more information on building Expectations and updating <TechnicalTag relative="../" tag="data_context" text="Data Context" /> configurations to automatically load <TechnicalTag relative="../" tag="batch" text="Batches" /> of data with custom <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.
 
 ### Distributional Expectations
 

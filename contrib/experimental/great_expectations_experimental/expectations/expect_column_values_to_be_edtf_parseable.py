@@ -370,7 +370,6 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["edtf", "datetime", "glam"],
         "contributors": ["@mielvds"],
-        "package": "experimental_expectations",
         "requirements": ["edtf_validate"],
     }
 

@@ -63,8 +63,10 @@ class Rule(SerializableDictDot):
                 parameter_nodes=None
             )
             self._parameters[domain.id] = parameter_container
+
+            parameter_builders: List[ParameterBuilder] = self.parameter_builders or []
             parameter_builder: ParameterBuilder
-            for parameter_builder in self.parameter_builders:
+            for parameter_builder in parameter_builders:
                 parameter_builder.build_parameters(
                     parameter_container=parameter_container,
                     domain=domain,
@@ -72,19 +74,48 @@ class Rule(SerializableDictDot):
                     parameters=self._parameters,
                 )
 
+            expectation_configuration_builders: List[
+                ExpectationConfigurationBuilder
+            ] = (self.expectation_configuration_builders or [])
             expectation_configuration_builder: ExpectationConfigurationBuilder
-            for (
-                expectation_configuration_builder
-            ) in self.expectation_configuration_builders:
+            for expectation_configuration_builder in expectation_configuration_builders:
                 expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
+                        parameter_container=parameter_container,
                         domain=domain,
                         variables=variables,
-                        parameters=self.parameters,
+                        parameters=self._parameters,
                     )
                 )
 
         return expectation_configurations
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value
+
+    @property
+    def domain_builder(self) -> DomainBuilder:
+        return self._domain_builder
+
+    @property
+    def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
+        return self._parameter_builders
+
+    @property
+    def expectation_configuration_builders(
+        self,
+    ) -> List[ExpectationConfigurationBuilder]:
+        return self._expectation_configuration_builders
+
+    @property
+    def parameters(self) -> Dict[str, ParameterContainer]:
+        # Returning a copy of the "self._parameters" state variable in order to prevent write-before-read hazard.
+        return copy.deepcopy(self._parameters)
 
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None
@@ -159,14 +190,6 @@ class Rule(SerializableDictDot):
         """
         return self.__repr__()
 
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value
-
     def _get_parameter_builders_as_dict(self) -> Dict[str, ParameterBuilder]:
         parameter_builders: List[ParameterBuilder] = self.parameter_builders
         if parameter_builders is None:
@@ -186,22 +209,3 @@ class Rule(SerializableDictDot):
             expectation_configuration_builder.expectation_type: expectation_configuration_builder
             for expectation_configuration_builder in self.expectation_configuration_builders
         }
-
-    @property
-    def domain_builder(self) -> DomainBuilder:
-        return self._domain_builder
-
-    @property
-    def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
-        return self._parameter_builders
-
-    @property
-    def expectation_configuration_builders(
-        self,
-    ) -> List[ExpectationConfigurationBuilder]:
-        return self._expectation_configuration_builders
-
-    @property
-    def parameters(self) -> Dict[str, ParameterContainer]:
-        # Returning a copy of the "self._parameters" state variable in order to prevent write-before-read hazard.
-        return copy.deepcopy(self._parameters)

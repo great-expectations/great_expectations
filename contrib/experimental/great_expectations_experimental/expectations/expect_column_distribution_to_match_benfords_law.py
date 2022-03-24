@@ -271,7 +271,6 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
             "@shekark642",
             "@vinodkri1",  # Don't forget to add your github handle here!
         ],
-        "package": "experimental_expectations",
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
