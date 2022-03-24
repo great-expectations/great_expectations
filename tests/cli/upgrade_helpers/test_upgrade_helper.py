@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 
+import pytest
 from click.testing import CliRunner, Result
 from freezegun import freeze_time
 from moto import mock_s3
@@ -20,6 +21,54 @@ try:
     from unittest import mock
 except ImportError:
     from unittest import mock
+
+
+@pytest.fixture
+def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_factory):
+    """
+    GE config_version: 3 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v30_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/great_expectations_v20_project_with_v30_configuration_and_v20_checkpoints/",
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def v20_project_directory_with_v30_configuration_and_no_checkpoints(tmp_path_factory):
+    """
+    GE config_version: 3 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v30_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/great_expectations_v20_project_with_v30_configuration_and_no_checkpoints/",
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
 
 
 def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):

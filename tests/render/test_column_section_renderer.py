@@ -8,10 +8,10 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationSuite,
     expectationSuiteSchema,
-    expectationSuiteValidationResultSchema,
 )
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
+    ExpectationSuiteValidationResultSchema,
     ExpectationValidationResult,
 )
 from great_expectations.data_context.util import file_relative_path
@@ -37,6 +37,38 @@ def titanic_expectations(empty_data_context_module_scoped):
             json.load(infile, object_pairs_hook=OrderedDict)
         )
         return ExpectationSuite(**titanic_expectation_suite_dict, data_context=context)
+
+
+@pytest.fixture
+def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
+    with open(
+        file_relative_path(
+            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
+        ),
+    ) as infile:
+        titanic_profiled_expectations_dict: dict = expectationSuiteSchema.load(
+            json.load(infile)
+        )
+        titanic_profiled_expectations = ExpectationSuite(
+            **titanic_profiled_expectations_dict, data_context=context
+        )
+
+    (
+        columns,
+        ordered_columns,
+    ) = titanic_profiled_expectations.get_grouped_and_ordered_expectations_by_column()
+    name_column_expectations = columns["Name"]
+
+    return name_column_expectations
+
+
+@pytest.fixture
+def titanic_validation_results():
+    with open(
+        file_relative_path(__file__, "../test_sets/expected_cli_results_default.json"),
+    ) as infile:
+        return ExpectationSuiteValidationResultSchema.load(json.load(infile))
 
 
 @pytest.mark.smoketest

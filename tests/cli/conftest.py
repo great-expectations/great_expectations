@@ -32,3 +32,25 @@ def empty_context_with_checkpoint_v1_stats_enabled(
     # # noinspection PyProtectedMember
     context._save_project_config()
     return context
+
+
+@pytest.fixture
+def v10_project_directory(tmp_path_factory):
+    """
+    GE 0.10.x project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v10_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__, "../test_fixtures/upgrade_helper/great_expectations_v10_project/"
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, "../test_fixtures/upgrade_helper/great_expectations_v1_basic.yml"
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
