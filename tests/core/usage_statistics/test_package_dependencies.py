@@ -12,102 +12,14 @@ from great_expectations.core.usage_statistics.package_dependencies import (
 )
 
 
-@pytest.fixture
-def ge_required_dependency_names():
-    """This should be kept in sync with our requirements.txt"""
-    ge_required_dependencies: List[str] = sorted(
-        [
-            "altair",
-            "Click",
-            "colorama",
-            "cryptography",
-            "importlib-metadata",
-            "ipywidgets",
-            "jinja2",
-            "jsonpatch",
-            "jsonschema",
-            "mistune",
-            "nbformat",
-            "numpy",
-            "packaging",
-            "pandas",
-            "pyparsing",
-            "python-dateutil",
-            "pytz",
-            "requests",
-            "ruamel.yaml",
-            "scipy",
-            "termcolor",
-            "tqdm",
-            "typing-extensions",
-            "urllib3",
-            "tzlocal",
-        ]
-    )
-    return ge_required_dependencies
-
-
-@pytest.fixture
-def ge_dev_dependency_names():
-    """This should be kept in sync with our requirements-dev*.txt dependencies"""
-    ge_dev_dependencies: List[str] = sorted(
-        [
-            "PyMySQL",
-            "azure-identity",
-            "azure-keyvault-secrets",
-            "azure-storage-blob",
-            "black",
-            "boto3",
-            "feather-format",
-            "flake8",
-            "flask",
-            "freezegun",
-            "gcsfs",
-            "google-cloud-secret-manager",
-            "google-cloud-storage",
-            "isort",
-            "moto",
-            "nbconvert",
-            "openpyxl",
-            "pre-commit",
-            "psycopg2-binary",
-            "pyarrow",
-            "pyathena",
-            "pyfakefs",
-            "pyodbc",
-            "pypd",
-            "pyspark",
-            "pytest",
-            "pytest-benchmark",
-            "pytest-cov",
-            "pytest-order",
-            "pyupgrade",
-            "requirements-parser",
-            "s3fs",
-            "snapshottest",
-            "snowflake-connector-python",
-            "snowflake-sqlalchemy",
-            "sqlalchemy",
-            "sqlalchemy-bigquery",
-            "sqlalchemy-dremio",
-            "sqlalchemy-redshift",
-            "teradatasqlalchemy",
-            "xlrd",
-        ]
-    )
-    return ge_dev_dependencies
-
-
 @mock.patch("importlib.metadata.version", return_value=True, side_effect=None)
 @mock.patch(
     "great_expectations.core.usage_statistics.package_dependencies.GEDependencies.get_dev_dependency_names",
     return_value=True,
-    side_effect=None,
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.package_dependencies.GEDependencies.get_required_dependency_names",
     return_value=True,
-    side_effect=None,
 )
 def test_get_installed_packages(
     get_required_dependency_names, get_dev_dependency_names, mock_version
@@ -153,12 +65,10 @@ def test_get_installed_packages(
 @mock.patch(
     "great_expectations.core.usage_statistics.package_dependencies.GEDependencies.get_dev_dependency_names",
     return_value=True,
-    side_effect=None,
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.package_dependencies.GEDependencies.get_required_dependency_names",
     return_value=True,
-    side_effect=None,
 )
 def test_get_not_installed_packages(
     get_required_dependency_names, get_dev_dependency_names, mock_version
@@ -198,26 +108,85 @@ def test_get_not_installed_packages(
     ]
 
 
-def test_get_required_dependency_names(ge_required_dependency_names):
-    ge_dependencies: GEDependencies = GEDependencies()
-    assert (
-        ge_dependencies.get_required_dependency_names() == ge_required_dependency_names
-    )
-
-
 def test_get_required_dependency_names_fail(ge_required_dependency_names):
+    # TODO: How to make this a valuable test?
     ge_dependencies: GEDependencies = GEDependencies()
     with pytest.raises(AssertionError):
         assert (
             ge_dependencies.get_required_dependency_names()
-            == ge_required_dependency_names
+            == ge_required_dependency_names.extend(["bad_dependency"])
         )
 
 
-def test_get_dev_dependency_names(ge_dev_dependency_names):
+def test__get_dependency_names():
+    """
+    Test that the regex parses a requirements file correctly
+    Returns:
+
+    """
+    mock_dependencies: List[str] = [
+        "# This is a comment",
+        "#This is another comment",
+        "--requirement requirements.txt",
+        "latest-package",
+        "duplicate-package",
+        "duplicate-package",  # Should not be filtered in this method
+        "pinned-package1==0.2.4",
+        "pinned-package2==0.2.4 # With comment after",
+        "lower-bound-package1>=5.2.4",
+        "lower-bound-package2>=5.2.4 # With comment after",
+        "lower-bound-package3>5.2.4",
+        "upper-bound-package1<=2.3.8",
+        "upper-bound-package2<=2.3.8 # With comment after",
+        "upper-bound-package3<2.3.8",
+        "two-bounds-package1>=0.8.4,<2.0.0",
+        "two-bounds-package2>=0.8.4,<2.0.0 # With comment after",
+        "package_with_underscores",
+        "1",
+        "-",
+        "",
+    ]
+    expected_dependendencies: List[str] = [
+        "latest-package",
+        "duplicate-package",
+        "duplicate-package",
+        "pinned-package1",
+        "pinned-package2",
+        "lower-bound-package1",
+        "lower-bound-package2",
+        "lower-bound-package3",
+        "upper-bound-package1",
+        "upper-bound-package2",
+        "upper-bound-package3",
+        "two-bounds-package1",
+        "two-bounds-package2",
+        "package_with_underscores",
+        "1",
+        "-",
+    ]
     ge_dependencies: GEDependencies = GEDependencies()
-    assert ge_dependencies.get_dev_dependency_names() == ge_dev_dependency_names
+    observed_dependencies = ge_dependencies._get_dependency_names(mock_dependencies)
+    assert observed_dependencies == expected_dependendencies
 
 
+@pytest.mark.integration
+def test_required_dependency_names_match_requirements_file():
+    ge_dependencies: GEDependencies = GEDependencies()
+    assert (
+        ge_dependencies.get_required_dependency_names()
+        == ge_dependencies.get_required_dependency_names_from_requirements_file()
+    )
+
+
+@pytest.mark.integration
+def test_dev_dependency_names_match_requirements_file():
+    ge_dependencies: GEDependencies = GEDependencies()
+    assert (
+        ge_dependencies.get_dev_dependency_names()
+        == ge_dependencies.get_dev_dependency_names_from_requirements_file()
+    )
+
+
+@pytest.mark.integration
 def test__get_dependency_names_from_requirements_file():
     raise NotImplementedError
