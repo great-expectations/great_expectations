@@ -1,4 +1,5 @@
 import warnings
+from typing import Dict, Tuple, Any
 
 from dateutil.parser import parse
 
@@ -7,9 +8,11 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.numpy_execution_engine import NumpyExecutionEngine
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     apply_dateutil_parse,
 )
+from great_expectations.expectations.metrics import metric_value
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_partial,
@@ -21,6 +24,18 @@ from great_expectations.expectations.metrics.import_manager import F, sa
 class ColumnMax(ColumnAggregateMetricProvider):
     metric_name = "column.max"
     value_keys = ("parse_strings_as_datetimes",)
+
+    @metric_value(engine=NumpyExecutionEngine)
+    def _numpy(
+        cls,
+        execution_engine: "NumpyExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        import numpy
+        return numpy.max
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):

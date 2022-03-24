@@ -3,9 +3,12 @@ from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
+import scipy.stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.execution_engine.numpy_execution_engine import NumpyExecutionEngine
+from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     compute_bootstrap_quantiles_point_estimate,
@@ -501,6 +504,21 @@ positive integer, or must be omitted (or set to None).
             round_decimals = 0
 
         return round_decimals
+
+
+    def _get_bootrap_estimate(
+            self,
+            metric_values: np.ndarray,
+            **kwargs
+    ):
+        metric_fn = get_metric_provider(self._metric_name, execution_engine=NumpyExecutionEngine)[1]
+        false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
+        res = scipy.stats.bootstrap(
+            data=metric_values,
+            statistic=metric_fn,
+            confidence_level=1-false_positive_rate
+        )
+        return res.confidence_interval.low, res.confidence_interval.high
 
     @staticmethod
     def _get_bootstrap_estimate(
