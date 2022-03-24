@@ -1,14 +1,17 @@
-"""Track installed package dependencies.
+"""Provide GE package dependencies.
 
-This module contains utilities for tracking installed package dependencies to help enable the core team
-to safely upgrade package dependencies to gain access to features of new package versions.
-It contains a
+This module contains static lists of GE dependencies, along with a utility for
+checking and updating these static lists.
 
     Typical usage example:
-        ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
-        ge_execution_environment.installed_required_dependencies
-        # dev and not-installed dependencies also available
-    # TODO AJB 20220322: Fill me in,  incl running this file to update static lists
+        ge_dependencies: GEDependencies = GEDependencies()
+        print(ge_dependencies.get_required_dependency_names())
+        print(ge_dependencies.get_dev_dependency_names())
+
+    To verify lists are accurate, you can run this file or execute main() from
+    within a cloned GE repository. This will check the existing requirements
+    files against the static lists returned via the methods above in the
+    usage example and raise exceptions if there are discrepancies.
 """
 import os
 import re
@@ -16,99 +19,105 @@ from typing import List, Set
 
 
 class GEDependencies:
+    """Store and provide dependencies when requested.
 
-    """This list should be kept in sync with our requirements.txt"""
+    Also acts as a utility to check stored dependencies match our
+    library requirements.
 
-    GE_REQUIRED_DEPENDENCIES: List[str] = sorted(
-        [
-            "altair",
-            "Click",
-            "colorama",
-            "cryptography",
-            "importlib-metadata",
-            "ipywidgets",
-            "jinja2",
-            "jsonpatch",
-            "jsonschema",
-            "mistune",
-            "nbformat",
-            "numpy",
-            "packaging",
-            "pandas",
-            "pyparsing",
-            "python-dateutil",
-            "pytz",
-            "requests",
-            "ruamel.yaml",
-            "scipy",
-            "termcolor",
-            "tqdm",
-            "typing-extensions",
-            "urllib3",
-            "tzlocal",
-        ]
-    )
-    GE_DEV_DEPENDENCIES: List[str] = sorted(
-        [
-            "PyMySQL",
-            "azure-identity",
-            "azure-keyvault-secrets",
-            "azure-storage-blob",
-            "black",
-            "boto3",
-            "feather-format",
-            "flake8",
-            "flask",
-            "freezegun",
-            "gcsfs",
-            "google-cloud-secret-manager",
-            "google-cloud-storage",
-            "isort",
-            "moto",
-            "nbconvert",
-            "openpyxl",
-            "pre-commit",
-            "psycopg2-binary",
-            "pyarrow",
-            "pyathena",
-            "pyfakefs",
-            "pyodbc",
-            "pypd",
-            "pyspark",
-            "pytest",
-            "pytest-benchmark",
-            "pytest-cov",
-            "pytest-order",
-            "pyupgrade",
-            "requirements-parser",
-            "s3fs",
-            "snapshottest",
-            "snowflake-connector-python",
-            "snowflake-sqlalchemy",
-            "sqlalchemy",
-            "sqlalchemy-bigquery",
-            "sqlalchemy-dremio",
-            "sqlalchemy-redshift",
-            "teradatasqlalchemy",
-            "xlrd",
-        ]
-    )
+    Attributes: None
+    """
+
+    """This list should be kept in sync with our requirements.txt file."""
+    GE_REQUIRED_DEPENDENCIES: List[str] = [
+        "altair",
+        "Click",
+        "colorama",
+        "cryptography",
+        "importlib-metadata",
+        "ipywidgets",
+        "jinja2",
+        "jsonpatch",
+        "jsonschema",
+        "mistune",
+        "nbformat",
+        "numpy",
+        "packaging",
+        "pandas",
+        "pyparsing",
+        "python-dateutil",
+        "pytz",
+        "requests",
+        "ruamel.yaml",
+        "scipy",
+        "termcolor",
+        "tqdm",
+        "typing-extensions",
+        "urllib3",
+        "tzlocal",
+    ]
+
+    """This list should be kept in sync with our requirements-dev*.txt files."""
+    GE_DEV_DEPENDENCIES: List[str] = [
+        "PyMySQL",
+        "azure-identity",
+        "azure-keyvault-secrets",
+        "azure-storage-blob",
+        "black",
+        "boto3",
+        "feather-format",
+        "flake8",
+        "flask",
+        "freezegun",
+        "gcsfs",
+        "google-cloud-secret-manager",
+        "google-cloud-storage",
+        "isort",
+        "moto",
+        "nbconvert",
+        "openpyxl",
+        "pre-commit",
+        "psycopg2-binary",
+        "pyarrow",
+        "pyathena",
+        "pyfakefs",
+        "pyodbc",
+        "pypd",
+        "pyspark",
+        "pytest",
+        "pytest-benchmark",
+        "pytest-cov",
+        "pytest-order",
+        "pyupgrade",
+        "requirements-parser",
+        "s3fs",
+        "snapshottest",
+        "snowflake-connector-python",
+        "snowflake-sqlalchemy",
+        "sqlalchemy",
+        "sqlalchemy-bigquery",
+        "sqlalchemy-dremio",
+        "sqlalchemy-redshift",
+        "teradatasqlalchemy",
+        "xlrd",
+    ]
 
     def __init__(self):
         self._requirements_relative_base_dir = "../../../"
         self._dev_requirements_prefix: str = "requirements-dev"
 
     def get_required_dependency_names(self) -> List[str]:
-        return self.GE_REQUIRED_DEPENDENCIES
+        """Sorted list of required GE dependencies"""
+        return sorted(self.GE_REQUIRED_DEPENDENCIES)
 
     def get_dev_dependency_names(self) -> List[str]:
-        return self.GE_DEV_DEPENDENCIES
+        """Sorted list of dev GE dependencies"""
+        return sorted(self.GE_DEV_DEPENDENCIES)
 
-    def get_required_dependency_names_from_requirements_file(self):
-        """Get unique names of required dependencies
+    def get_required_dependency_names_from_requirements_file(self) -> List[str]:
+        """Get unique names of required dependencies.
 
         Returns:
-
+            List of string names of required dependencies.
         """
         return sorted(
             list(
@@ -121,12 +130,12 @@ class GEDependencies:
         )
 
     def get_dev_dependency_names_from_requirements_file(self) -> List[str]:
-        """
-        Get unique names of dependencies
+        """Get unique names of dependencies from all dev requirements files.
         Returns:
-
+            List of string names of dev dependencies.
         """
         dev_dependency_names: Set[str] = set()
+        dev_dependency_filename: str
         for dev_dependency_filename in self.dev_requirements_paths:
             dependency_names: List[
                 str
@@ -140,14 +149,18 @@ class GEDependencies:
 
     @property
     def required_requirements_path(self) -> str:
+        """Get path for requirements.txt
+
+        Returns:
+            String path of requirements.txt
+        """
         return os.path.join(self._requirements_relative_base_dir, "requirements.txt")
 
     @property
     def dev_requirements_paths(self) -> List[str]:
-        """
-        Get all paths for requirements-dev files with dependencies in them
+        """Get all paths for requirements-dev files with dependencies in them.
         Returns:
-
+            List of string filenames for dev requirements files
         """
         return [
             filename
@@ -155,12 +168,30 @@ class GEDependencies:
             if filename.startswith(self._dev_requirements_prefix)
         ]
 
-    def _get_dependency_names_from_requirements_file(self, filepath: str):
+    def _get_dependency_names_from_requirements_file(self, filepath: str) -> List[str]:
+        """Load requirements file and parse to retrieve dependency names.
+
+        Args:
+            filepath: String relative filepath of requirements file to parse.
+
+        Returns:
+            List of string names of dependencies.
+        """
         with open(filepath) as f:
             dependencies_with_versions = f.read().splitlines()
             return self._get_dependency_names(dependencies_with_versions)
 
     def _get_dependency_names(self, dependencies: List[str]) -> List[str]:
+        """Parse dependency names from a list of strings.
+
+        List of strings typically from a requirements*.txt file.
+
+        Args:
+            dependencies: List of strings of requirements.
+
+        Returns:
+            List of dependency names. E.g. 'pandas' from 'pandas>=0.23.0'.
+        """
         dependency_matches = [
             re.search(r"^(?!--requirement)([\w\-.]+)", s) for s in dependencies
         ]
@@ -171,7 +202,7 @@ class GEDependencies:
         return dependency_names
 
 
-if __name__ == "__main__":
+def main():
     """Run this module to generate a list of packages from requirements files to update our static lists"""
     ge_dependencies: GEDependencies = GEDependencies()
     print("\n\nRequired Dependencies:\n\n")
@@ -189,3 +220,7 @@ if __name__ == "__main__":
     print(
         "Required and Dev dependencies in requirements files match those in GEDependencies"
     )
+
+
+if __name__ == "__main__":
+    main()

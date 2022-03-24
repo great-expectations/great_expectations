@@ -6,11 +6,7 @@ from great_expectations.core.usage_statistics.package_dependencies import GEDepe
 
 
 def test__get_dependency_names():
-    """
-    Test that the regex parses a requirements file correctly
-    Returns:
-
-    """
+    """Test that the regex in _get_dependency_names() parses a requirements file correctly."""
     mock_dependencies: List[str] = [
         "# This is a comment",
         "#This is another comment",
@@ -58,6 +54,10 @@ def test__get_dependency_names():
 
 @pytest.mark.integration
 def test_required_dependency_names_match_requirements_file():
+    """If there is a mismatch, GEDependencies should change to match our requirements.txt file.
+
+    See GEDependencies for a utility to check for a mismatch.
+    """
     ge_dependencies: GEDependencies = GEDependencies()
     assert (
         ge_dependencies.get_required_dependency_names()
@@ -67,13 +67,12 @@ def test_required_dependency_names_match_requirements_file():
 
 @pytest.mark.integration
 def test_dev_dependency_names_match_requirements_file():
+    """If there is a mismatch, GEDependencies should change to match our requirements-dev*.txt files.
+
+    See GEDependencies for a utility to check for a mismatch.
+    """
     ge_dependencies: GEDependencies = GEDependencies()
     assert (
         ge_dependencies.get_dev_dependency_names()
         == ge_dependencies.get_dev_dependency_names_from_requirements_file()
     )
-
-
-@pytest.mark.integration
-def test__get_dependency_names_from_requirements_file():
-    raise NotImplementedError

@@ -11,7 +11,7 @@ from great_expectations.core.usage_statistics.execution_environment import (
 
 
 @mock.patch(
-    "great_expectations.core.usage_statistics.execution_environment.GEExecutionEnvironment.get_all_installed_packages",
+    "great_expectations.core.usage_statistics.execution_environment.GEExecutionEnvironment._get_all_installed_packages",
     return_value=True,
 )
 @mock.patch("importlib.metadata.version", return_value=True)
@@ -29,6 +29,8 @@ def test_get_installed_packages(
     mock_version,
     get_all_installed_packages,
 ):
+    """Test that we are able to retrieve installed and not installed packages in the GE execution environment."""
+
     get_required_dependency_names.return_value = [
         "req-package-1",
         "req-package-2",
