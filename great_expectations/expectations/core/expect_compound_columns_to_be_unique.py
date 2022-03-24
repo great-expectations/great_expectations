@@ -13,11 +13,9 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "multi-column expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": [
             "@great_expectations",

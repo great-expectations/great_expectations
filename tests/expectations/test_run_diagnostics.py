@@ -37,7 +37,6 @@ def test_expectation_self_check():
             "has_full_test_suite": False,
             "manually_reviewed_code": False,
             "library_metadata_passed_checks": False,
-            "package": None,
         },
         "description": {
             "camel_name": "ExpectColumnValuesToEqualThree",
@@ -310,7 +309,6 @@ def test_self_check_on_an_existing_expectation():
         "library_metadata": {
             "contributors": ["@great_expectations"],
             "maturity": "production",
-            # "package": "great_expectations",
             "requirements": [],
             "tags": ["core expectation", "column map expectation"],
         },
