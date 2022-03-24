@@ -4,7 +4,9 @@ import datetime
 import enum
 import json
 import logging
+import platform
 import signal
+import sys
 import threading
 import time
 from functools import wraps
@@ -114,8 +116,26 @@ class UsageStatisticsHandler:
     def build_init_payload(self) -> dict:
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
-        anonymizer: Anonymizer = self._anonymizer
-        return anonymizer.build_init_payload(data_context=self._data_context)
+        expectation_suites = [
+            self._data_context.get_expectation_suite(expectation_suite_name)
+            for expectation_suite_name in self._data_context.list_expectation_suite_names()
+        ]
+
+        init_payload = {
+            "platform.system": platform.system(),
+            "platform.release": platform.release(),
+            "version_info": str(sys.version_info),
+            "datasources": self._data_context.project_config_with_variables_substituted.datasources,
+            "stores": self._data_context.stores,
+            "validation_operators": self._data_context.validation_operators,
+            "data_docs_sites": self._data_context.project_config_with_variables_substituted.data_docs_sites,
+            "expectation_suites": expectation_suites,
+        }
+
+        anonymized_init_payload = self._anonymizer.anonymize_init_payload(
+            init_payload=init_payload
+        )
+        return anonymized_init_payload
 
     def build_envelope(self, message: dict) -> dict:
         message["version"] = "1.0.0"
