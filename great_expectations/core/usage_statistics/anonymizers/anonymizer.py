@@ -81,37 +81,6 @@ class Anonymizer(BaseAnonymizer):
         )
 
     @staticmethod
-    def _is_batch_request_info(info: dict) -> bool:
-        return all(
-            attr in info
-            for attr in ("datasource_name", "data_connector_name", "data_asset_name")
-        )
-
-    @staticmethod
-    def _is_data_connector_info(obj: object) -> bool:
-        from great_expectations.datasource.data_connector.data_connector import (
-            DataConnector,
-        )
-
-        return obj is not None and isinstance(obj, DataConnector)
-
-    @staticmethod
-    def _is_batch_info(obj: object) -> bool:
-        from great_expectations.data_asset.data_asset import DataAsset
-        from great_expectations.validator.validator import Validator
-
-        if object is None:
-            return False
-
-        return isinstance(obj, (Validator, DataAsset)) or (
-            isinstance(obj, tuple) and len(obj) == 2
-        )
-
-    @staticmethod
-    def _is_store_info(info: dict):
-        return "store_name" in info or "store_obj" in info
-
-    @staticmethod
     def can_handle(obj: object, **kwargs) -> bool:
         return isinstance(obj, object)
 

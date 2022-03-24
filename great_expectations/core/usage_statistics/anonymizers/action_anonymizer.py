@@ -4,10 +4,12 @@ from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonym
 
 
 class ActionAnonymizer(BaseAnonymizer):
-    def anonymize(self, obj: object, **kwargs) -> Any:
-        action_name: str = kwargs["action_name"]
-        action_obj: Optional[object] = kwargs.get("action_obj")
-        action_config: Optional[dict] = kwargs.get("action_config")
+    def anonymize(
+        self,
+        action_name: str,
+        action_obj: Optional[object] = None,
+        action_config: Optional[dict] = None,
+    ) -> Any:
         anonymized_info_dict: dict = {
             "anonymized_name": self._anonymize_string(action_name),
         }
