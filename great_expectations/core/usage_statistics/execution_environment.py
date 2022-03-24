@@ -7,15 +7,6 @@ from packaging import version
 
 from great_expectations.core.usage_statistics.package_dependencies import GEDependencies
 
-# # BEFORE
-# @dataclass
-# class PackageInfo:
-#     package_name: str
-#     installed: bool
-#     version: Optional[version.Version]
-
-# AFTER
-
 
 class InstallEnvironment(enum.Enum):
     DEV = "dev"
@@ -28,20 +19,6 @@ class PackageInfo:
     installed: bool
     install_environment: InstallEnvironment
     version: Optional[version.Version]
-
-
-# # Where the EVENT then becomes two keys with arrays:
-# # "anonymized_execution_environment" in "data_context.__init__" event
-# class GEExecutionEnvironment:
-#     dependencies: List[PackageInfo]
-#     environment: List[ExecutionEnvironment]
-#
-# # where ExecutionEnvironment is:
-# @dataclass
-# class ExecutionEnvironment:
-#     environment_name: str
-#     environment_type: ExecutionEnvironmentType
-#     version: Optional[version.Version] # e.g. databricks environment version
 
 
 class GEExecutionEnvironment:
@@ -93,27 +70,23 @@ class GEExecutionEnvironment:
         dependencies: List[PackageInfo] = []
         for dependency_name in dependency_names:
 
+            package_version: Optional[version.Version]
+            installed: bool
             if dependency_name in self.get_all_installed_packages():
-                package_version: version.Version = self._get_version_from_package_name(
-                    dependency_name
-                )
-                dependencies.append(
-                    PackageInfo(
-                        package_name=dependency_name,
-                        version=package_version,
-                        install_environment=install_environment,
-                        installed=True,
-                    )
-                )
+                installed = True
+                package_version = self._get_version_from_package_name(dependency_name)
             else:
-                dependencies.append(
-                    PackageInfo(
-                        package_name=dependency_name,
-                        version=None,
-                        install_environment=install_environment,
-                        installed=False,
-                    )
+                installed = False
+                package_version = None
+
+            dependencies.append(
+                PackageInfo(
+                    package_name=dependency_name,
+                    installed=installed,
+                    install_environment=install_environment,
+                    version=package_version,
                 )
+            )
         return dependencies
 
     @staticmethod
