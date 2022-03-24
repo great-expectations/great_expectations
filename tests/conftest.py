@@ -1,6 +1,4 @@
 import datetime
-import gzip
-import json
 import locale
 import logging
 import os
@@ -8,8 +6,7 @@ import random
 import shutil
 import sys
 import warnings
-from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -19,7 +16,7 @@ from ruamel.yaml import YAML
 
 import great_expectations as ge
 from great_expectations import DataContext
-from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -45,16 +42,11 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.datasource import (
-    LegacyDatasource,
-    SimpleSqlalchemyDatasource,
-    SqlAlchemyDatasource,
-)
+from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -66,13 +58,10 @@ from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
 from great_expectations.self_check.util import (
-    expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
     get_dataset,
-    get_sqlite_connection_url,
 )
 from great_expectations.util import is_library_loadable
-from tests.test_utils import create_files_in_directory
 
 RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
 
@@ -1838,39 +1827,6 @@ def titanic_profiled_evrs_1():
         return expectationSuiteValidationResultSchema.loads(infile.read())
 
 
-@pytest.fixture
-def titanic_profiled_name_column_evrs():
-    # This is a janky way to fetch expectations matching a specific name from an EVR suite.
-    # TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
-    from great_expectations.render.renderer.renderer import Renderer
-
-    with open(
-        file_relative_path(
-            __file__, "./render/fixtures/BasicDatasetProfiler_evrs.json"
-        ),
-    ) as infile:
-        titanic_profiled_evrs_1 = expectationSuiteValidationResultSchema.load(
-            json.load(infile)
-        )
-
-    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
-    name_column_evrs = evrs_by_column["Name"]
-
-    return name_column_evrs
-
-
-@pytest.fixture
-def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
-    with open(
-        file_relative_path(
-            __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
-        ),
-    ) as infile:
-        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(infile))
-        return ExpectationSuite(**expectation_suite_dict, data_context=context)
-
-
 # various types of evr
 @pytest.fixture
 def evr_failed():
@@ -1907,28 +1863,6 @@ def evr_failed():
                 "regex": "^\\s+|\\s+$",
                 "result_format": "SUMMARY",
             },
-        ),
-    )
-
-
-@pytest.fixture
-def evr_failed_with_exception():
-    return ExpectationValidationResult(
-        success=False,
-        exception_info={
-            "raised_exception": True,
-            "exception_message": "Invalid partition object.",
-            "exception_traceback": 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',
-        },
-        expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_kl_divergence_to_be_less_than",
-            kwargs={
-                "column": "live",
-                "partition_object": None,
-                "threshold": None,
-                "result_format": "SUMMARY",
-            },
-            meta={"BasicDatasetProfiler": {"confidence": "very low"}},
         ),
     )
 
@@ -1984,46 +1918,10 @@ def basic_sqlalchemy_datasource(sqlitedb_engine):
 
 
 @pytest.fixture
-def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
-    if sa is None:
-        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
-
-    db_file_path: str = file_relative_path(
-        __file__,
-        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
-    )
-
-    engine: sa.engine.Engine = sa.create_engine(get_sqlite_connection_url(db_file_path))
-    conn: sa.engine.Connection = engine.connect()
-
-    # Build a SqlAlchemyDataset using that database
-    return SqlAlchemyExecutionEngine(
-        name="test_sql_execution_engine",
-        engine=conn,
-    )
-
-
-@pytest.fixture
 def test_folder_connection_path_csv(tmp_path_factory):
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     path = str(tmp_path_factory.mktemp("test_folder_connection_path_csv"))
     df1.to_csv(path_or_buf=os.path.join(path, "test.csv"), index=False)
-    return str(path)
-
-
-@pytest.fixture
-def test_folder_connection_path_tsv(tmp_path_factory):
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    path = str(tmp_path_factory.mktemp("test_folder_connection_path_tsv"))
-    df1.to_csv(path_or_buf=os.path.join(path, "test.tsv"), sep="\t", index=False)
-    return str(path)
-
-
-@pytest.fixture
-def test_folder_connection_path_parquet(tmp_path_factory):
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    path = str(tmp_path_factory.mktemp("test_folder_connection_path_parquet"))
-    df1.to_parquet(path=os.path.join(path, "test.parquet"))
     return str(path)
 
 
@@ -2106,139 +2004,6 @@ def test_df(tmp_path_factory):
 
 
 @pytest.fixture
-def test_connectable_postgresql_db(sa, test_backends, test_df):
-    """Populates a postgres DB with a `test_df` table in the `connection_test` schema to test DataConnectors against"""
-
-    if "postgresql" not in test_backends:
-        pytest.skip("skipping fixture because postgresql not selected")
-
-    import sqlalchemy as sa
-
-    url = sa.engine.url.URL(
-        drivername="postgresql",
-        username="postgres",
-        password="",
-        host=os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-        port="5432",
-        database="test_ci",
-    )
-    engine = sa.create_engine(url)
-
-    schema_check_results = engine.execute(
-        "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';"
-    ).fetchall()
-    if len(schema_check_results) == 0:
-        engine.execute("CREATE SCHEMA connection_test;")
-
-    table_check_results = engine.execute(
-        """
-SELECT EXISTS (
-   SELECT FROM information_schema.tables
-   WHERE  table_schema = 'connection_test'
-   AND    table_name   = 'test_df'
-);
-"""
-    ).fetchall()
-    if table_check_results != [(True,)]:
-        test_df.to_sql(name="test_df", con=engine, index=True, schema="connection_test")
-
-    # Return a connection string to this newly-created db
-    return engine
-
-
-@pytest.fixture
-def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch(
-    sa,
-    empty_data_context,
-    test_db_connection_string,
-):
-    context: DataContext = empty_data_context
-
-    sqlite_engine: sa.engine.base.Engine = sa.create_engine(test_db_connection_string)
-    # noinspection PyUnusedLocal
-    conn: sa.engine.base.Connection = sqlite_engine.connect()
-    datasource_config: str = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: SqlAlchemyExecutionEngine
-            connection_string: {test_db_connection_string}
-
-        data_connectors:
-            my_runtime_data_connector:
-                module_name: great_expectations.datasource.data_connector
-                class_name: RuntimeDataConnector
-                batch_identifiers:
-                    - pipeline_stage_name
-                    - airflow_run_id
-            my_inferred_data_connector:
-                module_name: great_expectations.datasource.data_connector
-                class_name: InferredAssetSqlDataConnector
-                include_schema_name: true
-            my_configured_data_connector:
-                module_name: great_expectations.datasource.data_connector
-                class_name: ConfiguredAssetSqlDataConnector
-                assets:
-                    my_first_data_asset:
-                        table_name: table_1
-                    my_second_data_asset:
-                        schema_name: main
-                        table_name: table_2
-                    table_1: {{}}
-                    table_2:
-                        schema_name: main
-    """
-
-    try:
-        # noinspection PyUnusedLocal
-        my_sql_datasource: Optional[
-            Union[SimpleSqlalchemyDatasource, LegacyDatasource]
-        ] = context.add_datasource(
-            "test_sqlite_db_datasource", **yaml.load(datasource_config)
-        )
-    except AttributeError:
-        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
-
-    return context
-
-
-@pytest.fixture
-def data_context_with_runtime_sql_datasource_for_testing_get_batch(
-    sa,
-    empty_data_context,
-):
-    context: DataContext = empty_data_context
-    db_file_path: str = file_relative_path(
-        __file__,
-        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
-    )
-
-    datasource_config: str = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: SqlAlchemyExecutionEngine
-            connection_string: sqlite:///{db_file_path}
-
-        data_connectors:
-            my_runtime_data_connector:
-                module_name: great_expectations.datasource.data_connector
-                class_name: RuntimeDataConnector
-                batch_identifiers:
-                    - pipeline_stage_name
-                    - airflow_run_id
-    """
-
-    context.test_yaml_config(
-        name="my_runtime_sql_datasource", yaml_config=datasource_config
-    )
-
-    # noinspection PyProtectedMember
-    context._save_project_config()
-    return context
-
-
-@pytest.fixture
 def data_context_with_simple_sql_datasource_for_testing_get_batch(
     sa, empty_data_context
 ):
@@ -2283,62 +2048,6 @@ introspection:
 
 
 @pytest.fixture
-def data_context_with_pandas_datasource_for_testing_get_batch(
-    empty_data_context_v3, tmp_path_factory
-):
-    context = empty_data_context_v3
-
-    base_directory: str = str(
-        tmp_path_factory.mktemp(
-            "data_context_with_pandas_datasource_for_testing_get_batch"
-        )
-    )
-
-    sample_file_names: List[str] = [
-        "test_dir_charlie/A/A-1.csv",
-        "test_dir_charlie/A/A-2.csv",
-        "test_dir_charlie/A/A-3.csv",
-        "test_dir_charlie/B/B-1.csv",
-        "test_dir_charlie/B/B-2.csv",
-        "test_dir_charlie/B/B-3.csv",
-        "test_dir_charlie/C/C-1.csv",
-        "test_dir_charlie/C/C-2.csv",
-        "test_dir_charlie/C/C-3.csv",
-        "test_dir_charlie/D/D-1.csv",
-        "test_dir_charlie/D/D-2.csv",
-        "test_dir_charlie/D/D-3.csv",
-    ]
-
-    create_files_in_directory(
-        directory=base_directory, file_name_list=sample_file_names
-    )
-
-    config = yaml.load(
-        f"""
-class_name: Datasource
-execution_engine:
-    class_name: PandasExecutionEngine
-
-data_connectors:
-    my_filesystem_data_connector:
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: {base_directory}/test_dir_charlie
-        glob_directive: "*/*.csv"
-
-        default_regex:
-            pattern: (.+)/(.+)-(\\d+)\\.csv
-            group_names:
-                - subdirectory
-                - data_asset_name
-                - number
-""",
-    )
-
-    context.add_datasource("my_pandas_datasource", **config)
-    return context
-
-
-@pytest.fixture
 def basic_datasource(tmp_path_factory):
     base_directory: str = str(
         tmp_path_factory.mktemp("basic_datasource_runtime_data_connector")
@@ -2372,98 +2081,6 @@ execution_engine:
     )
 
     return basic_datasource
-
-
-@pytest.fixture(scope="function")
-def misc_directory(tmp_path):
-    misc_dir = tmp_path / "random"
-    misc_dir.mkdir()
-    assert os.path.isabs(misc_dir)
-    return misc_dir
-
-
-@pytest.fixture()
-def yellow_trip_pandas_data_context(
-    tmp_path_factory,
-    monkeypatch,
-) -> DataContext:
-    """
-    Provides a data context with a data_connector for a pandas datasource which can connect to three months of
-    yellow trip taxi data in csv form. This data connector enables access to all three months through a BatchRequest
-    where the "year" in batch_filter_parameters is set to "2019", or to individual months if the "month" in
-    batch_filter_parameters is set to "01", "02", or "03"
-    """
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "integration",
-                "fixtures",
-                "yellow_tripdata_pandas_fixture",
-                "great_expectations",
-                "great_expectations.yml",
-            ),
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "test_sets",
-                "taxi_yellow_tripdata_samples",
-                "yellow_tripdata_sample_2019-01.csv",
-            ),
-        ),
-        str(
-            os.path.join(
-                context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "test_sets",
-                "taxi_yellow_tripdata_samples",
-                "yellow_tripdata_sample_2019-02.csv",
-            ),
-        ),
-        str(
-            os.path.join(
-                context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "test_sets",
-                "taxi_yellow_tripdata_samples",
-                "yellow_tripdata_sample_2019-03.csv",
-            ),
-        ),
-        str(
-            os.path.join(
-                context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
-            )
-        ),
-    )
-
-    context: DataContext = DataContext(context_root_dir=context_path)
-    assert context.root_directory == context_path
-
-    return context
 
 
 @pytest.fixture
@@ -2509,34 +2126,6 @@ def data_context_with_datasource_spark_engine(empty_data_context, spark_session)
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
-        """,
-    )
-    context.add_datasource(
-        "my_datasource",
-        **config,
-    )
-    return context
-
-
-@pytest.fixture
-def data_context_with_datasource_spark_engine_batch_spec_passthrough(
-    empty_data_context, spark_session
-):
-    context = empty_data_context
-    config = yaml.load(
-        f"""
-    class_name: Datasource
-    execution_engine:
-        class_name: SparkDFExecutionEngine
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-            batch_spec_passthrough:
-                reader_method: csv
-                reader_options:
-                    header: True
         """,
     )
     context.add_datasource(

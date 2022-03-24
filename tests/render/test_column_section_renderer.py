@@ -4,14 +4,9 @@ from collections import OrderedDict
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
-    expectationSuiteSchema,
-)
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
-    ExpectationSuiteValidationResultSchema,
     ExpectationValidationResult,
 )
 from great_expectations.data_context.util import file_relative_path
@@ -24,6 +19,10 @@ from great_expectations.render.renderer import (
 from great_expectations.render.renderer.content_block import (
     ProfilingColumnPropertiesTableContentBlockRenderer,
     ValidationResultsTableContentBlockRenderer,
+)
+from great_expectations.self_check.util import (
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
 )
 
 
@@ -68,7 +67,7 @@ def titanic_validation_results():
     with open(
         file_relative_path(__file__, "../test_sets/expected_cli_results_default.json"),
     ) as infile:
-        return ExpectationSuiteValidationResultSchema.load(json.load(infile))
+        return expectationSuiteValidationResultSchema.load(json.load(infile))
 
 
 @pytest.mark.smoketest

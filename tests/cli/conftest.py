@@ -54,3 +54,11 @@ def v10_project_directory(tmp_path_factory):
         os.path.join(context_root_dir, "great_expectations.yml"),
     )
     return context_root_dir
+
+
+@pytest.fixture(scope="function")
+def misc_directory(tmp_path):
+    misc_dir = tmp_path / "random"
+    misc_dir.mkdir()
+    assert os.path.isabs(misc_dir)
+    return misc_dir
