@@ -11,10 +11,16 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
     VARIABLES_KEY,
 )
 
@@ -102,32 +108,36 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "profiler_config",
     )
 
-    min_estimato_parameter_builder_config: dict = {
-        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-        "class_name": "MetricMultiBatchParameterBuilder",
-        "name": "min_estimator",
-        "metric_name": "column.min",
-        "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        "metric_value_kwargs": None,
-        "enforce_numeric_metric": True,
-        "replace_nan_with_zero": True,
-        "reduce_scalar_metric": True,
-        "evaluation_parameter_builder_configs": None,
-        "json_serialize": True,
-    }
-    max_estimato_parameter_builder_config: dict = {
-        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-        "class_name": "MetricMultiBatchParameterBuilder",
-        "name": "max_estimator",
-        "metric_name": "column.max",
-        "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        "metric_value_kwargs": None,
-        "enforce_numeric_metric": True,
-        "replace_nan_with_zero": True,
-        "reduce_scalar_metric": True,
-        "evaluation_parameter_builder_configs": None,
-        "json_serialize": True,
-    }
+    min_estimato_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MetricMultiBatchParameterBuilder",
+            name="min_estimator",
+            metric_name="column.min",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+    )
+    max_estimato_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MetricMultiBatchParameterBuilder",
+            name="max_estimator",
+            metric_name="column.max",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+    )
     validation_parameter_builder_configs: List[dict] = [
         min_estimato_parameter_builder_config,
         max_estimato_parameter_builder_config,
@@ -155,15 +165,15 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": "$parameter.min_estimator.value[-1]",
-                        "max_value": "$parameter.max_estimator.value[-1]",
+                        "min_value": f"{PARAMETER_KEY}{min_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[-1]",
+                        "max_value": f"{PARAMETER_KEY}{max_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[-1]",
                         "mostly": f"{VARIABLES_KEY}mostly",
                         "strict_min": f"{VARIABLES_KEY}strict_min",
                         "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
                             "profiler_details": {
-                                "min_estimator": "$parameter.min_estimator.details",
-                                "max_estimator": "$parameter.max_estimator.details",
+                                "min_estimator": f"{PARAMETER_KEY}{min_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                                "max_estimator": f"{PARAMETER_KEY}{max_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                             },
                         },
                     },

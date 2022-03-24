@@ -16,10 +16,16 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
     VARIABLES_KEY,
 )
 
@@ -125,15 +131,17 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "profiler_config",
     )
 
-    value_set_estimator_parameter_builder_config: dict = {
-        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-        "class_name": "ValueSetMultiBatchParameterBuilder",
-        "name": "value_set_estimator",
-        "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        "metric_value_kwargs": None,
-        "evaluation_parameter_builder_configs": None,
-        "json_serialize": True,
-    }
+    value_set_estimator_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="ValueSetMultiBatchParameterBuilder",
+            name="value_set_estimator",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+    )
     validation_parameter_builder_configs: List[dict] = [
         value_set_estimator_parameter_builder_config,
     ]
@@ -158,10 +166,10 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "value_set": "$parameter.value_set_estimator.value",
+                        "value_set": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
                         "mostly": f"{VARIABLES_KEY}mostly",
                         "meta": {
-                            "profiler_details": "$parameter.value_set_estimator.details",
+                            "profiler_details": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     },
                 ],

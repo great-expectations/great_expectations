@@ -11,10 +11,16 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
     VARIABLES_KEY,
 )
 
@@ -102,25 +108,27 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
-    min_range_estimator_parameter_builder_config: dict = {
-        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-        "name": "min_range_estimator",
-        "metric_name": "column.min",
-        "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        "metric_value_kwargs": None,
-        "enforce_numeric_metric": True,
-        "replace_nan_with_zero": True,
-        "reduce_scalar_metric": True,
-        "false_positive_rate": f"{VARIABLES_KEY}false_positive_rate",
-        "estimator": f"{VARIABLES_KEY}estimator",
-        "num_bootstrap_samples": f"{VARIABLES_KEY}num_bootstrap_samples",
-        "bootstrap_random_seed": f"{VARIABLES_KEY}bootstrap_random_seed",
-        "round_decimals": f"{VARIABLES_KEY}round_decimals",
-        "truncate_values": f"{VARIABLES_KEY}truncate_values",
-        "evaluation_parameter_builder_configs": None,
-        "json_serialize": True,
-    }
+    min_range_estimator_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="NumericMetricRangeMultiBatchParameterBuilder",
+            name="min_range_estimator",
+            metric_name="column.min",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+            estimator=f"{VARIABLES_KEY}estimator",
+            num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
+            bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
+            round_decimals=f"{VARIABLES_KEY}round_decimals",
+            truncate_values=f"{VARIABLES_KEY}truncate_values",
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+    )
     validation_parameter_builder_configs: List[dict] = [
         min_range_estimator_parameter_builder_config,
     ]
@@ -155,12 +163,12 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": "$parameter.min_range_estimator.value.value_range[0]",
-                        "max_value": "$parameter.min_range_estimator.value.value_range[1]",
-                        "strict_min": "$variables.strict_min",
-                        "strict_max": "$variables.strict_max",
+                        "min_value": f"{PARAMETER_KEY}{min_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}value_range[0]",
+                        "max_value": f"{PARAMETER_KEY}{min_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}value_range[1]",
+                        "strict_min": f"{VARIABLES_KEY}strict_min",
+                        "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
-                            "profiler_details": "$parameter.min_range_estimator.details",
+                            "profiler_details": f"{PARAMETER_KEY}{min_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     },
                 ],
