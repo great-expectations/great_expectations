@@ -16,7 +16,7 @@ This guide will explain how to use a Validation Action to emit results to an Ope
 <Prerequisites>
 
  - Created at least one Expectation Suite.
- - Created at least one [Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint) - you will need it in order to test that the OpenLineage Validation Operator is working.
+ - Created at least one [Checkpoint](../../validation/checkpoints/how_to_create_a_new_checkpoint.md) - you will need it in order to test that the OpenLineage Validation Operator is working.
 
 </Prerequisites>
 
@@ -77,6 +77,6 @@ Steps
 Additional resources
 --------------------
 
-- [Checkpoints and Actions](/docs/reference/checkpoints_and_actions)
+- [Checkpoints and Actions](../../../reference/checkpoints_and_actions.md)
 - The [OpenLineage Spec](https://github.com/OpenLineage/OpenLineage/blob/main/spec/OpenLineage.md)
 - Blog: [Expecting Great Quality with OpenLineage Facets](https://openlineage.io/blog/dataquality_expectations_facet/)
