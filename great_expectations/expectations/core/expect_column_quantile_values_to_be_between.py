@@ -19,6 +19,11 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    VARIABLES_KEY,
+)
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
@@ -164,35 +169,36 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 },
-                "parameter_builders": [
-                    {
-                        "name": "quantile_value_ranges",
-                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "column.quantile_values",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "metric_value_kwargs": {
-                            "quantiles": "$variables.quantiles",
-                            "allow_relative_error": "$variables.allow_relative_error",
-                        },
-                        "enforce_numeric_metric": True,
-                        "replace_nan_with_zero": True,
-                        "reduce_scalar_metric": True,
-                        "false_positive_rate": "$variables.false_positive_rate",
-                        "estimator": "$variables.estimator",
-                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                        "round_decimals": "$variables.round_decimals",
-                        "truncate_values": "$variables.truncate_values",
-                        "json_serialize": True,
-                    }
-                ],
                 "expectation_configuration_builders": [
                     {
                         "expectation_type": "expect_column_quantile_values_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "column": "$domain.domain_kwargs.column",
+                        "validation_parameter_builder_configs": [
+                            {
+                                "name": "quantile_value_ranges",
+                                "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                                "metric_name": "column.quantile_values",
+                                "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                                "metric_value_kwargs": {
+                                    "quantiles": f"{VARIABLES_KEY}quantiles",
+                                    "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
+                                },
+                                "enforce_numeric_metric": True,
+                                "replace_nan_with_zero": True,
+                                "reduce_scalar_metric": True,
+                                "false_positive_rate": f"{VARIABLES_KEY}false_positive_rate",
+                                "estimator": f"{VARIABLES_KEY}estimator",
+                                "num_bootstrap_samples": f"{VARIABLES_KEY}num_bootstrap_samples",
+                                "bootstrap_random_seed": f"{VARIABLES_KEY}bootstrap_random_seed",
+                                "round_decimals": f"{VARIABLES_KEY}round_decimals",
+                                "truncate_values": f"{VARIABLES_KEY}truncate_values",
+                                "evaluation_parameter_builder_configs": None,
+                                "json_serialize": True,
+                            },
+                        ],
+                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
                         "quantile_ranges": {
                             "quantiles": "$variables.quantiles",
                             "value_ranges": "$parameter.quantile_value_ranges.value.value_range",

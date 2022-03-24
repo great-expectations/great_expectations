@@ -17,6 +17,11 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    VARIABLES_KEY,
+)
 
 try:
     import sqlalchemy as sa
@@ -134,24 +139,25 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 },
-                "parameter_builders": [
-                    {
-                        "name": "value_set",
-                        "class_name": "ValueSetMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "metric_value_kwargs": None,
-                        "json_serialize": True,
-                    },
-                ],
                 "expectation_configuration_builders": [
                     {
                         "expectation_type": "expect_column_values_to_be_in_set",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "column": "$domain.domain_kwargs.column",
+                        "validation_parameter_builder_configs": [
+                            {
+                                "name": "value_set",
+                                "class_name": "ValueSetMultiBatchParameterBuilder",
+                                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                                "metric_domain_kwargs": DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+                                "metric_value_kwargs": None,
+                                "evaluation_parameter_builder_configs": None,
+                                "json_serialize": True,
+                            },
+                        ],
+                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
                         "value_set": "$parameter.value_set.value",
-                        "mostly": "$variables.mostly",
+                        "mostly": f"{VARIABLES_KEY}mostly",
                         "meta": {
                             "profiler_details": "$parameter.value_set.details",
                         },

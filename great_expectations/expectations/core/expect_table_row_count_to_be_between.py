@@ -12,6 +12,7 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.types import VARIABLES_KEY
 
 
 class ExpectTableRowCountToBeBetween(TableExpectation):
@@ -99,31 +100,32 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                     "class_name": "TableDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 },
-                "parameter_builders": [
-                    {
-                        "name": "row_count_range",
-                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "table.row_count",
-                        "metric_domain_kwargs": None,
-                        "metric_value_kwargs": None,
-                        "enforce_numeric_metric": True,
-                        "replace_nan_with_zero": True,
-                        "reduce_scalar_metric": True,
-                        "false_positive_rate": "$variables.false_positive_rate",
-                        "estimator": "$variables.estimator",
-                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                        "round_decimals": "$variables.round_decimals",
-                        "truncate_values": "$variables.truncate_values",
-                        "json_serialize": True,
-                    },
-                ],
                 "expectation_configuration_builders": [
                     {
                         "expectation_type": "expect_table_row_count_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "validation_parameter_builder_configs": [
+                            {
+                                "name": "row_count_range",
+                                "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                                "metric_name": "table.row_count",
+                                "metric_domain_kwargs": None,
+                                "metric_value_kwargs": None,
+                                "enforce_numeric_metric": True,
+                                "replace_nan_with_zero": True,
+                                "reduce_scalar_metric": True,
+                                "false_positive_rate": f"{VARIABLES_KEY}false_positive_rate",
+                                "estimator": f"{VARIABLES_KEY}estimator",
+                                "num_bootstrap_samples": f"{VARIABLES_KEY}num_bootstrap_samples",
+                                "bootstrap_random_seed": f"{VARIABLES_KEY}bootstrap_random_seed",
+                                "round_decimals": f"{VARIABLES_KEY}round_decimals",
+                                "truncate_values": f"{VARIABLES_KEY}truncate_values",
+                                "evaluation_parameter_builder_configs": None,
+                                "json_serialize": True,
+                            },
+                        ],
                         "min_value": "$parameter.row_count_range.value.value_range[0]",
                         "max_value": "$parameter.row_count_range.value.value_range[1]",
                         "meta": {
