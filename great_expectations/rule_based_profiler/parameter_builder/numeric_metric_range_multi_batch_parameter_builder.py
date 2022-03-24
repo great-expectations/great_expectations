@@ -306,9 +306,7 @@ detected.
         )
 
         return (
-            {
-                "value_range": metric_value_range,
-            },
+            metric_value_range,
             parameter_node.details,
         )
 
