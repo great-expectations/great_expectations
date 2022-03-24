@@ -15,10 +15,16 @@ class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
         {
             "data": {
                 "valid_articles": [
-                    "analytics-vidhya/term-frequency-text-summarization-cc4e6381254c"
+                    "analytics-vidhya/term-frequency-text-summarization-cc4e6381254c",
+                    "analytics-vidhya/dbscan-from-scratch-almost-b02096600c14",
+                    "analytics-vidhya/the-nature-of-trying-to-predict-student-success-is-tricky-16168faba8ec",
+                    "analytics-vidhya/how-can-i-see-a-ufo-f8518b1e1920",
                 ],
                 "invalid_articles": [
-                    "analytics-vidhya/term-frequency-text-summarization"
+                    "analytics-vidhya/term-frequency-text-summarization",
+                    "analytics-vidhya/dbscan-from-scratch-almost",
+                    "analytics-vidhya/the-nature-of-trying-to-predict-student-success-is-tricky",
+                    "analytics-vidhya/how-can-i-see-a-ufo",
                 ],
             },
             "tests": [
