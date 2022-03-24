@@ -267,7 +267,9 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                 "domain_builder": {
                     "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                     "class_name": "ColumnDomainBuilder",
-                    "include_column_name_suffixes": ["_amount"],
+                    "include_column_name_suffixes": [
+                        "_amount",
+                    ],
                     "batch_request": {
                         "datasource_name": "taxi_multibatch_datasource_other_possibility",
                         "data_connector_name": "default_inferred_data_connector_name",
@@ -287,6 +289,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,
+                        "evaluation_parameter_builder_configs": None,
                         "json_serialize": True,
                         "batch_request": {
                             "datasource_name": "taxi_multibatch_datasource_other_possibility",
@@ -296,19 +299,21 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                             "data_connector_query": {"index": -1},
                             "limit": None,
                         },
-                    }
+                    },
                 ],
                 "expectation_configuration_builders": [
                     {
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_values_to_be_greater_than",
-                        "column": "$domain.domain_kwargs.column",
                         "meta": {},
+                        "column": "$domain.domain_kwargs.column",
+                        "validation_parameter_builder_configs": None,
                         "value": "$parameter.my_column_min.value[-1]",
-                    }
+                        "batch_request": None,
+                    },
                 ],
-            }
+            },
         },
     }
 
