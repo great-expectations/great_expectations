@@ -101,10 +101,10 @@ class GEDependencies:
         self._requirements_relative_base_dir = "../../../"
         self._dev_requirements_prefix: str = "requirements-dev"
 
-    def get_required_dependency_names(self):
+    def get_required_dependency_names(self) -> List[str]:
         return self.GE_REQUIRED_DEPENDENCIES
 
-    def get_dev_dependency_names(self):
+    def get_dev_dependency_names(self) -> List[str]:
         return self.GE_DEV_DEPENDENCIES
 
     def get_required_dependency_names_from_requirements_file(self):
@@ -191,6 +191,8 @@ class GEExecutionEnvironment:
 
     def __init__(self):
         self._ge_dependencies: GEDependencies = GEDependencies()
+        self._all_installed_packages = None
+        self.get_all_installed_packages()
 
         self._installed_required_dependencies = None
         self._not_installed_required_dependencies = None
@@ -199,6 +201,14 @@ class GEExecutionEnvironment:
         self._installed_dev_dependencies = None
         self._not_installed_dev_dependencies = None
         self.build_dev_dependencies()
+
+    def get_all_installed_packages(self) -> List[str]:
+        if self._all_installed_packages is None:
+            # Only retrieve once
+            self._all_installed_packages = [
+                item.metadata.get("Name") for item in metadata.distributions()
+            ]
+        return self._all_installed_packages
 
     def build_required_dependencies(self) -> None:
         dependency_list: List[PackageInfo] = self._build_dependency_list(
@@ -237,7 +247,8 @@ class GEExecutionEnvironment:
     def _build_dependency_list(self, dependency_names: List[str]) -> List[PackageInfo]:
         dependencies: List[PackageInfo] = []
         for dependency_name in dependency_names:
-            try:
+
+            if dependency_name in self.get_all_installed_packages():
                 package_version: version.Version = self._get_version_from_package_name(
                     dependency_name
                 )
@@ -248,7 +259,7 @@ class GEExecutionEnvironment:
                         installed=True,
                     )
                 )
-            except metadata.PackageNotFoundError:
+            else:
                 dependencies.append(
                     PackageInfo(
                         package_name=dependency_name, version=None, installed=False
