@@ -109,9 +109,11 @@ class DomainBuilderConfig(DictDot):
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
-        self.class_name = class_name
         self.module_name = module_name
+        self.class_name = class_name
+
         self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -149,13 +151,22 @@ class ParameterBuilderConfig(DictDot):
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
+        evaluation_parameter_builder_configs: Optional[list] = None,
+        json_serialize: bool = True,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
-        self.name = name
-        self.class_name = class_name
         self.module_name = module_name
+        self.class_name = class_name
+
+        self.name = name
+
+        self.evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
+
+        self.json_serialize = json_serialize
+
         self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -185,6 +196,15 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=True,
         allow_none=False,
     )
+    evaluation_parameter_builder_configs = fields.List(
+        cls_or_instance=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
     json_serialize = fields.Boolean(
         required=False,
         allow_none=True,
@@ -203,12 +223,21 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         meta: Optional[dict] = None,
+        validation_parameter_builder_configs: Optional[list] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
-        self.expectation_type = expectation_type
-        self.class_name = class_name
         self.module_name = module_name
+        self.class_name = class_name
+
+        self.expectation_type = expectation_type
+
         self.meta = meta
+
+        self.validation_parameter_builder_configs = validation_parameter_builder_configs
+
+        self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -245,6 +274,19 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
             required=True,
             allow_none=False,
         ),
+        required=False,
+        allow_none=True,
+    )
+    validation_parameter_builder_configs = fields.List(
+        cls_or_instance=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
+    batch_request = fields.Raw(
         required=False,
         allow_none=True,
     )
@@ -349,14 +391,15 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ):
+        self.module_name = module_name
+        self.class_name = class_name
+
         self.name = name
+
         self.config_version = config_version
-        self.rules = rules
-        if class_name is not None:
-            self.class_name = class_name
-        if module_name is not None:
-            self.module_name = module_name
+
         self.variables = variables
+        self.rules = rules
 
         super().__init__(commented_map=commented_map)
 

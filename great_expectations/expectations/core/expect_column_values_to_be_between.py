@@ -77,10 +77,11 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.between"
@@ -150,7 +151,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                         "strict_min": "$variables.strict_min",
                         "strict_max": "$variables.strict_max",
                         "meta": {
-                            "details": {
+                            "profiler_details": {
                                 "min_estimator": "$parameter.min_estimator.details",
                                 "max_estimator": "$parameter.max_estimator.details",
                             },
@@ -256,7 +257,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {

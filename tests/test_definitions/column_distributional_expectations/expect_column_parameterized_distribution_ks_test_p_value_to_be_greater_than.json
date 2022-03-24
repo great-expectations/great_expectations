@@ -12,6 +12,7 @@
   },
   "tests" : [{
       "title": "positive_standard_norm_distribution",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in": {
         "column": "norm_std",
@@ -26,6 +27,7 @@
     },
     {
       "title": "negative_standard_norm_distribution",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in": {
         "column": "norm_std",

@@ -1279,8 +1279,9 @@ class BaseDataContext(ConfigPeer):
                 raise ValueError(
                     "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
                 )
+            # deprecated-v0.11.2
             warnings.warn(
-                "name is being deprecated as a batch_parameter. Please use data_asset_name instead.",
+                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
                 DeprecationWarning,
             )
             data_asset_name = kwargs.pop("name")
@@ -1434,8 +1435,9 @@ class BaseDataContext(ConfigPeer):
             **kwargs,
         )
         # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
+        # deprecated-v0.13.20
         warnings.warn(
-            "get_batch will be deprecated for the V3 Batch Request API in a future version of GE. Please use"
+            "get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use"
             "get_batch_list instead.",
             DeprecationWarning,
         )
@@ -2080,22 +2082,13 @@ class BaseDataContext(ConfigPeer):
         """
         datasources = []
         for (
-            key,
+            name,
             value,
         ) in self.project_config_with_variables_substituted.datasources.items():
-            value["name"] = key
-
-            if "credentials" in value:
-                if "password" in value["credentials"]:
-                    value["credentials"][
-                        "password"
-                    ] = PasswordMasker.MASKED_PASSWORD_STRING
-                if "url" in value["credentials"]:
-                    value["credentials"]["url"] = PasswordMasker.mask_db_url(
-                        value["credentials"]["url"]
-                    )
-
-            datasources.append(value)
+            datasource_config = copy.deepcopy(value)
+            datasource_config["name"] = name
+            masked_config = PasswordMasker.sanitize_config(datasource_config)
+            datasources.append(masked_config)
         return datasources
 
     def list_stores(self):
@@ -2108,7 +2101,8 @@ class BaseDataContext(ConfigPeer):
         ) in self.project_config_with_variables_substituted.stores.items():
             store_config = copy.deepcopy(value)
             store_config["name"] = name
-            stores.append(store_config)
+            masked_config = PasswordMasker.sanitize_config(store_config)
+            stores.append(masked_config)
         return stores
 
     def list_active_stores(self):
@@ -2970,8 +2964,9 @@ class BaseDataContext(ConfigPeer):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional). Instead of providing a run_id, you may also provide"
                 "run_name and run_time separately.",

@@ -160,7 +160,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
@@ -246,7 +245,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     metric_value_kwargs=None,
                 )
                 #
-                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuraiton here,
+                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuration here,
                 # since we have already evaluated it, and its result is in the kwargs for the histogram.
                 # However, currently the dependencies' configurations are not passed to the _validate method
                 #

@@ -12,7 +12,11 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricValues,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.types import (
+    PARAMETER_KEY,
+    Domain,
+    ParameterContainer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -48,9 +52,12 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[float, str] = 1.0,
         candidate_regexes: Optional[Union[Iterable[str], str]] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
         json_serialize: Union[str, bool] = True,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -61,16 +68,19 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_regexes: a list of candidate regex strings that will REPLACE the default
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: Optional[List[Batch]] = None,
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
             name=name,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -83,7 +93,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
     @property
     def fully_qualified_parameter_name(self) -> str:
-        return f"$parameter.{self.name}"
+        return f"{PARAMETER_KEY}{self.name}"
 
     """
     Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.

@@ -84,10 +84,11 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.value_length.between"
@@ -191,6 +192,10 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 "value": params.get("max_value"),
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "string"},
+                "value": params.get("mostly_pct"),
+            },
             "row_condition": {
                 "schema": {"type": "string"},
                 "value": params.get("row_condition"),
@@ -215,7 +220,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
+                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
