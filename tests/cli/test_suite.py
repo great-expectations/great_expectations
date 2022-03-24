@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from unittest import mock
 
 import pytest
@@ -9,7 +9,7 @@ from click.testing import CliRunner, Result
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
-from great_expectations.cli import cli
+from great_expectations.cli import cli, toolkit
 from great_expectations.cli.suite import (
     _process_suite_edit_flags_and_prompt,
     _process_suite_new_flags_and_prompt,
@@ -4477,3 +4477,46 @@ def test_suite_new_load_jupyter_configured_asset_sql_data_connector_missing_data
         pytest.fail(
             "data_asset_name does not need to be required before suite new/edit notebook workflow begins"
         )
+
+
+def test_suite_edit_load_citations_with_batch_list(
+    sqlite_configured_data_connector_missing_data_asset_data_context,
+):
+    context: DataContext = (
+        sqlite_configured_data_connector_missing_data_asset_data_context
+    )
+
+    interactive_mode, profile = _process_suite_new_flags_and_prompt(
+        context=context,
+        usage_event_end=None,
+        interactive_flag=True,
+        manual_flag=False,
+        profile=False,
+        batch_request=None,
+    )
+
+    expectation_suite_name: str = "test"
+
+    _suite_new_workflow(
+        context=context,
+        expectation_suite_name=expectation_suite_name,
+        interactive_mode=interactive_mode,
+        profile=profile,
+        profiler_name=None,
+        no_jupyter=True,
+        usage_event=None,
+        batch_request=None,
+    )
+
+    expectation_suite: ExpectationSuite = toolkit.load_expectation_suite(
+        data_context=context,
+        expectation_suite_name=expectation_suite_name,
+        usage_event=None,
+        create_if_not_exist=False,
+    )
+
+    batch_request_from_citations: Union[
+        str, Dict[str, Union[str, Dict[str, Any]]]
+    ] = toolkit.get_batch_request_from_citations(expectation_suite=expectation_suite)
+
+    assert False
