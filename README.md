@@ -163,7 +163,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 	</thead>
 	<tbody>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://dev.pandas.io/static/img/pandas.svg" />                                    </td><td style="width: 200px;">Pandas                   </td><td>Great for in-memory machine learning pipelines!</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://pandas.pydata.org/static/img/pandas.svg" />                                    </td><td style="width: 200px;">Pandas                   </td><td>Great for in-memory machine learning pipelines!</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://spark.apache.org/images/spark-logo-trademark.png" />                             </td><td style="width: 200px;">Spark                    </td><td>Good for really big data.</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://wiki.postgresql.org/images/3/30/PostgreSQL_logo.3colors.120x120.png" />          </td><td style="width: 200px;">Postgres                 </td><td>Leading open source database</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://raw.githubusercontent.com/gist/nelsonauner/be8160f2e576a327bfcde085b334f622/raw/b4ec25dd4d698abdc37e6c1887ec69ddcca1d27d/google_bigquery_logo.svg" /></td><td style="width: 200px;">BigQuery</td><td>Google serverless massive-scale SQL analytics platform</td></tr>
