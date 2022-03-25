@@ -96,10 +96,19 @@ class ExpectationDiagnostics(SerializableDictDot):
         library_metadata: AugmentedLibraryMetadata,
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
+        sub_messages = []
+        for problem in library_metadata.problems:
+            sub_messages.append(
+                {
+                    "message": problem,
+                    "passed": False,
+                }
+            )
 
         return ExpectationDiagnosticCheckMessage(
             message="Has a library_metadata object",
             passed=library_metadata.library_metadata_passed_checks,
+            sub_messages=sub_messages,
         )
 
     @staticmethod
