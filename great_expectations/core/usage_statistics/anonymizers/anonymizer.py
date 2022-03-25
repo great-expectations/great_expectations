@@ -52,14 +52,14 @@ class Anonymizer(BaseAnonymizer):
             ProfilerRunAnonymizer,
             DatasourceAnonymizer,
             DataConnectorAnonymizer,
-            StoreAnonymizer,
             BatchRequestAnonymizer,
             BatchAnonymizer,
             ActionAnonymizer,
             DataDocsAnonymizer,
             ExpectationAnonymizer,
-            StoreBackendAnonymizer,
             ValidationOperatorAnonymizer,
+            StoreAnonymizer,
+            StoreBackendAnonymizer,
         ]
 
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:

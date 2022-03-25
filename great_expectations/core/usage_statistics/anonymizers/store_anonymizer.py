@@ -52,6 +52,6 @@ class StoreAnonymizer(BaseAnonymizer):
     def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         from great_expectations.data_context.store.store import Store
 
-        return (obj and isinstance(obj, Store)) or (
+        return (obj is not None and isinstance(obj, Store)) or (
             "store_name" in kwargs or "store_obj" in kwargs
         )

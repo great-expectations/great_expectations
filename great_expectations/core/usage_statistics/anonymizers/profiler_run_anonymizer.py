@@ -237,6 +237,6 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
 
     @staticmethod
     def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
-        return object is not None and isinstance(
+        return obj is not None and isinstance(
             obj, (RuleBasedProfilerConfig, RuleBasedProfiler)
         )

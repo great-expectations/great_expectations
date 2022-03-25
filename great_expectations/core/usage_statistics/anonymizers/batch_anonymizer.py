@@ -88,7 +88,7 @@ class BatchAnonymizer(BaseAnonymizer):
         from great_expectations.data_asset.data_asset import DataAsset
         from great_expectations.validator.validator import Validator
 
-        if object is None:
+        if obj is None:
             return False
 
         return isinstance(obj, (Validator, DataAsset)) or (

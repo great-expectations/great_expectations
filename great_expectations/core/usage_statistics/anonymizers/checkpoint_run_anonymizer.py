@@ -260,4 +260,4 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
 
     @staticmethod
     def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
-        return object is not None and isinstance(obj, (Checkpoint, CheckpointConfig))
+        return obj is not None and isinstance(obj, (Checkpoint, CheckpointConfig))
