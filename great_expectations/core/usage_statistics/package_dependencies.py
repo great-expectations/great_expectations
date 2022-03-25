@@ -213,9 +213,7 @@ class GEDependencies:
 
 def main():
     """Run this module to generate a list of packages from requirements files to update our static lists"""
-    ge_dependencies: GEDependencies = GEDependencies(
-        requirements_relative_base_dir="../../../"
-    )
+    ge_dependencies: GEDependencies = GEDependencies()
     print("\n\nRequired Dependencies:\n\n")
     print(ge_dependencies.get_required_dependency_names_from_requirements_file())
     print("\n\nDev Dependencies:\n\n")
