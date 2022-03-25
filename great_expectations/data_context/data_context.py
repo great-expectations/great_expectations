@@ -1789,6 +1789,9 @@ class BaseDataContext(ConfigPeer):
         This method applies only to the new (V3) Datasource schema.
         """
 
+        citation_func: Callable
+        citation_comment: str
+
         if (
             sum(
                 bool(x)
@@ -1814,9 +1817,6 @@ class BaseDataContext(ConfigPeer):
         if create_expectation_suite_with_name is not None:
             expectation_suite = self.create_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name
-            )
-            expectation_suite.add_citation(
-                comment="Created suite via context.get_validator",
             )
 
         if (
@@ -1860,10 +1860,27 @@ class BaseDataContext(ConfigPeer):
                 )
             )
 
-        expectation_suite.update_last_citation(
-            comment="Updated suite via context.get_validator",
-            batch_request_list=batch_request_list,
-        )
+        if "citations" not in expectation_suite.meta:
+            citation_func = expectation_suite.add_citation
+            citation_comment = "Created suite via context.get_validator"
+        else:
+            citation_func = expectation_suite.update_last_citation
+            citation_comment = "Updated suite via context.get_validator"
+
+        if batch_request:
+            citation_func(
+                comment=citation_comment,
+                batch_request=batch_request,
+            )
+        elif batch_request_list:
+            citation_func(
+                comment=citation_comment,
+                batch_request_list=batch_request_list,
+            )
+        else:
+            citation_func(
+                comment=citation_comment,
+            )
 
         validator: Validator = self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,

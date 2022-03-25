@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 from unittest import mock
 
 import pytest
@@ -25,6 +25,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
 from great_expectations.util import deep_filter_properties_iterable, lint_code
+from great_expectations.validator.validator import Validator
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.render.test_util import (
     find_code_in_notebook,
@@ -4486,27 +4487,26 @@ def test_suite_edit_load_citations_with_batch_list(
         sqlite_configured_data_connector_missing_data_asset_data_context
     )
 
-    interactive_mode, profile = _process_suite_new_flags_and_prompt(
-        context=context,
-        usage_event_end=None,
-        interactive_flag=True,
-        manual_flag=False,
-        profile=False,
-        batch_request=None,
-    )
-
     expectation_suite_name: str = "test"
 
-    _suite_new_workflow(
-        context=context,
-        expectation_suite_name=expectation_suite_name,
-        interactive_mode=interactive_mode,
-        profile=profile,
-        profiler_name=None,
-        no_jupyter=True,
-        usage_event=None,
-        batch_request=None,
+    context.create_expectation_suite(
+        expectation_suite_name=expectation_suite_name, overwrite_existing=False
     )
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "default_configured_data_connector",
+        "data_asset_name": "table_containing_id_spacers_for_D",
+    }
+
+    validator: Validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    validator.expect_column_values_to_not_be_null(column="date")
+
+    validator.save_expectation_suite(discard_failed_expectations=False)
 
     expectation_suite: ExpectationSuite = toolkit.load_expectation_suite(
         data_context=context,
@@ -4515,8 +4515,15 @@ def test_suite_edit_load_citations_with_batch_list(
         create_if_not_exist=False,
     )
 
-    batch_request_from_citations: Union[
-        str, Dict[str, Union[str, Dict[str, Any]]]
-    ] = toolkit.get_batch_request_from_citations(expectation_suite=expectation_suite)
+    batch_request_from_citations: dict = toolkit.get_batch_request_from_citations(
+        expectation_suite=expectation_suite
+    )
 
-    assert False
+    # all key-value pairs in batch request exist in batch_request_from_citations
+    assert batch_request.items() <= batch_request_from_citations.items()
+
+    # all values in batch_request_from_citations that are not in batch_request should be None
+    assert all(
+        item[1] is None
+        for item in (batch_request_from_citations.items() - batch_request.items())
+    )
