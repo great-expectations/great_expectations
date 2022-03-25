@@ -346,6 +346,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Check that the validate_configuration exists and doesn't raise a config error"""
         passed = False
         sub_messages = []
+        rx = re.compile(r"^[\s]+assert",re.MULTILINE)
         try:
             first_test = examples[0]["tests"][0]
         except IndexError:
@@ -359,7 +360,7 @@ class ExpectationDiagnostics(SerializableDictDot):
             if "validate_configuration" not in expectation_instance.__class__.__dict__:
                 sub_messages.append(
                     {
-                        "message": "No validate_configuration method defined",
+                        "message": "No validate_configuration method defined on subclass",
                         "passed": passed,
                     }
                 )
@@ -368,6 +369,21 @@ class ExpectationDiagnostics(SerializableDictDot):
                     expectation_type=expectation_instance.expectation_type,
                     kwargs=first_test.input,
                 )
+                validate_configuration_source = inspect.getsource(expectation_instance.__class__.validate_configuration)
+                if rx.search(validate_configuration_source):
+                    sub_messages.append(
+                        {
+                            "message": "Custom 'assert' statements in validate_configuration",
+                            "passed": True,
+                        }
+                    )
+                else:
+                    sub_messages.append(
+                        {
+                            "message": "Using default validate_configuration from template",
+                            "passed": False,
+                        }
+                    )
                 try:
                     expectation_instance.validate_configuration(expectation_config)
                 except InvalidExpectationConfigurationError:
