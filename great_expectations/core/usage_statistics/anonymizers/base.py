@@ -29,10 +29,6 @@ class BaseAnonymizer(ABC):
         else:
             self._salt = salt
 
-    @property
-    def salt(self) -> str:
-        return self._salt
-
     @abstractmethod
     def anonymize(self, obj: Optional[object], **kwargs) -> Any:
         raise NotImplementedError

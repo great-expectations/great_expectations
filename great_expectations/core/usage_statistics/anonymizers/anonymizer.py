@@ -32,7 +32,7 @@ class Anonymizer(BaseAnonymizer):
             DatasourceAnonymizer,
         )
         from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
-            ExpectationAnonymizer,
+            ExpectationSuiteAnonymizer,
         )
         from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
             ProfilerRunAnonymizer,
@@ -56,7 +56,7 @@ class Anonymizer(BaseAnonymizer):
             BatchAnonymizer,
             ActionAnonymizer,
             DataDocsAnonymizer,
-            ExpectationAnonymizer,
+            ExpectationSuiteAnonymizer,
             ValidationOperatorAnonymizer,
             StoreAnonymizer,
             StoreBackendAnonymizer,
@@ -172,10 +172,10 @@ class Anonymizer(BaseAnonymizer):
         self, payload: List["ExpectationSuite"]  # noqa: F821
     ) -> List[dict]:
         from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
-            ExpectationAnonymizer,
+            ExpectationSuiteAnonymizer,
         )
 
-        anonymizer = ExpectationAnonymizer(salt=self._salt)
+        anonymizer = ExpectationSuiteAnonymizer(salt=self._salt)
 
         anonymized_values: List[dict] = []
         for suite in payload:

@@ -3,7 +3,7 @@ from typing import Optional
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
 
-class ExpectationAnonymizer(BaseAnonymizer):
+class ExpectationSuiteAnonymizer(BaseAnonymizer):
     def anonymize(
         self, obj: Optional["ExpectationSuite"] = None, **kwargs  # noqa: F821
     ) -> dict:
