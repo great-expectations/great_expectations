@@ -48,20 +48,9 @@ from great_expectations.core.expectation_validation_result import get_metric_kwa
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import (
-    CheckpointAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymizer import (
-    DataConnectorAnonymizer,
-)
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
-    ProfilerAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
-    StoreAnonymizer,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
@@ -1290,8 +1279,9 @@ class BaseDataContext(ConfigPeer):
                 raise ValueError(
                     "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
                 )
+            # deprecated-v0.11.2
             warnings.warn(
-                "name is being deprecated as a batch_parameter. Please use data_asset_name instead.",
+                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
                 DeprecationWarning,
             )
             data_asset_name = kwargs.pop("name")
@@ -1445,8 +1435,9 @@ class BaseDataContext(ConfigPeer):
             **kwargs,
         )
         # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
+        # deprecated-v0.13.20
         warnings.warn(
-            "get_batch will be deprecated for the V3 Batch Request API in a future version of GE. Please use"
+            "get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use"
             "get_batch_list instead.",
             DeprecationWarning,
         )
@@ -2091,22 +2082,13 @@ class BaseDataContext(ConfigPeer):
         """
         datasources = []
         for (
-            key,
+            name,
             value,
         ) in self.project_config_with_variables_substituted.datasources.items():
-            value["name"] = key
-
-            if "credentials" in value:
-                if "password" in value["credentials"]:
-                    value["credentials"][
-                        "password"
-                    ] = PasswordMasker.MASKED_PASSWORD_STRING
-                if "url" in value["credentials"]:
-                    value["credentials"]["url"] = PasswordMasker.mask_db_url(
-                        value["credentials"]["url"]
-                    )
-
-            datasources.append(value)
+            datasource_config = copy.deepcopy(value)
+            datasource_config["name"] = name
+            masked_config = PasswordMasker.sanitize_config(datasource_config)
+            datasources.append(masked_config)
         return datasources
 
     def list_stores(self):
@@ -2119,7 +2101,8 @@ class BaseDataContext(ConfigPeer):
         ) in self.project_config_with_variables_substituted.stores.items():
             store_config = copy.deepcopy(value)
             store_config["name"] = name
-            stores.append(store_config)
+            masked_config = PasswordMasker.sanitize_config(store_config)
+            stores.append(masked_config)
         return stores
 
     def list_active_stores(self):
@@ -2981,8 +2964,9 @@ class BaseDataContext(ConfigPeer):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
         if isinstance(run_id, str) and not run_name:
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional). Instead of providing a run_id, you may also provide"
                 "run_name and run_time separately.",
@@ -3689,8 +3673,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         store_name = instantiated_class.store_name or store_name
         self.config["stores"][store_name] = config
 
-        store_anonymizer = StoreAnonymizer(self.data_context_id)
-        usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+        anonymizer = Anonymizer(self.data_context_id)
+        usage_stats_event_payload = anonymizer.anonymize_store_info(
             store_name=store_name, store_obj=instantiated_class
         )
         return instantiated_class, usage_stats_event_payload
@@ -3763,11 +3747,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
-        checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-            self.data_context_id
-        )
+        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+        usage_stats_event_payload = anonymizer.anonymize_checkpoint_info(
             name=checkpoint_name, config=checkpoint_config
         )
 
@@ -3799,12 +3781,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             config_defaults={},
         )
 
-        data_connector_anonymizer = DataConnectorAnonymizer(self.data_context_id)
+        anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = (
-            data_connector_anonymizer.anonymize_data_connector_info(
-                name=data_connector_name, config=config
-            )
+        usage_stats_event_payload = anonymizer.anonymize_data_connector_info(
+            name=data_connector_name, config=config
         )
         return instantiated_class, usage_stats_event_payload
 
@@ -3834,11 +3814,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             },
         )
 
-        profiler_anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
-            self.data_context_id
-        )
+        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload: dict = profiler_anonymizer.anonymize_profiler_info(
+        usage_stats_event_payload: dict = anonymizer.anonymize_profiler_info(
             name=profiler_name, config=profiler_config
         )
 
@@ -3871,37 +3849,25 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
         # If a subclass of a supported type, find the parent class and anonymize
-        store_anonymizer: StoreAnonymizer = StoreAnonymizer(self.data_context_id)
+        anonymizer: Anonymizer = Anonymizer(self.data_context_id)
         datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
             self.data_context_id
         )
-        checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-            self.data_context_id
-        )
-        data_connector_anonymizer: DataConnectorAnonymizer = DataConnectorAnonymizer(
-            self.data_context_id
-        )
 
-        store_parent_class: Optional[str] = store_anonymizer.get_parent_class(
-            store_obj=instantiated_class
+        parent_class_from_object = anonymizer.get_parent_class(
+            object_=instantiated_class
         )
-        datasource_parent_class: Optional[str] = datasource_anonymizer.get_parent_class(
-            config=config
-        )
-        checkpoint_parent_class: Optional[str] = checkpoint_anonymizer.get_parent_class(
-            config=config
-        )
-        data_connector_parent_class: Optional[
-            str
-        ] = data_connector_anonymizer.get_parent_class(config=config)
+        parent_class_from_config = anonymizer.get_parent_class(object_config=config)
 
-        if store_parent_class is not None and store_parent_class.endswith("Store"):
+        if parent_class_from_object is not None and parent_class_from_object.endswith(
+            "Store"
+        ):
             store_name: str = name or config.get("name") or "my_temp_store"
             store_name = instantiated_class.store_name or store_name
-            usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+            usage_stats_event_payload = anonymizer.anonymize_store_info(
                 store_name=store_name, store_obj=instantiated_class
             )
-        elif datasource_parent_class is not None and datasource_parent_class.endswith(
+        elif parent_class_from_config is not None and parent_class_from_config.endswith(
             "Datasource"
         ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
@@ -3914,7 +3880,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             else:
                 # for v2 api
                 full_datasource_config = config
-            if datasource_parent_class == "SimpleSqlalchemyDatasource":
+            if parent_class_from_config == "SimpleSqlalchemyDatasource":
                 # Use the raw config here, defaults will be added in the anonymizer
                 usage_stats_event_payload = (
                     datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
@@ -3928,7 +3894,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     )
                 )
 
-        elif checkpoint_parent_class is not None and checkpoint_parent_class.endswith(
+        elif parent_class_from_config is not None and parent_class_from_config.endswith(
             "Checkpoint"
         ):
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
@@ -3939,21 +3905,18 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             checkpoint_config = checkpoint_config.to_json_dict()
             checkpoint_config.update({"name": checkpoint_name})
-            usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+            usage_stats_event_payload = anonymizer.anonymize_checkpoint_info(
                 name=checkpoint_name, config=checkpoint_config
             )
 
-        elif (
-            data_connector_parent_class is not None
-            and data_connector_parent_class.endswith("DataConnector")
+        elif parent_class_from_config is not None and parent_class_from_config.endswith(
+            "DataConnector"
         ):
             data_connector_name: str = (
                 name or config.get("name") or "my_temp_data_connector"
             )
-            usage_stats_event_payload = (
-                data_connector_anonymizer.anonymize_data_connector_info(
-                    name=data_connector_name, config=config
-                )
+            usage_stats_event_payload = anonymizer.anonymize_data_connector_info(
+                name=data_connector_name, config=config
             )
 
         else:

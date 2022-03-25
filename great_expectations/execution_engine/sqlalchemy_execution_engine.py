@@ -36,7 +36,11 @@ from great_expectations.execution_engine.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+    parse_condition_to_sqlalchemy,
+)
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_selectable,
@@ -107,8 +111,10 @@ except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
+        # deprecated-v0.14.7
         warnings.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
+            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
@@ -336,9 +342,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             handler.send_usage_message(
                 event="execution_engine.sqlalchemy.connect",
                 event_payload={
-                    "anonymized_name": handler._execution_engine_anonymizer.anonymize(
-                        self.name
-                    ),
+                    "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
                 },
                 success=True,
@@ -483,6 +487,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     f"Unable to find batch with batch_id {batch_id}"
                 )
 
+        selectable: Selectable
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
@@ -529,9 +534,31 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
                 )
 
+        # Filtering by filter_conditions
+        filter_conditions: List[RowCondition] = domain_kwargs.get(
+            "filter_conditions", []
+        )
+        # For SqlAlchemyExecutionEngine only one filter condition is allowed
+        if len(filter_conditions) == 1:
+            filter_condition = filter_conditions[0]
+            assert (
+                filter_condition.condition_type == RowConditionParserType.GE
+            ), "filter_condition must be of type GE for SqlAlchemyExecutionEngine"
+
+            selectable = (
+                sa.select([sa.text("*")])
+                .select_from(selectable)
+                .where(parse_condition_to_sqlalchemy(filter_condition.condition))
+            )
+        elif len(filter_conditions) > 1:
+            raise GreatExpectationsError(
+                "SqlAlchemyExecutionEngine currently only supports a single filter condition."
+            )
+
         if "column" in domain_kwargs:
             return selectable
 
+        # Filtering by ignore_row_if directive
         if (
             "column_A" in domain_kwargs
             and "column_B" in domain_kwargs
@@ -583,9 +610,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
 
                 if ignore_row_if == "never":
+                    # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
 """,
                         DeprecationWarning,
                     )

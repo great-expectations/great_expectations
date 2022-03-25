@@ -222,7 +222,6 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
             "@Rxmeez",
             "@ryanlindeborg",  # Don't forget to add your github handle here!
         ],
-        "package": "experimental_expectations",
         "requirements": ["geopandas"],
     }
 

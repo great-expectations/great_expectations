@@ -38,7 +38,7 @@ This should return something like:
 great_expectations, version 0.13.43
 ```
 
-For detailed installation instructions, see [How to install Great Expectations locally](/docs/guides/setup/installation/local).
+For detailed installation instructions, see [How to install Great Expectations locally](../../guides/setup/installation/local.md).
 
 <details>
   <summary>Other deployment patterns</summary>

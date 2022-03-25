@@ -5,6 +5,7 @@ import great_expectations as ge
 context = ge.get_context()
 
 # YAML
+# <snippet>
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -24,6 +25,7 @@ data_connectors:
         - month
       pattern: (.*)/.*(\d{4})-(\d{2})\.csv
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -34,6 +36,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet>
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -58,6 +61,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
@@ -87,6 +91,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
+# <snippet>
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -112,6 +117,7 @@ data_connectors:
           - year
           - month
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -122,6 +128,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet>
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -149,6 +156,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.

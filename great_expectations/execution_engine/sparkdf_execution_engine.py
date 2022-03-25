@@ -5,7 +5,7 @@ import logging
 import uuid
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from dateutil.parser import parse
 
@@ -28,7 +28,11 @@ from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
-from great_expectations.expectations.row_conditions import parse_condition_to_spark
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+    parse_condition_to_spark,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -414,9 +418,18 @@ Please check your config."""
                     f"unrecognized condition_parser {str(condition_parser)} for Spark execution engine"
                 )
 
+        # Filtering by filter_conditions
+        filter_conditions: List[RowCondition] = domain_kwargs.get(
+            "filter_conditions", []
+        )
+        if len(filter_conditions) > 0:
+            filter_condition = self._combine_row_conditions(filter_conditions)
+            data = data.filter(filter_condition.condition)
+
         if "column" in domain_kwargs:
             return data
 
+        # Filtering by ignore_row_if directive
         if (
             "column_A" in domain_kwargs
             and "column_B" in domain_kwargs
@@ -445,9 +458,10 @@ Please check your config."""
                     )
 
                 if ignore_row_if == "never":
+                    # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
 """,
                         DeprecationWarning,
                     )
@@ -478,6 +492,33 @@ Please check your config."""
             return data
 
         return data
+
+    def _combine_row_conditions(
+        self, row_conditions: List[RowCondition]
+    ) -> RowCondition:
+        """Combine row conditions using AND if condition_type is SPARK_SQL
+
+        Note, although this method does not currently use `self` internally we
+        are not marking as @staticmethod since it is meant to only be called
+        internally in this class.
+
+        Args:
+            row_conditions: Row conditions of type Spark
+
+        Returns:
+            Single Row Condition combined
+        """
+        assert all(
+            condition.condition_type == RowConditionParserType.SPARK_SQL
+            for condition in row_conditions
+        ), "All row conditions must have type SPARK_SQL"
+        conditions: List[str] = [
+            row_condition.condition for row_condition in row_conditions
+        ]
+        joined_condition: str = " AND ".join(conditions)
+        return RowCondition(
+            condition=joined_condition, condition_type=RowConditionParserType.SPARK_SQL
+        )
 
     def get_compute_domain(
         self,
@@ -522,10 +563,6 @@ Please check your config."""
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
         # We explicitly handle filter_nan & filter_null for spark using a spark-native condition
-        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
-            raise GreatExpectationsError(
-                "ExecutionEngine does not support updating existing row_conditions."
-            )
 
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
         assert "column" in domain_kwargs or column_name is not None
@@ -533,20 +570,30 @@ Please check your config."""
             column = column_name
         else:
             column = domain_kwargs["column"]
-        if filter_null and filter_nan:
-            new_domain_kwargs[
-                "row_condition"
-            ] = f"NOT isnan({column}) AND {column} IS NOT NULL"
-        elif filter_null:
-            new_domain_kwargs["row_condition"] = f"{column} IS NOT NULL"
-        elif filter_nan:
-            new_domain_kwargs["row_condition"] = f"NOT isnan({column})"
-        else:
+
+        filter_conditions: List[RowCondition] = []
+        if filter_null:
+            filter_conditions.append(
+                RowCondition(
+                    condition=f"{column} IS NOT NULL",
+                    condition_type=RowConditionParserType.SPARK_SQL,
+                )
+            )
+        if filter_nan:
+            filter_conditions.append(
+                RowCondition(
+                    condition=f"NOT isnan({column})",
+                    condition_type=RowConditionParserType.SPARK_SQL,
+                )
+            )
+
+        if not (filter_null or filter_nan):
             logger.warning(
                 "add_column_row_condition called without specifying a desired row condition"
             )
 
-        new_domain_kwargs["condition_parser"] = "spark"
+        new_domain_kwargs.setdefault("filter_conditions", []).extend(filter_conditions)
+
         return new_domain_kwargs
 
     def resolve_metric_bundle(
