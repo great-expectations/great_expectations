@@ -89,6 +89,8 @@ If you are interested in using and accessing data with an Execution Engine that 
 
 Execution Engines and their configurations are specified in the configurations of Datasources.  In the configuration for your Datasource, you will have an `execution_engine` key.  This is a dictionary which will have at the least a `class_name` key that indicates the Execution Engine that will be associated with the Datasource.  If you are using a custom Execution Engine from a Plugin, you will also need to include a `module_name` key.  
 
+The available Execution Engine classes are `PandasExecutionEngine`, `SparkDFExecutionEngine`, and `SqlAlchemyExecutionEngine`. The Spark Execution Engine is supported as a scalable alternative to Pandas.
+
 If additional configuration is required by the Execution Engine, it will also be specified in the `execution_engine` configuration.  For example, the `SqlAlchemyExecutionEngine` will also expect the key `connection_string` as part of its configuration.
 
 For specifics on the required keys for a given Execution Engine, please see our [how-to guides for Connecting to Data](../guides/connecting_to_your_data/index.md).
