@@ -47,6 +47,7 @@ def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_obj
         library_metadata_passed_checks=False,
         has_full_test_suite=False,
         manually_reviewed_code=False,
+        problems=["No library_metadata attribute found"],
     )
 
 
@@ -54,28 +55,6 @@ def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadat
     augmented_library_metadata = (
         ExpectColumnValuesToEqualThree__SecondIteration()._get_augmented_library_metadata()
     )
-    assert augmented_library_metadata == AugmentedLibraryMetadata(
-        maturity="EXPERIMENTAL",
-        tags=["tag", "other_tag"],
-        contributors=["@abegong"],
-        requirements=[],
-        library_metadata_passed_checks=True,
-        has_full_test_suite=False,
-        manually_reviewed_code=False,
-    )
-
-
-def test__get_augmented_library_metadata_on_a_class_with_a_package_in_its_library_metadata_object():
-    class MyExpectation(ExpectColumnValuesToEqualThree__SecondIteration):
-        library_metadata = {
-            "maturity": "EXPERIMENTAL",
-            "tags": ["tag", "other_tag"],
-            "contributors": [
-                "@abegong",
-            ],
-        }
-
-    augmented_library_metadata = MyExpectation()._get_augmented_library_metadata()
     assert augmented_library_metadata == AugmentedLibraryMetadata(
         maturity="EXPERIMENTAL",
         tags=["tag", "other_tag"],
