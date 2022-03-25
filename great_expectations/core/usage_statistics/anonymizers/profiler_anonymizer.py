@@ -11,11 +11,20 @@ logger = logging.getLogger(__name__)
 
 class ProfilerAnonymizer(BaseAnonymizer):
     def __init__(
-        self, salt: Optional[str], aggregate_anonymizer: "Anonymizer"  # noqa: F821
+        self,
+        salt: Optional[str],
+        aggregate_anonymizer: Optional["Anonymizer"] = None,  # noqa: F821
     ) -> None:
         super().__init__(salt=salt)
 
-        self._aggregate_anonymizer = aggregate_anonymizer
+        if aggregate_anonymizer:
+            self._aggregate_anonymizer = aggregate_anonymizer
+        else:
+            from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
+                Anonymizer,
+            )
+
+            self._aggregate_anonymizer = Anonymizer(salt=salt)
 
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         if obj and isinstance(obj, RuleBasedProfiler):
