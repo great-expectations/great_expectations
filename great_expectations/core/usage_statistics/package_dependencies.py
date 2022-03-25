@@ -17,6 +17,8 @@ import os
 import re
 from typing import List, Set
 
+from great_expectations.data_context.util import file_relative_path
+
 
 class GEDependencies:
     """Store and provide dependencies when requested.
@@ -108,8 +110,10 @@ class GEDependencies:
         ]
     )
 
-    def __init__(self):
-        self._requirements_relative_base_dir = "../../../"
+    def __init__(self, requirements_relative_base_dir: str = "../../../"):
+        self._requirements_relative_base_dir = file_relative_path(
+            __file__, requirements_relative_base_dir
+        )
         self._dev_requirements_prefix: str = "requirements-dev"
 
     def get_required_dependency_names(self) -> List[str]:
@@ -209,7 +213,9 @@ class GEDependencies:
 
 def main():
     """Run this module to generate a list of packages from requirements files to update our static lists"""
-    ge_dependencies: GEDependencies = GEDependencies()
+    ge_dependencies: GEDependencies = GEDependencies(
+        requirements_relative_base_dir="../../../"
+    )
     print("\n\nRequired Dependencies:\n\n")
     print(ge_dependencies.get_required_dependency_names_from_requirements_file())
     print("\n\nDev Dependencies:\n\n")
@@ -223,7 +229,7 @@ def main():
         == ge_dependencies.get_dev_dependency_names_from_requirements_file()
     ), "Mismatch between dev dependencies in requirements files and in GEDependencies"
     print(
-        "Required and Dev dependencies in requirements files match those in GEDependencies"
+        "\n\nRequired and Dev dependencies in requirements files match those in GEDependencies"
     )
 
 
