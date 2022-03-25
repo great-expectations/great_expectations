@@ -82,9 +82,8 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(

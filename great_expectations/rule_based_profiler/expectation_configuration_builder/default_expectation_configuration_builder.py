@@ -83,6 +83,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             or not underlying logic should be executed and thus resulting "ExpectationConfiguration" emitted.
             validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
             fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance.
+            These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder".
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
