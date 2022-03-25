@@ -426,7 +426,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
         value_set = configuration.kwargs.get(
@@ -445,4 +445,3 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
