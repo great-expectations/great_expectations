@@ -1,15 +1,7 @@
-import copy
-from typing import Any, Optional, Set, Union
+from typing import Any, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.data_context.store.store import Store
-
-from great_expectations.core.usage_statistics.anonymizers.types.base import (  # isort:skip
-    GETTING_STARTED_DATASOURCE_NAME,
-    GETTING_STARTED_EXPECTATION_SUITE_NAME,
-    GETTING_STARTED_CHECKPOINT_NAME,
-    BATCH_REQUEST_FLATTENED_KEYS,
-)
 
 
 class StoreAnonymizer(BaseAnonymizer):
@@ -53,51 +45,6 @@ class StoreAnonymizer(BaseAnonymizer):
                 anonymized_info_dict=anonymized_info_dict,
             )
         return anonymized_info_dict
-
-    def _anonymize_batch_request_properties(
-        self, source: Optional[Any] = None
-    ) -> Optional[Union[str, dict]]:
-        if source is None:
-            return None
-
-        if isinstance(source, str) and source in BATCH_REQUEST_FLATTENED_KEYS:
-            return source
-
-        if isinstance(source, dict):
-            source_copy: dict = copy.deepcopy(source)
-            anonymized_keys: Set[str] = set()
-
-            key: str
-            value: Any
-            for key, value in source.items():
-                if key in BATCH_REQUEST_FLATTENED_KEYS:
-                    if self._is_getting_started_keyword(value=value):
-                        source_copy[key] = value
-                    else:
-                        source_copy[key] = self._anonymize_batch_request_properties(
-                            source=value
-                        )
-                else:
-                    anonymized_key: str = self._anonymize_string(key)
-                    source_copy[
-                        anonymized_key
-                    ] = self._anonymize_batch_request_properties(source=value)
-                    anonymized_keys.add(key)
-
-            for key in anonymized_keys:
-                source_copy.pop(key)
-
-            return source_copy
-
-        return self._anonymize_string(str(source))
-
-    @staticmethod
-    def _is_getting_started_keyword(value: str) -> bool:
-        return value in [
-            GETTING_STARTED_DATASOURCE_NAME,
-            GETTING_STARTED_EXPECTATION_SUITE_NAME,
-            GETTING_STARTED_CHECKPOINT_NAME,
-        ]
 
     @staticmethod
     def can_handle(obj: object, **kwargs) -> bool:

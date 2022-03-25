@@ -159,7 +159,7 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
                     # noinspection PyBroadException
                     try:
                         anonymized_validation_action_list = [
-                            self._anonymize_action_info(
+                            self._action_anonymizer.anonymize(
                                 action_name=action_config_dict["name"],
                                 action_config=action_config_dict["action"],
                             )

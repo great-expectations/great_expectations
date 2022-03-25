@@ -1,12 +1,17 @@
+import copy
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    BATCH_REQUEST_FLATTENED_KEYS,
     BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS,
     BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS,
     BATCH_SPEC_PASSTHROUGH_KEYS,
     DATA_CONNECTOR_QUERY_KEYS,
+    GETTING_STARTED_CHECKPOINT_NAME,
+    GETTING_STARTED_DATASOURCE_NAME,
+    GETTING_STARTED_EXPECTATION_SUITE_NAME,
     RUNTIME_PARAMETERS_KEYS,
 )
 from great_expectations.util import deep_filter_properties_iterable
@@ -79,6 +84,43 @@ class BatchRequestAnonymizer(BaseAnonymizer):
 
         return anonymized_batch_request_properties_dict
 
+    def _anonymize_batch_request_properties(
+        self, source: Optional[Any] = None
+    ) -> Optional[Union[str, dict]]:
+        if source is None:
+            return None
+
+        if isinstance(source, str) and source in BATCH_REQUEST_FLATTENED_KEYS:
+            return source
+
+        if isinstance(source, dict):
+            source_copy: dict = copy.deepcopy(source)
+            anonymized_keys: Set[str] = set()
+
+            key: str
+            value: Any
+            for key, value in source.items():
+                if key in BATCH_REQUEST_FLATTENED_KEYS:
+                    if self._is_getting_started_keyword(value=value):
+                        source_copy[key] = value
+                    else:
+                        source_copy[key] = self._anonymize_batch_request_properties(
+                            source=value
+                        )
+                else:
+                    anonymized_key: str = self._anonymize_string(key)
+                    source_copy[
+                        anonymized_key
+                    ] = self._anonymize_batch_request_properties(source=value)
+                    anonymized_keys.add(key)
+
+            for key in anonymized_keys:
+                source_copy.pop(key)
+
+            return source_copy
+
+        return self._anonymize_string(str(source))
+
     def _build_anonymized_batch_request(
         self,
         destination: Optional[Dict[str, Union[Dict[str, str], List[str]]]],
@@ -106,6 +148,14 @@ class BatchRequestAnonymizer(BaseAnonymizer):
                 self._build_anonymized_batch_request(
                     destination=destination, source=value
                 )
+
+    @staticmethod
+    def _is_getting_started_keyword(value: str) -> bool:
+        return value in [
+            GETTING_STARTED_DATASOURCE_NAME,
+            GETTING_STARTED_EXPECTATION_SUITE_NAME,
+            GETTING_STARTED_CHECKPOINT_NAME,
+        ]
 
     @staticmethod
     def can_handle(obj: Optional[object], **kwargs) -> bool:
