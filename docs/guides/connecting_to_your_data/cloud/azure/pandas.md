@@ -80,6 +80,46 @@ Using these example configurations, add in your ABS container and path to a dire
 
 The below configuration is representative of the default setup you'll see when preparing your own environment.
 
+  <Tabs
+  groupId="yaml-or-python"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+  
+  <TabItem value="yaml">
+  
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L19-L43
+  ```
+  
+  Run this code to test your configuration.
+  
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L60
+  ```
+  </TabItem>
+  
+  <TabItem value="python">
+  
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L13-L38
+  ```
+  
+  Run this code to test your configuration.
+  
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L59
+  ```
+  
+  </TabItem>
+  
+  </Tabs>
+
+</TabItem>
+
+<TabItem value="configured">
+
+The below configuration is highly tuned to the specific bucket and blobs relevant to this example. You'll have to fine-tune your own regular expressions and assets to fit your use-case.
+
+
 <Tabs
 groupId="yaml-or-python"
 defaultValue='yaml'
@@ -90,43 +130,6 @@ values={[
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L19-L43
-```
-
-Run this code to test your configuration.
-
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L60
-```
-</TabItem>
-
-<TabItem value="python">
-
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L13-L38
-```
-
-Run this code to test your configuration.
-
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L59
-```
-
-</TabItem>
-
-</Tabs>
-
-</TabItem>
-
-<TabItem value="configured">
-
-The below configuration is highly tuned to the specific bucket and blobs relevant to this example. You'll have to fine-tune your own regular expressions and assets to fit your use-case.
-<Tabs
-  groupId="yaml-or-python"
-  defaultValue='yaml'
-  values={[
-  {label: 'YAML', value:'yaml'},
-  {label: 'Python', value:'python'},
-  ]}>
-<TabItem value="yaml">
-
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py#L10-L27
 ```
 
@@ -134,7 +137,9 @@ Run this code to test your configuration.
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py#L38
 ```
+
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py#L10-L27
@@ -144,9 +149,6 @@ Run this code to test your configuration.
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py#L37
 ```
-</TabItem>
-</Tabs>
-
 </TabItem>
 
 </Tabs>
