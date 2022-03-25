@@ -1,13 +1,14 @@
 altair>=4.0.0,<5
 Click>=7.1.2
 colorama>=0.4.3
-cryptography>=3.2,<4.0.0
+cryptography>=3.2
+dataclasses
 importlib-metadata>=1.7.0 # (included in Python 3.8 by default.)
-ipywidgets>=7.5.1
-jinja2>=2.10
+Ipython>=7.16.3
+jinja2>=2.10,<3.1.0 # contextfilter has been renamed
 jsonpatch>=1.22
 jsonschema>=2.5.1
-mistune>=0.8.4,<2.0.0
+mistune>=0.8.4
 nbformat>=5.0
 numpy>=1.14.1
 packaging

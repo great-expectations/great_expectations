@@ -112,7 +112,9 @@ class ExpectColumnValuesToBeValidIPv4(ColumnMapExpectation):
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -120,7 +122,7 @@ class ExpectColumnValuesToBeValidIPv4(ColumnMapExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         super().validate_configuration(configuration)
@@ -137,8 +139,6 @@ class ExpectColumnValuesToBeValidIPv4(ColumnMapExpectation):
         #     ), "message"
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
-
-        return True
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
