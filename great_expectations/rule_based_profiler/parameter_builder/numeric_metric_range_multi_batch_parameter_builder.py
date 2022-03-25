@@ -66,7 +66,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         false_positive_rate: Union[str, float] = 5.0e-2,
         estimator: str = "bootstrap",
         num_bootstrap_samples: Optional[Union[str, int]] = None,
-        bootstrap_random_seed: Optional[int] = None,
+        bootstrap_random_seed: Optional[Union[str, int]] = None,
         round_decimals: Optional[Union[str, int]] = None,
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
@@ -103,6 +103,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
@@ -305,9 +306,7 @@ detected.
         )
 
         return (
-            {
-                "value_range": metric_value_range,
-            },
+            metric_value_range,
             parameter_node.details,
         )
 
