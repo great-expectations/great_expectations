@@ -87,7 +87,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -110,8 +110,6 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             raise ValueError(f"Unable to use provided strftime_format. {str(e)}")
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
