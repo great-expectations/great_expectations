@@ -181,6 +181,6 @@ class BatchRequestAnonymizer(BaseAnonymizer):
             RuntimeBatchRequest.include_field_names
         )
         for kwarg in kwargs:
-            if kwarg in attrs:
+            if kwarg in attrs or kwarg == "batch_request":
                 return True
         return False
