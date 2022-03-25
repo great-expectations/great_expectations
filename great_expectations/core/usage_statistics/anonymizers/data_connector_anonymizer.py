@@ -4,10 +4,16 @@ from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonym
 
 
 class DataConnectorAnonymizer(BaseAnonymizer):
-    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
-        name: str = kwargs["name"]
-        config: dict = kwargs["config"]
+    def __init__(
+        self, salt: Optional[str], aggregate_anonymizer: "Anonymizer"  # noqa: F821
+    ) -> None:
+        super().__init__(salt=salt)
 
+        self._aggregate_anonymizer = aggregate_anonymizer
+
+    def anonymize(
+        self, name: str, config: dict, obj: Optional[object] = None, **kwargs
+    ) -> Any:
         anonymized_info_dict = {
             "anonymized_name": self._anonymize_string(name),
         }
@@ -38,4 +44,6 @@ class DataConnectorAnonymizer(BaseAnonymizer):
             DataConnector,
         )
 
-        return obj is not None and isinstance(obj, DataConnector)
+        return (obj is not None and isinstance(obj, DataConnector)) or (
+            "name" and kwargs and "config" in kwargs
+        )

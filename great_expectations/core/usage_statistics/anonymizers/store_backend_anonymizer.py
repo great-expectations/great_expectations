@@ -5,6 +5,13 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 
 
 class StoreBackendAnonymizer(BaseAnonymizer):
+    def __init__(
+        self, salt: Optional[str], aggregate_anonymizer: "Anonymizer"  # noqa: F821
+    ) -> None:
+        super().__init__(salt=salt)
+
+        self._aggregate_anonymizer = aggregate_anonymizer
+
     def anonymize(
         self,
         obj: Optional[object] = None,

@@ -5,35 +5,28 @@ from typing import Any, Dict, List, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core import RunIdentifier
 from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
     get_batch_request_as_dict,
 )
-from great_expectations.core.usage_statistics.anonymizers.action_anonymizer import (
-    ActionAnonymizer,
-)
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
-    BatchRequestAnonymizer,
-)
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS,
 )
-from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import deep_filter_properties_iterable
 
 logger = logging.getLogger(__name__)
 
 
 class CheckpointAnonymizer(BaseAnonymizer):
-    def __init__(self, salt: Optional[str] = None) -> None:
+    def __init__(
+        self, salt: Optional[str], aggregate_anonymizer: "Anonymizer"  # noqa: F821
+    ) -> None:
         super().__init__(salt=salt)
 
-        self._batch_request_anonymizer = BatchRequestAnonymizer(salt=salt)
-        self._action_anonymizer = ActionAnonymizer(salt=salt)
+        self._aggregate_anonymizer = aggregate_anonymizer
 
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         if "config" in kwargs:
@@ -105,7 +98,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
 
         anonymized_batch_request: Optional[
             Dict[str, List[str]]
-        ] = self._batch_request_anonymizer.anonymize(*(), **batch_request)
+        ] = self._aggregate_anonymizer.anonymize(*(), **batch_request)
 
         action_list: Optional[List[dict]] = kwargs.get("action_list")
         anonymized_action_list: Optional[List[dict]] = None
@@ -113,7 +106,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
             # noinspection PyBroadException
             try:
                 anonymized_action_list = [
-                    self._action_anonymizer.anonymize(
+                    self._aggregate_anonymizer.anonymize(
                         action_name=action_config_dict["name"],
                         action_config=action_config_dict["action"],
                     )
@@ -140,7 +133,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
 
                 anonymized_validation_batch_request: Optional[
                     Optional[Dict[str, List[str]]]
-                ] = self._batch_request_anonymizer.anonymize(
+                ] = self._aggregate_anonymizer.anonymize(
                     *(), **validation_batch_request
                 )
 
@@ -159,7 +152,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
                     # noinspection PyBroadException
                     try:
                         anonymized_validation_action_list = [
-                            self._action_anonymizer.anonymize(
+                            self._aggregate_anonymizer.anonymize(
                                 action_name=action_config_dict["name"],
                                 action_config=action_config_dict["action"],
                             )
@@ -260,4 +253,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
 
     @staticmethod
     def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+        from great_expectations.data_context.types.base import CheckpointConfig
+
         return obj is not None and isinstance(obj, (Checkpoint, CheckpointConfig))

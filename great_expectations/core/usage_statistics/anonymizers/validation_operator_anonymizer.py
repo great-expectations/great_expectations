@@ -1,8 +1,5 @@
 from typing import Any, Optional
 
-from great_expectations.core.usage_statistics.anonymizers.action_anonymizer import (
-    ActionAnonymizer,
-)
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.validation_operators.validation_operators import (
     ValidationOperator,
@@ -10,10 +7,12 @@ from great_expectations.validation_operators.validation_operators import (
 
 
 class ValidationOperatorAnonymizer(BaseAnonymizer):
-    def __init__(self, salt: Optional[str] = None) -> None:
+    def __init__(
+        self, salt: Optional[str], aggregate_anonymizer: "Anonymizer"  # noqa: F821
+    ) -> None:
         super().__init__(salt=salt)
 
-        self._action_anonymizer = ActionAnonymizer(salt=salt)
+        self._aggregate_anonymizer = aggregate_anonymizer
 
     def anonymize(
         self,
@@ -35,7 +34,7 @@ class ValidationOperatorAnonymizer(BaseAnonymizer):
 
         if actions_dict:
             anonymized_info_dict["anonymized_action_list"] = [
-                self._action_anonymizer.anonymize(
+                self._aggregate_anonymizer.anonymize(
                     action_name=action_name, action_obj=action_obj
                 )
                 for action_name, action_obj in actions_dict.items()

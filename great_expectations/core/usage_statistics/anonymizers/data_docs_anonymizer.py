@@ -1,16 +1,15 @@
 from typing import Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import (
-    StoreBackendAnonymizer,
-)
 
 
 class DataDocsAnonymizer(BaseAnonymizer):
-    def __init__(self, salt: Optional[str] = None) -> None:
+    def __init__(
+        self, salt: Optional[str], aggregate_anonymizer: "Anonymizer"  # noqa: F821
+    ) -> None:
         super().__init__(salt=salt)
 
-        self._store_backend_anonymizer = StoreBackendAnonymizer(salt=salt)
+        self._aggregate_anonymizer = aggregate_anonymizer
 
     def anonymize(
         self, site_name: str, site_config: dict, obj: Optional[object] = None
@@ -29,7 +28,7 @@ class DataDocsAnonymizer(BaseAnonymizer):
         store_backend_config = site_config.get("store_backend")
         anonymized_info_dict[
             "anonymized_store_backend"
-        ] = self._store_backend_anonymizer.anonymize(
+        ] = self._aggregate_anonymizer.anonymize(
             store_backend_object_config=store_backend_config
         )
         site_index_builder_config = site_config.get("site_index_builder")

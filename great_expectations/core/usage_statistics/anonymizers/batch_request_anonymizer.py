@@ -20,6 +20,13 @@ logger = logging.getLogger(__name__)
 
 
 class BatchRequestAnonymizer(BaseAnonymizer):
+    def __init__(
+        self, salt: Optional[str], aggregate_anonymizer: "Anonymizer"  # noqa: F821
+    ) -> None:
+        super().__init__(salt=salt)
+
+        self._aggregate_anonymizer = aggregate_anonymizer
+
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         anonymized_batch_request_properties_dict: Optional[Dict[str, List[str]]] = None
 
@@ -159,7 +166,12 @@ class BatchRequestAnonymizer(BaseAnonymizer):
 
     @staticmethod
     def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
-        return all(
-            attr in kwargs
-            for attr in ("datasource_name", "data_connector_name", "data_asset_name")
+        from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+
+        attrs: Set[str] = BatchRequest.include_field_names.union(
+            RuntimeBatchRequest.include_field_names
         )
+        for kwarg in kwargs:
+            if kwarg in attrs:
+                return True
+        return False

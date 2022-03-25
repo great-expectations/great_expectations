@@ -425,7 +425,8 @@ def add_datasource_usage_statistics(
         DatasourceAnonymizer,
     )
 
-    datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+    aggregate_anonymizer = Anonymizer(salt=data_context)
+    datasource_anonymizer = DatasourceAnonymizer(data_context_id, aggregate_anonymizer)
 
     payload = {}
     # noinspection PyBroadException

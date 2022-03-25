@@ -2,9 +2,6 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
-from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
-    BatchRequestAnonymizer,
-)
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import deep_filter_properties_iterable
@@ -13,10 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 class ProfilerAnonymizer(BaseAnonymizer):
-    def __init__(self, salt: Optional[str] = None) -> None:
+    def __init__(
+        self, salt: Optional[str], aggregate_anonymizer: "Anonymizer"  # noqa: F821
+    ) -> None:
         super().__init__(salt=salt)
 
-        self._batch_request_anonymizer = BatchRequestAnonymizer(salt=salt)
+        self._aggregate_anonymizer = aggregate_anonymizer
 
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         if obj and isinstance(obj, RuleBasedProfiler):
@@ -129,7 +128,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
         if batch_request:
             anonymized_batch_request: Optional[
                 dict
-            ] = self._batch_request_anonymizer.anonymize(**batch_request)
+            ] = self._aggregate_anonymizer.anonymize(**batch_request)
             anonymized_domain_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
@@ -167,7 +166,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
         if batch_request:
             anonymized_batch_request: Optional[
                 dict
-            ] = self._batch_request_anonymizer.anonymize(**batch_request)
+            ] = self._aggregate_anonymizer.anonymize(**batch_request)
             anonymized_parameter_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request

@@ -4,6 +4,13 @@ from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonym
 
 
 class ExpectationSuiteAnonymizer(BaseAnonymizer):
+    def __init__(
+        self, salt: Optional[str], aggregate_anonymizer: "Anonymizer"  # noqa: F821
+    ) -> None:
+        super().__init__(salt=salt)
+
+        self._aggregate_anonymizer = aggregate_anonymizer
+
     def anonymize(
         self, obj: Optional["ExpectationSuite"] = None, **kwargs  # noqa: F821
     ) -> dict:

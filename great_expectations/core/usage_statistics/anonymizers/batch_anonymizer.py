@@ -4,6 +4,13 @@ from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonym
 
 
 class BatchAnonymizer(BaseAnonymizer):
+    def __init__(
+        self, salt: Optional[str], aggregate_anonymizer: "Anonymizer"  # noqa: F821
+    ) -> None:
+        super().__init__(salt=salt)
+
+        self._aggregate_anonymizer = aggregate_anonymizer
+
     def anonymize(
         self,
         obj: Union[Tuple[dict, str], "DataAsset", "Validator"],  # noqa: F821

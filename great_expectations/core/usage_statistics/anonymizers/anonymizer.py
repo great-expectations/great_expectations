@@ -47,38 +47,55 @@ class Anonymizer(BaseAnonymizer):
             ValidationOperatorAnonymizer,
         )
 
-        self.STRATEGIES: List[Type[BaseAnonymizer]] = [
+        self._strategies: List[Type[BaseAnonymizer]] = [
             CheckpointAnonymizer,
             ProfilerAnonymizer,
             DatasourceAnonymizer,
             DataConnectorAnonymizer,
-            BatchRequestAnonymizer,
-            BatchAnonymizer,
             ActionAnonymizer,
             DataDocsAnonymizer,
             ExpectationSuiteAnonymizer,
             ValidationOperatorAnonymizer,
+            BatchRequestAnonymizer,
+            BatchAnonymizer,
             StoreAnonymizer,
             StoreBackendAnonymizer,
         ]
 
-    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
-        anonymizer: Optional[BaseAnonymizer] = None
-        for anonymizer_cls in self.STRATEGIES:
-            if anonymizer_cls.can_handle(obj=obj, **kwargs):
-                anonymizer = anonymizer_cls(salt=self._salt)
-                return anonymizer.anonymize(obj=obj, **kwargs)
+        # Instead of instantiating all child anonymizers, we perform JIT or on-demand instantiation.
+        # While this has some performance benefits, the primary reason is due to cyclic imports and recursive overflow.
+        self._cache: Dict[Type[BaseAnonymizer], BaseAnonymizer] = {}
 
-        if isinstance(obj, str):
+    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
+        anonymizer_type: Optional[Type[BaseAnonymizer]] = self._get_strategy(
+            obj=obj, **kwargs
+        )
+
+        if anonymizer_type is not None:
+            anonymizer: Optional[BaseAnonymizer] = self._cache.get(anonymizer_type)
+            if not anonymizer:
+                anonymizer = anonymizer_type(salt=self._salt, aggregate_anonymizer=self)
+                self._cache[anonymizer_type] = anonymizer
+            return anonymizer.anonymize(obj=obj, **kwargs)
+
+        elif isinstance(obj, str):
             return self._anonymize_string(string_=obj)
+        elif not obj:
+            return obj
 
         raise TypeError(
             f"The type {type(obj)} cannot be handled by the Anonymizer; no suitable strategy found."
         )
 
-    @staticmethod
-    def can_handle(obj: object, **kwargs) -> bool:
-        return isinstance(obj, object)
+    def can_handle(self, obj: object, **kwargs) -> bool:
+        return Anonymizer._get_strategy(obj=obj, **kwargs) is not None
+
+    def _get_strategy(self, obj: object, **kwargs) -> Optional[Type[BaseAnonymizer]]:
+        for anonymizer_type in self._strategies:
+            if anonymizer_type.can_handle(obj=obj, **kwargs):
+                return anonymizer_type
+
+        return None
 
     def anonymize_init_payload(self, init_payload: dict) -> dict:
         anonymized_init_payload = {}
