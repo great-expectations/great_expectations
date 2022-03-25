@@ -28,81 +28,85 @@ class GEDependencies:
     """
 
     """This list should be kept in sync with our requirements.txt file."""
-    GE_REQUIRED_DEPENDENCIES: List[str] = [
-        "altair",
-        "Click",
-        "colorama",
-        "cryptography",
-        "dataclasses",
-        "importlib-metadata",
-        "Ipython",
-        "jinja2",
-        "jsonpatch",
-        "jsonschema",
-        "mistune",
-        "nbformat",
-        "numpy",
-        "packaging",
-        "pandas",
-        "pyparsing",
-        "python-dateutil",
-        "pytz",
-        "requests",
-        "ruamel.yaml",
-        "scipy",
-        "termcolor",
-        "tqdm",
-        "typing-extensions",
-        "urllib3",
-        "tzlocal",
-    ]
+    GE_REQUIRED_DEPENDENCIES: List[str] = sorted(
+        [
+            "altair",
+            "Click",
+            "colorama",
+            "cryptography",
+            "dataclasses",
+            "importlib-metadata",
+            "Ipython",
+            "jinja2",
+            "jsonpatch",
+            "jsonschema",
+            "mistune",
+            "nbformat",
+            "numpy",
+            "packaging",
+            "pandas",
+            "pyparsing",
+            "python-dateutil",
+            "pytz",
+            "requests",
+            "ruamel.yaml",
+            "scipy",
+            "termcolor",
+            "tqdm",
+            "typing-extensions",
+            "urllib3",
+            "tzlocal",
+        ]
+    )
 
     """This list should be kept in sync with our requirements-dev*.txt files."""
-    GE_DEV_DEPENDENCIES: List[str] = [
-        "PyMySQL",
-        "azure-identity",
-        "azure-keyvault-secrets",
-        "azure-storage-blob",
-        "black",
-        "boto3",
-        "feather-format",
-        "flake8",
-        "flask",
-        "freezegun",
-        "gcsfs",
-        "google-cloud-secret-manager",
-        "google-cloud-storage",
-        "ipywidgets",
-        "isort",
-        "mistune",
-        "moto",
-        "nbconvert",
-        "openpyxl",
-        "pre-commit",
-        "psycopg2-binary",
-        "pyarrow",
-        "pyathena",
-        "pyfakefs",
-        "pyodbc",
-        "pypd",
-        "pyspark",
-        "pytest",
-        "pytest-benchmark",
-        "pytest-cov",
-        "pytest-order",
-        "pyupgrade",
-        "requirements-parser",
-        "s3fs",
-        "snapshottest",
-        "snowflake-connector-python",
-        "snowflake-sqlalchemy",
-        "sqlalchemy",
-        "sqlalchemy-bigquery",
-        "sqlalchemy-dremio",
-        "sqlalchemy-redshift",
-        "teradatasqlalchemy",
-        "xlrd",
-    ]
+    GE_DEV_DEPENDENCIES: List[str] = sorted(
+        [
+            "PyMySQL",
+            "azure-identity",
+            "azure-keyvault-secrets",
+            "azure-storage-blob",
+            "black",
+            "boto3",
+            "feather-format",
+            "flake8",
+            "flask",
+            "freezegun",
+            "gcsfs",
+            "google-cloud-secret-manager",
+            "google-cloud-storage",
+            "ipywidgets",
+            "isort",
+            "mistune",
+            "moto",
+            "nbconvert",
+            "openpyxl",
+            "pre-commit",
+            "psycopg2-binary",
+            "pyarrow",
+            "pyathena",
+            "pyfakefs",
+            "pyodbc",
+            "pypd",
+            "pyspark",
+            "pytest",
+            "pytest-benchmark",
+            "pytest-cov",
+            "pytest-order",
+            "pyupgrade",
+            "requirements-parser",
+            "s3fs",
+            "snapshottest",
+            "snowflake-connector-python",
+            "snowflake-sqlalchemy",
+            "sqlalchemy",
+            "sqlalchemy-bigquery",
+            "sqlalchemy-dremio",
+            "sqlalchemy-redshift",
+            "teradatasqlalchemy",
+            "xlrd",
+        ]
+    )
 
     def __init__(self):
         self._requirements_relative_base_dir = "../../../"
@@ -110,11 +114,11 @@ class GEDependencies:
 
     def get_required_dependency_names(self) -> List[str]:
         """Sorted list of required GE dependencies"""
-        return sorted(self.GE_REQUIRED_DEPENDENCIES)
+        return self.GE_REQUIRED_DEPENDENCIES
 
     def get_dev_dependency_names(self) -> List[str]:
         """Sorted list of dev GE dependencies"""
-        return sorted(self.GE_DEV_DEPENDENCIES)
+        return self.GE_DEV_DEPENDENCIES
 
     def get_required_dependency_names_from_requirements_file(self) -> List[str]:
         """Get unique names of required dependencies.
@@ -123,11 +127,9 @@ class GEDependencies:
             List of string names of required dependencies.
         """
         return sorted(
-            list(
-                set(
-                    self._get_dependency_names_from_requirements_file(
-                        self.required_requirements_path
-                    )
+            set(
+                self._get_dependency_names_from_requirements_file(
+                    self.required_requirements_path
                 )
             )
         )
@@ -148,7 +150,7 @@ class GEDependencies:
                 )
             )
             dev_dependency_names.update(dependency_names)
-        return sorted(list(dev_dependency_names))
+        return sorted(dev_dependency_names)
 
     @property
     def required_requirements_path(self) -> str:
