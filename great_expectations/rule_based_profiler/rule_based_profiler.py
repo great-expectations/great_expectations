@@ -40,17 +40,17 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
-from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
+    init_rule_expectation_configuration_builders,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
-    init_rule_expectation_configuration_builders,
-    init_rule_parameter_builders,
     set_batch_list_or_batch_request_on_builder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
+    init_rule_parameter_builders,
 )
 from great_expectations.rule_based_profiler.rule.rule import Rule
 from great_expectations.rule_based_profiler.types import (
