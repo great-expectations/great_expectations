@@ -72,10 +72,7 @@ class Anonymizer(BaseAnonymizer):
         )
 
         if anonymizer_type is not None:
-            anonymizer: Optional[BaseAnonymizer] = self._cache.get(anonymizer_type)
-            if not anonymizer:
-                anonymizer = anonymizer_type(salt=self._salt, aggregate_anonymizer=self)
-                self._cache[anonymizer_type] = anonymizer
+            anonymizer = self._retrieve_or_instantiate(type_=anonymizer_type)
             return anonymizer.anonymize(obj=obj, **kwargs)
 
         elif isinstance(obj, str):
@@ -96,6 +93,14 @@ class Anonymizer(BaseAnonymizer):
                 return anonymizer_type
 
         return None
+
+    def _retrieve_or_instantiate(self, type_: Type[BaseAnonymizer]) -> BaseAnonymizer:
+        anonymizer: Optional[BaseAnonymizer] = self._cache.get(type_)
+        if anonymizer is None:
+            anonymizer = type_(salt=self._salt)
+            self._cache[type_] = anonymizer
+
+        return anonymizer
 
     def anonymize_init_payload(self, init_payload: dict) -> dict:
         anonymized_init_payload = {}
@@ -122,7 +127,8 @@ class Anonymizer(BaseAnonymizer):
             DatasourceAnonymizer,
         )
 
-        anonymizer = DatasourceAnonymizer(salt=self._salt)
+        anonymizer = self._retrieve_or_instantiate(type_=DatasourceAnonymizer)
+
         anonymized_values: List[dict] = []
         for name, config in payload.items():
             anonymize_value: dict = anonymizer._anonymize_datasource_info(
@@ -139,7 +145,8 @@ class Anonymizer(BaseAnonymizer):
             StoreAnonymizer,
         )
 
-        anonymizer = StoreAnonymizer(salt=self._salt)
+        anonymizer = self._retrieve_or_instantiate(type_=StoreAnonymizer)
+
         anonymized_values: List[dict] = []
         for store_name, store_obj in payload.items():
             anonymize_value: dict = anonymizer.anonymize(
@@ -157,7 +164,8 @@ class Anonymizer(BaseAnonymizer):
             ValidationOperatorAnonymizer,
         )
 
-        anonymizer = ValidationOperatorAnonymizer(salt=self._salt)
+        anonymizer = self._retrieve_or_instantiate(type_=ValidationOperatorAnonymizer)
+
         anonymized_values: List[dict] = []
         for validation_operator_name, validation_operator_obj in payload.items():
             anonymize_value: dict = anonymizer.anonymize(
@@ -175,7 +183,8 @@ class Anonymizer(BaseAnonymizer):
             DataDocsAnonymizer,
         )
 
-        anonymizer = DataDocsAnonymizer(salt=self._salt)
+        anonymizer = self._retrieve_or_instantiate(type_=DataDocsAnonymizer)
+
         anonymized_values: List[dict] = []
         for site_name, site_config in payload.items():
             anonymize_value: dict = anonymizer.anonymize(
@@ -192,7 +201,7 @@ class Anonymizer(BaseAnonymizer):
             ExpectationSuiteAnonymizer,
         )
 
-        anonymizer = ExpectationSuiteAnonymizer(salt=self._salt)
+        anonymizer = self._retrieve_or_instantiate(type_=ExpectationSuiteAnonymizer)
 
         anonymized_values: List[dict] = []
         for suite in payload:
