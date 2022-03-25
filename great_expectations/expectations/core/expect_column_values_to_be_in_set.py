@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.expectation import (
@@ -16,7 +16,18 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
+    VARIABLES_KEY,
+)
 
 try:
     import sqlalchemy as sa
@@ -98,10 +109,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.in_set"
@@ -119,6 +131,20 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "profiler_config",
     )
 
+    value_set_estimator_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="ValueSetMultiBatchParameterBuilder",
+            name="value_set_estimator",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+    )
+    validation_parameter_builder_configs: List[dict] = [
+        value_set_estimator_parameter_builder_config,
+    ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_in_set",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -133,26 +159,17 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 },
-                "parameter_builders": [
-                    {
-                        "name": "value_set",
-                        "class_name": "ValueSetMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "metric_value_kwargs": None,
-                        "json_serialize": True,
-                    },
-                ],
                 "expectation_configuration_builders": [
                     {
                         "expectation_type": "expect_column_values_to_be_in_set",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "column": "$domain.domain_kwargs.column",
-                        "value_set": "$parameter.value_set.value",
-                        "mostly": "$variables.mostly",
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+                        "value_set": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+                        "mostly": f"{VARIABLES_KEY}mostly",
                         "meta": {
-                            "profiler_details": "$parameter.value_set.details",
+                            "profiler_details": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     },
                 ],
@@ -161,7 +178,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     )
 
     default_kwarg_values = {
-        "value_set": None,
+        "value_set": [],
         "parse_strings_as_datetimes": False,
         "auto": False,
         "profiler_config": default_profiler_config,
@@ -201,7 +218,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "parse_strings_as_datetimes": {
@@ -409,18 +426,22 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
+        # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
+        value_set = configuration.kwargs.get(
+            "value_set"
+        ) or self.default_kwarg_values.get("value_set")
         try:
-            assert "value_set" in configuration.kwargs, "value_set is required"
             assert (
-                isinstance(configuration.kwargs["value_set"], (list, set, dict))
-                or configuration.kwargs["value_set"] is None
-            ), "value_set must be a list, set, or None"
-            if isinstance(configuration.kwargs["value_set"], dict):
+                "value_set" in configuration.kwargs or value_set
+            ), "value_set is required"
+            assert isinstance(
+                value_set, (list, set, dict)
+            ), "value_set must be a list, set, or dict"
+            if isinstance(value_set, dict):
                 assert (
-                    "$PARAMETER" in configuration.kwargs["value_set"]
+                    "$PARAMETER" in value_set
                 ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True

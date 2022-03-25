@@ -595,7 +595,7 @@ data_connectors:
     class_name: InferredAssetFilesystemDataConnector
     base_directory: ../path/to/data
     default_regex:
-      group_names: 
+      group_names:
         - data_asset_name
       pattern: (.*)
   default_runtime_data_connector_name:
@@ -646,7 +646,7 @@ data_connectors:
     class_name: InferredAssetFilesystemDataConnector
     base_directory: ../path/to/data
     default_regex:
-      group_names: 
+      group_names:
         - data_asset_name
       pattern: (.*)
   default_runtime_data_connector_name:

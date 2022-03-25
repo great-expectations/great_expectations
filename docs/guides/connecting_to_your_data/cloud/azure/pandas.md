@@ -29,12 +29,12 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L4-L7
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L5-L8
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L11
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L15
 ```
 
 ### 3. Configure your Datasource
@@ -90,12 +90,12 @@ values={[
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L13-L37
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L19-L43
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L52
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L60
 ```
 </TabItem>
 
@@ -118,15 +118,13 @@ Run this code to test your configuration.
 <TabItem value="configured">
 
 The below configuration is highly tuned to the specific bucket and blobs relevant to this example. You'll have to fine-tune your own regular expressions and assets to fit your use-case.
-
 <Tabs
-groupId="yaml-or-python"
-defaultValue='yaml'
-values={[
-{label: 'YAML', value:'yaml'},
-{label: 'Python', value:'python'},
-]}>
-
+  groupId="yaml-or-python"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
 <TabItem value="yaml">
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py#L10-L27
@@ -137,16 +135,18 @@ Run this code to test your configuration.
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py#L38
 ```
 </TabItem>
-
 <TabItem value="python">
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py#L10-L27
 ```
 
-Run this code to test your configuration. 
+Run this code to test your configuration.
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py#L37
 ```
+</TabItem>
+</Tabs>
+
 </TabItem>
 
 </Tabs>
@@ -173,7 +173,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L54
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L64
 ```
 
 </TabItem>
@@ -193,12 +193,11 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L57-L61
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L69-L73
 ```
 
 Then load data into the `Validator`.
-
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L69-L74
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L83-L88
 ```
 
 <Congratulations />

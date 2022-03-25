@@ -29,12 +29,12 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L3-L6
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L4-L8
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L8
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L12
 ```
 
 ### 3. Configure your Datasource
@@ -58,10 +58,10 @@ It is also important to note that GCS `DataConnectors` support various methods o
   - This argument should contain a specific filepath that leads to your credentials JSON.
   - This method utilizes `google.oauth2.service_account.Credentials.from_service_account_file` under the hood.
 * Passing an `info` argument to the optional `gcs_options` dictionary.
-  - This argument should contain the actual JSON data from your credentials file in the form of a string. 
+  - This argument should contain the actual JSON data from your credentials file in the form of a string.
   - This method utilizes `google.oauth2.service_account.Credentials.from_service_account_info` under the hood.
 
-Please note that if you use the `filename` or `info` options, you must supply these options to any GE objects that interact with GCS (i.e. `PandasExecutionEngine`). 
+Please note that if you use the `filename` or `info` options, you must supply these options to any GE objects that interact with GCS (i.e. `PandasExecutionEngine`).
 The `gcs_options` dictionary is also responsible for storing any `**kwargs` you wish to pass to the GCS `storage.Client()` connection object (i.e. `project`)
 
 For more details regarding storing credentials for use with Great Expectations see: [How to configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials.md)
@@ -96,24 +96,24 @@ The below configuration is representative of the default setup you'll see when p
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L10-L28
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L16-L34
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L39
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L47
 ```
 
 </TabItem>
-
+ 
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L10-L29
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L11-L30
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L40
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L43
 ```
 
 </TabItem>
@@ -125,7 +125,6 @@ Run this code to test your configuration.
 <TabItem value="configured">
 
 The below configuration is highly tuned to the specific bucket and blobs relevant to this example. You'll have to fine-tune your own regular expressions and assets to fit your use-case.
-
 <Tabs
   groupId="yaml-or-python"
   defaultValue='yaml'
@@ -143,18 +142,17 @@ Run this code to test your configuration.
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L38
 ```
-
 </TabItem>
-
 <TabItem value="python">
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L10-L26
 ```
 
-Run this code to test your configuration. 
+Run this code to test your configuration.
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L37
 ```
+
 </TabItem>
 
 </Tabs>
@@ -181,14 +179,14 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L39
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L47
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L42
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L47
 ```
 
 </TabItem>
@@ -212,12 +210,12 @@ Add the GCS path to your CSV in the `path` key under `runtime_parameters` in you
 
 Please note we support the following format for GCS URL's: `gs://<BUCKET_OR_NAME>/<BLOB>`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L42-L48
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L52-L58
 ```
 
 Then load data into the `Validator`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L56-L62
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L68-L74
 ```
 
 </TabItem>
@@ -226,12 +224,12 @@ Then load data into the `Validator`.
 
 Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L74-L78
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L88-L92
 ```
 
 Then load data into the `Validator`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L56-L62
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L68-L74
 ```
 
 </TabItem>

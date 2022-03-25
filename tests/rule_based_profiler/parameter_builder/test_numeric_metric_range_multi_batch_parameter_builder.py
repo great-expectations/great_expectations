@@ -32,7 +32,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
         name="row_count_range",
         metric_name="table.row_count",
-        sampling_method="bootstrap",
+        estimator="bootstrap",
         false_positive_rate=1.0e-2,
         round_decimals=0,
         data_context=data_context,
@@ -64,7 +64,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
     expected_value_dict: dict = {
-        "value": {"value_range": None},
+        "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {},
@@ -82,8 +82,8 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         parameters={domain.id: parameter_container},
     )
 
-    actual_value = actual_value_dict.pop("value").pop("value_range")
-    actual_value_dict["value"] = {"value_range": None}
+    actual_value = actual_value_dict.pop("value")
+    actual_value_dict["value"] = None
 
     assert actual_value_dict == expected_value_dict
 

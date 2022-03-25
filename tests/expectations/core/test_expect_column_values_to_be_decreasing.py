@@ -40,7 +40,6 @@ def test_expect_column_values_to_be_decreasing_warn_parse_strings_as_datetimes(
         validator.expect_column_values_to_be_decreasing(
             column="a", parse_strings_as_datetimes=True
         )
-    assert (
-        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-        in str(record.list[0].message)
+    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+        record.list[0].message
     )

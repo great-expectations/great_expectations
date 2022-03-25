@@ -14,13 +14,13 @@ The SQL database introspection and partitioning are useful for:
 - Exploring the schema and column metadata of the tables in your SQL database, and
 - Organizing the tables into <TechnicalTag tag="data_asset" text="Data Assets" /> according to the partitioning considerations informed by this exploration.
 
-Partitioning enables you to select the desired subsets of your dataset for [Validation](/docs/reference/validation).
+Partitioning enables you to select the desired subsets of your dataset for [Validation](../../reference/validation.md).
 
 <Prerequisites>
 
 - [Configured and loaded a Data Context](../../tutorials/getting_started/initialize_a_data_context.md)
 - [Configured a Datasource and Data Connector](../../reference/datasources.md)
-  
+
 </Prerequisites>
 
 We will use the "Yellow Taxi" dataset to walk you through the configuration of `SimpleSqlalchemyDatasource`, where
@@ -41,14 +41,14 @@ To learn more about <TechnicalTag tag="datasource" text="Datasources" />, <Techn
 
 Import Great Expectations.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L3
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L4
 ```
 
 ### 2. Obtain DataContext
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L5
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L9
 ```
 
 ## Configuring Introspection and Tables
@@ -67,13 +67,13 @@ Load your DataContext into memory using the `get_context()` method.
 
 Start with an elementary `SimpleSqlalchemyDatasource` configuration, containing just a basic `introspection` component:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L7-L14
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L13-L20
 ```
 
 Using the above example configuration, specify the connection string for your database.  Then run this code to test your
 configuration:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L23
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L31
 ```
 
 Notice that the output reports the presence of exactly one `InferredAssetSqlDataConnector` (called `whole_table`, as per
@@ -95,12 +95,12 @@ to ensure the correctness of the proposed `YAML` configuration prior to incorpor
 For instance, try the following erroneous `SimpleSqlalchemyDatasource` configuration (it contains an illegal top-level
 key):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L25-L32
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L35-L42
 ```
 
 Then specify the connection string for your database, and again run this code to test your configuration:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L23
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L48
 ```
 
 Notice that the output reports an empty Data Connectors list, signaling a misconfiguration.
@@ -147,7 +147,7 @@ SQL database:
 
 The following `YAML` configurqation example utilizes several of these configuration directives:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L38-L50
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L52-L65
 ```
 
 ### 3. Save the Datasource configuration to your DataContext
@@ -155,15 +155,15 @@ The following `YAML` configurqation example utilizes several of these configurat
 Once the `SimpleSqlalchemyDatasource` configuration is error-free and satisfies your requirements, save it into your
 `DataContext` by using the `add_datasource()` function.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L56
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L73
 ```
 
 ### 4. Get names of available Data Assets
- 
+
 Getting names of available data assets using an `InferredAssetSqlDataConnector` affords you the visibility into types
 and naming structures of tables in your SQL database:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L57-L60
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L77-L79
 ```
 
 </TabItem>
@@ -174,13 +174,13 @@ and naming structures of tables in your SQL database:
 
 Start with an elementary `SimpleSqlalchemyDatasource` configuration, containing just a basic `tables` component:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L62-L71
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L85-L94
 ```
 
 Using the above example configuration, specify the connection string for your database.  Then run this code to test your
 configuration:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L23
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L100
 ```
 
 Notice that the output reports the presence of exactly one `ConfiguredAssetSqlDataConnector` (called `whole_table`, as
@@ -190,16 +190,16 @@ per the configuration) and that `Available data_asset_names (1 of 1)`, the name 
 ### 2. Enhance your SimpleSqlalchemyDatasource with ability to attribute metadata to tables
 
 Add `Data Asset Name` identification attributes (`data_asset_name_prefix` and `data_asset_name_suffix`) and set the
-`include_schema_name` flag in your `ConfiguredAssetSqlDataConnector` (named `whole_table`) configuration section.  These 
+`include_schema_name` flag in your `ConfiguredAssetSqlDataConnector` (named `whole_table`) configuration section.  These
 directives will result in the reported properties of your table to contain annotations, customized for your purposes:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L77-L89
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L104-L117
 ```
 
 Using the above example configuration, specify the connection string for your database.  Then run this code to test your
 configuration:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L23
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L123
 ```
 
 Notice that the output reports the presence of exactly one `ConfiguredAssetSqlDataConnector` (called `whole_table`, as
@@ -209,7 +209,7 @@ being `taxi__yellow_tripdata_sample_2019_01__asset`, correctly reflecting the en
 Finally, once your `Data Connector` configuration satisfies your requirements, save the enclosing `Datasource` into your
 `DataContext` using
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L56
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py#L127
 ```
 
 </TabItem>
