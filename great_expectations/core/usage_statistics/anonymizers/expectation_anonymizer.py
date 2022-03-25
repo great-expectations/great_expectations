@@ -48,4 +48,4 @@ class ExpectationAnonymizer(BaseAnonymizer):
 
     @staticmethod
     def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
-        assert "expectation_suite" in kwargs
+        return "expectation_suite" in kwargs

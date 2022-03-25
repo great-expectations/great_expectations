@@ -81,7 +81,6 @@ class Anonymizer(BaseAnonymizer):
         return isinstance(obj, object)
 
     def anonymize_init_payload(self, init_payload: dict) -> dict:
-        breakpoint()
         anonymized_init_payload = {}
         anonymizer_funcs = {
             "datasources": self._anonymize_datasources_init_payload,
@@ -97,7 +96,7 @@ class Anonymizer(BaseAnonymizer):
                 anonymized_key: str = f"anonymized_{key}"
                 anonymized_init_payload[anonymized_key] = anonymizer_func(val)
             else:
-                anonymizer_funcs[key] = val
+                anonymized_init_payload[key] = val
 
         return anonymized_init_payload
 
