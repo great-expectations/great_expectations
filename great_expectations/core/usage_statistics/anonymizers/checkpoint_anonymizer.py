@@ -28,7 +28,7 @@ from great_expectations.util import deep_filter_properties_iterable
 logger = logging.getLogger(__name__)
 
 
-class CheckpointRunAnonymizer(BaseAnonymizer):
+class CheckpointAnonymizer(BaseAnonymizer):
     def __init__(self, salt: Optional[str] = None) -> None:
         super().__init__(salt=salt)
 

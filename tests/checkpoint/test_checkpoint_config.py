@@ -6,8 +6,8 @@ import pytest
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
-    CheckpointRunAnonymizer,
+from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import (
+    CheckpointAnonymizer,
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import CheckpointConfig

@@ -12,7 +12,7 @@ from great_expectations.util import deep_filter_properties_iterable
 logger = logging.getLogger(__name__)
 
 
-class ProfilerRunAnonymizer(BaseAnonymizer):
+class ProfilerAnonymizer(BaseAnonymizer):
     def __init__(self, salt: Optional[str] = None) -> None:
         super().__init__(salt=salt)
 
@@ -49,7 +49,7 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
         """
         assert isinstance(
             obj, RuleBasedProfilerConfig
-        ), "ProfilerRunAnonymizer can only handle objects of type RuleBasedProfilerConfig"
+        ), "ProfilerAnonymizer can only handle objects of type RuleBasedProfilerConfig"
         profiler_config: RuleBasedProfilerConfig = obj
 
         name: str = profiler_config.name

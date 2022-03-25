@@ -19,8 +19,8 @@ class Anonymizer(BaseAnonymizer):
         from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
             BatchRequestAnonymizer,
         )
-        from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
-            CheckpointRunAnonymizer,
+        from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import (
+            CheckpointAnonymizer,
         )
         from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymizer import (
             DataConnectorAnonymizer,
@@ -34,8 +34,8 @@ class Anonymizer(BaseAnonymizer):
         from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
             ExpectationSuiteAnonymizer,
         )
-        from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
-            ProfilerRunAnonymizer,
+        from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
+            ProfilerAnonymizer,
         )
         from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
             StoreAnonymizer,
@@ -48,8 +48,8 @@ class Anonymizer(BaseAnonymizer):
         )
 
         self.STRATEGIES: List[Type[BaseAnonymizer]] = [
-            CheckpointRunAnonymizer,
-            ProfilerRunAnonymizer,
+            CheckpointAnonymizer,
+            ProfilerAnonymizer,
             DatasourceAnonymizer,
             DataConnectorAnonymizer,
             BatchRequestAnonymizer,
