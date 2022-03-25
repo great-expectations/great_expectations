@@ -1,5 +1,5 @@
 ---
-title: How To Write Integration Documentation
+title: How to write integration documentation
 ---
 
 ### Introduction
