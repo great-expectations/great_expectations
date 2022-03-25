@@ -97,6 +97,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[str, float] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
+        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
         json_serialize: bool = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
@@ -114,6 +115,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             metric_value_kwargs: used in MetricConfiguration
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_strings: a list of candidate date format strings that will replace the default
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
@@ -121,6 +125,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         """
         super().__init__(
             name=name,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,

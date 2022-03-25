@@ -1,4 +1,5 @@
 import copy
+import json
 import logging
 import smtplib
 import ssl
@@ -16,6 +17,11 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+
+try:
+    import boto3
+except ImportError:
+    boto3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -480,3 +486,40 @@ def send_cloud_notification(url: str, headers: dict):
             return {"cloud_notification_result": message}
         else:
             return {"cloud_notification_result": "Cloud notification succeeded."}
+
+
+def send_sns_notification(
+    sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs
+) -> str:
+    """
+    Send JSON results to an SNS topic with a schema of:
+
+
+    :param sns_topic_arn:  The SNS Arn to publish messages to
+    :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
+    :param validation_results:  The results of the validation ran
+    :param kwargs:  Keyword arguments to pass to the boto3 Session
+    :return:  Message ID that was published
+
+    """
+    if not boto3:
+        logger.warning("boto3 is not installed")
+        return "boto3 is not installed"
+
+    message_dict = {
+        "TopicArn": sns_topic_arn,
+        "Subject": sns_subject,
+        "Message": json.dumps(validation_results),
+        "MessageAttributes": {
+            "String": {"DataType": "String.Array", "StringValue": "ValidationResults"},
+        },
+        "MessageStructure": "json",
+    }
+    session = boto3.Session(**kwargs)
+    sns = session.client("sns")
+    try:
+        response = sns.publish(**message_dict)
+    except sns.exceptions.InvalidParameterException:
+        logger.error(f"Received invalid for message: {validation_results}")
+    else:
+        return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"

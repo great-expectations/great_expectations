@@ -22,7 +22,6 @@ class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     """TODO: Add a docstring here"""
 
     # These values will be used to configure the metric created by your expectation
-    regex_snake_name = "regex_name"
     regex_camel_name = "RegexName"
     regex = "regex pattern"
     semantic_type_name_plural = None
@@ -33,7 +32,6 @@ class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
 
     # Here your regex is used to create a custom metric for this expectation
     map_metric = RegexBasedColumnMapExpectation.register_metric(
-        regex_snake_name=regex_snake_name,
         regex_camel_name=regex_camel_name,
         regex_=regex,
     )

@@ -107,11 +107,11 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L52
+```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L50
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L127
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L125
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -140,7 +140,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L22-L111
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L21-L110
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -185,24 +185,24 @@ In the case of your Custom `RegexBasedColumnMapExpectation`, Great Expectations 
 
 To do this, we replace these:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L25-L27
+```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L25-L26
 ```
 
 with something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L17-L19
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L17-L18
 ```
 
 For more detail when rendering your Custom Expectation, you can optionally specify the plural form of a Semantic Type you're validating. 
 
 For example:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L28
+```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L27
 ```
 
 becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L20
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L19
 ```
 
 Great Expectations will use these values to tell your Custom Expectation to apply your specified regex as a <TechnicalTag tag="metric" text="Metric"/> to be utilized in validating your data.
@@ -251,12 +251,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L42-L47
+```python file=../../../../examples/expectations/regex_based_column_map_expectation_template.py#L40-L45
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L119-L122
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py#L117-L120
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

@@ -177,7 +177,6 @@ class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
             "@rldejournett",
             "@talagluck",
         ],
-        "package": "experimental_expectations",
     }
 
     map_metric = "column_values.expect_column_values_to_follow_rule"
