@@ -9,6 +9,7 @@ import numpy as np
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
@@ -22,16 +23,14 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
 )
-from great_expectations.rule_based_profiler.helpers.util import (
-    init_rule_parameter_builders,
-    resolve_evaluation_dependencies,
-)
 from great_expectations.rule_based_profiler.types import (
+    PARAMETER_KEY,
     Attributes,
     Builder,
     Domain,
     ParameterContainer,
     build_parameter_container,
+    get_fully_qualified_parameter_names,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -552,3 +551,100 @@ class ParameterBuilder(Builder, ABC):
                     np.nan_to_num(metric_value_vector, copy=False, nan=0.0)
 
         return metric_values
+
+
+def init_rule_parameter_builders(
+    parameter_builder_configs: Optional[List[dict]] = None,
+    data_context: Optional["DataContext"] = None,  # noqa: F821
+) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
+    if parameter_builder_configs is None:
+        return None
+
+    return [
+        init_parameter_builder(
+            parameter_builder_config=parameter_builder_config,
+            data_context=data_context,
+        )
+        for parameter_builder_config in parameter_builder_configs
+    ]
+
+
+def init_parameter_builder(
+    parameter_builder_config: Union["ParameterBuilderConfig", dict],  # noqa: F821
+    data_context: Optional["DataContext"] = None,  # noqa: F821
+) -> "ParameterBuilder":  # noqa: F821
+    if not isinstance(parameter_builder_config, dict):
+        parameter_builder_config = parameter_builder_config.to_dict()
+
+    parameter_builder: "ParameterBuilder" = instantiate_class_from_config(  # noqa: F821
+        config=parameter_builder_config,
+        runtime_environment={"data_context": data_context},
+        config_defaults={
+            "module_name": "great_expectations.rule_based_profiler.parameter_builder"
+        },
+    )
+    return parameter_builder
+
+
+def resolve_evaluation_dependencies(
+    parameter_builder: "ParameterBuilder",  # noqa: F821
+    parameter_container: ParameterContainer,
+    domain: Domain,
+    variables: Optional[ParameterContainer] = None,
+    parameters: Optional[Dict[str, ParameterContainer]] = None,
+) -> None:
+    """
+    This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
+    "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to fulfill its goals.
+    """
+
+    # Step 1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
+    evaluation_parameter_builders: List[
+        "ParameterBuilder"  # noqa: F821
+    ] = parameter_builder.evaluation_parameter_builders
+    if not evaluation_parameter_builders:
+        return
+
+    # Step 2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
+    # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
+    # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name").
+    fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
+    )
+
+    # Step 3: Check for presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
+    # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
+    evaluation_parameter_builder: "ParameterBuilder"  # noqa: F821
+    for evaluation_parameter_builder in evaluation_parameter_builders:
+        fully_qualified_evaluation_parameter_builder_name: str = (
+            f"{PARAMETER_KEY}{evaluation_parameter_builder.name}"
+        )
+
+        if (
+            fully_qualified_evaluation_parameter_builder_name
+            not in fully_qualified_parameter_names
+        ):
+            evaluation_parameter_builder.set_batch_list_or_batch_request(
+                batch_list=parameter_builder.batch_list,
+                batch_request=parameter_builder.batch_request,
+                force_batch_data=False,
+            )
+
+            evaluation_parameter_builder.build_parameters(
+                parameter_container=parameter_container,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
+
+            # Step 4: Any "ParameterBuilder" object, including members of "evaluation_parameter_builders" list may be
+            # configured with its own "evaluation_parameter_builders" list.  Recursive call handles such situations.
+            resolve_evaluation_dependencies(
+                parameter_builder=evaluation_parameter_builder,
+                parameter_container=parameter_container,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
