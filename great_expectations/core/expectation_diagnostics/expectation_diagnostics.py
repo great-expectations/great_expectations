@@ -457,7 +457,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         if snaked_impl_name != source_file_base_no_ext:
             sub_messages.append(
                 {
-                    "message": f"The snake_case of {impl.__name__} does not match filename part {source_file_base_no_ext}",
+                    "message": f"The snake_case of {impl.__name__} ({snaked_impl_name}) does not match filename part ({source_file_base_no_ext})",
                     "passed": False,
                 }
             )
