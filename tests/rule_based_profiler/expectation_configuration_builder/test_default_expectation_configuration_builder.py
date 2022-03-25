@@ -213,16 +213,6 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
 
     metric_domain_kwargs: dict = {"column": "user_id"}
 
-    min_user_id_parameter: MetricMultiBatchParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_min_user_id",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            batch_request=batch_request,
-            data_context=data_context,
-        )
-    )
-
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
@@ -237,8 +227,18 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     condition: Optional[str] = None
     max_user_id: int = 999999999999
 
+    min_user_id_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MetricMultiBatchParameterBuilder",
+            name="my_min_user_id",
+            metric_name="column.min",
+            metric_domain_kwargs=metric_domain_kwargs,
+            batch_request=batch_request,
+        )
+    )
     validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
-        ParameterBuilderConfig(**min_user_id_parameter.to_json_dict()),
+        min_user_id_parameter_builder_config,
     ]
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_be_between",
