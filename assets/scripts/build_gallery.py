@@ -229,7 +229,6 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
                 diagnostics["description"]["docstring"] = format_docstring_to_markdown(
                     diagnostics["description"]["docstring"]
                 )
-            gallery_info[expectation] = diagnostics.to_json_dict()
         except Exception:
             logger.error(f"Failed to run diagnostics for: {expectation}")
             print(traceback.format_exc())
@@ -237,6 +236,16 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
                 f"\n\n----------------\n{expectation} ({group})\n"
             )
             expectation_tracebacks.write(traceback.format_exc())
+        else:
+            try:
+                gallery_info[expectation] = diagnostics.to_json_dict()
+            except TypeError as e:
+                logger.error(f"Failed to create JSON for: {expectation}")
+                print(traceback.format_exc())
+                expectation_tracebacks.write(
+                    f"\n\n----------------\n[JSON write fail] {expectation} ({group})\n"
+                )
+                expectation_tracebacks.write(traceback.format_exc())
 
     if just_installed:
         print("\n\n\n=== (Uninstalling) ===")
