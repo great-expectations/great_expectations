@@ -12,7 +12,7 @@ class DataDocsAnonymizer(BaseAnonymizer):
 
         self._store_backend_anonymizer = StoreBackendAnonymizer(salt=salt)
 
-    def anonymize(self, site_name: str, site_config: str) -> dict:
+    def anonymize(self, site_name: str, site_config: dict) -> dict:
         site_config_module_name = site_config.get("module_name")
         if site_config_module_name is None:
             site_config[

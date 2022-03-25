@@ -1,6 +1,9 @@
 from typing import Any, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymizer import (
+    DataConnectorAnonymizer,
+)
 from great_expectations.datasource import (
     BaseDatasource,
     Datasource,
@@ -28,11 +31,12 @@ class DatasourceAnonymizer(BaseAnonymizer):
         BaseDatasource,
     ]
 
-    def anonymize(self, obj: object, *args, **kwargs) -> Any:
-        assert self.can_handle(
-            obj=obj
-        ), "DatasourceAnonymizer can only handle objects of type Datasource"
+    def __init__(self, salt: Optional[str] = None) -> None:
+        super().__init__(salt=salt)
 
+        self._data_connector_anonymizer = DataConnectorAnonymizer(salt=salt)
+
+    def anonymize(self, obj: object, *args, **kwargs) -> Any:
         if isinstance(obj, SimpleSqlalchemyDatasource):
             return self._anonymize_simple_sqlalchemy_datasource(*args, **kwargs)
         return self._anonymize_datasource_info(*args, **kwargs)
@@ -62,7 +66,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
             )
             data_connector_configs = config.get("data_connectors")
             anonymized_info_dict["anonymized_data_connectors"] = [
-                self._anonymize_data_connector_info(
+                self._data_connector_anonymizer.anonymize(
                     name=data_connector_name, config=data_connector_config
                 )
                 for data_connector_name, data_connector_config in data_connector_configs.items()
@@ -107,7 +111,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
                         "module_name"
                     ] = "great_expectations.datasource.data_connector"
                 introspection_data_connector_anonymized_configs.append(
-                    self._anonymize_data_connector_info(
+                    self._data_connector_anonymizer.anonymize(
                         name=data_connector_name, config=data_connector_config
                     )
                 )
@@ -127,7 +131,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
                         "module_name"
                     ] = "great_expectations.datasource.data_connector"
                 tables_data_connector_anonymized_configs.append(
-                    self._anonymize_data_connector_info(
+                    self._data_connector_anonymizer.anonymize(
                         name=data_connector_name, config=data_connector_config
                     )
                 )

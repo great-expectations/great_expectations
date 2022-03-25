@@ -2,6 +2,7 @@ import copy
 from typing import Any, Optional, Set, Union
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+from great_expectations.data_context.store.store import Store
 
 from great_expectations.core.usage_statistics.anonymizers.types.base import (  # isort:skip
     GETTING_STARTED_DATASOURCE_NAME,
@@ -12,10 +13,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (  #
 
 
 class StoreAnonymizer(BaseAnonymizer):
-    def anonymize(self, obj: object = None, **kwargs) -> Any:
-        store_name: str = kwargs["store_name"]
-        store_obj: object = kwargs["store_obj"]
-
+    def anonymize(self, store_name: str, store_obj: Store) -> Any:
         anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self._anonymize_string(store_name)
         store_backend_obj = store_obj.store_backend
