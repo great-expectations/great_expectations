@@ -1351,8 +1351,8 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
 
     # context.get_validator should add the new citation
     assert (
-        validator.expectation_suite.meta["citations"][0]["batch_request_list"][
-            0
+        validator.expectation_suite.meta["citations"][0][
+            "batch_request"
         ].data_asset_name
         == data_asset_name
     )
@@ -1409,22 +1409,22 @@ def test_update_runtime_data_connector_missing_data_asset_persists_to_data_conte
 
     # context.get_validator should add the new citation
     assert (
-        validator.expectation_suite.meta["citations"][0]["batch_request_list"][
-            0
+        validator.expectation_suite.meta["citations"][0][
+            "batch_request"
         ].data_asset_name
         == data_asset_name
     )
 
     assert (
-        validator.expectation_suite.meta["citations"][0]["batch_request_list"][
-            0
+        validator.expectation_suite.meta["citations"][0][
+            "batch_request"
         ].runtime_parameters["query"]
         == query
     )
 
     assert (
-        validator.expectation_suite.meta["citations"][0]["batch_request_list"][
-            0
+        validator.expectation_suite.meta["citations"][0][
+            "batch_request"
         ].batch_identifiers[batch_identifier_name]
         == batch_identifier
     )

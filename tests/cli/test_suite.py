@@ -4522,7 +4522,7 @@ def test_suite_edit_load_citations_with_batch_list(
     # all key-value pairs in batch request exist in batch_request_from_citations
     assert batch_request.items() <= batch_request_from_citations.items()
 
-    # all values in batch_request_from_citations that are not in batch_request should be None
+    # all values in batch_request_from_citations key-value pairs that are not in batch_request should be None
     assert all(
         item[1] is None
         for item in (batch_request_from_citations.items() - batch_request.items())
