@@ -43,7 +43,7 @@ class ColumnValuesToBeValidIPv4(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidIPv4(ColumnMapExpectation):
+class ExpectColumnValuesToBeValidIpv4(ColumnMapExpectation):
     """This Expectation validates data as conforming to the valid IPv4 address format."""
 
     # These examples will be shown in the public gallery.
@@ -147,9 +147,8 @@ class ExpectColumnValuesToBeValidIPv4(ColumnMapExpectation):
         "contributors": [
             "@voidforall",
         ],
-        "package": "experimental_expectations",
     }
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidIPv4().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidIpv4().print_diagnostic_checklist()
