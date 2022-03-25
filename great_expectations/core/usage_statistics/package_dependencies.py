@@ -62,7 +62,7 @@ class GEDependencies:
     )
 
     """This list should be kept in sync with our requirements-dev*.txt files."""
-    GE_DEV_DEPENDENCIES: List[str] = sorted(
+    ALL_GE_DEV_DEPENDENCIES: List[str] = sorted(
         [
             "PyMySQL",
             "azure-identity",
@@ -108,6 +108,35 @@ class GEDependencies:
             "teradatasqlalchemy",
             "xlrd",
         ]
+    )
+
+    GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING: List[str] = [
+        # requirements-dev-contrib.txt:
+        "black",
+        "flake8",
+        "isort",
+        "pre-commit",
+        "pytest-cov",
+        "pytest-order",
+        "pyupgrade",
+        # requirements-dev-lite.txt:
+        "flask",
+        "freezegun",
+        "ipywidgets",
+        "mistune",
+        "moto",
+        "nbconvert",
+        "pyfakefs",
+        "pytest",
+        "pytest-benchmark",
+        "requirements-parser",
+        "s3fs",
+        "snapshottest",
+        # "sqlalchemy",  # Not excluded from tracking
+    ]
+
+    GE_DEV_DEPENDENCIES: List[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(
+        GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
     )
 
     def __init__(self, requirements_relative_base_dir: str = "../../../"):

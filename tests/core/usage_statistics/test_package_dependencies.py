@@ -72,7 +72,6 @@ def test_dev_dependency_names_match_requirements_file():
     See GEDependencies for a utility to check for a mismatch.
     """
     ge_dependencies: GEDependencies = GEDependencies()
-    assert (
-        ge_dependencies.get_dev_dependency_names()
-        == ge_dependencies.get_dev_dependency_names_from_requirements_file()
-    )
+    assert ge_dependencies.get_dev_dependency_names() == set(
+        ge_dependencies.get_dev_dependency_names_from_requirements_file()
+    ) - set(GEDependencies.GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING)
