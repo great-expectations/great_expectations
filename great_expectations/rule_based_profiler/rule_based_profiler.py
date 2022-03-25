@@ -1054,6 +1054,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._name
 
     @property
+    def config_version(self) -> float:
+        return self._config_version
+
+    @property
     def variables(self) -> Optional[ParameterContainer]:
         # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
         return copy.deepcopy(self._variables)
@@ -1080,6 +1084,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             "class_name": self.__class__.__name__,
             "module_name": self.__class__.__module__,
             "name": self.name,
+            "config_version": self.config_version,
             "variables": variables_dict,
             "rules": [rule.to_json_dict() for rule in self.rules],
         }
@@ -1190,6 +1195,8 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+            class_name=self.__class__.__name__,
+            module_name=self.__class__.__module__,
             name=name,
             config_version=config_version,
             variables=variables,
