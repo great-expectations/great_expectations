@@ -45,6 +45,9 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder.ex
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
+    init_rule_expectation_configuration_builders,
+    init_rule_parameter_builders,
+    set_batch_list_or_batch_request_on_builder,
 )
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
@@ -194,16 +197,17 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
         parameter_builders: Optional[
             List[ParameterBuilder]
-        ] = RuleBasedProfiler._init_rule_parameter_builders(
+        ] = init_rule_parameter_builders(
             parameter_builder_configs=rule_config.get("parameter_builders"),
             data_context=self._data_context,
         )
         expectation_configuration_builders: List[
             ExpectationConfigurationBuilder
-        ] = RuleBasedProfiler._init_rule_expectation_configuration_builders(
+        ] = init_rule_expectation_configuration_builders(
             expectation_configuration_builder_configs=rule_config[
                 "expectation_configuration_builders"
-            ]
+            ],
+            data_context=self._data_context,
         )
 
         # Compile previous steps and package into a Rule object
@@ -228,73 +232,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
         return domain_builder
-
-    @staticmethod
-    def _init_rule_parameter_builders(
-        parameter_builder_configs: Optional[List[dict]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ) -> Optional[List[ParameterBuilder]]:
-        if parameter_builder_configs is None:
-            return None
-
-        parameter_builders: List[ParameterBuilder] = []
-
-        parameter_builder_config: dict
-        for parameter_builder_config in parameter_builder_configs:
-            parameter_builder: ParameterBuilder = (
-                RuleBasedProfiler._init_parameter_builder(
-                    parameter_builder_config=parameter_builder_config,
-                    data_context=data_context,
-                )
-            )
-            parameter_builders.append(parameter_builder)
-
-        return parameter_builders
-
-    @staticmethod
-    def _init_parameter_builder(
-        parameter_builder_config: dict,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ) -> ParameterBuilder:
-        parameter_builder: ParameterBuilder = instantiate_class_from_config(
-            config=parameter_builder_config,
-            runtime_environment={"data_context": data_context},
-            config_defaults={
-                "module_name": "great_expectations.rule_based_profiler.parameter_builder"
-            },
-        )
-        return parameter_builder
-
-    @staticmethod
-    def _init_rule_expectation_configuration_builders(
-        expectation_configuration_builder_configs: List[dict],
-    ) -> List[ExpectationConfigurationBuilder]:
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = []
-
-        expectation_configuration_builder_config: dict
-        for (
-            expectation_configuration_builder_config
-        ) in expectation_configuration_builder_configs:
-            expectation_configuration_builder: ExpectationConfigurationBuilder = RuleBasedProfiler._init_expectation_configuration_builder(
-                expectation_configuration_builder_config=expectation_configuration_builder_config,
-            )
-            expectation_configuration_builders.append(expectation_configuration_builder)
-
-        return expectation_configuration_builders
-
-    @staticmethod
-    def _init_expectation_configuration_builder(
-        expectation_configuration_builder_config: dict,
-    ) -> ExpectationConfigurationBuilder:
-        expectation_configuration_builder: ExpectationConfigurationBuilder = instantiate_class_from_config(
-            config=expectation_configuration_builder_config,
-            runtime_environment={},
-            config_defaults={
-                "class_name": "DefaultExpectationConfigurationBuilder",
-                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-            },
-        )
-        return expectation_configuration_builder
 
     @usage_statistics_enabled_method(
         event_name="profiler.run",
@@ -898,27 +835,38 @@ class BaseRuleBasedProfiler(ConfigPeer):
         domain_builder: DomainBuilder
         parameter_builders: Optional[List[ParameterBuilder]]
         parameter_builder: ParameterBuilder
+        expectation_configuration_builders: Optional[
+            List[ExpectationConfigurationBuilder]
+        ]
+        expectation_configuration_builder: ExpectationConfigurationBuilder
         for rule in rules:
             domain_builder = rule.domain_builder
-            if force_batch_data or domain_builder.batch_request is None:
-                domain_builder.set_batch_data(
+            set_batch_list_or_batch_request_on_builder(
+                builder=domain_builder,
+                batch_list=batch_list,
+                batch_request=batch_request,
+                force_batch_data=force_batch_data,
+            )
+
+            parameter_builders = rule.parameter_builders or []
+            for parameter_builder in parameter_builders:
+                set_batch_list_or_batch_request_on_builder(
+                    builder=parameter_builder,
                     batch_list=batch_list,
                     batch_request=batch_request,
+                    force_batch_data=force_batch_data,
                 )
 
-            """
-            Despite potentially having access to all loaded Batch objects, in general, a ParameterBuilder should
-            exclude using active Batch (in order to avoid estimation bias).  However, when ParameterBuilder is part
-            of RuleBasedProfiler used to estimate arguments of an Expectation class, all Batch objects must be used.
-            """
-            parameter_builders = rule.parameter_builders
-            if parameter_builders:
-                for parameter_builder in parameter_builders:
-                    if force_batch_data or parameter_builder.batch_request is None:
-                        parameter_builder.set_batch_data(
-                            batch_list=batch_list,
-                            batch_request=batch_request,
-                        )
+            expectation_configuration_builders = (
+                rule.expectation_configuration_builders or []
+            )
+            for expectation_configuration_builder in expectation_configuration_builders:
+                set_batch_list_or_batch_request_on_builder(
+                    builder=expectation_configuration_builder,
+                    batch_list=batch_list,
+                    batch_request=batch_request,
+                    force_batch_data=force_batch_data,
+                )
 
             resulting_rules.append(rule)
 
@@ -1106,6 +1054,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._name
 
     @property
+    def config_version(self) -> float:
+        return self._config_version
+
+    @property
     def variables(self) -> Optional[ParameterContainer]:
         # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
         return copy.deepcopy(self._variables)
@@ -1132,6 +1084,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             "class_name": self.__class__.__name__,
             "module_name": self.__class__.__module__,
             "name": self.name,
+            "config_version": self.config_version,
             "variables": variables_dict,
             "rules": [rule.to_json_dict() for rule in self.rules],
         }
@@ -1242,6 +1195,8 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+            class_name=self.__class__.__name__,
+            module_name=self.__class__.__module__,
             name=name,
             config_version=config_version,
             variables=variables,

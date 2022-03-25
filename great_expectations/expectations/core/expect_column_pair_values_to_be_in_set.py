@@ -39,7 +39,6 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "tags": [
             "core expectation",
             "multi-column expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],
@@ -68,7 +67,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -82,4 +81,3 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
             ), "must provide value_pairs_set"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True

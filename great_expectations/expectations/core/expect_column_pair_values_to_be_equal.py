@@ -49,7 +49,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "tags": [
             "core expectation",
             "multi-column expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],
@@ -80,7 +79,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -91,7 +90,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             ), "both columns must be provided"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(

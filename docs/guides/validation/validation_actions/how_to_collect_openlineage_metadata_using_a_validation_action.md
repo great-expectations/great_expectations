@@ -16,7 +16,7 @@ This guide will explain how to use an <TechnicalTag tag="action" text="Action" /
 
 <Prerequisites>
 
- - Created at least one Expectation Suite.
+ - Created at least one Expectation Suite
  - [Created at least one Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md) - you will need it in order to test that the OpenLineage <TechnicalTag tag="validation" text="Validation" /> is working.
 
 </Prerequisites>

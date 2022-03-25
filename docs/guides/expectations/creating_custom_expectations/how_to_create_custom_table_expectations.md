@@ -296,7 +296,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L203-L208
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L203-L206
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
