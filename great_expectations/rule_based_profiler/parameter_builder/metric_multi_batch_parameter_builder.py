@@ -55,6 +55,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.

@@ -1839,7 +1839,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "column": "$domain.domain_kwargs.column",
                         "quantile_ranges": {
                             "quantiles": "$variables.quantiles",
-                            "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                            "value_ranges": "$parameter.quantile_value_ranges.value",
                         },
                         "allow_relative_error": "$variables.allow_relative_error",
                         "meta": {
@@ -1938,7 +1938,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "column": "$domain.domain_kwargs.column",
                         "quantile_ranges": {
                             "quantiles": "$variables.quantiles",
-                            "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                            "value_ranges": "$parameter.quantile_value_ranges.value",
                         },
                         "allow_relative_error": "$variables.allow_relative_error",
                         "meta": {
