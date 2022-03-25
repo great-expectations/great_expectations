@@ -396,4 +396,4 @@ if __name__ == "__main__":
         with open("./checklists.txt", "w") as outfile:
             outfile.write(checklists)
     with open("./expectation_library_v2.json", "w") as outfile:
-        json.dump(gallery_info, outfile)
+        json.dump(gallery_info, outfile, indent=4)
