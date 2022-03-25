@@ -7,6 +7,7 @@ class BatchAnonymizer(BaseAnonymizer):
     def anonymize(
         self,
         obj: Union[Tuple[dict, str], "DataAsset", "Validator"],  # noqa: F821
+        **kwargs,
     ) -> Any:
         from great_expectations.data_asset import DataAsset
         from great_expectations.validator.validator import Validator
@@ -83,7 +84,7 @@ class BatchAnonymizer(BaseAnonymizer):
         return anonymized_batch_kwarg_keys
 
     @staticmethod
-    def can_handle(obj: Optional[object], **kwargs) -> bool:
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         from great_expectations.data_asset.data_asset import DataAsset
         from great_expectations.validator.validator import Validator
 

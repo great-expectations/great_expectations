@@ -62,7 +62,7 @@ class Anonymizer(BaseAnonymizer):
             ValidationOperatorAnonymizer,
         ]
 
-    def anonymize(self, obj: object = None, **kwargs) -> Any:
+    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         anonymizer: Optional[BaseAnonymizer] = None
         for anonymizer_cls in self.STRATEGIES:
             if anonymizer_cls.can_handle(obj=obj, **kwargs):
@@ -81,6 +81,7 @@ class Anonymizer(BaseAnonymizer):
         return isinstance(obj, object)
 
     def anonymize_init_payload(self, init_payload: dict) -> dict:
+        breakpoint()
         anonymized_init_payload = {}
         anonymizer_funcs = {
             "datasources": self._anonymize_datasources_init_payload,

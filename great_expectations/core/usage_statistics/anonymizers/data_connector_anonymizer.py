@@ -1,10 +1,10 @@
-from typing import Any
+from typing import Any, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
 
 class DataConnectorAnonymizer(BaseAnonymizer):
-    def anonymize(self, obj: object = None, **kwargs) -> Any:
+    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         name: str = kwargs["name"]
         config: dict = kwargs["config"]
 
@@ -33,7 +33,7 @@ class DataConnectorAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     @staticmethod
-    def can_handle(obj: object, **kwargs) -> bool:
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         from great_expectations.datasource.data_connector.data_connector import (
             DataConnector,
         )

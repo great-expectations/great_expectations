@@ -5,13 +5,9 @@ from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonym
 
 class ExpectationAnonymizer(BaseAnonymizer):
     def anonymize(
-        self, expectation_suite: "ExpectationSuite", **kwargs  # noqa: F821
+        self, obj: Optional["ExpectationSuite"] = None, **kwargs  # noqa: F821
     ) -> dict:
-        assert self.can_handle(obj=expectation_suite, **kwargs)
-
-    def _anonymize_expectation_suite(
-        self, expectation_suite: "ExpectationSuite"  # noqa: F821
-    ):
+        expectation_suite = obj
         anonymized_info_dict = {}
         anonymized_expectation_counts = list()
 
@@ -50,5 +46,6 @@ class ExpectationAnonymizer(BaseAnonymizer):
                 expectation_type
             )
 
-    def can_handle(obj: object, **kwargs) -> bool:
-        pass
+    @staticmethod
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
+        assert "expectation_suite" in kwargs

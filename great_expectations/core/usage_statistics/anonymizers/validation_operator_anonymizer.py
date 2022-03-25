@@ -19,6 +19,7 @@ class ValidationOperatorAnonymizer(BaseAnonymizer):
         self,
         validation_operator_obj: ValidationOperator,
         validation_operator_name: str,
+        obj: Optional[object] = None,
     ) -> Any:
         anonymized_info_dict: dict = {
             "anonymized_name": self._anonymize_string(validation_operator_name)
@@ -43,7 +44,9 @@ class ValidationOperatorAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     @staticmethod
-    def can_handle(obj: object, **kwargs) -> bool:
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         return (
-            isinstance(obj, ValidationOperator) and "validation_operator_name" in kwargs
+            obj is not None
+            and isinstance(obj, ValidationOperator)
+            and "validation_operator_name" in kwargs
         )

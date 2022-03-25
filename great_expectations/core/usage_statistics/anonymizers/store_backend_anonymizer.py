@@ -7,6 +7,7 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 class StoreBackendAnonymizer(BaseAnonymizer):
     def anonymize(
         self,
+        obj: Optional[object] = None,
         store_backend_obj: Optional[StoreBackend] = None,
         store_backend_object_config: Optional[dict] = None,
     ) -> dict:
@@ -31,7 +32,7 @@ class StoreBackendAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     @staticmethod
-    def can_handle(obj: Optional[object], **kwargs) -> bool:
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         return (obj is not None and isinstance(obj, StoreBackend)) or (
             "store_backend_object_config" in kwargs
         )

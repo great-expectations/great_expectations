@@ -18,8 +18,8 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
 
         self._batch_request_anonymizer = BatchRequestAnonymizer(salt=salt)
 
-    def anonymize(self, obj: object, **kwargs) -> Any:
-        if isinstance(obj, RuleBasedProfiler):
+    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
+        if obj and isinstance(obj, RuleBasedProfiler):
             return self._anonymize_profiler_info(**kwargs)
         return self._anonymize_profiler_run(obj=obj, **kwargs)
 
@@ -236,7 +236,7 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
             )
 
     @staticmethod
-    def can_handle(obj: object, **kwargs) -> bool:
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         return object is not None and isinstance(
             obj, (RuleBasedProfilerConfig, RuleBasedProfiler)
         )

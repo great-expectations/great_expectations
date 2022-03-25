@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class BatchRequestAnonymizer(BaseAnonymizer):
-    def anonymize(self, **kwargs) -> Any:
+    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         anonymized_batch_request_properties_dict: Optional[Dict[str, List[str]]] = None
 
         # noinspection PyBroadException
@@ -158,7 +158,7 @@ class BatchRequestAnonymizer(BaseAnonymizer):
         ]
 
     @staticmethod
-    def can_handle(obj: Optional[object], **kwargs) -> bool:
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         return all(
             attr in kwargs
             for attr in ("datasource_name", "data_connector_name", "data_asset_name")

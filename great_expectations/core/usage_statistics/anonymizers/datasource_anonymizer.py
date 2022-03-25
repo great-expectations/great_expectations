@@ -36,8 +36,8 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
         self._data_connector_anonymizer = DataConnectorAnonymizer(salt=salt)
 
-    def anonymize(self, obj: object, *args, **kwargs) -> Any:
-        if isinstance(obj, SimpleSqlalchemyDatasource):
+    def anonymize(self, obj: Optional[object] = None, *args, **kwargs) -> Any:
+        if obj and isinstance(obj, SimpleSqlalchemyDatasource):
             return self._anonymize_simple_sqlalchemy_datasource(*args, **kwargs)
         return self._anonymize_datasource_info(*args, **kwargs)
 
@@ -168,7 +168,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     @staticmethod
-    def can_handle(obj: object, **kwargs) -> bool:
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         return obj is not None and isinstance(obj, BaseDatasource)
 
     @staticmethod

@@ -9,6 +9,7 @@ class ActionAnonymizer(BaseAnonymizer):
         action_name: str,
         action_obj: Optional[object] = None,
         action_config: Optional[dict] = None,
+        obj: Optional[object] = None,
     ) -> Any:
         anonymized_info_dict: dict = {
             "anonymized_name": self._anonymize_string(action_name),
@@ -24,5 +25,5 @@ class ActionAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     @staticmethod
-    def can_handle(obj: Optional[object], **kwargs) -> bool:
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         return "action_name" in kwargs

@@ -259,5 +259,5 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
         return anonymized_checkpoint_run_properties_dict
 
     @staticmethod
-    def can_handle(obj: object, **kwargs) -> bool:
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         return object is not None and isinstance(obj, (Checkpoint, CheckpointConfig))

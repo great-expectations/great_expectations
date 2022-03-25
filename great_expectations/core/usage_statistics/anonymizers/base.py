@@ -34,7 +34,7 @@ class BaseAnonymizer(ABC):
         return self._salt
 
     @abstractmethod
-    def anonymize(self, **kwargs) -> Any:
+    def anonymize(self, obj: Optional[object], **kwargs) -> Any:
         raise NotImplementedError
 
     @abstractstaticmethod

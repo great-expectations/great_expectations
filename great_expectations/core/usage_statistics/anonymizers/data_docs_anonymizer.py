@@ -12,7 +12,9 @@ class DataDocsAnonymizer(BaseAnonymizer):
 
         self._store_backend_anonymizer = StoreBackendAnonymizer(salt=salt)
 
-    def anonymize(self, site_name: str, site_config: dict) -> dict:
+    def anonymize(
+        self, site_name: str, site_config: dict, obj: Optional[object] = None
+    ) -> dict:
         site_config_module_name = site_config.get("module_name")
         if site_config_module_name is None:
             site_config[
@@ -60,5 +62,5 @@ class DataDocsAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     @staticmethod
-    def can_handle(obj: Optional[object], **kwargs) -> bool:
+    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
         return "site_name" and "site_config" in kwargs
