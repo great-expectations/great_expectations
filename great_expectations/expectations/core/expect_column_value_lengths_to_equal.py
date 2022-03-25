@@ -91,7 +91,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -108,7 +108,6 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
