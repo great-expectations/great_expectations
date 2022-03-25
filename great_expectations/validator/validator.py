@@ -50,6 +50,9 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
+)
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
@@ -606,8 +609,23 @@ class Validator:
                 metric_value_kwargs=metric_value_kwargs_override,
             )
 
-    @staticmethod
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
+            rule.expectation_configuration_builders or []
+        )
+
+        expectation_configuration_builder: ExpectationConfigurationBuilder
+        for expectation_configuration_builder in expectation_configuration_builders:
+            validation_parameter_builders: List[ParameterBuilder] = (
+                expectation_configuration_builder.validation_parameter_builders or []
+            )
+            for parameter_builder in validation_parameter_builders:
+                self._update_metric_value_kwargs_for_success_keys(
+                    parameter_builder=parameter_builder,
+                    metric_value_kwargs=metric_value_kwargs_override,
+                )
+
     def _update_metric_value_kwargs_for_success_keys(
+        self,
         parameter_builder: ParameterBuilder,
         metric_value_kwargs: Optional[dict] = None,
     ):
@@ -629,6 +647,17 @@ class Validator:
             }
             parameter_builder.metric_value_kwargs = (
                 parameter_builder_metric_value_kwargs
+            )
+
+        evaluation_parameter_builders: List[ParameterBuilder] = (
+            parameter_builder.evaluation_parameter_builders or []
+        )
+
+        evaluation_parameter_builder: ParameterBuilder
+        for evaluation_parameter_builder in evaluation_parameter_builders:
+            self._update_metric_value_kwargs_for_success_keys(
+                parameter_builder=evaluation_parameter_builder,
+                metric_value_kwargs=metric_value_kwargs,
             )
 
     @property
