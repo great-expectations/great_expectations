@@ -19,7 +19,6 @@ from great_expectations.core.batch import (
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
     VARIABLES_PREFIX,
-    Builder,
     Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
@@ -389,19 +388,6 @@ def convert_variables_to_dict(
     )
 
     return variables or {}
-
-
-def set_batch_list_or_batch_request_on_builder(
-    builder: Builder,
-    batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
-    force_batch_data: bool = False,
-) -> None:
-    if force_batch_data or builder.batch_request is None:
-        builder.set_batch_data(
-            batch_list=batch_list,
-            batch_request=batch_request,
-        )
 
 
 def compute_quantiles(

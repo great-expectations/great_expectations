@@ -6,9 +6,6 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.helpers.util import (
-    set_batch_list_or_batch_request_on_builder,
-)
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     init_rule_parameter_builders,
@@ -113,8 +110,7 @@ class ExpectationConfigurationBuilder(Builder, ABC):
 
         validation_parameter_builder: ParameterBuilder
         for validation_parameter_builder in validation_parameter_builders:
-            set_batch_list_or_batch_request_on_builder(
-                builder=validation_parameter_builder,
+            validation_parameter_builder.set_batch_list_or_batch_request(
                 batch_list=self.batch_list,
                 batch_request=self.batch_request,
                 force_batch_data=False,

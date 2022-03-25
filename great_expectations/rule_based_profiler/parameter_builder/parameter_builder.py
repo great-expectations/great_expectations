@@ -23,9 +23,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
 )
-from great_expectations.rule_based_profiler.helpers.util import (
-    set_batch_list_or_batch_request_on_builder,
-)
 from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
     Attributes,
@@ -629,8 +626,7 @@ def resolve_evaluation_dependencies(
             fully_qualified_evaluation_parameter_builder_name
             not in fully_qualified_parameter_names
         ):
-            set_batch_list_or_batch_request_on_builder(
-                builder=evaluation_parameter_builder,
+            evaluation_parameter_builder.set_batch_list_or_batch_request(
                 batch_list=parameter_builder.batch_list,
                 batch_request=parameter_builder.batch_request,
                 force_batch_data=False,
