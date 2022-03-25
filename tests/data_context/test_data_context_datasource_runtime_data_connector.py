@@ -2,6 +2,7 @@ import os
 
 import pandas as pd
 import pytest
+from ruamel.yaml import YAML
 
 import great_expectations
 import great_expectations.exceptions as ge_exceptions
@@ -11,6 +12,8 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.validator.validator import Validator
+
+yaml = YAML()
 
 
 @pytest.fixture
@@ -48,6 +51,34 @@ def test_df_spark(spark_session):
         data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     )
     return test_df
+
+
+@pytest.fixture
+def data_context_with_datasource_spark_engine_batch_spec_passthrough(
+    empty_data_context, spark_session
+):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SparkDFExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+            batch_spec_passthrough:
+                reader_method: csv
+                reader_options:
+                    header: True
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
 
 
 #########################################
