@@ -312,7 +312,7 @@ class ParameterBuilder(Builder, ABC):
         Then, all "MetricConfiguration" objects, collected into list as container, are resolved simultaneously.
         """
 
-        # First: Gather "metric_domain_kwargs" (corresponding to "batch_ids").
+        # Step-1: Gather "metric_domain_kwargs" (corresponding to "batch_ids").
 
         domain_kwargs: dict = build_metric_domain_kwargs(
             batch_id=None,
@@ -336,7 +336,7 @@ class ParameterBuilder(Builder, ABC):
             for batch_id in batch_ids
         ]
 
-        # Second: Gather "metric_value_kwargs" (caller may require same metric computed for multiple arguments).
+        # Step-2: Gather "metric_value_kwargs" (caller may require same metric computed for multiple arguments).
 
         if not isinstance(metric_value_kwargs, list):
             metric_value_kwargs = [metric_value_kwargs]
@@ -354,7 +354,7 @@ class ParameterBuilder(Builder, ABC):
             for value_kwargs_cursor in metric_value_kwargs
         ]
 
-        # Third: Generate "MetricConfiguration" directives for all "metric_domain_kwargs" / "metric_value_kwargs" pairs.
+        # Step-3: Generate "MetricConfiguration" directives for all "metric_domain_kwargs" / "metric_value_kwargs" pairs.
 
         domain_kwargs_cursor: dict
         kwargs_combinations: List[List[dict]] = [
@@ -374,7 +374,7 @@ class ParameterBuilder(Builder, ABC):
             for kwargs_pair_cursor in kwargs_combinations
         ]
 
-        # Fourth: Resolve all metrics in one operation simultaneously.
+        # Step-4: Resolve all metrics in one operation simultaneously.
 
         # The Validator object used for metric calculation purposes.
         validator: "Validator" = self.get_validator(  # noqa: F821
@@ -387,7 +387,7 @@ class ParameterBuilder(Builder, ABC):
             metric_configurations=metrics_to_resolve
         )
 
-        # Fifth: Map resolved metrics to their attributes for identification and recovery by receiver.
+        # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
 
         metric_configuration: MetricConfiguration
         attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
@@ -413,12 +413,13 @@ class ParameterBuilder(Builder, ABC):
                 raise ge_exceptions.ProfilerExecutionError(
                     f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
                 )
+
             attributed_resolved_metrics.add_resolved_metric(value=resolved_metric_value)
 
         metric_attributes_id: str
         metric_values: AttributedResolvedMetrics
 
-        # Sixth: Leverage Numpy Array capabilities for subsequent operations on results of computed/resolved metrics.
+        # Step-6: Leverage Numpy Array capabilities for subsequent operations on results of computed/resolved metrics.
 
         attributed_resolved_metrics_map = {
             metric_attributes_id: AttributedResolvedMetrics(
@@ -428,7 +429,7 @@ class ParameterBuilder(Builder, ABC):
             for metric_attributes_id, metric_values in attributed_resolved_metrics_map.items()
         }
 
-        # Seventh: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
+        # Step-7: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
 
         idx: int
         for (
@@ -442,7 +443,7 @@ class ParameterBuilder(Builder, ABC):
                 metric_values.metric_values = np.array(metric_values.metric_values)
                 attributed_resolved_metrics_map[metric_attributes_id] = metric_values
 
-        # Eighth: Apply numeric/hygiene directives (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+        # Step-8: Apply numeric/hygiene directives (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
         for (
             metric_attributes_id,
             metric_values,
@@ -457,7 +458,7 @@ class ParameterBuilder(Builder, ABC):
                 parameters=parameters,
             )
 
-        # Ninth: Compose and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
+        # Step-9: Compose and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
         return MetricComputationResult(
             list(attributed_resolved_metrics_map.values()),
             details={
@@ -598,14 +599,14 @@ def resolve_evaluation_dependencies(
     "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to fulfill its goals.
     """
 
-    # Step 1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
+    # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
     evaluation_parameter_builders: List[
         "ParameterBuilder"  # noqa: F821
     ] = parameter_builder.evaluation_parameter_builders
     if not evaluation_parameter_builders:
         return
 
-    # Step 2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
+    # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
     # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
     # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name").
     fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
@@ -614,7 +615,7 @@ def resolve_evaluation_dependencies(
         parameters=parameters,
     )
 
-    # Step 3: Check for presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
+    # Step-3: Check for presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
     # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
     evaluation_parameter_builder: "ParameterBuilder"  # noqa: F821
     for evaluation_parameter_builder in evaluation_parameter_builders:
@@ -639,7 +640,7 @@ def resolve_evaluation_dependencies(
                 parameters=parameters,
             )
 
-            # Step 4: Any "ParameterBuilder" object, including members of "evaluation_parameter_builders" list may be
+            # Step-4: Any "ParameterBuilder" object, including members of "evaluation_parameter_builders" list may be
             # configured with its own "evaluation_parameter_builders" list.  Recursive call handles such situations.
             resolve_evaluation_dependencies(
                 parameter_builder=evaluation_parameter_builder,
