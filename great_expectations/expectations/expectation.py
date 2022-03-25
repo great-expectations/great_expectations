@@ -2,7 +2,6 @@ import glob
 import json
 import logging
 import os
-import re
 import traceback
 import warnings
 from abc import ABC, ABCMeta, abstractmethod
@@ -80,15 +79,11 @@ from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
-from great_expectations.util import is_parseable_date
+from great_expectations.util import camel_to_snake, is_parseable_date
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-
-p1 = re.compile(r"(.)([A-Z][a-z]+)")
-p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
 _TEST_DEFS_DIR = os.path.join(
@@ -98,11 +93,6 @@ _TEST_DEFS_DIR = os.path.join(
     "tests",
     "test_definitions",
 )
-
-
-def camel_to_snake(name):
-    name = p1.sub(r"\1_\2", name)
-    return p2.sub(r"\1_\2", name).lower()
 
 
 class MetaExpectation(ABCMeta):
@@ -843,7 +833,6 @@ class Expectation(metaclass=MetaExpectation):
             ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def validate(
         self,
@@ -916,6 +905,7 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
+        return_only_gallery_examples: bool = False,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -943,9 +933,11 @@ class Expectation(metaclass=MetaExpectation):
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
         )
-        gallery_examples: List[ExpectationTestDataCases] = self._get_examples()
+        gallery_examples: List[ExpectationTestDataCases] = self._get_examples(
+            return_only_gallery_examples=True
+        )
         examples: List[ExpectationTestDataCases] = self._get_examples(
-            return_only_gallery_examples=False
+            return_only_gallery_examples=return_only_gallery_examples
         )
         description_diagnostics: ExpectationDescriptionDiagnostics = (
             self._get_description_diagnostics()
@@ -1056,13 +1048,11 @@ class Expectation(metaclass=MetaExpectation):
         :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
         :return: list of examples or [], if no examples exist
         """
-        is_core_expectation = False
         try:
             # Currently, only community contrib expectations have an examples attribute
             all_examples = self.examples
         except AttributeError:
             all_examples = self._get_examples_from_json()
-            is_core_expectation = True
             if all_examples == []:
                 return []
 
@@ -1079,7 +1069,6 @@ class Expectation(metaclass=MetaExpectation):
                 if (
                     test.get("include_in_gallery") == True
                     or return_only_gallery_examples == False
-                    or is_core_expectation == True
                 ):
                     copied_test = deepcopy(test)
                     if top_level_only_for and "only_for" not in copied_test:
@@ -1510,7 +1499,6 @@ class Expectation(metaclass=MetaExpectation):
                     "tags",
                     "contributors",
                     "requirements",
-                    "package",
                     "has_full_test_suite",
                     "manually_reviewed_code",
                 }
@@ -1546,6 +1534,7 @@ class Expectation(metaclass=MetaExpectation):
                 tests
             )
         )
+        experimental_checks.append(ExpectationDiagnostics._check_linting(self))
 
         beta_checks.append(
             ExpectationDiagnostics._check_input_validation(self, examples)
@@ -1557,7 +1546,6 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
 
-        production_checks.append(ExpectationDiagnostics._check_linting(self))
         production_checks.append(
             ExpectationDiagnostics._check_full_test_suite(library_metadata)
         )
@@ -1674,9 +1662,11 @@ class TableExpectation(Expectation, ABC):
         )
 
         if parse_strings_as_datetimes:
+            # deprecated-v0.13.41
             warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
-future release.  Please update code accordingly.
+                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
+v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
+please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
 """,
                 DeprecationWarning,
             )
@@ -1727,7 +1717,6 @@ class ColumnExpectation(TableExpectation, ABC):
             ), "'column' parameter is required for column expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
 
 class ColumnMapExpectation(TableExpectation, ABC):
@@ -1762,7 +1751,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def get_validation_dependencies(
         self,
@@ -1978,7 +1966,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def get_validation_dependencies(
         self,
@@ -2167,7 +2154,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             ), "'column_list' parameter is required for multicolumn map expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def get_validation_dependencies(
         self,

@@ -11,6 +11,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
+    PARAMETER_KEY,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -41,9 +42,12 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         null_count_parameter_builder_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
         json_serialize: Union[str, bool] = True,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -57,9 +61,12 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             null_count_parameter_builder_name: name of parameter that computes null_count (of domain values in Batch).
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -70,9 +77,10 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             enforce_numeric_metric=True,
             replace_nan_with_zero=True,
             reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -117,7 +125,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         )
 
         fully_qualified_total_count_parameter_builder_name: str = (
-            f"$parameter.{total_count_parameter_builder_name}"
+            f"{PARAMETER_KEY}{total_count_parameter_builder_name}"
         )
         # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         total_count_parameter_node: ParameterNode = (
@@ -154,7 +162,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             null_count_values = np.zeros(shape=(num_batch_ids,))
         else:
             fully_qualified_null_count_parameter_builder_name: str = (
-                f"$parameter.{null_count_parameter_builder_name}"
+                f"{PARAMETER_KEY}{null_count_parameter_builder_name}"
             )
             # Obtain null_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
             null_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(

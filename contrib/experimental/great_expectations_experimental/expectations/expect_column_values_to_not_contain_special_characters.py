@@ -102,7 +102,6 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             "special characters",
         ],
         "contributors": ["@jaibirsingh"],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.

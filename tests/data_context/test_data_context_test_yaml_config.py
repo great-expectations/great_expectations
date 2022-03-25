@@ -242,6 +242,9 @@ def test_checkpoint_store_with_filesystem_store_backend(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -738,6 +741,9 @@ def test_golden_path_sql_datasource_configuration(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.filterwarnings(
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
+)
 def test_golden_path_inferred_asset_pandas_datasource_configuration(
     mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
@@ -926,6 +932,9 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@pytest.mark.filterwarnings(
+    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
 )
 def test_golden_path_configured_asset_pandas_datasource_configuration(
     mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory

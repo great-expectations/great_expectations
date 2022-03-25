@@ -2,13 +2,14 @@ import copy
 import itertools
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, make_dataclass
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
 )
@@ -20,6 +21,10 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    init_rule_parameter_builders,
+    resolve_evaluation_dependencies,
 )
 from great_expectations.rule_based_profiler.types import (
     Attributes,
@@ -87,24 +92,36 @@ class ParameterBuilder(Builder, ABC):
         ```
     """
 
+    exclude_field_names: Set[str] = Builder.exclude_field_names | {
+        "evaluation_parameter_builders",
+    }
+
     def __init__(
         self,
         name: str,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
+        ] = None,
         json_serialize: Union[str, bool] = True,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
-        The ParameterBuilder will build parameters for the active domain from the rule.
+        The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
 
         Args:
             name: the name of this parameter builder -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -114,6 +131,11 @@ class ParameterBuilder(Builder, ABC):
         )
 
         self._name = name
+
+        self._evaluation_parameter_builders = init_rule_parameter_builders(
+            parameter_builder_configs=evaluation_parameter_builder_configs,
+            data_context=self._data_context,
+        )
 
         self._json_serialize = json_serialize
 
@@ -126,12 +148,19 @@ class ParameterBuilder(Builder, ABC):
         parameter_computation_impl: Optional[Callable] = None,
         json_serialize: Optional[bool] = None,
     ) -> None:
-        computed_parameter_value: Any
-        parameter_computation_details: dict
+        resolve_evaluation_dependencies(
+            parameter_builder=self,
+            parameter_container=parameter_container,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
 
         if parameter_computation_impl is None:
             parameter_computation_impl = self._build_parameters
 
+        computed_parameter_value: Any
+        parameter_computation_details: dict
         (
             computed_parameter_value,
             parameter_computation_details,
@@ -173,6 +202,12 @@ class ParameterBuilder(Builder, ABC):
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def evaluation_parameter_builders(
+        self,
+    ) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
+        return self._evaluation_parameter_builders
 
     @property
     def json_serialize(self) -> Union[str, bool]:
@@ -514,6 +549,6 @@ class ParameterBuilder(Builder, ABC):
 """
                         )
 
-                    np.nan_to_num(metric_value_vector, copy=True, nan=0.0)
+                    np.nan_to_num(metric_value_vector, copy=False, nan=0.0)
 
         return metric_values
