@@ -58,12 +58,13 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.match_strftime_format"
@@ -86,7 +87,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -109,8 +110,6 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             raise ValueError(f"Unable to use provided strftime_format. {str(e)}")
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(

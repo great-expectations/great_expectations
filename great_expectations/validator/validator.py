@@ -50,6 +50,10 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
@@ -596,13 +600,65 @@ class Validator:
             column_name = expectation_kwargs["column"]
             rule.domain_builder.include_column_names = [column_name]
 
-        for parameter_builder in rule.parameter_builders:
-            if hasattr(parameter_builder, "metric_name") and hasattr(
-                parameter_builder, "metric_value_kwargs"
-            ):
-                metric_value_kwargs: dict = parameter_builder.metric_value_kwargs or {}
-                metric_value_kwargs.update(metric_value_kwargs_override)
-                parameter_builder.metric_value_kwargs = metric_value_kwargs
+        parameter_builders: List[ParameterBuilder] = rule.parameter_builders or []
+        parameter_builder: ParameterBuilder
+
+        for parameter_builder in parameter_builders:
+            self._update_metric_value_kwargs_for_success_keys(
+                parameter_builder=parameter_builder,
+                metric_value_kwargs=metric_value_kwargs_override,
+            )
+
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
+            rule.expectation_configuration_builders or []
+        )
+
+        expectation_configuration_builder: ExpectationConfigurationBuilder
+        for expectation_configuration_builder in expectation_configuration_builders:
+            validation_parameter_builders: List[ParameterBuilder] = (
+                expectation_configuration_builder.validation_parameter_builders or []
+            )
+            for parameter_builder in validation_parameter_builders:
+                self._update_metric_value_kwargs_for_success_keys(
+                    parameter_builder=parameter_builder,
+                    metric_value_kwargs=metric_value_kwargs_override,
+                )
+
+    def _update_metric_value_kwargs_for_success_keys(
+        self,
+        parameter_builder: ParameterBuilder,
+        metric_value_kwargs: Optional[dict] = None,
+    ):
+        if metric_value_kwargs is None:
+            metric_value_kwargs = {}
+
+        if hasattr(parameter_builder, "metric_name") and hasattr(
+            parameter_builder, "metric_value_kwargs"
+        ):
+            parameter_builder_metric_value_kwargs: dict = (
+                parameter_builder.metric_value_kwargs or {}
+            )
+
+            key: str
+            value: Any
+            parameter_builder_metric_value_kwargs = {
+                key: metric_value_kwargs.get(key) or value
+                for key, value in parameter_builder_metric_value_kwargs.items()
+            }
+            parameter_builder.metric_value_kwargs = (
+                parameter_builder_metric_value_kwargs
+            )
+
+        evaluation_parameter_builders: List[ParameterBuilder] = (
+            parameter_builder.evaluation_parameter_builders or []
+        )
+
+        evaluation_parameter_builder: ParameterBuilder
+        for evaluation_parameter_builder in evaluation_parameter_builders:
+            self._update_metric_value_kwargs_for_success_keys(
+                parameter_builder=evaluation_parameter_builder,
+                metric_value_kwargs=metric_value_kwargs,
+            )
 
     @property
     def execution_engine(self) -> ExecutionEngine:

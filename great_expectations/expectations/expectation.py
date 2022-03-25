@@ -833,7 +833,6 @@ class Expectation(metaclass=MetaExpectation):
             ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def validate(
         self,
@@ -1500,7 +1499,6 @@ class Expectation(metaclass=MetaExpectation):
                     "tags",
                     "contributors",
                     "requirements",
-                    "package",
                     "has_full_test_suite",
                     "manually_reviewed_code",
                 }
@@ -1719,7 +1717,6 @@ class ColumnExpectation(TableExpectation, ABC):
             ), "'column' parameter is required for column expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
 
 class ColumnMapExpectation(TableExpectation, ABC):
@@ -1754,7 +1751,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def get_validation_dependencies(
         self,
@@ -1970,7 +1966,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def get_validation_dependencies(
         self,
@@ -2159,7 +2154,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             ), "'column_list' parameter is required for multicolumn map expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def get_validation_dependencies(
         self,

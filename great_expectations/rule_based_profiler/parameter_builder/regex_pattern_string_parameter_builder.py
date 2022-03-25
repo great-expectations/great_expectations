@@ -52,6 +52,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[float, str] = 1.0,
         candidate_regexes: Optional[Union[Iterable[str], str]] = None,
+        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
         json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
@@ -67,6 +68,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_regexes: a list of candidate regex strings that will REPLACE the default
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: Optional[List[Batch]] = None,
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
@@ -74,6 +78,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         """
         super().__init__(
             name=name,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
