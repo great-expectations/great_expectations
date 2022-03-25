@@ -12,6 +12,9 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     get_batch_request_as_dict,
 )
+from great_expectations.core.usage_statistics.anonymizers.action_anonymizer import (
+    ActionAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
@@ -30,11 +33,9 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
         super().__init__(salt=salt)
 
         self._batch_request_anonymizer = BatchRequestAnonymizer(salt=salt)
+        self._action_anonymizer = ActionAnonymizer(salt=salt)
 
-    def anonymize(self, obj: object = None, **kwargs) -> Any:
-        assert self.can_handle(
-            obj=obj
-        ), "CheckpointRunAnonymizer can only handle objects of type Checkpoint or CheckpointConfig"
+    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         if "config" in kwargs:
             return self._anonymize_checkpoint_config(**kwargs)
         return self._anonymize_checkpoint_run(obj=obj, **kwargs)
@@ -70,10 +71,6 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
         Traverse the entire Checkpoint configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
         """
-        assert self.can_handle(
-            obj=obj
-        ), "CheckpointRunAnonymizer can only handle objects of type Checkpoint"
-
         attribute_name: str
         attribute_value: Optional[Union[str, dict]]
         validation_obj: dict
@@ -116,7 +113,7 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
             # noinspection PyBroadException
             try:
                 anonymized_action_list = [
-                    self._anonymize_action_info(
+                    self._action_anonymizer.anonymize(
                         action_name=action_config_dict["name"],
                         action_config=action_config_dict["action"],
                     )
@@ -260,25 +257,6 @@ class CheckpointRunAnonymizer(BaseAnonymizer):
         )
 
         return anonymized_checkpoint_run_properties_dict
-
-    def _anonymize_action_info(
-        self,
-        action_name: str,
-        action_obj: Optional[object] = None,
-        action_config: Optional[dict] = None,
-    ) -> dict:
-        anonymized_info_dict: dict = {
-            "anonymized_name": self._anonymize_string(action_name),
-        }
-
-        self._anonymize_object_info(
-            object_=action_obj,
-            object_config=action_config,
-            anonymized_info_dict=anonymized_info_dict,
-            runtime_environment={"module_name": "great_expectations.checkpoint"},
-        )
-
-        return anonymized_info_dict
 
     @staticmethod
     def can_handle(obj: object, **kwargs) -> bool:

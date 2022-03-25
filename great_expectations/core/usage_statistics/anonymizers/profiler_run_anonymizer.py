@@ -19,9 +19,6 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
         self._batch_request_anonymizer = BatchRequestAnonymizer(salt=salt)
 
     def anonymize(self, obj: object, **kwargs) -> Any:
-        assert self.can_handle(
-            obj
-        ), "ProfilerRunAnonymizer can only handle objects of type RuleBasedProfiler or RuleBasedProfilerConfig"
         if isinstance(obj, RuleBasedProfiler):
             return self._anonymize_profiler_info(**kwargs)
         return self._anonymize_profiler_run(obj=obj, **kwargs)
@@ -221,6 +218,22 @@ class ProfilerRunAnonymizer(BaseAnonymizer):
             logger.debug("Anonymized condition in ExpectationConfigurationBuilder")
 
         return anonymized_expectation_configuration_builder
+
+    def _anonymize_expectation(
+        self, expectation_type: Optional[str], info_dict: dict
+    ) -> None:
+        """Anonymize Expectation objs from 'great_expectations.expectations'.
+
+        Args:
+            expectation_type (Optional[str]): The string name of the Expectation.
+            info_dict (dict): A dictionary to update within this function.
+        """
+        if expectation_type in self.CORE_GE_EXPECTATION_TYPES:
+            info_dict["expectation_type"] = expectation_type
+        else:
+            info_dict["anonymized_expectation_type"] = self._anonymize_string(
+                expectation_type
+            )
 
     @staticmethod
     def can_handle(obj: object, **kwargs) -> bool:

@@ -70,10 +70,6 @@ class Anonymizer(BaseAnonymizer):
                 anonymizer = anonymizer_cls(salt=self._salt)
                 return anonymizer.anonymize(obj=obj, **kwargs)
 
-        # If our specialized handlers cannot handle the object, default to base anonymizer strategies.
-        return self._anonymize(obj=obj, **kwargs)
-
-    def _anonymize(self, obj: object, **kwargs) -> Any:
         if isinstance(obj, str):
             return self._anonymize_string(string_=obj)
         raise TypeError(

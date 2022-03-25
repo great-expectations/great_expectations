@@ -34,11 +34,11 @@ class BaseAnonymizer(ABC):
         return self._salt
 
     @abstractmethod
-    def anonymize(self, obj: object, **kwargs) -> Any:
+    def anonymize(self, **kwargs) -> Any:
         raise NotImplementedError
 
     @abstractstaticmethod
-    def can_handle(obj: object, **kwargs) -> bool:
+    def can_handle(obj: Optional[object], **kwargs) -> bool:
         raise NotImplementedError
 
     @staticmethod

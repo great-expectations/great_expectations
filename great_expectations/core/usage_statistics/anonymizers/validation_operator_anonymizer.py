@@ -16,7 +16,9 @@ class ValidationOperatorAnonymizer(BaseAnonymizer):
         self._action_anonymizer = ActionAnonymizer(salt=salt)
 
     def anonymize(
-        self, validation_operator_obj: object, validation_operator_name: str, **kwargs
+        self,
+        validation_operator_obj: ValidationOperator,
+        validation_operator_name: str,
     ) -> Any:
         anonymized_info_dict: dict = {
             "anonymized_name": self._anonymize_string(validation_operator_name)
