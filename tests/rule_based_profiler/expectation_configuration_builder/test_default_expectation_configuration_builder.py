@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import pytest
 
@@ -6,6 +6,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
 )
@@ -135,7 +136,7 @@ def test_condition_not_string_exception(
     )
 
 
-def test_default_expectation_configuration_builder_alice_null_condition(
+def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_separate(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -186,6 +187,67 @@ def test_default_expectation_configuration_builder_alice_null_condition(
         condition=condition,
         min_value=parameter_value.value[0],
         max_value=max_user_id,
+    )
+
+    expectation_configuration: Optional[
+        ExpectationConfiguration
+    ] = default_expectation_configuration_builder.build_expectation_configuration(
+        parameter_container=parameter_container,
+        domain=domain,
+        parameters=parameters,
+    )
+
+    assert expectation_configuration.kwargs["min_value"] == 397433
+
+
+def test_default_expectation_configuration_builder_alice_null_condition_parameter_builder_validation_dependency_included(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    metric_domain_kwargs: dict = {"column": "user_id"}
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+    )
+
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
+
+    condition: Optional[str] = None
+    max_user_id: int = 999999999999
+
+    min_user_id_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MetricMultiBatchParameterBuilder",
+            name="my_min_user_id",
+            metric_name="column.min",
+            metric_domain_kwargs=metric_domain_kwargs,
+            batch_request=batch_request,
+        )
+    )
+    validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        min_user_id_parameter_builder_config,
+    ]
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expectation_type="expect_column_values_to_be_between",
+        condition=condition,
+        min_value=fully_qualified_parameter_name_for_value,
+        max_value=max_user_id,
+        validation_parameter_builder_configs=validation_parameter_builder_configs,
+        batch_request=batch_request,
+        data_context=data_context,
     )
 
     expectation_configuration: Optional[

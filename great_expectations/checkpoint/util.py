@@ -7,7 +7,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List, Optional, Union
 
-import boto3
 import requests
 
 import great_expectations.exceptions as ge_exceptions
@@ -18,6 +17,11 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+
+try:
+    import boto3
+except ImportError:
+    boto3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -498,6 +502,10 @@ def send_sns_notification(
     :return:  Message ID that was published
 
     """
+    if not boto3:
+        logger.warning("boto3 is not installed")
+        return "boto3 is not installed"
+
     message_dict = {
         "TopicArn": sns_topic_arn,
         "Subject": sns_subject,
