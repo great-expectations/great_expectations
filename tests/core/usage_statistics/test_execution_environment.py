@@ -1,6 +1,7 @@
 from typing import List
 from unittest import mock
 
+import pytest
 from packaging import version
 
 from great_expectations.core.usage_statistics.execution_environment import (
@@ -10,6 +11,9 @@ from great_expectations.core.usage_statistics.execution_environment import (
 )
 
 
+@pytest.mark.parametrize(
+    "input_version", ["8.8.8", "0.14.12+14.g8f54aa902.dirty", "0.1.0.post0"]
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.execution_environment.GEExecutionEnvironment._get_all_installed_packages",
     return_value=True,
@@ -28,6 +32,7 @@ def test_get_installed_packages(
     get_dev_dependency_names,
     mock_version,
     get_all_installed_packages,
+    input_version,
 ):
     """Test that we are able to retrieve installed and not installed packages in the GE execution environment."""
 
@@ -43,7 +48,7 @@ def test_get_installed_packages(
         "not-installed-dev-package-1",
         "not-installed-dev-package-2",
     ]
-    mock_version.return_value = "8.8.8"
+    mock_version.return_value = input_version
     get_all_installed_packages.return_value = [
         "req-package-1",
         "req-package-2",
@@ -57,13 +62,13 @@ def test_get_installed_packages(
             package_name="req-package-1",
             installed=True,
             install_environment=InstallEnvironment.REQUIRED,
-            version=version.Version("8.8.8"),
+            version=version.Version(input_version),
         ),
         PackageInfo(
             package_name="req-package-2",
             installed=True,
             install_environment=InstallEnvironment.REQUIRED,
-            version=version.Version("8.8.8"),
+            version=version.Version(input_version),
         ),
         PackageInfo(
             package_name="not-installed-req-package-1",
@@ -81,13 +86,13 @@ def test_get_installed_packages(
             package_name="dev-package-1",
             installed=True,
             install_environment=InstallEnvironment.DEV,
-            version=version.Version("8.8.8"),
+            version=version.Version(input_version),
         ),
         PackageInfo(
             package_name="dev-package-2",
             installed=True,
             install_environment=InstallEnvironment.DEV,
-            version=version.Version("8.8.8"),
+            version=version.Version(input_version),
         ),
         PackageInfo(
             package_name="not-installed-dev-package-1",
