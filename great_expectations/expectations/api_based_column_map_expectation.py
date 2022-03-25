@@ -18,6 +18,7 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationConfiguration,
 )
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -45,10 +46,14 @@ class APIColumnMapMetricProvider(ColumnMapMetricProvider):
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(cls, column, _dialect, **kwargs):
     #     return column.in_(cls.set_)
-    #
-    # @column_condition_partial(engine=SparkDFExecutionEngine)
-    # def _spark(cls, column, **kwargs):
-    #     return column.isin(cls.set_)
+
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        endpoints = F.udf(
+            lambda x, y=cls.url_: cls.is_valid_endpoint(y, x), sparktypes.BooleanType()
+        )
+        breakpoint()
+        return endpoints(column)
 
     @staticmethod
     def is_valid_endpoint(url, title):

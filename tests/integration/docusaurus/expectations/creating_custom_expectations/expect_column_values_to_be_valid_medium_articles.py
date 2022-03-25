@@ -48,18 +48,18 @@ class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
                 },
             ],
             "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
+                # {
+                #     "backend": "pandas",
+                #     "dialects": None,
+                # },
                 # {
                 #     "backend": "sqlalchemy",
                 #     "dialects": ["sqlite", "postgresql"],
                 # },
-                # {
-                #     "backend": "spark",
-                #     "dialects": None,
-                # },
+                {
+                    "backend": "spark",
+                    "dialects": None,
+                },
             ],
         }
     ]
@@ -76,20 +76,20 @@ class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
 
 
 # </snippet>
-if __name__ == "__main__":
-    ExpectColumnValuesToBeValidMediumArticles().print_diagnostic_checklist()
+# if __name__ == "__main__":
+# ExpectColumnValuesToBeValidMediumArticles().print_diagnostic_checklist()
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
-# diagnostics = ExpectColumnValuesToBeValidMediumArticles().run_diagnostics()
+diagnostics = ExpectColumnValuesToBeValidMediumArticles().run_diagnostics()
+breakpoint()
+for check in diagnostics["tests"]:
+    assert check["test_passed"] is True
+    assert check["error_message"] is None
+    assert check["stack_trace"] is None
 
-# for check in diagnostics["tests"]:
-#     assert check["test_passed"] is True
-#     assert check["error_message"] is None
-#     assert check["stack_trace"] is None
-#
-# for check in diagnostics["errors"]:
-#     assert check is None
-#
-# for check in diagnostics["maturity_checklist"]["experimental"]:
-#     assert check["passed"] is True
+for check in diagnostics["errors"]:
+    assert check is None
+
+for check in diagnostics["maturity_checklist"]["experimental"]:
+    assert check["passed"] is True
