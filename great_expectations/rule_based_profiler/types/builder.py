@@ -70,6 +70,18 @@ class Builder(SerializableDictDot):
     def data_context(self) -> Optional["DataContext"]:  # noqa: F821
         return self._data_context
 
+    def set_batch_list_or_batch_request(
+        self,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        force_batch_data: bool = False,
+    ) -> None:
+        if force_batch_data or self.batch_request is None:
+            self.set_batch_data(
+                batch_list=batch_list,
+                batch_request=batch_request,
+            )
+
     def set_batch_data(
         self,
         batch_list: Optional[List[Batch]] = None,
