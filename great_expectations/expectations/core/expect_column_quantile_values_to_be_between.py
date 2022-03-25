@@ -243,7 +243,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -272,7 +272,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             raise ValueError(
                 "quantile_values and quantiles must have the same number of elements"
             )
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
