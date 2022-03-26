@@ -905,7 +905,6 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
-        return_only_gallery_examples: bool = False,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -937,7 +936,7 @@ class Expectation(metaclass=MetaExpectation):
             return_only_gallery_examples=True
         )
         examples: List[ExpectationTestDataCases] = self._get_examples(
-            return_only_gallery_examples=return_only_gallery_examples
+            return_only_gallery_examples=False
         )
         description_diagnostics: ExpectationDescriptionDiagnostics = (
             self._get_description_diagnostics()

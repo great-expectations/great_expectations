@@ -219,7 +219,7 @@ def build_gallery(include_core: bool = True, include_contrib: bool = True) -> Di
             expectation
         )
         try:
-            diagnostics = impl().run_diagnostics(return_only_gallery_examples=True)
+            diagnostics = impl().run_diagnostics()
             checklist_string = diagnostics.generate_checklist()
             expectation_checklists.write(
                 f"\n\n----------------\n{expectation} ({group})\n"
