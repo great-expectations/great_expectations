@@ -37,6 +37,7 @@ def test_expectation_self_check():
             "has_full_test_suite": False,
             "manually_reviewed_code": False,
             "library_metadata_passed_checks": False,
+            "problems": ["No library_metadata attribute found"],
         },
         "description": {
             "camel_name": "ExpectColumnValuesToEqualThree",
@@ -151,7 +152,12 @@ def test_expectation_self_check():
                     "doc_url": None,
                     "message": "Has a library_metadata object",
                     "passed": False,
-                    "sub_messages": [],
+                    "sub_messages": [
+                        {
+                            "message": "No library_metadata attribute found",
+                            "passed": False,
+                        },
+                    ],
                 },
                 {
                     "doc_url": None,
