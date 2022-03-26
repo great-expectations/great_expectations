@@ -19,6 +19,7 @@ def is_valid_country(c: str) -> bool:
     except LookupError:
         return False
 
+
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidIsoCountry(ColumnMapMetricProvider):
@@ -65,6 +66,7 @@ class ExpectColumnValuesToBeValidIsoCountry(ColumnMapExpectation):
                     "country",
                     "ZZ",
                     "United State",
+                    "This is not a country",
                 ],
             },
             "tests": [
@@ -124,7 +126,6 @@ class ExpectColumnValuesToBeValidIsoCountry(ColumnMapExpectation):
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
 
-
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "maturity": "experimental",
@@ -132,8 +133,7 @@ class ExpectColumnValuesToBeValidIsoCountry(ColumnMapExpectation):
         "contributors": [
             "@voidforall",
         ],
-        "package": "experimental_expectations",
-        "requirements": ["price_parser"],
+        "requirements": ["pycountry"],
     }
 
 
