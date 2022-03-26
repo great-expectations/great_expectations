@@ -10,6 +10,12 @@ from great_expectations.core import (
 )
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestCase,
+    ExpectationTestDataCases,
+    TestBackend,
+    TestData,
+)
+from great_expectations.core.expectation_diagnostics.supporting_types import (
+    ExpectationExecutionEngineDiagnostics,
 )
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import ExecutionEngine
@@ -21,6 +27,7 @@ from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
 from great_expectations.self_check.util import (
+    generate_expectation_tests,
     generate_test_table_name,
     should_we_generate_this_test,
 )
@@ -416,6 +423,211 @@ def test_table_column_reflection_fallback(test_backends, sa):
 
         validation_result = validator.expect_table_row_count_to_equal(value=3)
         assert not validation_result.success
+
+
+@pytest.mark.skipif(
+    sqlalchemy is None,
+    reason="sqlalchemy is not installed",
+)
+def test__generate_expectation_tests__with_test_backends():
+    expectation_type = "whatever"
+    data = TestData(stuff=[1, 2, 3, 4, 5])
+    test_case = ExpectationTestCase(
+        title="",
+        input={},
+        output={},
+        exact_match_out=False,
+        include_in_gallery=False,
+        suppress_test_for=[],
+        only_for=[],
+    )
+    test_backends = [
+        TestBackend(
+            backend="sqlalchemy",
+            dialects=["sqlite"],
+        ),
+    ]
+    test_data_cases = [
+        ExpectationTestDataCases(
+            data=data,
+            tests=[test_case],
+            test_backends=test_backends,
+        )
+    ]
+    engines = ExpectationExecutionEngineDiagnostics(
+        PandasExecutionEngine=True,
+        SqlAlchemyExecutionEngine=True,
+        SparkDFExecutionEngine=False,
+    )
+
+    results = generate_expectation_tests(
+        expectation_type=expectation_type,
+        test_data_cases=test_data_cases,
+        execution_engine_diagnostics=engines,
+        raise_exceptions_for_backends=False,
+    )
+    backends_to_use = [r["backend"] for r in results]
+    assert backends_to_use == ["sqlite"]
+
+
+@pytest.mark.skipif(
+    sqlalchemy is None,
+    reason="sqlalchemy is not installed",
+)
+def test__generate_expectation_tests__with_test_backends2():
+    expectation_type = "whatever"
+    data = TestData(stuff=[1, 2, 3, 4, 5])
+    test_case = ExpectationTestCase(
+        title="",
+        input={},
+        output={},
+        exact_match_out=False,
+        include_in_gallery=False,
+        suppress_test_for=[],
+        only_for=[],
+    )
+    test_backends = [
+        TestBackend(
+            backend="sqlalchemy",
+            dialects=["sqlite"],
+        ),
+        TestBackend(
+            backend="pandas",
+            dialects=None,
+        ),
+    ]
+    test_data_cases = [
+        ExpectationTestDataCases(
+            data=data,
+            tests=[test_case],
+            test_backends=test_backends,
+        )
+    ]
+    engines = ExpectationExecutionEngineDiagnostics(
+        PandasExecutionEngine=True,
+        SqlAlchemyExecutionEngine=True,
+        SparkDFExecutionEngine=False,
+    )
+
+    results = generate_expectation_tests(
+        expectation_type=expectation_type,
+        test_data_cases=test_data_cases,
+        execution_engine_diagnostics=engines,
+        raise_exceptions_for_backends=False,
+    )
+    backends_to_use = [r["backend"] for r in results]
+    assert sorted(backends_to_use) == ["pandas", "sqlite"]
+
+
+@pytest.mark.skipif(
+    sqlalchemy is None,
+    reason="sqlalchemy is not installed",
+)
+def test__generate_expectation_tests__with_no_test_backends():
+    expectation_type = "whatever"
+    data = TestData(stuff=[1, 2, 3, 4, 5])
+    test_case = ExpectationTestCase(
+        title="",
+        input={},
+        output={},
+        exact_match_out=False,
+        include_in_gallery=False,
+        suppress_test_for=[],
+        only_for=[],
+    )
+    test_data_cases = [
+        ExpectationTestDataCases(
+            data=data,
+            tests=[test_case],
+        )
+    ]
+    engines = ExpectationExecutionEngineDiagnostics(
+        PandasExecutionEngine=True,
+        SqlAlchemyExecutionEngine=True,
+        SparkDFExecutionEngine=False,
+    )
+
+    results = generate_expectation_tests(
+        expectation_type=expectation_type,
+        test_data_cases=test_data_cases,
+        execution_engine_diagnostics=engines,
+        raise_exceptions_for_backends=False,
+    )
+    backends_to_use = [r["backend"] for r in results]
+
+    # If another SQL backend is available wherever this test is being run, it will
+    # be included (i.e. postgresql)
+    assert "pandas" in backends_to_use
+    assert "sqlite" in backends_to_use
+    assert "spark" not in backends_to_use
+
+
+def test__TestBackend__bad_backends():
+    with pytest.raises(AssertionError):
+        TestBackend(
+            backend="dogs",
+            dialects=None,
+        )
+
+
+def test__TestBackend__bad_dialects():
+    with pytest.raises(AssertionError):
+        TestBackend(
+            backend="sqlalchemy",
+            dialects=None,
+        )
+
+    with pytest.raises(AssertionError):
+        TestBackend(
+            backend="sqlalchemy",
+            dialects=[],
+        )
+
+    with pytest.raises(AssertionError):
+        TestBackend(
+            backend="sqlalchemy",
+            dialects=["postgresql", "mysql", "ramen"],
+        )
+
+    with pytest.raises(AssertionError):
+        TestBackend(
+            backend="spark",
+            dialects=["sqlite"],
+        )
+
+    with pytest.raises(AssertionError):
+        TestBackend(
+            backend="pandas",
+            dialects=["sqlite"],
+        )
+
+    with pytest.raises(AssertionError):
+        TestBackend(
+            backend="sqlalchemy",
+            dialects="sqlite",
+        )
+
+    TestBackend(
+        backend="sqlalchemy",
+        dialects=["sqlite"],
+    )
+
+
+def test__TestBackend__good_backends_and_dialects():
+    tb1 = TestBackend(
+        backend="pandas",
+        dialects=None,
+    )
+
+    tb2 = TestBackend(
+        backend="spark",
+        dialects=None,
+    )
+
+    tb3 = TestBackend(
+        backend="sqlalchemy",
+        dialects=["sqlite", "postgresql", "mysql"],
+    )
 
 
 def test__should_we_generate_this_test__obvious():

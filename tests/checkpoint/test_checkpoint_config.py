@@ -205,16 +205,7 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
         "data_connector_name": "default_runtime_data_connector_name",
         "data_asset_name": "my_data_asset",
         "runtime_parameters": {
-          "batch_data": [
-            {
-              "a": 1,
-              "b": 3
-            },
-            {
-              "a": 2,
-              "b": 4
-            }
-          ]
+          "batch_data": "<class \'pandas.core.frame.DataFrame\'>"
         },
         "batch_identifiers": {
           "default_identifier_name": "my_simple_df"

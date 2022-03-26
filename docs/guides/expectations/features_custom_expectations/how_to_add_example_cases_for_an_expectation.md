@@ -2,12 +2,13 @@
 title: How to create example cases for a Custom Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you add example cases to document and test the behavior of your [Expectation](../../../reference/expectations/expectations.md). 
+This guide will help you add example cases to document and test the behavior of your <TechnicalTag tag="expectation" text="Expectation" />. 
 
 <Prerequisites>
 
- - Created a [Custom Expectation](../creating_custom_expectations/overview.md)
+ - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
 
 </Prerequisites>
 
@@ -18,7 +19,7 @@ Example cases in Great Expectations serve a dual purpose:
 
 If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will render these examples.
 
-We will explain the structure of these tests using the Custom Expectation implemented in our guide on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
+We will explain the structure of these tests using the <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> implemented in our guide on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
 
 ## Steps
 
@@ -61,12 +62,15 @@ These tests can include examples intended to pass, fail, or error out, and expec
 </details>
 
 At a minimum, we want to create tests that show what our Custom Expectation will and will *not* do. 
+
 These basic positive and negative example cases are the minimum amount of test coverage required for a Custom Expectation to be accepted into the Great Expectations codebase at an [Experimental level](../../../contributing/contributing_maturity.md#contributing-expectations).
+
 To begin with, let's implement those two basic tests: one positive example case, and one negative example case. 
 
 ### 2. Defining our data
 
 Search for `examples = []` in the template file you are modifying for your new Custom Expectation. 
+
 We're going to populate `examples` with a list of example cases.
 
 <details>
@@ -85,14 +89,11 @@ Each example is a dictionary with two keys:
 </ul>
 </details>
 
-In our example, `data` will have two columns, "x" and "y", each with five rows. 
-If you define multiple columns, make sure that they have the same number of rows. 
-When possible, include test data and tests that includes null values (`None` in the Python test definition).
+In our example, `data` will have two columns, "x" and "y", each with five rows. If you define multiple columns, make sure that they have the same number of rows. When possible, include test data and tests that includes null values (`None` in the Python test definition).
 
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L88
 ```
 
-:::note
 When you define data in your examples, we will mostly guess the type of the columns. 
 Sometimes you need to specify the precise type of the columns for each backend. Then you use the `schemas` attribute (on the same level as `data` and `tests` in the dictionary):
 
@@ -105,6 +106,22 @@ Sometimes you need to specify the precise type of the columns for each backend. 
     "x": "INTEGER",
   },
 ```
+
+:::info
+While Pandas is fairly flexible in typing, Spark and many SQL dialects are much more strict. 
+
+You may find you wish to use data that is incompatible with a given backend, or write different individual tests for different backends. 
+To do this, you can use the `only_for` attribute, which accepts a list containing `pandas`, `spark`, `sqlite`, a SQL dialect, or a combination of any of the above:
+
+```console
+"only_for": ["spark", "pandas"]
+```
+
+Passing this attribute on the same level as `data`, `tests`, and `schemas` 
+will tell Great Expectations to only instantiate the data specified in that example for the given backend, ensuring you don't encounter any backend-related errors relating to data before your Custom Expectation can even be tested:
+
+
+Passing this attribute within a test (at the same level as `title`, `in`, `out`, etc.) will execute that individual test only for that specified backend.
 :::
 
 ### 3. Defining our tests
@@ -119,19 +136,26 @@ You will need to:
 
 If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publically displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L89-L116
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L132
 ```
+
+:::note
+You may have noticed that specifying `test_backends` isn't required for successfully testing your Custom Expectation.
+
+If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.
+:::
 
 <details>
   <summary>Can I test for errors?</summary>
 Yes! If you would like to define an example case illustrating when your Custom Expectation should throw an error, 
-you can replace the <code>out</code> key with an <code>error</code> key defining a <code>traceback_substring</code>. 
+you can pass an empty <code>out</code> key, and include an <code>error</code> key defining a <code>traceback_substring</code>. 
 <br/><br/>
 For example:
 <br/><br/>
-<code>{`"error": {
-          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
-        }`}
+<code>{`"out": {},
+"error": {
+    "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+}`}
 </code>
 </details>
 
@@ -139,8 +163,7 @@ For example:
 
 If you now run your file, `print_diagnostic_checklist()` will attempt to execute these example cases.
 
-If the tests are correctly defined, and the rest of the logic in your Custom Expectation is already complete,
-you will see the following in your Diagnostic Checklist:
+If the tests are correctly defined, and the rest of the logic in your Custom Expectation is already complete, you will see the following in your Diagnostic Checklist:
 
 ```console
 ✔ Has at least one positive and negative example case, and all test cases pass

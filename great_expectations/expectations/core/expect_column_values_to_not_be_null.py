@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_configuration import parse_result_format
@@ -64,16 +64,33 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.nonnull"
     args_keys = ("column",)
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+        super().validate_configuration(configuration)
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -99,7 +116,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
@@ -136,7 +153,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -185,7 +202,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -277,7 +294,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                     },
                 }
             ),
-            "%.1f%%" % result.result["unexpected_percent"]
+            f"{result.result['unexpected_percent']:.1f}%"
             if "unexpected_percent" in result.result
             and result.result["unexpected_percent"] is not None
             else "--",
@@ -297,7 +314,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             "mostly", self.default_kwarg_values.get("mostly")
         )
         total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
+        unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
 
         if total_count is None or total_count == 0:
             # Vacuously true
@@ -313,9 +330,9 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             success=success,
             element_count=metrics.get("table.row_count"),
             nonnull_count=nonnull_count,
-            unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
-            unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
+            unexpected_count=metrics.get(f"{self.map_metric}.unexpected_count"),
+            unexpected_list=metrics.get(f"{self.map_metric}.unexpected_values"),
             unexpected_index_list=metrics.get(
-                self.map_metric + ".unexpected_index_list"
+                f"{self.map_metric}.unexpected_index_list"
             ),
         )

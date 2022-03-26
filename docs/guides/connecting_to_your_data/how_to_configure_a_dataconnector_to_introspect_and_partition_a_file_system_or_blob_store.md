@@ -4,6 +4,7 @@ title: How to configure a DataConnector to introspect and partition a file syste
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you introspect and partition any file type data store (e.g., filesystem, cloud blob storage) using
 an `Active Data Connector`.  For background on connecting to different backends, please see the
@@ -11,9 +12,9 @@ an `Active Data Connector`.  For background on connecting to different backends,
 
 File-based introspection and partitioning are useful for:
 - Exploring the types, subdirectory location, and filepath naming structures of the files in your dataset, and
-- Organizing the discovered files into `Data Assets` according to the identified structures.
+- Organizing the discovered files into <TechnicalTag tag="data_asset" text="Data Assets" /> according to the identified structures.
 
-`Partitioning` enables you to select the desired subsets of your dataset for [Validation](/docs/reference/validation).
+`Partitioning` enables you to select the desired subsets of your dataset for [Validation](../../reference/validation.md).
 
 <Prerequisites>
 
@@ -26,7 +27,7 @@ We will use the "Yellow Taxi" dataset to walk you through the configuration of `
 bare-bones version of either an `Inferred Asset Data Connector` or a `Configured Asset Data Connector`, we gradually
 build out the configuration to achieve the introspection of your files with the semantics consistent with your goals.
 
-To learn more about `Datasources`, `Data Connectors`, and `Batch(es)`, please see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md).
+To learn more about <TechnicalTag tag="datasource" text="Datasources" />, <TechnicalTag tag="datasource" text="Data Connectors" />, and <TechnicalTag tag="batch" text="Batch(es)" />, please see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md).
 
 ## Preliminary Steps
 
@@ -53,7 +54,8 @@ Load your DataContext into memory using the `get_context()` method.
   {label: 'Inferred Asset Data Connector', value:'inferred'},
   {label: 'Configured Asset Data Connector', value:'configured'},
   ]}>
-  <TabItem value="inferred">
+
+<TabItem value="inferred">
 
 ### 1. Configure your Datasource
 
@@ -228,6 +230,7 @@ guide for examples of considerable flexibility in querying `Batch` objects along
 as a result of partitioning the dataset as specified by the `taxi_data_flat` and `taxi_data_year_month` `Data Assets`.
 
 </TabItem>
+
 </Tabs>
 
 To view the full scripts used in this page, see them on GitHub:

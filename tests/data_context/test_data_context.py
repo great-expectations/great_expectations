@@ -8,10 +8,12 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
+import great_expectations as ge
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
@@ -30,7 +32,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.data_context.util import PasswordMasker, file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     Datasource,
@@ -41,6 +43,7 @@ from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
+    is_library_loadable,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
 
@@ -64,6 +67,62 @@ def parameterized_expectation_suite():
         fixture_path,
     ) as suite:
         return json.load(suite)
+
+
+@pytest.fixture(scope="function")
+def titanic_multibatch_data_context(
+    tmp_path,
+) -> DataContext:
+    """
+    Based on titanic_data_context, but with 2 identical batches of
+    data asset "titanic"
+    """
+    project_path = tmp_path / "titanic_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data", "titanic")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(__file__, "../test_fixtures/great_expectations_titanic.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "../test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "../test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_with_bad_datasource(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+
+    This DataContext has a connection to a datasource named my_postgres_db
+    which is not a valid datasource.
+
+    It is used by test_get_batch_multiple_datasources_do_not_scan_all()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "../test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_bad_datasource.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    return ge.data_context.DataContext(context_path)
 
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
@@ -297,87 +356,89 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
         },
     ]
 
-    # Make sure passwords are masked in password or url fields
-    data_context_parameterized_expectation_suite.add_datasource(
-        "postgres_source_with_password",
-        initialize=False,
-        module_name="great_expectations.datasource",
-        class_name="SqlAlchemyDatasource",
-        credentials={
-            "drivername": "postgresql",
-            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-            "port": "65432",
-            "username": "username_str",
-            "password": "password_str",
-            "database": "database_str",
-        },
-    )
+    if is_library_loadable(library_name="psycopg2"):
 
-    data_context_parameterized_expectation_suite.add_datasource(
-        "postgres_source_with_password_in_url",
-        initialize=False,
-        module_name="great_expectations.datasource",
-        class_name="SqlAlchemyDatasource",
-        credentials={
-            "url": "postgresql+psycopg2://username:password@host:65432/database",
-        },
-    )
-
-    datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-    assert datasources == [
-        {
-            "name": "mydatasource",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {"class_name": "PandasDataset"},
-            "batch_kwargs_generators": {
-                "mygenerator": {
-                    "base_directory": "../data",
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "reader_options": {"engine": "python", "sep": None},
-                }
-            },
-        },
-        {
-            "name": "second_pandas_source",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {
-                "class_name": "PandasDataset",
-                "module_name": "great_expectations.dataset",
-            },
-        },
-        {
-            "name": "postgres_source_with_password",
-            "class_name": "SqlAlchemyDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {
-                "class_name": "SqlAlchemyDataset",
-                "module_name": "great_expectations.dataset",
-            },
-            "credentials": {
+        # Make sure passwords are masked in password or url fields
+        data_context_parameterized_expectation_suite.add_datasource(
+            "postgres_source_with_password",
+            initialize=False,
+            module_name="great_expectations.datasource",
+            class_name="SqlAlchemyDatasource",
+            credentials={
                 "drivername": "postgresql",
                 "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                 "port": "65432",
                 "username": "username_str",
-                "password": "***",
+                "password": "password_str",
                 "database": "database_str",
             },
-        },
-        {
-            "name": "postgres_source_with_password_in_url",
-            "class_name": "SqlAlchemyDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {
-                "class_name": "SqlAlchemyDataset",
-                "module_name": "great_expectations.dataset",
+        )
+
+        data_context_parameterized_expectation_suite.add_datasource(
+            "postgres_source_with_password_in_url",
+            initialize=False,
+            module_name="great_expectations.datasource",
+            class_name="SqlAlchemyDatasource",
+            credentials={
+                "url": "postgresql+psycopg2://username:password@host:65432/database",
             },
-            "credentials": {
-                "url": "postgresql+psycopg2://username:***@host:65432/database",
+        )
+
+        datasources = data_context_parameterized_expectation_suite.list_datasources()
+
+        assert datasources == [
+            {
+                "name": "mydatasource",
+                "class_name": "PandasDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {"class_name": "PandasDataset"},
+                "batch_kwargs_generators": {
+                    "mygenerator": {
+                        "base_directory": "../data",
+                        "class_name": "SubdirReaderBatchKwargsGenerator",
+                        "reader_options": {"engine": "python", "sep": None},
+                    }
+                },
             },
-        },
-    ]
+            {
+                "name": "second_pandas_source",
+                "class_name": "PandasDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {
+                    "class_name": "PandasDataset",
+                    "module_name": "great_expectations.dataset",
+                },
+            },
+            {
+                "name": "postgres_source_with_password",
+                "class_name": "SqlAlchemyDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {
+                    "class_name": "SqlAlchemyDataset",
+                    "module_name": "great_expectations.dataset",
+                },
+                "credentials": {
+                    "drivername": "postgresql",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+                    "port": "65432",
+                    "username": "username_str",
+                    "password": PasswordMasker.MASKED_PASSWORD_STRING,
+                    "database": "database_str",
+                },
+            },
+            {
+                "name": "postgres_source_with_password_in_url",
+                "class_name": "SqlAlchemyDatasource",
+                "module_name": "great_expectations.datasource",
+                "data_asset_type": {
+                    "class_name": "SqlAlchemyDataset",
+                    "module_name": "great_expectations.dataset",
+                },
+                "credentials": {
+                    "url": f"postgresql+psycopg2://username:{PasswordMasker.MASKED_PASSWORD_STRING}@host:65432/database",
+                },
+            },
+        ]
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -2702,3 +2763,39 @@ def test_add_datasource_from_yaml_with_substitution_variables(
         ]
     )
     assert mock_emit.call_args_list == expected_call_args_list
+
+
+def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_store):
+    """End to end test demonstrating usage of Stores evaluation parameters"""
+    context = data_context_with_query_store
+    suite_name = "eval_param_suite"
+    context.create_expectation_suite(expectation_suite_name=suite_name)
+    batch_request = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "default_runtime_data_connector_name",
+        "data_asset_name": "DEFAULT_ASSET_NAME",
+        "batch_identifiers": {"default_identifier_name": "test123"},
+        "runtime_parameters": {"query": "select * from titanic"},
+    }
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(**batch_request),
+        expectation_suite_name=suite_name,
+    )
+    validator.expect_table_row_count_to_equal(
+        value={
+            # unnecessarily complex URN which should resolve to the actual row count.
+            "$PARAMETER": "abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count) + 4"
+        }
+    )
+
+    checkpoint_config = {
+        "class_name": "SimpleCheckpoint",
+        "validations": [
+            {"batch_request": batch_request, "expectation_suite_name": suite_name}
+        ],
+    }
+    checkpoint = SimpleCheckpoint(
+        f"_tmp_checkpoint_{suite_name}", context, **checkpoint_config
+    )
+    checkpoint_result = checkpoint.run()
+    assert checkpoint_result.get("success") is True

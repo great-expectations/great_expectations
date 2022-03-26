@@ -2,15 +2,14 @@ from typing import List
 
 import py
 import pytest
-
-from contrib.cli.great_expectations_contrib.package import (
+from great_expectations_contrib.package import (
     Dependency,
     DomainExpert,
     GitHubUser,
     GreatExpectationsContribPackageManifest,
     Maturity,
-    RenderedExpectation,
 )
+
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
 )
@@ -50,8 +49,8 @@ def test_update_expectations(
 
     assert package.expectation_count == 3
     assert package.expectations and all(
-        isinstance(expectation, RenderedExpectation)
-        for expectation in package.expectations
+        isinstance(expectation, ExpectationDiagnostics)
+        for expectation in package.expectations.values()
     )
     assert (
         package.status and package.status.production == 3 and package.status.total == 3

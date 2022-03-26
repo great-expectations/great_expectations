@@ -26,7 +26,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Set, Union
+from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse
 from packaging import version
@@ -71,7 +71,7 @@ except ImportError:
     Table = None
     Select = None
 
-SINGULAR_TO_PLURAL_LOOKUP_DICT = {
+SINGULAR_TO_PLURAL_LOOKUP_DICT: dict = {
     "batch": "batches",
     "checkpoint": "checkpoints",
     "data_asset": "data_assets",
@@ -83,7 +83,7 @@ SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "rendered_data_doc": "rendered_data_docs",
 }
 
-PLURAL_TO_SINGULAR_LOOKUP_DICT = {
+PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "batches": "batch",
     "checkpoints": "checkpoint",
     "data_assets": "data_asset",
@@ -94,6 +94,9 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT = {
     "contracts": "contract",
     "rendered_data_docs": "rendered_data_doc",
 }
+
+p1 = re.compile(r"(.)([A-Z][a-z]+)")
+p2 = re.compile(r"([a-z0-9])([A-Z])")
 
 
 def pluralize(singular_ge_noun):
@@ -120,6 +123,11 @@ def singularize(plural_ge_noun):
             f"Unable to singularize '{plural_ge_noun}'. Please update "
             f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
         )
+
+
+def camel_to_snake(name):
+    name = p1.sub(r"\1_\2", name)
+    return p2.sub(r"\1_\2", name).lower()
 
 
 def underscore(word: str) -> str:
@@ -1184,6 +1192,21 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        keys_to_delete: List[str] = list(
+            filter(
+                lambda k: _is_to_be_removed_from_deep_filter_properties_iterable(
+                    value=properties[k],
+                    clean_nulls=clean_nulls,
+                    clean_falsy=clean_falsy,
+                    keep_falsy_numerics=keep_falsy_numerics,
+                ),
+                properties.keys(),
+            )
+        )
+        for key in keys_to_delete:
+            properties.pop(key)
+
     elif isinstance(properties, (list, set, tuple)):
         if not inplace:
             properties = copy.deepcopy(properties)
@@ -1200,10 +1223,34 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        properties = list(
+            filter(
+                lambda v: not _is_to_be_removed_from_deep_filter_properties_iterable(
+                    value=v,
+                    clean_nulls=clean_nulls,
+                    clean_falsy=clean_falsy,
+                    keep_falsy_numerics=keep_falsy_numerics,
+                ),
+                properties,
+            )
+        )
+
     if inplace:
         return None
 
     return properties
+
+
+def _is_to_be_removed_from_deep_filter_properties_iterable(
+    value: Any, clean_nulls: bool, clean_falsy: bool, keep_falsy_numerics: bool
+) -> bool:
+    conditions: Tuple[bool, ...] = (
+        clean_nulls and value is None,
+        not keep_falsy_numerics and is_numeric(value) and value == 0,
+        clean_falsy and not is_numeric(value) and not value,
+    )
+    return any(condition for condition in conditions)
 
 
 def is_truthy(value: Any) -> bool:
@@ -1358,3 +1405,16 @@ def import_make_url():
     else:
         from sqlalchemy.engine import make_url
     return make_url
+
+
+def get_pyathena_potential_type(type_module, type_):
+    if version.parse(type_module.pyathena.__version__) >= version.parse("2.5.0"):
+        # introduction of new column type mapping in 2.5
+        potential_type = type_module.AthenaDialect()._get_column_type(type_)
+    else:
+        if type_ == "string":
+            type_ = "varchar"
+        # < 2.5 column type mapping
+        potential_type = type_module._TYPE_MAPPINGS.get(type_)
+
+    return potential_type

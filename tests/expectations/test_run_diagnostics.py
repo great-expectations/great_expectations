@@ -37,7 +37,7 @@ def test_expectation_self_check():
             "has_full_test_suite": False,
             "manually_reviewed_code": False,
             "library_metadata_passed_checks": False,
-            "package": None,
+            "problems": ["No library_metadata attribute found"],
         },
         "description": {
             "camel_name": "ExpectColumnValuesToEqualThree",
@@ -152,7 +152,12 @@ def test_expectation_self_check():
                     "doc_url": None,
                     "message": "Has a library_metadata object",
                     "passed": False,
-                    "sub_messages": [],
+                    "sub_messages": [
+                        {
+                            "message": "No library_metadata attribute found",
+                            "passed": False,
+                        },
+                    ],
                 },
                 {
                     "doc_url": None,
@@ -177,14 +182,14 @@ def test_expectation_self_check():
                         }
                     ],
                 },
-            ],
-            "production": [
                 {
                     "doc_url": None,
                     "message": "Passes all linting checks",
-                    "passed": False,
+                    "passed": True,
                     "sub_messages": [],
                 },
+            ],
+            "production": [
                 {
                     "doc_url": None,
                     "message": "Has a full suite of tests, as determined by a code owner",
@@ -310,7 +315,6 @@ def test_self_check_on_an_existing_expectation():
         "library_metadata": {
             "contributors": ["@great_expectations"],
             "maturity": "production",
-            # "package": "great_expectations",
             "requirements": [],
             "tags": ["core expectation", "column map expectation"],
         },
@@ -375,7 +379,7 @@ def test_expectation__get_renderers():
         assert isinstance(element, ExpectationRendererDiagnostics)
 
     print([rd.name for rd in renderer_diagnostics])
-    assert set([rd.name for rd in renderer_diagnostics]) == {
+    assert {rd.name for rd in renderer_diagnostics} == {
         "renderer.diagnostic.unexpected_statement",
         "renderer.diagnostic.meta_properties",
         "renderer.diagnostic.unexpected_table",
@@ -440,7 +444,7 @@ def test_expectation__get_renderers():
         assert isinstance(element, ExpectationRendererDiagnostics)
 
     assert len(renderer_diagnostics) == 10
-    assert set([rd.name for rd in renderer_diagnostics]) == {
+    assert {rd.name for rd in renderer_diagnostics} == {
         "renderer.diagnostic.observed_value",
         "renderer.prescriptive",
         "renderer.diagnostic.meta_properties",
@@ -496,7 +500,7 @@ def test_expectation__get_renderers():
         assert isinstance(element, ExpectationRendererDiagnostics)
 
     assert len(renderer_diagnostics) == 10
-    assert set([rd.name for rd in renderer_diagnostics]) == {
+    assert {rd.name for rd in renderer_diagnostics} == {
         "renderer.diagnostic.observed_value",
         "renderer.prescriptive",
         "renderer.diagnostic.meta_properties",
