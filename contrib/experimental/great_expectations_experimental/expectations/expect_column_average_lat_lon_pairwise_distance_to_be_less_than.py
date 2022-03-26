@@ -1,23 +1,18 @@
-from scipy.spatial.distance import  pdist
-from sklearn.metrics.pairwise import haversine_distances
-import numpy as np
-
 from math import radians
-from statistics import mean
-from typing import Dict, Optional
+from typing import Dict
+
+import numpy as np
+from scipy.spatial.distance import pdist
+from sklearn.metrics.pairwise import haversine_distances
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
-    column_aggregate_partial,
     column_aggregate_value,
 )
 
@@ -29,30 +24,28 @@ class ColumnAverageLatLonPairwiseDistance(ColumnAggregateMetricProvider):
     metric_name = "column.average_lat_lon_pairwise_distance"
     value_keys = ()
 
-
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        #convert everything to arrays for pairwise distance computation
-        arr = np.array([np.array([point[0],point[1]]) for point in column])
+        # convert everything to arrays for pairwise distance computation
+        column_array = np.array([np.array([point[0], point[1]]) for point in column])
 
-        result = pdist(arr, cls.haversine_adapted).mean()
+        result = pdist(column_array, cls.haversine_adapted).mean()
 
         return result
 
     @staticmethod
     def haversine_adapted(point_1, point_2):
-        #lat lon to radians for haversine
+        # lat lon to radians for haversine
         point_1 = [radians(_) for _ in point_1]
         point_2 = [radians(_) for _ in point_2]
 
         result = haversine_distances([point_1, point_2])
-        #convert to km
-        result *= 6371000/1000 
-        #result is a 2d distance matrix, 
+        # convert to km
+        result *= 6371000 / 1000
+        # result is a 2d distance matrix,
         #  0, dist
         #  dist, 0
-        return result[0][1] 
-
+        return result[0][1]
 
 
 # This class defines the Expectation itself
@@ -89,7 +82,6 @@ class ExpectColumnAverageLatLonPairwiseDistanceToBeLessThan(ColumnExpectation):
                     "title": "positive_test_within_100km",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-
                     "in": {
                         "column": "mostly_points_within_geo_region_US",
                         "max_distance": 100,
@@ -102,7 +94,6 @@ class ExpectColumnAverageLatLonPairwiseDistanceToBeLessThan(ColumnExpectation):
                     "title": "negative_test_within_50km",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-
                     "in": {
                         "column": "mostly_points_within_geo_region_US",
                         "max_distance": 50,
@@ -110,27 +101,23 @@ class ExpectColumnAverageLatLonPairwiseDistanceToBeLessThan(ColumnExpectation):
                     "out": {
                         "success": False,
                     },
-                },            
+                },
                 {
                     "title": "positive_test_within_7000km",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-
                     "in": {
                         "column": "mostly_points_within_geo_region_GBR",
-
                         "max_distance": 7000,
                     },
                     "out": {
                         "success": True,
                     },
-                },            
-
+                },
                 {
                     "title": "negative_test_within_1000km",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-
                     "in": {
                         "column": "mostly_points_within_geo_region_PER",
                         "max_distance": 1000,
@@ -138,19 +125,16 @@ class ExpectColumnAverageLatLonPairwiseDistanceToBeLessThan(ColumnExpectation):
                     "out": {
                         "success": False,
                     },
-                },            
-
-
+                },
             ],
         }
     ]
-
 
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
     metric_dependencies = ("column.average_lat_lon_pairwise_distance",)
 
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
-    success_keys = ("max_distance", )
+    success_keys = ("max_distance",)
 
     # This dictionary contains default values for any parameters that should have default values.
     default_kwarg_values = {}
