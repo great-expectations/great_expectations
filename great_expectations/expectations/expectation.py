@@ -1229,8 +1229,8 @@ class Expectation(metaclass=MetaExpectation):
         """Generate test results. This is an internal method for run_diagnostics."""
         test_results = []
 
-        exp_tests = cls._generate_expectation_tests(
-            snake_name=expectation_type,
+        exp_tests = generate_expectation_tests(
+            expectation_type=expectation_type,
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
@@ -1266,22 +1266,6 @@ class Expectation(metaclass=MetaExpectation):
                 )
 
         return test_results
-
-    @staticmethod
-    def _generate_expectation_tests(
-        snake_name: str,
-        test_data_cases: List[ExpectationTestDataCases],
-        execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
-        raise_exceptions_for_backends: bool = False,
-    ):
-        """This is a placeholder method to adapt the typed objects used to build ExpectationDiagnostics with the untyped dictionaries used in generate_expectation_tests"""
-        parameterized_tests = generate_expectation_tests(
-            expectation_type=snake_name,
-            test_data_cases=test_data_cases,
-            execution_engine_diagnostics=execution_engine_diagnostics,
-            raise_exceptions_for_backends=raise_exceptions_for_backends,
-        )
-        return parameterized_tests
 
     def _get_rendered_result_as_string(self, rendered_result) -> str:
         """Convenience method to get rendered results as strings."""

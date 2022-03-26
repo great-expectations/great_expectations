@@ -1524,19 +1524,12 @@ def generate_expectation_tests(
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     raise_exceptions_for_backends: bool = False,
 ):
-    """
+    """Determine tests to run
 
     :param expectation_type: snake_case name of the expectation type
-    :param examples_config: a dictionary that defines the data and test cases for the expectation
-    :param expectation_execution_engines_dict: shows which backends/execution engines the
-            expectation is implemented for. It can be obtained from the output of the expectation's self_check method
-            Example:
-            {
-             "PandasExecutionEngine": True,
-             "SqlAlchemyExecutionEngine": False,
-             "SparkDFExecutionEngine": False
-            }
-    :return:
+    :param test_data_cases: list of ExpectationTestDataCases that has data, tests, schemas, and backends to use
+    :param execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics object specifying the engines the expectation is implemented for
+    :return: list of parametrized tests with loaded validators and accessible backends
     """
     parametrized_tests = []
 
