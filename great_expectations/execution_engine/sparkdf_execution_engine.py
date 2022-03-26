@@ -5,7 +5,7 @@ import logging
 import uuid
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from dateutil.parser import parse
 
@@ -28,7 +28,11 @@ from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
-from great_expectations.expectations.row_conditions import parse_condition_to_spark
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+    parse_condition_to_spark,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -249,7 +253,7 @@ Please check your config."""
                         "org.apache.hadoop.fs.azure.NativeAzureFileSystem",
                     )
                     self.spark.conf.set(
-                        "fs.azure.account.key." + storage_account_url, credential
+                        f"fs.azure.account.key.{storage_account_url}", credential
                     )
                 reader: DataFrameReader = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
@@ -332,7 +336,7 @@ Please check your config."""
             return "parquet"
 
         raise ExecutionEngineError(
-            "Unable to determine reader method from path: %s" % path
+            f"Unable to determine reader method from path: {path}"
         )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):
@@ -362,7 +366,7 @@ Please check your config."""
             return getattr(reader, reader_method_op)
         except AttributeError:
             raise ExecutionEngineError(
-                "Unable to find reader_method %s in spark." % reader_method,
+                f"Unable to find reader_method {reader_method} in spark.",
             )
 
     def get_domain_records(
@@ -414,9 +418,18 @@ Please check your config."""
                     f"unrecognized condition_parser {str(condition_parser)} for Spark execution engine"
                 )
 
+        # Filtering by filter_conditions
+        filter_conditions: List[RowCondition] = domain_kwargs.get(
+            "filter_conditions", []
+        )
+        if len(filter_conditions) > 0:
+            filter_condition = self._combine_row_conditions(filter_conditions)
+            data = data.filter(filter_condition.condition)
+
         if "column" in domain_kwargs:
             return data
 
+        # Filtering by ignore_row_if directive
         if (
             "column_A" in domain_kwargs
             and "column_B" in domain_kwargs
@@ -445,9 +458,10 @@ Please check your config."""
                     )
 
                 if ignore_row_if == "never":
+                    # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
 """,
                         DeprecationWarning,
                     )
@@ -479,6 +493,33 @@ Please check your config."""
 
         return data
 
+    def _combine_row_conditions(
+        self, row_conditions: List[RowCondition]
+    ) -> RowCondition:
+        """Combine row conditions using AND if condition_type is SPARK_SQL
+
+        Note, although this method does not currently use `self` internally we
+        are not marking as @staticmethod since it is meant to only be called
+        internally in this class.
+
+        Args:
+            row_conditions: Row conditions of type Spark
+
+        Returns:
+            Single Row Condition combined
+        """
+        assert all(
+            condition.condition_type == RowConditionParserType.SPARK_SQL
+            for condition in row_conditions
+        ), "All row conditions must have type SPARK_SQL"
+        conditions: List[str] = [
+            row_condition.condition for row_condition in row_conditions
+        ]
+        joined_condition: str = " AND ".join(conditions)
+        return RowCondition(
+            condition=joined_condition, condition_type=RowConditionParserType.SPARK_SQL
+        )
+
     def get_compute_domain(
         self,
         domain_kwargs: dict,
@@ -504,98 +545,24 @@ Please check your config."""
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the domain within the compute domain
         """
-        data = self.get_domain_records(
-            domain_kwargs=domain_kwargs,
-        )
-        # Extracting value from enum if it is given for future computation
-        domain_type = MetricDomainTypes(domain_type)
+        data = self.get_domain_records(domain_kwargs)
 
-        compute_domain_kwargs = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs = {}
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
-        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
-        if (
-            domain_type != MetricDomainTypes.TABLE
-            and accessor_keys is not None
-            and len(list(accessor_keys)) > 0
-        ):
-            logger.warning(
-                'Accessor keys ignored since Metric Domain Type is not "table"'
-            )
+        split_domain_kwargs = self._split_domain_kwargs(
+            domain_kwargs, domain_type, accessor_keys
+        )
 
-        if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(list(accessor_keys)) > 0:
-                for key in accessor_keys:
-                    accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
-            if len(compute_domain_kwargs.keys()) > 0:
-                # Warn user if kwarg not "normal".
-                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
-                    {
-                        "batch_id",
-                        "table",
-                        "row_condition",
-                        "condition_parser",
-                    }
-                )
-                if len(unexpected_keys) > 0:
-                    unexpected_keys_str: str = ", ".join(
-                        map(lambda element: f'"{element}"', unexpected_keys)
-                    )
-                    logger.warning(
-                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
-                    )
-            return data, compute_domain_kwargs, accessor_domain_kwargs
-
-        elif domain_type == MetricDomainTypes.COLUMN:
-            if "column" not in compute_domain_kwargs:
-                raise GreatExpectationsError(
-                    "Column not provided in compute_domain_kwargs"
-                )
-
-            accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
-
-        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
-            if not (
-                "column_A" in compute_domain_kwargs
-                and "column_B" in compute_domain_kwargs
-            ):
-                raise GreatExpectationsError(
-                    "column_A or column_B not found within compute_domain_kwargs"
-                )
-
-            accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
-            accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
-
-        elif domain_type == MetricDomainTypes.MULTICOLUMN:
-            if "column_list" not in domain_kwargs:
-                raise ge_exceptions.GreatExpectationsError(
-                    "column_list not found within domain_kwargs"
-                )
-
-            column_list = compute_domain_kwargs.pop("column_list")
-
-            if len(column_list) < 2:
-                raise ge_exceptions.GreatExpectationsError(
-                    "column_list must contain at least 2 columns"
-                )
-
-            accessor_domain_kwargs["column_list"] = column_list
-
-        return data, compute_domain_kwargs, accessor_domain_kwargs
+        return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
         # We explicitly handle filter_nan & filter_null for spark using a spark-native condition
-        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
-            raise GreatExpectationsError(
-                "ExecutionEngine does not support updating existing row_conditions."
-            )
 
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
         assert "column" in domain_kwargs or column_name is not None
@@ -603,20 +570,30 @@ Please check your config."""
             column = column_name
         else:
             column = domain_kwargs["column"]
-        if filter_null and filter_nan:
-            new_domain_kwargs[
-                "row_condition"
-            ] = f"NOT isnan({column}) AND {column} IS NOT NULL"
-        elif filter_null:
-            new_domain_kwargs["row_condition"] = f"{column} IS NOT NULL"
-        elif filter_nan:
-            new_domain_kwargs["row_condition"] = f"NOT isnan({column})"
-        else:
+
+        filter_conditions: List[RowCondition] = []
+        if filter_null:
+            filter_conditions.append(
+                RowCondition(
+                    condition=f"{column} IS NOT NULL",
+                    condition_type=RowConditionParserType.SPARK_SQL,
+                )
+            )
+        if filter_nan:
+            filter_conditions.append(
+                RowCondition(
+                    condition=f"NOT isnan({column})",
+                    condition_type=RowConditionParserType.SPARK_SQL,
+                )
+            )
+
+        if not (filter_null or filter_nan):
             logger.warning(
                 "add_column_row_condition called without specifying a desired row condition"
             )
 
-        new_domain_kwargs["condition_parser"] = "spark"
+        new_domain_kwargs.setdefault("filter_conditions", []).extend(filter_conditions)
+
         return new_domain_kwargs
 
     def resolve_metric_bundle(

@@ -242,6 +242,10 @@ local_tests = [
         name="expect_column_values_to_equal_three",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py",
     ),
+    IntegrationTestFixture(
+        name="expect_table_columns_to_be_unique",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py",
+    ),
 ]
 
 
@@ -279,7 +283,7 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
-        name="introspect_and_partition_yaml_example_gradual",
+        name="introspect_and_partition_yaml_example_gradual_sql",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
@@ -287,7 +291,7 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
-        name="introspect_and_partition_yaml_example_complete",
+        name="introspect_and_partition_yaml_example_complete_sql",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
@@ -624,7 +628,6 @@ docs_test_matrix += cloud_bigquery_tests
 docs_test_matrix += cloud_azure_tests
 docs_test_matrix += cloud_s3_tests
 docs_test_matrix += cloud_redshift_tests
-docs_test_matrix += dockerized_db_tests
 
 pandas_integration_tests = [
     IntegrationTestFixture(
@@ -794,7 +797,7 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
     if not dependencies:
         return
     elif dependencies == BackendDependencies.POSTGRESQL and (
-        pytest_args.no_postgresql or pytest_args.no_sqlalchemy
+        not pytest_args.postgresql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping postgres tests")
     elif dependencies == BackendDependencies.MYSQL and (
@@ -815,7 +818,7 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
         pytest.skip("Skipping AWS tests")
     elif dependencies == BackendDependencies.REDSHIFT and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping redshift tests")
-    elif dependencies == BackendDependencies.SPARK and pytest_args.no_spark:
+    elif dependencies == BackendDependencies.SPARK and not pytest_args.spark:
         pytest.skip("Skipping spark tests")
     elif dependencies == BackendDependencies.SNOWFLAKE and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping snowflake tests")

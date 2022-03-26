@@ -118,7 +118,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
         )
-    except sqlalchemy.exc.OperationalError:
+    except (sqlalchemy.exc.OperationalError, ModuleNotFoundError):
         return None
 
     sql_dtypes = {}

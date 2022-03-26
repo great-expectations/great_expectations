@@ -160,10 +160,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     success_keys = (
@@ -188,6 +189,22 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         "partition_object",
         "threshold",
     )
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+        super().validate_configuration(configuration)
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     def get_validation_dependencies(
         self,
@@ -246,7 +263,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     metric_value_kwargs=None,
                 )
                 #
-                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuraiton here,
+                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuration here,
                 # since we have already evaluated it, and its result is in the kwargs for the histogram.
                 # However, currently the dependencies' configurations are not passed to the _validate method
                 #
@@ -747,7 +764,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                         "header": header,
                         "styling": {
                             "classes": [
-                                "col-" + str(chart_container_col_width),
+                                f"col-{str(chart_container_col_width)}",
                                 "mt-2",
                                 "pl-1",
                                 "pr-1",
@@ -763,7 +780,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                         "graph": chart,
                         "styling": {
                             "classes": [
-                                "col-" + str(chart_container_col_width),
+                                f"col-{str(chart_container_col_width)}",
                                 "mt-2",
                                 "pl-1",
                                 "pr-1",
@@ -849,18 +866,14 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 if idx == len(fractions) - 1:
                     table_rows.append(
                         [
-                            "[{} - {}]".format(
-                                num_to_str(bins[idx]), num_to_str(bins[idx + 1])
-                            ),
+                            f"[{num_to_str(bins[idx])} - {num_to_str(bins[idx + 1])}]",
                             num_to_str(fraction),
                         ]
                     )
                 else:
                     table_rows.append(
                         [
-                            "[{} - {})".format(
-                                num_to_str(bins[idx]), num_to_str(bins[idx + 1])
-                            ),
+                            f"[{num_to_str(bins[idx])} - {num_to_str(bins[idx + 1])})",
                             num_to_str(fraction),
                         ]
                     )
@@ -1035,7 +1048,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
         # optionally, add column name
         if include_column_name:
-            header_template_str = "$column " + header_template_str
+            header_template_str = f"$column {header_template_str}"
 
         # generate table or chart depending on number of weights
         if len(weights) > 60:
@@ -1058,7 +1071,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                 params["row_condition"], with_schema=True
             )
             header_template_str = (
-                conditional_template_str + ", then " + header_template_str
+                f"{conditional_template_str}, then {header_template_str}"
             )
             header_params_with_json_schema.update(conditional_params)
 
@@ -1177,14 +1190,14 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             )
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         expectation_string_obj = {

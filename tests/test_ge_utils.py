@@ -1,4 +1,5 @@
 import copy
+import json
 import logging
 import os
 
@@ -14,6 +15,26 @@ from great_expectations.util import (
     hyphen,
     lint_code,
 )
+
+
+@pytest.fixture
+def empty_expectation_suite():
+    expectation_suite = {
+        "expectation_suite_name": "default",
+        "meta": {},
+        "expectations": [],
+    }
+    return expectation_suite
+
+
+@pytest.fixture
+def file_data_asset(tmp_path):
+    tmp_path = str(tmp_path)
+    path = os.path.join(tmp_path, "file_data_asset.txt")
+    with open(path, "w+") as file:
+        file.write(json.dumps([0, 1, 2, 3, 4]))
+
+    return ge.data_asset.FileDataAsset(file_path=path)
 
 
 def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
@@ -558,6 +579,27 @@ def test_deep_filter_properties_iterable():
         },
     }
     assert d1_end == d1_end_expected
+
+
+def test_deep_filter_properties_iterable_on_batch_request_dict():
+    batch_request: dict = {
+        "datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
+        "data_connector_name": "123a3221fc4b65014d061cce4a71782e",
+        "data_asset_name": "eac128c5824b698c22b441ada61022d4",
+        "batch_spec_passthrough": {},
+        "data_connector_query": {"batch_filter_parameters": {}},
+        "limit": None,
+    }
+
+    deep_filter_properties_iterable(
+        properties=batch_request, clean_nulls=True, clean_falsy=True, inplace=True
+    )
+
+    assert batch_request == {
+        "datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
+        "data_connector_name": "123a3221fc4b65014d061cce4a71782e",
+        "data_asset_name": "eac128c5824b698c22b441ada61022d4",
+    }
 
 
 def test_hyphen():

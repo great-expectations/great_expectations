@@ -81,9 +81,9 @@ def create_expectation_suite(
     :return: a tuple: (success, suite name, profiling_results)
     """
     if generator_asset:
+        # deprecated-v0.13.12
         warnings.warn(
-            "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-            "Please update code accordingly.",
+            "The 'generator_asset' argument is deprecated as of v0.13.12 and will be removed in v0.16. Please use 'data_asset_name' instead.",
             DeprecationWarning,
         )
         data_asset_name = generator_asset
@@ -228,7 +228,7 @@ def _raise_profiling_errors(profiling_results):
             )
         )
     raise ge_exceptions.DataContextError(
-        "Unknown profiling error code: " + profiling_results["error"]["code"]
+        f"Unknown profiling error code: {profiling_results['error']['code']}"
     )
 
 
@@ -256,7 +256,7 @@ def _get_default_expectation_suite_name(batch_kwargs, data_asset_name):
             filename = os.path.split(os.path.normpath(batch_kwargs["path"]))[1]
             # Take all but the last part after the period
             filename = ".".join(filename.split(".")[:-1])
-            suite_name = str(filename) + ".warning"
+            suite_name = f"{str(filename)}.warning"
         except (OSError, IndexError):
             suite_name = "warning"
     else:
@@ -397,12 +397,12 @@ def select_datasource(context: DataContext, datasource_name: str = None) -> Data
         else:
             choices = "\n".join(
                 [
-                    "    {}. {}".format(i, data_source["name"])
+                    f"    {i}. {data_source['name']}"
                     for i, data_source in enumerate(data_sources, 1)
                 ]
             )
             option_selection = click.prompt(
-                "Select a datasource" + "\n" + choices + "\n",
+                f"Select a datasource\n{choices}\n",
                 type=click.Choice(
                     [str(i) for i, data_source in enumerate(data_sources, 1)]
                 ),

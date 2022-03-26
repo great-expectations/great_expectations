@@ -27,15 +27,6 @@ class Maturity(Enum):
 
 
 @dataclass
-class Package:
-    """A package name, link to its pypi or Gallery page, and (optional) version number"""
-
-    text: str
-    link: str
-    version: Optional[str]
-
-
-@dataclass
 class AugmentedLibraryMetadata(SerializableDictDot):
     """An augmented version of the Expectation.library_metadata object, used within ExpectationDiagnostics"""
 
@@ -46,7 +37,7 @@ class AugmentedLibraryMetadata(SerializableDictDot):
     library_metadata_passed_checks: bool
     has_full_test_suite: bool
     manually_reviewed_code: bool
-    package: Optional[Package] = None
+    problems: List[str] = field(default_factory=list)
 
     legacy_maturity_level_substitutions = {
         "experimental": "EXPERIMENTAL",

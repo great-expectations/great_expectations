@@ -1,52 +1,10 @@
 ---  
 title: 'Tutorial, Step 1: Setup'  
 ---  
-<table class="borderless center">
-<tr>
-    <td>
-        <img
-          src={require('../../images/universal_map/Gear-active.png').default}
-          alt="Setup"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Outlet-inactive.png').default}
-          alt="Connect to Data"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Flask-inactive.png').default}
-          alt="Create Expectations"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Arrow.png').default}
-          alt="Arrow"
-        />
-    </td>
-    <td>
-        <img
-          src={require('../../images/universal_map/Checkmark-inactive.png').default}
-          alt="Validate Data"
-        />
-    </td>
-</tr>
-</table>
+import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
+
+<UniversalMap setup='active' connect='inactive' create='inactive' validate='inactive'/> 
 
 :::note Prerequisites
 In order to work with Great Expectations, you will need:
@@ -57,10 +15,11 @@ In order to work with Great Expectations, you will need:
 - A working Git install
 - A working internet browser install (for viewing Data Docs in steps 3 and 4).
 
-If you need assistance with setting up any of these utilities, we have links to their documentation on our page for [supporting resources.](../../reference/supporting_resources.md)
+If you need assistance with setting up any of these utilities, we have links to their documentation on our page for <TechnicalTag relative="../../" tag="supporting_resource" text="supporting resources" />.
 :::
 
 ### Setting up the tutorial data
+
 The first thing we'll need is a copy of the data that this tutorial will work with.  Fortunately, we've already put that data into a convenient repository that you can clone to your machine.
 
 Clone the [ge_tutorials](https://github.com/superconductive/ge_tutorials) repository to download the data.  This repository also contains directories with the final versions of the tutorial, which you can use for reference.
@@ -94,22 +53,24 @@ This should return something like:
 great_expectations, version 0.13.46
 ```
 
-For detailed installation instructions, see [How to install Great Expectations locally](/docs/guides/setup/installation/local).
+For detailed installation instructions, see [How to install Great Expectations locally](../../guides/setup/installation/local.md).
 
 <details>
   <summary>Other deployment patterns</summary>
   <div>
     <p>
-      This tutorial deploys Great Expectations locally. Note that other options (e.g. running Great Expectations on an EMR Cluster) are also available. You can find more information in the Deployment Patterns section of the documentation.
-    </p>
+
+This tutorial deploys Great Expectations locally. Note that other options (e.g. running Great Expectations on an EMR Cluster) are also available. You can find more information in the [Reference Architectures](../../deployment_patterns/index.md) section of the documentation.
+
+</p>
   </div>
 </details>
 
 ### Create a Data Context
 
-In Great Expectations, your Data Context manages your project configuration, so let’s go and create a Data Context for our tutorial project!
+In Great Expectations, your <TechnicalTag relative="../../" tag="data_context" text="Data Context" /> manages your project configuration, so let’s go and create a Data Context for our tutorial project!
 
-When you installed Great Expectations, you also installed the Great Expectations command line interface (CLI). It provides helpful utilities for deploying and configuring Data Contexts, plus a few other convenience methods.
+When you installed Great Expectations, you also installed the Great Expectations command line interface (<TechnicalTag relative="../../" tag="cli" text="CLI" />). It provides helpful utilities for deploying and configuring Data Contexts, plus a few other convenience methods.
 
 To initialize your Great Expectations deployment for the project, run this command in the terminal from the `ge_tutorials` directory:
 
@@ -152,7 +113,7 @@ When you see the prompt, press enter to continue.  Great Expectations will build
 
 Your Data Context will contain the entirety of your Great Expectations project.  It is also the entry point for accessing all of the primary methods for creating elements of your project, configuring those elements, and working with the metadata for your project.  That is why the first thing you do when working with Great Expectations is to initialize a Data Context!
 
-[You can follow this link to read more about Data Contexts.](../../reference/data_context.md)
+[You can follow this link to read more about Data Contexts.](../../terms/data_context.md)
 
 :::
 
@@ -164,7 +125,11 @@ Your Data Context will contain the entirety of your Great Expectations project. 
     </p>
     <ul>
       <li><code>great_expectations.yml</code> contains the main configuration of your deployment.</li>
-      <li>The <code>expectations/</code> directory stores all your Expectations as JSON files. If you want to store them somewhere else, you can change that later.</li>
+      <li>
+
+The `expectations` directory stores all your <TechnicalTag relative="../../" tag="expectation" text="Expectations" /> as JSON files. If you want to store them somewhere else, you can change that later.
+
+</li>
       <li>The <code>plugins/</code> directory holds code for any custom plugins you develop as part of your deployment.</li>
       <li>The <code>uncommitted/</code> directory contains files that shouldn’t live in version control. It has a .gitignore configured to exclude all its contents from version control. The main contents of the directory are:
         <ul>

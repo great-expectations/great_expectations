@@ -5,7 +5,7 @@ import os
 import sys
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 
 import pkg_resources
 from ruamel.yaml import YAML
@@ -23,33 +23,12 @@ yaml = YAML()
 
 
 @dataclass
-class ExpectationCompletenessCheck(SerializableDictDot):
-    message: str
-    passed: bool
-
-
-@dataclass
-class ExpectationCompletenessChecklist(SerializableDictDot):
-    experimental: List[ExpectationCompletenessCheck]
-    beta: List[ExpectationCompletenessCheck]
-    production: List[ExpectationCompletenessCheck]
-
-
-@dataclass
 class PackageCompletenessStatus(SerializableDictDot):
     concept_only: int
     experimental: int
     beta: int
     production: int
     total: int
-
-
-@dataclass
-class RenderedExpectation(SerializableDictDot):
-    name: str
-    tags: List[str]
-    supported: List[str]
-    status: ExpectationCompletenessChecklist
 
 
 @dataclass
@@ -98,7 +77,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
     package_name: Optional[str] = None
     icon: Optional[str] = None
     description: Optional[str] = None
-    expectations: Optional[List[RenderedExpectation]] = None
+    expectations: Optional[Dict[str, ExpectationDiagnostics]] = None
     expectation_count: Optional[int] = None
     dependencies: Optional[List[Dependency]] = None
     maturity: Optional[Maturity] = None
@@ -160,22 +139,29 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         if domain_experts:
             self.domain_experts = []
             for expert in domain_experts:
+
+                # If the user has provided a picture, we need to check if it is a relative URL.
+                # If it is, we need to convert to the HTTPS path that will show up when merged into `develop`.
+                picture_path: Optional[str] = expert.get("picture")
+                if picture_path and os.path.exists(picture_path):
+                    package_name: str = os.path.basename(os.getcwd())
+                    url: str = os.path.join(
+                        "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
+                        package_name,
+                        picture_path,
+                    )
+                    expert["picture"] = url
+
                 domain_expert = DomainExpert(**expert)
                 self.domain_experts.append(domain_expert)
 
     def _update_expectations(self, diagnostics: List[ExpectationDiagnostics]) -> None:
-        expectations = []
+        expectations = {}
         status = {maturity.name: 0 for maturity in Maturity}
 
         for diagnostic in diagnostics:
-            expectation = RenderedExpectation(
-                name=diagnostic.description.snake_name,
-                tags=diagnostic.library_metadata.tags,
-                supported=[],
-                status=diagnostic.maturity_checklist,  # Should be converted to the proper type
-            )
-            expectations.append(expectation)
-
+            name = diagnostic.description.snake_name
+            expectations[name] = diagnostic
             expectation_maturity = diagnostic.library_metadata.maturity
             status[expectation_maturity] += 1
 
