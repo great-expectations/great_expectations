@@ -47,7 +47,7 @@ the first four checks are required for Experimental acceptance, the following th
 
 | Criteria                                 | <i class="fas fa-circle" style={{color: "#dc3545"}}></i> Experimental <br/>Try, but do not rely | <i class="fas fa-circle" style={{color: "#ffc107"}}></i> Beta <br/>Ready for early adopters | <i class="fas fa-check-circle" style={{color: "#28a745"}}></i> Production <br/>Ready for general use |
 |------------------------------------------|:------------------------------------:|:--------------------------------:|:-----------------------------------:|
-| Has a library_metadata object            | &#10004; | &#10004; | &#10004; |
+| Has a valid library_metadata object            | &#10004; | &#10004; | &#10004; |
 | Has a docstring, including a one-line short description | &#10004; | &#10004; | &#10004; |
 | Has at least one positive and negative example case, and all test cases pass | &#10004; | &#10004; | &#10004; |
 | Has core logic and passes tests on at least one Execution Engine | &#10004; | &#10004; | &#10004; |

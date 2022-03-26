@@ -72,7 +72,7 @@ This guide will walk you through the first four steps, the minimum for a functio
 
 ```
 Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
@@ -118,7 +118,7 @@ At this point you can re-run your diagnostic checklist. You should see something
 $ python expect_column_max_to_be_between_custom.py
 
 Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
@@ -161,7 +161,7 @@ However, you should see that the tests you've written are now being caught and r
 $ python expect_column_column_max_to_be_between_custom.py
 
 Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
@@ -268,7 +268,7 @@ Running your diagnostic checklist at this point should return something like thi
 $ python expect_column_max_to_be_between_custom.py
 
 Completeness checklist for ExpectColumnMaxToBeBetweenCustom:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine

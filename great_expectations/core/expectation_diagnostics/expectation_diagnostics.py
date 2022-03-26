@@ -106,7 +106,7 @@ class ExpectationDiagnostics(SerializableDictDot):
             )
 
         return ExpectationDiagnosticCheckMessage(
-            message="Has a library_metadata object",
+            message="Has a valid library_metadata object",
             passed=library_metadata.library_metadata_passed_checks,
             sub_messages=sub_messages,
         )

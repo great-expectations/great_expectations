@@ -150,7 +150,7 @@ def test_expectation_self_check():
             "experimental": [
                 {
                     "doc_url": None,
-                    "message": "Has a library_metadata object",
+                    "message": "Has a valid library_metadata object",
                     "passed": False,
                     "sub_messages": [
                         {

@@ -36,7 +36,7 @@ def test_print_diagnostic_checklist__second_iteration():
         output_message
         == """\
 Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration:
- ✔ Has a library_metadata object
+ ✔ Has a valid library_metadata object
  ✔ Has a docstring, including a one-line short description
     ✔ "Expect values in this column to equal the number three."
  ✔ Has at least one positive and negative example case, and all test cases pass
@@ -65,7 +65,7 @@ def test_print_diagnostic_checklist__third_iteration():
         output_message
         == """\
 Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration:
- ✔ Has a library_metadata object
+ ✔ Has a valid library_metadata object
    Has a docstring, including a one-line short description
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine

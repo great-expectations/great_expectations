@@ -24,7 +24,7 @@ document on [levels of maturity for Expectations](../../../contributing/contribu
 If you call the `print_diagnostic_checklist()` method on your Custom Expectation, you should see a checklist similar to this one:
 
 ```
-✔ Has a library_metadata object
+✔ Has a valid library_metadata object
 ✔ Has a docstring, including a one-line short description
   ...
 ✔ Has at least one positive and negative example case, and all test cases pass
