@@ -236,8 +236,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
                 expectation_type
             )
 
-    @staticmethod
-    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
+    def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
         return obj is not None and isinstance(
             obj, (RuleBasedProfilerConfig, RuleBasedProfiler)
         )

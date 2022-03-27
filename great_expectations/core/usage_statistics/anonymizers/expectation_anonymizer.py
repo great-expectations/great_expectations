@@ -55,6 +55,5 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
                 expectation_type
             )
 
-    @staticmethod
-    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
+    def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
         return "expectation_suite" in kwargs

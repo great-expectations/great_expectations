@@ -1,5 +1,5 @@
 import logging
-from abc import ABC, abstractmethod, abstractstaticmethod
+from abc import ABC, abstractmethod
 from hashlib import md5
 from typing import Any, List, Optional, Tuple
 
@@ -33,8 +33,8 @@ class BaseAnonymizer(ABC):
     def anonymize(self, obj: Optional[object], **kwargs) -> Any:
         raise NotImplementedError
 
-    @abstractstaticmethod
-    def can_handle(obj: Optional[object], **kwargs) -> bool:
+    @abstractmethod
+    def can_handle(self, obj: Optional[object], **kwargs) -> bool:
         raise NotImplementedError
 
     @staticmethod

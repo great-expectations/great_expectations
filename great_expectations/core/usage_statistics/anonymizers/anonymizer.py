@@ -62,19 +62,16 @@ class Anonymizer(BaseAnonymizer):
             StoreBackendAnonymizer,
         ]
 
-        # Instead of instantiating all child anonymizers, we perform JIT or on-demand instantiation.
-        # While this has some performance benefits, the primary reason is due to cyclic imports and recursive overflow.
-        self._cache: Dict[Type[BaseAnonymizer], BaseAnonymizer] = {}
+        self._anonymizers: Dict[Type[BaseAnonymizer], BaseAnonymizer] = {
+            strategy: strategy(salt=self._salt, aggregate_anonymizer=self)
+            for strategy in self._strategies
+        }
 
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
-        anonymizer_type: Optional[Type[BaseAnonymizer]] = self._get_strategy(
-            obj=obj, **kwargs
-        )
+        anonymizer: Optional[BaseAnonymizer] = self._get_strategy(obj=obj, **kwargs)
 
-        if anonymizer_type is not None:
-            anonymizer = self._retrieve_or_instantiate(type_=anonymizer_type)
+        if anonymizer is not None:
             return anonymizer.anonymize(obj=obj, **kwargs)
-
         elif isinstance(obj, str):
             return self._anonymize_string(string_=obj)
         elif not obj:
@@ -87,20 +84,12 @@ class Anonymizer(BaseAnonymizer):
     def can_handle(self, obj: object, **kwargs) -> bool:
         return Anonymizer._get_strategy(obj=obj, **kwargs) is not None
 
-    def _get_strategy(self, obj: object, **kwargs) -> Optional[Type[BaseAnonymizer]]:
-        for anonymizer_type in self._strategies:
-            if anonymizer_type.can_handle(obj=obj, **kwargs):
-                return anonymizer_type
+    def _get_strategy(self, obj: object, **kwargs) -> Optional[BaseAnonymizer]:
+        for anonymizer in self._anonymizers.values():
+            if anonymizer.can_handle(obj=obj, **kwargs):
+                return anonymizer
 
         return None
-
-    def _retrieve_or_instantiate(self, type_: Type[BaseAnonymizer]) -> BaseAnonymizer:
-        anonymizer: Optional[BaseAnonymizer] = self._cache.get(type_)
-        if anonymizer is None:
-            anonymizer = type_(salt=self._salt, aggregate_anonymizer=self)
-            self._cache[type_] = anonymizer
-
-        return anonymizer
 
     def anonymize_init_payload(self, init_payload: dict) -> dict:
         anonymized_init_payload = {}
@@ -127,7 +116,7 @@ class Anonymizer(BaseAnonymizer):
             DatasourceAnonymizer,
         )
 
-        anonymizer = self._retrieve_or_instantiate(type_=DatasourceAnonymizer)
+        anonymizer = self._anonymizers[DatasourceAnonymizer]
 
         anonymized_values: List[dict] = []
         for name, config in payload.items():
@@ -145,7 +134,7 @@ class Anonymizer(BaseAnonymizer):
             StoreAnonymizer,
         )
 
-        anonymizer = self._retrieve_or_instantiate(type_=StoreAnonymizer)
+        anonymizer = self._anonymizers[StoreAnonymizer]
 
         anonymized_values: List[dict] = []
         for store_name, store_obj in payload.items():
@@ -164,7 +153,7 @@ class Anonymizer(BaseAnonymizer):
             ValidationOperatorAnonymizer,
         )
 
-        anonymizer = self._retrieve_or_instantiate(type_=ValidationOperatorAnonymizer)
+        anonymizer = self._anonymizers[ValidationOperatorAnonymizer]
 
         anonymized_values: List[dict] = []
         for validation_operator_name, validation_operator_obj in payload.items():
@@ -183,7 +172,7 @@ class Anonymizer(BaseAnonymizer):
             DataDocsAnonymizer,
         )
 
-        anonymizer = self._retrieve_or_instantiate(type_=DataDocsAnonymizer)
+        anonymizer = self._anonymizers[DataDocsAnonymizer]
 
         anonymized_values: List[dict] = []
         for site_name, site_config in payload.items():
@@ -201,7 +190,7 @@ class Anonymizer(BaseAnonymizer):
             ExpectationSuiteAnonymizer,
         )
 
-        anonymizer = self._retrieve_or_instantiate(type_=ExpectationSuiteAnonymizer)
+        anonymizer = self._anonymizers[ExpectationSuiteAnonymizer]
 
         anonymized_values: List[dict] = []
         for suite in payload:

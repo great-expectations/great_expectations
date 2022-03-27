@@ -62,6 +62,5 @@ class DataDocsAnonymizer(BaseAnonymizer):
 
         return anonymized_info_dict
 
-    @staticmethod
-    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
+    def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
         return "site_name" and "site_config" in kwargs

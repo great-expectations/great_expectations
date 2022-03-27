@@ -33,6 +33,5 @@ class ActionAnonymizer(BaseAnonymizer):
 
         return anonymized_info_dict
 
-    @staticmethod
-    def can_handle(obj: Optional[object] = None, **kwargs) -> bool:
+    def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
         return "action_name" in kwargs
