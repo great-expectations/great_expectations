@@ -425,7 +425,7 @@ def add_datasource_usage_statistics(
         DatasourceAnonymizer,
     )
 
-    aggregate_anonymizer = Anonymizer(salt=data_context)
+    aggregate_anonymizer = Anonymizer(salt=data_context_id)
     datasource_anonymizer = DatasourceAnonymizer(data_context_id, aggregate_anonymizer)
 
     payload = {}

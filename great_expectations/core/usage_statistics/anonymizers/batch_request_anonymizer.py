@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class BatchRequestAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        salt: Optional[str],
+        salt: Optional[str] = None,
         aggregate_anonymizer: Optional["Anonymizer"] = None,  # noqa: F821
     ) -> None:
         super().__init__(salt=salt)
