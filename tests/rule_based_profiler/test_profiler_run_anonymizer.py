@@ -2,6 +2,7 @@ from typing import Dict
 
 import pytest
 
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
     ProfilerAnonymizer,
 )
@@ -12,7 +13,10 @@ from great_expectations.rule_based_profiler.config.base import RuleBasedProfiler
 def profiler_anonymizer() -> ProfilerAnonymizer:
     # Standardize the salt so our tests are deterimistic
     salt: str = "00000000-0000-0000-0000-00000000a004"
-    anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(salt=salt)
+    aggregate_anonymizer: Anonymizer = Anonymizer(salt=salt)
+    anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
+        salt=salt, aggregate_anonymizer=aggregate_anonymizer
+    )
     return anonymizer
 
 
