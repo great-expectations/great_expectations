@@ -7,19 +7,12 @@ from great_expectations.data_context.store.store import Store
 class StoreAnonymizer(BaseAnonymizer):
     def __init__(
         self,
+        aggregate_anonymizer: "Anonymizer",  # noqa: F821
         salt: Optional[str] = None,
-        aggregate_anonymizer: Optional["Anonymizer"] = None,  # noqa: F821
     ) -> None:
         super().__init__(salt=salt)
 
-        if aggregate_anonymizer:
-            self._aggregate_anonymizer = aggregate_anonymizer
-        else:
-            from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
-                Anonymizer,
-            )
-
-            self._aggregate_anonymizer = Anonymizer(salt=salt)
+        self._aggregate_anonymizer = aggregate_anonymizer
 
     def anonymize(
         self, store_name: str, store_obj: Store, obj: Optional[object] = None

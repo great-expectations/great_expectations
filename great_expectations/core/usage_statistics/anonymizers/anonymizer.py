@@ -97,7 +97,7 @@ class Anonymizer(BaseAnonymizer):
     def _retrieve_or_instantiate(self, type_: Type[BaseAnonymizer]) -> BaseAnonymizer:
         anonymizer: Optional[BaseAnonymizer] = self._cache.get(type_)
         if anonymizer is None:
-            anonymizer = type_(salt=self._salt)
+            anonymizer = type_(salt=self._salt, aggregate_anonymizer=self)
             self._cache[type_] = anonymizer
 
         return anonymizer

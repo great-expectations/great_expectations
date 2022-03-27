@@ -22,19 +22,12 @@ logger = logging.getLogger(__name__)
 class BatchRequestAnonymizer(BaseAnonymizer):
     def __init__(
         self,
+        aggregate_anonymizer: "Anonymizer",  # noqa: F821
         salt: Optional[str] = None,
-        aggregate_anonymizer: Optional["Anonymizer"] = None,  # noqa: F821
     ) -> None:
         super().__init__(salt=salt)
 
-        if aggregate_anonymizer:
-            self._aggregate_anonymizer = aggregate_anonymizer
-        else:
-            from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
-                Anonymizer,
-            )
-
-            self._aggregate_anonymizer = Anonymizer(salt=salt)
+        self._aggregate_anonymizer = aggregate_anonymizer
 
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         anonymized_batch_request_properties_dict: Optional[Dict[str, List[str]]] = None
