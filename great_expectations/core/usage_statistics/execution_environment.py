@@ -20,7 +20,7 @@ from packaging import version
 from great_expectations.core.usage_statistics.package_dependencies import GEDependencies
 
 if sys.version_info < (3, 8):
-    # Note: this is included in the python standard library as importlib
+    # Note: importlib_metadata is included in the python standard library as importlib
     # starting with v3.8. At the time we remove support for python v3.7
     # this conditional can be removed.
     from importlib_metadata import metadata
