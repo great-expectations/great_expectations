@@ -56,15 +56,17 @@ class ExpectColumnValuesToBeValidGeohash(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_geohash_strings": ["dpz8"],
-                "invalid_geohash_strings": ["dpz-"],
+                "valid_geohash": ["dpz8"],
+                "invalid_alphanumeric": ["apz8"],  # "a" is an invalid geohash char
+                "invalid_non_alphanumeric": ["dp2-"],
+                "empty": [""]
             },
             "tests": [
                 {
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "valid_geohash_strings"},
+                    "in": {"column": "valid_geohash"},
                     "out": {
                         "success": True,
                     },
@@ -73,7 +75,25 @@ class ExpectColumnValuesToBeValidGeohash(ColumnMapExpectation):
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "invalid_geohash_strings", "mostly": 1},
+                    "in": {"column": "invalid_alphanumeric", "mostly": 1},
+                    "out": {
+                        "success": False,
+                    },
+                },
+                {
+                    "title": "invalid_non_alphanumeric",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "invalid_non_alphanumeric", "mostly": 1},
+                    "out": {
+                        "success": False,
+                    },
+                },
+                {
+                    "title": "empty",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "empty", "mostly": 1},
                     "out": {
                         "success": False,
                     },
