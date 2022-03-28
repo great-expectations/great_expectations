@@ -14,15 +14,20 @@ from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
+from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core import ExpectationSuite, ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.rule_based_profiler import (
+    BaseRuleBasedProfiler,
+    RuleBasedProfiler,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.core.usage_statistics.util import (
@@ -403,6 +408,59 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     ).to_pydatetime()
     month: int = pickup_datetime.month
     assert month == 3
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time("09/26/2019 13:42:41")
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_bobby_profiler_user_workflow_initialize_through(
+    mock_emit,
+    caplog,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+    bobby_columnar_table_multi_batch,
+):
+    # Load data context
+    data_context: DataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
+
+    # Load profiler configs & loop (run tests for each one)
+    yaml_config: str = bobby_columnar_table_multi_batch["profiler_config"]
+
+    # Instantiate Profiler
+    yaml_handler = YAMLHandler()
+    profiler_config: dict = yaml_handler.load(yaml_config)
+    hero_batch: BatchRequest = BatchRequest(
+        **profiler_config["variables"]["jan_feb_2019_monthly_tripdata_batch_request"]
+    )
+
+    profiler_configuration: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        **profiler_config
+    )
+
+    profiler: RuleBasedProfiler = BaseRuleBasedProfiler(
+        profiler_configuration, data_context=data_context
+    )
+    expectation_suite: ExpectationSuite = profiler.run(
+        expectation_suite_name="test_me",
+        include_citation=True,
+    )
+    data_context.save_expectation_suite(expectation_suite)
+
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
+        data_context=data_context,
+        name="hero_checkpoint",
+        validations=[
+            {"batch_request": hero_batch, "expectation_suite_name": "test_me"}
+        ],
+    )
+    results = checkpoint.run()
+    # print(results)
 
 
 @pytest.mark.skipif(
