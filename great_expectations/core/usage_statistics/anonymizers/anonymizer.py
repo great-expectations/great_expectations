@@ -68,7 +68,7 @@ class Anonymizer(BaseAnonymizer):
         }
 
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
-        anonymizer: Optional[BaseAnonymizer] = self._get_strategy(obj=obj, **kwargs)
+        anonymizer: Optional[BaseAnonymizer] = self._get_anonymizer(obj=obj, **kwargs)
 
         if anonymizer is not None:
             return anonymizer.anonymize(obj=obj, **kwargs)
@@ -82,9 +82,9 @@ class Anonymizer(BaseAnonymizer):
         )
 
     def can_handle(self, obj: object, **kwargs) -> bool:
-        return Anonymizer._get_strategy(obj=obj, **kwargs) is not None
+        return Anonymizer._get_anonymizer(obj=obj, **kwargs) is not None
 
-    def _get_strategy(self, obj: object, **kwargs) -> Optional[BaseAnonymizer]:
+    def _get_anonymizer(self, obj: object, **kwargs) -> Optional[BaseAnonymizer]:
         for anonymizer in self._anonymizers.values():
             if anonymizer.can_handle(obj=obj, **kwargs):
                 return anonymizer
