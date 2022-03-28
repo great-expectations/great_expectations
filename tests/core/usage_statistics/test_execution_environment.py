@@ -1,3 +1,4 @@
+import sys
 from typing import List
 from unittest import mock
 
@@ -10,6 +11,14 @@ from great_expectations.core.usage_statistics.execution_environment import (
     PackageInfo,
 )
 
+if sys.version_info < (3, 8):
+    # Note: importlib_metadata is included in the python standard library as importlib
+    # starting with v3.8. At the time we remove support for python v3.7
+    # this conditional can be removed.
+    METADATA_VERSION_PATCH: str = "importlib_metadata.version"
+else:
+    METADATA_VERSION_PATCH: str = "importlib.metadata.version"
+
 
 @pytest.mark.parametrize(
     "input_version", ["8.8.8", "0.14.12+14.g8f54aa902.dirty", "0.1.0.post0"]
@@ -18,7 +27,7 @@ from great_expectations.core.usage_statistics.execution_environment import (
     "great_expectations.core.usage_statistics.execution_environment.GEExecutionEnvironment._get_all_installed_packages",
     return_value=True,
 )
-@mock.patch("importlib.metadata.version", return_value=True)
+@mock.patch(METADATA_VERSION_PATCH, return_value=True)
 @mock.patch(
     "great_expectations.core.usage_statistics.package_dependencies.GEDependencies.get_dev_dependency_names",
     return_value=True,
