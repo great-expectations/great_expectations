@@ -1,14 +1,10 @@
-import os
 from unittest import mock
 
 import pytest
-from ruamel import yaml
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    DatasourceConfig,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import DataContextError, GeCloudError
 from great_expectations.exceptions.exceptions import DatasourceInitializationError
 
@@ -114,6 +110,7 @@ def ge_cloud_data_context_config(
       usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
       data_context_id: {ge_cloud_data_context_config}
     """
+    yaml = YAMLHandler()
     config = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
     return DataContextConfig(**config)
 

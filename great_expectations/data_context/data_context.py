@@ -21,6 +21,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -129,9 +130,9 @@ except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 logger = logging.getLogger(__name__)
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml = YAMLHandler()
+# yaml.indent(mapping=2, sequence=4, offset=2)
+# yaml.default_flow_style = False
 
 
 class BaseDataContext(ConfigPeer):
@@ -325,12 +326,13 @@ class BaseDataContext(ConfigPeer):
     )
     def __init__(
         self,
-        project_config,
-        context_root_dir=None,
-        runtime_environment=None,
-        ge_cloud_mode=False,
-        ge_cloud_config=None,
-    ):
+        project_config: DataContextConfig,
+        context_root_dir: Optional[str] = None,
+        runtime_environment: Optional[dict] = None,
+        ge_cloud_mode: bool = False,
+        ge_cloud_config: Optional[GeCloudConfig] = None,
+        yaml_handler: YAMLHandler = YAMLHandler(),
+    ) -> None:
         """DataContext constructor
 
         Args:
@@ -350,6 +352,8 @@ class BaseDataContext(ConfigPeer):
         self._ge_cloud_config = ge_cloud_config
         self._project_config = project_config
         self._apply_global_config_overrides()
+
+        self._yaml_handler = YAMLHandler()
 
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
@@ -1013,7 +1017,7 @@ class BaseDataContext(ConfigPeer):
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
-                    return yaml.load(config_variables_file) or {}
+                    return self._yaml_handler.load(config_variables_file) or {}
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
@@ -1155,7 +1159,7 @@ class BaseDataContext(ConfigPeer):
                 template.write(CONFIG_VARIABLES_TEMPLATE)
 
         with open(config_variables_filepath, "w") as config_variables_file:
-            yaml.dump(config_variables, config_variables_file)
+            self._yaml_handler.dump(config_variables, config_variables_file)
 
     def delete_datasource(self, datasource_name: str):
         """Delete a data source
@@ -3639,7 +3643,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             raise e
 
         try:
-            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
+            config: CommentedMap = self._yaml_handler.load(
+                config_str_with_substituted_variables
+            )
             return config
 
         except Exception as e:
