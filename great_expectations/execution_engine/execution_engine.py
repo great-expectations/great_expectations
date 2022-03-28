@@ -362,53 +362,39 @@ class ExecutionEngine(ABC):
                     )
                 )
                 continue
+
             metric_fn_type = getattr(
                 metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
             )
-            if metric_fn_type in [
+
+            if not metric_fn_type in [
                 MetricPartialFunctionTypes.MAP_FN,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
                 MetricPartialFunctionTypes.WINDOW_FN,
                 MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
                 MetricPartialFunctionTypes.AGGREGATE_FN,
-            ]:
-                # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
-                # than data to optimize compute in the future
-                try:
-                    resolved_metrics[metric_to_resolve.id] = metric_fn(
-                        **metric_provider_kwargs
-                    )
-                except Exception as e:
-                    raise ge_exceptions.MetricResolutionError(
-                        message=str(e), failed_metrics=(metric_to_resolve,)
-                    )
-            elif metric_fn_type in [
                 MetricFunctionTypes.VALUE,
                 MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
             ]:
-                try:
-                    resolved_metrics[metric_to_resolve.id] = metric_fn(
-                        **metric_provider_kwargs
-                    )
-                except Exception as e:
-                    raise ge_exceptions.MetricResolutionError(
-                        message=str(e), failed_metrics=(metric_to_resolve,)
-                    )
-            else:
                 logger.warning(
                     f"Unrecognized metric function type while trying to resolve {str(metric_to_resolve.id)}"
                 )
-                try:
-                    resolved_metrics[metric_to_resolve.id] = metric_fn(
-                        **metric_provider_kwargs
-                    )
-                except Exception as e:
-                    raise ge_exceptions.MetricResolutionError(
-                        message=str(e), failed_metrics=(metric_to_resolve,)
-                    )
+
+            try:
+                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
+                resolved_metrics[metric_to_resolve.id] = metric_fn(
+                    **metric_provider_kwargs
+                )
+            except Exception as e:
+                raise ge_exceptions.MetricResolutionError(
+                    message=str(e), failed_metrics=(metric_to_resolve,)
+                )
+
         if len(metric_fn_bundle) > 0:
             try:
+                # an engine-specific way of computing metrics together
+                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
                 new_resolved = self.resolve_metric_bundle(metric_fn_bundle)
                 resolved_metrics.update(new_resolved)
             except Exception as e:
