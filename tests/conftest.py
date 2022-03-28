@@ -63,8 +63,6 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.util import is_library_loadable
 
-RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
-
 yaml = YAML()
 ###
 #
@@ -75,21 +73,6 @@ yaml = YAML()
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 logger = logging.getLogger(__name__)
-
-
-def skip_if_python_below_minimum_version():
-    """
-    All test fixtures for Rule-Based Profiler must execute this method; for example:
-        ```
-        skip_if_python_below_minimum_version()
-        ```
-    for as long as the support for Python versions less than 3.7 is provided.  In particular, Python-3.6 support for
-    "dataclasses.asdict()" does not handle None values as well as the more recent versions of Python do.
-    """
-    if sys.version_info < RULE_BASED_PROFILER_MIN_PYTHON_VERSION:
-        pytest.skip(
-            "skipping fixture because Python version 3.7 (or greater) is required"
-        )
 
 
 def pytest_configure(config):
