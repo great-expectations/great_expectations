@@ -12,7 +12,6 @@ access to features of new package versions.
 
 import enum
 import sys
-import warnings
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -20,12 +19,10 @@ from packaging import version
 
 from great_expectations.core.usage_statistics.package_dependencies import GEDependencies
 
-if sys.version_info < (3, 7):
-    # deprecated-v0.14.12
-    warnings.warn(
-        "importlib_metadata is deprecated as of v0.14.12 and will be removed when python3.6 support is removed in v0.15. Please use importlib.metadata instead.",
-        DeprecationWarning,
-    )
+if sys.version_info < (3, 8):
+    # Note: this is included in the python standard library as importlib
+    # starting with v3.8. At the time we remove support for python v3.7
+    # this conditional can be removed.
     from importlib_metadata import metadata
 else:
     from importlib import metadata
