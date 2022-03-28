@@ -8,6 +8,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.validator.validator import Validator
+
 # </snippet>
 # <snippet>
 context: DataContext = ge.get_context()
