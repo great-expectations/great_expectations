@@ -26,6 +26,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 from great_expectations.core.usage_statistics.execution_environment import (
     GEExecutionEnvironment,
     PackageInfo,
+    PackageInfoSchema,
 )
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
@@ -124,8 +125,6 @@ class UsageStatisticsHandler:
             self._data_context.get_expectation_suite(expectation_suite_name)
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
-        ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
-        dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
         init_payload = {
             "platform.system": platform.system(),
@@ -136,13 +135,25 @@ class UsageStatisticsHandler:
             "validation_operators": self._data_context.validation_operators,
             "data_docs_sites": self._data_context.project_config_with_variables_substituted.data_docs_sites,
             "expectation_suites": expectation_suites,
-            "dependencies": dependencies,
+            "dependencies": self._get_and_serialize_dependencies(),
         }
 
         anonymized_init_payload = self._anonymizer.anonymize_init_payload(
             init_payload=init_payload
         )
         return anonymized_init_payload
+
+    def _get_and_serialize_dependencies(self) -> List[dict]:
+        ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
+        dependencies: List[PackageInfo] = ge_execution_environment.dependencies
+
+        schema: PackageInfoSchema = PackageInfoSchema()
+
+        serialized_dependencies: List[dict] = [
+            schema.dump(package_info) for package_info in dependencies
+        ]
+
+        return serialized_dependencies
 
     def build_envelope(self, message: dict) -> dict:
         message["version"] = "1.0.0"

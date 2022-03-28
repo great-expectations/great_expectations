@@ -265,7 +265,7 @@ anonymized_expectation_suite_schema = {
 
 package_info_schema = {
     "$schema": SCHEMA,
-    "title": "package_info",
+    "title": "package-info",
     "type": "object",
     "properties": {
         "package_name": {"type": "string", "maxLength": 256},
@@ -941,6 +941,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_expectation_configuration_builder": anonymized_expectation_configuration_builder_schema,
         "anonymized_rule": anonymized_rule_schema,
         "anonymized_rule_based_profiler_run": anonymized_rule_based_profiler_run_schema,
+        "package_info": package_info_schema,
     },
     "type": "object",
     "properties": {
