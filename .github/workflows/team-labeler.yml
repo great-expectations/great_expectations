@@ -1,4 +1,7 @@
-on: pull_request
+on:
+  pull_request:
+    types: [opened]
+
 name: team-label
 jobs:
   team-labeler:
