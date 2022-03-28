@@ -14,7 +14,7 @@ from great_expectations.data_context.data_context import BaseDataContext
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.util import load_class
+from great_expectations.util import get_sqlalchemy_url, load_class
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -29,9 +29,7 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
     if "postgresql" not in test_backends:
         pytest.skip("skipping fixture because postgresql not selected")
 
-    import sqlalchemy as sa
-
-    url = sa.engine.url.URL(
+    url = get_sqlalchemy_url(
         drivername="postgresql",
         username="postgres",
         password="",
