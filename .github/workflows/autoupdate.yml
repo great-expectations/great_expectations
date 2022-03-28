@@ -1,6 +1,9 @@
 # https://github.com/marketplace/actions/auto-update
 name: autoupdate
 on:
+  pull_request:
+    types:
+      - auto_merge_enabled
   push:
     branches:
       - main
@@ -9,6 +12,7 @@ on:
 jobs:
   autoupdate:
     name: autoupdate
+    if: contains(github.event.pull_request.labels.*.name, 'core-team') # Must be a core-team PR
     runs-on: ubuntu-20.04
     steps:
       - uses: docker://chinthakagodawita/autoupdate-action:v1
