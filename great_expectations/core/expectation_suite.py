@@ -161,6 +161,11 @@ class ExpectationSuite(SerializableDictDot):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
+
+        # sort expectations to be deterministic
+        self.expectations.sort()
+        other.expectations.sort()
+
         return all(
             (
                 self.expectation_suite_name == other.expectation_suite_name,

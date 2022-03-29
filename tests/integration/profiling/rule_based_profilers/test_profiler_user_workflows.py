@@ -451,11 +451,11 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         include_citation=True,
     )
 
-    assert sorted(expectation_suite) == sorted(
-        bobby_columnar_table_multi_batch["test_configuration_oneshot_estimator"][
-            "expected_expectation_suite"
-        ]
-    )
+    fixture_expectation_suite: ExpectationSuite = bobby_columnar_table_multi_batch[
+        "test_configuration_oneshot_estimator"
+    ]["expected_expectation_suite"]
+
+    assert expectation_suite == fixture_expectation_suite
 
     assert mock_emit.call_count == 99
 
