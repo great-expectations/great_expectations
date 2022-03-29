@@ -2838,6 +2838,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "table.row_count",
                             "domain_kwargs": {},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     },
@@ -2857,6 +2859,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "VendorID"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -2877,6 +2881,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "VendorID"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -2897,6 +2903,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "passenger_count"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -2917,6 +2925,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "passenger_count"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -2937,6 +2947,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "trip_distance"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -2957,6 +2969,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "trip_distance"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -2977,6 +2991,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "RatecodeID"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -2997,6 +3013,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "RatecodeID"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3017,6 +3035,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "PULocationID"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3037,6 +3057,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "PULocationID"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3057,6 +3079,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "DOLocationID"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3077,6 +3101,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "DOLocationID"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3097,6 +3123,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "payment_type"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3117,6 +3145,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "payment_type"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3137,6 +3167,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "fare_amount"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3157,6 +3189,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "fare_amount"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3177,6 +3211,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "extra"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3197,6 +3233,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "extra"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3217,6 +3255,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "mta_tax"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3237,6 +3277,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "mta_tax"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3257,6 +3299,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "tip_amount"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3277,6 +3321,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "tip_amount"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3297,6 +3343,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "tolls_amount"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3317,6 +3365,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "tolls_amount"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3337,6 +3387,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "improvement_surcharge"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3357,6 +3409,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "improvement_surcharge"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3377,6 +3431,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "total_amount"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3397,6 +3453,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "total_amount"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3417,6 +3475,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.min",
                             "domain_kwargs": {"column": "congestion_surcharge"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3437,6 +3497,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_configuration": {
                             "metric_name": "column.max",
                             "domain_kwargs": {"column": "congestion_surcharge"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
                         },
                         "num_batches": 2,
                     }
@@ -3459,24 +3521,22 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_strftime_format",
                 "kwargs": {
                     "column": "pickup_datetime",
-                    "strftime_format": {
-                        "value": "%Y-%m-%d %H:%M:%S",
-                        "details": {
-                            "success_ratio": 1.0,
-                            "candidate_strings": [
-                                "%Y-%m-%d %H:%M:%S",
-                                "%y-%m-%d",
-                            ],
-                        },
-                    },
+                    "strftime_format": "%Y-%m-%d %H:%M:%S",
                 },
                 "meta": {
+                    "details": {
+                        "success_ratio": 1.0,
+                        "candidate_strings": [
+                            "%Y-%m-%d %H:%M:%S",
+                            "%y-%m-%d",
+                        ],
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3485,24 +3545,22 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_strftime_format",
                 "kwargs": {
                     "column": "dropoff_datetime",
-                    "strftime_format": {
-                        "value": "%Y-%m-%d %H:%M:%S",
-                        "details": {
-                            "success_ratio": 1.0,
-                            "candidate_strings": [
-                                "%Y-%m-%d %H:%M:%S",
-                                "%y-%m-%d",
-                            ],
-                        },
-                    },
+                    "strftime_format": "%Y-%m-%d %H:%M:%S",
                 },
                 "meta": {
+                    "details": {
+                        "success_ratio": 1.0,
+                        "candidate_strings": [
+                            "%Y-%m-%d %H:%M:%S",
+                            "%y-%m-%d",
+                        ],
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3515,21 +3573,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_regex",
                 "kwargs": {
                     "column": "VendorID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": [r"^\d{1}$"],
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "threshold": 0.9,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3539,21 +3595,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "RatecodeID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": [r"^\d{1}$"],
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "threshold": 0.9,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3563,21 +3617,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "PULocationID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": [r"^\d{1}$"],
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "threshold": 0.9,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3587,21 +3639,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "DOLocationID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": [r"^\d{1}$"],
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "threshold": 0.9,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
