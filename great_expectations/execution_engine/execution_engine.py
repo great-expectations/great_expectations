@@ -367,7 +367,7 @@ class ExecutionEngine(ABC):
                 metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
             )
 
-            if not metric_fn_type in [
+            if metric_fn_type not in [
                 MetricPartialFunctionTypes.MAP_FN,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
                 MetricPartialFunctionTypes.WINDOW_FN,
