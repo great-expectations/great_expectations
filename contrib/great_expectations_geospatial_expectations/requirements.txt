@@ -1,0 +1,4 @@
+geopandas
+great_expectations
+shapely
+uszipcode

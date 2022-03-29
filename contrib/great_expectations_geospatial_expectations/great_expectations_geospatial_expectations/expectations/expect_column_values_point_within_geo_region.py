@@ -222,7 +222,7 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
             "@Rxmeez",
             "@ryanlindeborg",  # Don't forget to add your github handle here!
         ],
-        "requirements": ["geopandas"],
+        "requirements": ["geopandas", "shapely"],
     }
 
     # This is the id string of the Metric used by this Expectation.
