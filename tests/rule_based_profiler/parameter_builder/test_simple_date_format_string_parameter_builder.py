@@ -241,13 +241,15 @@ def test_simple_date_format_parameter_builder_bobby(
 
     assert actual_value == expected_value
 
+    fully_qualified_parameter_name_for_meta: str = (
+        "$parameter.my_simple_date_format_string_parameter_builder.details"
+    )
     expected_meta: dict = {
         "success_ratio": 1.0,
         "candidate_strings": candidate_strings,
     }
-
     meta: dict = get_parameter_value_and_validate_return_type(
-        parameter_reference="$parameter.my_simple_date_format_string_parameter_builder.details",
+        parameter_reference=fully_qualified_parameter_name_for_meta,
         expected_return_type=dict,
         domain=domain,
         parameters={domain.id: parameter_container},
