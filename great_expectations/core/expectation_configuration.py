@@ -1268,12 +1268,6 @@ class ExpectationConfiguration(SerializableDictDot):
             )
         )
 
-    def __lt__(self, other):
-        # Basic comparator for ExpectationType, so that ExpectationSuites can be compared
-        # in a deterministic way. Less-than is determined from Expectation-type
-        # TODO: ensure comparator takes into account kwargs and meta
-        return self.expectation_type < other.expectation_type
-
     def __ne__(self, other):
         # By using the == operator, the returned NotImplemented is handled correctly.
         return not self == other
