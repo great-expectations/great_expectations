@@ -1,7 +1,13 @@
 name: Test PEP 273 compatibility
 
 on:
-  - push
+  pull_request_target:
+    types:
+      - opened
+    branches:
+      - 'main'
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   run:
