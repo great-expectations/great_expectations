@@ -702,6 +702,12 @@ class Validator:
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
+        # updates graph with aborted metrics
+        self.resolve_validation_graph(
+            graph=graph,
+            metrics=resolved_metrics,
+        )
+
         return resolved_metrics
 
     def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
