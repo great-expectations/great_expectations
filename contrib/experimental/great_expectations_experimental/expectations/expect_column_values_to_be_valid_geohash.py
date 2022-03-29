@@ -22,9 +22,9 @@ class ExpectColumnValuesToBeValidGeohash(RegexBasedColumnMapExpectation):
     """Expect values in this column to be a valid geohash."""
 
     # These values will be used to configure the metric created by your expectation
-    regex_camel_name = "GeohashCharacter"
+    regex_camel_name = "Geohash"
     regex = "^[0123456789bcdefghjkmnpqrstuvwxyz]+$"
-    semantic_type_name_plural = "geohash_characters"
+    semantic_type_name_plural = "geohashes"
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
