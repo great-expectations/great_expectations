@@ -22,7 +22,7 @@ Reading our guide on [Deploying Great Expectations in a hosted environment witho
 
 ## Steps
 
-### 1. Scaffold your script
+### 1. Import the necessary modules
 
 The recommended method for creating a Checkpoint is to use the CLI to open a Jupyter Notebook which contains code scaffolding to assist you with the process.  Since that option is not available (this guide is assuming that your need for an in-memory Checkpoint is due to being unable to use the CLI or access a filesystem) you will have to provide that scaffolding yourself.
 
@@ -32,10 +32,18 @@ In the script that you are defining and executing your Checkpoint in, enter the 
 
 ```
 
-### 2. Edit your checkpoint
+### 2. Initialize your Data Context
+
+### 3. Define your Checkpoint configuration
 
 The Checkpoint configuration in the above scaffolding uses placeholders for the <TechnicalTag tag="batch" text="Batch" /> of data and <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> that the Checkpoint will use.  You will need to replace these placeholders with your own Batch and Expectation Suite.  You can further edit the configuration to add additional entries under the `validations` key.  Alternatively, you can even replace this configuration entirely and build one from scratch.  If you choose to build a configuration from scratch, you may wish to reference [our documentation on Checkpoint configurations](../../../terms/checkpoint.md#checkpoint-configuration) as you do. 
 
-### 3.
+```python
 
-### 4.
+```
+
+### 4. Initialize your Checkpoint 
+
+### 5. Run your Checkpoint
+
+### 6. Check your Data Docs
