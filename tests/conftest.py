@@ -3573,15 +3573,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_regex",
                 "kwargs": {
                     "column": "VendorID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": [r"^\d{1}$"],
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "threshold": 0.9,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
@@ -3597,21 +3595,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "RatecodeID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": [r"^\d{1}$"],
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "threshold": 0.9,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3621,21 +3617,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "PULocationID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": [r"^\d{1}$"],
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "threshold": 0.9,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3645,21 +3639,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "DOLocationID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": [r"^\d{1}$"],
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "threshold": 0.9,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
