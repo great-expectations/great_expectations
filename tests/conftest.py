@@ -3570,7 +3570,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     ] = [
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_column_values_to_match_regex",
+                "expectation_type": "expect_column_values_to_match_regex_list",
                 "kwargs": {
                     "column": "VendorID",
                     "regex": [r"^\d{1}$"],
@@ -3591,7 +3591,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_column_values_to_match_regex",
+                "expectation_type": "expect_column_values_to_match_regex_list",
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "RatecodeID",
@@ -3613,7 +3613,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_column_values_to_match_regex",
+                "expectation_type": "expect_column_values_to_match_regex_list",
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "PULocationID",
@@ -3635,7 +3635,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_column_values_to_match_regex",
+                "expectation_type": "expect_column_values_to_match_regex_list",
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "DOLocationID",
