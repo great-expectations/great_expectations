@@ -1316,7 +1316,10 @@ def compare_two_lists_or_items_that_might_have_nan(first: Any, second: Any) -> b
     if first == second:
         return True
     elif isinstance(first, list) and isinstance(second, list):
-        return all(compare_two_lists_or_items_that_might_have_nan(first=f, second=s) for f, s in zip(first, second))
+        return all(
+            compare_two_lists_or_items_that_might_have_nan(first=f, second=s)
+            for f, s in zip(first, second)
+        )
     else:
         return _is_nan_or_none(first) and _is_nan_or_none(second)
 
