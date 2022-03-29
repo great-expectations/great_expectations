@@ -7,7 +7,13 @@ from great_expectations.expectations.api_based_column_map_expectation import (
 class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
     """To-Do"""
 
-    url_ = "https://medium.com/"
+    endpoint_ = "https://medium.com/"
+    method_ = "HEAD"
+    header_ = None
+    body_ = None
+    auth_ = None
+    data_key_ = None
+    result_key_ = None
     api_camel_name = "Medium"
     api_semantic_name = "Medium"
 
@@ -48,16 +54,8 @@ class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
                 },
             ],
             "test_backends": [
-                # {
-                #     "backend": "pandas",
-                #     "dialects": None,
-                # },
-                # {
-                #     "backend": "sqlalchemy",
-                #     "dialects": ["sqlite", "postgresql"],
-                # },
                 {
-                    "backend": "spark",
+                    "backend": "pandas",
                     "dialects": None,
                 },
             ],
@@ -66,7 +64,13 @@ class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
 
     map_metric = APIBasedColumnMapExpectation.register_metric(
         api_camel_name=api_camel_name,
-        url_=url_,
+        endpoint_=endpoint_,
+        method_=method_,
+        header_=header_,
+        body_=body_,
+        auth_=auth_,
+        data_key_=data_key_,
+        result_key_=result_key_,
     )
 
     library_metadata = {
@@ -76,13 +80,13 @@ class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
 
 
 # </snippet>
-# if __name__ == "__main__":
-# ExpectColumnValuesToBeValidMediumArticles().print_diagnostic_checklist()
+if __name__ == "__main__":
+    ExpectColumnValuesToBeValidMediumArticles().print_diagnostic_checklist()
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
 diagnostics = ExpectColumnValuesToBeValidMediumArticles().run_diagnostics()
-breakpoint()
+
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
     assert check["error_message"] is None

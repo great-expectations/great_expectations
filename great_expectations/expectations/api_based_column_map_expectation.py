@@ -41,29 +41,45 @@ class APIColumnMapMetricProvider(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return column.apply(lambda x: cls.is_valid_endpoint(cls.url_, x))
+        return column.apply(
+            lambda x: cls.make_request(
+                cls.endpoint_,
+                cls.method_,
+                cls.header_,
+                cls.body_,
+                cls.auth_,
+                cls.data_key_,
+                cls.result_key_,
+                x,
+            )
+        )
 
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(cls, column, _dialect, **kwargs):
     #     return column.in_(cls.set_)
 
-    @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, **kwargs):
-        endpoints = F.udf(
-            lambda x, y=cls.url_: cls.is_valid_endpoint(y, x), sparktypes.BooleanType()
-        )
-        breakpoint()
-        return endpoints(column)
+    # @column_condition_partial(engine=SparkDFExecutionEngine)
+    # def _spark(cls, column, **kwargs):
+    #     endpoints = F.udf(
+    #         lambda x, y=cls.url_: cls.is_valid_endpoint(y, x), sparktypes.BooleanType()
+    #     )
+    #
+    #     return endpoints(column)
 
     @staticmethod
-    def is_valid_endpoint(url, title):
+    def make_request(endpoint, method, header, body, auth, data_key, result_key, data):
         try:
-            endpoint = url + title
-            r = requests.head(endpoint)
-            if r.status_code == 200:
-                return True
-            else:
-                return False
+            if method == "HEAD":
+                endpoint = endpoint + data
+                r = requests.head(endpoint)
+                if r.status_code == 200:
+                    return True
+                else:
+                    return False
+            elif method == "POST":
+                body[data_key] = data
+                r = requests.post(url=endpoint, headers=header, json=body)
+                return r.json()[result_key] == data
         except requests.ConnectionError:
             print("failed to connect")
             return False
@@ -73,18 +89,30 @@ class APIBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     @staticmethod
     def register_metric(
         api_camel_name: str,
-        url_: str,
+        endpoint_: str,
+        method_: str = None,
+        header_=None,
+        body_=None,
+        auth_=None,
+        data_key_=None,
+        result_key_=None,
     ):
         api_snake_name = camel_to_snake(api_camel_name)
         map_metric = "column_values.match_" + api_snake_name + "_api"
 
         # Define the class using `type`. This allows us to name it dynamically.
-        new_column_set_metric_provider = type(
-            f"(ColumnValuesMatch{api_camel_name}Set",
+        new_column_api_metric_provider = type(
+            f"(ColumnValuesMatch{api_camel_name}API",
             (APIColumnMapMetricProvider,),
             {
                 "condition_metric_name": map_metric,
-                "url_": url_,
+                "endpoint_": endpoint_,
+                "method_": method_,
+                "header_": header_,
+                "body_": body_,
+                "auth_": auth_,
+                "data_key_": data_key_,
+                "result_key_": result_key_,
             },
         )
 
@@ -94,8 +122,8 @@ class APIBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         super().validate_configuration(configuration)
         try:
             assert (
-                getattr(self, "url_", None) is not None
-            ), "url_ is required for APIBasedColumnMap Expectations"
+                getattr(self, "endpoint_", None) is not None
+            ), "endpoint_ is required for APIBasedColumnMap Expectations"
 
             assert (
                 "column" in configuration.kwargs
