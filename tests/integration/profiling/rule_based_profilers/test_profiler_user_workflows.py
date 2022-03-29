@@ -23,6 +23,7 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.util import compare_two_lists_or_items_that_might_have_nan
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.core.usage_statistics.util import (
@@ -2025,10 +2026,40 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
         "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
     }
 
-    value_set_expected: List[int] = [0, 1, 2, 3, 4, 5, 6, 7]
+    nan = float("nan")
+    value_set_expected: List[int] = [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+        nan,
+    ]
     value_set_computed: List[int] = result.expectation_config["kwargs"]["value_set"]
 
-    assert value_set_computed == value_set_expected
+    assert compare_two_lists_or_items_that_might_have_nan(
+        value_set_computed, value_set_expected
+    )
 
 
 @pytest.mark.skipif(

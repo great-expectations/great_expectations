@@ -46,7 +46,10 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.profile import ColumnsExistProfiler
-from great_expectations.util import import_library_module
+from great_expectations.util import (
+    compare_two_lists_or_items_that_might_have_nan,
+    import_library_module,
+)
 from great_expectations.validator.validator import Validator
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -1901,7 +1904,9 @@ def check_json_test_result(test, result, data_asset=None):
                             rtol=test["tolerance"],
                         )
                 else:
-                    assert result["result"]["observed_value"] == value
+                    assert compare_two_lists_or_items_that_might_have_nan(
+                        result["result"]["observed_value"], value
+                    )
 
             # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
             # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
@@ -1917,7 +1922,9 @@ def check_json_test_result(test, result, data_asset=None):
                     assert result["result"]["unexpected_index_list"] == value
 
             elif key == "unexpected_list":
-                assert result["result"]["unexpected_list"] == value, (
+                assert compare_two_lists_or_items_that_might_have_nan(
+                    result["result"]["unexpected_list"], value
+                ), (
                     "expected "
                     + str(value)
                     + " but got "

@@ -58,7 +58,7 @@
           },
           "out": {
             "success": true,
-            "unexpected_list": [null],
+            "unexpected_list": [NaN],
             "unexpected_index_list": [2]
           }
         },{
@@ -71,7 +71,7 @@
           },
           "out": {
             "success": false,
-            "unexpected_list": [null],
+            "unexpected_list": [NaN],
             "unexpected_index_list": [2]
           }
         },{
@@ -83,7 +83,7 @@
           },
           "out": {
             "success": false,
-            "unexpected_list": [null],
+            "unexpected_list": [NaN],
             "unexpected_index_list": [2]
           }
         },{
@@ -108,9 +108,9 @@
           "out": {
             "success": false,
             "unexpected_list": [
-              null,
-              null,
-              null
+              NaN,
+              NaN,
+              NaN
             ],
             "unexpected_index_list": [
               0,

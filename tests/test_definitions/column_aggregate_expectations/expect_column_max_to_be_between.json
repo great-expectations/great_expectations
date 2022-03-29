@@ -103,7 +103,7 @@
         },
         "out": {
           "success": false,
-          "observed_value": null
+          "observed_value": NaN
         }
       }]
   }]
