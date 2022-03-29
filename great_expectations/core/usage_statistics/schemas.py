@@ -273,7 +273,7 @@ package_info_schema = {
         "install_environment": {
             "enum": [ie.value for ie in InstallEnvironment],
         },
-        "version": {"type": "string", "maxLength": 256},
+        "version": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]},
     },
     "additionalProperties": False,
 }

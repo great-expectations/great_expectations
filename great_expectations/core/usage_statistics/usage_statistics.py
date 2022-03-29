@@ -135,7 +135,7 @@ class UsageStatisticsHandler:
             "validation_operators": self._data_context.validation_operators,
             "data_docs_sites": self._data_context.project_config_with_variables_substituted.data_docs_sites,
             "expectation_suites": expectation_suites,
-            "dependencies": self._get_and_serialize_dependencies(),
+            "dependencies": self._get_serialized_dependencies(),
         }
 
         anonymized_init_payload = self._anonymizer.anonymize_init_payload(
@@ -143,7 +143,8 @@ class UsageStatisticsHandler:
         )
         return anonymized_init_payload
 
-    def _get_and_serialize_dependencies(self) -> List[dict]:
+    def _get_serialized_dependencies(self) -> List[dict]:
+        """Get the serialized dependencies from the GEExecutionEnvironment."""
         ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
