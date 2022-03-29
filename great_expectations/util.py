@@ -1312,46 +1312,13 @@ def _is_nan_or_none(scalar: Any) -> bool:
 
 
 def compare_two_lists_or_items_that_might_have_nan(first: Any, second: Any) -> bool:
-    """Did you know that `float("nan") != float("nan")`?
-
-    Only 1 level of nesting is supported by this func
-    """
-    result = False
+    """Did you know that `float("nan") != float("nan")`?"""
     if first == second:
-        result = True
-    elif type(first) != list:
-        first_is_nan_or_none = _is_nan_or_none(first)
-        second_is_nan_or_none = _is_nan_or_none(second)
-        if first_is_nan_or_none and second_is_nan_or_none:
-            result = True
+        return True
+    elif isinstance(first, list) and isinstance(second, list):
+        return all(compare_two_lists_or_items_that_might_have_nan(first=f, second=s) for f, s in zip(first, second))
     else:
-        try:
-            for i, val in enumerate(first):
-                if type(val) == list:
-                    for j, list_val in enumerate(val):
-                        if list_val == second[i][j]:
-                            pass
-                        else:
-                            first_is_nan_or_none = _is_nan_or_none(list_val)
-                            second_is_nan_or_none = _is_nan_or_none(second[i][j])
-                            if first_is_nan_or_none and second_is_nan_or_none:
-                                pass
-                            else:
-                                raise ValueError("These are not the same")
-                else:
-                    if val == second[i]:
-                        pass
-                    else:
-                        first_is_nan_or_none = _is_nan_or_none(val)
-                        second_is_nan_or_none = _is_nan_or_none(second[i])
-                        if first_is_nan_or_none and second_is_nan_or_none:
-                            pass
-                        else:
-                            raise ValueError("These are not the same")
-            result = True
-        except ValueError:
-            pass
-    return result
+        return _is_nan_or_none(first) and _is_nan_or_none(second)
 
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
