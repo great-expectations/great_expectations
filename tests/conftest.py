@@ -3459,24 +3459,22 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_strftime_format",
                 "kwargs": {
                     "column": "pickup_datetime",
-                    "strftime_format": {
-                        "value": "%Y-%m-%d %H:%M:%S",
-                        "details": {
-                            "success_ratio": 1.0,
-                            "candidate_strings": [
-                                "%Y-%m-%d %H:%M:%S",
-                                "%y-%m-%d",
-                            ],
-                        },
-                    },
+                    "strftime_format": "%Y-%m-%d %H:%M:%S",
                 },
                 "meta": {
+                    "details": {
+                        "success_ratio": 1.0,
+                        "candidate_strings": [
+                            "%Y-%m-%d %H:%M:%S",
+                            "%y-%m-%d",
+                        ],
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3516,20 +3514,22 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "kwargs": {
                     "column": "VendorID",
                     "regex": {
+                        # this would also need to become :
+                        "regex": [r"^\d{1}$"],
                         "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
                     },
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "threshold": 0.9,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
