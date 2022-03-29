@@ -1,31 +1,60 @@
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.util import (
-    aggregate_all_core_expectation_types,
-)
+from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import deep_filter_properties_iterable
 
 logger = logging.getLogger(__name__)
 
 
-class ProfilerRunAnonymizer(Anonymizer):
-    def __init__(self, salt: Optional[str] = None) -> None:
+class ProfilerAnonymizer(BaseAnonymizer):
+    def __init__(
+        self,
+        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        salt: Optional[str] = None,
+    ) -> None:
         super().__init__(salt=salt)
 
-        self._ge_expectation_types = aggregate_all_core_expectation_types()
+        self._aggregate_anonymizer = aggregate_anonymizer
 
-        self._salt = salt
+    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
+        if obj and isinstance(obj, RuleBasedProfiler):
+            return self._anonymize_profiler_info(**kwargs)
+        return self._anonymize_profiler_run(obj=obj, **kwargs)
 
-    def anonymize_profiler_run(self, profiler_config: RuleBasedProfilerConfig) -> dict:
+    def _anonymize_profiler_info(self, name: str, config: dict) -> dict:
+        """Anonymize RuleBasedProfiler objs from the 'great_expectations.rule_based_profiler' module.
+
+        Args:
+            name (str): The name of the given profiler.
+            config (dict): The dictionary configuration of the given profiler.
+
+        Returns:
+            An anonymized dictionary payload that obfuscates user-specific details.
+        """
+        anonymized_info_dict: dict = {
+            "anonymized_name": self._anonymize_string(name),
+        }
+        self._anonymize_object_info(
+            anonymized_info_dict=anonymized_info_dict,
+            object_config=config,
+        )
+        return anonymized_info_dict
+
+    def _anonymize_profiler_run(self, obj: object, **kwargs) -> dict:
         """
         Traverse the entire RuleBasedProfiler configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
         """
+        assert isinstance(
+            obj, RuleBasedProfilerConfig
+        ), "ProfilerAnonymizer can only handle objects of type RuleBasedProfilerConfig"
+        profiler_config: RuleBasedProfilerConfig = obj
+
         name: str = profiler_config.name
-        anonymized_name: Optional[str] = self.anonymize(name)
+        anonymized_name: Optional[str] = self._anonymize_string(name)
 
         config_version: float = profiler_config.config_version
 
@@ -64,7 +93,7 @@ class ProfilerRunAnonymizer(Anonymizer):
 
     def _anonymize_rule(self, name: str, rule: dict) -> dict:
         anonymized_rule: dict = {}
-        anonymized_rule["anonymized_name"] = self.anonymize(name)
+        anonymized_rule["anonymized_name"] = self._anonymize_string(name)
 
         domain_builder: Optional[dict] = rule.get("domain_builder")
         if domain_builder is not None:
@@ -99,9 +128,9 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         batch_request: Optional[dict] = domain_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[dict] = self.anonymize_batch_request(
-                **batch_request
-            )
+            anonymized_batch_request: Optional[
+                dict
+            ] = self._aggregate_anonymizer.anonymize(**batch_request)
             anonymized_domain_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
@@ -131,15 +160,15 @@ class ProfilerRunAnonymizer(Anonymizer):
             },
         )
 
-        anonymized_parameter_builder["anonymized_name"] = self.anonymize(
+        anonymized_parameter_builder["anonymized_name"] = self._anonymize_string(
             parameter_builder.get("name")
         )
 
         batch_request: Optional[dict] = parameter_builder.get("batch_request")
         if batch_request:
-            anonymized_batch_request: Optional[dict] = self.anonymize_batch_request(
-                **batch_request
-            )
+            anonymized_batch_request: Optional[
+                dict
+            ] = self._aggregate_anonymizer.anonymize(**batch_request)
             anonymized_parameter_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
@@ -178,7 +207,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         expectation_type: Optional[str] = expectation_configuration_builder.get(
             "expectation_type"
         )
-        self.anonymize_expectation(
+        self._anonymize_expectation(
             expectation_type, anonymized_expectation_configuration_builder
         )
 
@@ -186,7 +215,28 @@ class ProfilerRunAnonymizer(Anonymizer):
         if condition:
             anonymized_expectation_configuration_builder[
                 "anonymized_condition"
-            ] = self.anonymize(condition)
+            ] = self._anonymize_string(condition)
             logger.debug("Anonymized condition in ExpectationConfigurationBuilder")
 
         return anonymized_expectation_configuration_builder
+
+    def _anonymize_expectation(
+        self, expectation_type: Optional[str], info_dict: dict
+    ) -> None:
+        """Anonymize Expectation objs from 'great_expectations.expectations'.
+
+        Args:
+            expectation_type (Optional[str]): The string name of the Expectation.
+            info_dict (dict): A dictionary to update within this function.
+        """
+        if expectation_type in self.CORE_GE_EXPECTATION_TYPES:
+            info_dict["expectation_type"] = expectation_type
+        else:
+            info_dict["anonymized_expectation_type"] = self._anonymize_string(
+                expectation_type
+            )
+
+    def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        return obj is not None and isinstance(
+            obj, (RuleBasedProfilerConfig, RuleBasedProfiler)
+        )
