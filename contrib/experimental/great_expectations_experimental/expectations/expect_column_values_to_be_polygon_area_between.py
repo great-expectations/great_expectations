@@ -143,7 +143,10 @@ class ExpectColumnValuesToBePolygonAreaBetween(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["experimental"],  # Tags for this Expectation in the gallery
+        "tags": [
+            "geospatial",
+            "hackathon-22",
+        ],  # Tags for this Expectation in the gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@mmi333",
         ],
