@@ -92,7 +92,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==22.1.0 pyupgrade==2.7.2
+              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==22.3.0 pyupgrade==2.7.2
               EXIT_STATUS=0
               isort . --check-only --skip docs/ || EXIT_STATUS=$?
               black --check --exclude docs/ . || EXIT_STATUS=$?
