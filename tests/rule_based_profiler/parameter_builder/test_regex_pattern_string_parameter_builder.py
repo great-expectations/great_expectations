@@ -158,7 +158,7 @@ def test_regex_pattern_string_parameter_builder_alice(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": [r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$"],
+        "value": r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
         "details": {
             "evaluated_regexes": {
                 r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$": 1.0,
@@ -232,7 +232,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": [r"^[12]{1}$", r"^\d{1}$"],
+        "value": r"^\d{1}$",
         "details": {
             "evaluated_regexes": {
                 r"^\d{1}$": 1.0,
@@ -248,7 +248,6 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         domain=domain,
         parameters={domain.id: parameter_container},
     )
-
     assert results is not None
     assert sorted(results["value"]) == sorted(expected_value["value"])
     assert results["details"] == expected_value["details"]
@@ -300,7 +299,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": [],
+        "value": None,
         "details": {
             "evaluated_regexes": {
                 r"/\d+/": 0,
@@ -405,11 +404,11 @@ def test_regex_single_candidate(
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"
     )
-    expected_value: List[str] = ["^\\d{1}$"]
+    expected_value: str = "^\\d{1}$"
     assert (
         get_parameter_value_and_validate_return_type(
             parameter_reference=fully_qualified_parameter_name_for_value,
-            expected_return_type=List[str],
+            expected_return_type=str,
             domain=domain,
             parameters={domain.id: parameter_container},
         )
@@ -466,7 +465,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
         "$parameter.my_regex_pattern_string_parameter_builder.value"
     )
 
-    expected_value: List[str] = ["^\\d{1}$"]
+    expected_value: str = "^\\d{1}$"
 
     assert (
         get_parameter_value_and_validate_return_type(

@@ -234,10 +234,8 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        # get list of regex_strings that match greater than threshold
-        regex_string_success_list: List[
-            str
-        ] = self._get_regex_matched_greater_than_threshold(
+        # get best-matching regex_string that match greater than threshold
+        best_regex_string: str = self._get_best_regex_greater_than_threshold(
             regex_string_success_ratios, threshold
         )
         # sorted regex and ratios for all evaluated candidates
@@ -246,7 +244,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         )
 
         return (
-            regex_string_success_list,
+            best_regex_string,
             {
                 "evaluated_regexes": dict(
                     zip(sorted_regex_string_list, sorted_ratio_list)
@@ -256,22 +254,24 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         )
 
     @staticmethod
-    def _get_regex_matched_greater_than_threshold(
+    def _get_best_regex_greater_than_threshold(
         regex_string_success_ratio_dict: Dict[str, float],
         threshold: float,
-    ) -> List[str]:
+    ) -> str:
         """
         Helper method to calculate which regex_strings match greater than threshold
         """
+        best_regex: Optional[str] = None
+        best_ratio: float = 0.0
+
         regex_string: str
         ratio: float
-        regex_string_success_list: List[str] = [
-            regex_string
-            for regex_string, ratio in regex_string_success_ratio_dict.items()
-            if ratio >= threshold
-        ]
+        for regex_string, ratio in regex_string_success_ratio_dict.items():
+            if ratio > best_ratio and ratio >= threshold:
+                best_regex = regex_string
+                best_ratio = ratio
 
-        return regex_string_success_list
+        return best_regex
 
     @staticmethod
     def _get_sorted_regex_and_ratios(

@@ -152,7 +152,7 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        regex: $parameter.my_regex.value[0]
+        regex: $parameter.my_regex.value
         meta:
           details: $parameter.my_regex.details
           notes:
