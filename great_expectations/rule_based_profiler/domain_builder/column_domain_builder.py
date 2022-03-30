@@ -334,7 +334,7 @@ class ColumnDomainBuilder(DomainBuilder):
         if semantic_type_filter_class_name is None:
             semantic_type_filter_class_name = "SimpleSemanticTypeFilter"
 
-        self._semantic_type_filter: SemanticTypeFilter = instantiate_class_from_config(
+        semantic_type_filter: SemanticTypeFilter = instantiate_class_from_config(
             config={
                 "module_name": semantic_type_filter_module_name,
                 "class_name": semantic_type_filter_class_name,
@@ -346,6 +346,7 @@ class ColumnDomainBuilder(DomainBuilder):
             },
             config_defaults={},
         )
+        self._semantic_type_filter = semantic_type_filter
 
         # Obtain include_semantic_types from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         include_semantic_types: Optional[
