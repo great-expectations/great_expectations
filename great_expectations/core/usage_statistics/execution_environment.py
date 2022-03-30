@@ -18,6 +18,7 @@ from typing import List, Optional
 from packaging import version
 
 from great_expectations.core.usage_statistics.package_dependencies import GEDependencies
+from great_expectations.marshmallow__shade import Schema, fields
 
 if sys.version_info < (3, 8):
     # Note: importlib_metadata is included in the python standard library as importlib
@@ -39,6 +40,13 @@ class PackageInfo:
     installed: bool
     install_environment: InstallEnvironment
     version: Optional[version.Version]
+
+
+class PackageInfoSchema(Schema):
+    package_name = fields.Str()
+    installed = fields.Boolean()
+    install_environment = fields.Function(lambda obj: obj.install_environment.value)
+    version = fields.Str(required=False, allow_none=True)
 
 
 class GEExecutionEnvironment:
