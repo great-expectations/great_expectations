@@ -409,6 +409,7 @@ def test_regex_single_candidate(
     assert (
         get_parameter_value_and_validate_return_type(
             parameter_reference=fully_qualified_parameter_name_for_value,
+            expected_return_type=List[str],
             domain=domain,
             parameters={domain.id: parameter_container},
         )

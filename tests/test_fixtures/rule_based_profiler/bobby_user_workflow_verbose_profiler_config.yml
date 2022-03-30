@@ -148,11 +148,11 @@ rules:
           - "^\\d{2}$"
         threshold: 0.9
     expectation_configuration_builders:
-      - expectation_type: expect_column_values_to_match_regex_list
+      - expectation_type: expect_column_values_to_match_regex
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        regex: $parameter.my_regex.value
+        regex: $parameter.my_regex.value[0]
         meta:
           details: $parameter.my_regex.details
           notes:

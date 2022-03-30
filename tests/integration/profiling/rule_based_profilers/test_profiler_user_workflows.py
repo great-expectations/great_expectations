@@ -635,7 +635,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                         "anonymized_expectation_configuration_builders": [
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "expectation_type": "expect_column_values_to_match_regex_list",
+                                "expectation_type": "expect_column_values_to_match_regex",
                             }
                         ],
                     },
