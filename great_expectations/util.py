@@ -1311,13 +1311,13 @@ def _is_nan_or_none(scalar: Any) -> bool:
     return result
 
 
-def compare_two_lists_or_items_that_might_have_nan(first: Any, second: Any) -> bool:
+def are_nan_inclusive_inputs_equal(first: Any, second: Any) -> bool:
     """Did you know that `float("nan") != float("nan")`?"""
     if first == second:
         return True
     elif isinstance(first, list) and isinstance(second, list):
         return all(
-            compare_two_lists_or_items_that_might_have_nan(first=f, second=s)
+            are_nan_inclusive_inputs_equal(first=f, second=s)
             for f, s in zip(first, second)
         )
     else:

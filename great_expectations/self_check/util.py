@@ -47,7 +47,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import (
-    compare_two_lists_or_items_that_might_have_nan,
+    are_nan_inclusive_inputs_equal,
     import_library_module,
 )
 from great_expectations.validator.validator import Validator
@@ -1904,7 +1904,7 @@ def check_json_test_result(test, result, data_asset=None):
                             rtol=test["tolerance"],
                         )
                 else:
-                    assert compare_two_lists_or_items_that_might_have_nan(
+                    assert are_nan_inclusive_inputs_equal(
                         result["result"]["observed_value"], value
                     )
 
@@ -1922,7 +1922,7 @@ def check_json_test_result(test, result, data_asset=None):
                     assert result["result"]["unexpected_index_list"] == value
 
             elif key == "unexpected_list":
-                assert compare_two_lists_or_items_that_might_have_nan(
+                assert are_nan_inclusive_inputs_equal(
                     result["result"]["unexpected_list"], value
                 ), (
                     "expected "

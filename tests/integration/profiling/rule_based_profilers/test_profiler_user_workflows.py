@@ -23,7 +23,7 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.util import compare_two_lists_or_items_that_might_have_nan
+from great_expectations.util import are_nan_inclusive_inputs_equal
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.core.usage_statistics.util import (
@@ -2057,9 +2057,7 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
     ]
     value_set_computed: List[int] = result.expectation_config["kwargs"]["value_set"]
 
-    assert compare_two_lists_or_items_that_might_have_nan(
-        value_set_computed, value_set_expected
-    )
+    assert are_nan_inclusive_inputs_equal(value_set_computed, value_set_expected)
 
 
 @pytest.mark.skipif(
