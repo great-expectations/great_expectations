@@ -23,7 +23,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
     ):
         """
         Args:
-            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            include_column_names: Explicitly specified desired columns.
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.

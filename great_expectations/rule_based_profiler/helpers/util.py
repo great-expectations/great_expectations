@@ -238,25 +238,12 @@ def get_parameter_value(
             variables=variables,
             parameters=parameters,
         )
-        if isinstance(parameter_reference, dict):
-            for key, value in parameter_reference.items():
-                parameter_reference[key] = get_parameter_value(
-                    domain=domain,
-                    parameter_reference=value,
-                    variables=variables,
-                    parameters=parameters,
-                )
-        elif isinstance(
-            parameter_reference, str
-        ) and is_fully_qualified_parameter_name_literal_string_format(
-            fully_qualified_parameter_name=parameter_reference
-        ):
-            parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
-                fully_qualified_parameter_name=parameter_reference,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        parameter_reference = get_parameter_value(
+            domain=domain,
+            parameter_reference=parameter_reference,
+            variables=variables,
+            parameters=parameters,
+        )
 
     return parameter_reference
 
