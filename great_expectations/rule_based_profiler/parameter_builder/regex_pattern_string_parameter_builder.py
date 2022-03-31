@@ -238,7 +238,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         (
             best_regex_string,
             best_ratio,
-        ) = ParameterBuilder._get_best_pattern_greater_than_threshold(
+        ) = ParameterBuilder._get_best_candidate_above_threshold(
             regex_string_success_ratios, threshold
         )
         # sorted regex and ratios for all evaluated candidates

@@ -554,39 +554,38 @@ class ParameterBuilder(Builder, ABC):
         return metric_values
 
     @staticmethod
-    def _get_best_pattern_greater_than_threshold(
+    def _get_best_candidate_above_threshold(
         candidate_ratio_dict: Dict[str, float],
         threshold: float,
     ) -> Tuple[Optional[str], float]:
         """
-        Helper method to calculate which regex_strings match greater than threshold
+        Helper method to calculate which candidate strings or patterns are the best match (ie. highest ratio),
+        provided they are also above the threshold.
         """
-        best_pattern: Optional[str] = None
+        best_candidate: Optional[str] = None
         best_ratio: float = 0.0
 
-        pattern: str
+        candidate: str
         ratio: float
-        for pattern, ratio in candidate_ratio_dict.items():
+        for candidate, ratio in candidate_ratio_dict.items():
             if ratio > best_ratio and ratio >= threshold:
-                best_pattern = pattern
+                best_candidate = candidate
                 best_ratio = ratio
 
-        return best_pattern, best_ratio
+        return best_candidate, best_ratio
 
     @staticmethod
     def _get_sorted_candidates_and_ratios(
         candidate_ratio_dict: Dict[str, float],
     ) -> Tuple[List[float], List[str]]:
         """
-        Helper method to sort all candidate strings (regex or datetime) that were evaluated by their success ratio.
+        Helper method to sort all candidate strings strings or patterns by success ratio (how well they matched the domain).
 
         Returns Tuple(ratio, sorted_strings)
         """
         strings: List[str] = list(candidate_ratio_dict.keys())
         ratios: List[float] = list(candidate_ratio_dict.values())
 
-        string: str
-        ratio: float
         sorted_strings: List[str] = [
             string for ratio, string in sorted(zip(ratios, strings), reverse=True)
         ]

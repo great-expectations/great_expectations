@@ -289,7 +289,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         (
             best_datetime_string,
             best_ratio,
-        ) = ParameterBuilder._get_best_pattern_greater_than_threshold(
+        ) = ParameterBuilder._get_best_candidate_above_threshold(
             format_string_success_ratios, threshold
         )
         # sorted datetime and ratios for all evaluated candidates
