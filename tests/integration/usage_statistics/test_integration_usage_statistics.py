@@ -128,14 +128,20 @@ def valid_usage_statistics_message():
     }
 
 
-def test_send_malformed_data(valid_usage_statistics_message):
+def test_send_malformed_data(
+    valid_usage_statistics_message, requests_session_with_retries: requests.Session
+):
     # We should be able to successfully send a valid message, but find that
     # a malformed message is not accepted
-    res = requests.post(USAGE_STATISTICS_QA_URL, json=valid_usage_statistics_message)
+    res = requests_session_with_retries.post(
+        USAGE_STATISTICS_QA_URL, json=valid_usage_statistics_message
+    )
     assert res.status_code == 201
     invalid_usage_statistics_message = copy.deepcopy(valid_usage_statistics_message)
     del invalid_usage_statistics_message["data_context_id"]
-    res = requests.post(USAGE_STATISTICS_QA_URL, json=invalid_usage_statistics_message)
+    res = requests_session_with_retries.post(
+        USAGE_STATISTICS_QA_URL, json=invalid_usage_statistics_message
+    )
     assert res.status_code == 400
 
 
