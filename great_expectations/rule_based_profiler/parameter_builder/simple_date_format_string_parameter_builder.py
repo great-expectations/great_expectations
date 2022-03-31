@@ -282,12 +282,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        best_datetime_string: Optional[str] = None
+        best_fmt_string: Optional[str] = None
         best_ratio: float = 0.0
 
-        # get best-matching regex_string that match greater than threshold
+        # get best-matching datetime string that matches greater than threshold
         (
-            best_datetime_string,
+            best_fmt_string,
             best_ratio,
         ) = ParameterBuilder._get_best_candidate_above_threshold(
             format_string_success_ratios, threshold
@@ -301,7 +301,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         )
 
         return (
-            best_datetime_string,
+            best_fmt_string,
             {
                 "success_ratio": best_ratio,
                 "candidate_strings": dict(

@@ -234,6 +234,7 @@ def test_simple_date_format_parameter_builder_alice(
         domain=domain,
         parameters={domain.id: parameter_container},
     )
+
     assert actual_value == expected_value
 
 

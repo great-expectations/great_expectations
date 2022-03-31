@@ -2552,7 +2552,7 @@ def alice_columnar_table_single_batch(empty_data_context):
     ] = []
     column_data: Dict[str, str]
 
-    candidate_strings_dict: dict = {
+    expected_candidate_strings_dict: dict = {
         "%Y-%m-%d %H:%M:%S": 1.0,
         "%y/%m/%d %H:%M:%S": 0.0,
         "%y/%m/%d": 0.0,
@@ -2613,7 +2613,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         "%H:%M:%S,%f": 0.0,
         "%H:%M:%S": 0.0,
     }
-    candidate_strings_dict
+
     for column_data in my_rule_for_timestamps_column_data:
         my_rule_for_timestamps_expectation_configurations.extend(
             [
@@ -2683,7 +2683,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                             ],  # Pin to event_ts column
                             "details": {
                                 "success_ratio": 1.0,
-                                "candidate_strings": candidate_strings_dict,
+                                "candidate_strings": expected_candidate_strings_dict,
                             },
                         },
                     },
