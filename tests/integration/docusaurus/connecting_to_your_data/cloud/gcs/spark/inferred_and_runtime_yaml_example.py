@@ -24,7 +24,7 @@ data_context_config = DataContextConfig(
 context = BaseDataContext(project_config=data_context_config)
 
 # <snippet>
-datasource_yaml = r"""
+datasource_yaml = rf"""
 name: my_gcs_datasource
 class_name: Datasource
 execution_engine:

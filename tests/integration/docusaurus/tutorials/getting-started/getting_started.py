@@ -19,7 +19,7 @@ context = ge.get_context()
 assert context
 
 # First configure a new Datasource and add to DataContext
-datasource_yaml = """
+datasource_yaml = f"""
 name: getting_started_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -119,7 +119,7 @@ suite = profiler.build_suite()
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv
-my_checkpoint_config = """
+my_checkpoint_config = f"""
 name: getting_started_checkpoint
 config_version: 1.0
 class_name: SimpleCheckpoint
@@ -161,7 +161,7 @@ assert checkpoint_result.run_results
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
 # <snippet>
-yaml_config = """
+yaml_config = f"""
 name: getting_started_checkpoint
 config_version: 1.0
 class_name: SimpleCheckpoint

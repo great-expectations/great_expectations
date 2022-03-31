@@ -7,7 +7,7 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 
 context = ge.get_context()
 
-datasource_yaml = r"""
+datasource_yaml = rf"""
 name: my_s3_datasource
 class_name: Datasource
 execution_engine:

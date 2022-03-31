@@ -207,7 +207,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # adding datasource
-datasource_yaml = r"""
+datasource_yaml = rf"""
 name: my_gcs_datasource
 class_name: Datasource
 execution_engine:

@@ -10,7 +10,7 @@ CREDENTIAL = os.getenv("AZURE_ACCESS_KEY", "")
 
 context = ge.get_context()
 
-datasource_yaml = r"""
+datasource_yaml = rf"""
 name: my_azure_datasource
 class_name: Datasource
 execution_engine:

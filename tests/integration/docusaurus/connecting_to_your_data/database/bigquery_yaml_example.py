@@ -19,7 +19,7 @@ CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 context = ge.get_context()
 
-datasource_yaml = """
+datasource_yaml = f"""
 name: my_bigquery_datasource
 class_name: Datasource
 execution_engine:

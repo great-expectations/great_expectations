@@ -10,7 +10,7 @@ context = ge.get_context()
 # </snippet>
 
 # <snippet>
-datasource_yaml = """
+datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>
@@ -32,7 +32,7 @@ context.test_yaml_config(datasource_yaml)
 # </snippet>
 
 # <snippet>
-datasource_yaml = """  # buggy datasource_yaml configuration
+datasource_yaml = f"""  # buggy datasource_yaml configuration
 name: mis_configured_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>
@@ -49,7 +49,7 @@ context.test_yaml_config(datasource_yaml)
 # </snippet>
 
 # <snippet>
-datasource_yaml = """
+datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>
@@ -82,7 +82,7 @@ available_data_asset_names = context.datasources[
 assert len(available_data_asset_names) == 2
 
 # <snippet>
-datasource_yaml = """
+datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>
@@ -101,7 +101,7 @@ context.test_yaml_config(datasource_yaml)
 # </snippet>
 
 # <snippet>
-datasource_yaml = """
+datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>

@@ -6,7 +6,7 @@ import great_expectations as ge
 
 context = ge.get_context()
 
-datasource_yaml = """
+datasource_yaml = f"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -32,7 +32,7 @@ datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_p
 
 context.test_yaml_config(datasource_yaml)
 
-buggy_data_connector_yaml = """
+buggy_data_connector_yaml = f"""
     buggy_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -44,7 +44,7 @@ buggy_data_connector_yaml = """
 """
 
 # noinspection PyRedeclaration
-buggy_datasource_yaml = """
+buggy_datasource_yaml = f"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -76,7 +76,7 @@ buggy_datasource_yaml = buggy_datasource_yaml.replace(
 
 context.test_yaml_config(buggy_datasource_yaml)
 
-another_buggy_data_connector_yaml = """
+another_buggy_data_connector_yaml = f"""
     buggy_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: <PATH_TO_BAD_DATA_DIRECTORY_HERE>
@@ -88,7 +88,7 @@ another_buggy_data_connector_yaml = """
 """
 
 # noinspection PyRedeclaration
-buggy_datasource_yaml = """
+buggy_datasource_yaml = f"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -132,7 +132,7 @@ available_data_asset_names = context.datasources[
 ]
 assert len(available_data_asset_names) == 36
 
-bare_bones_configured_data_connector_yaml = """
+bare_bones_configured_data_connector_yaml = f"""
    configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -144,7 +144,7 @@ bare_bones_configured_data_connector_yaml = """
         assets: {{}}
 """
 
-datasource_yaml = """
+datasource_yaml = f"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -167,7 +167,7 @@ datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_p
 
 context.test_yaml_config(datasource_yaml)
 
-configured_data_connector_yaml = """
+configured_data_connector_yaml = f"""
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -184,7 +184,7 @@ configured_data_connector_yaml = """
               - filename
 """
 
-datasource_yaml = """
+datasource_yaml = f"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -221,7 +221,7 @@ available_data_asset_names = context.datasources[
 assert len(available_data_asset_names) == 1
 
 # noinspection PyRedeclaration
-configured_data_connector_yaml = """
+configured_data_connector_yaml = f"""
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -245,7 +245,7 @@ configured_data_connector_yaml = """
               - month
 """
 
-datasource_yaml = """
+datasource_yaml = f"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource

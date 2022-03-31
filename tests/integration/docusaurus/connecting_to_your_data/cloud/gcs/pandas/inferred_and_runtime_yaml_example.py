@@ -13,7 +13,7 @@ context = ge.get_context()
 # </snippet>
 
 # <snippet>
-datasource_yaml = r"""
+datasource_yaml = rf"""
 name: my_gcs_datasource
 class_name: Datasource
 execution_engine:
@@ -62,7 +62,7 @@ batch_request = RuntimeBatchRequest(
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters[
     "path"
-] = "gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
+] = f"gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
 # <snippet>
 context.create_expectation_suite(

@@ -16,7 +16,7 @@ CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sf
 
 context = ge.get_context()
 
-datasource_yaml = """
+datasource_yaml = f"""
 name: my_snowflake_datasource
 class_name: Datasource
 execution_engine:

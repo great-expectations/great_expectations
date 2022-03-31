@@ -6,7 +6,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 
 context = ge.get_context()
 
-datasource_yaml = """
+datasource_yaml = f"""
 name: example_datasource
 class_name: Datasource
 module_name: great_expectations.datasource

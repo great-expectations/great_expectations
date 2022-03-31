@@ -31,7 +31,7 @@ suite: ExpectationSuite = context.get_expectation_suite(
 )
 # </snippet>
 # <snippet>
-datasource_yaml = """
+datasource_yaml = f"""
 name: my_spark_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
