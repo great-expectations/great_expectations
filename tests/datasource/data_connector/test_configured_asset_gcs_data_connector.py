@@ -1272,7 +1272,7 @@ datasource_name: FAKE_DATASOURCE_NAME
 bucket_or_name: my_bucket
 prefix: my_base_directory/
 default_regex:
-   pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+   pattern: ^(.+)-(\\d{4})(\\d{2})\\.(csv|txt)$
    group_names:
        - data_asset_name
        - year_dir
@@ -1280,12 +1280,12 @@ default_regex:
 assets:
    alpha:
        prefix: my_base_directory/alpha/files/go/here/
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
+       pattern: ^(.+)-(\\d{4})(\\d{2})\\.csv$
    beta:
        prefix: my_base_directory/beta_here/
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.txt$
+       pattern: ^(.+)-(\\d{4})(\\d{2})\\.txt$
    gamma:
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
+       pattern: ^(.+)-(\\d{4})(\\d{2})\\.csv$
    """
     config = yaml.load(yaml_string)
 

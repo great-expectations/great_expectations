@@ -498,7 +498,7 @@ name: TEST_DATA_CONNECTOR
 bucket_or_name: test_bucket
 prefix: ""
 default_regex:
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
     group_names:
         - year_dir
         - month_dir
@@ -573,7 +573,7 @@ name: TEST_DATA_CONNECTOR
 bucket_or_name: test_bucket
 prefix: ""
 default_regex:
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
     group_names:
         - year_dir
         - month_dir
@@ -644,7 +644,7 @@ bucket_or_name: test_bucket
 prefix: ""
 
 default_regex:
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
     group_names:
         - year_dir
         - month_dir
@@ -728,7 +728,7 @@ def test_nested_directory_data_asset_name_in_folder(
             - data_asset_name
             - letter
             - number
-        pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
+        pattern: (\\w{1})\\/(\\w{1})-(\\d{1})\\.csv
         """,
         runtime_environment={
             "execution_engine": PandasExecutionEngine(),
@@ -800,7 +800,7 @@ def test_redundant_information_in_naming_convention_random_hash(
                 - month
                 - day
                 - data_asset_name
-              pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
+              pattern: (\\d{4})/(\\d{2})/(\\d{2})/(log_file)-.*\\.txt\\.gz
               """,
         runtime_environment={
             "execution_engine": PandasExecutionEngine(),
@@ -868,7 +868,7 @@ def test_redundant_information_in_naming_convention_timestamp(
                 - year
                 - month
                 - day
-              pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
+              pattern: (log_file)-(\\d{4})-(\\d{2})-(\\d{2})-.*\\.*\\.txt\\.gz
       """,
         runtime_environment={
             "execution_engine": PandasExecutionEngine(),
@@ -935,7 +935,7 @@ def test_redundant_information_in_naming_convention_bucket(
                   - year
                   - month
                   - day
-              pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
+              pattern: (\\w{11})/(\\d{4})/(\\d{2})/(\\d{2})/log_file-.*\\.txt\\.gz
               """,
         runtime_environment={
             "execution_engine": PandasExecutionEngine(),
@@ -1002,7 +1002,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
                   - month
                   - day
                   - full_date
-              pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-(.*)\\.txt\\.gz
+              pattern: (\\w{11})/(\\d{4})/(\\d{2})/(\\d{2})/log_file-(.*)\\.txt\\.gz
           sorters:
               - orderby: desc
                 class_name: DateTimeSorter
@@ -1130,7 +1130,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
                   - month
                   - day
                   - full_date
-              pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-(.*)\\.txt\\.gz
+              pattern: (\\w{11})/(\\d{4})/(\\d{2})/(\\d{2})/log_file-(.*)\\.txt\\.gz
           sorters:
               - orderby: desc
                 class_name: DateTimeSorter
@@ -1192,7 +1192,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
                 - month
                 - day
                 - full_date
-            pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-(.*)\\.txt\\.gz
+            pattern: (\\w{11})/(\\d{4})/(\\d{2})/(\\d{2})/log_file-(.*)\\.txt\\.gz
         sorters:
             - datetime_format: "%Y%m%d"
               orderby: desc
@@ -1239,7 +1239,7 @@ datasource_name: FAKE_DATASOURCE_NAME
 bucket_or_name: my_bucket
 prefix: my_base_directory/
 default_regex:
-   pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+   pattern: ^(.+)-(\\d{4})(\\d{2})\\.(csv|txt)$
    group_names:
        - data_asset_name
        - year_dir
