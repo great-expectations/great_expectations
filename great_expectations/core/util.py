@@ -146,7 +146,6 @@ def convert_to_json_serializable(data):
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
 
-    # NOTE(cdkini): Deleting this breaks a whole lotta tests
     # Handling "float(nan)" separately is required by Python-3.6 and Pandas-0.23 versions.
     if isinstance(data, float) and np.isnan(data):
         return None
