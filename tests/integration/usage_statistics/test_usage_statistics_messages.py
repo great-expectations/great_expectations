@@ -2644,7 +2644,7 @@ for message_type, messages in valid_usage_statistics_messages.items():
 @pytest.mark.aws_integration
 @pytest.mark.parametrize("message", test_messages, ids=message_test_ids)
 def test_usage_statistics_message(
-    message, requests_session_with_retries: requests.Session
+    message: dict, requests_session_with_retries: requests.Session
 ):
     """known message formats should be valid"""
     res = requests_session_with_retries.post(

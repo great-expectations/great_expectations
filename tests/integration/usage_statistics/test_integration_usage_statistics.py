@@ -33,7 +33,7 @@ def aws_session():
 
 
 @pytest.fixture(scope="session")
-def valid_usage_statistics_message():
+def valid_usage_statistics_message() -> dict:
     return {
         "event_payload": {
             "platform.system": "Darwin",
@@ -129,7 +129,8 @@ def valid_usage_statistics_message():
 
 
 def test_send_malformed_data(
-    valid_usage_statistics_message, requests_session_with_retries: requests.Session
+    valid_usage_statistics_message: dict,
+    requests_session_with_retries: requests.Session,
 ):
     # We should be able to successfully send a valid message, but find that
     # a malformed message is not accepted
