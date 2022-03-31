@@ -241,20 +241,17 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         ) = ParameterBuilder._get_best_candidate_above_threshold(
             regex_string_success_ratios, threshold
         )
-        # sorted regex and ratios for all evaluated candidates
-        (
-            sorted_ratio_list,
-            sorted_regex_string_list,
-        ) = ParameterBuilder._get_sorted_candidates_and_ratios(
-            regex_string_success_ratios
+        # dict of sorted regex and ratios for all evaluated candidates
+        sorted_regex_candidates_and_ratios: dict = (
+            ParameterBuilder._get_sorted_candidates_and_ratios(
+                regex_string_success_ratios
+            )
         )
 
         return (
             best_regex_string,
             {
                 "success_ratio": best_ratio,
-                "evaluated_regexes": dict(
-                    zip(sorted_regex_string_list, sorted_ratio_list)
-                ),
+                "evaluated_regexes": sorted_regex_candidates_and_ratios,
             },
         )

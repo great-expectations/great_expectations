@@ -577,21 +577,19 @@ class ParameterBuilder(Builder, ABC):
     @staticmethod
     def _get_sorted_candidates_and_ratios(
         candidate_ratio_dict: Dict[str, float],
-    ) -> Tuple[List[float], List[str]]:
+    ) -> Dict[str, float]:
         """
         Helper method to sort all candidate strings or patterns by success ratio (how well they matched the domain).
 
-        Returns Tuple(ratio, sorted_strings)
+        Returns sorted dict of candidate as key and ratio as value
         """
-        strings: List[str] = list(candidate_ratio_dict.keys())
-        ratios: List[float] = list(candidate_ratio_dict.values())
-
-        sorted_strings: List[str] = [
-            string for ratio, string in sorted(zip(ratios, strings), reverse=True)
-        ]
-        ratios.sort(reverse=True)
-
-        return ratios, sorted_strings
+        return dict(
+            sorted(
+                candidate_ratio_dict.items(),
+                key=lambda element: element[1],
+                reverse=True,
+            )
+        )
 
 
 def init_rule_parameter_builders(

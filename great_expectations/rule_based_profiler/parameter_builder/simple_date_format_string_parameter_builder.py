@@ -292,20 +292,16 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         ) = ParameterBuilder._get_best_candidate_above_threshold(
             format_string_success_ratios, threshold
         )
-        # sorted datetime and ratios for all evaluated candidates
-        (
-            sorted_ratio_list,
-            sorted_datetime_string_list,
-        ) = ParameterBuilder._get_sorted_candidates_and_ratios(
-            format_string_success_ratios
+        # dict of sorted datetime and ratios for all evaluated candidates
+        sorted_fmt_strings_and_ratios: dict = (
+            ParameterBuilder._get_sorted_candidates_and_ratios(
+                format_string_success_ratios
+            )
         )
-
         return (
             best_fmt_string,
             {
                 "success_ratio": best_ratio,
-                "candidate_strings": dict(
-                    zip(sorted_datetime_string_list, sorted_ratio_list)
-                ),
+                "candidate_strings": sorted_fmt_strings_and_ratios,
             },
         )
