@@ -2038,7 +2038,7 @@ def basic_datasource(tmp_path_factory):
 
     basic_datasource: Datasource = instantiate_class_from_config(
         config=yaml.load(
-            f"""
+            """
 class_name: Datasource
 
 data_connectors:
@@ -2078,7 +2078,7 @@ def db_file():
 def data_context_with_datasource_pandas_engine(empty_data_context):
     context = empty_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine
@@ -2100,7 +2100,7 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
 def data_context_with_datasource_spark_engine(empty_data_context, spark_session):
     context = empty_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: SparkDFExecutionEngine
@@ -2278,7 +2278,7 @@ def empty_cloud_data_context(
 def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
     context = empty_cloud_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine

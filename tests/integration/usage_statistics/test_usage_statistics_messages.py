@@ -2643,8 +2643,12 @@ for message_type, messages in valid_usage_statistics_messages.items():
 
 @pytest.mark.aws_integration
 @pytest.mark.parametrize("message", test_messages, ids=message_test_ids)
-def test_usage_statistics_message(message):
+def test_usage_statistics_message(
+    message: dict, requests_session_with_retries: requests.Session
+):
     """known message formats should be valid"""
-    res = requests.post(USAGE_STATISTICS_QA_URL, json=message, timeout=2)
+    res = requests_session_with_retries.post(
+        USAGE_STATISTICS_QA_URL, json=message, timeout=2
+    )
     assert res.status_code == 201
     assert res.json() == {"event_count": 1}
