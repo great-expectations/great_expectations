@@ -1,6 +1,6 @@
 import pytest
 
-from .fixtures.expect_column_values_to_equal_three import (
+from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,
     ExpectColumnValuesToEqualThree__ThirdIteration,

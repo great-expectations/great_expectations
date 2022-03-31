@@ -12,8 +12,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationMetricDiagnostics,
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
-
-from .fixtures.expect_column_values_to_equal_three import (
+from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,
     ExpectColumnValuesToEqualThree__ThirdIteration,
