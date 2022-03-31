@@ -167,10 +167,10 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
 
-              pushd dgtest
-              pip install -e .
+              pushd ..
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
               popd
 
               # Run dgtest
@@ -252,10 +252,10 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
 
-              pushd dgtest
-              pip install -e .
+              pushd ..
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
               popd
 
               # Run dgtest
@@ -357,10 +357,10 @@ stages:
               # Install dependencies
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
 
-              pushd dgtest
-              pip install -e .
+              pushd ..
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
               popd
 
               # Run dgtest
@@ -401,8 +401,9 @@ stages:
               pip install pytest pytest-cov pytest-azurepipelines
               git clone https://github.com/superconductive/dgtest.git
 
-              pushd dgtest
-              pip install -e .
+              pushd ..
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
               popd
 
               # Run dgtest
@@ -449,10 +450,10 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest
-              git clone https://github.com/superconductive/dgtest.git
 
-              pushd dgtest
-              pip install -e .
+              pushd ..
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
               popd
 
               # Run dgtest
