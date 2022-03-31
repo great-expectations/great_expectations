@@ -24,6 +24,7 @@ from great_expectations.rule_based_profiler.types import (
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
+from great_expectations.types import safe_deep_copy
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -187,7 +188,7 @@ def get_parameter_value_and_validate_return_type(
     or as a fully-qualified parameter name.  In either case, it can optionally validate the type of the return value.
     """
     if isinstance(parameter_reference, dict):
-        parameter_reference = dict(copy.deepcopy(parameter_reference))
+        parameter_reference = safe_deep_copy(data=parameter_reference)
 
     parameter_reference = get_parameter_value(
         domain=domain,
