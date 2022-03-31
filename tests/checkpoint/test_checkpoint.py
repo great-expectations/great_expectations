@@ -26,9 +26,6 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
 )
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
-)
 
 yaml = YAML()
 
