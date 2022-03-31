@@ -29,7 +29,7 @@ data_context_config = DataContextConfig(
 )
 context = BaseDataContext(project_config=data_context_config)
 
-datasource_yaml = f"""
+datasource_yaml = """
 name: my_spark_dataframe
 class_name: Datasource
 execution_engine:

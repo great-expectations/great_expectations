@@ -218,7 +218,7 @@ bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
-datasource_yaml = rf"""
+datasource_yaml = r"""
 name: my_bigquery_datasource
 class_name: Datasource
 execution_engine:

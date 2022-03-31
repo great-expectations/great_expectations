@@ -16,7 +16,7 @@ context = ge.get_context()
 # </snippet>
 
 # <snippet>
-datasource_yaml = rf"""
+datasource_yaml = r"""
 name: my_azure_datasource
 class_name: Datasource
 execution_engine:

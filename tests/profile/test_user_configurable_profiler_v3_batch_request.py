@@ -452,7 +452,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
             ignored_columns=["col_few"],
         )
     assert e.value.args[0] == (
-        f"Column col_few is specified in both the semantic_types_dict and the list of ignored columns. Please remove "
+        "Column col_few is specified in both the semantic_types_dict and the list of ignored columns. Please remove "
         f"one of these entries to proceed."
     )
 

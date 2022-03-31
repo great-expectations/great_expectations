@@ -6,7 +6,7 @@ from great_expectations.expectations.metrics.import_manager import sa
 
 context = ge.get_context()
 
-datasource_yaml = f"""
+datasource_yaml = """
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
 connection_string: <CONNECTION_STRING>
