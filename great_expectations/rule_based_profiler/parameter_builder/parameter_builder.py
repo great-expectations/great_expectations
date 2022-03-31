@@ -553,6 +553,47 @@ class ParameterBuilder(Builder, ABC):
 
         return metric_values
 
+    @staticmethod
+    def _get_best_pattern_greater_than_threshold(
+        candidate_ratio_dict: Dict[str, float],
+        threshold: float,
+    ) -> Tuple[Optional[str], float]:
+        """
+        Helper method to calculate which regex_strings match greater than threshold
+        """
+        best_pattern: Optional[str] = None
+        best_ratio: float = 0.0
+
+        pattern: str
+        ratio: float
+        for pattern, ratio in candidate_ratio_dict.items():
+            if ratio > best_ratio and ratio >= threshold:
+                best_pattern = pattern
+                best_ratio = ratio
+
+        return best_pattern, best_ratio
+
+    @staticmethod
+    def _get_sorted_candidates_and_ratios(
+        candidate_ratio_dict: Dict[str, float],
+    ) -> Tuple[List[float], List[str]]:
+        """
+        Helper method to sort all candidate strings (regex or datetime) that were evaluated by their success ratio.
+
+        Returns Tuple(ratio, sorted_strings)
+        """
+        strings: List[str] = list(candidate_ratio_dict.keys())
+        ratios: List[float] = list(candidate_ratio_dict.values())
+
+        string: str
+        ratio: float
+        sorted_strings: List[str] = [
+            string for ratio, string in sorted(zip(ratios, strings), reverse=True)
+        ]
+        ratios.sort(reverse=True)
+
+        return ratios, sorted_strings
+
 
 def init_rule_parameter_builders(
     parameter_builder_configs: Optional[List[dict]] = None,

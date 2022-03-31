@@ -235,62 +235,26 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         )
 
         # get best-matching regex_string that match greater than threshold
-        best_regex_string: str = self._get_best_regex_greater_than_threshold(
+        (
+            best_regex_string,
+            best_ratio,
+        ) = ParameterBuilder._get_best_pattern_greater_than_threshold(
             regex_string_success_ratios, threshold
         )
         # sorted regex and ratios for all evaluated candidates
-        sorted_ratio_list, sorted_regex_string_list = self._get_sorted_regex_and_ratios(
+        (
+            sorted_ratio_list,
+            sorted_regex_string_list,
+        ) = ParameterBuilder._get_sorted_candidates_and_ratios(
             regex_string_success_ratios
         )
 
         return (
             best_regex_string,
             {
+                "success_ratio": best_ratio,
                 "evaluated_regexes": dict(
                     zip(sorted_regex_string_list, sorted_ratio_list)
                 ),
-                "threshold": threshold,
             },
         )
-
-    @staticmethod
-    def _get_best_regex_greater_than_threshold(
-        regex_string_success_ratio_dict: Dict[str, float],
-        threshold: float,
-    ) -> str:
-        """
-        Helper method to calculate which regex_strings match greater than threshold
-        """
-        best_regex: Optional[str] = None
-        best_ratio: float = 0.0
-
-        regex_string: str
-        ratio: float
-        for regex_string, ratio in regex_string_success_ratio_dict.items():
-            if ratio > best_ratio and ratio >= threshold:
-                best_regex = regex_string
-                best_ratio = ratio
-
-        return best_regex
-
-    @staticmethod
-    def _get_sorted_regex_and_ratios(
-        regex_string_success_ratio_dict: Dict[str, float],
-    ) -> Tuple[List[float], List[str]]:
-        """
-        Helper method to sort all regexes that were evaluated by their success ratio.
-
-        Returns Tuple(ratio, sorted_strings)
-        """
-        regex_strings: List[str] = list(regex_string_success_ratio_dict.keys())
-        ratios: List[float] = list(regex_string_success_ratio_dict.values())
-
-        regex_string: str
-        ratio: float
-        sorted_regex_strings: List[str] = [
-            regex_string
-            for ratio, regex_string in sorted(zip(ratios, regex_strings), reverse=True)
-        ]
-        ratios.sort(reverse=True)
-
-        return ratios, sorted_regex_strings

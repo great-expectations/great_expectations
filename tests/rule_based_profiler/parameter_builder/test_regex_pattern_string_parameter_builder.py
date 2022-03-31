@@ -162,10 +162,10 @@ def test_regex_pattern_string_parameter_builder_alice(
         "details": {
             "evaluated_regexes": {
                 r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$": 1.0,
-                r"^\d{1}$": 0,
-                r"^\d{2}$": 0,
+                r"^\d{1}$": 0.0,
+                r"^\d{2}$": 0.0,
             },
-            "threshold": 1.0,
+            "success_ratio": 1.0,
         },
     }
 
@@ -237,9 +237,9 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
             "evaluated_regexes": {
                 r"^\d{1}$": 1.0,
                 r"^[12]{1}$": 0.9941111111111111,
-                r"^\d{4}$": 0,
+                r"^\d{4}$": 0.0,
             },
-            "threshold": 0.9,
+            "success_ratio": 1.0,
         },
     }
 
@@ -314,7 +314,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
                 r"/(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}/": 0,
                 r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ": 0,
             },
-            "threshold": 0.9,
+            "success_ratio": 0.0,
         },
     }
 
@@ -418,7 +418,7 @@ def test_regex_single_candidate(
     fully_qualified_parameter_name_for_meta: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.details"
     )
-    expected_meta: dict = {"evaluated_regexes": {"^\\d{1}$": 1.0}, "threshold": 1.0}
+    expected_meta: dict = {"evaluated_regexes": {"^\\d{1}$": 1.0}, "success_ratio": 1.0}
 
     meta: dict = get_parameter_value_and_validate_return_type(
         parameter_reference=fully_qualified_parameter_name_for_meta,
@@ -480,7 +480,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
     )
     expected_meta: dict = {
         "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{3}$": 0.0},
-        "threshold": 1.0,
+        "success_ratio": 1.0,
     }
     meta: dict = get_parameter_value_and_validate_return_type(
         parameter_reference=fully_qualified_parameter_name_for_meta,
