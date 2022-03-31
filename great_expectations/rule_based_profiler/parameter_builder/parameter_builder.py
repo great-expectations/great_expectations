@@ -579,7 +579,7 @@ class ParameterBuilder(Builder, ABC):
         candidate_ratio_dict: Dict[str, float],
     ) -> Tuple[List[float], List[str]]:
         """
-        Helper method to sort all candidate strings strings or patterns by success ratio (how well they matched the domain).
+        Helper method to sort all candidate strings or patterns by success ratio (how well they matched the domain).
 
         Returns Tuple(ratio, sorted_strings)
         """
