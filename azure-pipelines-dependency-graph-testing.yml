@@ -168,7 +168,10 @@ stages:
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
               git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+
+              pushd dgtest
+              pip install -e .
+              popd
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
@@ -250,7 +253,10 @@ stages:
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
               git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+
+              pushd dgtest
+              pip install -e .
+              popd
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
@@ -352,7 +358,10 @@ stages:
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
               git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+
+              pushd dgtest
+              pip install -e .
+              popd
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
@@ -391,7 +400,10 @@ stages:
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
               git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+
+              pushd dgtest
+              pip install -e .
+              popd
 
               # Run dgtest
               dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
@@ -438,7 +450,10 @@ stages:
               # Install dependencies
               pip install pytest
               git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+
+              pushd dgtest
+              pip install -e .
+              popd
 
               # Run dgtest
               dgtest run great_expectations --filter 'tests/cli' --aws-integration -v
