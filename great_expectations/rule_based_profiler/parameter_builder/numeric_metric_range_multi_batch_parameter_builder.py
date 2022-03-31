@@ -256,6 +256,7 @@ detected.
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
                 "num_bootstrap_samples": self.num_bootstrap_samples,
+                "bootstrap_random_seed": self.bootstrap_random_seed,
             }
         else:
             estimator_func = self._get_deterministic_estimate
