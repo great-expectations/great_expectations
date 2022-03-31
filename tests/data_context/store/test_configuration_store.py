@@ -1,15 +1,9 @@
+import logging
 from pathlib import Path
 
 import pytest
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
-
-try:
-    from unittest import mock
-except ImportError:
-    from unittest import mock
-
-import logging
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import ConfigurationStore
