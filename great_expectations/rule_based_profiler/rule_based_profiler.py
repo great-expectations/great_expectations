@@ -914,7 +914,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_requests: List[Union[BatchRequest, RuntimeBatchRequest, dict]] = []
         rule: dict
         for rule in config.rules.values():
-
             domain_builder: dict = rule["domain_builder"]
             if "batch_request" in domain_builder:
                 batch_requests.append(domain_builder["batch_request"])

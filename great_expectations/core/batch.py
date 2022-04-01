@@ -7,7 +7,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
-from great_expectations.types import SerializableDictDot, safe_deep_copy
+from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -648,7 +648,7 @@ def materialize_batch_request(
 
 
 def batch_request_contains_batch_data(
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, dict]] = None
 ) -> bool:
     return (
         batch_request_contains_runtime_parameters(batch_request=batch_request)
@@ -661,6 +661,7 @@ def batch_request_contains_runtime_parameters(
 ) -> bool:
     return (
         batch_request is not None
+        and isinstance(batch_request, (dict, DictDot))
         and batch_request.get("runtime_parameters") is not None
     )
 

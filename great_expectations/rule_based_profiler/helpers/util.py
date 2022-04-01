@@ -227,6 +227,20 @@ def get_parameter_value(
                 variables=variables,
                 parameters=parameters,
             )
+    elif isinstance(parameter_reference, (list, set, tuple)):
+        parameter_reference_type: type = type(parameter_reference)
+        element: Any
+        return parameter_reference_type(
+            [
+                get_parameter_value(
+                    domain=domain,
+                    parameter_reference=element,
+                    variables=variables,
+                    parameters=parameters,
+                )
+                for element in parameter_reference
+            ]
+        )
     elif isinstance(
         parameter_reference, str
     ) and is_fully_qualified_parameter_name_literal_string_format(

@@ -434,6 +434,7 @@ def batch_request_in_validations_contains_batch_data(
         for idx, val in enumerate(validations):
             if (
                 val.get("batch_request") is not None
+                and isinstance(val.get("batch_request"), (dict, DictDot))
                 and val["batch_request"].get("runtime_parameters") is not None
                 and val["batch_request"]["runtime_parameters"].get("batch_data")
                 is not None

@@ -6,6 +6,7 @@ from great_expectations.core.batch import (
     Batch,
     BatchRequest,
     RuntimeBatchRequest,
+    batch_request_contains_batch_data,
     get_batch_request_as_dict,
 )
 from great_expectations.core.util import convert_to_json_serializable
@@ -38,7 +39,16 @@ class Builder(SerializableDictDot):
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
         self._batch_list = batch_list
+
+        if batch_request_contains_batch_data(batch_request=batch_request):
+            raise ValueError(
+                f"""Error: batch_data found in batch_request -- only primitive types are allowed as part of \
+{self.__class__.__name__} instance attributes.
+"""
+            )
+
         self._batch_request = batch_request
+
         self._data_context = data_context
 
     """
