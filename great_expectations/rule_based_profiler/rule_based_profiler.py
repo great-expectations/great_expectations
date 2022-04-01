@@ -854,7 +854,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     batch_requests.append(parameter_builder["batch_request"])
 
         # DataFrames shouldn't be saved to ProfilerStore
-        batch_request: Optional[Union[BatchRequestBase, dict]]
+        batch_request: Union[BatchRequestBase, dict]
         for batch_request in batch_requests:
             if batch_request_contains_batch_data(batch_request=batch_request):
                 return False
