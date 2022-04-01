@@ -24,4 +24,4 @@ jobs:
           ```
           ${{ steps.docstrings.outputs.result }}
           ```
-          For more details, see https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}?check_suite_focus=true
+          For more details, see [the logs](https://github.com/${{github.repository}}/actions/runs/${{github.run_id}})
