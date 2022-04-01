@@ -7,7 +7,12 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    BatchRequestBase,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -146,7 +151,28 @@ class ParameterBuilder(Builder, ABC):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         parameter_computation_impl: Optional[Callable] = None,
         json_serialize: Optional[bool] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
     ) -> None:
+        """
+        Args:
+            parameter_container: Storage for parameters, computed by this ParameterBuilder object.
+            domain: Domain object that is context for execution of this ParameterBuilder object.
+            variables: attribute name/value pairs
+            parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
+            parameter_computation_impl: Object containing desired ParameterBuilder implementation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
+            batch_list: Explicit list of Batch objects used as data to supply arguments at runtime.
+            batch_request: batch_request used to override builder attributes to get runtime data.
+            force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
+        """
+        self.set_batch_list_or_batch_request(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            force_batch_data=force_batch_data,
+        )
+
         resolve_evaluation_dependencies(
             parameter_builder=self,
             parameter_container=parameter_container,
