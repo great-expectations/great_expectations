@@ -145,7 +145,6 @@ class ParameterBuilder(Builder, ABC):
 
     def build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -157,7 +156,6 @@ class ParameterBuilder(Builder, ABC):
     ) -> None:
         """
         Args:
-            parameter_container: Storage for parameters, computed by this ParameterBuilder object.
             domain: Domain object that is context for execution of this ParameterBuilder object.
             variables: attribute name/value pairs
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
@@ -175,7 +173,6 @@ class ParameterBuilder(Builder, ABC):
 
         resolve_evaluation_dependencies(
             parameter_builder=self,
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -190,7 +187,6 @@ class ParameterBuilder(Builder, ABC):
             computed_parameter_value,
             parameter_computation_details,
         ) = parameter_computation_impl(
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -216,7 +212,7 @@ class ParameterBuilder(Builder, ABC):
         }
 
         build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
+            parameter_container=parameters[domain.id], parameter_values=parameter_values
         )
 
     @property
@@ -241,7 +237,6 @@ class ParameterBuilder(Builder, ABC):
     @abstractmethod
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -654,7 +649,6 @@ def init_parameter_builder(
 
 def resolve_evaluation_dependencies(
     parameter_builder: "ParameterBuilder",  # noqa: F821
-    parameter_container: ParameterContainer,
     domain: Domain,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -699,7 +693,6 @@ def resolve_evaluation_dependencies(
             )
 
             evaluation_parameter_builder.build_parameters(
-                parameter_container=parameter_container,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
@@ -709,7 +702,6 @@ def resolve_evaluation_dependencies(
             # configured with its own "evaluation_parameter_builders" list.  Recursive call handles such situations.
             resolve_evaluation_dependencies(
                 parameter_builder=evaluation_parameter_builder,
-                parameter_container=parameter_container,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,

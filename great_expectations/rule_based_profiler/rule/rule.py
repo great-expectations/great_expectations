@@ -83,7 +83,6 @@ class Rule(SerializableDictDot):
             parameter_builder: ParameterBuilder
             for parameter_builder in parameter_builders:
                 parameter_builder.build_parameters(
-                    parameter_container=parameter_container,
                     domain=domain,
                     variables=variables,
                     parameters=self._parameters,
@@ -101,7 +100,6 @@ class Rule(SerializableDictDot):
             for expectation_configuration_builder in expectation_configuration_builders:
                 expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
-                        parameter_container=parameter_container,
                         domain=domain,
                         variables=variables,
                         parameters=self._parameters,

@@ -86,7 +86,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
 
     def build_expectation_configuration(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -96,7 +95,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
     ) -> ExpectationConfiguration:
         """
         Args:
-            parameter_container: Storage for parameters, computed by this ParameterBuilder object.
             domain: Domain object that is context for execution of this ParameterBuilder object.
             variables: attribute name/value pairs
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
@@ -114,7 +112,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
         )
 
         self._resolve_validation_dependencies(
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -126,7 +123,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
 
     def _resolve_validation_dependencies(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -143,7 +139,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
                 force_batch_data=False,
             )
             validation_parameter_builder.build_parameters(
-                parameter_container=parameter_container,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
