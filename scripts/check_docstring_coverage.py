@@ -71,7 +71,6 @@ def render_diagnostics(diagnostics: Diagnostics) -> None:
     directory_results = {}
 
     for file, diagnostics_list in diagnostics.items():
-
         base_directory: str = _get_base_directory(file)
         if base_directory not in directory_results:
             directory_results[base_directory] = [0, 0]
@@ -87,6 +86,7 @@ def render_diagnostics(diagnostics: Diagnostics) -> None:
     repo_passed: int = 0
     repo_total: int = 0
 
+    print()
     for directory, results in directory_results.items():
         passed, total = results
         repo_passed += passed
@@ -100,7 +100,7 @@ def render_diagnostics(diagnostics: Diagnostics) -> None:
     )
 
 
-def _get_base_directory(path: str):
+def _get_base_directory(path: str) -> str:
     parts = path.split("/")
     if parts[1].endswith(".py"):
         return parts[0]
