@@ -254,9 +254,6 @@ class CheckpointAnonymizer(BaseAnonymizer):
         return anonymized_checkpoint_run_properties_dict
 
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
-        """
-        See parent
-        """
         from great_expectations.checkpoint.checkpoint import Checkpoint
         from great_expectations.data_context.types.base import CheckpointConfig
 

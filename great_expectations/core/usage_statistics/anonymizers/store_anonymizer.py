@@ -58,9 +58,6 @@ class StoreAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
-        """
-        See parent
-        """
         from great_expectations.data_context.store.store import Store
 
         return (obj is not None and isinstance(obj, Store)) or (

@@ -35,9 +35,6 @@ class BaseAnonymizer(ABC):
 
     @abstractmethod
     def can_handle(self, obj: Optional[object], **kwargs) -> bool:
-        """
-        See parent
-        """
         raise NotImplementedError
 
     @staticmethod

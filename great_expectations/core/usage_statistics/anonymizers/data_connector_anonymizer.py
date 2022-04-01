@@ -41,9 +41,6 @@ class DataConnectorAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
-        """
-        See parent
-        """
         from great_expectations.datasource.data_connector.data_connector import (
             DataConnector,
         )
