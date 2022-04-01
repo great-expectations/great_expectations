@@ -80,7 +80,7 @@ def render_diagnostics(diagnostics: Diagnostics) -> None:
             if success:
                 directory_results[base_directory][0] += 1
             else:
-                logger.info(f"{file} - L{func.lineno}:{func.name}")
+                logger.info(f"{file: <120} L{func.lineno}:{func.name}")
 
             directory_results[base_directory][1] += 1
 
