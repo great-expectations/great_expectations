@@ -11,11 +11,12 @@ jobs:
     - name: Run script
       id: docstrings
       run: |
-        RESULT=$(python scripts/check_docstring_coverage.py)
-        OUTPUT=$(echo $RESULT | tail -n 1)
+        OUTPUT=$(python scripts/check_docstring_coverage.py)
         echo "::set-output name=result::$OUTPUT"
     - uses: marocchino/sticky-pull-request-comment@v2
       with:
         header: docstrings
         message: |
+          ```
           ${{ steps.docstrings.outputs.result }}
+          ```
