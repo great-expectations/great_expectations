@@ -1,7 +1,16 @@
 import ast
 import glob
+import logging
 from collections import defaultdict
 from typing import Dict, List, Tuple, cast
+
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+logger = logging.getLogger(__name__)
 
 Diagnostics = Dict[str, List[Tuple[ast.FunctionDef, bool]]]
 
@@ -70,10 +79,10 @@ def render_diagnostics(diagnostics: Diagnostics) -> None:
         success_count += len(diagnostics_list) - len(failures)
 
         if failures:
-            print(f"{file}:")
+            logger.info(f"{file}:")
             for func, _ in failures:
-                print(f"   L{func.lineno} - {func.name}")
-            print()
+                logger.info(f"   L{func.lineno} - {func.name}")
+            logger.info("")
 
     print(
         f"RESULT: {100 * success_count / total_count:.2f}% of public functions have docstrings!"

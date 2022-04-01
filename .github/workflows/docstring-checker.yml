@@ -11,7 +11,7 @@ jobs:
     - name: Run script
       id: docstrings
       run: |
-        OUTPUT=$(python scripts/check_docstring_coverage.py)
+        OUTPUT=$(python scripts/check_docstring_coverage.py | tail -n 1)
         OUTPUT="${OUTPUT//'%'/'%25'}"
         OUTPUT="${OUTPUT//$'\n'/'%0A'}"
         OUTPUT="${OUTPUT//$'\r'/'%0D'}"
