@@ -163,8 +163,8 @@ class ParameterBuilder(Builder, ABC):
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
             parameter_computation_impl: Object containing desired ParameterBuilder implementation.
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: Explicit list of Batch objects used as data to supply arguments at runtime.
-            batch_request: batch_request used to override builder attributes to get runtime data.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
             force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
         """
         self.set_batch_list_or_batch_request(
@@ -609,6 +609,7 @@ class ParameterBuilder(Builder, ABC):
 
         Returns sorted dict of candidate as key and ratio as value
         """
+        # noinspection PyTypeChecker
         return dict(
             sorted(
                 candidate_ratio_dict.items(),

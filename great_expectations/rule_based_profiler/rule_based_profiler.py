@@ -249,17 +249,18 @@ class BaseRuleBasedProfiler(ConfigPeer):
     ) -> ExpectationSuite:
         """
         Args:
-            :param variables attribute name/value pairs (overrides)
-            :param rules name/(configuration-dictionary) (overrides)
-            :param batch_list: List of Batch objects used to supply arguments at runtime.
-            :param batch_request: batch_request used to supply arguments at runtime.
-            :param force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
-            :param reconciliation_directives directives for how each rule component should be overwritten
-            :param expectation_suite: An existing ExpectationSuite to update.
-            :param expectation_suite_name: A name for returned ExpectationSuite.
-            :param include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
+            variables: attribute name/value pairs (overrides), commonly-used in Builder objects.
+            rules: name/(configuration-dictionary) (overrides)
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
+            reconciliation_directives: directives for how each rule component should be overwritten
+            expectation_suite: An existing ExpectationSuite to update.
+            expectation_suite_name: A name for returned ExpectationSuite.
+            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
 
-        :return: Set of rule evaluation results in the form of an ExpectationSuite
+        Returns:
+            Set of rule evaluation results in the form of an ExpectationSuite
         """
         assert not (
             expectation_suite and expectation_suite_name

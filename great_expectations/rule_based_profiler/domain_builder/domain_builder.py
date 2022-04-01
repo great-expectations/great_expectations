@@ -60,8 +60,8 @@ class DomainBuilder(Builder, ABC):
         """
         Args:
             variables: attribute name/value pairs
-            batch_list: Explicit list of Batch objects used as data to supply arguments at runtime.
-            batch_request: batch_request used to override builder attributes to get runtime data.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
             force_batch_data: Whether or not to overwrite existing batch_request value in DomainBuilder components.
 
         Returns:

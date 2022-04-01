@@ -100,8 +100,8 @@ class ExpectationConfigurationBuilder(Builder, ABC):
             domain: Domain object that is context for execution of this ParameterBuilder object.
             variables: attribute name/value pairs
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
-            batch_list: Explicit list of Batch objects used as data to supply arguments at runtime.
-            batch_request: batch_request used to override builder attributes to get runtime data.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
             force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
 
         Returns:

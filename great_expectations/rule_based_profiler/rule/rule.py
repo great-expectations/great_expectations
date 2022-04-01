@@ -55,12 +55,13 @@ class Rule(SerializableDictDot):
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
         ConfigurationBuilder available based on the instantiation.
         Args:
-            :param variables attribute name/value pairs (overrides)
-            :param batch_list: List of Batch objects used to supply arguments at runtime.
-            :param batch_request: batch_request used to supply arguments at runtime.
-            :param force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
+            variables: attribute name/value pairs, commonly-used in Builder objects.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
 
-        :return: List of Corresponding Expectation Configurations representing every configured rule
+        Returns:
+            List of Corresponding Expectation Configurations representing every configured rule
         """
         expectation_configurations: List[ExpectationConfiguration] = []
 
