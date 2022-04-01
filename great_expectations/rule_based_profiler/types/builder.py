@@ -4,8 +4,7 @@ from typing import Any, List, Optional, Set, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
-    BatchRequest,
-    RuntimeBatchRequest,
+    BatchRequestBase,
     batch_request_contains_batch_data,
     get_batch_request_as_dict,
 )
@@ -27,9 +26,7 @@ class Builder(SerializableDictDot):
     def __init__(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
+        batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -64,13 +61,11 @@ class Builder(SerializableDictDot):
         self._batch_list = value
 
     @property
-    def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
+    def batch_request(self) -> Optional[Union[BatchRequestBase, dict]]:
         return self._batch_request
 
     @batch_request.setter
-    def batch_request(
-        self, value: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]
-    ) -> None:
+    def batch_request(self, value: Optional[Union[BatchRequestBase, dict]]) -> None:
         if not (value is None or isinstance(value, dict)):
             value = get_batch_request_as_dict(batch_request=value)
 
@@ -83,7 +78,7 @@ class Builder(SerializableDictDot):
     def set_batch_list_or_batch_request(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         force_batch_data: bool = False,
     ) -> None:
         if force_batch_data or self.batch_request is None:
@@ -95,7 +90,7 @@ class Builder(SerializableDictDot):
     def set_batch_data(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> None:
         arg: Any
         num_supplied_batch_specification_args: int = sum(

@@ -13,6 +13,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     materialize_batch_request,
 )
@@ -38,7 +39,7 @@ def get_validator(
     *,
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -93,7 +94,7 @@ def get_validator(
 def get_batch_ids(
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,

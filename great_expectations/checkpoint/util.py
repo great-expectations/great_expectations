@@ -12,6 +12,7 @@ import requests
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     get_batch_request_as_dict,
     materialize_batch_request,
@@ -215,9 +216,7 @@ def get_substituted_validation_dict(
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_substituted_batch_request(
     substituted_runtime_config: dict,
-    validation_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest, dict]
-    ] = None,
+    validation_batch_request: Optional[Union[BatchRequestBase, dict]] = None,
 ) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     substituted_runtime_batch_request = substituted_runtime_config.get("batch_request")
 

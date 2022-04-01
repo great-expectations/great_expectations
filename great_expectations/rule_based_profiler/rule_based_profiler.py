@@ -9,8 +9,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
-    BatchRequest,
-    RuntimeBatchRequest,
+    BatchRequestBase,
     batch_request_contains_batch_data,
 )
 from great_expectations.core.config_peer import ConfigPeer
@@ -241,7 +240,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         force_batch_data: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -768,7 +767,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         data_context: "DataContext",  # noqa: F821
         profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -803,7 +802,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def generate_rule_overrides_from_batch_request(
         rules: List[Rule],
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         force_batch_data: bool = False,
     ) -> List[Rule]:
         """Iterates through the profiler's builder attributes and generates a set of
@@ -911,7 +910,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         config: RuleBasedProfilerConfig,
     ) -> bool:
         # Evaluate nested types in RuleConfig to parse out BatchRequests
-        batch_requests: List[Union[BatchRequest, RuntimeBatchRequest, dict]] = []
+        batch_requests: List[Union[BatchRequestBase, dict]] = []
         rule: dict
         for rule in config.rules.values():
             domain_builder: dict = rule["domain_builder"]
@@ -925,7 +924,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     batch_requests.append(parameter_builder["batch_request"])
 
         # DataFrames shouldn't be saved to ProfilerStore
-        batch_request: Union[BatchRequest, RuntimeBatchRequest, dict]
+        batch_request: Optional[Union[BatchRequestBase, dict]]
         for batch_request in batch_requests:
             if batch_request_contains_batch_data(batch_request=batch_request):
                 return False
