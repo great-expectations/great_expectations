@@ -1,7 +1,7 @@
 """
 This is a template for creating custom SetBasedColumnMapExpectations.
 For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_seet_based_column_map_expectations
+    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations
 """
 
 from great_expectations.expectations.set_based_column_map_expectation import (
