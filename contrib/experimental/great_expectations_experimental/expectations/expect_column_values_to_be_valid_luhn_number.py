@@ -51,7 +51,7 @@ def is_valid_luhn_number(num: Union[int, str], min_digits: int) -> bool:
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesContainLuhnNumbers(ColumnMapMetricProvider):
+class ColumnValuesValidLuhnNumber(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_luhn_number"
     condition_value_keys = (
@@ -61,7 +61,7 @@ class ColumnValuesContainLuhnNumbers(ColumnMapMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, min_length, **kwargs):
-        raise column.apply(lambda x: is_valid_luhn_number(x))
+        return column.apply(lambda x: is_valid_luhn_number(x))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -76,9 +76,7 @@ class ColumnValuesContainLuhnNumbers(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidLuhnNumber(ColumnMapExpectation):
-    """
-        This Expectation validates data as conforming to the Luhn Algorithmic Standard
-    """
+    """This Expectation validates data as conforming to the Luhn Algorithmic Standard"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -108,28 +106,18 @@ class ExpectColumnValuesToBeValidLuhnNumber(ColumnMapExpectation):
         },
         "tests": [
             {
-                "title": "pass_test",
+                "title": "basic_positive_test",
                 "exact_match_out": False,
                 "include_in_gallery": True,
-                "in": {
-                    "column": "valid_numbers"
-                },
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [],
-                    "unexpected_list": [],
-                },
+                "in": { "column": "valid_numbers" },
+                "out": { "success": True, },
             },
             {
-                "title": "fail_test",
+                "title": "basic_negative_test",
                 "exact_match_out": False,
                 "include_in_gallery": True,
-                "in": {
-                    "column": "invalid_numbers"
-                },
-                "out": {
-                    "success": False,
-                },
+                "in": { "column": "invalid_numbers", "mostly": 0.8},
+                "out": { "success": False, },
             },
         ],
     }]
