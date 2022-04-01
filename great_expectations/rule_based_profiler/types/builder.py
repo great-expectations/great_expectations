@@ -116,6 +116,10 @@ class Builder(SerializableDictDot):
         dict_obj: dict = super().to_dict()
         dict_obj["class_name"] = self.__class__.__name__
         dict_obj["module_name"] = self.__class__.__module__
+
+        if batch_request_contains_batch_data(batch_request=self.batch_request):
+            dict_obj.pop("batch_request", None)
+
         return dict_obj
 
     def to_json_dict(self) -> dict:
