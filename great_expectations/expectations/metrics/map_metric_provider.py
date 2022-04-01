@@ -1992,7 +1992,13 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 ]
             )
         ).scalar()
-        unexpected_count = int(unexpected_count)
+        # Unexpected count can be None if the table is empty, in which case the count
+        # should default to zero.
+        try:
+            unexpected_count = int(unexpected_count)
+        except TypeError:
+            unexpected_count = 0
+
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
