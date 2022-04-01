@@ -11,15 +11,11 @@ jobs:
     - name: Run script
       id: docstrings
       run: |
-        OUTPUT=$(python scripts/check_docstring_coverage.py)
-        OUTPUT="${OUTPUT//'%'/'%25'}​【7,6 m】"
-        OUTPUT="${OUTPUT//$'\n'/'%0A'}"
-        OUTPUT="${OUTPUT//$'\r'/'%0D'}"
+        RESULT=$(python scripts/check_docstring_coverage.py)
+        OUTPUT=$(echo $RESULT | tail -n 1)
         echo "::set-output name=result::$OUTPUT"
     - uses: marocchino/sticky-pull-request-comment@v2
       with:
         header: docstrings
         message: |
-          ```
           ${{ steps.docstrings.outputs.result }}
-          ```
