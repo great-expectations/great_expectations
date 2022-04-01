@@ -59,7 +59,25 @@ def _is_getter_or_setter(func: ast.FunctionDef) -> bool:
 
 
 def render_diagnostics(diagnostics: Diagnostics) -> None:
-    pass
+    total_count = 0
+    success_count = 0
+
+    for file, diagnostics_list in diagnostics.items():
+        failures = list(filter(lambda d: d[1] is False, diagnostics_list))
+        failures.sort(key=lambda d: d[0].lineno)
+
+        total_count += len(diagnostics_list)
+        success_count += len(diagnostics_list) - len(failures)
+
+        if failures:
+            print(f"{file}:")
+            for func, _ in failures:
+                print(f"   L{func.lineno} - {func.name}")
+            print()
+
+    print(
+        f"RESULT: {100 * success_count / total_count:.2f}% of public functions have docstrings!"
+    )
 
 
 if __name__ == "__main__":
@@ -67,3 +85,4 @@ if __name__ == "__main__":
         "great_expectations"
     )
     docstring_diagnostics: Diagnostics = gather_docstring_diagnostics(all_funcs)
+    render_diagnostics(docstring_diagnostics)

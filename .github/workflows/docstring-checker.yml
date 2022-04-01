@@ -7,7 +7,18 @@ jobs:
   team-labeler:
     runs-on: ubuntu-latest
     steps:
+    - name: Run script
+      id: docstrings
+      run: |
+        OUTPUT=$(python scripts/check_docstring_coverage.py)
+        OUTPUT="${OUTPUT//'%'/'%25'}​【7,6 m】"
+        OUTPUT="${OUTPUT//$'\n'/'%0A'}"
+        OUTPUT="${OUTPUT//$'\r'/'%0D'}"
+        echo "::set-output name=result::$OUTPUT"
     - uses: marocchino/sticky-pull-request-comment@v2
       with:
+        header: docstrings
         message: |
-          Release ${{ github.sha }} to <https://pr-${{ github.event.number }}.example.com>
+          ```
+          ${{ steps.docstrings.outputs.result }}
+          ```
