@@ -2038,7 +2038,7 @@ def basic_datasource(tmp_path_factory):
 
     basic_datasource: Datasource = instantiate_class_from_config(
         config=yaml.load(
-            f"""
+            """
 class_name: Datasource
 
 data_connectors:
@@ -2078,7 +2078,7 @@ def db_file():
 def data_context_with_datasource_pandas_engine(empty_data_context):
     context = empty_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine
@@ -2100,7 +2100,7 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
 def data_context_with_datasource_spark_engine(empty_data_context, spark_session):
     context = empty_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: SparkDFExecutionEngine
@@ -2278,7 +2278,7 @@ def empty_cloud_data_context(
 def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
     context = empty_cloud_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine
@@ -2516,6 +2516,69 @@ def alice_columnar_table_single_batch(empty_data_context):
         ExpectationConfiguration
     ] = []
     column_data: Dict[str, str]
+
+    expected_candidate_strings_dict: dict = {
+        "%Y-%m-%d %H:%M:%S": 1.0,
+        "%y/%m/%d %H:%M:%S": 0.0,
+        "%y/%m/%d": 0.0,
+        "%y-%m-%d %H:%M:%S,%f %z": 0.0,
+        "%y-%m-%d %H:%M:%S,%f": 0.0,
+        "%y-%m-%d %H:%M:%S": 0.0,
+        "%y-%m-%d": 0.0,
+        "%y%m%d %H:%M:%S": 0.0,
+        "%m/%d/%y*%H:%M:%S": 0.0,
+        "%m/%d/%y %H:%M:%S %z": 0.0,
+        "%m/%d/%Y*%H:%M:%S*%f": 0.0,
+        "%m/%d/%Y*%H:%M:%S": 0.0,
+        "%m/%d/%Y %H:%M:%S %z": 0.0,
+        "%m/%d/%Y %H:%M:%S %p:%f": 0.0,
+        "%m/%d/%Y %H:%M:%S %p": 0.0,
+        "%m/%d/%Y": 0.0,
+        "%m-%d-%Y": 0.0,
+        "%m%d_%H:%M:%S.%f": 0.0,
+        "%m%d_%H:%M:%S": 0.0,
+        "%d/%m/%Y": 0.0,
+        "%d/%b/%Y:%H:%M:%S %z": 0.0,
+        "%d/%b/%Y:%H:%M:%S": 0.0,
+        "%d/%b/%Y %H:%M:%S": 0.0,
+        "%d/%b %H:%M:%S,%f": 0.0,
+        "%d-%m-%Y": 0.0,
+        "%d-%b-%Y %H:%M:%S.%f": 0.0,
+        "%d-%b-%Y %H:%M:%S": 0.0,
+        "%d %b %Y %H:%M:%S*%f": 0.0,
+        "%d %b %Y %H:%M:%S": 0.0,
+        "%b %d, %Y %H:%M:%S %p": 0.0,
+        "%b %d %Y %H:%M:%S": 0.0,
+        "%b %d %H:%M:%S %z %Y": 0.0,
+        "%b %d %H:%M:%S %z": 0.0,
+        "%b %d %H:%M:%S %Y": 0.0,
+        "%b %d %H:%M:%S": 0.0,
+        "%Y/%m/%d*%H:%M:%S": 0.0,
+        "%Y/%m/%d": 0.0,
+        "%Y-%m-%dT%z": 0.0,
+        "%Y-%m-%d*%H:%M:%S:%f": 0.0,
+        "%Y-%m-%d*%H:%M:%S": 0.0,
+        "%Y-%m-%d'T'%H:%M:%S.%f'%z'": 0.0,
+        "%Y-%m-%d'T'%H:%M:%S.%f": 0.0,
+        "%Y-%m-%d'T'%H:%M:%S'%z'": 0.0,
+        "%Y-%m-%d'T'%H:%M:%S%z": 0.0,
+        "%Y-%m-%d'T'%H:%M:%S": 0.0,
+        "%Y-%m-%d %H:%M:%S.%f%z": 0.0,
+        "%Y-%m-%d %H:%M:%S.%f": 0.0,
+        "%Y-%m-%d %H:%M:%S,%f%z": 0.0,
+        "%Y-%m-%d %H:%M:%S,%f": 0.0,
+        "%Y-%m-%d %H:%M:%S%z": 0.0,
+        "%Y-%m-%d %H:%M:%S %z": 0.0,
+        "%Y-%m-%d": 0.0,
+        "%Y%m%d %H:%M:%S.%f": 0.0,
+        "%Y %b %d %H:%M:%S.%f*%Z": 0.0,
+        "%Y %b %d %H:%M:%S.%f %Z": 0.0,
+        "%Y %b %d %H:%M:%S.%f": 0.0,
+        "%H:%M:%S.%f": 0.0,
+        "%H:%M:%S,%f": 0.0,
+        "%H:%M:%S": 0.0,
+    }
+
     for column_data in my_rule_for_timestamps_column_data:
         my_rule_for_timestamps_expectation_configurations.extend(
             [
@@ -2585,7 +2648,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                             ],  # Pin to event_ts column
                             "details": {
                                 "success_ratio": 1.0,
-                                "candidate_strings": sorted(DEFAULT_CANDIDATE_STRINGS),
+                                "candidate_strings": expected_candidate_strings_dict,
                             },
                         },
                     },
@@ -3487,10 +3550,10 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {
                     "details": {
                         "success_ratio": 1.0,
-                        "candidate_strings": [
-                            "%Y-%m-%d %H:%M:%S",
-                            "%y-%m-%d",
-                        ],
+                        "candidate_strings": {
+                            "%Y-%m-%d %H:%M:%S": 1.0,
+                            "%y-%m-%d": 0.0,
+                        },
                     },
                     "notes": {
                         "format": "markdown",
@@ -3511,10 +3574,10 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {
                     "details": {
                         "success_ratio": 1.0,
-                        "candidate_strings": [
-                            "%Y-%m-%d %H:%M:%S",
-                            "%y-%m-%d",
-                        ],
+                        "candidate_strings": {
+                            "%Y-%m-%d %H:%M:%S": 1.0,
+                            "%y-%m-%d": 0.0,
+                        },
                     },
                     "notes": {
                         "format": "markdown",
@@ -3534,15 +3597,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_regex",
                 "kwargs": {
                     "column": "VendorID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": r"^\d{1}$",
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "success_ratio": 1.0,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
@@ -3558,21 +3619,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "RatecodeID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": r"^\d{1}$",
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "success_ratio": 1.0,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3582,21 +3641,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "PULocationID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": r"^\d{1}$",
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "success_ratio": 1.0,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3606,21 +3663,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "DOLocationID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": r"^\d{1}$",
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "success_ratio": 1.0,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),

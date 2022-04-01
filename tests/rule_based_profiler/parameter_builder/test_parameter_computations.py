@@ -4,8 +4,6 @@ from typing import Callable, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
-import scipy
-from packaging import version
 
 from great_expectations.rule_based_profiler.helpers.util import (
     _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method,

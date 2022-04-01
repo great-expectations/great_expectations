@@ -85,7 +85,6 @@ def column_Age_domain():
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Age",
-            "batch_id": "c260e179bb1bc81d84bba72a8110d8e2",
         },
         details=None,
     )
@@ -98,7 +97,6 @@ def column_Date_domain():
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Date",
-            "batch_id": "c260e179bb1bc81d84bba72a8110d8e2",
         },
         details=None,
     )
@@ -111,7 +109,39 @@ def column_Description_domain():
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Description",
-            "batch_id": "c260e179bb1bc81d84bba72a8110d8e2",
+        },
+        details=None,
+    )
+
+
+# noinspection PyPep8Naming
+@pytest.fixture
+def column_pair_Age_Date_domain():
+    skip_if_python_below_minimum_version()
+
+    return Domain(
+        domain_type=MetricDomainTypes.COLUMN_PAIR,
+        domain_kwargs={
+            "column_A": "Age",
+            "column_B": "Date",
+        },
+        details=None,
+    )
+
+
+# noinspection PyPep8Naming
+@pytest.fixture
+def multi_column_Age_Date_Description_domain():
+    skip_if_python_below_minimum_version()
+
+    return Domain(
+        domain_type=MetricDomainTypes.MULTICOLUMN,
+        domain_kwargs={
+            "column_list": [
+                "Age",
+                "Date",
+                "Description",
+            ],
         },
         details=None,
     )
