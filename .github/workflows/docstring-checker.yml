@@ -17,7 +17,8 @@ jobs:
       with:
         header: docstrings
         message: |
-          I took a quick look at your code:
+          Here is your docstring coverage report:
           ```
           ${{ steps.docstrings.outputs.result }}
           ```
+          For more details, see https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}!

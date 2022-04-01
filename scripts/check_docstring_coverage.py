@@ -68,25 +68,44 @@ def _is_getter_or_setter(func: ast.FunctionDef) -> bool:
 
 
 def render_diagnostics(diagnostics: Diagnostics) -> None:
-    total_count = 0
-    success_count = 0
+    directory_results = {}
 
     for file, diagnostics_list in diagnostics.items():
-        failures = list(filter(lambda d: d[1] is False, diagnostics_list))
-        failures.sort(key=lambda d: d[0].lineno)
 
-        total_count += len(diagnostics_list)
-        success_count += len(diagnostics_list) - len(failures)
+        base_directory: str = _get_base_directory(file)
+        if base_directory not in directory_results:
+            directory_results[base_directory] = [0, 0]
 
-        if failures:
-            logger.info(f"{file}:")
-            for func, _ in failures:
-                logger.info(f"   L{func.lineno} - {func.name}")
-            logger.info("")
+        for func, success in diagnostics_list:
+            if success:
+                directory_results[base_directory][0] += 1
+            else:
+                logger.info(f"{file} - L{func.lineno}:{func.name}")
+
+            directory_results[base_directory][1] += 1
+
+    repo_passed: int = 0
+    repo_total: int = 0
+
+    for directory, results in directory_results.items():
+        passed, total = results
+        repo_passed += passed
+        repo_total += total
+
+        ratio: str = f"{passed}/{total}"
+        print(f"{directory: <50} {ratio: <10} ({100 * passed/total:.2f}%)")
 
     print(
-        f"RESULT: {100 * success_count / total_count:.2f}% of public functions have docstrings!"
+        f"\nRESULT: {100 * repo_passed / repo_total:.2f}% of public functions have docstrings!"
     )
+
+
+def _get_base_directory(path: str):
+    parts = path.split("/")
+    if parts[1].endswith(".py"):
+        return parts[0]
+    else:
+        return "/".join(p for p in parts[:2])
 
 
 if __name__ == "__main__":
