@@ -86,7 +86,6 @@ def render_diagnostics(diagnostics: Diagnostics) -> None:
     repo_passed: int = 0
     repo_total: int = 0
 
-    print()
     for directory, results in directory_results.items():
         passed, total = results
         repo_passed += passed
