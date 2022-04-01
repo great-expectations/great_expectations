@@ -1224,7 +1224,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
         context = ge.get_context()
         mock_emit.reset_mock()  # Remove data_context.__init__ call
 
-        yaml_config = f"""
+        yaml_config = """
            class_name: Datasource
 
            execution_engine:
