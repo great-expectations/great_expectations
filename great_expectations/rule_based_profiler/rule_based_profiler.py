@@ -258,6 +258,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             :param expectation_suite: An existing ExpectationSuite to update.
             :param expectation_suite_name: A name for returned ExpectationSuite.
             :param include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
+
         :return: Set of rule evaluation results in the form of an ExpectationSuite
         """
         assert not (
