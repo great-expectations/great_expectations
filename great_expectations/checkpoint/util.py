@@ -17,6 +17,7 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.types import DictDot
 
 try:
     import boto3
