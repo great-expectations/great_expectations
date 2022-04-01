@@ -276,13 +276,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules, reconciliation_directives=reconciliation_directives
         )
 
-        effective_rules = self.generate_rule_overrides_from_batch_request(
-            rules=effective_rules,
-            batch_list=batch_list,
-            batch_request=batch_request,
-            force_batch_data=force_batch_data,
-        )
-
         if expectation_suite is None:
             if expectation_suite_name is None:
                 expectation_suite_name = f"tmp.profiler_{self.__class__.__name__}_suite_{str(uuid.uuid4())[:8]}"
@@ -302,6 +295,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         for rule in effective_rules:
             expectation_configurations: List[ExpectationConfiguration] = rule.generate(
                 variables=effective_variables,
+                batch_list=batch_list,
+                batch_request=batch_request,
+                force_batch_data=force_batch_data,
             )
             expectation_configuration: ExpectationConfiguration
             for expectation_configuration in expectation_configurations:
@@ -788,85 +784,18 @@ class BaseRuleBasedProfiler(ConfigPeer):
         }
 
         result: ExpectationSuite = profiler.run(
+            variables=None,
             rules=rules,
             batch_list=batch_list,
             batch_request=batch_request,
             force_batch_data=True,
+            reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
         )
 
         return result
-
-    @staticmethod
-    def generate_rule_overrides_from_batch_request(
-        rules: List[Rule],
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
-    ) -> List[Rule]:
-        """Iterates through the profiler's builder attributes and generates a set of
-        Rules that contain overrides from the input batch request. This only applies to
-        ParameterBuilder and any DomainBuilder with a COLUMN MetricDomainType.
-
-        Note that we are passing all batches, corresponding to the specified batch_request, to ParameterBuilder objects.
-        If not used carefully, bias may creep in to the resulting estimates, computed by these ParameterBuilder objects.
-
-        Users of this override should be aware that a batch request should either have no
-        notion of "current/active" batch or it is excluded.
-
-        Args:
-            rules: List of Rule objects, for which Batch data is supplied.
-            batch_list: Explicit list of Batch objects used as data to supply arguments at runtime.
-            batch_request: batch_request used to override builder attributes to get runtime data.
-            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
-
-        Returns:
-            Updated List of Rule objects, containing Batch data (as batch_list or batch_request representation).
-
-        Raises:
-            ProfilerConfigurationError is both "batch_list" and "batch_request" arguments are specified.
-        """
-        resulting_rules: List[Rule] = []
-
-        rule: Rule
-        domain_builder: DomainBuilder
-        parameter_builders: Optional[List[ParameterBuilder]]
-        parameter_builder: ParameterBuilder
-        expectation_configuration_builders: Optional[
-            List[ExpectationConfigurationBuilder]
-        ]
-        expectation_configuration_builder: ExpectationConfigurationBuilder
-        for rule in rules:
-            domain_builder = rule.domain_builder
-            domain_builder.set_batch_list_or_batch_request(
-                batch_list=batch_list,
-                batch_request=batch_request,
-                force_batch_data=force_batch_data,
-            )
-
-            parameter_builders = rule.parameter_builders or []
-            for parameter_builder in parameter_builders:
-                parameter_builder.set_batch_list_or_batch_request(
-                    batch_list=batch_list,
-                    batch_request=batch_request,
-                    force_batch_data=force_batch_data,
-                )
-
-            expectation_configuration_builders = (
-                rule.expectation_configuration_builders or []
-            )
-            for expectation_configuration_builder in expectation_configuration_builders:
-                expectation_configuration_builder.set_batch_list_or_batch_request(
-                    batch_list=batch_list,
-                    batch_request=batch_request,
-                    force_batch_data=force_batch_data,
-                )
-
-            resulting_rules.append(rule)
-
-        return resulting_rules
 
     @staticmethod
     def add_profiler(
