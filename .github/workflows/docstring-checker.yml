@@ -12,6 +12,9 @@ jobs:
       id: docstrings
       run: |
         OUTPUT=$(python scripts/check_docstring_coverage.py)
+        OUTPUT="${OUTPUT//'%'/'%25'}"
+        OUTPUT="${OUTPUT//$'\n'/'%0A'}"
+        OUTPUT="${OUTPUT//$'\r'/'%0D'}"
         echo "::set-output name=result::$OUTPUT"
     - uses: marocchino/sticky-pull-request-comment@v2
       with:
