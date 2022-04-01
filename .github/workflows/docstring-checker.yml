@@ -1,0 +1,13 @@
+name: docstring checker
+
+on:
+  push
+
+jobs:
+  team-labeler:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        message: |
+          Release ${{ github.sha }} to <https://pr-${{ github.event.number }}.example.com>
