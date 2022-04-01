@@ -1,5 +1,7 @@
 on:
-  pull_request
+  pull_request:
+    types:
+      [opened, reopened]
 
 jobs:
   comment:
@@ -9,10 +11,4 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            diagnostics=$(python script.py)
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: diagnostics
-            })
+            python script.py
