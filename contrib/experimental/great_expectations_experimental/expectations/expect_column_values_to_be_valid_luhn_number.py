@@ -13,6 +13,7 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+from great_expectations.render.renderer.renderer import renderer
 
 
 def is_valid_luhn_number(num: Union[int, str], min_digits: int) -> bool:
@@ -90,21 +91,10 @@ class ExpectColumnValuesToBeValidLuhnNumber(ColumnMapExpectation):
                 "79927398713",
                 "4534 9128 9647 3231",
                 "4930 7981 1144 8417",
-                "4811 7406 1378 2814",
                 "5518 8676 9303 8206",
-                "5273 0969 7731 2153",
-                "3459 1369 4497 239",
-                "3779 8778 8360 017",
                 "347071884397020",
                 "342025750561957",
-                "370609206167777",
-                "349878269549530",
-                "349058669459818",
                 "5468766368079125",
-                "5199153034449600",
-                "5221444429161450",
-                "5173739314869309",
-                "5334891378365033",
             ],
             "invalid_numbers": [
                 "",
