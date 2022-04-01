@@ -24,4 +24,4 @@ jobs:
           ```
           ${{ steps.docstrings.outputs.result }}
           ```
-          For more details, see [the logs](https://github.com/${{github.repository}}/actions/runs/${{github.run_id}})
+          For more details on individual functions, see [the logs](https://github.com/${{github.repository}}/actions/runs/${{github.run_id}})!
