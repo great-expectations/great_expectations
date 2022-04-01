@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
@@ -7,7 +7,7 @@ from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBu
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 
 
-class MultiColumnDomainBuilder(ColumnDomainBuilder):
+class ColumnPairDomainBuilder(ColumnDomainBuilder):
     """
     This DomainBuilder uses relative tolerance of specified map metric to identify domains.
     """
@@ -23,7 +23,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
     ):
         """
         Args:
-            include_column_names: Explicitly specified desired columns.
+            include_column_names: Explicitly specified exactly two desired columns.
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
@@ -44,7 +44,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
 
     @property
     def domain_type(self) -> Union[str, MetricDomainTypes]:
-        return MetricDomainTypes.MULTICOLUMN
+        return MetricDomainTypes.COLUMN_PAIR
 
     def _get_domains(
         self,
@@ -68,17 +68,27 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
         )
 
-        if not (self.include_column_names and effective_column_names):
+        if not (effective_column_names and (len(effective_column_names) == 2)):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Error: "column_list" in {self.__class__.__name__} must not be empty.'
+                message=f"""Error: Columns specified for {self.__class__.__name__} in sorted order must correspond to \
+"column_A" and "column_B" (in this exact order).
+"""
             )
+
+        domain_kwargs: Dict[str, str] = dict(
+            zip(
+                [
+                    "column_A",
+                    "column_B",
+                ],
+                sorted(effective_column_names),
+            )
+        )
 
         domains: List[Domain] = [
             Domain(
                 domain_type=self.domain_type,
-                domain_kwargs={
-                    "column_list": effective_column_names,
-                },
+                domain_kwargs=domain_kwargs,
             ),
         ]
 
