@@ -56,4 +56,7 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
             )
 
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        """
+        See parent
+        """
         return "expectation_suite" in kwargs

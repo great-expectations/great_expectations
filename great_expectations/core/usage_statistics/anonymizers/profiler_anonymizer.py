@@ -237,6 +237,9 @@ class ProfilerAnonymizer(BaseAnonymizer):
             )
 
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        """
+        See parent
+        """
         return obj is not None and isinstance(
             obj, (RuleBasedProfilerConfig, RuleBasedProfiler)
         )

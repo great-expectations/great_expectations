@@ -45,6 +45,9 @@ class ValidationOperatorAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        """
+        See parent
+        """
         return (
             obj is not None
             and isinstance(obj, ValidationOperator)

@@ -93,6 +93,9 @@ class BatchAnonymizer(BaseAnonymizer):
         return anonymized_batch_kwarg_keys
 
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        """
+        See parent
+        """
         from great_expectations.data_asset.data_asset import DataAsset
         from great_expectations.validator.validator import Validator
 

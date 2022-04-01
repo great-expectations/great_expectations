@@ -82,6 +82,9 @@ class Anonymizer(BaseAnonymizer):
         )
 
     def can_handle(self, obj: object, **kwargs) -> bool:
+        """
+        See parent
+        """
         return Anonymizer._get_anonymizer(obj=obj, **kwargs) is not None
 
     def _get_anonymizer(self, obj: object, **kwargs) -> Optional[BaseAnonymizer]:

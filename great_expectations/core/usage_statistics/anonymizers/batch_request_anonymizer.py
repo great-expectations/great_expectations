@@ -167,6 +167,9 @@ class BatchRequestAnonymizer(BaseAnonymizer):
         ]
 
     def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        """
+        See parent
+        """
         from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
         attrs: Set[str] = BatchRequest.include_field_names.union(
