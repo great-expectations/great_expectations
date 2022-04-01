@@ -15,6 +15,9 @@ from great_expectations.core.id_dict import BatchSpec, IDDict
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     RegexPatternStringParameterBuilder,
 )
@@ -154,14 +157,14 @@ def test_regex_pattern_string_parameter_builder_alice(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": [r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$"],
+        "value": r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
         "details": {
             "evaluated_regexes": {
                 r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$": 1.0,
-                r"^\d{1}$": 0,
-                r"^\d{2}$": 0,
+                r"^\d{1}$": 0.0,
+                r"^\d{2}$": 0.0,
             },
-            "threshold": 1.0,
+            "success_ratio": 1.0,
         },
     }
 
@@ -228,14 +231,14 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": [r"^[12]{1}$", r"^\d{1}$"],
+        "value": r"^\d{1}$",
         "details": {
             "evaluated_regexes": {
                 r"^\d{1}$": 1.0,
                 r"^[12]{1}$": 0.9941111111111111,
-                r"^\d{4}$": 0,
+                r"^\d{4}$": 0.0,
             },
-            "threshold": 0.9,
+            "success_ratio": 1.0,
         },
     }
 
@@ -244,7 +247,6 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         domain=domain,
         parameters={domain.id: parameter_container},
     )
-
     assert results is not None
     assert sorted(results["value"]) == sorted(expected_value["value"])
     assert results["details"] == expected_value["details"]
@@ -296,7 +298,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": [],
+        "value": None,
         "details": {
             "evaluated_regexes": {
                 r"/\d+/": 0,
@@ -311,7 +313,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
                 r"/(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}/": 0,
                 r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ": 0,
             },
-            "threshold": 0.9,
+            "success_ratio": 0.0,
         },
     }
 
@@ -399,21 +401,31 @@ def test_regex_single_candidate(
         parameter_container=parameter_container, domain=domain
     )
     fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_regex_pattern_string_parameter_builder"
+        "$parameter.my_regex_pattern_string_parameter_builder.value"
     )
-    expected_value: dict = {
-        "details": {"evaluated_regexes": {"^\\d{1}$": 1.0}, "threshold": 1.0},
-        "value": ["^\\d{1}$"],
-    }
-
+    expected_value: str = "^\\d{1}$"
     assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        get_parameter_value_and_validate_return_type(
+            parameter_reference=fully_qualified_parameter_name_for_value,
+            expected_return_type=str,
             domain=domain,
             parameters={domain.id: parameter_container},
         )
         == expected_value
     )
+
+    fully_qualified_parameter_name_for_meta: str = (
+        "$parameter.my_regex_pattern_string_parameter_builder.details"
+    )
+    expected_meta: dict = {"evaluated_regexes": {"^\\d{1}$": 1.0}, "success_ratio": 1.0}
+
+    meta: dict = get_parameter_value_and_validate_return_type(
+        parameter_reference=fully_qualified_parameter_name_for_meta,
+        expected_return_type=dict,
+        domain=domain,
+        parameters={domain.id: parameter_container},
+    )
+    assert meta == expected_meta
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
@@ -449,21 +461,31 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
         parameter_container=parameter_container, domain=domain
     )
     fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_regex_pattern_string_parameter_builder"
+        "$parameter.my_regex_pattern_string_parameter_builder.value"
     )
-    expected_value: dict = {
-        "details": {
-            "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{3}$": 0.0},
-            "threshold": 1.0,
-        },
-        "value": ["^\\d{1}$"],
-    }
+
+    expected_value: str = "^\\d{1}$"
 
     assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        get_parameter_value_and_validate_return_type(
+            parameter_reference=fully_qualified_parameter_name_for_value,
             domain=domain,
             parameters={domain.id: parameter_container},
         )
         == expected_value
     )
+    fully_qualified_parameter_name_for_meta: str = (
+        "$parameter.my_regex_pattern_string_parameter_builder.details"
+    )
+    expected_meta: dict = {
+        "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{3}$": 0.0},
+        "success_ratio": 1.0,
+    }
+    meta: dict = get_parameter_value_and_validate_return_type(
+        parameter_reference=fully_qualified_parameter_name_for_meta,
+        expected_return_type=dict,
+        domain=domain,
+        parameters={domain.id: parameter_container},
+    )
+
+    assert meta == expected_meta
