@@ -2,7 +2,12 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Set, Union
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    BatchRequestBase,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -85,7 +90,29 @@ class ExpectationConfigurationBuilder(Builder, ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
     ) -> ExpectationConfiguration:
+        """
+        Args:
+            parameter_container: Storage for parameters, computed by this ParameterBuilder object.
+            domain: Domain object that is context for execution of this ParameterBuilder object.
+            variables: attribute name/value pairs
+            parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
+
+        Returns:
+            ExpectationConfiguration object.
+        """
+        self.set_batch_list_or_batch_request(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            force_batch_data=force_batch_data,
+        )
+
         self._resolve_validation_dependencies(
             parameter_container=parameter_container,
             domain=domain,

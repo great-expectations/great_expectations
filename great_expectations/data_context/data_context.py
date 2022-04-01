@@ -38,9 +38,8 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
-    BatchRequest,
+    BatchRequestBase,
     IDDict,
-    RuntimeBatchRequest,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -883,7 +882,7 @@ class BaseDataContext(ConfigPeer):
             raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
     @property
-    def checkpoint_store(self) -> "CheckpointStore":
+    def checkpoint_store(self) -> "CheckpointStore":  # noqa: F821
         checkpoint_store_name: str = self.checkpoint_store_name
         try:
             return self.stores[checkpoint_store_name]
@@ -1358,7 +1357,7 @@ class BaseDataContext(ConfigPeer):
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
@@ -1661,7 +1660,7 @@ class BaseDataContext(ConfigPeer):
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[dict] = None,
         batch_identifiers: Optional[dict] = None,
@@ -1760,10 +1759,8 @@ class BaseDataContext(ConfigPeer):
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
-        batch_request_list: List[
-            Optional[Union[BatchRequest, RuntimeBatchRequest]]
-        ] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        batch_request_list: List[Optional[BatchRequestBase]] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
@@ -2268,7 +2265,9 @@ class BaseDataContext(ConfigPeer):
             )
 
         if self.expectations_store.has_key(key):
-            expectations_schema_dict: dict = self.expectations_store.get(key)
+            expectations_schema_dict: dict = cast(
+                dict, self.expectations_store.get(key)
+            )
             # create the ExpectationSuite from constructor
             return ExpectationSuite(**expectations_schema_dict, data_context=self)
 
@@ -2461,7 +2460,7 @@ class BaseDataContext(ConfigPeer):
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
         for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = self.expectations_store.get(key)
+            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
             if not expectation_suite_dict:
                 continue
             expectation_suite: ExpectationSuite = ExpectationSuite(
@@ -3097,6 +3096,7 @@ class BaseDataContext(ConfigPeer):
 
         self.save_expectation_suite(expectation_suite)
         duration = (datetime.datetime.now() - start_time).total_seconds()
+        # noinspection PyUnboundLocalVariable
         logger.info(
             "\tProfiled %d columns using %d rows from %s (%.3f sec)"
             % (new_column_count, row_count, name, duration)
@@ -3214,7 +3214,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -3395,7 +3395,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def run_profiler_on_data(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -3405,8 +3405,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
         Args:
-            batch_list: List of Batch objects used to supply arguments at runtime.
-            batch_request: The batch_request used to supply arguments at runtime.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
             name: Identifier used to retrieve the profiler from a store.
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
             expectation_suite: An existing ExpectationSuite to update.
