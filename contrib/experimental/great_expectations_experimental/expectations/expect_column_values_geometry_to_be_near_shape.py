@@ -85,7 +85,7 @@ class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesGeometryToBeNearShape(ColumnMapExpectation):
     """
-    Expect that column values as geometries are near (within a given distance) of a given reference shape.
+    Expect that column values as geometries are near (within a given distance) of a given reference shape in the units of the provided geometries.
     
     expect_column_values_geometry_to_be_near_shape is a :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
     
@@ -117,8 +117,9 @@ class ExpectColumnValuesGeometryToBeNearShape(ColumnMapExpectation):
         An ExpectationSuiteValidationResult
     
     Notes:
-        The distance returned and specified is based on the coordinate system of the points, not Latitude and Longitude. The user is responsible for the projection method and units (e.g. UTM in m)
-        Convention is (X Y Z) for points, which would map to (Longitude Latitude) for geospatial cases, but any convention can be followed as long as the test and reference shapes are consistent.
+        The distance returned and specified is based on the coordinate system of the points, not Latitude and Longitude. The user is responsible for the projection method and units (e.g. UTM in m).
+        The distance calculation is based on a cartesian coordinate system.
+        Convention is (X Y Z) for points, which would map to (Longitude Latitude Elevation) for geospatial cases, but any convention can be followed as long as the test and reference shapes are consistent.
         The reference shape allows for an array, but will union (merge) all the shapes into 1 and check the contains condition.
     """
 
