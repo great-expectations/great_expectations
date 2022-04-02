@@ -187,7 +187,6 @@ detected.
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -266,7 +265,6 @@ detected.
 
         # Compute metric value for each Batch object.
         super().build_parameters(
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
