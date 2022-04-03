@@ -62,7 +62,7 @@ class ColumnValuesUrlHostnameMatchWithCert(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesUrlHostnameMatchWithCert(ColumnMapExpectation):
-    """Expect provided url has got valid cert. (NotBefore < now < NotAfter"""
+    """Expect provided url's hostname match with cert"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
