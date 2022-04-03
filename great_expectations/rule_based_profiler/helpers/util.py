@@ -13,6 +13,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     materialize_batch_request,
 )
@@ -38,7 +39,7 @@ def get_validator(
     *,
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -93,7 +94,7 @@ def get_validator(
 def get_batch_ids(
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -227,6 +228,20 @@ def get_parameter_value(
                 variables=variables,
                 parameters=parameters,
             )
+    elif isinstance(parameter_reference, (list, set, tuple)):
+        parameter_reference_type: type = type(parameter_reference)
+        element: Any
+        return parameter_reference_type(
+            [
+                get_parameter_value(
+                    domain=domain,
+                    parameter_reference=element,
+                    variables=variables,
+                    parameters=parameters,
+                )
+                for element in parameter_reference
+            ]
+        )
     elif isinstance(
         parameter_reference, str
     ) and is_fully_qualified_parameter_name_literal_string_format(
@@ -238,25 +253,12 @@ def get_parameter_value(
             variables=variables,
             parameters=parameters,
         )
-        if isinstance(parameter_reference, dict):
-            for key, value in parameter_reference.items():
-                parameter_reference[key] = get_parameter_value(
-                    domain=domain,
-                    parameter_reference=value,
-                    variables=variables,
-                    parameters=parameters,
-                )
-        elif isinstance(
-            parameter_reference, str
-        ) and is_fully_qualified_parameter_name_literal_string_format(
-            fully_qualified_parameter_name=parameter_reference
-        ):
-            parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
-                fully_qualified_parameter_name=parameter_reference,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        parameter_reference = get_parameter_value(
+            domain=domain,
+            parameter_reference=parameter_reference,
+            variables=variables,
+            parameters=parameters,
+        )
 
     return parameter_reference
 
