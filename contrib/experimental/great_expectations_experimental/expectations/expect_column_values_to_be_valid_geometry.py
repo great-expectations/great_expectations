@@ -54,7 +54,42 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
     """
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    examples = []
+
+    examples = [
+        {
+            "data": {
+                "valid_geometry": [
+                            "Polygon([(0, 0), (1, 1), (0, 1)])",
+                            "Polygon([(10, 0), (10, 5), (0, 0)])",
+                            "Polygon([(0, 0), (2, 2), (2, 0)])",
+                            "LineString([(0, 0), (1, 1), (0, 1)])",
+                            "Point(0, 1)"
+                ],
+                "invalid_geometry":[
+                    "Polygon([(0,0), (1, 1), (1, 0), (0, 1)])",
+                    "None",
+                    "Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)])"
+                ],
+
+            },
+            "tests": [
+                {
+                    "title": "basic_positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "valid_geometry"},
+                    "out": {"success": True},
+                },
+                {
+                    "title": "basic_negative_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "invalid_geometry"},
+                    "out": {"success": False},  
+                },
+            ],
+        }
+    ]
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
