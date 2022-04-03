@@ -180,6 +180,7 @@ class ExpectColumnValuesToBeDaytime(ColumnMapExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@szecsip",  # Don't forget to add your github handle here!
         ],
+        "requirements": ["ephem"],
     }
 
     success_keys = (
