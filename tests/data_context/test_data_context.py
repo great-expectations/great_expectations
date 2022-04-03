@@ -1784,6 +1784,59 @@ data_connectors:
     assert type(my_validator.get_expectation_suite()) == ExpectationSuite
     assert my_validator.expectation_suite_name == "default"
 
+def test_get_validator_with_batch(
+    empty_data_context, tmp_path_factory
+):
+    context = empty_data_context
+
+    base_directory = str(
+        tmp_path_factory.mktemp("test_get_validator_with_batch")
+    )
+
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "some_file.csv",
+        ],
+    )
+
+    yaml_config = f"""
+class_name: Datasource
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: ConfiguredAssetFilesystemDataConnector
+        base_directory: {base_directory}
+        default_regex:
+            pattern: (.+)\\.csv
+            group_names:
+                - alphanumeric
+        assets:
+            A:
+"""
+
+    config = yaml.load(yaml_config)
+    context.add_datasource(
+        "my_directory_datasource",
+        **config,
+    )
+
+    my_batch = context.get_batch_list(
+        datasource_name="my_directory_datasource",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="A",
+        batch_identifiers={
+            "alphanumeric": "some_file",
+        },
+    )[0]
+
+    my_validator = context.get_validator(
+        batch=my_batch,
+        create_expectation_suite_with_name="A_expectation_suite",
+    )
 
 def test_get_batch_multiple_datasources_do_not_scan_all(
     data_context_with_bad_datasource,

@@ -1760,6 +1760,7 @@ class BaseDataContext(ConfigPeer):
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
+        batch: Optional[Batch] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_request_list: List[
             Optional[Union[BatchRequest, RuntimeBatchRequest]]
@@ -1819,43 +1820,51 @@ class BaseDataContext(ConfigPeer):
         if (
             sum(
                 bool(x)
-                for x in [batch_request is not None, batch_request_list is not None]
+                for x in [
+                    batch is not None,
+                    batch_request is not None,
+                    batch_request_list is not None,
+                ]
             )
             > 1
         ):
             raise ValueError(
-                "Only one of batch_request or batch_request_list may be specified"
+                "No more than one of batch, batch_request, or batch_request_list can be specified"
             )
-
-        if not batch_request_list:
-            batch_request_list = [batch_request]
 
         batch_list: List = []
-        for batch_request in batch_request_list:
-            batch_list.extend(
-                self.get_batch_list(
-                    datasource_name=datasource_name,
-                    data_connector_name=data_connector_name,
-                    data_asset_name=data_asset_name,
-                    batch_request=batch_request,
-                    batch_data=batch_data,
-                    data_connector_query=data_connector_query,
-                    batch_identifiers=batch_identifiers,
-                    limit=limit,
-                    index=index,
-                    custom_filter_function=custom_filter_function,
-                    sampling_method=sampling_method,
-                    sampling_kwargs=sampling_kwargs,
-                    splitter_method=splitter_method,
-                    splitter_kwargs=splitter_kwargs,
-                    runtime_parameters=runtime_parameters,
-                    query=query,
-                    path=path,
-                    batch_filter_parameters=batch_filter_parameters,
-                    batch_spec_passthrough=batch_spec_passthrough,
-                    **kwargs,
+        if batch:
+            batch_list = [batch]
+        
+        else:
+            if not batch_request_list:
+                batch_request_list = [batch_request]
+
+            for batch_request in batch_request_list:
+                batch_list.extend(
+                    self.get_batch_list(
+                        datasource_name=datasource_name,
+                        data_connector_name=data_connector_name,
+                        data_asset_name=data_asset_name,
+                        batch_request=batch_request,
+                        batch_data=batch_data,
+                        data_connector_query=data_connector_query,
+                        batch_identifiers=batch_identifiers,
+                        limit=limit,
+                        index=index,
+                        custom_filter_function=custom_filter_function,
+                        sampling_method=sampling_method,
+                        sampling_kwargs=sampling_kwargs,
+                        splitter_method=splitter_method,
+                        splitter_kwargs=splitter_kwargs,
+                        runtime_parameters=runtime_parameters,
+                        query=query,
+                        path=path,
+                        batch_filter_parameters=batch_filter_parameters,
+                        batch_spec_passthrough=batch_spec_passthrough,
+                        **kwargs,
+                    )
                 )
-            )
 
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
