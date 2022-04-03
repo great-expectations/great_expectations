@@ -145,8 +145,8 @@ stages:
             ${{if eq(variables['numpy.version'], 'latest') }}:
               pip install numpy
             ${{else}}:
-              pip install numpy==$(numpy.version)
-            displayName: 'Install numpy latest'
+              pip install numpy==${{ variables['numpy.version'] }}
+            displayName: 'Install numpy'
 
           - bash: pip install pandas
             condition: eq(variables['pandas.version'], 'latest')
