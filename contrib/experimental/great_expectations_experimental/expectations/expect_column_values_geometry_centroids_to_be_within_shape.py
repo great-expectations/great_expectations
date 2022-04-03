@@ -113,7 +113,7 @@ class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
         An ExpectationSuiteValidationResult
     
     Notes:
-        Convention is (X Y Z) for points, which would map to (Longitude Latitude) for geospatial cases, but any convention can be followed as long as the test and reference shapes are consistent.
+        Convention is (X Y Z) for points, which would map to (Longitude Latitude Elevation) for geospatial cases, but any convention can be followed as long as the test and reference shapes are consistent.
         The reference shape allows for an array, but will union (merge) all the shapes into 1 and check the contains condition.
         MultiLinestrings and Multipolygons area weighted by their length and areas, respectively. See the pygeos docs for reference.
     """
