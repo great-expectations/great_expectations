@@ -50,7 +50,7 @@ class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnGeometryToOverlap(ColumnExpectation):
+class ExpectColumnGeometryNotOverlap(ColumnExpectation):
     """Expect geometries in this column to not overlap with each other. For more
     information look here 
     https://stackoverflow.com/questions/64042379/shapely-is-valid-returns-true-to-invalid-overlap-polygons
@@ -64,7 +64,7 @@ class ExpectColumnGeometryToOverlap(ColumnExpectation):
                     "Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])",
                     "Polygon([(2, 2), (4, 2), (4, 4), (2, 4)])"
                 ],
-                "geometry__not_overlaps":[
+                "geometry_not_overlaps":[
                     "Polygon([(0, 0), (1, 1), (0, 1)])",
                     "Polygon([(10, 0), (10, 5), (0, 0)])",
                     "Polygon([(0, 0), (2, 2), (2, 0)])"
@@ -140,4 +140,4 @@ class ExpectColumnGeometryToOverlap(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnGeometryToOverlap().print_diagnostic_checklist()
+    ExpectColumnGeometryNotOverlap().print_diagnostic_checklist()
