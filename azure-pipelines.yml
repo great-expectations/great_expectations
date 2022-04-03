@@ -123,28 +123,28 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              if [[ $(numpy.version) == 'latest' ]]; then
-                pip install numpy
-              else
-                pip install numpy==$(numpy.version)
-              fi
-            displayName: 'Install numpy'
-
-          - script: |
-              if [[ $(pandas.version) == 'latest' ]]; then
-                pip install pandas
-              else
-                pip install pandas==$(pandas.version)
-              fi
-            displayName: 'Install pandas'
-
-          - script: |
               if [[ $(scipy.version) == 'latest' ]]; then
                 pip install scipy
               else
                 pip install scipy==$(scipy.version)
               fi
             displayName: 'Install scipy'
+
+          - script: |
+              if [[ $(pandas.version) == 'latest' ]]; then
+                pip install -I pandas
+              else
+                pip install -I pandas==$(pandas.version)
+              fi
+            displayName: 'Install pandas'
+
+          - script: |
+              if [[ $(numpy.version) == 'latest' ]]; then
+                pip install -I numpy
+              else
+                pip install -I numpy==$(numpy.version)
+              fi
+            displayName: 'Install numpy'
 
           - script: |
               pip install $(GE_pytest_pip_opts)
