@@ -25,7 +25,7 @@ from great_expectations.expectations.metrics import (
 class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.geometry_overlap"
+    metric_name = "column_values.geometry_overlap"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -90,7 +90,7 @@ class ExpectColumnGeometryToOverlap(ColumnExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.geometry_overlap"
+    metric_dependencies  = "column_values.geometry_overlap"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
