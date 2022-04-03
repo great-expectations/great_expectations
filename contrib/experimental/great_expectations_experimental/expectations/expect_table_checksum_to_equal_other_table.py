@@ -435,7 +435,7 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["core expectation", "table expectation", "multi-table expectation"],
-        "contributors": [  "Yashavant Dudhe",
+        "contributors": [  "Yashavant Dudhe", "@yashgithub"
         ],
         "package": "experimental_expectations",
     }
