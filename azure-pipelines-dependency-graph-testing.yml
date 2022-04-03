@@ -149,17 +149,21 @@ stages:
               fi
             displayName: 'Install numpy'
 
-          - bash: pip install pandas
-            condition: eq(variables['pandas.version'], 'latest')
-            displayName: 'Install pandas latest'
+          - script: |
+              if [[ $(pandas.version) == 'latest' ]]; then
+                pip install pandas
+              else
+                pip install pandas==$(pandas.version)
+              fi
+            displayName: 'Install pandas'
 
-          - bash: pip install scipy
-            condition: eq(variables['scipy.version'], 'latest')
-            displayName: 'Install scipy latest'
-
-          - bash: pip install pandas==$(pandas.version)
-            condition: ne(variables['pandas.version'], 'latest')
-            displayName: 'Install pandas - $(pandas.version)'
+          - script: |
+              if [[ $(scipy.version) == 'latest' ]]; then
+                pip install scipy
+              else
+                pip install scipy==$(scipy.version)
+              fi
+            displayName: 'Install scipy'
 
           - script: |
               pip install --requirement requirements.txt
@@ -231,13 +235,13 @@ stages:
               pip install pypandoc
             displayName: 'Install pandoc'
 
-          - bash: pip install pandas
-            condition: eq(variables['pandas.version'], 'latest')
-            displayName: 'Install pandas latest'
-
-          - bash: pip install pandas==$(pandas.version)
-            condition: ne(variables['pandas.version'], 'latest')
-            displayName: 'Install pandas - $(pandas.version)'
+          - script: |
+              if [[ $(pandas.version) == 'latest' ]]; then
+                pip install pandas
+              else
+                pip install pandas==$(pandas.version)
+              fi
+            displayName: 'Install pandas'
 
           - script: |
               pip install --requirement requirements.txt
