@@ -142,10 +142,11 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-            ${{if eq(variables['numpy.version'], 'latest') }}:
-              pip install numpy
-            ${{if ne(variables['numpy.version'], 'latest') }}:
-              pip install numpy==${{ variables['numpy.version'] }}
+              if [[ $(numpy.version) == 'latest' ]]; then
+                pip install numpy
+              else
+                pip install numpy==$(numpy.version)
+              fi
             displayName: 'Install numpy'
 
           - bash: pip install pandas
