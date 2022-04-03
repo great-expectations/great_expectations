@@ -1799,10 +1799,10 @@ class BaseDataContext(ConfigPeer):
                     expectation_suite_ge_cloud_id is not None,
                 ]
             )
-            != 1
+            > 1
         ):
             raise ValueError(
-                f"Exactly one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name must be specified"
+                f"No more than one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
         if expectation_suite_ge_cloud_id is not None:
