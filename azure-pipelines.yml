@@ -123,7 +123,7 @@ stages:
             displayName: 'Update pip'
 
           - bash: pip install numpy
-            condition: eq(variables['scipy.version'], 'numpy')
+            condition: eq(variables['numpy.version'], 'latest')
             displayName: 'Install numpy latest'
 
           - bash: pip install pandas

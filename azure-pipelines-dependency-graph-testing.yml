@@ -141,8 +141,11 @@ stages:
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
-          - bash: pip install numpy
-            condition: eq(variables['scipy.version'], 'numpy')
+          - script: |
+            ${{if eq(variables['numpy.version']), 'latest') }}:
+              pip install numpy
+            ${{else}}:
+              pip install numpy==$(numpy.version)
             displayName: 'Install numpy latest'
 
           - bash: pip install pandas
