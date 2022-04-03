@@ -114,13 +114,13 @@ stages:
           matrix:
             Python37-Pandas023:
               python.version: '3.7'
-              numpy.version: '1.15.1'
+              numpy.version: '1.16.5'
               pandas.version: '0.23.4'
               scipy.version: 'latest'
               GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
             Python37-Pandas025:
               python.version: '3.7'
-              numpy.version: '1.15.1'
+              numpy.version: '1.16.5'
               pandas.version: '0.25.3'
               scipy.version: 'latest'
               # numpy 1.20 and pandas 0.25.3 do not coexist happily
