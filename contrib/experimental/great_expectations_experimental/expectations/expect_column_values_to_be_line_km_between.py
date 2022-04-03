@@ -36,8 +36,7 @@ class ColumnValuesLinestringKMDistanceBetween(ColumnMapMetricProvider):
         # Set crs to meters
         column = column.to_crs({"proj": "cea"})
         #access the length of the column
-        col_len = column.length
-        col_len
+        col_len = column.length/1000
         return (col_len >= min_distance) & (col_len <= max_distance)
 
 
