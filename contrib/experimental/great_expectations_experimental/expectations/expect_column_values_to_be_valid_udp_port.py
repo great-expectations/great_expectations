@@ -52,9 +52,9 @@ class ExpectColumnValuesToBeValidUdpPort(ColumnMapExpectation):
         {
             "data": {
                 "well_formed_udp_port": [
-                    "7",    # Echo Protocol
-                    "37",   # Time Protocol
-                    "53",   # Domain Name System (DNS)
+                    "7",  # Echo Protocol
+                    "37",  # Time Protocol
+                    "53",  # Domain Name System (DNS)
                     "520",  # Routing Information Protocol (RIP)
                     "623",  # ASF-RMCP & IPMI Remote Management Protocol
                 ],
