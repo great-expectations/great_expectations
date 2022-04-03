@@ -142,7 +142,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-            ${{if eq(variables['numpy.version']), 'latest') }}:
+            ${{if eq(variables['numpy.version'], 'latest') }}:
               pip install numpy
             ${{else}}:
               pip install numpy==$(numpy.version)
