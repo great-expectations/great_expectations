@@ -16,12 +16,11 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import requests
 from dateutil.parser import parse
-from ruamel.yaml import YAMLError
+from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 from great_expectations.core.config_peer import ConfigPeer
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -129,6 +128,9 @@ except ImportError:
     SQLAlchemyError = ge_exceptions.ProfilerError
 
 logger = logging.getLogger(__name__)
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 class BaseDataContext(ConfigPeer):
@@ -305,6 +307,8 @@ class BaseDataContext(ConfigPeer):
         + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
     )
 
+    _data_context = None
+
     @classmethod
     def validate_config(cls, project_config):
         if isinstance(project_config, DataContextConfig):
@@ -320,13 +324,12 @@ class BaseDataContext(ConfigPeer):
     )
     def __init__(
         self,
-        project_config: DataContextConfig,
-        context_root_dir: Optional[str] = None,
-        runtime_environment: Optional[dict] = None,
-        ge_cloud_mode: bool = False,
-        ge_cloud_config: Optional[GeCloudConfig] = None,
-        yaml_handler: YAMLHandler = YAMLHandler(),
-    ) -> None:
+        project_config,
+        context_root_dir=None,
+        runtime_environment=None,
+        ge_cloud_mode=False,
+        ge_cloud_config=None,
+    ):
         """DataContext constructor
 
         Args:
@@ -346,8 +349,6 @@ class BaseDataContext(ConfigPeer):
         self._ge_cloud_config = ge_cloud_config
         self._project_config = project_config
         self._apply_global_config_overrides()
-
-        self._yaml_handler = yaml_handler
 
         if context_root_dir is not None:
             context_root_dir = os.path.abspath(context_root_dir)
@@ -1011,7 +1012,7 @@ class BaseDataContext(ConfigPeer):
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
-                    return self._yaml_handler.load(config_variables_file) or {}
+                    return yaml.load(config_variables_file) or {}
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
@@ -1153,7 +1154,7 @@ class BaseDataContext(ConfigPeer):
                 template.write(CONFIG_VARIABLES_TEMPLATE)
 
         with open(config_variables_filepath, "w") as config_variables_file:
-            self._yaml_handler.dump(config_variables, config_variables_file)
+            yaml.dump(config_variables, config_variables_file)
 
     def delete_datasource(self, datasource_name: str):
         """Delete a data source
@@ -3638,9 +3639,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             raise e
 
         try:
-            config: CommentedMap = self._yaml_handler.load(
-                config_str_with_substituted_variables
-            )
+            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
             return config
 
         except Exception as e:
@@ -4033,10 +4032,8 @@ class DataContext(BaseDataContext):
         path_to_yml = os.path.join(ge_dir, cls.GE_YML)
 
         # TODO this is so brittle and gross
-        yaml = YAMLHandler()
         with open(path_to_yml) as f:
             config = yaml.load(f)
-
         config_var_path = config.get("config_variables_file_path")
         config_var_path = os.path.join(ge_dir, config_var_path)
         return os.path.isfile(config_var_path)
@@ -4303,7 +4300,6 @@ class DataContext(BaseDataContext):
 
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
-            yaml = YAMLHandler()
             with open(path_to_yml) as data:
                 config_commented_map_from_yaml = yaml.load(data)
 
@@ -4394,7 +4390,6 @@ class DataContext(BaseDataContext):
         if yml_path is None:
             return
 
-        yaml = YAMLHandler()
         with open(yml_path) as f:
             config_commented_map_from_yaml = yaml.load(f)
 
@@ -4428,7 +4423,6 @@ class DataContext(BaseDataContext):
         if yml_path is None:
             return False
 
-        yaml = YAMLHandler()
         with open(yml_path) as f:
             config_commented_map_from_yaml = yaml.load(f)
             config_commented_map_from_yaml["config_version"] = float(config_version)
