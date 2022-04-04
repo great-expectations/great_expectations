@@ -14,7 +14,7 @@ The SQL database introspection and partitioning are useful for:
 - Exploring the schema and column metadata of the tables in your SQL database, and
 - Organizing the tables into <TechnicalTag tag="data_asset" text="Data Assets" /> according to the partitioning considerations informed by this exploration.
 
-Partitioning enables you to select the desired subsets of your dataset for [Validation](/docs/reference/validation).
+Partitioning enables you to select the desired subsets of your dataset for [Validation](../../reference/validation.md).
 
 <Prerequisites>
 

@@ -13,6 +13,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     materialize_batch_request,
 )
@@ -24,6 +25,7 @@ from great_expectations.rule_based_profiler.types import (
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
+from great_expectations.types import safe_deep_copy
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -37,7 +39,7 @@ def get_validator(
     *,
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -92,7 +94,7 @@ def get_validator(
 def get_batch_ids(
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -187,7 +189,7 @@ def get_parameter_value_and_validate_return_type(
     or as a fully-qualified parameter name.  In either case, it can optionally validate the type of the return value.
     """
     if isinstance(parameter_reference, dict):
-        parameter_reference = dict(copy.deepcopy(parameter_reference))
+        parameter_reference = safe_deep_copy(data=parameter_reference)
 
     parameter_reference = get_parameter_value(
         domain=domain,
@@ -226,6 +228,20 @@ def get_parameter_value(
                 variables=variables,
                 parameters=parameters,
             )
+    elif isinstance(parameter_reference, (list, set, tuple)):
+        parameter_reference_type: type = type(parameter_reference)
+        element: Any
+        return parameter_reference_type(
+            [
+                get_parameter_value(
+                    domain=domain,
+                    parameter_reference=element,
+                    variables=variables,
+                    parameters=parameters,
+                )
+                for element in parameter_reference
+            ]
+        )
     elif isinstance(
         parameter_reference, str
     ) and is_fully_qualified_parameter_name_literal_string_format(
@@ -237,25 +253,12 @@ def get_parameter_value(
             variables=variables,
             parameters=parameters,
         )
-        if isinstance(parameter_reference, dict):
-            for key, value in parameter_reference.items():
-                parameter_reference[key] = get_parameter_value(
-                    domain=domain,
-                    parameter_reference=value,
-                    variables=variables,
-                    parameters=parameters,
-                )
-        elif isinstance(
-            parameter_reference, str
-        ) and is_fully_qualified_parameter_name_literal_string_format(
-            fully_qualified_parameter_name=parameter_reference
-        ):
-            parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
-                fully_qualified_parameter_name=parameter_reference,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        parameter_reference = get_parameter_value(
+            domain=domain,
+            parameter_reference=parameter_reference,
+            variables=variables,
+            parameters=parameters,
+        )
 
     return parameter_reference
 
@@ -528,8 +531,8 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
     lower_quantile_pct: float = false_positive_rate / 2
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2
 
-    sample_lower_quantile: Number = np.quantile(metric_values, q=lower_quantile_pct)
-    sample_upper_quantile: Number = np.quantile(metric_values, q=upper_quantile_pct)
+    sample_lower_quantile: np.ndarray = np.quantile(metric_values, q=lower_quantile_pct)
+    sample_upper_quantile: np.ndarray = np.quantile(metric_values, q=upper_quantile_pct)
 
     if random_seed:
         random_state: np.random.Generator = np.random.Generator(
@@ -548,9 +551,9 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
         q=lower_quantile_pct,
         axis=1,
     )
-    bootstrap_lower_quantile_point_estimate: Number = np.mean(bootstrap_lower_quantiles)
-    bootstrap_lower_quantile_standard_error: Number = np.std(bootstrap_lower_quantiles)
-    bootstrap_lower_quantile_bias: Number = (
+    bootstrap_lower_quantile_point_estimate: float = np.mean(bootstrap_lower_quantiles)
+    bootstrap_lower_quantile_standard_error: float = np.std(bootstrap_lower_quantiles)
+    bootstrap_lower_quantile_bias: float = (
         bootstrap_lower_quantile_point_estimate - sample_lower_quantile
     )
 
@@ -573,9 +576,13 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
         q=upper_quantile_pct,
         axis=1,
     )
-    bootstrap_upper_quantile_point_estimate: Number = np.mean(bootstrap_upper_quantiles)
-    bootstrap_upper_quantile_standard_error: Number = np.std(bootstrap_upper_quantiles)
-    bootstrap_upper_quantile_bias: Number = (
+    bootstrap_upper_quantile_point_estimate: np.ndarray = np.mean(
+        bootstrap_upper_quantiles
+    )
+    bootstrap_upper_quantile_standard_error: np.ndarray = np.std(
+        bootstrap_upper_quantiles
+    )
+    bootstrap_upper_quantile_bias: float = (
         bootstrap_upper_quantile_point_estimate - sample_upper_quantile
     )
 

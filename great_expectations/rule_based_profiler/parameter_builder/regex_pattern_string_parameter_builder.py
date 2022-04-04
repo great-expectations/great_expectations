@@ -50,13 +50,14 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        threshold: Union[float, str] = 1.0,
-        candidate_regexes: Optional[Union[Iterable[str], str]] = None,
+        threshold: Union[str, float] = 1.0,
+        candidate_regexes: Optional[Union[str, Iterable[str]]] = None,
+        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
+        json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
             Union[str, BatchRequest, RuntimeBatchRequest, dict]
         ] = None,
-        json_serialize: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -67,16 +68,20 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_regexes: a list of candidate regex strings that will REPLACE the default
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: Optional[List[Batch]] = None,
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
             name=name,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -119,7 +124,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -229,63 +233,24 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        # get list of regex_strings that match greater than threshold
-        regex_string_success_list: List[
-            str
-        ] = self._get_regex_matched_greater_than_threshold(
+        # get best-matching regex_string that match greater than threshold
+        (
+            best_regex_string,
+            best_ratio,
+        ) = ParameterBuilder._get_best_candidate_above_threshold(
             regex_string_success_ratios, threshold
         )
-        # sorted regex and ratios for all evaluated candidates
-        sorted_ratio_list, sorted_regex_string_list = self._get_sorted_regex_and_ratios(
-            regex_string_success_ratios
+        # dict of sorted regex and ratios for all evaluated candidates
+        sorted_regex_candidates_and_ratios: dict = (
+            ParameterBuilder._get_sorted_candidates_and_ratios(
+                regex_string_success_ratios
+            )
         )
 
         return (
-            regex_string_success_list,
+            best_regex_string,
             {
-                "evaluated_regexes": dict(
-                    zip(sorted_regex_string_list, sorted_ratio_list)
-                ),
-                "threshold": threshold,
+                "success_ratio": best_ratio,
+                "evaluated_regexes": sorted_regex_candidates_and_ratios,
             },
         )
-
-    @staticmethod
-    def _get_regex_matched_greater_than_threshold(
-        regex_string_success_ratio_dict: Dict[str, float],
-        threshold: float,
-    ) -> List[str]:
-        """
-        Helper method to calculate which regex_strings match greater than threshold
-        """
-        regex_string: str
-        ratio: float
-        regex_string_success_list: List[str] = [
-            regex_string
-            for regex_string, ratio in regex_string_success_ratio_dict.items()
-            if ratio >= threshold
-        ]
-
-        return regex_string_success_list
-
-    @staticmethod
-    def _get_sorted_regex_and_ratios(
-        regex_string_success_ratio_dict: Dict[str, float],
-    ) -> Tuple[List[float], List[str]]:
-        """
-        Helper method to sort all regexes that were evaluated by their success ratio.
-
-        Returns Tuple(ratio, sorted_strings)
-        """
-        regex_strings: List[str] = list(regex_string_success_ratio_dict.keys())
-        ratios: List[float] = list(regex_string_success_ratio_dict.values())
-
-        regex_string: str
-        ratio: float
-        sorted_regex_strings: List[str] = [
-            regex_string
-            for ratio, regex_string in sorted(zip(ratios, regex_strings), reverse=True)
-        ]
-        ratios.sort(reverse=True)
-
-        return ratios, sorted_regex_strings

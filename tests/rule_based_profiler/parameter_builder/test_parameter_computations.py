@@ -4,8 +4,6 @@ from typing import Callable, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
-import scipy
-from packaging import version
 
 from great_expectations.rule_based_profiler.helpers.util import (
     _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method,
@@ -15,7 +13,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
-from tests.conftest import skip_if_python_below_minimum_version
 
 # Allowable tolerance for how closely a bootstrap method approximates the sample
 EFFICACY_TOLERANCE: float = 1.0e-2
@@ -214,8 +211,6 @@ def test_bootstrap_point_estimate_scipy_efficacy(
     Efficacy means the scipy.stats.bootstrap confidence interval midpoint method
     approximates the sample +/- efficacy tolerance
     """
-    skip_if_python_below_minimum_version()
-
     false_positive_rate: np.float64 = (
         bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
             "false_positive_rate"

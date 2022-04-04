@@ -220,8 +220,10 @@ module.exports = {
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations',
-                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
                 {
                   type: 'category',
@@ -306,7 +308,7 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_with_prefect',
-
+        'deployment_patterns/how_to_use_great_expectations_with_meltano',
         { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
       ]
     },
@@ -338,6 +340,14 @@ module.exports = {
               items: [
                 { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
                 { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
+              ]
+            },
+            {
+              type: 'category',
+              label: 'How to contribute integration documentation',
+              items: [
+                'integrations/contributing_integration',
+                { type: 'doc', id: 'integrations/integration_template', label: 'TEMPLATE Integration Document' }
               ]
             },
             'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
