@@ -453,9 +453,17 @@ class Validator:
                 override_profiler_config=override_profiler_config,
             )
 
-            expectation_configurations: List[
-                ExpectationConfiguration
-            ] = profiler.run().expectations
+            expectation_configurations: List[ExpectationConfiguration] = profiler.run(
+                variables=None,
+                rules=None,
+                batch_list=list(self.batches.values()),
+                batch_request=None,
+                force_batch_data=False,
+                reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+                expectation_suite=None,
+                expectation_suite_name=None,
+                include_citation=True,
+            ).expectations
 
             configuration = expectation_configurations[0]
 
@@ -524,7 +532,10 @@ class Validator:
 
         effective_variables: Optional[
             ParameterContainer
-        ] = profiler.reconcile_profiler_variables(variables=override_variables)
+        ] = profiler.reconcile_profiler_variables(
+            variables=override_variables,
+            reconciliation_strategy=ReconciliationStrategy.UPDATE,
+        )
         profiler.variables = effective_variables
 
         override_rules: Optional[
@@ -571,13 +582,6 @@ class Validator:
             rule.expectation_configuration_builders[0].expectation_type
             == expectation_type
         ), "ExpectationConfigurationBuilder in profiler used to build an ExpectationConfiguration must have the same expectation_type as the expectation being invoked."
-
-        rule = profiler.generate_rule_overrides_from_batch_request(
-            rules=[rule],
-            batch_list=list(self.batches.values()),
-            batch_request=None,
-            force_batch_data=False,
-        )[0]
 
         # TODO: <Alex>Add "metric_domain_kwargs_override" when "Expectation" defines "domain_keys" separately.</Alex>
         key: str
@@ -639,8 +643,6 @@ class Validator:
                 parameter_builder.metric_value_kwargs or {}
             )
 
-            key: str
-            value: Any
             parameter_builder_metric_value_kwargs = {
                 key: metric_value_kwargs.get(key) or value
                 for key, value in parameter_builder_metric_value_kwargs.items()
@@ -703,11 +705,9 @@ class Validator:
             )
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
-        # noinspection PyUnusedLocal
-        aborted_metrics_info: Dict[
-            Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, List[Exception], int]],
-        ] = self.resolve_validation_graph(
+
+        # updates graph with aborted metrics
+        self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
         )
@@ -723,7 +723,6 @@ class Validator:
             metric_configurations=list(metrics.values())
         )
 
-        metric_configuration: MetricConfiguration
         return {
             metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
             for metric_configuration in metrics.values()
@@ -1119,7 +1118,7 @@ class Validator:
         exception_info: ExceptionInfo
 
         # noinspection SpellCheckingInspection
-        pbar = None
+        progress_bar = None
 
         done: bool = False
         while not done:
@@ -1141,14 +1140,14 @@ class Validator:
             if len(graph.edges) < min_graph_edges_pbar_enable:
                 disable = True
 
-            if pbar is None:
+            if progress_bar is None:
                 # noinspection PyProtectedMember,SpellCheckingInspection
-                pbar = tqdm(
+                progress_bar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
                     disable=disable,
                 )
-                pbar.update(0)
+                progress_bar.update(0)
 
             computable_metrics = set()
 
@@ -1171,7 +1170,7 @@ class Validator:
                         runtime_configuration=runtime_configuration,
                     )
                 )
-                pbar.update(len(computable_metrics))
+                progress_bar.update(len(computable_metrics))
             except MetricResolutionError as err:
                 if catch_exceptions:
                     exception_traceback = traceback.format_exc()
@@ -1213,7 +1212,7 @@ aborting graph resolution.
             ):
                 done = True
 
-        pbar.close()
+        progress_bar.close()
 
         return aborted_metrics_info
 
