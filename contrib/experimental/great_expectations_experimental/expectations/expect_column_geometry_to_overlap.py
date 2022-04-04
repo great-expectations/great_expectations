@@ -1,8 +1,10 @@
 import json
 from typing import Optional
-import rtree 
-import numpy as np
+
 import geopandas
+import numpy as np
+import rtree
+from shapely.geometry import LineString, Point, Polygon
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -19,7 +21,6 @@ from great_expectations.expectations.metrics import (
 )
 
 
-
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
@@ -29,14 +30,16 @@ class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):   
+    def _pandas(cls, column, **kwargs):
         geo_ser = geopandas.GeoSeries(column)
-        input_indices, result_indices = geo_ser.sindex.query_bulk(geo_ser.geometry, predicate='overlaps')
+        input_indices, result_indices = geo_ser.sindex.query_bulk(
+            geo_ser.geometry, predicate="overlaps"
+        )
         overlapping = np.unique(result_indices)  # integer indeces of overlapping
         if np.any(overlapping):
             return True
         else:
-            return False    
+            return False
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -51,8 +54,8 @@ class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnGeometryToOverlap(ColumnExpectation):
-    """Expect geometries in this column to overlap with each other.
-    """
+    """Expect geometries in this column to overlap with each other."""
+
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
@@ -61,13 +64,12 @@ class ExpectColumnGeometryToOverlap(ColumnExpectation):
                 "geometry_overlaps": [
                     "Polygon([(0, 0), (1, 1), (0, 1)])",
                     "Polygon([(10, 0), (10, 5), (0, 0)])",
-                    "Polygon([(0, 0), (2, 2), (2, 0)])"
+                    "Polygon([(0, 0), (2, 2), (2, 0)])",
                 ],
-                "geometry__not_overlaps":[
+                "geometry__not_overlaps": [
                     "Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])",
-                    "Polygon([(2, 2), (4, 2), (4, 4), (2, 4)])"
+                    "Polygon([(2, 2), (4, 2), (4, 4), (2, 4)])",
                 ],
-
             },
             "tests": [
                 {
@@ -82,7 +84,7 @@ class ExpectColumnGeometryToOverlap(ColumnExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "geometry_not_overlaps"},
-                    "out": {"success": False},  
+                    "out": {"success": False},
                 },
             ],
         }
@@ -90,7 +92,7 @@ class ExpectColumnGeometryToOverlap(ColumnExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    metric_dependencies  = "column_values.geometry_overlap"
+    metric_dependencies = "column_values.geometry_overlap"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
@@ -130,10 +132,12 @@ class ExpectColumnGeometryToOverlap(ColumnExpectation):
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["hackathon","geospatial"],  # Tags for this Expectation in the Gallery
+        "tags": ["hackathon", "geospatial"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@luismdiaz01", "@derekma73"  # Don't forget to add your github handle here!
+            "@luismdiaz01",
+            "@derekma73",  # Don't forget to add your github handle here!
         ],
+        "requirements": ["rtree", "geopandas", "shapely", "numpy"],
     }
 
 
