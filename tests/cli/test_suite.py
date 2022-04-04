@@ -1500,6 +1500,10 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
+    suite.add_citation(
+        batch_request=batch_request, comment="Citation added via ExpectationSuite API"
+    )
+    context.save_expectation_suite(expectation_suite=suite)
     assert isinstance(suite, ExpectationSuite)
 
     # Actual testing really starts here
@@ -1581,15 +1585,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
         ),
         mock.call(
             {
-                "event": "data_context.save_expectation_suite",
-                "event_payload": {
-                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": True,
@@ -1605,6 +1600,15 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
             {
                 "event": "data_context.__init__",
                 "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
                 "success": True,
             }
         ),
