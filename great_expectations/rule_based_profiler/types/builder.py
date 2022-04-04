@@ -4,8 +4,8 @@ from typing import Any, List, Optional, Set, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
-    BatchRequest,
-    RuntimeBatchRequest,
+    BatchRequestBase,
+    batch_request_contains_batch_data,
     get_batch_request_as_dict,
 )
 from great_expectations.core.util import convert_to_json_serializable
@@ -19,14 +19,14 @@ class Builder(SerializableDictDot):
     """
 
     exclude_field_names: Set[str] = {
-        "data_context",
         "batch_list",
+        "data_context",
     }
 
     def __init__(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -36,13 +36,15 @@ class Builder(SerializableDictDot):
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
         self._batch_list = batch_list
-        self._batch_request = None
-        self.batch_request = batch_request
 
-        if data_context is None:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"{self.__class__.__name__} requires a data_context, but none was provided."
+        if batch_request_contains_batch_data(batch_request=batch_request):
+            raise ValueError(
+                f"""Error: batch_data found in batch_request -- only primitive types are allowed as part of \
+{self.__class__.__name__} instance attributes.
+"""
             )
+
+        self._batch_request = batch_request
 
         self._data_context = data_context
 
@@ -59,26 +61,36 @@ class Builder(SerializableDictDot):
         self._batch_list = value
 
     @property
-    def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
+    def batch_request(self) -> Optional[Union[BatchRequestBase, dict]]:
         return self._batch_request
 
     @batch_request.setter
-    def batch_request(
-        self, value: Union[BatchRequest, RuntimeBatchRequest, dict]
-    ) -> None:
+    def batch_request(self, value: Optional[Union[BatchRequestBase, dict]]) -> None:
         if not (value is None or isinstance(value, dict)):
             value = get_batch_request_as_dict(batch_request=value)
 
         self._batch_request = value
 
     @property
-    def data_context(self) -> "DataContext":  # noqa: F821
+    def data_context(self) -> Optional["DataContext"]:  # noqa: F821
         return self._data_context
+
+    def set_batch_list_or_batch_request(
+        self,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
+    ) -> None:
+        if force_batch_data or self.batch_request is None:
+            self.set_batch_data(
+                batch_list=batch_list,
+                batch_request=batch_request,
+            )
 
     def set_batch_data(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> None:
         arg: Any
         num_supplied_batch_specification_args: int = sum(
@@ -104,6 +116,10 @@ class Builder(SerializableDictDot):
         dict_obj: dict = super().to_dict()
         dict_obj["class_name"] = self.__class__.__name__
         dict_obj["module_name"] = self.__class__.__module__
+
+        if batch_request_contains_batch_data(batch_request=self.batch_request):
+            dict_obj.pop("batch_request", None)
+
         return dict_obj
 
     def to_json_dict(self) -> dict:

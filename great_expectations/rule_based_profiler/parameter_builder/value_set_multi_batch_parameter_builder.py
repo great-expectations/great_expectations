@@ -51,9 +51,12 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
         json_serialize: Union[str, bool] = True,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -63,9 +66,12 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -76,15 +82,15 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -97,7 +103,6 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         """
         # Build the list of unique values for each Batch object.
         super().build_parameters(
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,

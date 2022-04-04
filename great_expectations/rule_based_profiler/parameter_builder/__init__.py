@@ -4,6 +4,7 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     MetricComputationResult,
     MetricValues,
     MetricComputationDetails,
+    init_rule_parameter_builders,
 )
 from great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder import (  # isort:skip
     MetricMultiBatchParameterBuilder,

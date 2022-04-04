@@ -27,9 +27,6 @@ class ColumnDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
@@ -42,15 +39,17 @@ class ColumnDomainBuilder(DomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         A semantic type is distinguished from the structured column type;
         An example structured column type would be "integer".  The inferred semantic type would be "id".
 
         Args:
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
-            data_context: DataContext
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             include_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to match.
@@ -61,6 +60,9 @@ class ColumnDomainBuilder(DomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
+            batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+            data_context: DataContext
 
         Inclusion/Exclusion Logic:
         (include_column_names|table_columns - exclude_column_names) + (include_semantic_types - exclude_semantic_types)
@@ -77,14 +79,7 @@ class ColumnDomainBuilder(DomainBuilder):
         self._include_column_name_suffixes = include_column_name_suffixes
         self._exclude_column_name_suffixes = exclude_column_name_suffixes
 
-        if semantic_type_filter_module_name is None:
-            semantic_type_filter_module_name = "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter"
-
         self._semantic_type_filter_module_name = semantic_type_filter_module_name
-
-        if semantic_type_filter_class_name is None:
-            semantic_type_filter_class_name = "SimpleSemanticTypeFilter"
-
         self._semantic_type_filter_class_name = semantic_type_filter_class_name
 
         self._include_semantic_types = include_semantic_types
@@ -146,11 +141,11 @@ class ColumnDomainBuilder(DomainBuilder):
         self._exclude_column_name_suffixes = value
 
     @property
-    def semantic_type_filter_module_name(self) -> str:
+    def semantic_type_filter_module_name(self) -> Optional[str]:
         return self._semantic_type_filter_module_name
 
     @property
-    def semantic_type_filter_class_name(self) -> str:
+    def semantic_type_filter_class_name(self) -> Optional[str]:
         return self._semantic_type_filter_class_name
 
     @property
@@ -314,28 +309,32 @@ class ColumnDomainBuilder(DomainBuilder):
             )
 
         # Obtain semantic_type_filter_module_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        semantic_type_filter_module_name: str = (
-            get_parameter_value_and_validate_return_type(
-                domain=None,
-                parameter_reference=self.semantic_type_filter_module_name,
-                expected_return_type=str,
-                variables=variables,
-                parameters=None,
-            )
+        semantic_type_filter_module_name: Optional[
+            str
+        ] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.semantic_type_filter_module_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
         )
+        if semantic_type_filter_module_name is None:
+            semantic_type_filter_module_name = "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter"
 
         # Obtain semantic_type_filter_class_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        semantic_type_filter_class_name: str = (
-            get_parameter_value_and_validate_return_type(
-                domain=None,
-                parameter_reference=self.semantic_type_filter_class_name,
-                expected_return_type=str,
-                variables=variables,
-                parameters=None,
-            )
+        semantic_type_filter_class_name: Optional[
+            str
+        ] = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.semantic_type_filter_class_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=None,
         )
+        if semantic_type_filter_class_name is None:
+            semantic_type_filter_class_name = "SimpleSemanticTypeFilter"
 
-        self._semantic_type_filter: SemanticTypeFilter = instantiate_class_from_config(
+        semantic_type_filter: SemanticTypeFilter = instantiate_class_from_config(
             config={
                 "module_name": semantic_type_filter_module_name,
                 "class_name": semantic_type_filter_class_name,
@@ -347,10 +346,11 @@ class ColumnDomainBuilder(DomainBuilder):
             },
             config_defaults={},
         )
+        self._semantic_type_filter = semantic_type_filter
 
         # Obtain include_semantic_types from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        include_semantic_types: Union[
-            str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]
+        include_semantic_types: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.include_semantic_types,
@@ -365,8 +365,8 @@ class ColumnDomainBuilder(DomainBuilder):
         )
 
         # Obtain exclude_semantic_types from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        exclude_semantic_types: Union[
-            str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]
+        exclude_semantic_types: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.exclude_semantic_types,

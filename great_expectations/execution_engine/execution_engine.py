@@ -6,18 +6,19 @@ from enum import Enum
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
 import pandas as pd
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+)
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
-yaml = YAML()
-yaml.default_flow_style = False
 
 
 class NoOpDict:
@@ -361,53 +362,39 @@ class ExecutionEngine(ABC):
                     )
                 )
                 continue
+
             metric_fn_type = getattr(
                 metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
             )
-            if metric_fn_type in [
+
+            if metric_fn_type not in [
                 MetricPartialFunctionTypes.MAP_FN,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
                 MetricPartialFunctionTypes.WINDOW_FN,
                 MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
                 MetricPartialFunctionTypes.AGGREGATE_FN,
-            ]:
-                # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
-                # than data to optimize compute in the future
-                try:
-                    resolved_metrics[metric_to_resolve.id] = metric_fn(
-                        **metric_provider_kwargs
-                    )
-                except Exception as e:
-                    raise ge_exceptions.MetricResolutionError(
-                        message=str(e), failed_metrics=(metric_to_resolve,)
-                    )
-            elif metric_fn_type in [
                 MetricFunctionTypes.VALUE,
                 MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
             ]:
-                try:
-                    resolved_metrics[metric_to_resolve.id] = metric_fn(
-                        **metric_provider_kwargs
-                    )
-                except Exception as e:
-                    raise ge_exceptions.MetricResolutionError(
-                        message=str(e), failed_metrics=(metric_to_resolve,)
-                    )
-            else:
                 logger.warning(
                     f"Unrecognized metric function type while trying to resolve {str(metric_to_resolve.id)}"
                 )
-                try:
-                    resolved_metrics[metric_to_resolve.id] = metric_fn(
-                        **metric_provider_kwargs
-                    )
-                except Exception as e:
-                    raise ge_exceptions.MetricResolutionError(
-                        message=str(e), failed_metrics=(metric_to_resolve,)
-                    )
+
+            try:
+                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
+                resolved_metrics[metric_to_resolve.id] = metric_fn(
+                    **metric_provider_kwargs
+                )
+            except Exception as e:
+                raise ge_exceptions.MetricResolutionError(
+                    message=str(e), failed_metrics=(metric_to_resolve,)
+                )
+
         if len(metric_fn_bundle) > 0:
             try:
+                # an engine-specific way of computing metrics together
+                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
                 new_resolved = self.resolve_metric_bundle(metric_fn_bundle)
                 resolved_metrics.update(new_resolved)
             except Exception as e:
@@ -483,19 +470,19 @@ class ExecutionEngine(ABC):
                 "Base ExecutionEngine does not support adding nan condition filters"
             )
 
-        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
-            raise ge_exceptions.GreatExpectationsError(
-                "ExecutionEngine does not support updating existing row_conditions."
-            )
-
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
-        assert "column" in domain_kwargs or column_name is not None
+        assert (
+            "column" in domain_kwargs or column_name is not None
+        ), "No column provided: A column must be provided in domain_kwargs or in the column_name parameter"
         if column_name is not None:
             column = column_name
         else:
             column = domain_kwargs["column"]
-        new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
-        new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
+        row_condition: RowCondition = RowCondition(
+            condition=f'col("{column}").notnull()',
+            condition_type=RowConditionParserType.GE,
+        )
+        new_domain_kwargs.setdefault("filter_conditions", []).append(row_condition)
         return new_domain_kwargs
 
     def resolve_data_reference(

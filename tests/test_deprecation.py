@@ -46,6 +46,7 @@ def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
         ), f"Either a 'deprecated-v...' comment or 'DeprecationWarning' call is missing from {file}"
 
 
+@pytest.mark.filterwarnings("ignore::DeprecationWarning:versioneer")
 def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
     regex_for_deprecation_comments: Pattern,
     files_with_deprecation_warnings: List[str],

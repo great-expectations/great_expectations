@@ -84,10 +84,11 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.value_length.between"
@@ -118,7 +119,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
 
         if configuration is None:
@@ -150,7 +151,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
