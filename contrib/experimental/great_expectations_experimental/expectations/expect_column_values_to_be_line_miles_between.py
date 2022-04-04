@@ -75,11 +75,11 @@ class ExpectColumnValuesToBeLinestringMilesDistanceBetween(ColumnMapExpectation)
             },
             "tests": [
                 {
-                    "title": "linestring_less_than_500_miles",
+                    "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "",
+                        "column": "linestring_less_than_500_miles",
                         "min_distance": 0,
                         "max_distance": 1000,
                     },
@@ -88,11 +88,11 @@ class ExpectColumnValuesToBeLinestringMilesDistanceBetween(ColumnMapExpectation)
                     },
                 },
                 {
-                    "title": "linestring_between_1000_and_2000_miles",
+                    "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "",
+                        "column": "linestring_between_1000_and_2000_miles",
                         "min_distance": 1000,
                         "max_distance": 2000,
                     },
