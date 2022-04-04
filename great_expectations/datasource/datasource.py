@@ -2,8 +2,6 @@ import copy
 import logging
 import warnings
 
-from ruamel.yaml import YAML
-
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
@@ -12,8 +10,6 @@ from great_expectations.data_context.util import (
 from great_expectations.exceptions import ClassInstantiationError
 
 logger = logging.getLogger(__name__)
-yaml = YAML()
-yaml.default_flow_style = False
 
 
 class LegacyDatasource:
@@ -174,9 +170,11 @@ class LegacyDatasource:
         """
         self._data_context = data_context
         self._name = name
+        # deprecated-v0.7.11
         if isinstance(data_asset_type, str):
             warnings.warn(
-                "String-only configuration for data_asset_type is deprecated. Use module_name and class_name instead.",
+                "String-only configuration for data_asset_type is deprecated as of v0.7.11. "
+                "As support will be removed in v0.16, please use module_name and class_name instead.",
                 DeprecationWarning,
             )
         self._data_asset_type = data_asset_type
@@ -387,8 +385,9 @@ class LegacyDatasource:
                 raise ValueError(
                     "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
                 )
+            # deprecated-v0.11.2
             warnings.warn(
-                "name is being deprecated as a batch_parameter. Please use data_asset_name instead.",
+                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
                 DeprecationWarning,
             )
             data_asset_name = kwargs.pop("name")

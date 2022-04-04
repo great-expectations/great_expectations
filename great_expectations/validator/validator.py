@@ -50,6 +50,10 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
@@ -449,9 +453,17 @@ class Validator:
                 override_profiler_config=override_profiler_config,
             )
 
-            expectation_configurations: List[
-                ExpectationConfiguration
-            ] = profiler.run().expectations
+            expectation_configurations: List[ExpectationConfiguration] = profiler.run(
+                variables=None,
+                rules=None,
+                batch_list=list(self.batches.values()),
+                batch_request=None,
+                force_batch_data=False,
+                reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+                expectation_suite=None,
+                expectation_suite_name=None,
+                include_citation=True,
+            ).expectations
 
             configuration = expectation_configurations[0]
 
@@ -501,10 +513,6 @@ class Validator:
             len(rules) == 1
         ), "A Rule-Based Profiler for an Expectation can have exactly one rule."
 
-        rule: Rule
-
-        rule = rules[0]
-
         domain_type: MetricDomainTypes
 
         if override_profiler_config is None:
@@ -524,7 +532,10 @@ class Validator:
 
         effective_variables: Optional[
             ParameterContainer
-        ] = profiler.reconcile_profiler_variables(variables=override_variables)
+        ] = profiler.reconcile_profiler_variables(
+            variables=override_variables,
+            reconciliation_strategy=ReconciliationStrategy.UPDATE,
+        )
         profiler.variables = effective_variables
 
         override_rules: Optional[
@@ -550,10 +561,8 @@ class Validator:
             )
             profiler.rules = effective_rules
 
-            rule = profiler.rules[0]
-
-        self._validate_rule_and_update_rule_properties(
-            rule=rule,
+        self._validate_profiler_and_update_rules_properties(
+            profiler=profiler,
             expectation_type=expectation_type,
             expectation_kwargs=expectation_kwargs,
             success_keys=success_keys,
@@ -561,30 +570,18 @@ class Validator:
 
         return profiler
 
-    def _validate_rule_and_update_rule_properties(
+    def _validate_profiler_and_update_rules_properties(
         self,
-        rule: Rule,
+        profiler: BaseRuleBasedProfiler,
         expectation_type: str,
         expectation_kwargs: dict,
         success_keys: Tuple[str],
     ) -> None:
+        rule: Rule = profiler.rules[0]
         assert (
             rule.expectation_configuration_builders[0].expectation_type
             == expectation_type
         ), "ExpectationConfigurationBuilder in profiler used to build an ExpectationConfiguration must have the same expectation_type as the expectation being invoked."
-
-        domain_type: MetricDomainTypes = rule.domain_builder.domain_type
-        # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
-        if domain_type == MetricDomainTypes.COLUMN:
-            column_name = expectation_kwargs["column"]
-            rule.domain_builder.column_names = [column_name]
-            if rule.domain_builder.batch_request is None:
-                # A DomainBuilder that emits MetricDomainTypes.COLUMN type Domain object needs exactly 1 Batch of data.
-                rule.domain_builder.batch_list = [self.active_batch]
-        elif domain_type == MetricDomainTypes.TABLE:
-            pass  # No action is needed.
-        else:
-            pass  # No action is needed.
 
         # TODO: <Alex>Add "metric_domain_kwargs_override" when "Expectation" defines "domain_keys" separately.</Alex>
         key: str
@@ -595,21 +592,75 @@ class Validator:
             if key in success_keys
             and key not in BaseRuleBasedProfiler.EXPECTATION_SUCCESS_KEYS
         }
-        for parameter_builder in rule.parameter_builders:
-            if parameter_builder.batch_request is None:
-                """
-                Despite potentially having access to all loaded Batch objects, in general, a ParameterBuilder should
-                exclude using active Batch (in order to avoid estimation bias).  However, when ParameterBuilder is part
-                of RuleBasedProfiler used to estimate arguments of an Expectation class, all Batch objects must be used.
-                """
-                parameter_builder.batch_list = list(self.batches.values())
 
-            if hasattr(parameter_builder, "metric_name") and hasattr(
-                parameter_builder, "metric_value_kwargs"
-            ):
-                metric_value_kwargs: dict = parameter_builder.metric_value_kwargs or {}
-                metric_value_kwargs.update(metric_value_kwargs_override)
-                parameter_builder.metric_value_kwargs = metric_value_kwargs
+        domain_type: MetricDomainTypes = rule.domain_builder.domain_type
+        if domain_type not in MetricDomainTypes:
+            raise ValueError(
+                f'Domain type declaration "{domain_type}" in "MetricDomainTypes" does not exist.'
+            )
+
+        # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
+        if domain_type == MetricDomainTypes.COLUMN:
+            column_name = expectation_kwargs["column"]
+            rule.domain_builder.include_column_names = [column_name]
+
+        parameter_builders: List[ParameterBuilder] = rule.parameter_builders or []
+        parameter_builder: ParameterBuilder
+
+        for parameter_builder in parameter_builders:
+            self._update_metric_value_kwargs_for_success_keys(
+                parameter_builder=parameter_builder,
+                metric_value_kwargs=metric_value_kwargs_override,
+            )
+
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
+            rule.expectation_configuration_builders or []
+        )
+
+        expectation_configuration_builder: ExpectationConfigurationBuilder
+        for expectation_configuration_builder in expectation_configuration_builders:
+            validation_parameter_builders: List[ParameterBuilder] = (
+                expectation_configuration_builder.validation_parameter_builders or []
+            )
+            for parameter_builder in validation_parameter_builders:
+                self._update_metric_value_kwargs_for_success_keys(
+                    parameter_builder=parameter_builder,
+                    metric_value_kwargs=metric_value_kwargs_override,
+                )
+
+    def _update_metric_value_kwargs_for_success_keys(
+        self,
+        parameter_builder: ParameterBuilder,
+        metric_value_kwargs: Optional[dict] = None,
+    ):
+        if metric_value_kwargs is None:
+            metric_value_kwargs = {}
+
+        if hasattr(parameter_builder, "metric_name") and hasattr(
+            parameter_builder, "metric_value_kwargs"
+        ):
+            parameter_builder_metric_value_kwargs: dict = (
+                parameter_builder.metric_value_kwargs or {}
+            )
+
+            parameter_builder_metric_value_kwargs = {
+                key: metric_value_kwargs.get(key) or value
+                for key, value in parameter_builder_metric_value_kwargs.items()
+            }
+            parameter_builder.metric_value_kwargs = (
+                parameter_builder_metric_value_kwargs
+            )
+
+        evaluation_parameter_builders: List[ParameterBuilder] = (
+            parameter_builder.evaluation_parameter_builders or []
+        )
+
+        evaluation_parameter_builder: ParameterBuilder
+        for evaluation_parameter_builder in evaluation_parameter_builders:
+            self._update_metric_value_kwargs_for_success_keys(
+                parameter_builder=evaluation_parameter_builder,
+                metric_value_kwargs=metric_value_kwargs,
+            )
 
     @property
     def execution_engine(self) -> ExecutionEngine:
@@ -654,11 +705,9 @@ class Validator:
             )
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
-        # noinspection PyUnusedLocal
-        aborted_metrics_info: Dict[
-            Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, List[Exception], int]],
-        ] = self.resolve_validation_graph(
+
+        # updates graph with aborted metrics
+        self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
         )
@@ -674,7 +723,6 @@ class Validator:
             metric_configurations=list(metrics.values())
         )
 
-        metric_configuration: MetricConfiguration
         return {
             metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
             for metric_configuration in metrics.values()
@@ -1070,7 +1118,7 @@ class Validator:
         exception_info: ExceptionInfo
 
         # noinspection SpellCheckingInspection
-        pbar = None
+        progress_bar = None
 
         done: bool = False
         while not done:
@@ -1092,14 +1140,14 @@ class Validator:
             if len(graph.edges) < min_graph_edges_pbar_enable:
                 disable = True
 
-            if pbar is None:
+            if progress_bar is None:
                 # noinspection PyProtectedMember,SpellCheckingInspection
-                pbar = tqdm(
+                progress_bar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
                     disable=disable,
                 )
-                pbar.update(0)
+                progress_bar.update(0)
 
             computable_metrics = set()
 
@@ -1122,7 +1170,7 @@ class Validator:
                         runtime_configuration=runtime_configuration,
                     )
                 )
-                pbar.update(len(computable_metrics))
+                progress_bar.update(len(computable_metrics))
             except MetricResolutionError as err:
                 if catch_exceptions:
                     exception_traceback = traceback.format_exc()
@@ -1164,14 +1212,15 @@ aborting graph resolution.
             ):
                 done = True
 
-        pbar.close()
+        progress_bar.close()
 
         return aborted_metrics_info
 
     def append_expectation(self, expectation_config: ExpectationConfiguration) -> None:
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
+        # deprecated-v0.13.0
         warnings.warn(
-            "append_expectation is deprecated, and will be removed in a future release. "
+            "append_expectation is deprecated as of v0.13.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.add_expectation instead.",
             DeprecationWarning,
         )
@@ -1183,8 +1232,9 @@ aborting graph resolution.
         match_type: str = "domain",
     ) -> List[int]:
         """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
+        # deprecated-v0.13.0
         warnings.warn(
-            "find_expectation_indexes is deprecated, and will be removed in a future release. "
+            "find_expectation_indexes is deprecated as of v0.13.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
@@ -1199,8 +1249,9 @@ aborting graph resolution.
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
         """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
+        # deprecated-v0.13.0
         warnings.warn(
-            "find_expectations is deprecated, and will be removed in a future release. "
+            "find_expectations is deprecated as of v0.13.0 and will be removed in v0.16. "
             + "Please use ExpectationSuite.find_expectation_indexes instead.",
             DeprecationWarning,
         )
@@ -1379,8 +1430,9 @@ set as active.
         Returns an expectation configuration, providing an option to discard failed expectation and discard/ include'
         different result aspects, such as exceptions and result format.
         """
+        # deprecated-v0.13.0
         warnings.warn(
-            "get_expectations_config is deprecated, and will be removed in a future release. "
+            "get_expectations_config is deprecated as of v0.13.0 and will be removed in v0.16. "
             + "Please use get_expectation_suite instead.",
             DeprecationWarning,
         )
@@ -1425,7 +1477,7 @@ set as active.
              copy of _expectation_suite, not the original object.
         """
 
-        expectation_suite = copy.deepcopy(self._expectation_suite)
+        expectation_suite = copy.deepcopy(self.expectation_suite)
         expectations = expectation_suite.expectations
 
         discards = defaultdict(int)
@@ -1654,8 +1706,9 @@ set as active.
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
             if isinstance(run_id, str) and not run_name:
+                # deprecated-v0.13.0
                 warnings.warn(
-                    "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                    "String run_ids are deprecated as of v0.13.0 and support will be removed in v0.16. Please provide a run_id of type "
                     "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                     "and run_time (both optional). Instead of providing a run_id, you may also provide"
                     "run_name and run_time separately.",
@@ -1710,9 +1763,7 @@ set as active.
                     # noinspection PyProtectedMember
                     handler.send_usage_message(
                         event="data_asset.validate",
-                        event_payload=handler._batch_anonymizer.anonymize_batch_info(
-                            self
-                        ),
+                        event_payload=handler.anonymizer.anonymize(obj=self),
                         success=False,
                     )
                 return ExpectationValidationResult(success=False)
@@ -1822,7 +1873,7 @@ set as active.
                 # noinspection PyProtectedMember
                 handler.send_usage_message(
                     event="data_asset.validate",
-                    event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
+                    event_payload=handler.anonymizer.anonymize(obj=self),
                     success=False,
                 )
             raise
@@ -1835,7 +1886,7 @@ set as active.
             # noinspection PyProtectedMember
             handler.send_usage_message(
                 event="data_asset.validate",
-                event_payload=handler._batch_anonymizer.anonymize_batch_info(self),
+                event_payload=handler.anonymizer.anonymize(obj=self),
                 success=True,
             )
         return result
