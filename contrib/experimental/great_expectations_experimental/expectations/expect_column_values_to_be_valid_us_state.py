@@ -1,5 +1,4 @@
 from typing import Optional
-
 import us
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
