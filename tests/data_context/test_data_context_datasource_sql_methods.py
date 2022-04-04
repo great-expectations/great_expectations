@@ -5,11 +5,9 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest, IDDict
-from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.marshmallow__shade.exceptions import ValidationError
 
 yaml = YAML()
 

@@ -71,10 +71,11 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.increasing"
@@ -93,8 +94,8 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
-        return super().validate_configuration(configuration)
+    ) -> None:
+        super().validate_configuration(configuration)
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -130,7 +131,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "parse_strings_as_datetimes": {
