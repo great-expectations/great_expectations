@@ -8,10 +8,9 @@ from typing import Any, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
-    BatchRequest,
-    RuntimeBatchRequest,
+    Batch,
+    BatchRequestBase,
     batch_request_contains_batch_data,
-    get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -28,7 +27,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config.base import (
     DomainBuilderConfig,
     ExpectationConfigurationBuilderConfig,
@@ -41,14 +39,16 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
-from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
+    init_rule_expectation_configuration_builders,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
+    init_rule_parameter_builders,
 )
 from great_expectations.rule_based_profiler.rule.rule import Rule
 from great_expectations.rule_based_profiler.types import (
@@ -195,16 +195,17 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
         parameter_builders: Optional[
             List[ParameterBuilder]
-        ] = RuleBasedProfiler._init_rule_parameter_builders(
+        ] = init_rule_parameter_builders(
             parameter_builder_configs=rule_config.get("parameter_builders"),
             data_context=self._data_context,
         )
         expectation_configuration_builders: List[
             ExpectationConfigurationBuilder
-        ] = RuleBasedProfiler._init_rule_expectation_configuration_builders(
+        ] = init_rule_expectation_configuration_builders(
             expectation_configuration_builder_configs=rule_config[
                 "expectation_configuration_builders"
-            ]
+            ],
+            data_context=self._data_context,
         )
 
         # Compile previous steps and package into a Rule object
@@ -230,73 +231,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return domain_builder
 
-    @staticmethod
-    def _init_rule_parameter_builders(
-        parameter_builder_configs: Optional[List[dict]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ) -> Optional[List[ParameterBuilder]]:
-        if parameter_builder_configs is None:
-            return None
-
-        parameter_builders: List[ParameterBuilder] = []
-
-        parameter_builder_config: dict
-        for parameter_builder_config in parameter_builder_configs:
-            parameter_builder: ParameterBuilder = (
-                RuleBasedProfiler._init_parameter_builder(
-                    parameter_builder_config=parameter_builder_config,
-                    data_context=data_context,
-                )
-            )
-            parameter_builders.append(parameter_builder)
-
-        return parameter_builders
-
-    @staticmethod
-    def _init_parameter_builder(
-        parameter_builder_config: dict,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ) -> ParameterBuilder:
-        parameter_builder: ParameterBuilder = instantiate_class_from_config(
-            config=parameter_builder_config,
-            runtime_environment={"data_context": data_context},
-            config_defaults={
-                "module_name": "great_expectations.rule_based_profiler.parameter_builder"
-            },
-        )
-        return parameter_builder
-
-    @staticmethod
-    def _init_rule_expectation_configuration_builders(
-        expectation_configuration_builder_configs: List[dict],
-    ) -> List[ExpectationConfigurationBuilder]:
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = []
-
-        expectation_configuration_builder_config: dict
-        for (
-            expectation_configuration_builder_config
-        ) in expectation_configuration_builder_configs:
-            expectation_configuration_builder: ExpectationConfigurationBuilder = RuleBasedProfiler._init_expectation_configuration_builder(
-                expectation_configuration_builder_config=expectation_configuration_builder_config,
-            )
-            expectation_configuration_builders.append(expectation_configuration_builder)
-
-        return expectation_configuration_builders
-
-    @staticmethod
-    def _init_expectation_configuration_builder(
-        expectation_configuration_builder_config: dict,
-    ) -> ExpectationConfigurationBuilder:
-        expectation_configuration_builder: ExpectationConfigurationBuilder = instantiate_class_from_config(
-            config=expectation_configuration_builder_config,
-            runtime_environment={},
-            config_defaults={
-                "class_name": "DefaultExpectationConfigurationBuilder",
-                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-            },
-        )
-        return expectation_configuration_builder
-
     @usage_statistics_enabled_method(
         event_name="profiler.run",
         args_payload_fn=get_profiler_run_usage_statistics,
@@ -305,6 +239,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
@@ -312,13 +249,18 @@ class BaseRuleBasedProfiler(ConfigPeer):
     ) -> ExpectationSuite:
         """
         Args:
-            :param variables attribute name/value pairs (overrides)
-            :param rules name/(configuration-dictionary) (overrides)
-            :param reconciliation_directives directives for how each rule component should be overwritten
-            :param expectation_suite: An existing ExpectationSuite to update.
-            :param expectation_suite_name: A name for returned ExpectationSuite.
-            :param include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
-        :return: Set of rule evaluation results in the form of an ExpectationSuite
+            variables: attribute name/value pairs (overrides), commonly-used in Builder objects.
+            rules: name/(configuration-dictionary) (overrides)
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
+            reconciliation_directives: directives for how each rule component should be overwritten
+            expectation_suite: An existing ExpectationSuite to update.
+            expectation_suite_name: A name for returned ExpectationSuite.
+            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
+
+        Returns:
+            Set of rule evaluation results in the form of an ExpectationSuite
         """
         assert not (
             expectation_suite and expectation_suite_name
@@ -338,6 +280,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if expectation_suite is None:
             if expectation_suite_name is None:
                 expectation_suite_name = f"tmp.profiler_{self.__class__.__name__}_suite_{str(uuid.uuid4())[:8]}"
+
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
                 data_context=self._data_context,
@@ -353,12 +296,17 @@ class BaseRuleBasedProfiler(ConfigPeer):
         for rule in effective_rules:
             expectation_configurations: List[ExpectationConfiguration] = rule.generate(
                 variables=effective_variables,
+                batch_list=batch_list,
+                batch_request=batch_request,
+                force_batch_data=force_batch_data,
             )
             expectation_configuration: ExpectationConfiguration
             for expectation_configuration in expectation_configurations:
                 expectation_suite._add_expectation(
                     expectation_configuration=expectation_configuration,
                     send_usage_event=False,
+                    match_type="domain",
+                    overwrite_existing=True,
                 )
 
         return expectation_suite
@@ -586,7 +534,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
         :return: reconciled domain builder configuration, returned in dictionary (configuration) form
         """
-        domain_builder_as_dict: dict = domain_builder.to_dict()
+        domain_builder_as_dict: dict = domain_builder.to_json_dict()
         domain_builder_as_dict["class_name"] = domain_builder.__class__.__name__
         domain_builder_as_dict["module_name"] = domain_builder.__class__.__module__
 
@@ -649,7 +597,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             parameter_builder_name,
             parameter_builder,
         ) in current_parameter_builders.items():
-            parameter_builder_as_dict = parameter_builder.to_dict()
+            parameter_builder_as_dict = parameter_builder.to_json_dict()
             parameter_builder_as_dict[
                 "class_name"
             ] = parameter_builder.__class__.__name__
@@ -732,7 +680,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             expectation_configuration_builder,
         ) in current_expectation_configuration_builders.items():
             expectation_configuration_builder_as_dict = (
-                expectation_configuration_builder.to_dict()
+                expectation_configuration_builder.to_json_dict()
             )
             expectation_configuration_builder_as_dict[
                 "class_name"
@@ -783,7 +731,224 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rule: Rule
         return {rule.name: rule for rule in self.rules}
 
-    def self_check(self, pretty_print=True) -> dict:
+    @staticmethod
+    def run_profiler(
+        data_context: "DataContext",  # noqa: F821
+        profiler_store: ProfilerStore,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        variables: Optional[dict] = None,
+        rules: Optional[dict] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> ExpectationSuite:
+        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
+            data_context=data_context,
+            profiler_store=profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
+        result: ExpectationSuite = profiler.run(
+            variables=variables,
+            rules=rules,
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+
+        return result
+
+    @staticmethod
+    def run_profiler_on_data(
+        data_context: "DataContext",  # noqa: F821
+        profiler_store: ProfilerStore,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> ExpectationSuite:
+        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
+            data_context=data_context,
+            profiler_store=profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
+        rule: Rule
+        rules: Dict[str, Dict[str, Any]] = {
+            rule.name: rule.to_json_dict() for rule in profiler.rules
+        }
+
+        result: ExpectationSuite = profiler.run(
+            variables=None,
+            rules=rules,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            force_batch_data=True,
+            reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+
+        return result
+
+    @staticmethod
+    def add_profiler(
+        config: RuleBasedProfilerConfig,
+        data_context: "DataContext",  # noqa: F821
+        profiler_store: ProfilerStore,
+        ge_cloud_id: Optional[str] = None,
+    ) -> "RuleBasedProfiler":  # noqa: F821
+        if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
+            config=config
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store.store_name}"'
+            )
+
+        # Chetan - 20220204 - DataContext to be removed once it can be decoupled from RBP
+        new_profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
+            config=config.to_json_dict(),
+            runtime_environment={
+                "data_context": data_context,
+            },
+            config_defaults={
+                "module_name": "great_expectations.rule_based_profiler",
+                "class_name": "RuleBasedProfiler",
+            },
+        )
+
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id:
+            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        else:
+            key = ConfigurationIdentifier(
+                configuration_key=config.name,
+            )
+
+        profiler_store.set(key=key, value=config)
+
+        return new_profiler
+
+    @staticmethod
+    def _check_validity_of_batch_requests_in_config(
+        config: RuleBasedProfilerConfig,
+    ) -> bool:
+        # Evaluate nested types in RuleConfig to parse out BatchRequests
+        batch_requests: List[Union[BatchRequestBase, dict]] = []
+        rule: dict
+        for rule in config.rules.values():
+            domain_builder: dict = rule["domain_builder"]
+            if "batch_request" in domain_builder:
+                batch_requests.append(domain_builder["batch_request"])
+
+            parameter_builders: List[dict] = rule.get("parameter_builders", [])
+            parameter_builder: dict
+            for parameter_builder in parameter_builders:
+                if "batch_request" in parameter_builder:
+                    batch_requests.append(parameter_builder["batch_request"])
+
+        # DataFrames shouldn't be saved to ProfilerStore
+        batch_request: Union[BatchRequestBase, dict]
+        for batch_request in batch_requests:
+            if batch_request_contains_batch_data(batch_request=batch_request):
+                return False
+
+        return True
+
+    @staticmethod
+    def get_profiler(
+        data_context: "DataContext",  # noqa: F821
+        profiler_store: ProfilerStore,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> "RuleBasedProfiler":  # noqa: F821
+        assert bool(name) ^ bool(
+            ge_cloud_id
+        ), "Must provide either name or ge_cloud_id (but not both)"
+
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id:
+            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        else:
+            key = ConfigurationIdentifier(
+                configuration_key=name,
+            )
+        try:
+            profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
+        except ge_exceptions.InvalidKeyError as exc_ik:
+            id_ = (
+                key.configuration_key
+                if isinstance(key, ConfigurationIdentifier)
+                else key
+            )
+            raise ge_exceptions.ProfilerNotFoundError(
+                message=f'Non-existent Profiler configuration named "{id_}".\n\nDetails: {exc_ik}'
+            )
+
+        config: dict = profiler_config.to_json_dict()
+        if name:
+            config.update({"name": name})
+
+        config = filter_properties_dict(properties=config, clean_falsy=True)
+
+        profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
+            config=config,
+            runtime_environment={
+                "data_context": data_context,
+            },
+            config_defaults={
+                "module_name": "great_expectations.rule_based_profiler",
+                "class_name": "RuleBasedProfiler",
+            },
+        )
+
+        return profiler
+
+    @staticmethod
+    def delete_profiler(
+        profiler_store: ProfilerStore,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        assert bool(name) ^ bool(
+            ge_cloud_id
+        ), "Must provide either name or ge_cloud_id (but not both)"
+
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id:
+            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        else:
+            key = ConfigurationIdentifier(configuration_key=name)
+
+        try:
+            profiler_store.remove_key(key=key)
+        except (ge_exceptions.InvalidKeyError, KeyError) as exc_ik:
+            id_ = (
+                key.configuration_key
+                if isinstance(key, ConfigurationIdentifier)
+                else key
+            )
+            raise ge_exceptions.ProfilerNotFoundError(
+                message=f'Non-existent Profiler configuration named "{id_}".\n\nDetails: {exc_ik}'
+            )
+
+    @staticmethod
+    def list_profilers(
+        profiler_store: ProfilerStore,
+        ge_cloud_mode: bool,
+    ) -> List[str]:
+        if ge_cloud_mode:
+            return profiler_store.list_keys()
+        return [x.configuration_key for x in profiler_store.list_keys()]
+
+    def self_check(self, pretty_print: bool = True) -> dict:
         """
         Necessary to enable integration with `DataContext.test_yaml_config`
         Args:
@@ -814,6 +979,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._name
 
     @property
+    def config_version(self) -> float:
+        return self._config_version
+
+    @property
     def variables(self) -> Optional[ParameterContainer]:
         # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
         return copy.deepcopy(self._variables)
@@ -840,6 +1009,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             "class_name": self.__class__.__name__,
             "module_name": self.__class__.__module__,
             "name": self.name,
+            "config_version": self.config_version,
             "variables": variables_dict,
             "rules": [rule.to_json_dict() for rule in self.rules],
         }
@@ -950,6 +1120,8 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+            class_name=self.__class__.__name__,
+            module_name=self.__class__.__module__,
             name=name,
             config_version=config_version,
             variables=variables,
@@ -965,271 +1137,6 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             data_context=data_context,
             usage_statistics_handler=usage_statistics_handler,
         )
-
-    @staticmethod
-    def run_profiler(
-        data_context: "DataContext",  # noqa: F821
-        profiler_store: ProfilerStore,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-        variables: Optional[dict] = None,
-        rules: Optional[dict] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
-
-        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
-            data_context=data_context,
-            profiler_store=profiler_store,
-            name=name,
-            ge_cloud_id=ge_cloud_id,
-        )
-
-        result: ExpectationSuite = profiler.run(
-            variables=variables,
-            rules=rules,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-        )
-
-        return result
-
-    @staticmethod
-    def run_profiler_on_data(
-        data_context: "DataContext",  # noqa: F821
-        profiler_store: ProfilerStore,
-        batch_request: Union[BatchRequest, RuntimeBatchRequest, dict],
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
-        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
-            data_context=data_context,
-            profiler_store=profiler_store,
-            name=name,
-            ge_cloud_id=ge_cloud_id,
-        )
-
-        rules: Dict[
-            str, Dict[str, Any]
-        ] = profiler._generate_rule_overrides_from_batch_request(
-            batch_request=batch_request
-        )
-
-        result: ExpectationSuite = profiler.run(
-            rules=rules,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-        )
-        return result
-
-    def _generate_rule_overrides_from_batch_request(
-        self,
-        batch_request: Union[BatchRequest, RuntimeBatchRequest, dict],
-    ) -> Dict[str, Dict[str, Any]]:
-        """Iterates through the profiler's builder attributes and generates a set of
-        Rules that contain overrides from the input batch request. This only applies to
-        ParameterBuilder and any DomainBuilder with a COLUMN MetricDomainType.
-
-        Note that we are passing all batches, corresponding to the specified batch_request, to ParameterBuilder objects.
-        If not used carefully, bias may creep in to the resulting estimates, computed by these ParameterBuilder objects.
-
-        Users of this override should be aware that a batch request should either have no
-        notion of "current/active" batch or it is excluded.
-
-        Args:
-            batch_request: Data used to override builder attributes
-
-        Returns:
-            The dictionary representation of the Rules used as runtime arguments to `run()`
-        """
-        rules: List[Rule] = self.rules
-        if not isinstance(batch_request, dict):
-            batch_request = get_batch_request_as_dict(batch_request=batch_request)
-            logger.debug("Converted batch request to dictionary: %s", batch_request)
-
-        resulting_rules: Dict[str, Dict[str, Any]] = {}
-
-        rule: Rule
-        domain_builder: DomainBuilder
-        parameter_builders: Optional[List[ParameterBuilder]]
-        parameter_builder: ParameterBuilder
-        expectation_configuration_builders: Optional[
-            List[ExpectationConfigurationBuilder]
-        ]
-        expectation_configuration_builder: ExpectationConfigurationBuilder
-        for rule in rules:
-            domain_builder = rule.domain_builder
-            if domain_builder.domain_type == MetricDomainTypes.COLUMN:
-                domain_builder.batch_request = batch_request
-                domain_builder.batch_request["data_connector_query"] = {
-                    "index": -1,
-                }
-
-            parameter_builders = rule.parameter_builders
-            if parameter_builders:
-                for parameter_builder in parameter_builders:
-                    parameter_builder.batch_request = batch_request
-
-            resulting_rules[rule.name] = rule.to_dict()
-
-        return resulting_rules
-
-    @staticmethod
-    def add_profiler(
-        config: RuleBasedProfilerConfig,
-        data_context: "DataContext",  # noqa: F821
-        profiler_store: ProfilerStore,
-        ge_cloud_id: Optional[str] = None,
-    ) -> "RuleBasedProfiler":  # noqa: F821
-        if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
-            config=config
-        ):
-            raise ge_exceptions.InvalidConfigError(
-                f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store.store_name}"'
-            )
-
-        # Chetan - 20220204 - DataContext to be removed once it can be decoupled from RBP
-        new_profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
-            config=config.to_json_dict(),
-            runtime_environment={
-                "data_context": data_context,
-            },
-            config_defaults={
-                "module_name": "great_expectations.rule_based_profiler",
-                "class_name": "RuleBasedProfiler",
-            },
-        )
-
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
-        else:
-            key = ConfigurationIdentifier(
-                configuration_key=config.name,
-            )
-
-        profiler_store.set(key=key, value=config)
-
-        return new_profiler
-
-    @staticmethod
-    def _check_validity_of_batch_requests_in_config(
-        config: RuleBasedProfilerConfig,
-    ) -> bool:
-        # Evaluate nested types in RuleConfig to parse out BatchRequests
-        batch_requests: List[Union[BatchRequest, RuntimeBatchRequest, dict]] = []
-        rule: dict
-        for rule in config.rules.values():
-
-            domain_builder: dict = rule["domain_builder"]
-            if "batch_request" in domain_builder:
-                batch_requests.append(domain_builder["batch_request"])
-
-            parameter_builders: List[dict] = rule.get("parameter_builders", [])
-            parameter_builder: dict
-            for parameter_builder in parameter_builders:
-                if "batch_request" in parameter_builder:
-                    batch_requests.append(parameter_builder["batch_request"])
-
-        # DataFrames shouldn't be saved to ProfilerStore
-        batch_request: Union[BatchRequest, RuntimeBatchRequest, dict]
-        for batch_request in batch_requests:
-            if batch_request_contains_batch_data(batch_request=batch_request):
-                return False
-
-        return True
-
-    @staticmethod
-    def get_profiler(
-        data_context: "DataContext",  # noqa: F821
-        profiler_store: ProfilerStore,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> "RuleBasedProfiler":  # noqa: F821
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id (but not both)"
-
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
-        else:
-            key = ConfigurationIdentifier(
-                configuration_key=name,
-            )
-        try:
-            profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
-        except ge_exceptions.InvalidKeyError as exc_ik:
-            id_ = (
-                key.configuration_key
-                if isinstance(key, ConfigurationIdentifier)
-                else key
-            )
-            raise ge_exceptions.ProfilerNotFoundError(
-                message=f'Non-existent Profiler configuration named "{id_}".\n\nDetails: {exc_ik}'
-            )
-
-        config: dict = profiler_config.to_json_dict()
-        if name:
-            config.update({"name": name})
-
-        config = filter_properties_dict(properties=config, clean_falsy=True)
-
-        profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
-            config=config,
-            runtime_environment={
-                "data_context": data_context,
-            },
-            config_defaults={
-                "module_name": "great_expectations.rule_based_profiler",
-                "class_name": "RuleBasedProfiler",
-            },
-        )
-
-        return profiler
-
-    @staticmethod
-    def delete_profiler(
-        profiler_store: ProfilerStore,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> None:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id (but not both)"
-
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
-        else:
-            key = ConfigurationIdentifier(configuration_key=name)
-
-        try:
-            profiler_store.remove_key(key=key)
-        except (ge_exceptions.InvalidKeyError, KeyError) as exc_ik:
-            id_ = (
-                key.configuration_key
-                if isinstance(key, ConfigurationIdentifier)
-                else key
-            )
-            raise ge_exceptions.ProfilerNotFoundError(
-                message=f'Non-existent Profiler configuration named "{id_}".\n\nDetails: {exc_ik}'
-            )
-
-    @staticmethod
-    def list_profilers(
-        profiler_store: ProfilerStore,
-        ge_cloud_mode: bool,
-    ) -> List[str]:
-        if ge_cloud_mode:
-            return profiler_store.list_keys()
-        return [x.configuration_key for x in profiler_store.list_keys()]
 
 
 def _validate_builder_override_config(builder_config: dict):

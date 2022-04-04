@@ -3,7 +3,6 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.expectations.metrics.import_manager import reflection
 from great_expectations.util import get_sqlalchemy_inspector
 
 

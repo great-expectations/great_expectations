@@ -108,7 +108,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 str(response.text),
                 str(jsonError),
             )
-            raise StoreBackendError("Unable to get object in GE Cloud Store Backend.")
+            raise StoreBackendError(
+                f"Unable to get object in GE Cloud Store Backend: {jsonError}"
+            )
 
     def _move(self):
         pass
@@ -146,7 +148,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
-                "Unable to update object in GE Cloud Store Backend."
+                f"Unable to update object in GE Cloud Store Backend: {e}"
             )
 
     @property
@@ -208,7 +210,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # TODO Show more detailed error messages
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError("Unable to set object in GE Cloud Store Backend.")
+            raise StoreBackendError(
+                f"Unable to set object in GE Cloud Store Backend: {e}"
+            )
 
     @property
     def ge_cloud_base_url(self):
@@ -246,7 +250,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return keys
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError("Unable to list keys in GE Cloud Store Backend.")
+            raise StoreBackendError(
+                f"Unable to list keys in GE Cloud Store Backend: {e}"
+            )
 
     def get_url_for_key(self, key, protocol=None):
         ge_cloud_id = key[1]
@@ -289,7 +295,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
-                "Unable to delete object in GE Cloud Store Backend."
+                f"Unable to delete object in GE Cloud Store Backend: {e}"
             )
 
     def _has_key(self, key):

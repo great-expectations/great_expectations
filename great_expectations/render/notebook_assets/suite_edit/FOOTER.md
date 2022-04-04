@@ -1,4 +1,4 @@
-## Save & Review Your Expectations
+## Review & Save Your Expectations
 
 Let's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.
 If you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).

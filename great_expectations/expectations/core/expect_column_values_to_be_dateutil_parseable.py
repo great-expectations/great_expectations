@@ -53,10 +53,11 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.dateutil_parseable"
@@ -74,9 +75,8 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -104,7 +104,7 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
                 "value": params.get("mostly"),
             },
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
