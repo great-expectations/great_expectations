@@ -5,7 +5,6 @@ import os
 import platform
 import random
 import string
-import tempfile
 import threading
 import warnings
 from functools import wraps
@@ -57,9 +56,6 @@ expectationSuiteSchema = ExpectationSuiteSchema()
 
 
 logger = logging.getLogger(__name__)
-
-tmp_dir = str(tempfile.mkdtemp())
-
 
 try:
     import sqlalchemy as sqlalchemy
@@ -140,8 +136,10 @@ except ImportError:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
         import pybigquery.sqlalchemy_bigquery as BigQueryDialect
 
+        # deprecated-v0.14.7
         warnings.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
+            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
