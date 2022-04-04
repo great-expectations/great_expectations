@@ -89,10 +89,10 @@ class ExpectTableModelBias(TableExpectation):
         {
             "data": {
                 "entity_id":[1,3,4,5,6],
-                "score": [0,0,0,1,0],
-                "label_value": [0,1,1,0,0],
-                "race": ["Other", "African-American","African-American","African-American","Other"],
-                "sex":["Male","Male","Male","Male","Female"],
+                "pred": [0,0,0,1,0],
+                "y": [0,1,1,0,0],
+                "race": ["African-American", "African-American","African-American","African-American","African-American"],
+                "sex":["Male","Male","Male","Male","Male"],
                 "age_cat":["Greater than 45","25 - 45","Less than 25","Less than 25","25 - 45"]
             },
             "tests": [
@@ -101,6 +101,7 @@ class ExpectTableModelBias(TableExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
+                        "important_columns":["race","sex"],
                         "y_true": "y",
                         "y_pred": "pred",
                     },
@@ -112,7 +113,10 @@ class ExpectTableModelBias(TableExpectation):
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"y_pred": "pred", "y_true": "y"},
+                    "in": {
+                        "important_columns":["race","sex","age_cat"],
+                        "y_pred": "pred", 
+                        "y_true": "y"},
                     "out": {"success": False},
                 },
             ],
@@ -128,13 +132,13 @@ class ExpectTableModelBias(TableExpectation):
 
     metric_dependencies = ("table.model_bias",)
     success_keys = (
-#        "important_columns", # might use this if people want to use specific features
+        "important_columns", # might use this if people want to use specific features
         "y_true",
         "y_pred",
     )
 
     default_kwarg_values = {
- #       "important_columns": None,
+        "important_columns": None,
         "y_pred": None,
         "y_true": None, #When the y_true column is not included in the original data set, Aequitas calculates only Statistical Parity and Impact Parities.
         "result_format": "BASIC",
@@ -164,8 +168,11 @@ class ExpectTableModelBias(TableExpectation):
 #        columns = configuration.kwargs.get("important_columns")
         y_true = configuration.kwargs.get("y_true")
         y_pred = configuration.kwargs.get("y_pred")
+        columns = configuration.kwargs.get("important_columns")
+
 
         try:
+            assert columns is not None, "target columns must be specified"
             assert y_true is not None, "target y_true must be specified"
             assert y_pred is not None, "target y_true must be specified"
             assert isinstance(y_pred, str), "y_pred must be a string column name"
