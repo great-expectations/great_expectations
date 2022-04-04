@@ -7,7 +7,12 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    BatchRequestBase,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -140,16 +145,34 @@ class ParameterBuilder(Builder, ABC):
 
     def build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         parameter_computation_impl: Optional[Callable] = None,
         json_serialize: Optional[bool] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
     ) -> None:
+        """
+        Args:
+            domain: Domain object that is context for execution of this ParameterBuilder object.
+            variables: attribute name/value pairs
+            parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
+            parameter_computation_impl: Object containing desired ParameterBuilder implementation.
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
+        """
+        self.set_batch_list_or_batch_request(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            force_batch_data=force_batch_data,
+        )
+
         resolve_evaluation_dependencies(
             parameter_builder=self,
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -164,7 +187,6 @@ class ParameterBuilder(Builder, ABC):
             computed_parameter_value,
             parameter_computation_details,
         ) = parameter_computation_impl(
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -190,7 +212,7 @@ class ParameterBuilder(Builder, ABC):
         }
 
         build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
+            parameter_container=parameters[domain.id], parameter_values=parameter_values
         )
 
     @property
@@ -215,7 +237,6 @@ class ParameterBuilder(Builder, ABC):
     @abstractmethod
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -583,6 +604,7 @@ class ParameterBuilder(Builder, ABC):
 
         Returns sorted dict of candidate as key and ratio as value
         """
+        # noinspection PyTypeChecker
         return dict(
             sorted(
                 candidate_ratio_dict.items(),
@@ -627,7 +649,6 @@ def init_parameter_builder(
 
 def resolve_evaluation_dependencies(
     parameter_builder: "ParameterBuilder",  # noqa: F821
-    parameter_container: ParameterContainer,
     domain: Domain,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -672,7 +693,6 @@ def resolve_evaluation_dependencies(
             )
 
             evaluation_parameter_builder.build_parameters(
-                parameter_container=parameter_container,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
@@ -682,7 +702,6 @@ def resolve_evaluation_dependencies(
             # configured with its own "evaluation_parameter_builders" list.  Recursive call handles such situations.
             resolve_evaluation_dependencies(
                 parameter_builder=evaluation_parameter_builder,
-                parameter_container=parameter_container,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
