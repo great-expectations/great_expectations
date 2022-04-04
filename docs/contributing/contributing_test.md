@@ -31,7 +31,7 @@ After setting up authentication, you can run with your project using the environ
 ```bash
     GE_TEST_BIGQUERY_PROJECT=<YOUR_GOOGLE_CLOUD_PROJECT> 
     GE_TEST_BIGQUERY_DATASET=test_ci
-    pytest tests/test_definitions/test_expectations_cfe.py --bigquery --no-spark --no-postgresql
+    pytest tests/test_definitions/test_expectations_cfe.py --bigquery
 ```
 
 ## Writing unit and integration tests
@@ -175,7 +175,7 @@ pytest tests/performance/test_bigquery_benchmarks.py \
   --bigquery --performance-tests \
   -k 'test_taxi_trips_benchmark[1-True-V3]'  \
   --benchmark-json=tests/performance/results/`date "+%H%M"`_${USER}.json \
-  --no-spark --no-postgresql -rP -vv
+  -rP -vv
 ```
 
 Some benchmarks take a long time to complete. In this example, only the relatively fast `test_taxi_trips_benchmark[1-True-V3]` benchmark is run and the output should include runtime like the following:
