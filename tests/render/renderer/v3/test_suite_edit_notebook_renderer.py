@@ -1063,6 +1063,11 @@ def test_notebook_execution_with_pandas_backend(
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
+    # citation_date and comment will be different due to update
+    suite.meta["citations"][0].pop("citation_date")
+    suite.meta["citations"][0].pop("comment")
+    original_suite.meta["citations"][0].pop("citation_date")
+    original_suite.meta["citations"][0].pop("comment")
     assert suite == original_suite
 
 
