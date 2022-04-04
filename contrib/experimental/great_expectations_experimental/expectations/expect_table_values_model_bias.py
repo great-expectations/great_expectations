@@ -1,9 +1,6 @@
 import json
 from typing import Any, Dict, Optional, Tuple
 
-from sklearn.inspection import permutation_importance
-from sklearn.linear_model import LinearRegression
-
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -27,7 +24,7 @@ import aequitas.plot as ap
 class TableEvaluatingModelBias(TableMetricProvider):
 
     metric_name = "table.model_bias"
-    value_keys = ("y_column",)
+    value_keys = ("y_true","y_pred")
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
@@ -42,7 +39,7 @@ class TableEvaluatingModelBias(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-
+        df = df.rename(columns={"y_true": "label_value", "y_pred": "score"})
 
         # Group() class evaluates biases across all subgroups in dataset by assembling a confusion matrix 
         # of each subgroup, calculating used metrics such as false positive rate and false omission rate, 
@@ -91,10 +88,12 @@ class ExpectTableModelBias(TableExpectation):
     examples = [
         {
             "data": {
-                "x_1": [3, 5, 7],
-                "x_2": [1, 1, 1],
-                "x_3": [0.01, 0.02, 0.01],
-                "y": [0.031, 0.052, 0.071],
+                "entity_id":[1,3,4,5,6],
+                "score": [0,0,0,1,0],
+                "label_value": [0,1,1,0,0],
+                "race": ["Other", "African-American","African-American","African-American","Other"],
+                "sex":["Male","Male","Male","Male","Female"],
+                "age_cat":["Greater than 45","25 - 45","Less than 25","Less than 25","25 - 45"]
             },
             "tests": [
                 {
@@ -102,10 +101,8 @@ class ExpectTableModelBias(TableExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "n_features": 1,
-                        "important_columns": ["x_1"],
-                        "y_column": "y",
-                        "threshold": 0.35,
+                        "y_true": "y",
+                        "y_pred": "pred",
                     },
                     "out": {
                         "success": True,
@@ -115,7 +112,7 @@ class ExpectTableModelBias(TableExpectation):
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"n_features": 2, "y_column": "y", "threshold": 0.35},
+                    "in": {"y_pred": "pred", "y_true": "y"},
                     "out": {"success": False},
                 },
             ],
@@ -131,17 +128,15 @@ class ExpectTableModelBias(TableExpectation):
 
     metric_dependencies = ("table.model_bias",)
     success_keys = (
-        "n_features",
-        "important_columns",
-        "y_column",
-        "threshold",
+#        "important_columns", # might use this if people want to use specific features
+        "y_true",
+        "y_pred",
     )
 
     default_kwarg_values = {
-        "n_features": None,
-        "important_columns": None,
-        "y_column": None,
-        "threshold": None,
+ #       "important_columns": None,
+        "y_pred": None,
+        "y_true": None, #When the y_true column is not included in the original data set, Aequitas calculates only Statistical Parity and Impact Parities.
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -166,29 +161,16 @@ class ExpectTableModelBias(TableExpectation):
         if configuration is None:
             configuration = self.configuration
 
-        n_features = configuration.kwargs.get("n_features")
-        columns = configuration.kwargs.get("important_columns")
-        threshold = configuration.kwargs.get("threshold")
-        y_column = configuration.kwargs.get("y_column")
+#        columns = configuration.kwargs.get("important_columns")
+        y_true = configuration.kwargs.get("y_true")
+        y_pred = configuration.kwargs.get("y_pred")
 
         try:
-            assert (
-                columns is not None or threshold is not None
-            ), "at least one of important_columns or threshold is required"
-            assert (
-                isinstance(n_features, int) or n_features is None
-            ), "n_features must be an integer"
-            if columns is not None:
-                assert (
-                    isinstance(columns, tuple) or isinstance(columns, list)
-                ) and all(
-                    isinstance(i, str) for i in columns
-                ), "columns must be a tuple or list of string column names"
-            assert (
-                isinstance(threshold, float) and (0 <= threshold <= 1)
-            ) or threshold is None, "threshold must be a float between 0 and 1"
-            assert y_column is not None, "target y_column must be specified"
-            assert isinstance(y_column, str), "y_column must be a string column name"
+            assert y_true is not None, "target y_true must be specified"
+            assert y_pred is not None, "target y_true must be specified"
+            assert isinstance(y_pred, str), "y_pred must be a string column name"
+            assert isinstance(y_true, str), "y_true must be a string column name"
+
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         super().validate_configuration(configuration)
@@ -208,33 +190,10 @@ class ExpectTableModelBias(TableExpectation):
                 reverse=True,
             )
         )
-        n_features = configuration["kwargs"].get("n_features")
-        columns = configuration["kwargs"].get("important_columns")
-        threshold = configuration["kwargs"].get("threshold")
+#        columns = configuration["kwargs"].get("important_columns")
 
-        if columns:
-            column_success = []
-            for i in columns:
-                if importances[i] >= threshold:
-                    column_success.append(True)
-                else:
-                    column_success.append(False)
-            column_success = all(column_success)
-        else:
-            column_success = True
 
-        if n_features:
-            n_features_success = []
-            for i in importances.keys():
-                if importances[i] >= threshold:
-                    n_features_success.append(True)
-            n_features_success = len(n_features_success) == int(n_features)
-        else:
-            n_features_success = True
-
-        success = column_success and n_features_success
-
-        return {"success": success, "result": {"observed_value": importances}}
+        return {"result": {"observed_value": importances}}
 
 
 if __name__ == "__main__":
