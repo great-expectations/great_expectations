@@ -1,7 +1,8 @@
 import json
 from typing import Optional
+
 import geopandas
-from shapely.geometry import Polygon, Point, LineString
+from shapely.geometry import LineString, Point, Polygon
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -33,7 +34,8 @@ class ColumnValuesToBeValidGeometry(ColumnMapMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return column.apply(lambda x: is_valid_geometry(x))
+        geo = geopandas.GeoSeries(column)
+        return geo.apply(lambda x: is_valid_geometry(x))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -60,8 +62,6 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
             "data": {
                 "valid_geometry": [
                             "Polygon([(0, 0), (1, 1), (0, 1)])",
-                            "Polygon([(10, 0), (10, 5), (0, 0)])",
-                            "Polygon([(0, 0), (2, 2), (2, 0)])",
                             "LineString([(0, 0), (1, 1), (0, 1)])",
                             "Point(0, 1)"
                 ],
@@ -136,6 +136,7 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@luismdiaz01", "@derekma73"  # Don't forget to add your github handle here!
         ],
+        "requirements": ["geopandas", "shapely"],
     }
 
 
