@@ -1923,6 +1923,12 @@ set as active.
     def add_citation(
         self,
         comment: str,
+        batch_request_list: Optional[
+            List[Union[str, Dict[str, Union[str, Dict[str, Any]]]]]
+        ] = None,
+        batch_request: Optional[
+            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+        ] = None,
         batch_spec: Optional[dict] = None,
         batch_markers: Optional[dict] = None,
         batch_definition: Optional[dict] = None,
@@ -1937,6 +1943,8 @@ set as active.
             batch_definition = self.active_batch_definition
         self._expectation_suite.add_citation(
             comment,
+            batch_request_list=batch_request_list,
+            batch_request=batch_request,
             batch_spec=batch_spec,
             batch_markers=batch_markers,
             batch_definition=batch_definition,
@@ -1946,6 +1954,12 @@ set as active.
     def update_last_citation(
         self,
         comment: str,
+        batch_request_list: Optional[
+            List[Union[str, Dict[str, Union[str, Dict[str, Any]]]]]
+        ] = None,
+        batch_request: Optional[
+            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+        ] = None,
         batch_spec: Optional[dict] = None,
         batch_markers: Optional[dict] = None,
         batch_definition: Optional[dict] = None,
@@ -1960,6 +1974,8 @@ set as active.
             batch_definition = self.active_batch_definition
         self._expectation_suite.update_last_citation(
             comment,
+            batch_request_list=batch_request_list,
+            batch_request=batch_request,
             batch_spec=batch_spec,
             batch_markers=batch_markers,
             batch_definition=batch_definition,
