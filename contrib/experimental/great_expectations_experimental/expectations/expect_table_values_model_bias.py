@@ -19,6 +19,8 @@ from aequitas.group import Group
 from aequitas.bias import Bias
 from aequitas.fairness import Fairness
 import aequitas.plot as ap
+from aequitas.preprocessing import preprocess_input_df
+
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableEvaluatingModelBias(TableMetricProvider):
@@ -34,19 +36,22 @@ class TableEvaluatingModelBias(TableMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
+        reference_group = None,
         alpha = .05
     ):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         df = df.rename(columns={"y_true": "label_value", "y_pred": "score"})
+        df, _ = preprocess_input_df(df)
 
         # Group() class evaluates biases across all subgroups in dataset by assembling a confusion matrix 
         # of each subgroup, calculating used metrics such as false positive rate and false omission rate, 
         # as well as counts by group and group prevelance among the sample population.
         g = Group()
         # The get_crosstabs() method expects a dataframe with predefined columns score, and label_value 
-        # and treats other columns as attributes against which to test for disparities
+        # and treats other columns as attributes against which to test for disparities. Requires attributes
+        # to be strings
         xtab, _ = g.get_crosstabs(df)
         # Bias() class calculates disparities between groups based on the crosstab returned by the Group() 
         # class get_crosstabs(). Disparities are calculated as a ratio of a metric for a group of interest 
@@ -55,9 +60,15 @@ class TableEvaluatingModelBias(TableMetricProvider):
         # can pick frame of reference (ex: Caucasians or males historically favored), but thos
         # chooses disparities in relation to the group with the lowest value for every disparity metric, 
         # as then every group's value will be at least 1.0, and relationships can be evaluated more linearly.
-        majority_bdf = b.get_disparity_major_group(xtab, original_df=df)
+        if reference_group:
+            bdf = b.get_disparity_predefined_groups(xtab, original_df=df, 
+                                        ref_groups_dict=reference_group, 
+                                        alpha=alpha, check_significance=True, 
+                                        mask_significance=True)
+        else:
+            bdf = b.get_disparity_major_group(xtab, original_df=df)
         f = Fairness()
-        fdf = f.get_group_value_fairness(majority_bdf)
+        fdf = f.get_group_value_fairness(bdf)
         #gaf = f.get_group_attribute_fairness(fdf) #this produces cool chart that would be nice to display
         gof = f.get_overall_fairness(fdf)
         return gof['Overall Fairness']
@@ -81,7 +92,8 @@ class TableEvaluatingModelBias(TableMetricProvider):
 # The main business logic for calculation lives here.
 class ExpectTableModelBias(TableExpectation):
     """Using Aeqitas we evaluate predicted and true values to evaluate certain metrics 
-    on how a classider model imposes bias on a given attribute group. For more information
+    on how a classider model imposes bias on a given attribute group. Requirescolumns
+    score (binary or continuous) and label_value (binary). For more information
     go to https://dssg.github.io/aequitas/examples/compas_demo.html"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
