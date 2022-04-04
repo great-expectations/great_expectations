@@ -17,7 +17,7 @@ from great_expectations.expectations.metrics import (
 )
 
 
-def is_ip_address_in_class(addr: str, ip_class) -> bool:
+def is_private_ip_address_in_class(addr: str, ip_class) -> bool:
     try:
         for ic in ip_class:
             if ic == "A":
@@ -36,15 +36,15 @@ def is_ip_address_in_class(addr: str, ip_class) -> bool:
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeIpv4Class(ColumnMapMetricProvider):
+class ColumnValuesToBePrivateIpv4Class(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.ip_class"
+    condition_metric_name = "column_values.private_ip_class"
     condition_value_keys = ("ip_class",)
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, ip_class, **kwargs):
-        return column.apply(lambda x: is_ip_address_in_class(x, ip_class))
+        return column.apply(lambda x: is_private_ip_address_in_class(x, ip_class))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -58,8 +58,8 @@ class ColumnValuesToBeIpv4Class(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeIpv4Class(ColumnMapExpectation):
-    """Expect the provided IP v4 address in the IP class (A, B, C) which passed in the parameters"""
+class ExpectColumnValuesToBePrivateIpv4Class(ColumnMapExpectation):
+    """Expect the provided private IP v4 address in the IP class (A, B, C) which passed in the parameters"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -113,7 +113,7 @@ class ExpectColumnValuesToBeIpv4Class(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.ip_class"
+    map_metric = "column_values.private_ip_class"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = (
@@ -175,4 +175,4 @@ class ExpectColumnValuesToBeIpv4Class(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeIpv4Class().print_diagnostic_checklist()
+    ExpectColumnValuesToBePrivateIpv4Class().print_diagnostic_checklist()
