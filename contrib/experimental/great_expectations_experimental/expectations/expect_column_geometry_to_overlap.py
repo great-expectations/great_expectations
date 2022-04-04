@@ -13,17 +13,16 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
-    ColumnAggregateMetricProvider,
-    column_aggregate_partial,
-    column_aggregate_value,
+    ColumnMapMetricProvider,
+    column_condition_partial,
 )
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
+class ColumnValuesToCheckOverlap(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     metric_name = "column_values.geometry_overlap"
@@ -53,7 +52,7 @@ class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnGeometryToOverlap(ColumnExpectation):
+class ExpectColumnGeometryToOverlap(ColumnMapExpectation):
     """Expect geometries in this column to overlap with each other."""
 
     # These examples will be shown in the public gallery.
