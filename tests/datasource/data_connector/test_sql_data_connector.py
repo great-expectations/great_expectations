@@ -1374,7 +1374,7 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
     )
 
 
-def test_update_inferred_asset_sql_data_connector_missing_data_asset_not_persisted_to_data_context(
+def test_update_inferred_asset_sql_data_connector_missing_data_asset_does_not_persist_to_data_context(
     postgres_introspection_directives_schema_data_context,
 ):
     context: DataContext = postgres_introspection_directives_schema_data_context
@@ -1421,11 +1421,11 @@ def test_update_inferred_asset_sql_data_connector_missing_data_asset_not_persist
     )
 
     # data_asset_name should NOT be updated in context.config.datasources
-    assert (
-        data_asset_name
-        not in context.config.datasources[datasource_name]
-        .data_connectors[data_connector_name]
-        .assets.keys()
+    assert not hasattr(
+        context.config.datasources[datasource_name].data_connectors[
+            data_connector_name
+        ],
+        "assets",
     )
 
 
