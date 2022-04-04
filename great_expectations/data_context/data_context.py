@@ -1864,10 +1864,10 @@ class BaseDataContext(ConfigPeer):
 
         # either create the first citation or update the most recent citation if necessary
         if "citations" not in expectation_suite.meta:
-            citation_func = expectation_suite.add_citation
+            citation_func = validator.add_citation
             citation_comment = "Created suite via context.get_validator"
         else:
-            citation_func = expectation_suite.update_last_citation
+            citation_func = validator.update_last_citation
             citation_comment = "Updated suite via context.get_validator"
 
         if batch_request:

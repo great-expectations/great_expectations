@@ -1311,7 +1311,7 @@ def test_introspection_directives_schema_only_selects_schema_objects(
 
     batch_request: BatchRequest = BatchRequest(**batch_request)
 
-    # this will fail because the table with data_asset_name does not exist in the public schema
+    # this should fail because the table with data_asset_name does not exist in the public schema
     with pytest.raises(KeyError):
         context.get_validator(
             batch_request=batch_request, expectation_suite_name=expectation_suite_name
