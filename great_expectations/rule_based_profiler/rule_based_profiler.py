@@ -294,7 +294,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         rule: Rule
         for rule in effective_rules:
-            expectation_configurations: List[ExpectationConfiguration] = rule.generate(
+            expectation_configurations: List[ExpectationConfiguration] = rule.run(
                 variables=effective_variables,
                 batch_list=batch_list,
                 batch_request=batch_request,
