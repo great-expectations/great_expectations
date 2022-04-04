@@ -16,13 +16,14 @@ from great_expectations.expectations.metrics import (
 
 import zipcodes
 
+
 def is_valid_zip5(zip: str):
     if len(zip) != 5:
         return False
-    else:   
+    else:
         try:
             return zipcodes.is_real(zip)
-        except:  
+        except:
             return False
 
 
@@ -60,9 +61,8 @@ class ExpectColumnValuesToBeValidZip5(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_zip5": ["90001", "78884", "20010","10011"],
-                "invalid_zip5":["-10000","1234","99999", "25487"],
-
+                "valid_zip5": ["90001", "78884", "20010", "10011"],
+                "invalid_zip5": ["-10000", "1234", "99999", "25487"],
             },
             "tests": [
                 {
@@ -77,7 +77,7 @@ class ExpectColumnValuesToBeValidZip5(ColumnMapExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "invalid_zip5"},
-                    "out": {"success": False},  
+                    "out": {"success": False},
                 },
             ],
         }
@@ -124,9 +124,13 @@ class ExpectColumnValuesToBeValidZip5(ColumnMapExpectation):
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["hackathon","typed-entities"],  # Tags for this Expectation in the Gallery
+        "tags": [
+            "hackathon",
+            "typed-entities",
+        ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@luismdiaz01", "@derekma73"  # Don't forget to add your github handle here!
+            "@luismdiaz01",
+            "@derekma73",  # Don't forget to add your github handle here!
         ],
         "requirements": ["zipcodes"],
     }
