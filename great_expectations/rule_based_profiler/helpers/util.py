@@ -13,21 +13,19 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     materialize_batch_request,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
-    PARAMETER_KEY,
     VARIABLES_PREFIX,
-    Builder,
     Domain,
     ParameterContainer,
-    get_fully_qualified_parameter_names,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
+from great_expectations.types import safe_deep_copy
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -41,7 +39,7 @@ def get_validator(
     *,
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -96,7 +94,7 @@ def get_validator(
 def get_batch_ids(
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -191,7 +189,7 @@ def get_parameter_value_and_validate_return_type(
     or as a fully-qualified parameter name.  In either case, it can optionally validate the type of the return value.
     """
     if isinstance(parameter_reference, dict):
-        parameter_reference = dict(copy.deepcopy(parameter_reference))
+        parameter_reference = safe_deep_copy(data=parameter_reference)
 
     parameter_reference = get_parameter_value(
         domain=domain,
@@ -230,6 +228,20 @@ def get_parameter_value(
                 variables=variables,
                 parameters=parameters,
             )
+    elif isinstance(parameter_reference, (list, set, tuple)):
+        parameter_reference_type: type = type(parameter_reference)
+        element: Any
+        return parameter_reference_type(
+            [
+                get_parameter_value(
+                    domain=domain,
+                    parameter_reference=element,
+                    variables=variables,
+                    parameters=parameters,
+                )
+                for element in parameter_reference
+            ]
+        )
     elif isinstance(
         parameter_reference, str
     ) and is_fully_qualified_parameter_name_literal_string_format(
@@ -241,25 +253,12 @@ def get_parameter_value(
             variables=variables,
             parameters=parameters,
         )
-        if isinstance(parameter_reference, dict):
-            for key, value in parameter_reference.items():
-                parameter_reference[key] = get_parameter_value(
-                    domain=domain,
-                    parameter_reference=value,
-                    variables=variables,
-                    parameters=parameters,
-                )
-        elif isinstance(
-            parameter_reference, str
-        ) and is_fully_qualified_parameter_name_literal_string_format(
-            fully_qualified_parameter_name=parameter_reference
-        ):
-            parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
-                fully_qualified_parameter_name=parameter_reference,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+        parameter_reference = get_parameter_value(
+            domain=domain,
+            parameter_reference=parameter_reference,
+            variables=variables,
+            parameters=parameters,
+        )
 
     return parameter_reference
 
@@ -392,153 +391,6 @@ def convert_variables_to_dict(
     )
 
     return variables or {}
-
-
-def init_rule_parameter_builders(
-    parameter_builder_configs: Optional[List[dict]] = None,
-    data_context: Optional["DataContext"] = None,  # noqa: F821
-) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
-    if parameter_builder_configs is None:
-        return None
-
-    return [
-        init_parameter_builder(
-            parameter_builder_config=parameter_builder_config,
-            data_context=data_context,
-        )
-        for parameter_builder_config in parameter_builder_configs
-    ]
-
-
-def init_parameter_builder(
-    parameter_builder_config: Union["ParameterBuilderConfig", dict],  # noqa: F821
-    data_context: Optional["DataContext"] = None,  # noqa: F821
-) -> "ParameterBuilder":  # noqa: F821
-    if not isinstance(parameter_builder_config, dict):
-        parameter_builder_config = parameter_builder_config.to_dict()
-
-    parameter_builder: "ParameterBuilder" = instantiate_class_from_config(  # noqa: F821
-        config=parameter_builder_config,
-        runtime_environment={"data_context": data_context},
-        config_defaults={
-            "module_name": "great_expectations.rule_based_profiler.parameter_builder"
-        },
-    )
-    return parameter_builder
-
-
-def init_rule_expectation_configuration_builders(
-    expectation_configuration_builder_configs: List[dict],
-    data_context: Optional["DataContext"] = None,  # noqa: F821
-) -> List["ExpectationConfigurationBuilder"]:  # noqa: F821
-    expectation_configuration_builder_config: dict
-    return [
-        init_expectation_configuration_builder(
-            expectation_configuration_builder_config=expectation_configuration_builder_config,
-            data_context=data_context,
-        )
-        for expectation_configuration_builder_config in expectation_configuration_builder_configs
-    ]
-
-
-def init_expectation_configuration_builder(
-    expectation_configuration_builder_config: Union[
-        "ExpectationConfigurationBuilder", dict  # noqa: F821
-    ],
-    data_context: Optional["DataContext"] = None,  # noqa: F821
-) -> "ExpectationConfigurationBuilder":  # noqa: F821
-    if not isinstance(expectation_configuration_builder_config, dict):
-        expectation_configuration_builder_config = (
-            expectation_configuration_builder_config.to_dict()
-        )
-
-    expectation_configuration_builder: "ExpectationConfigurationBuilder" = instantiate_class_from_config(  # noqa: F821
-        config=expectation_configuration_builder_config,
-        runtime_environment={"data_context": data_context},
-        config_defaults={
-            "class_name": "DefaultExpectationConfigurationBuilder",
-            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-        },
-    )
-    return expectation_configuration_builder
-
-
-def resolve_evaluation_dependencies(
-    parameter_builder: "ParameterBuilder",  # noqa: F821
-    parameter_container: ParameterContainer,
-    domain: Domain,
-    variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> None:
-    """
-    This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
-    "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to fulfill its goals.
-    """
-
-    # Step 1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
-    evaluation_parameter_builders: List[
-        "ParameterBuilder"  # noqa: F821
-    ] = parameter_builder.evaluation_parameter_builders
-    if not evaluation_parameter_builders:
-        return
-
-    # Step 2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
-    # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
-    # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name").
-    fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
-    )
-
-    # Step 3: Check for presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
-    # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
-    evaluation_parameter_builder: "ParameterBuilder"  # noqa: F821
-    for evaluation_parameter_builder in evaluation_parameter_builders:
-        fully_qualified_evaluation_parameter_builder_name: str = (
-            f"{PARAMETER_KEY}{evaluation_parameter_builder.name}"
-        )
-
-        if (
-            fully_qualified_evaluation_parameter_builder_name
-            not in fully_qualified_parameter_names
-        ):
-            set_batch_list_or_batch_request_on_builder(
-                builder=evaluation_parameter_builder,
-                batch_list=parameter_builder.batch_list,
-                batch_request=parameter_builder.batch_request,
-                force_batch_data=False,
-            )
-
-            evaluation_parameter_builder.build_parameters(
-                parameter_container=parameter_container,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-
-            # Step 4: Any "ParameterBuilder" object, including members of "evaluation_parameter_builders" list may be
-            # configured with its own "evaluation_parameter_builders" list.  Recursive call handles such situations.
-            resolve_evaluation_dependencies(
-                parameter_builder=evaluation_parameter_builder,
-                parameter_container=parameter_container,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-
-
-def set_batch_list_or_batch_request_on_builder(
-    builder: Builder,
-    batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
-    force_batch_data: bool = False,
-) -> None:
-    if force_batch_data or builder.batch_request is None:
-        builder.set_batch_data(
-            batch_list=batch_list,
-            batch_request=batch_request,
-        )
 
 
 def compute_quantiles(

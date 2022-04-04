@@ -14,12 +14,51 @@ from great_expectations.data_context.data_context import BaseDataContext
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.util import load_class
+from great_expectations.util import get_sqlalchemy_url, load_class
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
 )
 from tests.test_utils import create_files_in_directory, set_directory
+
+
+@pytest.fixture
+def test_connectable_postgresql_db(sa, test_backends, test_df):
+    """Populates a postgres DB with a `test_df` table in the `connection_test` schema to test DataConnectors against"""
+
+    if "postgresql" not in test_backends:
+        pytest.skip("skipping fixture because postgresql not selected")
+
+    url = get_sqlalchemy_url(
+        drivername="postgresql",
+        username="postgres",
+        password="",
+        host=os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+        port="5432",
+        database="test_ci",
+    )
+    engine = sa.create_engine(url)
+
+    schema_check_results = engine.execute(
+        "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';"
+    ).fetchall()
+    if len(schema_check_results) == 0:
+        engine.execute("CREATE SCHEMA connection_test;")
+
+    table_check_results = engine.execute(
+        """
+SELECT EXISTS (
+   SELECT FROM information_schema.tables
+   WHERE  table_schema = 'connection_test'
+   AND    table_name   = 'test_df'
+);
+"""
+    ).fetchall()
+    if table_check_results != [(True,)]:
+        test_df.to_sql(name="test_df", con=engine, index=True, schema="connection_test")
+
+    # Return a connection string to this newly-created db
+    return engine
 
 
 @mock.patch(
@@ -1183,7 +1222,7 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
         context = ge.get_context()
         mock_emit.reset_mock()  # Remove data_context.__init__ call
 
-        yaml_config = f"""
+        yaml_config = """
            class_name: Datasource
 
            execution_engine:
