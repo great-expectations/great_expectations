@@ -2261,7 +2261,7 @@ def test_add_datasource_from_yaml_sql_datasource(
 
     datasource_name: str = "my_datasource"
 
-    example_yaml = f"""
+    example_yaml = """
     class_name: SimpleSqlalchemyDatasource
     introspection:
       whole_table:
@@ -2455,7 +2455,7 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
 
     datasource_name: str = "my_datasource"
 
-    example_yaml = f"""
+    example_yaml = """
     class_name: Datasource
     execution_engine:
       class_name: SqlAlchemyExecutionEngine

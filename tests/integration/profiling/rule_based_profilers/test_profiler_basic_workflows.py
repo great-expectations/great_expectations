@@ -83,9 +83,9 @@ def test_domain_builder(data_context_with_taxi_data):
         data_connector_query={"index": -1},
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        data_context=context,
-        batch_request=batch_request,
         include_column_name_suffixes=["_amount"],
+        batch_request=batch_request,
+        data_context=context,
     )
     domains: list = domain_builder.get_domains()
     assert len(domains) == 4
@@ -117,9 +117,9 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
         data_connector_query={"index": -1},
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        data_context=context,
-        batch_request=batch_request.to_json_dict(),
         include_column_name_suffixes=["_amount"],
+        batch_request=batch_request.to_json_dict(),
+        data_context=context,
     )
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_not_be_null",
@@ -156,9 +156,9 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
         data_connector_query={"index": -1},
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        data_context=context,
-        batch_request=batch_request.to_json_dict(),
         include_column_name_suffixes=["_amount"],
+        batch_request=batch_request.to_json_dict(),
+        data_context=context,
     )
     # parameter_builder
     numeric_range_parameter_builder: MetricMultiBatchParameterBuilder = (
@@ -210,9 +210,9 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         data_connector_query={"index": -1},
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        data_context=context,
-        batch_request=batch_request.to_json_dict(),
         include_column_name_suffixes=["_amount"],
+        batch_request=batch_request.to_json_dict(),
+        data_context=context,
     )
     # parameter_builder
     numeric_range_parameter_builder: MetricMultiBatchParameterBuilder = (
@@ -331,9 +331,9 @@ def test_profiler_run_with_expectation_suite_arg(
         data_connector_query={"index": -1},
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        data_context=context,
-        batch_request=batch_request.to_json_dict(),
         include_column_name_suffixes=["_amount"],
+        batch_request=batch_request.to_json_dict(),
+        data_context=context,
     )
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_not_be_null",

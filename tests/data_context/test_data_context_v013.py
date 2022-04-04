@@ -246,7 +246,7 @@ def test_config_variables(empty_data_context):
 def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
     context = empty_data_context
 
-    yaml_config = f"""
+    yaml_config = """
         class_name: Datasource
 
         execution_engine:
@@ -405,7 +405,7 @@ def test_relative_data_connector_default_and_relative_asset_base_directory_paths
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    yaml_config = f"""
+    yaml_config = """
 class_name: Datasource
 
 execution_engine:
@@ -466,7 +466,7 @@ def test__get_data_context_version(empty_data_context, titanic_data_context):
     assert not context._get_data_context_version("some_datasource_name", **{})
     assert not context._get_data_context_version(arg1="some_datasource_name", **{})
 
-    yaml_config = f"""
+    yaml_config = """
 class_name: Datasource
 
 execution_engine:
