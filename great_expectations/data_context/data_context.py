@@ -1860,11 +1860,17 @@ class BaseDataContext(ConfigPeer):
                 )
             )
 
+        validator: Validator = self.get_validator_using_batch_list(
+            expectation_suite=expectation_suite,
+            batch_list=batch_list,
+        )
+
+        # either create the first citation or update the most recent citation if necessary
         if "citations" not in expectation_suite.meta:
-            citation_func = expectation_suite.add_citation
+            citation_func = validator.add_citation
             citation_comment = "Created suite via context.get_validator"
         else:
-            citation_func = expectation_suite.update_last_citation
+            citation_func = validator.update_last_citation
             citation_comment = "Updated suite via context.get_validator"
 
         if batch_request:
@@ -1881,11 +1887,6 @@ class BaseDataContext(ConfigPeer):
             citation_func(
                 comment=citation_comment,
             )
-
-        validator: Validator = self.get_validator_using_batch_list(
-            expectation_suite=expectation_suite,
-            batch_list=batch_list,
-        )
 
         # changes that validator made to the batch_request datasource config (e.g. add data_asset_name)
         # are updated in project config and saved to disk

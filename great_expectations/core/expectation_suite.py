@@ -145,8 +145,12 @@ class ExpectationSuite(SerializableDictDot):
         profiler_config: Optional[dict] = None,
         citation_date: Optional[Union[str, datetime.datetime]] = None,
     ):
-        if "citations" not in self.meta:
-            self.meta["citations"] = []
+        if len(self.meta["citations"]) > 0:
+            last_citation: Dict[str, Any] = self.meta["citations"][-1]
+        else:
+            raise KeyError(
+                f"ExpectationSuite {self.expectation_suite_name} has no existing citations to update."
+            )
 
         if isinstance(citation_date, str):
             citation_date = parse_string_to_datetime(datetime_string=citation_date)
@@ -169,10 +173,13 @@ class ExpectationSuite(SerializableDictDot):
         ge.util.filter_properties_dict(
             properties=citation, clean_falsy=True, inplace=True
         )
-        if len(self.meta["citations"]) > 0:
+
+        # only update the last citation if it is different
+        ignore_keys: List[str] = ["citation_date", "comment"]
+        if {k: v for k, v in last_citation.items() if k not in ignore_keys} != {
+            k: v for k, v in citation.items() if k not in ignore_keys
+        }:
             self.meta["citations"][-1] = citation
-        else:
-            self.meta["citations"].append(citation)
 
     def isEquivalentTo(self, other):
         """

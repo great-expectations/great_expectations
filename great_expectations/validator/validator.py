@@ -1888,6 +1888,29 @@ set as active.
             citation_date=citation_date,
         )
 
+    def update_last_citation(
+        self,
+        comment: str,
+        batch_spec: Optional[dict] = None,
+        batch_markers: Optional[dict] = None,
+        batch_definition: Optional[dict] = None,
+        citation_date: Optional[str] = None,
+    ) -> None:
+        """Adds a citation to an existing Expectation Suite within the validator"""
+        if batch_spec is None:
+            batch_spec = self.batch_spec
+        if batch_markers is None:
+            batch_markers = self.active_batch_markers
+        if batch_definition is None:
+            batch_definition = self.active_batch_definition
+        self._expectation_suite.update_last_citation(
+            comment,
+            batch_spec=batch_spec,
+            batch_markers=batch_markers,
+            batch_definition=batch_definition,
+            citation_date=citation_date,
+        )
+
     @property
     def expectation_suite(self) -> ExpectationSuite:
         return self._expectation_suite
