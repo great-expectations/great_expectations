@@ -75,11 +75,11 @@ class ExpectColumnValuesToBeLinestringKMDistanceBetween(ColumnMapExpectation):
             },
             "tests": [
                 {
-                    "title": "linestring_less_than_1000_km",
+                    "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "",
+                        "column": "linestring_less_than_1000_km",
                         "min_distance": 0,
                         "max_distance": 1000,
                     },
@@ -88,11 +88,11 @@ class ExpectColumnValuesToBeLinestringKMDistanceBetween(ColumnMapExpectation):
                     },
                 },
                 {
-                    "title": "linestring_between_1000_and_2000_km",
+                    "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "",
+                        "column": "linestring_between_1000_and_2000_km",
                         "min_distance": 1000,
                         "max_distance": 2000,
                     },
