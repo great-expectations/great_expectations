@@ -54,9 +54,9 @@ import re
 
 # DEBUG=True
 DEBUG=False
-if DEBUG:
-    import logging
-    logger = logging.getLogger(__name__)
+
+import logging
+logger = logging.getLogger(__name__)
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableChecksum(TableMetricProvider):
@@ -159,6 +159,8 @@ def get_bigquery_checksum_query(table_name, selectcolumns, ignore_columns):
 
 # function to form sqlite query as some functions will be different in each dialect.
 def get_sqlite_checksum_query(table_name, selectcolumns, ignore_columns):
+
+    logger.warning("“Warning: get_sqlite_checksum_query is experimental. The checksum or similar hashing function is not there in sqlite so using length function for testing purposes")
     # checksum or similar hashing function is not there in sqlite so using length function for testing purposes.
     return 'select sum(length(\'\' || ' \
                 + ' || '.join(
