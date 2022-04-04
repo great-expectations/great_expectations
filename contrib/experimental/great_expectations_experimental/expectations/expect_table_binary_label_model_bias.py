@@ -1,6 +1,13 @@
 import json
 from typing import Any, Dict, Optional, Tuple
 
+import aequitas.plot as ap
+import pandas as pd
+from aequitas.bias import Bias
+from aequitas.fairness import Fairness
+from aequitas.group import Group
+from aequitas.preprocessing import preprocess_input_df
+
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -14,19 +21,12 @@ from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 
-import pandas as pd
-from aequitas.group import Group
-from aequitas.bias import Bias
-from aequitas.fairness import Fairness
-import aequitas.plot as ap
-from aequitas.preprocessing import preprocess_input_df
-
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
-class TableEvaluatingModelBias(TableMetricProvider):
+class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
 
     metric_name = "table.model_bias"
-    value_keys = ("y_true","y_pred")
+    value_keys = ("y_true", "y_pred")
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
@@ -36,8 +36,8 @@ class TableEvaluatingModelBias(TableMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
-        reference_group = None,
-        alpha = .05
+        reference_group=None,
+        alpha=0.05,
     ):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
@@ -45,33 +45,37 @@ class TableEvaluatingModelBias(TableMetricProvider):
         df = df.rename(columns={"y_true": "label_value", "y_pred": "score"})
         df, _ = preprocess_input_df(df)
 
-        # Group() class evaluates biases across all subgroups in dataset by assembling a confusion matrix 
-        # of each subgroup, calculating used metrics such as false positive rate and false omission rate, 
+        # Group() class evaluates biases across all subgroups in dataset by assembling a confusion matrix
+        # of each subgroup, calculating used metrics such as false positive rate and false omission rate,
         # as well as counts by group and group prevelance among the sample population.
         g = Group()
-        # The get_crosstabs() method expects a dataframe with predefined columns score, and label_value 
+        # The get_crosstabs() method expects a dataframe with predefined columns score, and label_value
         # and treats other columns as attributes against which to test for disparities. Requires attributes
         # to be strings
         xtab, _ = g.get_crosstabs(df)
-        # Bias() class calculates disparities between groups based on the crosstab returned by the Group() 
-        # class get_crosstabs(). Disparities are calculated as a ratio of a metric for a group of interest 
+        # Bias() class calculates disparities between groups based on the crosstab returned by the Group()
+        # class get_crosstabs(). Disparities are calculated as a ratio of a metric for a group of interest
         # compared to a base group.
         b = Bias()
         # can pick frame of reference (ex: Caucasians or males historically favored), but thos
-        # chooses disparities in relation to the group with the lowest value for every disparity metric, 
+        # chooses disparities in relation to the group with the lowest value for every disparity metric,
         # as then every group's value will be at least 1.0, and relationships can be evaluated more linearly.
         if reference_group:
-            bdf = b.get_disparity_predefined_groups(xtab, original_df=df, 
-                                        ref_groups_dict=reference_group, 
-                                        alpha=alpha, check_significance=True, 
-                                        mask_significance=True)
+            bdf = b.get_disparity_predefined_groups(
+                xtab,
+                original_df=df,
+                ref_groups_dict=reference_group,
+                alpha=alpha,
+                check_significance=True,
+                mask_significance=True,
+            )
         else:
             bdf = b.get_disparity_major_group(xtab, original_df=df)
         f = Fairness()
         fdf = f.get_group_value_fairness(bdf)
-        #gaf = f.get_group_attribute_fairness(fdf) #this produces cool chart that would be nice to display
+        # gaf = f.get_group_attribute_fairness(fdf) #this produces cool chart that would be nice to display
         gof = f.get_overall_fairness(fdf)
-        return gof['Overall Fairness']
+        return gof["Overall Fairness"]
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -90,8 +94,8 @@ class TableEvaluatingModelBias(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTableModelBias(TableExpectation):
-    """Using Aeqitas we evaluate predicted and true values to evaluate certain metrics 
+class ExpectTableBinaryLabelModelBias(TableExpectation):
+    """Using Aeqitas we evaluate predicted and true values to evaluate certain metrics
     on how a classider model imposes bias on a given attribute group. Requirescolumns
     score (binary or continuous) and label_value (binary). For more information
     go to https://dssg.github.io/aequitas/examples/compas_demo.html"""
@@ -100,12 +104,24 @@ class ExpectTableModelBias(TableExpectation):
     examples = [
         {
             "data": {
-                "entity_id":[1,3,4,5,6],
-                "pred": [0,0,0,1,0],
-                "y": [0,1,1,0,0],
-                "race": ["African-American", "African-American","African-American","African-American","African-American"],
-                "sex":["Male","Male","Male","Male","Male"],
-                "age_cat":["Greater than 45","25 - 45","Less than 25","Less than 25","25 - 45"]
+                "entity_id": [1, 3, 4, 5, 6],
+                "pred": [0, 0, 0, 1, 0],
+                "y": [0, 1, 1, 0, 0],
+                "race": [
+                    "African-American",
+                    "African-American",
+                    "African-American",
+                    "African-American",
+                    "African-American",
+                ],
+                "sex": ["Male", "Male", "Male", "Male", "Male"],
+                "age_cat": [
+                    "Greater than 45",
+                    "25 - 45",
+                    "Less than 25",
+                    "Less than 25",
+                    "25 - 45",
+                ],
             },
             "tests": [
                 {
@@ -113,7 +129,7 @@ class ExpectTableModelBias(TableExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "important_columns":["race","sex"],
+                        "important_columns": ["race", "sex"],
                         "y_true": "y",
                         "y_pred": "pred",
                     },
@@ -126,9 +142,10 @@ class ExpectTableModelBias(TableExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "important_columns":["race","sex","age_cat"],
-                        "y_pred": "pred", 
-                        "y_true": "y"},
+                        "important_columns": ["race", "sex", "age_cat"],
+                        "y_pred": "pred",
+                        "y_true": "y",
+                    },
                     "out": {"success": False},
                 },
             ],
@@ -139,13 +156,13 @@ class ExpectTableModelBias(TableExpectation):
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["ai/ml", "fair-ai", "hackathon-22"],
-        "contributors": ["@luismdiaz01","@derekma73"],
+        "contributors": ["@luismdiaz01", "@derekma73"],
         "requirements": ["aequitas"],
     }
 
     metric_dependencies = ("table.model_bias",)
     success_keys = (
-        "important_columns", # might use this if people want to use specific features
+        "important_columns",  # might use this if people want to use specific features
         "y_true",
         "y_pred",
     )
@@ -153,7 +170,7 @@ class ExpectTableModelBias(TableExpectation):
     default_kwarg_values = {
         "important_columns": None,
         "y_pred": None,
-        "y_true": None, #When the y_true column is not included in the original data set, Aequitas calculates only Statistical Parity and Impact Parities.
+        "y_true": None,  # When the y_true column is not included in the original data set, Aequitas calculates only Statistical Parity and Impact Parities.
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -178,11 +195,10 @@ class ExpectTableModelBias(TableExpectation):
         if configuration is None:
             configuration = self.configuration
 
-#        columns = configuration.kwargs.get("important_columns")
+        #        columns = configuration.kwargs.get("important_columns")
         y_true = configuration.kwargs.get("y_true")
         y_pred = configuration.kwargs.get("y_pred")
         columns = configuration.kwargs.get("important_columns")
-
 
         try:
             assert columns is not None, "target columns must be specified"
@@ -210,11 +226,10 @@ class ExpectTableModelBias(TableExpectation):
                 reverse=True,
             )
         )
-#        columns = configuration["kwargs"].get("important_columns")
-
+        #        columns = configuration["kwargs"].get("important_columns")
 
         return {"result": {"observed_value": importances}}
 
 
 if __name__ == "__main__":
-    ExpectTableModelBias().print_diagnostic_checklist()
+    ExpectTableBinaryLabelModelBias().print_diagnostic_checklist()
