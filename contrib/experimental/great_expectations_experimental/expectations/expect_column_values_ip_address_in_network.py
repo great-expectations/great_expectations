@@ -1,11 +1,15 @@
+"""
+This is a template for creating custom ColumnMapExpectations.
+For detailed instructions on how to use it, please see:
+    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
+"""
+import ipaddress
 import json
 from typing import Optional
 
-import us
-
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
-
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -13,33 +17,25 @@ from great_expectations.expectations.metrics import (
 )
 
 
-def is_valid_state_abbreviation(state: str, dc_statehood: bool):
-    list_of_state_abbrs = [x.abbr for x in us.states.STATES]
-    if dc_statehood == True:
-        list_of_state_abbrs.append("DC")
-    else:
-        pass
-    if len(state) != 2:
-        return False
-    elif type(state) != str:
-        return False
-    elif state in list_of_state_abbrs:
-        return True
-    else:
-        return False
+def is_ip_address_in_network(addr: str, ip_network) -> bool:
+    for ipn in ip_network:
+        if ipaddress.ip_address(addr) in ipaddress.ip_network(ipn):
+            return True
+    return False
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidUSStateAbbreviation(ColumnMapMetricProvider):
+class ColumnValuesIpAddressInNetwork(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.valid_state_abbreviation"
+    condition_metric_name = "column_values.ip_address_in_network"
+    condition_value_keys = ("ip_network",)
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, dc_statehood=True, **kwargs):
-        return column.apply(lambda x: is_valid_state_abbreviation(x, dc_statehood))
+    def _pandas(cls, column, ip_network, **kwargs):
+        return column.apply(lambda x: is_ip_address_in_network(x, ip_network))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -53,35 +49,54 @@ class ColumnValuesToBeValidUSStateAbbreviation(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidUSStateAbbreviation(ColumnMapExpectation):
-    """Expect values in this column to be valid state abbreviations.
-    See https://pypi.org/project/us/ for more information.
-    DC statehood is a perennial issue in data science, and the owners of the us repo addressed it differently than we have: https://github.com/unitedstates/python-us/issues/50
-    dc_statehood defaults to True, though can be overriden by end users
-    """
+class ExpectColumnValuesIpAddressInNetwork(ColumnMapExpectation):
+    """Expect the provided IP address in the network which passed in the parameters"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "valid_state_abbreviation": ["KS", "MI", "AL", "NE", "ND"],
-                "invalid_state_abbreviation": ["", "1234", "WVV", "AA", "WX"],
+                "all_in": [
+                    "192.168.0.0",
+                    "192.168.0.1",
+                    "192.168.0.2",
+                    "192.168.0.3",
+                    "192.168.0.254",
+                ],
+                "some_other": [
+                    "213.181.199.16",
+                    "213.181.199.16",
+                    "213.181.199.16",
+                    "213.181.199.16",
+                    "142.250.180.206",
+                ],
             },
             "tests": [
                 {
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "valid_state_abbreviation"},
-                    "out": {"success": True},
+                    "in": {
+                        "column": "all_in",
+                        "ip_network": ["192.168.0.0/24", "54.33.0.0/17"],
+                    },
+                    "out": {
+                        "success": True,
+                    },
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "invalid_state_abbreviation"},
-                    "out": {"success": False},
+                    "in": {
+                        "column": "some_other",
+                        "ip_network": ["192.168.0.0/24"],
+                        "mostly": 0.9,
+                    },
+                    "out": {
+                        "success": False,
+                    },
                 },
             ],
         }
@@ -89,10 +104,13 @@ class ExpectColumnValuesToBeValidUSStateAbbreviation(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_state_abbreviation"
+    map_metric = "column_values.ip_address_in_network"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    success_keys = ("mostly",)
+    success_keys = (
+        "mostly",
+        "ip_network",
+    )
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
@@ -126,20 +144,26 @@ class ExpectColumnValuesToBeValidUSStateAbbreviation(ColumnMapExpectation):
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
 
+        return True
+
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
+        "maturity": "experimental",
         "tags": [
-            "hackathon",
+            "hackathon-22",
+            "experimental",
             "typed-entities",
         ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@luismdiaz01",
-            "@derekma73",  # Don't forget to add your github handle here!
+            "@szecsip",  # Don't forget to add your github handle here!
         ],
-        "requirements": ["us"],
     }
+
+    success_keys = (
+        "ip_network",
+        "mostly",
+    )
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidUSStateAbbreviation().print_diagnostic_checklist()
+    ExpectColumnValuesIpAddressInNetwork().print_diagnostic_checklist()

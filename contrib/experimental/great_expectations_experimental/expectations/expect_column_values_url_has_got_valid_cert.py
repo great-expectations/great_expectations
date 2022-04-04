@@ -1,11 +1,20 @@
+"""
+This is a template for creating custom ColumnMapExpectations.
+For detailed instructions on how to use it, please see:
+    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
+"""
+import datetime
 import json
+import socket
+import ssl
+from datetime import datetime
 from typing import Optional
 
-import us
+from dateutil.parser import parse
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
-
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -13,33 +22,49 @@ from great_expectations.expectations.metrics import (
 )
 
 
-def is_valid_state_abbreviation(state: str, dc_statehood: bool):
-    list_of_state_abbrs = [x.abbr for x in us.states.STATES]
-    if dc_statehood == True:
-        list_of_state_abbrs.append("DC")
-    else:
-        pass
-    if len(state) != 2:
-        return False
-    elif type(state) != str:
-        return False
-    elif state in list_of_state_abbrs:
-        return True
-    else:
+def get_certificate_exp_date(host, port=443, timeout=1):
+    try:
+        context = ssl.create_default_context()
+        conn = socket.create_connection((host, port))
+        sock = context.wrap_socket(conn, server_hostname=host)
+        sock.settimeout(timeout)
+        cert = sock.getpeercert()
+        expiry_date = datetime.strptime(cert["notAfter"], "%b %d %H:%M:%S %Y %Z")
+        before_date = datetime.strptime(cert["notBefore"], "%b %d %H:%M:%S %Y %Z")
+        return before_date, expiry_date
+    except Exception as e:
+        return parse("1900-01-01"), parse("1900-01-01")
+    finally:
+        sock.close()
+
+
+def has_valid_cert(url: str) -> bool:
+    try:
+        before_date, expiry_date = get_certificate_exp_date(url)
+        if (
+            expiry_date > datetime.utcnow()
+            and before_date < datetime.utcnow()
+            and expiry_date is not None
+            and before_date is not None
+        ):
+            return True
+        else:
+            return False
+    except Exception as e:
         return False
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidUSStateAbbreviation(ColumnMapMetricProvider):
+class ColumnValuesUrlHasGotValidCert(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.valid_state_abbreviation"
+    condition_metric_name = "column_values.valid_cert"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, dc_statehood=True, **kwargs):
-        return column.apply(lambda x: is_valid_state_abbreviation(x, dc_statehood))
+    def _pandas(cls, column, **kwargs):
+        return column.apply(lambda x: has_valid_cert(x))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -53,35 +78,47 @@ class ColumnValuesToBeValidUSStateAbbreviation(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidUSStateAbbreviation(ColumnMapExpectation):
-    """Expect values in this column to be valid state abbreviations.
-    See https://pypi.org/project/us/ for more information.
-    DC statehood is a perennial issue in data science, and the owners of the us repo addressed it differently than we have: https://github.com/unitedstates/python-us/issues/50
-    dc_statehood defaults to True, though can be overriden by end users
-    """
+class ExpectColumnValuesUrlHasGotValidCert(ColumnMapExpectation):
+    """Expect provided url has got valid cert. (NotBefore < now < NotAfter"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "valid_state_abbreviation": ["KS", "MI", "AL", "NE", "ND"],
-                "invalid_state_abbreviation": ["", "1234", "WVV", "AA", "WX"],
+                "all_valid": [
+                    "google.com",
+                    "index.hu",
+                    "yahoo.com",
+                    "github.com",
+                    "microsoft.com",
+                ],
+                "some_other": [
+                    "google.com",
+                    "index.hu",
+                    "yahoo.com",
+                    "github.com",
+                    "expired.badssl.com",
+                ],
             },
             "tests": [
                 {
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "valid_state_abbreviation"},
-                    "out": {"success": True},
+                    "in": {"column": "all_valid"},
+                    "out": {
+                        "success": True,
+                    },
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "invalid_state_abbreviation"},
-                    "out": {"success": False},
+                    "in": {"column": "some_other", "mostly": 0.9},
+                    "out": {
+                        "success": False,
+                    },
                 },
             ],
         }
@@ -89,7 +126,7 @@ class ExpectColumnValuesToBeValidUSStateAbbreviation(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_state_abbreviation"
+    map_metric = "column_values.valid_cert"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
@@ -126,20 +163,21 @@ class ExpectColumnValuesToBeValidUSStateAbbreviation(ColumnMapExpectation):
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
 
+        return True
+
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
+        "maturity": "experimental",
         "tags": [
-            "hackathon",
+            "hackathon-22",
+            "experimental",
             "typed-entities",
         ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@luismdiaz01",
-            "@derekma73",  # Don't forget to add your github handle here!
+            "@szecsip",  # Don't forget to add your github handle here!
         ],
-        "requirements": ["us"],
     }
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidUSStateAbbreviation().print_diagnostic_checklist()
+    ExpectColumnValuesUrlHasGotValidCert().print_diagnostic_checklist()
