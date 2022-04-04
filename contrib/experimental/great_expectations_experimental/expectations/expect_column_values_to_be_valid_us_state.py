@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 
 import us
@@ -148,7 +149,7 @@ class ExpectColumnValuesToBeValidUSState(ColumnMapExpectation):
             "@luismdiaz01",
             "@derekma73",  # Don't forget to add your github handle here!
         ],
-        "requirements":["us"],
+        "requirements": ["us"],
     }
 
 
