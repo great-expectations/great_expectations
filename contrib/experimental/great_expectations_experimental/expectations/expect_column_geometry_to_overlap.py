@@ -69,6 +69,7 @@ class ExpectColumnGeometryToOverlap(ColumnExpectation):
                 "geometry__not_overlaps": [
                     "Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])",
                     "Polygon([(2, 2), (4, 2), (4, 4), (2, 4)])",
+                    "Point(5, 6)"
                 ],
             },
             "tests": [
