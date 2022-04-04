@@ -2,10 +2,8 @@ from typing import Optional
 
 import pandas as pd
 import pygeos as geos
-
 from geopy import geocoders
 from geopy.distance import distance, lonlat
-
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
