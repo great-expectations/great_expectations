@@ -1,8 +1,9 @@
 import copy
 import json
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.config.base import (
     domainBuilderConfigSchema,
@@ -46,16 +47,30 @@ class Rule(SerializableDictDot):
     def generate(
         self,
         variables: Optional[ParameterContainer] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
     ) -> List[ExpectationConfiguration]:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
         ConfigurationBuilder available based on the instantiation.
+        Args:
+            variables: attribute name/value pairs, commonly-used in Builder objects.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
 
-        :return: List of Corresponding Expectation Configurations representing every configured rule
+        Returns:
+            List of Corresponding Expectation Configurations representing every configured rule
         """
         expectation_configurations: List[ExpectationConfiguration] = []
 
-        domains: List[Domain] = self.domain_builder.get_domains(variables=variables)
+        domains: List[Domain] = self.domain_builder.get_domains(
+            variables=variables,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            force_batch_data=force_batch_data,
+        )
 
         domain: Domain
         for domain in domains:
@@ -68,10 +83,14 @@ class Rule(SerializableDictDot):
             parameter_builder: ParameterBuilder
             for parameter_builder in parameter_builders:
                 parameter_builder.build_parameters(
-                    parameter_container=parameter_container,
                     domain=domain,
                     variables=variables,
                     parameters=self._parameters,
+                    parameter_computation_impl=None,
+                    json_serialize=None,
+                    batch_list=batch_list,
+                    batch_request=batch_request,
+                    force_batch_data=force_batch_data,
                 )
 
             expectation_configuration_builders: List[
@@ -81,10 +100,12 @@ class Rule(SerializableDictDot):
             for expectation_configuration_builder in expectation_configuration_builders:
                 expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
-                        parameter_container=parameter_container,
                         domain=domain,
                         variables=variables,
                         parameters=self._parameters,
+                        batch_list=batch_list,
+                        batch_request=batch_request,
+                        force_batch_data=force_batch_data,
                     )
                 )
 

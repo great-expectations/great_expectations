@@ -174,7 +174,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -273,9 +272,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 attributed_resolved_metrics.metric_attributes["strftime_format"]
             ] = success_ratio
 
-        best_fmt_string: Optional[str] = None
-        best_ratio: float = 0.0
-
         # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         threshold: float = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -285,17 +281,26 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        fmt_string: str
-        ratio: float
-        for fmt_string, ratio in format_string_success_ratios.items():
-            if ratio > best_ratio and ratio >= threshold:
-                best_fmt_string = fmt_string
-                best_ratio = ratio
+        best_fmt_string: Optional[str] = None
+        best_ratio: float = 0.0
 
+        # get best-matching datetime string that matches greater than threshold
+        (
+            best_fmt_string,
+            best_ratio,
+        ) = ParameterBuilder._get_best_candidate_above_threshold(
+            format_string_success_ratios, threshold
+        )
+        # dict of sorted datetime and ratios for all evaluated candidates
+        sorted_fmt_strings_and_ratios: dict = (
+            ParameterBuilder._get_sorted_candidates_and_ratios(
+                format_string_success_ratios
+            )
+        )
         return (
             best_fmt_string,
             {
                 "success_ratio": best_ratio,
-                "candidate_strings": sorted(candidate_strings),
+                "candidate_strings": sorted_fmt_strings_and_ratios,
             },
         )
