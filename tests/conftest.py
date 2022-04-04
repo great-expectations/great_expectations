@@ -63,8 +63,6 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.util import is_library_loadable
 
-RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
-
 yaml = YAML()
 ###
 #
@@ -75,21 +73,6 @@ yaml = YAML()
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 logger = logging.getLogger(__name__)
-
-
-def skip_if_python_below_minimum_version():
-    """
-    All test fixtures for Rule-Based Profiler must execute this method; for example:
-        ```
-        skip_if_python_below_minimum_version()
-        ```
-    for as long as the support for Python versions less than 3.7 is provided.  In particular, Python-3.6 support for
-    "dataclasses.asdict()" does not handle None values as well as the more recent versions of Python do.
-    """
-    if sys.version_info < RULE_BASED_PROFILER_MIN_PYTHON_VERSION:
-        pytest.skip(
-            "skipping fixture because Python version 3.7 (or greater) is required"
-        )
 
 
 def pytest_configure(config):
@@ -2055,7 +2038,7 @@ def basic_datasource(tmp_path_factory):
 
     basic_datasource: Datasource = instantiate_class_from_config(
         config=yaml.load(
-            f"""
+            """
 class_name: Datasource
 
 data_connectors:
@@ -2095,7 +2078,7 @@ def db_file():
 def data_context_with_datasource_pandas_engine(empty_data_context):
     context = empty_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine
@@ -2117,7 +2100,7 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
 def data_context_with_datasource_spark_engine(empty_data_context, spark_session):
     context = empty_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: SparkDFExecutionEngine
@@ -2295,7 +2278,7 @@ def empty_cloud_data_context(
 def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
     context = empty_cloud_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine
@@ -2340,15 +2323,11 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
 
 @pytest.fixture(scope="function")
 def profiler_name() -> str:
-    skip_if_python_below_minimum_version()
-
     return "my_first_profiler"
 
 
 @pytest.fixture(scope="function")
 def profiler_store_name() -> str:
-    skip_if_python_below_minimum_version()
-
     return "profiler_store"
 
 
@@ -2360,8 +2339,6 @@ def profiler_config_with_placeholder_args(
     This fixture does not correspond to a practical profiler with rules, whose constituent components perform meaningful
     computations; rather, it uses "placeholder" style attribute values, which is adequate for configuration level tests.
     """
-    skip_if_python_below_minimum_version()
-
     return RuleBasedProfilerConfig(
         name=profiler_name,
         class_name="RuleBasedProfiler",
@@ -2404,29 +2381,21 @@ def profiler_config_with_placeholder_args(
 
 @pytest.fixture
 def empty_profiler_store(profiler_store_name: str) -> ProfilerStore:
-    skip_if_python_below_minimum_version()
-
     return ProfilerStore(profiler_store_name)
 
 
 @pytest.fixture
 def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
-    skip_if_python_below_minimum_version()
-
     return ConfigurationIdentifier(configuration_key=profiler_name)
 
 
 @pytest.fixture
 def ge_cloud_profiler_id() -> str:
-    skip_if_python_below_minimum_version()
-
     return "my_ge_cloud_profiler_id"
 
 
 @pytest.fixture
 def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
-    skip_if_python_below_minimum_version()
-
     return GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_profiler_id)
 
 
@@ -2436,8 +2405,6 @@ def populated_profiler_store(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
     profiler_key: ConfigurationIdentifier,
 ) -> ProfilerStore:
-    skip_if_python_below_minimum_version()
-
     # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(
         profiler_config_with_placeholder_args
@@ -2478,8 +2445,6 @@ def alice_columnar_table_single_batch(empty_data_context):
 
     Alice configures her Profiler using the YAML configurations and data file locations captured in this fixture.
     """
-    skip_if_python_below_minimum_version()
-
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
         os.path.join(
@@ -2551,6 +2516,69 @@ def alice_columnar_table_single_batch(empty_data_context):
         ExpectationConfiguration
     ] = []
     column_data: Dict[str, str]
+
+    expected_candidate_strings_dict: dict = {
+        "%Y-%m-%d %H:%M:%S": 1.0,
+        "%y/%m/%d %H:%M:%S": 0.0,
+        "%y/%m/%d": 0.0,
+        "%y-%m-%d %H:%M:%S,%f %z": 0.0,
+        "%y-%m-%d %H:%M:%S,%f": 0.0,
+        "%y-%m-%d %H:%M:%S": 0.0,
+        "%y-%m-%d": 0.0,
+        "%y%m%d %H:%M:%S": 0.0,
+        "%m/%d/%y*%H:%M:%S": 0.0,
+        "%m/%d/%y %H:%M:%S %z": 0.0,
+        "%m/%d/%Y*%H:%M:%S*%f": 0.0,
+        "%m/%d/%Y*%H:%M:%S": 0.0,
+        "%m/%d/%Y %H:%M:%S %z": 0.0,
+        "%m/%d/%Y %H:%M:%S %p:%f": 0.0,
+        "%m/%d/%Y %H:%M:%S %p": 0.0,
+        "%m/%d/%Y": 0.0,
+        "%m-%d-%Y": 0.0,
+        "%m%d_%H:%M:%S.%f": 0.0,
+        "%m%d_%H:%M:%S": 0.0,
+        "%d/%m/%Y": 0.0,
+        "%d/%b/%Y:%H:%M:%S %z": 0.0,
+        "%d/%b/%Y:%H:%M:%S": 0.0,
+        "%d/%b/%Y %H:%M:%S": 0.0,
+        "%d/%b %H:%M:%S,%f": 0.0,
+        "%d-%m-%Y": 0.0,
+        "%d-%b-%Y %H:%M:%S.%f": 0.0,
+        "%d-%b-%Y %H:%M:%S": 0.0,
+        "%d %b %Y %H:%M:%S*%f": 0.0,
+        "%d %b %Y %H:%M:%S": 0.0,
+        "%b %d, %Y %H:%M:%S %p": 0.0,
+        "%b %d %Y %H:%M:%S": 0.0,
+        "%b %d %H:%M:%S %z %Y": 0.0,
+        "%b %d %H:%M:%S %z": 0.0,
+        "%b %d %H:%M:%S %Y": 0.0,
+        "%b %d %H:%M:%S": 0.0,
+        "%Y/%m/%d*%H:%M:%S": 0.0,
+        "%Y/%m/%d": 0.0,
+        "%Y-%m-%dT%z": 0.0,
+        "%Y-%m-%d*%H:%M:%S:%f": 0.0,
+        "%Y-%m-%d*%H:%M:%S": 0.0,
+        "%Y-%m-%d'T'%H:%M:%S.%f'%z'": 0.0,
+        "%Y-%m-%d'T'%H:%M:%S.%f": 0.0,
+        "%Y-%m-%d'T'%H:%M:%S'%z'": 0.0,
+        "%Y-%m-%d'T'%H:%M:%S%z": 0.0,
+        "%Y-%m-%d'T'%H:%M:%S": 0.0,
+        "%Y-%m-%d %H:%M:%S.%f%z": 0.0,
+        "%Y-%m-%d %H:%M:%S.%f": 0.0,
+        "%Y-%m-%d %H:%M:%S,%f%z": 0.0,
+        "%Y-%m-%d %H:%M:%S,%f": 0.0,
+        "%Y-%m-%d %H:%M:%S%z": 0.0,
+        "%Y-%m-%d %H:%M:%S %z": 0.0,
+        "%Y-%m-%d": 0.0,
+        "%Y%m%d %H:%M:%S.%f": 0.0,
+        "%Y %b %d %H:%M:%S.%f*%Z": 0.0,
+        "%Y %b %d %H:%M:%S.%f %Z": 0.0,
+        "%Y %b %d %H:%M:%S.%f": 0.0,
+        "%H:%M:%S.%f": 0.0,
+        "%H:%M:%S,%f": 0.0,
+        "%H:%M:%S": 0.0,
+    }
+
     for column_data in my_rule_for_timestamps_column_data:
         my_rule_for_timestamps_expectation_configurations.extend(
             [
@@ -2620,7 +2648,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                             ],  # Pin to event_ts column
                             "details": {
                                 "success_ratio": 1.0,
-                                "candidate_strings": sorted(DEFAULT_CANDIDATE_STRINGS),
+                                "candidate_strings": expected_candidate_strings_dict,
                             },
                         },
                     },
@@ -2705,8 +2733,6 @@ def alice_columnar_table_single_batch_context(
     empty_data_context_stats_enabled,
     alice_columnar_table_single_batch,
 ):
-    skip_if_python_below_minimum_version()
-
     context: DataContext = empty_data_context_stats_enabled
     # We need our salt to be consistent between runs to ensure idempotent anonymized values
     context._usage_statistics_handler = UsageStatisticsHandler(
@@ -2811,8 +2837,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     Bobby uses a crude, highly inaccurate deterministic parametric estimator -- for illustrative purposes.
     Bobby configures his Profiler using the YAML configurations and data file locations captured in this fixture.
     """
-    skip_if_python_below_minimum_version()
-
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
         os.path.join(
@@ -3526,10 +3550,10 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {
                     "details": {
                         "success_ratio": 1.0,
-                        "candidate_strings": [
-                            "%Y-%m-%d %H:%M:%S",
-                            "%y-%m-%d",
-                        ],
+                        "candidate_strings": {
+                            "%Y-%m-%d %H:%M:%S": 1.0,
+                            "%y-%m-%d": 0.0,
+                        },
                     },
                     "notes": {
                         "format": "markdown",
@@ -3550,10 +3574,10 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {
                     "details": {
                         "success_ratio": 1.0,
-                        "candidate_strings": [
-                            "%Y-%m-%d %H:%M:%S",
-                            "%y-%m-%d",
-                        ],
+                        "candidate_strings": {
+                            "%Y-%m-%d %H:%M:%S": 1.0,
+                            "%y-%m-%d": 0.0,
+                        },
                     },
                     "notes": {
                         "format": "markdown",
@@ -3573,15 +3597,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_regex",
                 "kwargs": {
                     "column": "VendorID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": r"^\d{1}$",
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "success_ratio": 1.0,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
@@ -3597,21 +3619,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "RatecodeID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": r"^\d{1}$",
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "success_ratio": 1.0,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3621,21 +3641,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "PULocationID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": r"^\d{1}$",
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "success_ratio": 1.0,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3645,21 +3663,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "DOLocationID",
-                    "regex": {
-                        "value": [r"^\d{1}$"],
-                        "details": {
-                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
-                            "threshold": 0.9,
-                        },
-                    },
+                    "regex": r"^\d{1}$",
                 },
                 "meta": {
+                    "details": {
+                        "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                        "success_ratio": 1.0,
+                    },
                     "notes": {
                         "format": "markdown",
                         "content": [
                             "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
                         ],
-                    }
+                    },
                 },
             }
         ),
@@ -3752,8 +3768,6 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     tmp_path_factory,
     monkeypatch,
 ) -> DataContext:
-    skip_if_python_below_minimum_version()
-
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
@@ -3854,8 +3868,6 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
 
     Bobster configures his Profiler using the YAML configurations and data file locations captured in this fixture.
     """
-    skip_if_python_below_minimum_version()
-
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
         os.path.join(
@@ -3923,8 +3935,6 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
     of a batch sampled from a normal distribution with the mean of 5,000 rows and the standard deviation of 1,000 rows.
     """
-    skip_if_python_below_minimum_version()
-
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
@@ -4008,8 +4018,6 @@ def quentin_columnar_table_multi_batch():
     Quentin uses a custom implementation of the "bootstrap" non-parametric (i.e, data-driven) statistical estimator.
     Quentin configures his Profiler using the YAML configurations and data file locations captured in this fixture.
     """
-    skip_if_python_below_minimum_version()
-
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
         os.path.join(
@@ -4062,8 +4070,6 @@ def quentin_columnar_table_multi_batch_data_context(
     This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
     of each batch being equal to the original number per log file (10,000 rows).
     """
-    skip_if_python_below_minimum_version()
-
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
@@ -4120,7 +4126,6 @@ def multibatch_generic_csv_generator():
     """
     Construct a series of csv files with many data types for use in multibatch testing
     """
-    skip_if_python_below_minimum_version()
 
     def _multibatch_generic_csv_generator(
         data_path: str,
@@ -4177,8 +4182,6 @@ def multibatch_generic_csv_generator():
 
 @pytest.fixture
 def multibatch_generic_csv_generator_context(monkeypatch, empty_data_context):
-    skip_if_python_below_minimum_version()
-
     context: DataContext = empty_data_context
     monkeypatch.chdir(context.root_directory)
     data_relative_path = "../data"
