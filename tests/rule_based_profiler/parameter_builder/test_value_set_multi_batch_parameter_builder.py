@@ -62,20 +62,19 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
     )
-
-    assert parameter_container.parameter_nodes is None
-
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    assert parameter_container.parameter_nodes is None
+
     variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -141,20 +140,19 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
     )
-
-    assert parameter_container.parameter_nodes is None
-
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    assert parameter_container.parameter_nodes is None
+
     variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -219,21 +217,20 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    variables: Optional[ParameterContainer] = None
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    assert parameter_container.parameter_nodes is None
-
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
-    variables: Optional[ParameterContainer] = None
+
+    assert parameter_container.parameter_nodes is None
+
     value_set_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -298,21 +295,20 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    variables: Optional[ParameterContainer] = None
 
     metric_domain_kwargs: dict = {"column": "store_and_fwd_flag"}
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    assert parameter_container.parameter_nodes is None
-
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
-    variables: Optional[ParameterContainer] = None
+
+    assert parameter_container.parameter_nodes is None
+
     value_set_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
