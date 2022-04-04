@@ -1374,6 +1374,61 @@ def test_update_configured_asset_sql_data_connector_missing_data_asset_persists_
     )
 
 
+def test_update_inferred_asset_sql_data_connector_missing_data_asset_persists_to_data_context(
+    postgres_introspection_directives_schema_data_context,
+):
+    context: DataContext = postgres_introspection_directives_schema_data_context
+
+    datasource_name: str = "my_datasource"
+    data_connector_name: str = "inferred_data_connector_test_connection_schema"
+    data_asset_name: str = "test_df"
+
+    batch_request: dict[str, Any] = {
+        "datasource_name": datasource_name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        "limit": 1000,
+    }
+
+    expectation_suite_name: str = "test"
+
+    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    validator: Validator = context.get_validator(
+        batch_request=batch_request, expectation_suite_name=expectation_suite_name
+    )
+
+    validator.expect_column_values_to_not_be_null(column="id")
+
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    # context.get_validator should add the new citation
+    assert (
+        validator.expectation_suite.meta["citations"][0][
+            "batch_request"
+        ].data_asset_name
+        == data_asset_name
+    )
+
+    # data_asset_name should be updated in context.datasources
+    assert (
+        data_asset_name
+        in context.datasources[datasource_name]
+        .data_connectors[data_connector_name]
+        .assets.keys()
+    )
+
+    # data_asset_name should be updated in context.config.datasources
+    assert (
+        data_asset_name
+        in context.config.datasources[datasource_name]
+        .data_connectors[data_connector_name]
+        .assets.keys()
+    )
+
+
 def test_update_runtime_data_connector_missing_data_asset_persists_to_data_context(
     sqlite_runtime_data_connector_missing_data_asset_data_context,
 ):

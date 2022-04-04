@@ -4310,6 +4310,47 @@ def sqlite_runtime_data_connector_missing_data_asset_data_context(
 
 
 @pytest.fixture
+def test_connectable_postgresql_db(sa, test_backends, test_df):
+    """Populates a postgres DB with a `test_df` table in the `connection_test` schema to test DataConnectors against"""
+
+    if "postgresql" not in test_backends:
+        pytest.skip("skipping fixture because postgresql not selected")
+
+    import sqlalchemy as sa
+
+    url = sa.engine.url.URL(
+        drivername="postgresql",
+        username="postgres",
+        password="",
+        host=os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+        port="5432",
+        database="test_ci",
+    )
+    engine = sa.create_engine(url)
+
+    schema_check_results = engine.execute(
+        "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';"
+    ).fetchall()
+    if len(schema_check_results) == 0:
+        engine.execute("CREATE SCHEMA connection_test;")
+
+    table_check_results = engine.execute(
+        """
+SELECT EXISTS (
+   SELECT FROM information_schema.tables
+   WHERE  table_schema = 'connection_test'
+   AND    table_name   = 'test_df'
+);
+"""
+    ).fetchall()
+    if table_check_results != [(True,)]:
+        test_df.to_sql(name="test_df", con=engine, index=True, schema="connection_test")
+
+    # Return a connection string to this newly-created db
+    return engine
+
+
+@pytest.fixture
 def postgres_introspection_directives_schema_data_context(
     empty_data_context, test_connectable_postgresql_db
 ):

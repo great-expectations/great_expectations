@@ -141,18 +141,9 @@ class BaseDatasource:
         """
         self._validate_batch_request(batch_request=batch_request)
 
-        # checks if the data_asset_name is missing from data_context config and
-        # updates it if you are using a ConfiguredAssetSqlDataConnector
-        if (
-            isinstance(
-                self.data_connectors[batch_request.data_connector_name],
-                ConfiguredAssetSqlDataConnector,
-            )
-            and "data_connectors" in self._datasource_config
-        ):
-            self._update_missing_data_asset_name_from_configured_data_connector(
-                batch_request=batch_request
-            )
+        # checks if the data_asset_name is missing from data_context config and updates it if so
+        if "data_connectors" in self._datasource_config:
+            self._update_missing_data_asset_name(batch_request=batch_request)
 
         data_connector: DataConnector = self.data_connectors[
             batch_request.data_connector_name
@@ -220,10 +211,10 @@ class BaseDatasource:
                 batches.append(new_batch)
             return batches
 
-    def _update_missing_data_asset_name_from_configured_data_connector(
+    def _update_missing_data_asset_name(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> None:
-        # if the data_asset_name is missing from a ConfiguredAssetSqlDataConnector config,
+        # if the data_asset_name is missing from a data connector config,
         # add it as a table_name
         if (
             "assets"
