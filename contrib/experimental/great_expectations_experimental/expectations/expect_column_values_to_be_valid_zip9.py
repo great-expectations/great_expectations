@@ -1,6 +1,8 @@
 import json
 from typing import Optional
 
+import zipcodes
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
@@ -14,15 +16,14 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
-import zipcodes
 
 def is_valid_zip9(zip: str):
     if len(zip) != 10:
         return False
-    else:   
+    else:
         try:
             return zipcodes.is_real(zip)
-        except:  
+        except:
             return False
 
 
@@ -60,9 +61,8 @@ class ExpectColumnValuesToBeValidZip9(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_zip9": ["90001-0000", "78884-5888", "20010-8795","10011-9999"],
-                "invalid_zip9":["1111-10000","1234","99999", "254878291"],
-
+                "valid_zip9": ["90001-0000", "78884-5888", "20010-8795", "10011-9999"],
+                "invalid_zip9": ["1111-10000", "1234", "99999", "254878291"],
             },
             "tests": [
                 {
@@ -77,7 +77,7 @@ class ExpectColumnValuesToBeValidZip9(ColumnMapExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "invalid_zip9"},
-                    "out": {"success": False},  
+                    "out": {"success": False},
                 },
             ],
         }
@@ -124,10 +124,15 @@ class ExpectColumnValuesToBeValidZip9(ColumnMapExpectation):
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["hackathon","typed-entities"],  # Tags for this Expectation in the Gallery
+        "tags": [
+            "hackathon",
+            "typed-entities",
+        ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@luismdiaz01", "@derekma73"  # Don't forget to add your github handle here!
+            "@luismdiaz01",
+            "@derekma73",  # Don't forget to add your github handle here!
         ],
+        "requirements": ["zipcodes"],
     }
 
 
