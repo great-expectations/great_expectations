@@ -187,7 +187,6 @@ detected.
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -256,6 +255,7 @@ detected.
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
                 "num_bootstrap_samples": self.num_bootstrap_samples,
+                "bootstrap_random_seed": self.bootstrap_random_seed,
             }
         else:
             estimator_func = self._get_deterministic_estimate
@@ -265,7 +265,6 @@ detected.
 
         # Compute metric value for each Batch object.
         super().build_parameters(
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
