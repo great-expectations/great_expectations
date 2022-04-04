@@ -22,7 +22,8 @@ def is_valid_geometry(geo):
     try:
         return geo.is_valid
     except:
-        return False   
+        return False
+
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
@@ -54,6 +55,7 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
     See https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoSeries.is_valid.html
     for more information.
     """
+
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
 
@@ -61,16 +63,15 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
         {
             "data": {
                 "valid_geometry": [
-                            "Polygon([(0, 0), (1, 1), (0, 1)])",
-                            "LineString([(0, 0), (1, 1), (0, 1)])",
-                            "Point(0, 1)"
+                    "Polygon([(0, 0), (1, 1), (0, 1)])",
+                    "LineString([(0, 0), (1, 1), (0, 1)])",
+                    "Point(0, 1)",
                 ],
-                "invalid_geometry":[
+                "invalid_geometry": [
                     "Polygon([(0,0), (1, 1), (1, 0), (0, 1)])",
                     "None",
-                    "Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)])"
+                    "Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)])",
                 ],
-
             },
             "tests": [
                 {
@@ -85,7 +86,7 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "invalid_geometry"},
-                    "out": {"success": False},  
+                    "out": {"success": False},
                 },
             ],
         }
@@ -132,9 +133,10 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["hackathon","geospatial"],  # Tags for this Expectation in the Gallery
+        "tags": ["hackathon", "geospatial"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@luismdiaz01", "@derekma73"  # Don't forget to add your github handle here!
+            "@luismdiaz01",
+            "@derekma73",  # Don't forget to add your github handle here!
         ],
         "requirements": ["geopandas", "shapely"],
     }
