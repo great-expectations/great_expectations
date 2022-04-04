@@ -151,7 +151,7 @@ class ExpectColumnValuesToBeValidUSStateOrTerritory(ColumnMapExpectation):
             "@luismdiaz01",
             "@derekma73",  # Don't forget to add your github handle here!
         ],
-        "requirements":["us"],
+        "requirements": ["us"],
     }
 
 
