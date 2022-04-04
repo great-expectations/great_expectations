@@ -12,7 +12,7 @@ import time
 from functools import wraps
 from queue import Queue
 from types import FrameType
-from typing import Callable, Optional
+from typing import Callable, List, Optional
 
 import jsonschema
 import requests
@@ -22,6 +22,11 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
+)
+from great_expectations.core.usage_statistics.execution_environment import (
+    GEExecutionEnvironment,
+    PackageInfo,
+    PackageInfoSchema,
 )
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
@@ -116,7 +121,7 @@ class UsageStatisticsHandler:
     def build_init_payload(self) -> dict:
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
-        expectation_suites = [
+        expectation_suites: List[ExpectationSuite] = [
             self._data_context.get_expectation_suite(expectation_suite_name)
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
@@ -130,12 +135,26 @@ class UsageStatisticsHandler:
             "validation_operators": self._data_context.validation_operators,
             "data_docs_sites": self._data_context.project_config_with_variables_substituted.data_docs_sites,
             "expectation_suites": expectation_suites,
+            "dependencies": self._get_serialized_dependencies(),
         }
 
         anonymized_init_payload = self._anonymizer.anonymize_init_payload(
             init_payload=init_payload
         )
         return anonymized_init_payload
+
+    def _get_serialized_dependencies(self) -> List[dict]:
+        """Get the serialized dependencies from the GEExecutionEnvironment."""
+        ge_execution_environment: GEExecutionEnvironment = GEExecutionEnvironment()
+        dependencies: List[PackageInfo] = ge_execution_environment.dependencies
+
+        schema: PackageInfoSchema = PackageInfoSchema()
+
+        serialized_dependencies: List[dict] = [
+            schema.dump(package_info) for package_info in dependencies
+        ]
+
+        return serialized_dependencies
 
     def build_envelope(self, message: dict) -> dict:
         message["version"] = "1.0.0"
