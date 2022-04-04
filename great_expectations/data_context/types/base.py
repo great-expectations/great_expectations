@@ -419,7 +419,7 @@ class DataConnectorConfigSchema(Schema):
     )
     module_name = fields.String(
         required=False,
-        allow_nonw=True,
+        allow_none=True,
         missing="great_expectations.datasource.data_connector",
     )
 

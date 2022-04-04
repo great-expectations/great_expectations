@@ -1894,9 +1894,6 @@ class BaseDataContext(ConfigPeer):
                 initialize=False,
             )
 
-        if isinstance(self, DataContext):
-            self._save_project_config()
-
         return validator
 
     def get_validator_using_batch_list(
@@ -1969,6 +1966,12 @@ class BaseDataContext(ConfigPeer):
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
+        # Inferred data connectors should not write assets to yml config
+        for data_connector in datasource_config.data_connectors.values():
+            if data_connector.class_name.startswith("Inferred") and hasattr(
+                data_connector, "assets"
+            ):
+                data_connector.assets = None
         self.config["datasources"][name] = datasource_config
         datasource_config = self.project_config_with_variables_substituted.datasources[
             name
