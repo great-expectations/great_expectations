@@ -2,10 +2,11 @@
 title: How to configure a RuntimeDataConnector
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide demonstrates how to configure a RuntimeDataConnector and only applies to the V3 (Batch Request) API. A `RuntimeDataConnector` allows you to specify a Batch using a Runtime Batch Request, which is used to create a Validator. A Validator is the key object used to create Expectations and validate datasets.
+This guide demonstrates how to configure a RuntimeDataConnector and only applies to the V3 (Batch Request) API. A `RuntimeDataConnector` allows you to specify a <TechnicalTag tag="batch" text="Batch" /> using a Runtime <TechnicalTag tag="batch_request" text="Batch Request" />, which is used to create a Validator. A <TechnicalTag tag="validator" text="Validator" /> is the key object used to create <TechnicalTag tag="expectation" text="Expectations" /> and <TechnicalTag tag="validation" text="Validate" /> datasets.
 
 <Prerequisites>
 
@@ -29,18 +30,21 @@ Import these necessary packages and modules:
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L4-L5
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L2-L5
 ```
 
 </TabItem>
+
 </Tabs>
 
 ### 2. Set up a Datasource
@@ -54,6 +58,7 @@ All of the examples below assume you’re testing configuration using something 
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python
@@ -91,6 +96,7 @@ context.test_yaml_config(yaml.dump(datasource_config))
 ```
 
 </TabItem>
+
 </Tabs>
 
 If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
@@ -106,28 +112,31 @@ This basic configuration can be used in multiple ways depending on how the `Runt
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L10-L22
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L27-L41
 ```
 
 </TabItem>
+
 </Tabs>
 
-Once the RuntimeDataConnector is configured you can add your datasource using:
+Once the RuntimeDataConnector is configured you can add your <TechnicalTag tag="datasource" text="Datasource" /> using:
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L49-L49
 ```
 
 #### Example 1: RuntimeDataConnector for access to file-system data:
 
-At runtime, you would get a Validator from the Data Context by first defining a `RuntimeBatchRequest` with the `path` to your data defined in `runtime_parameters`:
+At runtime, you would get a Validator from the <TechnicalTag tag="data_context" text="Data Context" /> by first defining a `RuntimeBatchRequest` with the `path` to your data defined in `runtime_parameters`:
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py#L50-L57
 ```

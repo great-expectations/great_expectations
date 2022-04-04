@@ -48,12 +48,13 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "multi-column expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     metric_dependencies = tuple()
@@ -123,7 +124,7 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
                 "value": params.get("mostly"),
             },
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
         }
