@@ -1,8 +1,4 @@
-"""
-This is a template for creating custom ColumnMapExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
-"""
+import json
 from typing import Optional
 
 import us
@@ -158,6 +154,7 @@ class ExpectColumnValuesToBeValidUSStateOrTerritoryAbbreviation(ColumnMapExpecta
             "@luismdiaz01",
             "@derekma73",  # Don't forget to add your github handle here!
         ],
+        "requirements": ["us"],
     }
 
 
