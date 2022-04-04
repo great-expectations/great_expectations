@@ -128,6 +128,7 @@ class ExpectColumnValuesToBeValidZip5(ColumnMapExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@luismdiaz01", "@derekma73"  # Don't forget to add your github handle here!
         ],
+        "requirements": ["zipcodes"],
     }
 
 
