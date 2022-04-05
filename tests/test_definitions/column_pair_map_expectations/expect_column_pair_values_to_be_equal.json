@@ -47,6 +47,7 @@
       }
     },{
       "title" : "basic_negative_example_compare_numbers",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column_A": "a",
@@ -60,6 +61,7 @@
       }
     },{
       "title" : "positive_example_with_mostly_compare_number_to_text",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "only_for": ["pandas"],
       "in": {

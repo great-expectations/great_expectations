@@ -225,18 +225,18 @@ def test_cli_init_spark_without_library_installed_instructs_user(
         assert "What data would you like Great Expectations to connect to" in stdout
         assert "What are you processing your files with" in stdout
         assert (
-            f"Great Expectations relies on the library `pyspark` to connect to your data"
+            "Great Expectations relies on the library `pyspark` to connect to your data"
             in stdout
         )
         assert (
-            f"but the package `pyspark` containing this library is not installed."
+            "but the package `pyspark` containing this library is not installed."
             in stdout
         )
         assert (
-            f"Would you like Great Expectations to try to execute `pip install pyspark` for you?"
+            "Would you like Great Expectations to try to execute `pip install pyspark` for you?"
             in stdout
         )
-        assert f"Please execute `pip install pyspark` before trying again." in stdout
+        assert "Please execute `pip install pyspark` before trying again." in stdout
         # assert "Great Expectations relies on the library `pyspark`" in stdout
         # assert "Please `pip install pyspark` before trying again" in stdout
 

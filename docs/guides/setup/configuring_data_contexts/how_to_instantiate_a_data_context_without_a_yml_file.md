@@ -2,8 +2,9 @@
 title: How to instantiate a Data Context without a yml file
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-This guide will help you instantiate a Data Context without a yml file, aka configure a Data Context in code. If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.) you may wish to configure your Data Context in code, within your notebook or workflow tool (e.g. Airflow DAG node).
+This guide will help you instantiate a <TechnicalTag tag="data_context" text="Data Context" /> without a yml file, aka configure a Data Context in code. If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.) you may wish to configure your Data Context in code, within your notebook or workflow tool (e.g. Airflow DAG node).
 
 <Prerequisites>
 
@@ -13,23 +14,21 @@ This guide will help you instantiate a Data Context without a yml file, aka conf
 - See also our companion video for this guide: [Data Contexts In Code](https://youtu.be/4VMOYpjHNhM).
 :::
 
+## Steps
 
-Steps
------
+### 1. **Create a DataContextConfig**
 
-1. **Create a DataContextConfig**
+The `DataContextConfig` holds all of the associated configuration parameters to build a Data Context. There are defaults set for you to minimize configuration in typical cases, but please note that every parameter is configurable and all defaults are overridable. Also note that `DatasourceConfig` also has defaults which can be overridden.
 
-    The `DataContextConfig` holds all of the associated configuration parameters to build a Data Context. There are defaults set for you to minimize configuration in typical cases, but please note that every parameter is configurable and all defaults are overridable. Also note that `DatasourceConfig` also has defaults which can be overridden.
+Here we will show a few examples of common configurations, using the ``store_backend_defaults`` parameter. Note that you can use the existing API without defaults by omitting that parameter, and you can override all of the parameters as shown in the last example. A parameter set in ``DataContextConfig`` will override a parameter set in ``store_backend_defaults`` if both are used.
 
-    Here we will show a few examples of common configurations, using the ``store_backend_defaults`` parameter. Note that you can use the existing API without defaults by omitting that parameter, and you can override all of the parameters as shown in the last example. A parameter set in ``DataContextConfig`` will override a parameter set in ``store_backend_defaults`` if both are used.
+The following ``store_backend_defaults`` are currently available:
+- `S3StoreBackendDefaults`
+- `GCSStoreBackendDefaults`
+- `DatabaseStoreBackendDefaults`
+- `FilesystemStoreBackendDefaults`
 
-    The following ``store_backend_defaults`` are currently available:
-        - :py:class:`~great_expectations.data_context.types.base.S3StoreBackendDefaults`
-        - :py:class:`~great_expectations.data_context.types.base.GCSStoreBackendDefaults`
-        - :py:class:`~great_expectations.data_context.types.base.DatabaseStoreBackendDefaults`
-        - :py:class:`~great_expectations.data_context.types.base.FilesystemStoreBackendDefaults`
-
-    The following example shows a Data Context configuration with an SQLAlchemy datasource and an AWS S3 bucket for all metadata stores, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
+The following example shows a Data Context configuration with an SQLAlchemy <TechnicalTag relative="../../../" tag="datasource" text="Datasource" /> and an AWS S3 bucket for all metadata <TechnicalTag relative="../../../" tag="store" text="Stores" />, using default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code.
 
 ```python
 from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, S3StoreBackendDefaults
@@ -65,7 +64,7 @@ data_context_config = DataContextConfig(
     )
 ```
 
-    The following example shows a Data Context configuration with a Pandas datasource and local filesystem defaults for metadata stores. Note: imports are omitted in the following examples. Note: You may add an optional root_directory parameter to set the base location for the Store Backends.
+The following example shows a Data Context configuration with a Pandas datasource and local filesystem defaults for metadata stores. Note: imports are omitted in the following examples. Note: You may add an optional root_directory parameter to set the base location for the Store Backends.
 
 ```python
 from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, FilesystemStoreBackendDefaults
@@ -95,9 +94,9 @@ data_context_config = DataContextConfig(
 )
 ```
 
-    The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata Stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. `default_bucket_name`, `default_project_name` sets the default value for all stores that are not specified individually.
+The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata Stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. `default_bucket_name`, `default_project_name` sets the default value for all stores that are not specified individually.
 
-    The resulting `DataContextConfig` from the following example creates an Expectations Store and Data Docs using the `my_default_bucket` and `my_default_project` parameters since their bucket and project is not specified explicitly. The Validations Store is created using the explicitly specified `my_validations_bucket` and `my_validations_project`. Further, the prefixes are set for the Expectations Store and Validations Store, while Data Docs use the default `data_docs` prefix.
+The resulting `DataContextConfig` from the following example creates an <TechnicalTag tag="expectation_store" text="Expectations Store" /> and <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> using the `my_default_bucket` and `my_default_project` parameters since their bucket and project is not specified explicitly. The <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is created using the explicitly specified `my_validations_bucket` and `my_validations_project`. Further, the prefixes are set for the Expectations Store and Validation Results Store, while Data Docs use the default `data_docs` prefix.
 
 ```python
 data_context_config = DataContextConfig(
@@ -138,7 +137,7 @@ data_context_config = DataContextConfig(
 )
 ```
 
-    The following example sets overrides for many of the parameters available to you when creating a `DataContextConfig` and a Datasource.
+The following example sets overrides for many of the parameters available to you when creating a `DataContextConfig` and a Datasource.
 
 ```python
 data_context_config = DataContextConfig(
@@ -230,19 +229,19 @@ data_context_config = DataContextConfig(
 ### 2. Pass this DataContextConfig as a project_config to BaseDataContext
 
 ```python
-from great_expectations.data_context.types.base import BaseDataContext
+from great_expectations.data_context import BaseDataContext
 context = BaseDataContext(project_config=data_context_config)
 ```
 
 ### 3. Use this BaseDataContext instance as your DataContext
 
-    If you are using Airflow, you may wish to pass this Data Context to your GreatExpectationsOperator as a parameter. See the following guide for more details:
+If you are using Airflow, you may wish to pass this Data Context to your GreatExpectationsOperator as a parameter. See the following guide for more details:
 
-    - [Deploying Great Expectations with Airflow](../../../../docs/intro.md)
+- [Deploying Great Expectations with Airflow](../../../../docs/intro.md)
 
 
 Additional resources
 --------------------
 
 - [How to instantiate a Data Context on an EMR Spark cluster](../../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
+- [How to use Great Expectations in Databricks](../../../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
