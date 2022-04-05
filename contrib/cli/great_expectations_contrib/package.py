@@ -46,9 +46,10 @@ class GitHubUser(SerializableDictDot):
 
 class SocialLinkType(str, Enum):
     TWITTER = "TWITTER"
-    INSTAGRAM = "INSTAGRAM"
+    GITHUB = "GITHUB"
     LINKEDIN = "LINKEDIN"
     MEDIUM = "MEDIUM"
+    WEBSITE = "WEBSITE"
 
 
 @dataclass
