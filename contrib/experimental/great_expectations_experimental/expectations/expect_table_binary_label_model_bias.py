@@ -25,8 +25,8 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
 
-    metric_name = "table.model_bias"
-    value_keys = ("y_true", "y_pred")
+    metric_name = "table.modeling.binary.model_bias"
+    value_keys = ("y_true", "y_pred", "feature_columns")
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
@@ -77,7 +77,7 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
         fdf = f.get_group_value_fairness(bdf)
         # gaf = f.get_group_attribute_fairness(fdf) #this produces cool chart that would be nice to display
         gof = f.get_overall_fairness(fdf)
-        return gof["Overall Fairness"]
+        return gof
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -131,7 +131,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "important_columns": ["race", "sex"],
+                        "feature_columns": ["race", "sex"],
                         "y_true": "y",
                         "y_pred": "pred",
                     },
@@ -144,7 +144,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "important_columns": ["race", "sex", "age_cat"],
+                        "feature_columns": ["race", "sex", "age_cat"],
                         "y_pred": "pred",
                         "y_true": "y",
                     },
@@ -162,15 +162,15 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         "requirements": ["aequitas"],
     }
 
-    metric_dependencies = ("table.model_bias",)
+    metric_dependencies = ("table.modeling.binary.model_bias",)
     success_keys = (
-        "important_columns",  # might use this if people want to use specific features
+        "feature_columns",  # might use this if people want to use specific features
         "y_true",
         "y_pred",
     )
 
     default_kwarg_values = {
-        "important_columns": None,
+        "feature_columns": None,
         "y_pred": None,
         "y_true": None,  # When the y_true column is not included in the original data set, Aequitas calculates only Statistical Parity and Impact Parities.
         "result_format": "BASIC",
@@ -200,7 +200,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         #        columns = configuration.kwargs.get("important_columns")
         y_true = configuration.kwargs.get("y_true")
         y_pred = configuration.kwargs.get("y_pred")
-        columns = configuration.kwargs.get("important_columns")
+        columns = configuration.kwargs.get("feature_columns")
 
         try:
             assert columns is not None, "target columns must be specified"
@@ -221,11 +221,14 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         execution_engine=None,
     ):
 
-        importances = metrics["table.model_bias"],
+        fairness = (metrics["table.modeling.binary.model_bias"],)
 
         #        columns = configuration["kwargs"].get("important_columns")
 
-        return {"result": {"observed_value": importances}}
+        return {
+            "success": fairness["Overall Fairness"],
+            "result": {"observed_value": fairness},
+        }
 
 
 if __name__ == "__main__":
