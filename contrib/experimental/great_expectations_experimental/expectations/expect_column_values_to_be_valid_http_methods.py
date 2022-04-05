@@ -2,10 +2,10 @@ from great_expectations.expectations.set_based_column_map_expectation import (
     SetBasedColumnMapExpectation,
 )
 
-class ExpectColumnValuesToBeHTTPMethods(SetBasedColumnMapExpectation):
+class ExpectColumnValuesToBeValidHTTPMethods(SetBasedColumnMapExpectation):
     """Ensures all values are a valid http method:
     GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
-    H"""
+    """
 
     # These values will be used to configure the metric created by your expectation
     set_ = [
@@ -83,13 +83,13 @@ class ExpectColumnValuesToBeHTTPMethods(SetBasedColumnMapExpectation):
 
 
     library_metadata = {
-        "tags": ["set-based"],  
+        "tags": ["type-entities", "hackathon","set-based"],  
         "contributors": [  
             "@zachlindsey",  
         ],
     }
 
 
-# </snippet>
+
 if __name__ == "__main__":
-    ExpectColumnValuesToBeHTTPMethods().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidHTTPMethods().print_diagnostic_checklist()
