@@ -39,10 +39,12 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
         reference_group=None,
         alpha=0.05,
     ):
+        y_true = metric_value_kwargs.get("y_true")
+        y_pred = metric_value_kwargs.get("y_pred")
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        df = df.rename(columns={"y_true": "label_value", "y_pred": "score"})
+        df = df.rename(columns={y_true: "label_value", y_pred: "score"})
         df, _ = preprocess_input_df(df)
 
         # Group() class evaluates biases across all subgroups in dataset by assembling a confusion matrix
@@ -219,13 +221,8 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         execution_engine=None,
     ):
 
-        importances = dict(
-            sorted(
-                metrics["table.model_bias"].items(),
-                key=lambda item: item[1],
-                reverse=True,
-            )
-        )
+        importances = metrics["table.model_bias"],
+
         #        columns = configuration["kwargs"].get("important_columns")
 
         return {"result": {"observed_value": importances}}
