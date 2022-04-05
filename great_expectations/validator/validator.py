@@ -1935,11 +1935,11 @@ set as active.
         citation_date: Optional[str] = None,
     ) -> None:
         """Adds a citation to an existing Expectation Suite within the validator"""
-        if batch_spec is None and hasattr(self, batch_spec):
+        if batch_spec is None and hasattr(self, "batch_spec"):
             batch_spec = self.batch_spec
-        if batch_markers is None and hasattr(self, batch_markers):
+        if batch_markers is None and hasattr(self, "batch_markers"):
             batch_markers = self.active_batch_markers
-        if batch_definition is None and hasattr(self, batch_definition):
+        if batch_definition is None and hasattr(self, "batch_definition"):
             batch_definition = self.active_batch_definition
         self._expectation_suite.add_citation(
             comment,
@@ -1966,11 +1966,11 @@ set as active.
         citation_date: Optional[str] = None,
     ) -> None:
         """Adds a citation to an existing Expectation Suite within the validator"""
-        if batch_spec is None and hasattr(self, batch_spec):
+        if batch_spec is None and hasattr(self, "batch_spec"):
             batch_spec = self.batch_spec
-        if batch_markers is None and hasattr(self, batch_markers):
+        if batch_markers is None and hasattr(self, "batch_markers"):
             batch_markers = self.active_batch_markers
-        if batch_definition is None and hasattr(self, batch_definition):
+        if batch_definition is None and hasattr(self, "batch_definition"):
             batch_definition = self.active_batch_definition
         self._expectation_suite.update_last_citation(
             comment,
