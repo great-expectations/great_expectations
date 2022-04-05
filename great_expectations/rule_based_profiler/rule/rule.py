@@ -44,7 +44,7 @@ class Rule(SerializableDictDot):
 
         self._parameters = {}
 
-    def generate(
+    def run(
         self,
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
