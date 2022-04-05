@@ -55,8 +55,8 @@ class ExpectColumnValuesToBeValidTcpPort(ColumnMapExpectation):
                     "7",  # Echo Protocol
                     "20",  # File Transfer Protocol (FTP)
                     "22",  # Secure Shell (SSH)
+                    "37",  # Time Protocol
                     "179",  # Border Gateway Protocol (BGP)
-                    "853",  # DNS over TLS
                 ],
                 "malformed_tcp_port": [
                     "",
