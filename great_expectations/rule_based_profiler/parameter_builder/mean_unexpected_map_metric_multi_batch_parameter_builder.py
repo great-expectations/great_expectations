@@ -102,7 +102,6 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -178,7 +177,6 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
 
         # Compute "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").
         super().build_parameters(
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
