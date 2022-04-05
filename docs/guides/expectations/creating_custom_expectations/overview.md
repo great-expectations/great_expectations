@@ -2,23 +2,24 @@
 title: Overview
 ---
 import Prerequisites from './components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-You can extend the functionality of Great Expectations by creating your own Custom [**Expectations**](../../../reference/expectations/expectations.md). You can also enrich Great Expectations as a shared standard for data quality by contributing new Expectations to the open source project.
+You can extend the functionality of Great Expectations by creating your own <TechnicalTag tag="custom_expectation" text="Custom Expectations" />. You can also enrich Great Expectations as a shared standard for data quality by contributing new <TechnicalTag tag="expectation" text="Expectations" /> to the open source project.
 
-These processes compliment each other and their steps are streamlined so that one flows into the other. Once you have created a custom Expectation, it is simple to contribute it to the open source project. This section will teach you how to do both.
+These processes compliment each other and their steps are streamlined so that one flows into the other. Once you have created a Custom Expectation, it is simple to contribute it to the open source project. This section will teach you how to do both.
 
 <Prerequisites>
 </Prerequisites>
 
-## Creating Custom Expectation
+## Creating Custom Expectations
 
 A fully-developed, Production-ready Expectation needs to do a lot of things:
 * Execute consistently across many types of data infrastructure
-* Render itself and its Validation Results into several formats
-* Support Profiling against new data
+* Render itself and its <TechnicalTag tag="validation_result" text="Validation Results" /> into several formats
+* Support <TechnicalTag tag="profiling" text="Profiling" /> against new data
 * Be maintainable, with good tests, documentation, linting, type hints, etc.
 
-In order to make development of Expectations as easy as possible, we've broken up the steps to create custom Expectations into a series of bite-sized steps. Each step can be completed in minutes. They can be completed (and contributed) incrementally, unlocking value at each step along the way.
+In order to make development of Expectations as easy as possible, we've broken up the steps to create Custom Expectations into a series of bite-sized steps. Each step can be completed in minutes. They can be completed (and contributed) incrementally, unlocking value at each step along the way.
 
 Grouped together, they constitute a Definition of Done for Expectations at each [Level of Maturity](../../../contributing/contributing_maturity.md).
 
@@ -28,7 +29,7 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 * Has a `library_metadata` object
 * Has a docstring, including a one-line short description
 * Has at least one positive and negative example case, and all test cases pass
-* Has core logic and passes tests on at least one [**Execution Engine**](../../../reference/execution_engine.md)
+* Has core logic and passes tests on at least one <TechnicalTag tag="execution_engine" text="Execution Engine" />
 
 <i class="fas fa-circle" style={{color: "#ffc107"}}></i> A Beta Expectation...
 
@@ -47,9 +48,7 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 ### How these docs are organized
 
 The docs in `Creating Custom Expectations` focus on completing the four steps required for Experimental Expectations. 
-Completing them will leave your with a Custom Expectation that can be executed against one backend, with a couple tests to verify correctness, and a basic docstring and metadata to support diagonstics. 
-
-Optionally, you can also publish Custom Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md).
+Completing them will leave you with a Custom Expectation that can be executed against one backend, with a couple tests to verify correctness, and a basic docstring and metadata to support diagonstics. 
 
 The code to achieve the first four steps looks somewhat different depending on the class of Expectation you're developing. Accordingly, there are separate how-to guides and templates for each class of Expectation.
 
@@ -57,6 +56,9 @@ The code to achieve the first four steps looks somewhat different depending on t
 |-----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [Column Map Expectation](./how_to_create_custom_column_map_expectations.md)             | [column_map_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py)       |
 | [Column Aggregate Expectation](./how_to_create_custom_column_aggregate_expectations.md) | [column_aggregate_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py) |
+| [Regex-Based Column Map Expectation](./how_to_create_custom_regex_based_column_map_expectations.md) | [regex-based map column_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/regex_based_column_map_expectation_template.py) |
+| [Set-Based Column Map Expectation](./how_to_create_custom_set_based_column_map_expectations.md) | [set-based map_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/set_based_column_map_expectation_template.py) |
+
 
 :::note 
 Not all classes of Expectation currently have guides and templates. <br></br>
@@ -74,8 +76,10 @@ Beyond the first four steps, additional features are generally similar across al
 
 The final two checks required for acceptance into the Great Expectations codebase at a Production level require manual review and guidance by a code owner.
 
-If you believe your Custom Expectation is otherwise ready for contribution at a Production level, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls), and we will work with you to ensure your Custom Expectation meets these standards.
+### Using your Expectation
+
+You can find instructions for using your Custom Expectation in our guide: [how to use a Custom Expectation](./how_to_use_custom_expectations.md).
 
 ### Publishing your Expectation as an open source contribution
 
-You can find more detailed instructions in our guide on [contributing Custom Expectations](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md).
+Optionally, you can also publish Custom Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md).
