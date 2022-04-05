@@ -33,10 +33,11 @@ class ColumnValuesLinestringMilesDistanceBetween(ColumnMapMetricProvider):
     def _pandas(cls, column, min_distance, max_distance, **kwargs):
         column = geopandas.GeoSeries(column)
         # Set crs to meters
-        column = column.to_crs({"proj": "cea"})
+        column = column.set_crs({"proj": "cea"})
         # access the length of the column. In meters so have to turn to miles
         col_len = column.length * 0.000621371192
-        return (col_len >= min_distance) & (col_len <= max_distance)
+        in_between = (col_len >= min_distance) & (col_len <= max_distance)
+        return in_between
 
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
@@ -52,7 +53,7 @@ class ColumnValuesLinestringMilesDistanceBetween(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToBeLinestringMilesDistanceBetween(ColumnMapExpectation):
+class ExpectColumnValuesToBeLineMilesDistanceBetween(ColumnMapExpectation):
     """This expectation will compute the distance of Linestring
     in miles and check if it's between two values."""
 
@@ -61,14 +62,44 @@ class ExpectColumnValuesToBeLinestringMilesDistanceBetween(ColumnMapExpectation)
         {
             "data": {
                 "linestring_less_than_500_miles": [
-                    "LineString([0 0, 111319.490793 110568.8124, 0 110568.8124])",
-                    "LineString([0 0, 111319.490793 110568.8124, 111319.490793 0, 0 110568.8124])",
-                    "LineString([0 0, 222638.981587 221104.845779, 222638.981587 0])",
+                    LineString(
+                        [(0, 0), (111319.490793, 110568.8124), (0, 110568.8124)]
+                    ),
+                    LineString(
+                        [
+                            (0, 0),
+                            (111319.490793, 110568.8124),
+                            (111319.490793, 0),
+                            (0, 110568.8124),
+                        ]
+                    ),
+                    LineString(
+                        [(0, 0), (222638.981587, 221104.845779), (222638.981587, 0)]
+                    ),
                 ],
                 "linestring_between_1000_and_2000_miles": [
-                    "LineString([222638.981587 552188.640112, 111319.490793 772147.013102, 1113194.907933 1209055.279421])",
-                    "LineString([111319.490793 881798.964757, 1001875.417139 221104.845779, 111319.490793 0, 556597.453966 1317466.085138])",
-                    "LineString([556597.453966 552188.640112, 1224514.398726 1209055.279421, 779236.435553 881798.964757])",
+                    LineString(
+                        [
+                            (222638.981587, 552188.640112),
+                            (111319.490793, 772147.013102),
+                            (1113194.907933, 1209055.279421),
+                        ]
+                    ),
+                    LineString(
+                        [
+                            (111319.490793, 881798.964757),
+                            (1001875.417139, 221104.845779),
+                            (111319.490793, 0),
+                            (556597.453966, 1317466.085138),
+                        ]
+                    ),
+                    LineString(
+                        [
+                            (556597.453966, 552188.640112),
+                            (1224514.398726, 1209055.279421),
+                            (779236.435553, 881798.964757),
+                        ]
+                    ),
                 ],
             },
             "tests": [
@@ -81,9 +112,7 @@ class ExpectColumnValuesToBeLinestringMilesDistanceBetween(ColumnMapExpectation)
                         "min_distance": 0,
                         "max_distance": 1000,
                     },
-                    "out": {
-                        "success": True,
-                    },
+                    "out": {"success": True,},
                 },
                 {
                     "title": "basic_negative_test",
@@ -94,9 +123,7 @@ class ExpectColumnValuesToBeLinestringMilesDistanceBetween(ColumnMapExpectation)
                         "min_distance": 1000,
                         "max_distance": 2000,
                     },
-                    "out": {
-                        "success": False,
-                    },
+                    "out": {"success": False,},
                 },
             ],
         }
@@ -137,4 +164,4 @@ class ExpectColumnValuesToBeLinestringMilesDistanceBetween(ColumnMapExpectation)
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeLinestringMilesDistanceBetween().print_diagnostic_checklist()
+    ExpectColumnValuesToBeLineMilesDistanceBetween().print_diagnostic_checklist()
