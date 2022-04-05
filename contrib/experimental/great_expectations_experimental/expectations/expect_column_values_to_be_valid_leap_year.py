@@ -9,6 +9,7 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
+
 # This method compares a string to the valid leap year
 def is_valid_leap_year(year: str) -> bool:
     try:
