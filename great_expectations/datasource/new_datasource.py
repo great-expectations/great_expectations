@@ -139,8 +139,8 @@ class BaseDatasource:
         self._validate_batch_request(batch_request=batch_request)
 
         # checks if the data_asset_name is missing from data_context config and updates it if so
-        if "data_connectors" in self._datasource_config:
-            self._update_missing_data_asset_name(batch_request=batch_request)
+        # if "data_connectors" in self._datasource_config:
+        #     self._update_missing_data_asset_name(batch_request=batch_request)
 
         data_connector: DataConnector = self.data_connectors[
             batch_request.data_connector_name
