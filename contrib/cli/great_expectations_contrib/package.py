@@ -63,6 +63,8 @@ class DomainExpert(SerializableDictDot):
     full_name: str
     social_links: Optional[List[SocialLink]] = None
     picture: Optional[str] = None
+    title: Optional[str] = None
+    bio: Optional[str] = None
 
 
 class Maturity(str, Enum):
