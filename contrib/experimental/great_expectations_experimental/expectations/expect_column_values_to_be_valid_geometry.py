@@ -30,7 +30,7 @@ def is_valid_geometry(geo):
 class ColumnValuesToBeValidGeometry(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.valid_geometry"
+    condition_metric_name = "column_values.check_valid_geometry"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -63,14 +63,14 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
         {
             "data": {
                 "valid_geometry": [
-                    "Polygon([(0, 0), (1, 1), (0, 1)])",
-                    "LineString([(0, 0), (1, 1), (0, 1)])",
-                    "Point(0, 1)",
+                    Polygon([(0, 0), (1, 1), (0, 1)]),
+                    LineString([(0, 0), (1, 1), (0, 1)]),
+                    Point(0, 1),
                 ],
                 "invalid_geometry": [
-                    "Polygon([(0,0), (1, 1), (1, 0), (0, 1)])",
-                    "None",
-                    "Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)])",
+                    Polygon([(0, 0), (1, 1), (1, 0), (0, 1)]),
+                    None,
+                    Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)]),
                 ],
             },
             "tests": [
@@ -94,7 +94,7 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_geometry"
+    map_metric = "column_values.check_valid_geometry"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
