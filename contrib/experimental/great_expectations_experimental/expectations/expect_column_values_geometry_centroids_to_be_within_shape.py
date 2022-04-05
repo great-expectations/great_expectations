@@ -1,7 +1,7 @@
-import json
 from typing import Optional
-import pygeos as geos
+
 import pandas as pd
+import pygeos as geos
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -27,50 +27,49 @@ class ColumnValuesGeometryCentroidsWithinShape(ColumnMapMetricProvider):
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs): 
-        
+    def _pandas(cls, column, **kwargs):
+
         shape = kwargs.get("shape")
         shape_format = kwargs.get("shape_format")
         column_shape_format = kwargs.get("column_shape_format")
-        
-        #Check that shape is given and given in the correct format
+
+        # Check that shape is given and given in the correct format
         if shape is not None:
             try:
-                if shape_format == 'wkt':
+                if shape_format == "wkt":
                     shape_ref = geos.from_wkt(shape)
-                elif shape_format == 'wkb':
+                elif shape_format == "wkb":
                     shape_ref = geos.from_wkb(shape)
-                elif shape_format == 'geojson':
+                elif shape_format == "geojson":
                     shape_ref = geos.from_geojson(shape)
                 else:
-                    raise NotImplementedError("Shape constructor method not implemented. Must be in WKT, WKB, or GeoJSON format.")
+                    raise NotImplementedError(
+                        "Shape constructor method not implemented. Must be in WKT, WKB, or GeoJSON format."
+                    )
             except:
                 raise Exception("A valid reference shape was not given.")
         else:
             raise Exception("A shape must be provided for this method.")
-        
-        
+
         # Load the column into a pygeos Geometry vector from numpy array (Series not supported).
-        if column_shape_format == 'wkt':
-            shape_test = geos.from_wkt(column.to_numpy(), on_invalid='ignore')
-        elif column_shape_format == 'wkb':
-            shape_test = geos.from_wkb(column.to_numpy(), on_invalid='ignore')
+        if column_shape_format == "wkt":
+            shape_test = geos.from_wkt(column.to_numpy(), on_invalid="ignore")
+        elif column_shape_format == "wkb":
+            shape_test = geos.from_wkb(column.to_numpy(), on_invalid="ignore")
         else:
             raise NotImplementedError("Column values shape format not implemented.")
-        
-        
-        #Allow for an array of reference shapes to be provided. Return a union of all the shapes in the array (Polygon or Multipolygon)
+
+        # Allow for an array of reference shapes to be provided. Return a union of all the shapes in the array (Polygon or Multipolygon)
         shape_ref = geos.union_all(shape_ref)
-            
-        #Prepare the geometries 
+
+        # Prepare the geometries
         geos.prepare(shape_ref)
         geos.prepare(shape_test)
         column_centroids = geos.centroid(shape_test)
-        
-        print(column_centroids)
-        
-        return pd.Series(geos.within(column_centroids, shape_ref))   
 
+        print(column_centroids)
+
+        return pd.Series(geos.within(column_centroids, shape_ref))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -87,33 +86,34 @@ class ColumnValuesGeometryCentroidsWithinShape(ColumnMapMetricProvider):
 class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
     """
     Expect that column values as geometries each have a centroid that are within a given reference shape.
-    
+
     expect_column_values_geometry_centroids_to_be_within_shape is a :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
-    
+
     Args:
         column (str): \
             The column name.
             Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
-    
+
     Keyword Args:
         shape: str or list(str)
-            The reference geometry 
-            
+            The reference geometry
+
         shape_format: str
             Geometry format for 'shape' string(s). Can be provided as 'Well Known Text' (WKT), 'Well Known Binary' (WKB), or as GeoJSON.
             Must be one of: [wkt, wkb, geojson]
             Default: wkt
-        
+
         column_shape_format: str
             Geometry format for 'column'. Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
-            
+
     Returns:
         An ExpectationSuiteValidationResult
-    
+
     Notes:
-        Convention is (X Y Z) for points, which would map to (Longitude Latitude Elevation) for geospatial cases, but any convention can be followed as long as the test and reference shapes are consistent.
+        Convention is (X Y Z) for points, which would map to (Longitude Latitude Elevation) for geospatial cases.
+        Any convention can be followed as long as the test and reference shapes are consistent.
         The reference shape allows for an array, but will union (merge) all the shapes into 1 and check the contains condition.
         MultiLinestrings and Multipolygons area weighted by their length and areas, respectively. See the pygeos docs for reference.
     """
@@ -123,8 +123,18 @@ class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "lines": ['LINESTRING(0 0, 10 10)', 'LINESTRING(5 5, 8 10)', 'LINESTRING(0 0, 18 2)', 'LINESTRING(3 4, 0 7, 10 0, 15 10)'],
-                "polygons": ['POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 'POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0))', 'POLYGON ((10 10, 10 15, 15 15, 15 10, 10 10))', None],
+                "lines": [
+                    "LINESTRING(0 0, 10 10)",
+                    "LINESTRING(5 5, 8 10)",
+                    "LINESTRING(0 0, 18 2)",
+                    "LINESTRING(3 4, 0 7, 10 0, 15 10)",
+                ],
+                "polygons": [
+                    "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))",
+                    "POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0))",
+                    "POLYGON ((10 10, 10 15, 15 15, 15 10, 10 10))",
+                    None,
+                ],
             },
             "tests": [
                 {
@@ -133,28 +143,26 @@ class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
                     "include_in_gallery": True,
                     "in": {
                         "column": "lines",
-                        "shape": 'POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))', 
-                        "shape_format": 'wkt',
+                        "shape": "POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))",
+                        "shape_format": "wkt",
                     },
                     "out": {
                         "success": True,
                     },
                 },
-
                 {
                     "title": "negative_test_with_polygons",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "column": "polygons",
-                        "shape": 'POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))', 
-                        "shape_format": 'wkt',
+                        "shape": "POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))",
+                        "shape_format": "wkt",
                     },
                     "out": {
                         "success": False,
                     },
                 },
-                
             ],
         }
     ]
@@ -168,10 +176,10 @@ class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {
-        'mostly': 1,
-        'shape_format':'wkt', 
-        'column_shape_format': 'wkt', 
-        }
+        "mostly": 1,
+        "shape_format": "wkt",
+        "column_shape_format": "wkt",
+    }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -204,12 +212,14 @@ class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "tags": ['geospatial',
-                 'hackathon-2022'],  # Tags for this Expectation in the Gallery
+        "tags": [
+            "geospatial",
+            "hackathon-2022",
+        ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@pjdobson",  # Don't forget to add your github handle here!
         ],
-        "requirements": ['pygeos']
+        "requirements": ["pygeos"],
     }
 
 
