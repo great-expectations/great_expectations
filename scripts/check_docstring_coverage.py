@@ -1,18 +1,24 @@
 import ast
 import glob
-import logging
+import subprocess
 from collections import defaultdict
 from typing import Dict, List, Tuple, cast
 
-logging.basicConfig(
-    format="%(asctime)s %(levelname)-8s %(message)s",
-    level=logging.INFO,
-    datefmt="%Y-%m-%d %H:%M:%S",
+Diagnostics = Dict[str, List[Tuple[ast.FunctionDef, bool]]]
+
+DOCSTRING_ERROR_THRESHOLD = (
+    1087  # This number is to be reduced as we document more public functions!
 )
 
-logger = logging.getLogger(__name__)
 
-Diagnostics = Dict[str, List[Tuple[ast.FunctionDef, bool]]]
+def get_changed_files() -> List[str]:
+    git_diff: subprocess.CompletedProcess = subprocess.run(
+        ["git", "diff", "origin/develop", "--name-only"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    )
+    return [f for f in git_diff.stdout.split()]
 
 
 def collect_functions(directory_path: str) -> Dict[str, List[ast.FunctionDef]]:
@@ -45,71 +51,71 @@ def gather_docstring_diagnostics(
     diagnostics: Diagnostics = defaultdict(list)
     for file, func_list in all_funcs.items():
         public_funcs: List[ast.FunctionDef] = list(
-            filter(lambda f: not f.name.startswith("_"), func_list)
+            filter(
+                lambda f: _function_filter(f),
+                func_list,
+            )
         )
         for func in public_funcs:
-            if _is_getter_or_setter(func):
-                continue
             result: Tuple[ast.FunctionDef, bool] = (func, bool(ast.get_docstring(func)))
             diagnostics[file].append(result)
 
     return diagnostics
 
 
-def _is_getter_or_setter(func: ast.FunctionDef) -> bool:
+def _function_filter(func: ast.FunctionDef) -> bool:
+    # Private and dunder funcs/methods
+    if func.name.startswith("_"):
+        return False
+    # Getters and setters
     for decorator in func.decorator_list:
-        if (
-            (isinstance(decorator, ast.Name) and decorator.id == "property")
-            or isinstance(decorator, ast.Attribute)
-            and decorator.attr == "setter"
+        if (isinstance(decorator, ast.Name) and decorator.id == "property") or (
+            isinstance(decorator, ast.Attribute) and decorator.attr == "setter"
         ):
-            return True
-    return False
+            return False
+    return True
 
 
-def render_diagnostics(diagnostics: Diagnostics) -> None:
-    directory_results = {}
+def review_diagnostics(diagnostics: Diagnostics, changed_files: List[str]) -> None:
+    total_passed: int = 0
+    total_funcs: int = 0
+
+    relevant_diagnostics: Dict[str, List[ast.FunctionDef]] = defaultdict(list)
 
     for file, diagnostics_list in diagnostics.items():
-        base_directory: str = _get_base_directory(file)
-        if base_directory not in directory_results:
-            directory_results[base_directory] = [0, 0]
-
+        relevant_file: bool = file in changed_files
         for func, success in diagnostics_list:
             if success:
-                directory_results[base_directory][0] += 1
-            else:
-                logger.info(f"{file: <120} L{func.lineno}:{func.name}")
-
-            directory_results[base_directory][1] += 1
-
-    repo_passed: int = 0
-    repo_total: int = 0
-
-    for directory, results in directory_results.items():
-        passed, total = results
-        repo_passed += passed
-        repo_total += total
-
-        ratio: str = f"{passed}/{total}"
-        print(f"{directory: <50} {ratio: <10} ({100 * passed/total:.2f}%)")
+                total_passed += 1
+            elif not success and relevant_file:
+                relevant_diagnostics[file].append(func)
+            total_funcs += 1
 
     print(
-        f"\nRESULT: {100 * repo_passed / repo_total:.2f}% of public functions have docstrings!"
+        f"[SUMMARY] {total_passed} of {total_funcs} public functions ({100 * total_passed / total_funcs:.2f}%) have docstrings!"
     )
 
+    if relevant_diagnostics:
+        print(
+            "\nHere are violations of the style guide that are relevant to the files changed in your PR:"
+        )
 
-def _get_base_directory(path: str) -> str:
-    parts = path.split("/")
-    if parts[1].endswith(".py"):
-        return parts[0]
-    else:
-        return "/".join(p for p in parts[:2])
+        for file, func_list in relevant_diagnostics.items():
+            print(f"  {file}:")
+            for func in func_list:
+                print(f"    L{func.lineno}:{func.name}")
+
+    total_failed: int = total_funcs - total_passed
+    assert (
+        total_failed <= DOCSTRING_ERROR_THRESHOLD
+    ), f"""A public function without a docstring was introduced; please resolve the matter before merging.
+                We expect there to be {total_failed} or fewer violations of the style guide (actual: {total_failed})"""
 
 
 if __name__ == "__main__":
+    changed_files: List[str] = get_changed_files()
     all_funcs: Dict[str, List[ast.FunctionDef]] = collect_functions(
         "great_expectations"
     )
     docstring_diagnostics: Diagnostics = gather_docstring_diagnostics(all_funcs)
-    render_diagnostics(docstring_diagnostics)
+    review_diagnostics(docstring_diagnostics, changed_files)
