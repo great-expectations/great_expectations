@@ -35,11 +35,25 @@ code_owners:
 domain_experts:
   - full_name: Taylor Turner
     picture: assets/taylor.jpeg
+    title: Principal Machine Learning Engineer at Capital One
+    bio: Since joining Capital One in 2016, Taylor has worked on projects within the model lifecycle, consulted with other departments on their ML projects, and taken new ideas and made them reusable tools internal and external to Capital One. He developed the profiler validator, null data flag, and data quantile reporting features for Data Profiler. Prior to Capital One, Taylor worked as a lead engineer for a hedge fund focused on using deep learning to glean tradable datapoints from a corpus of niche data streams of high-profile market commentators.
+    social_links:
+      - account_type: GITHUB
+        identifier: https://github.com/taylorfturner
+      - account_type: LINKEDIN
+        identifier: https://www.linkedin.com/in/taylorfturner
 
   - full_name: Jeremy Goodsitt
     picture: assets/jeremy.png
+    title: Lead Machine Learning Engineer at Capital One
+    bio: Since joining Capital One in 2017, Jeremy has worked on machine learning optimization infrastructure, NLP model development such as the sensitive data labeler within the Data Profiler, and the engineering design behind the open source library, Data Profiler. His doctoral studies were at the University of Illinois where he worked on improving medical diagnostic techniques through computer vision and optimization techniques.
+    social_links:
+      - account_type: GITHUB
+        identifier: https://github.com/JGSweets
+      - account_type: LINKEDIN
+        identifier: https://www.linkedin.com/in/jeremy-goodsitt
 
     # social_links:
-    #   - account_type: ~ # May be one of TWITTER | INSTAGRAM | LINKEDIN | MEDIUM
+    #   - account_type: ~ # May be one of TWITTER | GITHUB | LINKEDIN | MEDIUM | WEBSITE
     #     identifier: ~
     # picture: ~ # May be a relative path to `assets/` or a URL
