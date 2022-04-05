@@ -2,7 +2,12 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Set, Union
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    BatchRequestBase,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -81,28 +86,46 @@ class ExpectationConfigurationBuilder(Builder, ABC):
 
     def build_expectation_configuration(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
     ) -> ExpectationConfiguration:
-        self._resolve_validation_dependencies(
-            parameter_container=parameter_container,
+        """
+        Args:
+            domain: Domain object that is context for execution of this ParameterBuilder object.
+            variables: attribute name/value pairs
+            parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
+
+        Returns:
+            ExpectationConfiguration object.
+        """
+        self.resolve_validation_dependencies(
             domain=domain,
             variables=variables,
             parameters=parameters,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            force_batch_data=force_batch_data,
         )
 
         return self._build_expectation_configuration(
             domain=domain, variables=variables, parameters=parameters
         )
 
-    def _resolve_validation_dependencies(
+    def resolve_validation_dependencies(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
     ) -> None:
         validation_parameter_builders: List[ParameterBuilder] = (
             self.validation_parameter_builders or []
@@ -110,16 +133,15 @@ class ExpectationConfigurationBuilder(Builder, ABC):
 
         validation_parameter_builder: ParameterBuilder
         for validation_parameter_builder in validation_parameter_builders:
-            validation_parameter_builder.set_batch_list_or_batch_request(
-                batch_list=self.batch_list,
-                batch_request=self.batch_request,
-                force_batch_data=False,
-            )
             validation_parameter_builder.build_parameters(
-                parameter_container=parameter_container,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
+                parameter_computation_impl=None,
+                json_serialize=None,
+                batch_list=batch_list,
+                batch_request=batch_request,
+                force_batch_data=force_batch_data,
             )
 
     @abstractmethod
