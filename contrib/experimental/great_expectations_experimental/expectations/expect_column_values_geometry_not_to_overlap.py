@@ -64,14 +64,14 @@ class ExpectColumnGeometryNotOverlap(ColumnMapExpectation):
         {
             "data": {
                 "geometry_overlaps": [
-                    "Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])",
-                    "Polygon([(2, 2), (4, 2), (4, 4), (2, 4)])",
-                    "Point(5, 6)",
+                    Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+                    Polygon([(2, 2), (4, 2), (4, 4), (2, 4)]),
+                    Point(5, 6),
                 ],
                 "geometry_not_overlaps": [
-                    "Polygon([(0, 0), (1, 1), (0, 1)])",
-                    "Polygon([(10, 0), (10, 5), (0, 0)])",
-                    "Polygon([(0, 0), (2, 2), (2, 0)])",
+                    Polygon([(0, 0), (1, 1), (0, 1)]),
+                    Polygon([(10, 0), (10, 5), (0, 0)]),
+                    Polygon([(0, 0), (2, 2), (2, 0)]),
                 ],
             },
             "tests": [
