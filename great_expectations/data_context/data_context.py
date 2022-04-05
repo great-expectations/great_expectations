@@ -1885,6 +1885,15 @@ class BaseDataContext(ConfigPeer):
                 comment=citation_comment,
             )
 
+        # changes that validator made to the batch_request datasource config (e.g. add data_asset_name)
+        # are updated in project config and saved to disk
+        for datasource in validator.data_context.datasources:
+            self._instantiate_datasource_from_config_and_update_project_config(
+                name=datasource,
+                config=validator.data_context.datasources[datasource].config,
+                initialize=False,
+            )
+
         return validator
 
     def get_validator_using_batch_list(
