@@ -21,7 +21,7 @@ class ColumnValuesLinestringKMDistanceBetween(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.linestring_distance"
+    condition_metric_name = "column_values.linestring_distance_km"
     condition_value_keys = (
         "min_distance",
         "max_distance",
@@ -33,10 +33,11 @@ class ColumnValuesLinestringKMDistanceBetween(ColumnMapMetricProvider):
     def _pandas(cls, column, min_distance, max_distance, **kwargs):
         column = geopandas.GeoSeries(column)
         # Set crs to meters
-        column = column.to_crs({"proj": "cea"})
+        column = column.set_crs({"proj": "cea"})
         # access the length of the column
         col_len = column.length / 1000
-        return (col_len >= min_distance) & (col_len <= max_distance)
+        in_between = (col_len >= min_distance) & (col_len <= max_distance)
+        return in_between
 
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
@@ -52,7 +53,7 @@ class ColumnValuesLinestringKMDistanceBetween(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToBeLinestringKMDistanceBetween(ColumnMapExpectation):
+class ExpectColumnValuesToBeLineKMDistanceBetween(ColumnMapExpectation):
     """This expectation will compute the distance of Linestring
     in kilometers and check if it's between two values."""
 
@@ -61,14 +62,44 @@ class ExpectColumnValuesToBeLinestringKMDistanceBetween(ColumnMapExpectation):
         {
             "data": {
                 "linestring_less_than_1000_km": [
-                    LineString([(0, 0), (111319.490793, 110568.8124), (0 ,110568.8124)]),
-                    LineString([(0, 0), (111319.490793, 110568.8124), (111319.490793, 0),(0, 110568.8124)]),
-                    LineString([(0, 0), (222638.981587, 221104.845779), (222638.981587, 0)]),
+                    LineString(
+                        [(0, 0), (111319.490793, 110568.8124), (0, 110568.8124)]
+                    ),
+                    LineString(
+                        [
+                            (0, 0),
+                            (111319.490793, 110568.8124),
+                            (111319.490793, 0),
+                            (0, 110568.8124),
+                        ]
+                    ),
+                    LineString(
+                        [(0, 0), (222638.981587, 221104.845779), (222638.981587, 0)]
+                    ),
                 ],
                 "linestring_between_1000_and_2000_km": [
-                    LineString([(222638.981587, 552188.640112), (111319.490793 ,772147.013102), (1113194.907933 ,1209055.279421)]),
-                    LineString([(111319.490793, 881798.964757), (1001875.417139, 221104.845779), (111319.490793, 0), (556597.453966, 1317466.085138)]),
-                    LineString([(556597.453966, 552188.640112), (1224514.398726, 1209055.279421), (779236.435553, 881798.964757)]),
+                    LineString(
+                        [
+                            (222638.981587, 552188.640112),
+                            (111319.490793, 772147.013102),
+                            (1113194.907933, 1209055.279421),
+                        ]
+                    ),
+                    LineString(
+                        [
+                            (111319.490793, 881798.964757),
+                            (1001875.417139, 221104.845779),
+                            (111319.490793, 0),
+                            (556597.453966, 1317466.085138),
+                        ]
+                    ),
+                    LineString(
+                        [
+                            (556597.453966, 552188.640112),
+                            (1224514.398726, 1209055.279421),
+                            (779236.435553, 881798.964757),
+                        ]
+                    ),
                 ],
             },
             "tests": [
@@ -81,9 +112,7 @@ class ExpectColumnValuesToBeLinestringKMDistanceBetween(ColumnMapExpectation):
                         "min_distance": 0,
                         "max_distance": 1000,
                     },
-                    "out": {
-                        "success": True,
-                    },
+                    "out": {"success": True,},
                 },
                 {
                     "title": "basic_negative_test",
@@ -94,9 +123,7 @@ class ExpectColumnValuesToBeLinestringKMDistanceBetween(ColumnMapExpectation):
                         "min_distance": 1000,
                         "max_distance": 2000,
                     },
-                    "out": {
-                        "success": False,
-                    },
+                    "out": {"success": False,},
                 },
             ],
         }
@@ -118,7 +145,7 @@ class ExpectColumnValuesToBeLinestringKMDistanceBetween(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.linestring_distance"
+    map_metric = "column_values.linestring_distance_km"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
@@ -137,4 +164,4 @@ class ExpectColumnValuesToBeLinestringKMDistanceBetween(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeLinestringKMDistanceBetween().print_diagnostic_checklist()
+    ExpectColumnValuesToBeLineKMDistanceBetween().print_diagnostic_checklist()
