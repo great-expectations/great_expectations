@@ -9,8 +9,9 @@ access to features of new package versions.
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
 """
-
+import abc
 import enum
+import os
 import sys
 from dataclasses import dataclass
 from typing import List, Optional
@@ -49,6 +50,77 @@ class PackageInfoSchema(Schema):
     version = fields.Str(required=False, allow_none=True)
 
 
+class ExecutionEnvironmentType(enum.Enum):
+    ORCHESTRATION = "orchestration"  # Airflow, prefect, dagster, kedro, etc.
+    INTERACTIVE = "interactive"  # Jupyter / Databricks / EMR notebooks
+    HOSTED_ORCHESTRATION = "hosted_orchestration"  # Google Cloud Composer, Astronomer
+
+
+@dataclass
+class ExecutionEnvironment:
+    environment_name: str
+    version: Optional[version.Version]
+    environment_type: ExecutionEnvironmentType
+
+
+class ExecutionEnvironmentSchema(Schema):
+    environment_name: fields.Str()
+    version = fields.Str(required=False, allow_none=True)
+    environment_type: fields.Str()
+
+
+class EnvironmentIdentifier(abc.ABC):
+    """Identify which environment you are executing Great Expectations in."""
+
+    def identify_environment(self) -> List[ExecutionEnvironment]:
+        return self._identify_environment()
+
+    @abc.abstractmethod
+    def _identify_environment(self) -> List[ExecutionEnvironment]:
+        pass
+
+
+class DatabricksEnvironmentIdentifier(EnvironmentIdentifier):
+    """Identify whether you are running Great Expectations in a
+    Databricks Data Science & Engineering notebook environment."""
+
+    def _identify_environment(self) -> List[ExecutionEnvironment]:
+
+        environments: List[ExecutionEnvironment] = []
+        # TODO: 20220405 AJB Are these mutually exclusive?
+        if self._in_databricks_notebook():
+            environments.append(
+                ExecutionEnvironment(
+                    environment_name="databricks",
+                    version=version.parse(os.getenv("DATABRICKS_RUNTIME_VERSION")),
+                    environment_type=ExecutionEnvironmentType.INTERACTIVE,
+                )
+            )
+
+        if self._in_databricks_job():
+            environments.append(
+                ExecutionEnvironment(
+                    environment_name="databricks",
+                    version=version.parse(os.getenv("DATABRICKS_RUNTIME_VERSION")),
+                    environment_type=ExecutionEnvironmentType.ORCHESTRATION,
+                )
+            )
+        return environments
+
+    def _in_databricks_notebook(self):
+        """Determine if you are running in a databricks notebook."""
+        has_runtime_env_var: bool = bool(os.getenv("DATABRICKS_RUNTIME_VERSION"))
+        has_databricks_named_env_var: bool = (
+            len(list([key for key in os.environ.keys() if "databricks" in key.lower()]))
+            > 0
+        )
+        return any([has_runtime_env_var, has_databricks_named_env_var])
+
+    def _in_databricks_job(self):
+        """Determine if you are running in a databricks job."""
+        raise NotImplementedError
+
+
 class GEExecutionEnvironment:
     """The list of GE dependencies with version and install information.
 
@@ -58,6 +130,10 @@ class GEExecutionEnvironment:
     Attributes: None
     """
 
+    REGISTERED_ENVIRONMENTS: List[EnvironmentIdentifier] = [
+        DatabricksEnvironmentIdentifier
+    ]
+
     def __init__(self):
         self._ge_dependencies: GEDependencies = GEDependencies()
         self._all_installed_packages = None
@@ -66,6 +142,9 @@ class GEExecutionEnvironment:
         self._dependencies = []
         self._build_required_dependencies()
         self._build_dev_dependencies()
+
+        self._execution_environments = []
+        self._build_execution_environments()
 
     @property
     def dependencies(self) -> List[PackageInfo]:
@@ -77,6 +156,13 @@ class GEExecutionEnvironment:
         Attributes: None
         """
         return self._dependencies
+
+    @property
+    def execution_environments(self) -> List[ExecutionEnvironment]:
+        raise NotImplementedError
+
+    def _build_execution_environments(self) -> None:
+        raise NotImplementedError
 
     def _build_required_dependencies(self) -> None:
         dependency_list: List[PackageInfo] = self._build_dependencies_info(
