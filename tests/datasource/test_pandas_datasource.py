@@ -18,7 +18,7 @@ from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.util import is_library_loadable
-from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.validator.validator import BridgeValidator
 
 yaml = YAML()
 
