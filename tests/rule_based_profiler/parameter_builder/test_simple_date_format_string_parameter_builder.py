@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Dict
 
 import pytest
 
@@ -15,68 +15,6 @@ from great_expectations.rule_based_profiler.parameter_builder.simple_date_format
     DEFAULT_CANDIDATE_STRINGS,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-
-DEFAULT_CANDIDATE_STRINGS: Set[str] = {
-    "%H:%M:%S",
-    "%H:%M:%S,%f",
-    "%H:%M:%S.%f",
-    "%Y %b %d %H:%M:%S.%f",
-    "%Y %b %d %H:%M:%S.%f %Z",
-    "%Y %b %d %H:%M:%S.%f*%Z",
-    "%Y%m%d %H:%M:%S.%f",
-    "%Y-%m-%d",
-    "%Y-%m-%d %H:%M:%S",
-    "%Y-%m-%d %H:%M:%S %z",
-    "%Y-%m-%d %H:%M:%S%z",
-    "%Y-%m-%d %H:%M:%S,%f",
-    "%Y-%m-%d %H:%M:%S,%f%z",
-    "%Y-%m-%d %H:%M:%S.%f",
-    "%Y-%m-%d %H:%M:%S.%f%z",
-    "%Y-%m-%d'T'%H:%M:%S",
-    "%Y-%m-%d'T'%H:%M:%S%z",
-    "%Y-%m-%d'T'%H:%M:%S'%z'",
-    "%Y-%m-%d'T'%H:%M:%S.%f",
-    "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
-    "%Y-%m-%d*%H:%M:%S",
-    "%Y-%m-%d*%H:%M:%S:%f",
-    "%Y-%m-%dT%z",
-    "%Y/%m/%d",
-    "%Y/%m/%d*%H:%M:%S",
-    "%b %d %H:%M:%S",
-    "%b %d %H:%M:%S %Y",
-    "%b %d %H:%M:%S %z",
-    "%b %d %H:%M:%S %z %Y",
-    "%b %d %Y %H:%M:%S",
-    "%b %d, %Y %H:%M:%S %p",
-    "%d %b %Y %H:%M:%S",
-    "%d %b %Y %H:%M:%S*%f",
-    "%d-%b-%Y %H:%M:%S",
-    "%d-%b-%Y %H:%M:%S.%f",
-    "%d-%m-%Y",
-    "%d/%b %H:%M:%S,%f",
-    "%d/%b/%Y %H:%M:%S",
-    "%d/%b/%Y:%H:%M:%S",
-    "%d/%b/%Y:%H:%M:%S %z",
-    "%d/%m/%Y",
-    "%m%d_%H:%M:%S",
-    "%m%d_%H:%M:%S.%f",
-    "%m-%d-%Y",
-    "%m/%d/%Y",
-    "%m/%d/%Y %H:%M:%S %p",
-    "%m/%d/%Y %H:%M:%S %p:%f",
-    "%m/%d/%Y %H:%M:%S %z",
-    "%m/%d/%Y*%H:%M:%S",
-    "%m/%d/%Y*%H:%M:%S*%f",
-    "%m/%d/%y %H:%M:%S %z",
-    "%m/%d/%y*%H:%M:%S",
-    "%y%m%d %H:%M:%S",
-    "%y-%m-%d",
-    "%y-%m-%d %H:%M:%S",
-    "%y-%m-%d %H:%M:%S,%f",
-    "%y-%m-%d %H:%M:%S,%f %z",
-    "%y/%m/%d",
-    "%y/%m/%d %H:%M:%S",
-}
 
 
 def test_simple_date_format_parameter_builder_instantiation(
@@ -106,12 +44,17 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
             data_context=data_context,
         )
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+
     domain: Domain = Domain(domain_type=MetricDomainTypes.COLUMN)
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
         date_format_string_parameter.build_parameters(
-            parameter_container=parameter_container, domain=domain
+            domain=domain,
+            parameters=parameters,
         )
 
     assert (
@@ -145,15 +88,19 @@ def test_simple_date_format_parameter_builder_alice(
     assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
     assert date_format_string_parameter._threshold == 1.0
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     assert parameter_container.parameter_nodes is None
 
     date_format_string_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        domain=domain,
+        parameters=parameters,
     )
 
     # noinspection PyTypeChecker
@@ -232,7 +179,7 @@ def test_simple_date_format_parameter_builder_alice(
         parameter_reference=fully_qualified_parameter_name_for_value,
         expected_return_type=dict,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     assert actual_value == expected_value
@@ -271,15 +218,19 @@ def test_simple_date_format_parameter_builder_bobby(
     assert date_format_string_parameter._candidate_strings == set(candidate_strings)
     assert date_format_string_parameter._threshold == 0.9
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     assert parameter_container.parameter_nodes is None
 
     date_format_string_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        domain=domain,
+        parameters=parameters,
     )
 
     assert (
@@ -296,7 +247,7 @@ def test_simple_date_format_parameter_builder_bobby(
         parameter_reference=fully_qualified_parameter_name_for_value,
         expected_return_type=str,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     assert actual_value == expected_value
@@ -312,6 +263,6 @@ def test_simple_date_format_parameter_builder_bobby(
         parameter_reference=fully_qualified_parameter_name_for_meta,
         expected_return_type=dict,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
     assert meta == expected_meta
