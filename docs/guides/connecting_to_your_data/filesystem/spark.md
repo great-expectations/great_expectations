@@ -10,9 +10,10 @@ import SparkDataContextNote from '../components/spark_data_context_note.md'
 import SparkAdditionalNotes from '../components/spark_additional_notes.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you connect to your data stored on a filesystem using Spark.
-This will allow you to validate and explore your data.
+This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
 <Prerequisites>
 
@@ -79,7 +80,7 @@ Feel free to adjust your configuration and re-run `test_yaml_config()` as needed
 
 ### 4. Save the Datasource configuration to your DataContext
 
-Save the configuration into your `DataContext` by using the `add_datasource()` function.
+Save the configuration into your <TechnicalTag tag="data_context" text="Data Context" /> by using the `add_datasource()` function.
 
 <Tabs
   groupId="yaml-or-python"
@@ -88,7 +89,8 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L46
 ```
@@ -104,7 +106,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 ### 5. Test your new Datasource
 
-Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
+Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a <TechnicalTag tag="batch_request" text="Batch Request" />.
 
 <Tabs
   defaultValue='runtime_batch_request'
@@ -118,14 +120,14 @@ Add the path to your CSV in the `path` key under `runtime_parameters` in your `B
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L49-L55
 ```
-Then load data into the `Validator`.
+Then load data into the Validator.
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L61-L67
 ```
 
   </TabItem>
   <TabItem value="batch_request">
 
-Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
+Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L73-L77
 ```
@@ -160,7 +162,7 @@ You could write a `BatchRequest` that reads in the entire folder as a single Spa
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L106-L113
 ```
 
-Once that step is complete, then we can confirm that our `Validator` contains a batch with the expected 30,000 lines. 
+Once that step is complete, then we can confirm that our Validator contains a <TechnicalTag tag="batch" text="Batch" /> with the expected 30,000 lines. 
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L119-L127
 ```

@@ -1,5 +1,3 @@
-import pytest
-
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,

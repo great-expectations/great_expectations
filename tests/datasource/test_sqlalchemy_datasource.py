@@ -11,7 +11,7 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.datasource import SqlAlchemyDatasource
-from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.validator.validator import BridgeValidator
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
