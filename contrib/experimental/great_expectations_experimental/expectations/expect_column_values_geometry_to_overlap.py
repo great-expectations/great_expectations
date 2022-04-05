@@ -1,3 +1,9 @@
+"""
+This is a template for creating custom ColumnMapExpectations.
+For detailed instructions on how to use it, please see:
+    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
+"""
+
 import json
 from typing import Optional
 
@@ -25,7 +31,7 @@ from great_expectations.expectations.metrics import (
 class ColumnValuesToCheckOverlap(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    metric_name = "column_values.geometry_overlap"
+    condition_metric_name = "column_values.geometry_overlap"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -52,8 +58,11 @@ class ColumnValuesToCheckOverlap(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnGeometryToOverlap(ColumnMapExpectation):
-    """Expect geometries in this column to overlap with each other."""
+class ExpectColumnValuesGeometryToOverlap(ColumnMapExpectation):
+    """Expect geometries in this column to overlap with each other. If any two
+    geometries do overlap, expectation will return True. For more information look here   
+    https://stackoverflow.com/questions/64042379/shapely-is-valid-returns-true-to-invalid-overlap-polygons
+"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -68,7 +77,7 @@ class ExpectColumnGeometryToOverlap(ColumnMapExpectation):
                 "geometry_not_overlaps": [
                     Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
                     Polygon([(2, 2), (4, 2), (4, 4), (2, 4)]),
-                    Point(5, 6)
+                    Point(5, 6),
                 ],
             },
             "tests": [
@@ -92,7 +101,7 @@ class ExpectColumnGeometryToOverlap(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    metric_dependencies = "column_values.geometry_overlap"
+    map_metric = "column_values.geometry_overlap"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
@@ -142,4 +151,4 @@ class ExpectColumnGeometryToOverlap(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnGeometryToOverlap().print_diagnostic_checklist()
+    ExpectColumnValuesGeometryToOverlap().print_diagnostic_checklist()
