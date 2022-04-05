@@ -1,8 +1,12 @@
 from typing import Dict, List, Optional, Tuple
 
+from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
+)
+from great_expectations.datasource.data_connector.util import (
+    batch_definition_matches_batch_request,
 )
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -296,3 +300,32 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             A list of tuples consisting of available names and types
         """
         return [(asset["table_name"], asset["type"]) for asset in self.assets.values()]
+
+    def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):
+        sub_cache: dict
+
+        self._validate_batch_request(batch_request=batch_request)
+
+        if len(self._data_references_cache) == 0:
+            self._refresh_data_references_cache()
+
+        batch_definition_list: List[BatchDefinition] = []
+        try:
+            sub_cache = self._data_references_cache[batch_request.data_asset_name]
+        except KeyError:
+            raise KeyError(
+                f"data_asset_name {batch_request.data_asset_name} is not recognized."
+            )
+
+        for batch_identifiers in sub_cache:
+            batch_definition: BatchDefinition = BatchDefinition(
+                datasource_name=self.datasource_name,
+                data_connector_name=self.name,
+                data_asset_name=batch_request.data_asset_name,
+                batch_identifiers=IDDict(batch_identifiers),
+                batch_spec_passthrough=batch_request.batch_spec_passthrough,
+            )
+            if batch_definition_matches_batch_request(batch_definition, batch_request):
+                batch_definition_list.append(batch_definition)
+
+        return batch_definition_list
