@@ -2,6 +2,7 @@ from great_expectations.expectations.set_based_column_map_expectation import (
     SetBasedColumnMapExpectation,
 )
 
+
 class ExpectColumnValuesToBeValidHTTPMethods(SetBasedColumnMapExpectation):
     """Ensures all values are a valid http method:
     GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH
@@ -81,14 +82,12 @@ class ExpectColumnValuesToBeValidHTTPMethods(SetBasedColumnMapExpectation):
         set_=set_,
     )
 
-
     library_metadata = {
-        "tags": ["type-entities", "hackathon","set-based"],  
-        "contributors": [  
-            "@zachlindsey",  
+        "tags": ["type-entities", "hackathon", "set-based"],
+        "contributors": [
+            "@zachlindsey",
         ],
     }
-
 
 
 if __name__ == "__main__":
