@@ -160,7 +160,7 @@ class ParameterBuilder(Builder, ABC):
             variables: attribute name/value pairs
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
             parameter_computation_impl: Object containing desired ParameterBuilder implementation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
+            json_serialize: If absent, use property value (in standard way, supporting variables look-up).
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
