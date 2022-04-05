@@ -128,7 +128,7 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"]
     )
 
-    assert mock_emit.call_count == 45
+    assert mock_emit.call_count == 43
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
@@ -207,7 +207,7 @@ def test_alice_profiler_user_workflow_single_batch(
                     {
                         "anonymized_name": "116c25bb5cf9b84958846024fe1c2b7b",
                         "anonymized_domain_builder": {
-                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "parent_class": "ColumnDomainBuilder",
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
@@ -413,7 +413,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_sampling_method(
+def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_oneshot_estimator(
     mock_emit,
     caplog,
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -444,20 +444,20 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiled_expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=bobby_columnar_table_multi_batch[
-            "test_configuration_oneshot_sampling_method"
+            "test_configuration_oneshot_estimator"
         ]["expectation_suite_name"],
         include_citation=True,
     )
 
-    assert sorted(expectation_suite) == sorted(
-        bobby_columnar_table_multi_batch["test_configuration_oneshot_sampling_method"][
-            "expected_expectation_suite"
-        ]
-    )
+    fixture_expectation_suite: ExpectationSuite = bobby_columnar_table_multi_batch[
+        "test_configuration_oneshot_estimator"
+    ]["expected_expectation_suite"]
 
-    assert mock_emit.call_count == 103
+    assert profiled_expectation_suite == fixture_expectation_suite
+
+    assert mock_emit.call_count == 99
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
@@ -503,7 +503,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                     {
                         "anonymized_name": "9b95e917ab153669bcd32ec522604556",
                         "anonymized_domain_builder": {
-                            "parent_class": "SimpleSemanticTypeColumnDomainBuilder",
+                            "parent_class": "ColumnDomainBuilder",
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
@@ -562,7 +562,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                     {
                         "anonymized_name": "716348d3985f11679de53ec2b6ce5987",
                         "anonymized_domain_builder": {
-                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "parent_class": "ColumnDomainBuilder",
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
@@ -602,7 +602,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                     {
                         "anonymized_name": "38f59421a7c7b59a45b547a73c7714f9",
                         "anonymized_domain_builder": {
-                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "parent_class": "ColumnDomainBuilder",
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
@@ -1395,7 +1395,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_sampling_method(
+def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_estimator(
     mock_emit,
     caplog,
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
@@ -1430,7 +1430,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
 
     expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
+            "test_configuration_bootstrap_estimator"
         ][
             "expectation_suite_name"
         ],
@@ -1451,20 +1451,20 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
 
     assert (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
+            "test_configuration_bootstrap_estimator"
         ]["expect_table_row_count_to_be_between_min_value_mean_value"]
         < min_value
         < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
+            "test_configuration_bootstrap_estimator"
         ]["expect_table_row_count_to_be_between_mean_value"]
     )
     assert (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
+            "test_configuration_bootstrap_estimator"
         ]["expect_table_row_count_to_be_between_mean_value"]
         < max_value
         < bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
-            "test_configuration_bootstrap_sampling_method"
+            "test_configuration_bootstrap_estimator"
         ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
 
@@ -1689,7 +1689,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     {
                         "anonymized_name": "f54fc6b216560f2a56a3cced587fb6e3",
                         "anonymized_domain_builder": {
-                            "parent_class": "SimpleColumnSuffixDomainBuilder",
+                            "parent_class": "ColumnDomainBuilder",
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
@@ -1839,7 +1839,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "column": "$domain.domain_kwargs.column",
                         "quantile_ranges": {
                             "quantiles": "$variables.quantiles",
-                            "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                            "value_ranges": "$parameter.quantile_value_ranges.value",
                         },
                         "allow_relative_error": "$variables.allow_relative_error",
                         "meta": {
@@ -1938,7 +1938,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "column": "$domain.domain_kwargs.column",
                         "quantile_ranges": {
                             "quantiles": "$variables.quantiles",
-                            "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                            "value_ranges": "$parameter.quantile_value_ranges.value",
                         },
                         "allow_relative_error": "$variables.allow_relative_error",
                         "meta": {

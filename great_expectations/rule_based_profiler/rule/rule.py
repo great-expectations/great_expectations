@@ -1,8 +1,9 @@
 import copy
 import json
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.config.base import (
     domainBuilderConfigSchema,
@@ -43,19 +44,33 @@ class Rule(SerializableDictDot):
 
         self._parameters = {}
 
-    def generate(
+    def run(
         self,
         variables: Optional[ParameterContainer] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
     ) -> List[ExpectationConfiguration]:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
         ConfigurationBuilder available based on the instantiation.
+        Args:
+            variables: attribute name/value pairs, commonly-used in Builder objects.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
 
-        :return: List of Corresponding Expectation Configurations representing every configured rule
+        Returns:
+            List of Corresponding Expectation Configurations representing every configured rule
         """
         expectation_configurations: List[ExpectationConfiguration] = []
 
-        domains: List[Domain] = self.domain_builder.get_domains(variables=variables)
+        domains: List[Domain] = self.domain_builder.get_domains(
+            variables=variables,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            force_batch_data=force_batch_data,
+        )
 
         domain: Domain
         for domain in domains:
@@ -63,28 +78,65 @@ class Rule(SerializableDictDot):
                 parameter_nodes=None
             )
             self._parameters[domain.id] = parameter_container
+
+            parameter_builders: List[ParameterBuilder] = self.parameter_builders or []
             parameter_builder: ParameterBuilder
-            for parameter_builder in self.parameter_builders:
+            for parameter_builder in parameter_builders:
                 parameter_builder.build_parameters(
-                    parameter_container=parameter_container,
                     domain=domain,
                     variables=variables,
                     parameters=self._parameters,
+                    parameter_computation_impl=None,
+                    json_serialize=None,
+                    batch_list=batch_list,
+                    batch_request=batch_request,
+                    force_batch_data=force_batch_data,
                 )
 
+            expectation_configuration_builders: List[
+                ExpectationConfigurationBuilder
+            ] = (self.expectation_configuration_builders or [])
             expectation_configuration_builder: ExpectationConfigurationBuilder
-            for (
-                expectation_configuration_builder
-            ) in self.expectation_configuration_builders:
+            for expectation_configuration_builder in expectation_configuration_builders:
                 expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
                         domain=domain,
                         variables=variables,
-                        parameters=self.parameters,
+                        parameters=self._parameters,
+                        batch_list=batch_list,
+                        batch_request=batch_request,
+                        force_batch_data=force_batch_data,
                     )
                 )
 
         return expectation_configurations
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value
+
+    @property
+    def domain_builder(self) -> DomainBuilder:
+        return self._domain_builder
+
+    @property
+    def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
+        return self._parameter_builders
+
+    @property
+    def expectation_configuration_builders(
+        self,
+    ) -> List[ExpectationConfigurationBuilder]:
+        return self._expectation_configuration_builders
+
+    @property
+    def parameters(self) -> Dict[str, ParameterContainer]:
+        # Returning a copy of the "self._parameters" state variable in order to prevent write-before-read hazard.
+        return copy.deepcopy(self._parameters)
 
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None
@@ -159,14 +211,6 @@ class Rule(SerializableDictDot):
         """
         return self.__repr__()
 
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value
-
     def _get_parameter_builders_as_dict(self) -> Dict[str, ParameterBuilder]:
         parameter_builders: List[ParameterBuilder] = self.parameter_builders
         if parameter_builders is None:
@@ -186,22 +230,3 @@ class Rule(SerializableDictDot):
             expectation_configuration_builder.expectation_type: expectation_configuration_builder
             for expectation_configuration_builder in self.expectation_configuration_builders
         }
-
-    @property
-    def domain_builder(self) -> DomainBuilder:
-        return self._domain_builder
-
-    @property
-    def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
-        return self._parameter_builders
-
-    @property
-    def expectation_configuration_builders(
-        self,
-    ) -> List[ExpectationConfigurationBuilder]:
-        return self._expectation_configuration_builders
-
-    @property
-    def parameters(self) -> Dict[str, ParameterContainer]:
-        # Returning a copy of the "self._parameters" state variable in order to prevent write-before-read hazard.
-        return copy.deepcopy(self._parameters)

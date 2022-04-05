@@ -214,7 +214,6 @@ class ExpectValueAtIndex(ColumnMapExpectation):
             # Github handles for all contributors to this Expectation.
             #         "@your_name_here", # Don't forget to add your github handle here!
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
