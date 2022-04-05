@@ -25,7 +25,7 @@ from great_expectations.expectations.metrics import (
 class ColumnValuesToCheckOverlap(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    metric_name = "column_values.geometry_not_overlap"
+    condition_metric_name = "column_values.geometry_not_overlap"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -52,11 +52,11 @@ class ColumnValuesToCheckOverlap(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnGeometryNotOverlap(ColumnMapExpectation):
-    """Expect geometries in this column to not overlap with each other. For more
-    information look here
+class ExpectColumnValuesGeometryNotToOverlap(ColumnMapExpectation):
+    """Expect geometries in this column to overlap with each other. If any two
+    geometries do overlap, expectation will return True. For more information look here   
     https://stackoverflow.com/questions/64042379/shapely-is-valid-returns-true-to-invalid-overlap-polygons
-    """
+"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -95,7 +95,7 @@ class ExpectColumnGeometryNotOverlap(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    metric_dependencies = "column_values.geometry_not_overlap"
+    map_metric = "column_values.geometry_not_overlap"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
@@ -145,4 +145,4 @@ class ExpectColumnGeometryNotOverlap(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnGeometryNotOverlap().print_diagnostic_checklist()
+    ExpectColumnValuesGeometryNotToOverlap().print_diagnostic_checklist()
