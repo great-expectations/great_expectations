@@ -453,13 +453,20 @@ class Validator:
                 override_profiler_config=override_profiler_config,
             )
 
-            expectation_configurations: List[ExpectationConfiguration] = profiler.run(
+            profiler.run(
                 variables=None,
                 rules=None,
                 batch_list=list(self.batches.values()),
                 batch_request=None,
                 force_batch_data=False,
                 reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+            )
+            expectation_configurations: List[
+                ExpectationConfiguration
+            ] = profiler.expectation_suite(
+                batch_list=list(self.batches.values()),
+                batch_request=None,
+                force_batch_data=False,
                 expectation_suite=None,
                 expectation_suite_name=None,
                 include_citation=True,
