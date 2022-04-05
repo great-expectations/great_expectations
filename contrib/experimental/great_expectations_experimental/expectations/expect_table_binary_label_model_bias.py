@@ -26,7 +26,7 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
 
     metric_name = "table.modeling.binary.model_bias"
-    value_keys = ("y_true", "y_pred", "feature_columns")
+    value_keys = ("y_true", "y_pred")  # , "feature_columns")
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
@@ -41,10 +41,14 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
     ):
         y_true = metric_value_kwargs.get("y_true")
         y_pred = metric_value_kwargs.get("y_pred")
+        #      feature_columns = metric_value_kwargs.get("feature_columns")
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         df = df.rename(columns={y_true: "label_value", y_pred: "score"})
+        #       feature_columns.append("label_value")
+        #       feature_columns.append("score")
+        #       df = df[[feature_columns]]
         df, _ = preprocess_input_df(df)
 
         # Group() class evaluates biases across all subgroups in dataset by assembling a confusion matrix
@@ -107,7 +111,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         {
             "data": {
                 "entity_id": [1, 3, 4, 5, 6],
-                "pred": [0, 0, 0, 1, 0],
+                "pred": [0, 1, 1, 0, 0],
                 "y": [0, 1, 1, 0, 0],
                 "race": [
                     "African-American",
@@ -116,7 +120,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
                     "African-American",
                     "African-American",
                 ],
-                "sex": ["Male", "Male", "Male", "Male", "Male"],
+                "sex": ["Male", "Female", "Male", "Female", "Male"],
                 "age_cat": [
                     "Greater than 45",
                     "25 - 45",
@@ -131,7 +135,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "feature_columns": ["race", "sex"],
+                        "partial_success": True,
                         "y_true": "y",
                         "y_pred": "pred",
                     },
@@ -144,7 +148,6 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "feature_columns": ["race", "sex", "age_cat"],
                         "y_pred": "pred",
                         "y_true": "y",
                     },
@@ -164,18 +167,18 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
 
     metric_dependencies = ("table.modeling.binary.model_bias",)
     success_keys = (
-        "feature_columns",  # might use this if people want to use specific features
+        "partial_success",  # might use this if people want to use specific features
         "y_true",
         "y_pred",
     )
 
     default_kwarg_values = {
-        "feature_columns": None,
         "y_pred": None,
         "y_true": None,  # When the y_true column is not included in the original data set, Aequitas calculates only Statistical Parity and Impact Parities.
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "partial_success": False,
         "meta": None,
     }
 
@@ -200,10 +203,8 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         #        columns = configuration.kwargs.get("important_columns")
         y_true = configuration.kwargs.get("y_true")
         y_pred = configuration.kwargs.get("y_pred")
-        columns = configuration.kwargs.get("feature_columns")
 
         try:
-            assert columns is not None, "target columns must be specified"
             assert y_true is not None, "target y_true must be specified"
             assert y_pred is not None, "target y_true must be specified"
             assert isinstance(y_pred, str), "y_pred must be a string column name"
@@ -221,14 +222,18 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         execution_engine=None,
     ):
 
-        fairness = (metrics["table.modeling.binary.model_bias"],)
-
-        #        columns = configuration["kwargs"].get("important_columns")
-
-        return {
-            "success": fairness["Overall Fairness"],
-            "result": {"observed_value": fairness},
-        }
+        fairness = metrics["table.modeling.binary.model_bias"]
+        partial_success = configuration["kwargs"].get("partial_success")
+        if partial_success:
+            return {
+                "success": True in fairness.values(),
+                "result": {"observed_value": fairness},
+            }
+        else:
+            return {
+                "success": fairness["Overall Fairness"],
+                "result": {"observed_value": fairness},
+            }
 
 
 if __name__ == "__main__":
