@@ -10,6 +10,7 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
+
 # This method compares a string to the valid base32 code
 def is_valid_base32(code: str) -> bool:
     try:
