@@ -5,6 +5,13 @@ from great_expectations.rule_based_profiler.types import Domain, ParameterContai
 
 
 class RuleState:
+    """
+    RuleState maintains state information, resulting from executing "Rule.run()" method by combining passed "Batch" data
+    with currently loaded configuration of "Rule" components ("DomainBuilder" object, "ParameterBuilder" objects, and
+    "ExpectationConfigurationBuilder" objects).  Using "RuleState" with correponding flags is sufficient for generating
+    outputs for different purposes (in raw and aggregated form) from available "Domain" objects and computed parameters.
+    """
+
     def __init__(
         self,
         rule: "Rule",  # noqa: F821
@@ -12,6 +19,13 @@ class RuleState:
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
+        """
+        Args:
+            rule: Rule object for which present RuleState object corresponds (needed for various Rule properties).
+            domains: List of Domain objects, which DomainBuilder of associated Rule generated.
+            variables: attribute name/value pairs (part of state, relevant for associated Rule).
+            parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
+        """
         self._rule = rule
 
         if domains is None:

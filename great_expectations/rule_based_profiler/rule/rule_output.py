@@ -9,10 +9,18 @@ from great_expectations.rule_based_profiler.types import Domain, RuleState
 
 
 class RuleOutput:
+    """
+    RuleOutput provides methods for extracting useful information from RuleState using directives and application logic.
+    """
+
     def __init__(
         self,
         rule_state: RuleState,
     ):
+        """
+        Args:
+            rule_state: RuleState object represented by "Domain" objects and parameters,.computed for one Rule object.
+        """
         self._rule_state = rule_state
 
     @property

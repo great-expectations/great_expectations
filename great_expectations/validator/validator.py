@@ -463,11 +463,7 @@ class Validator:
             )
             expectation_configurations: List[
                 ExpectationConfiguration
-            ] = profiler.expectation_suite(
-                expectation_suite=None,
-                expectation_suite_name=None,
-                include_citation=True,
-            ).expectations
+            ] = profiler.expectation_configurations()
 
             configuration = expectation_configurations[0]
 
