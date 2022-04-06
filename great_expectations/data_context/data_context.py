@@ -474,12 +474,7 @@ class BaseDataContext(ConfigPeer):
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
-                if self._ge_cloud_mode:
-                    # when running in cloud mode, we want to know if a datasource has been improperly configured at
-                    # init time.
-                    raise
-                else:
-                    pass
+                pass
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
