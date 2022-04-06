@@ -46,9 +46,10 @@ class GitHubUser(SerializableDictDot):
 
 class SocialLinkType(str, Enum):
     TWITTER = "TWITTER"
-    INSTAGRAM = "INSTAGRAM"
+    GITHUB = "GITHUB"
     LINKEDIN = "LINKEDIN"
     MEDIUM = "MEDIUM"
+    WEBSITE = "WEBSITE"
 
 
 @dataclass
@@ -62,6 +63,8 @@ class DomainExpert(SerializableDictDot):
     full_name: str
     social_links: Optional[List[SocialLink]] = None
     picture: Optional[str] = None
+    title: Optional[str] = None
+    bio: Optional[str] = None
 
 
 class Maturity(str, Enum):
@@ -124,7 +127,22 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         general = data.get("general")
         if general:
             for attr in ("package_name", "icon", "description"):
-                self[attr] = general.get(attr)
+                if attr == "icon":
+                    # If the user has provided an icon, we need to check if it is a relative URL.
+                    # If it is, we need to convert to the HTTPS path that will show up when merged into `develop`.
+                    icon: Optional[str] = general.get(attr)
+                    if icon and os.path.exists(icon):
+                        package_name: str = os.path.basename(os.getcwd())
+                        url: str = os.path.join(
+                            "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
+                            package_name,
+                            icon,
+                        )
+                        self["icon"] = url
+                    else:
+                        self["icon"] = icon
+                else:
+                    self[attr] = general.get(attr)
 
         # Assign code owners
         code_owners = data.get("code_owners")
