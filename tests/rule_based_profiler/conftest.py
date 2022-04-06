@@ -17,6 +17,7 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     ParameterNode,
+    RuleState,
 )
 
 yaml = YAML()
@@ -477,12 +478,18 @@ def variables_multi_part_name_parameter_container():
     return variables
 
 
+# noinspection PyPep8Naming
 @pytest.fixture
-def rule_without_parameters(
+def rule_without_variables(
     empty_data_context,
+    column_Age_domain,
+    column_Date_domain,
+    variables_multi_part_name_parameter_container,
+    single_part_name_parameter_container,
+    multi_part_name_parameter_container,
 ):
     rule: Rule = Rule(
-        name="rule_with_no_variables_no_parameters",
+        name="rule_without_variables",
         domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
         expectation_configuration_builders=[
             DefaultExpectationConfigurationBuilder(
@@ -495,28 +502,25 @@ def rule_without_parameters(
 
 # noinspection PyPep8Naming
 @pytest.fixture
-def rule_with_parameters(
-    empty_data_context,
+def rule_state_with_domains_and_parameters(
+    rule_without_variables,
     column_Age_domain,
     column_Date_domain,
-    variables_multi_part_name_parameter_container,
     single_part_name_parameter_container,
     multi_part_name_parameter_container,
 ):
-    rule: Rule = Rule(
-        name="rule_with_parameters",
-        domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
-        expectation_configuration_builders=[
-            DefaultExpectationConfigurationBuilder(
-                expectation_type="expect_my_validation"
-            )
+    rule_state: RuleState = RuleState(
+        rule=rule_without_variables,
+        domains=[
+            column_Age_domain,
+            column_Date_domain,
         ],
+        parameters={
+            column_Age_domain.id: single_part_name_parameter_container,
+            column_Date_domain.id: multi_part_name_parameter_container,
+        },
     )
-    rule._parameters = {
-        column_Age_domain.id: single_part_name_parameter_container,
-        column_Date_domain.id: multi_part_name_parameter_container,
-    }
-    return rule
+    return rule_state
 
 
 @pytest.fixture
