@@ -1753,7 +1753,6 @@ class BaseDataContext(ConfigPeer):
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
-        *,
         batch: Optional[Batch] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[BatchRequestBase] = None,
@@ -1902,8 +1901,6 @@ class BaseDataContext(ConfigPeer):
                 config=validator.data_context.datasources[datasource].config,
                 initialize=False,
             )
-            if self is DataContext:
-                self._save_project_config()
 
         return validator
 
@@ -4400,6 +4397,74 @@ class DataContext(BaseDataContext):
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
         with open(config_filepath, "w") as outfile:
             self.config.to_yaml(outfile)
+
+    def get_validator(
+        self,
+        datasource_name: Optional[str] = None,
+        data_connector_name: Optional[str] = None,
+        data_asset_name: Optional[str] = None,
+        *,
+        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        batch_request_list: List[Optional[BatchRequestBase]] = None,
+        batch_data: Optional[Any] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
+        batch_identifiers: Optional[dict] = None,
+        limit: Optional[int] = None,
+        index: Optional[Union[int, list, tuple, slice, str]] = None,
+        custom_filter_function: Optional[Callable] = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[dict] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        expectation_suite_name: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        create_expectation_suite_with_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        """
+        This method applies only to the new (V3) Datasource schema.
+        """
+        validator: Validator = super().get_validator(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch=batch,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            batch_request_list=batch_request_list,
+            batch_data=batch_data,
+            data_connector_query=data_connector_query,
+            batch_identifiers=batch_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
+            batch_filter_parameters=batch_filter_parameters,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            batch_spec_passthrough=batch_spec_passthrough,
+            expectation_suite_name=expectation_suite_name,
+            expectation_suite=expectation_suite,
+            create_expectation_suite_with_name=create_expectation_suite_with_name,
+            **kwargs,
+        )
+
+        self._save_project_config()
+
+        return validator
 
     def add_store(self, store_name, store_config):
         logger.debug(f"Starting DataContext.add_store for store {store_name}")
