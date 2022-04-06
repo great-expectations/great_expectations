@@ -98,7 +98,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         threshold: Union[str, float] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
         evaluation_parameter_builder_configs: Optional[List[dict]] = None,
-        json_serialize: bool = True,
+        json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
             Union[str, BatchRequest, RuntimeBatchRequest, dict]
@@ -174,7 +174,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
