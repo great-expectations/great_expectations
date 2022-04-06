@@ -1805,8 +1805,10 @@ def test_get_validator_without_expectation_suite(in_memory_runtime_context):
         )
     )
 
-    my_validator = context.get_validator(batch=batch)
-    assert type(my_validator.get_expectation_suite()) == ExpectationSuite
+    my_validator = context.get_validator(
+        batch=batch
+    )
+    assert isinstance(my_validator.get_expectation_suite(), ExpectationSuite)
     assert my_validator.expectation_suite_name == "default"
 
 
