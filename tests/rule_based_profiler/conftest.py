@@ -12,8 +12,10 @@ from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBu
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
 from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -493,8 +495,9 @@ def rule_without_variables(
         domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
         expectation_configuration_builders=[
             DefaultExpectationConfigurationBuilder(
-                expectation_type="expect_my_validation"
-            )
+                expectation_type="expect_my_validation",
+                column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            ),
         ],
     )
     return rule
@@ -521,6 +524,16 @@ def rule_state_with_domains_and_parameters(
         },
     )
     return rule_state
+
+
+@pytest.fixture
+def rule_output_for_rule_state_with_domains_and_parameters(
+    rule_state_with_domains_and_parameters,
+):
+    rule_output: RuleOutput = RuleOutput(
+        rule_state=rule_state_with_domains_and_parameters
+    )
+    return rule_output
 
 
 @pytest.fixture

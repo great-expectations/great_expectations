@@ -280,18 +280,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def expectation_suite_meta(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> Dict[str, Any]:
         """
         Args:
-            batch_list: Explicit list of Batch objects to supply data at runtime.
-            batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
             expectation_suite: An existing ExpectationSuite to update.
             expectation_suite_name: A name for returned ExpectationSuite.
             include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
@@ -300,9 +294,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             Dictionary corresponding to meta property of ExpectationSuite using ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
         """
         expectation_suite: ExpectationSuite = self.expectation_suite(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            force_batch_data=force_batch_data,
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
@@ -311,18 +302,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def expectation_suite(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
         """
         Args:
-            batch_list: Explicit list of Batch objects to supply data at runtime.
-            batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
             expectation_suite: An existing ExpectationSuite to update.
             expectation_suite_name: A name for returned ExpectationSuite.
             include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
@@ -351,7 +336,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         expectation_configurations: List[
             ExpectationConfiguration
-        ] = self.expectation_configurations()
+        ] = self.get_expectation_configurations()
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expectation_configurations:
@@ -364,7 +349,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return expectation_suite
 
-    def expectation_configurations(self) -> List[ExpectationConfiguration]:
+    def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
         """
         Returns:
             List of ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
@@ -375,7 +360,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rule_output: RuleOutput
         for rule_state in self.rule_states:
             rule_output = RuleOutput(rule_state=rule_state)
-            expectation_configurations.extend(rule_output.expectation_configurations())
+            expectation_configurations.extend(
+                rule_output.get_expectation_configurations()
+            )
 
         return expectation_configurations
 
