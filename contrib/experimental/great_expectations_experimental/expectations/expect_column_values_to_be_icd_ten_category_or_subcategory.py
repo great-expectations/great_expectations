@@ -4,26 +4,22 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-import json
 from typing import Optional
 
+import simple_icd_10 as icd
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
 
-import simple_icd_10 as icd
-
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
+
+
 class ColumnValuesMatchValidIcdTenCategoryOrSubcategory(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
@@ -34,8 +30,10 @@ class ColumnValuesMatchValidIcdTenCategoryOrSubcategory(ColumnMapMetricProvider)
     def _pandas(cls, column, **kwargs):
         def check_if_icd_ten_category_or_subcategory(code: str) -> bool:
             return icd.is_category_or_subcategory(code)
-    
-        column_icd_ten_category_or_subcategory=column.apply(check_if_icd_ten_category_or_subcategory)
+
+        column_icd_ten_category_or_subcategory = column.apply(
+            check_if_icd_ten_category_or_subcategory
+        )
         return column_icd_ten_category_or_subcategory
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
@@ -51,16 +49,34 @@ class ColumnValuesMatchValidIcdTenCategoryOrSubcategory(ColumnMapMetricProvider)
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeIcdTenCategoryOrSubcategory(ColumnMapExpectation):
-    """     
-    Expect column values to consist only of ICD-10 categories or subcategories. 
     """
-        
+    Expect column values to consist only of ICD-10 categories or subcategories.
+    """
+
     examples = [
         {
             "data": {
-                "all_valid_categories_or_subcategories": ['C00', 'C00.1', 'C002', 'C01', 'C00.4'],
-                "mostly_valid_categories_or_subcategories": ['D10', 'D17.1', 'D171', 'C00.3', 'INVALID'],
-                "some_invalid_categories_or_subcategories": ['C00','C00.1','C00-C14','DOG','Z999'],
+                "all_valid_categories_or_subcategories": [
+                    "C00",
+                    "C00.1",
+                    "C002",
+                    "C01",
+                    "C00.4",
+                ],
+                "mostly_valid_categories_or_subcategories": [
+                    "D10",
+                    "D17.1",
+                    "D171",
+                    "C00.3",
+                    "INVALID",
+                ],
+                "some_invalid_categories_or_subcategories": [
+                    "C00",
+                    "C00.1",
+                    "C00-C14",
+                    "DOG",
+                    "Z999",
+                ],
             },
             "tests": [
                 {
@@ -68,21 +84,33 @@ class ExpectColumnValuesToBeIcdTenCategoryOrSubcategory(ColumnMapExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "all_valid_categories_or_subcategories"},
-                    "out": {"success": True,},
+                    "out": {
+                        "success": True,
+                    },
                 },
                 {
                     "title": "mostly_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "mostly_valid_categories_or_subcategories", "mostly":.8},
-                    "out": {"success": True,},
+                    "in": {
+                        "column": "mostly_valid_categories_or_subcategories",
+                        "mostly": 0.8,
+                    },
+                    "out": {
+                        "success": True,
+                    },
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "some_invalid_categories_or_subcategories", "mostly": 1},
-                    "out": { "success": False,},
+                    "in": {
+                        "column": "some_invalid_categories_or_subcategories",
+                        "mostly": 1,
+                    },
+                    "out": {
+                        "success": False,
+                    },
                 },
             ],
         }
@@ -130,11 +158,14 @@ class ExpectColumnValuesToBeIcdTenCategoryOrSubcategory(ColumnMapExpectation):
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "tags": [
-                "hackathon",
-                "semantic-type",
-                "experimental",
-                "typed-entities",],  
-        "contributors": ["@andyjessen",],
+            "hackathon",
+            "semantic-type",
+            "experimental",
+            "typed-entities",
+        ],
+        "contributors": [
+            "@andyjessen",
+        ],
         "requirements": "simple_icd_10",
     }
 
