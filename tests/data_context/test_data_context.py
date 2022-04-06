@@ -1789,106 +1789,54 @@ data_connectors:
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 
 def test_get_validator_without_expectation_suite(
-    empty_data_context_stats_enabled, tmp_path_factory
+    in_memory_runtime_context
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = in_memory_runtime_context
 
-    base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_get_validator_without_expectation_suite"
+    batch = context.get_batch(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="pandas_datasource",
+            data_connector_name="runtime_data_connector",
+            data_asset_name="my_data_asset",
+            runtime_parameters={
+                "batch_data": pd.DataFrame({
+                    "x": range(10)
+                })
+            },
+            batch_identifiers={
+                "id_key_0": "id_0_value_a",
+                "id_key_1": "id_1_value_a",
+            },
         )
     )
 
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "some_file.csv",
-        ],
-    )
-
-    yaml_config = f"""
-class_name: Datasource
-
-execution_engine:
-    class_name: PandasExecutionEngine
-
-data_connectors:
-    my_filesystem_data_connector:
-        class_name: ConfiguredAssetFilesystemDataConnector
-        base_directory: {base_directory}
-        default_regex:
-            pattern: (.+)\\.csv
-            group_names:
-                - alphanumeric
-        assets:
-            A:
-"""
-
-    config = yaml.load(yaml_config)
-    context.add_datasource(
-        "my_directory_datasource",
-        **config,
-    )
-
     my_validator = context.get_validator(
-        datasource_name="my_directory_datasource",
-        data_connector_name="my_filesystem_data_connector",
-        data_asset_name="A",
-        batch_identifiers={
-            "alphanumeric": "some_file",
-        },
+        batch=batch
     )
     assert type(my_validator.get_expectation_suite()) == ExpectationSuite
     assert my_validator.expectation_suite_name == "default"
 
 def test_get_validator_with_batch(
-    empty_data_context, tmp_path_factory
+    in_memory_runtime_context
 ):
-    context = empty_data_context
+    context = in_memory_runtime_context
 
-    base_directory = str(
-        tmp_path_factory.mktemp("test_get_validator_with_batch")
+    my_batch = context.get_batch(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="pandas_datasource",
+            data_connector_name="runtime_data_connector",
+            data_asset_name="my_data_asset",
+            runtime_parameters={
+                "batch_data": pd.DataFrame({
+                    "x": range(10)
+                })
+            },
+            batch_identifiers={
+                "id_key_0": "id_0_value_a",
+                "id_key_1": "id_1_value_a",
+            },
+        )
     )
-
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "some_file.csv",
-        ],
-    )
-
-    yaml_config = f"""
-class_name: Datasource
-
-execution_engine:
-    class_name: PandasExecutionEngine
-
-data_connectors:
-    my_filesystem_data_connector:
-        class_name: ConfiguredAssetFilesystemDataConnector
-        base_directory: {base_directory}
-        default_regex:
-            pattern: (.+)\\.csv
-            group_names:
-                - alphanumeric
-        assets:
-            A:
-"""
-
-    config = yaml.load(yaml_config)
-    context.add_datasource(
-        "my_directory_datasource",
-        **config,
-    )
-
-    my_batch = context.get_batch_list(
-        datasource_name="my_directory_datasource",
-        data_connector_name="my_filesystem_data_connector",
-        data_asset_name="A",
-        batch_identifiers={
-            "alphanumeric": "some_file",
-        },
-    )[0]
 
     my_validator = context.get_validator(
         batch=my_batch,
