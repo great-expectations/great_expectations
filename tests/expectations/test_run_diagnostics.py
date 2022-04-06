@@ -337,15 +337,22 @@ def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_match_regex"
     my_expectation = _registered_expectations[expectation_name]()
 
-    from great_expectations.expectations.registry import _registered_metrics, _registered_renderers
+    from great_expectations.expectations.registry import (
+        _registered_metrics,
+        _registered_renderers,
+    )
 
     # supported_renderers = my_expectation._get_registered_renderers(
     #     expectation_name,
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
-    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(expectation_config=my_expectation_config)
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
+        examples
+    )
+    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
+        expectation_config=my_expectation_config
+    )
     my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
         metric_diagnostics_list=my_metric_diagnostics_list,
         registered_metrics=_registered_metrics,
@@ -401,8 +408,12 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
-    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(expectation_config=my_expectation_config)
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
+        examples
+    )
+    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
+        expectation_config=my_expectation_config
+    )
     my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
         metric_diagnostics_list=my_metric_diagnostics_list,
         registered_metrics=_registered_metrics,
@@ -448,8 +459,12 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
-    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(expectation_config=my_expectation_config)
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(
+        examples
+    )
+    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(
+        expectation_config=my_expectation_config
+    )
     my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
         metric_diagnostics_list=my_metric_diagnostics_list,
         registered_metrics=_registered_metrics,
@@ -503,7 +518,7 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
 
     assert len(tests) == 5
     first_to_dict = tests[0].to_dict()
-    del(first_to_dict["validation_result"])
+    del first_to_dict["validation_result"]
     assert first_to_dict == {
         "test_title": "positive_test_with_mostly",
         "backend": "pandas",

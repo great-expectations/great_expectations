@@ -937,9 +937,7 @@ class Expectation(metaclass=MetaExpectation):
         gallery_examples: List[ExpectationTestDataCases] = []
         for example in examples:
             _tests_to_include = [
-                test
-                for test in example.tests
-                if test.include_in_gallery
+                test for test in example.tests if test.include_in_gallery
             ]
             example = deepcopy(example)
             if _tests_to_include:
@@ -950,8 +948,8 @@ class Expectation(metaclass=MetaExpectation):
             self._get_description_diagnostics()
         )
 
-        _expectation_config: ExpectationConfiguration = self._get_expectation_configuration_from_examples(
-            examples
+        _expectation_config: ExpectationConfiguration = (
+            self._get_expectation_configuration_from_examples(examples)
         )
         metric_diagnostics_list: List[
             ExpectationMetricDiagnostics
@@ -1139,7 +1137,7 @@ class Expectation(metaclass=MetaExpectation):
                         if test.output.get("success"):
                             return ExpectationConfiguration(
                                 expectation_type=self.expectation_type,
-                                kwargs=test.input
+                                kwargs=test.input,
                             )
 
     @staticmethod
@@ -1205,7 +1203,9 @@ class Expectation(metaclass=MetaExpectation):
             else:
                 # The ExpectationTestDiagnostics instance will error when calling it's to_dict()
                 # method (AttributeError: 'ExpectationConfiguration' object has no attribute 'raw_kwargs')
-                validation_result.expectation_config.raw_kwargs = validation_result.expectation_config._raw_kwargs
+                validation_result.expectation_config.raw_kwargs = (
+                    validation_result.expectation_config._raw_kwargs
+                )
 
             test_results.append(
                 ExpectationTestDiagnostics(
@@ -1305,7 +1305,9 @@ class Expectation(metaclass=MetaExpectation):
 
                     try:
                         rendered_result = renderer(
-                            configuration=test_diagnostic["validation_result"]["expectation_config"],
+                            configuration=test_diagnostic["validation_result"][
+                                "expectation_config"
+                            ],
                             result=test_diagnostic["validation_result"],
                         )
                         rendered_result_str = self._get_rendered_result_as_string(
