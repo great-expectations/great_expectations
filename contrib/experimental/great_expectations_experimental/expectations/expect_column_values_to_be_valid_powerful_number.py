@@ -10,6 +10,7 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
+
 # This method compares a string to the valid powerful number
 def is_valid_powerful_number(num: str) -> bool:
     try:
