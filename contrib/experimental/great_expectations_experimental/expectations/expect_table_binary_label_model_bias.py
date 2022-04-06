@@ -26,7 +26,7 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
 
     metric_name = "table.modeling.binary.model_bias"
-    value_keys = ("y_true", "y_pred")  # , "feature_columns")
+    value_keys = ("y_true", "y_pred", "reference_group")  # , "feature_columns")
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
@@ -36,11 +36,11 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
-        reference_group=None,
         alpha=0.05,
     ):
         y_true = metric_value_kwargs.get("y_true")
         y_pred = metric_value_kwargs.get("y_pred")
+        reference_group = metric_value_kwargs.get("reference_group")
         #      feature_columns = metric_value_kwargs.get("feature_columns")
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
@@ -202,6 +202,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         "y_true": None,  # When the y_true column is not included in the original data set, Aequitas calculates only Statistical Parity and Impact Parities.
         "result_format": "BASIC",
         "include_config": True,
+        "reference_group": None,
         "catch_exceptions": False,
         "partial_success": False,
         "meta": None,
