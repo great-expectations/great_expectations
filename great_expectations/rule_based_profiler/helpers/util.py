@@ -410,7 +410,7 @@ def compute_quantiles(
     return lower_quantile, upper_quantile
 
 
-def _compute_bootstrap_quantiles_point_estimate(
+def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
