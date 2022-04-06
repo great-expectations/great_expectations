@@ -1,57 +1,65 @@
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import (
-    StoreBackendAnonymizer,
-)
-from great_expectations.data_context.store import (
-    CheckpointStore,
-    ConfigurationStore,
-    EvaluationParameterStore,
-    ExpectationsStore,
-    HtmlSiteStore,
-    MetricStore,
-    ProfilerStore,
-    Store,
-    ValidationsStore,
-)
+from typing import Any, Optional
+
+from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+from great_expectations.data_context.store.store import Store
 
 
-class StoreAnonymizer(Anonymizer):
-    def __init__(self, salt=None):
+class StoreAnonymizer(BaseAnonymizer):
+    def __init__(
+        self,
+        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        salt: Optional[str] = None,
+    ) -> None:
         super().__init__(salt=salt)
-        # ordered bottom up in terms of inheritance order
-        self._ge_classes = [
-            ProfilerStore,
-            CheckpointStore,
-            ValidationsStore,
-            ExpectationsStore,
-            EvaluationParameterStore,
-            MetricStore,
-            ConfigurationStore,
-            Store,
-            HtmlSiteStore,
-        ]
-        self._store_backend_anonymizer = StoreBackendAnonymizer(salt=salt)
 
-    def anonymize_store_info(self, store_name, store_obj):
+        self._aggregate_anonymizer = aggregate_anonymizer
+
+    def anonymize(
+        self, store_name: str, store_obj: Store, obj: Optional[object] = None
+    ) -> Any:
         anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self.anonymize(store_name)
+        anonymized_info_dict["anonymized_name"] = self._anonymize_string(store_name)
         store_backend_obj = store_obj.store_backend
 
-        self.anonymize_object_info(
+        self._anonymize_object_info(
             object_=store_obj,
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
         )
 
         anonymized_info_dict[
             "anonymized_store_backend"
-        ] = self._store_backend_anonymizer.anonymize_store_backend_info(
-            store_backend_obj=store_backend_obj
-        )
+        ] = self._anonymize_store_backend_info(store_backend_obj=store_backend_obj)
 
         return anonymized_info_dict
 
-    def is_parent_class_recognized(self, store_obj):
-        return self._is_parent_class_recognized(
-            classes_to_check=self._ge_classes, object_=store_obj
+    def _anonymize_store_backend_info(
+        self,
+        store_backend_obj: Optional[object] = None,
+        store_backend_object_config: Optional[dict] = None,
+    ) -> dict:
+        assert (
+            store_backend_obj or store_backend_object_config
+        ), "Must pass store_backend_obj or store_backend_object_config."
+        anonymized_info_dict = {}
+        if store_backend_obj is not None:
+            self._anonymize_object_info(
+                object_=store_backend_obj,
+                anonymized_info_dict=anonymized_info_dict,
+            )
+        else:
+            class_name = store_backend_object_config.get("class_name")
+            module_name = store_backend_object_config.get("module_name")
+            if module_name is None:
+                module_name = "great_expectations.data_context.store"
+            self._anonymize_object_info(
+                object_config={"class_name": class_name, "module_name": module_name},
+                anonymized_info_dict=anonymized_info_dict,
+            )
+        return anonymized_info_dict
+
+    def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        from great_expectations.data_context.store.store import Store
+
+        return (obj is not None and isinstance(obj, Store)) or (
+            "store_name" in kwargs or "store_obj" in kwargs
         )

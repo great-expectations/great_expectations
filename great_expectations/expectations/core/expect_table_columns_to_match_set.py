@@ -47,12 +47,13 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "table expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     metric_dependencies = ("table.columns",)
@@ -74,7 +75,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -83,7 +84,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         # Setting up a configuration
@@ -102,7 +103,6 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
                 ), 'Evaluation Parameter dict for column_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -139,7 +139,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
             template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
 
             for idx in range(len(params["column_list"])):
-                params["column_list_" + str(idx)] = params["column_list"][idx]
+                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
         params_with_json_schema = {
             "column_list": {
@@ -190,7 +190,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
             template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
 
             for idx in range(len(params["column_list"])):
-                params["column_list_" + str(idx)] = params["column_list"][idx]
+                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
         return [
             RenderedStringTemplateContent(

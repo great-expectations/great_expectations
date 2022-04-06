@@ -5,7 +5,6 @@ import os
 import platform
 import random
 import string
-import tempfile
 import threading
 import warnings
 from functools import wraps
@@ -57,9 +56,6 @@ expectationSuiteSchema = ExpectationSuiteSchema()
 
 
 logger = logging.getLogger(__name__)
-
-tmp_dir = str(tempfile.mkdtemp())
-
 
 try:
     import sqlalchemy as sqlalchemy
@@ -140,19 +136,13 @@ except ImportError:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
         import pybigquery.sqlalchemy_bigquery as BigQueryDialect
 
+        # deprecated-v0.14.7
         warnings.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
+            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        ###
-        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-        # to define an attribute "dialect". A PR has been submitted to fix this upstream
-        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-        # fix isn't present, add this "dialect" attribute here:
-        if not hasattr(sqla_bigquery, "dialect"):
-            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
-
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sqlalchemy.dialects.registry.register(
@@ -385,7 +375,7 @@ def get_dataset(
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "sqlite":
-        if not create_engine:
+        if not create_engine or not SQLITE_TYPES:
             return None
 
         engine = create_engine(get_sqlite_connection_url(sqlite_db_path=sqlite_db_path))
@@ -445,7 +435,7 @@ def get_dataset(
         )
 
     elif dataset_type == "postgresql":
-        if not create_engine:
+        if not create_engine or not POSTGRESQL_TYPES:
             return None
 
         # Create a new database
@@ -508,7 +498,7 @@ def get_dataset(
         )
 
     elif dataset_type == "mysql":
-        if not create_engine:
+        if not create_engine or not MYSQL_TYPES:
             return None
 
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
@@ -566,7 +556,7 @@ def get_dataset(
         # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
         # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
         # rather than referring the table by name.
-        custom_sql = "SELECT * FROM " + table_name
+        custom_sql = f"SELECT * FROM {table_name}"
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
@@ -596,7 +586,7 @@ def get_dataset(
         )
 
     elif dataset_type == "mssql":
-        if not create_engine:
+        if not create_engine or not MSSQL_TYPES:
             return None
 
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
@@ -768,7 +758,7 @@ def get_dataset(
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
     else:
-        raise ValueError("Unknown dataset_type " + str(dataset_type))
+        raise ValueError(f"Unknown dataset_type {str(dataset_type)}")
 
 
 def get_test_validator_with_data(
@@ -942,7 +932,7 @@ def get_test_validator_with_data(
         return build_spark_validator_with_data(df=spark_df, spark=spark)
 
     else:
-        raise ValueError("Unknown dataset_type " + str(execution_engine))
+        raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
 
 
 def build_pandas_validator_with_data(
@@ -967,20 +957,34 @@ def build_sa_validator_with_data(
     sqlite_db_path=None,
     batch_definition: Optional[BatchDefinition] = None,
 ):
-    dialect_classes = {
-        "sqlite": sqlitetypes.dialect,
-        "postgresql": postgresqltypes.dialect,
-        "mysql": mysqltypes.dialect,
-        "mssql": mssqltypes.dialect,
-        "bigquery": sqla_bigquery.BigQueryDialect,
-    }
-    dialect_types = {
-        "sqlite": SQLITE_TYPES,
-        "postgresql": POSTGRESQL_TYPES,
-        "mysql": MYSQL_TYPES,
-        "mssql": MSSQL_TYPES,
-        "bigquery": BIGQUERY_TYPES,
-    }
+    dialect_classes = {}
+    dialect_types = {}
+    try:
+        dialect_classes["sqlite"] = sqlitetypes.dialect
+        dialect_types["sqlite"] = SQLITE_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["postgresql"] = postgresqltypes.dialect
+        dialect_types["postgresql"] = POSTGRESQL_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["mysql"] = mysqltypes.dialect
+        dialect_types["mysql"] = MYSQL_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["mssql"] = mssqltypes.dialect
+        dialect_types["mssql"] = MSSQL_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["bigquery"] = sqla_bigquery.BigQueryDialect
+        dialect_types["bigquery"] = BIGQUERY_TYPES
+    except AttributeError:
+        pass
+
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         engine = create_engine(get_sqlite_connection_url(sqlite_db_path))
@@ -1352,13 +1356,14 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
 
 def build_test_backends_list(
     include_pandas=True,
-    include_spark=True,
+    include_spark=False,
     include_sqlalchemy=True,
     include_sqlite=True,
     include_postgresql=False,
     include_mysql=False,
     include_mssql=False,
     include_bigquery=False,
+    include_aws=False,
     raise_exceptions_for_backends: bool = True,
 ) -> List[str]:
     """Attempts to identify supported backends by checking which imports are available."""
@@ -1488,6 +1493,20 @@ def build_test_backends_list(
             else:
                 test_backends += ["bigquery"]
 
+        if include_aws:
+            # TODO need to come up with a better way to do this check.
+            # currently this checks the 3 default EVN variables that boto3 looks for
+            aws_access_key_id: Optional[str] = os.getenv("AWS_ACCESS_KEY_ID")
+            aws_secret_access_key: Optional[str] = os.getenv("AWS_SECRET_ACCESS_KEY")
+            aws_session_token: Optional[str] = os.getenv("AWS_SESSION_TOKEN")
+            if (
+                not aws_access_key_id
+                and not aws_secret_access_key
+                and not aws_session_token
+            ):
+                logger.warning(
+                    f"AWS tests are requested, but credentials were not set up"
+                )
     return test_backends
 
 
@@ -1934,7 +1953,7 @@ def check_json_test_result(test, result, data_asset=None):
                         )
                 else:
                     raise ValueError(
-                        "Invalid test specification: unknown key " + key + " in 'out'"
+                        f"Invalid test specification: unknown key {key} in 'out'"
                     )
 
             elif key == "traceback_substring":
@@ -1982,7 +2001,7 @@ def check_json_test_result(test, result, data_asset=None):
 
             else:
                 raise ValueError(
-                    "Invalid test specification: unknown key " + key + " in 'out'"
+                    f"Invalid test specification: unknown key {key} in 'out'"
                 )
 
 

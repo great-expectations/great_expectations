@@ -1,6 +1,7 @@
 from ruamel import yaml
 
 from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 profiler_config = r"""
@@ -37,15 +38,15 @@ rules:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        min_value: $parameter.row_count_range.value.value_range[0]
-        max_value: $parameter.row_count_range.value.value_range[1]
+        min_value: $parameter.row_count_range.value[0]
+        max_value: $parameter.row_count_range.value[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.row_count_range.details
   column_ranges_rule:
     domain_builder:
-      class_name: SimpleSemanticTypeColumnDomainBuilder
-      semantic_types:
+      class_name: ColumnDomainBuilder
+      include_semantic_types:
         - numeric
       # BatchRequest yielding exactly one batch (March, 2019 trip data)
       batch_request:
@@ -84,8 +85,8 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $parameter.min_range.value.value_range[0]
-        max_value: $parameter.min_range.value.value_range[1]
+        min_value: $parameter.min_range.value[0]
+        max_value: $parameter.min_range.value[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.min_range.details
@@ -93,8 +94,8 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $parameter.max_range.value.value_range[0]
-        max_value: $parameter.max_range.value.value_range[1]
+        min_value: $parameter.max_range.value[0]
+        max_value: $parameter.max_range.value[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.max_range.details
@@ -112,7 +113,10 @@ rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
     data_context=data_context,
 )
 
-suite = rule_based_profiler.run(expectation_suite_name="test_suite_name")
+rule_based_profiler.run()
+suite: ExpectationSuite = rule_based_profiler.expectation_suite(
+    expectation_suite_name="test_suite_name"
+)
 print(suite)
 
 # Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.

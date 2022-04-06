@@ -29,7 +29,71 @@ try:
 except ImportError:
     sqlalchemy = None
 
+try:
+    import sqlalchemy_bigquery as sqla_bigquery
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+    except ImportError:
+        sqla_bigquery = None
+
 yaml = YAML()
+
+
+@pytest.fixture
+def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch(
+    sa,
+    empty_data_context,
+    test_db_connection_string,
+):
+    context: DataContext = empty_data_context
+
+    sqlite_engine: sa.engine.base.Engine = sa.create_engine(test_db_connection_string)
+    # noinspection PyUnusedLocal
+    conn: sa.engine.base.Connection = sqlite_engine.connect()
+    datasource_config: str = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SqlAlchemyExecutionEngine
+            connection_string: {test_db_connection_string}
+
+        data_connectors:
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                batch_identifiers:
+                    - pipeline_stage_name
+                    - airflow_run_id
+            my_inferred_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: InferredAssetSqlDataConnector
+                include_schema_name: true
+            my_configured_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: ConfiguredAssetSqlDataConnector
+                assets:
+                    my_first_data_asset:
+                        table_name: table_1
+                    my_second_data_asset:
+                        schema_name: main
+                        table_name: table_2
+                    table_1: {{}}
+                    table_2:
+                        schema_name: main
+    """
+
+    try:
+        # noinspection PyUnusedLocal
+        my_sql_datasource: Optional[
+            Union[SimpleSqlalchemyDatasource, LegacyDatasource]
+        ] = context.add_datasource(
+            "test_sqlite_db_datasource", **yaml.load(datasource_config)
+        )
+    except AttributeError:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
+
+    return context
 
 
 def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector(sa):
@@ -502,6 +566,10 @@ tables:
     # Here we should test getting another batch
 
 
+@pytest.mark.skipif(
+    sqla_bigquery is None,
+    reason="sqlalchemy_bigquery/pybigquery is not installed",
+)
 def test_basic_instantiation_with_bigquery_creds(sa, empty_data_context):
     context = empty_data_context
     my_data_source = instantiate_class_from_config(

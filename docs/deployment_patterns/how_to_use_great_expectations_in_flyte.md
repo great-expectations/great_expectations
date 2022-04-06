@@ -1,7 +1,7 @@
 ---
 title: How to Use Great Expectations in Flyte
 ---
-import Prerequisites from '../guides/connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
 *This piece of documentation was authored by [Samhita Alla](https://www.linkedin.com/in/samhita-alla) and the [Flyte](https://flyte.org/) team*
 

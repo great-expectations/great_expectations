@@ -62,14 +62,31 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.null"
     args_keys = ("column",)
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+        super().validate_configuration(configuration)
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -94,7 +111,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
@@ -107,7 +124,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             },
         }
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -117,7 +134,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             template_str = "values must be null."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -126,7 +143,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -153,7 +170,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -163,14 +180,14 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             template_str = "values must be null."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [
@@ -237,7 +254,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             "mostly", self.default_kwarg_values.get("mostly")
         )
         total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
+        unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
 
         if total_count is None or total_count == 0:
             # Vacuously true
@@ -253,9 +270,9 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             success=success,
             element_count=metrics.get("table.row_count"),
             nonnull_count=nonnull_count,
-            unexpected_count=metrics.get(self.map_metric + ".unexpected_count"),
-            unexpected_list=metrics.get(self.map_metric + ".unexpected_values"),
+            unexpected_count=metrics.get(f"{self.map_metric}.unexpected_count"),
+            unexpected_list=metrics.get(f"{self.map_metric}.unexpected_values"),
             unexpected_index_list=metrics.get(
-                self.map_metric + ".unexpected_index_list"
+                f"{self.map_metric}.unexpected_index_list"
             ),
         )

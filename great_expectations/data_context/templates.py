@@ -36,7 +36,7 @@ PROJECT_HELP_COMMENT = f"""
 # Here you can define datasources, batch kwargs generators, integrations and
 # more. This file is intended to be committed to your repo. For help with
 # configuration please:
-#   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/spare_parts/data_context_reference.html#configuration
+#   - Read our docs: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview/#2-configure-your-datasource
 #   - Join our slack channel: http://greatexpectations.io/slack
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
@@ -45,7 +45,7 @@ config_version: {DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value}
 
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
-# add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
+# add a new datasource. Read more at https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview
 datasources: {{}}
 """
 
@@ -65,12 +65,12 @@ CONFIG_VARIABLES_INTRO = """
 # nested value such as a dictionary, or an environment variable (i.e. ${ENV_VAR})
 #
 #
-# https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html
+# https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
 
 """
 
 CONFIG_VARIABLES_TEMPLATE = (
-    CONFIG_VARIABLES_INTRO + "instance_id: " + str(uuid.uuid4()) + os.linesep
+    f"{CONFIG_VARIABLES_INTRO}instance_id: {str(uuid.uuid4())}{os.linesep}"
 )
 
 # Create yaml strings
@@ -125,7 +125,7 @@ stores:
   {VALIDATIONS_STORE_STRING}
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
+    # https://docs.greatexpectations.io/docs/reference/evaluation_parameters/
     {EVALUATION_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
   {PROFILER_STORE_STRING}
@@ -138,7 +138,7 @@ data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
   # include Expectations, Validations & Profiles. The are built for all
   # Datasources from JSON artifacts in the local repo including validations &
-  # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/data_docs.html
+  # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/docs/terms/data_docs
   local_site:
     class_name: SiteBuilder
     # set to false to hide how-to buttons in Data Docs

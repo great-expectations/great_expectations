@@ -247,8 +247,8 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             return self.engine.execute(sel).fetchone()[0]
         except (IndexError, SQLAlchemyError) as e:
-            logger.debug("Error fetching value: " + str(e))
-            raise ge_exceptions.StoreError("Unable to fetch value for key: " + str(key))
+            logger.debug(f"Error fetching value: {str(e)}")
+            raise ge_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
     def _set(self, key, value, allow_update=True, **kwargs):
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
@@ -295,7 +295,7 @@ class DatabaseStoreBackend(StoreBackend):
         full_url = str(self.engine.url)
         engine_name = full_url.split("://")[0]
         db_name = full_url.split("/")[-1]
-        return engine_name + "://" + db_name + "/" + str(key[0])
+        return f"{engine_name}://{db_name}/{str(key[0])}"
 
     def _has_key(self, key):
         sel = (
@@ -313,7 +313,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             return self.engine.execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
-            logger.debug("Error checking for value: " + str(e))
+            logger.debug(f"Error checking for value: {str(e)}")
             return False
 
     def list_keys(self, prefix=()):
@@ -322,10 +322,11 @@ class DatabaseStoreBackend(StoreBackend):
             .select_from(self._table)
             .where(
                 and_(
+                    True,
                     *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns[: len(prefix)], prefix)
-                    )
+                    ),
                 )
             )
         )

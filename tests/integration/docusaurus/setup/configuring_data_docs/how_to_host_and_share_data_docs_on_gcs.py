@@ -85,6 +85,7 @@ with open(requirements_txt_file_path, "w") as f:
     f.write(requirements_txt)
 
 main_py = """
+# <snippet>
 import logging
 import os
 from flask import Flask, request
@@ -115,6 +116,7 @@ def server_error(e):
     An internal error occurred: <pre>{}</pre>
     See logs for full stacktrace.
     '''.format(e), 500
+# </snippet>
 """
 
 main_py_file_path = os.path.join(team_gcs_app_directory, "main.py")

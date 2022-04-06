@@ -1,121 +1,201 @@
 import logging
-from hashlib import md5
-from typing import Optional
+from typing import Any, Callable, Dict, List, Optional, Type
 
-from great_expectations.util import load_class
+from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
 logger = logging.getLogger(__name__)
 
 
-class Anonymizer:
-    """Anonymize string names in an optionally-consistent way."""
+class Anonymizer(BaseAnonymizer):
+    def __init__(self, salt: Optional[str] = None) -> None:
+        super().__init__(salt=salt)
 
-    def __init__(self, salt=None):
-        if salt is not None and not isinstance(salt, str):
-            logger.error("invalid salt: must provide a string. Setting a random salt.")
-            salt = None
-        if salt is None:
-            import secrets
+        from great_expectations.core.usage_statistics.anonymizers.action_anonymizer import (
+            ActionAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
+            BatchAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
+            BatchRequestAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.checkpoint_anonymizer import (
+            CheckpointAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymizer import (
+            DataConnectorAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.data_docs_anonymizer import (
+            DataDocsAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
+            DatasourceAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
+            ExpectationSuiteAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
+            ProfilerAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
+            StoreAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymizer import (
+            StoreBackendAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
+            ValidationOperatorAnonymizer,
+        )
 
-            self._salt = secrets.token_hex(8)
-        else:
-            self._salt = salt
+        self._strategies: List[Type[BaseAnonymizer]] = [
+            CheckpointAnonymizer,
+            ProfilerAnonymizer,
+            DatasourceAnonymizer,
+            DataConnectorAnonymizer,
+            ActionAnonymizer,
+            DataDocsAnonymizer,
+            ExpectationSuiteAnonymizer,
+            ValidationOperatorAnonymizer,
+            BatchRequestAnonymizer,
+            BatchAnonymizer,
+            StoreAnonymizer,
+            StoreBackendAnonymizer,
+        ]
 
-    @property
-    def salt(self):
-        return self._salt
+        self._anonymizers: Dict[Type[BaseAnonymizer], BaseAnonymizer] = {
+            strategy: strategy(salt=self._salt, aggregate_anonymizer=self)
+            for strategy in self._strategies
+        }
 
-    def anonymize(self, string_):
-        if string_ is None:
-            return None
+    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
+        anonymizer: Optional[BaseAnonymizer] = self._get_anonymizer(obj=obj, **kwargs)
 
-        if not isinstance(string_, str):
-            raise TypeError(
-                f"""The type of the "string_" argument must be a string (Python "str").  The type given is
-"{str(type(string_))}", which is illegal.
-            """
+        if anonymizer is not None:
+            return anonymizer.anonymize(obj=obj, **kwargs)
+        elif isinstance(obj, str):
+            return self._anonymize_string(string_=obj)
+        elif not obj:
+            return obj
+
+        raise TypeError(
+            f"The type {type(obj)} cannot be handled by the Anonymizer; no suitable strategy found."
+        )
+
+    def can_handle(self, obj: object, **kwargs) -> bool:
+        return Anonymizer._get_anonymizer(obj=obj, **kwargs) is not None
+
+    def _get_anonymizer(self, obj: object, **kwargs) -> Optional[BaseAnonymizer]:
+        for anonymizer in self._anonymizers.values():
+            if anonymizer.can_handle(obj=obj, **kwargs):
+                return anonymizer
+
+        return None
+
+    def anonymize_init_payload(self, init_payload: dict) -> dict:
+        anonymized_init_payload = {}
+        anonymizer_funcs = {
+            "datasources": self._anonymize_datasources_init_payload,
+            "stores": self._anonymize_stores_init_payload,
+            "validation_operators": self._anonymize_validation_operator_init_payload,
+            "data_docs_sites": self._anonymize_data_docs_sites_init_payload,
+            "expectation_suites": self._anonymize_expectation_suite_init_payload,
+            "dependencies": None,  # dependencies do not need anonymization
+        }
+
+        for key, val in init_payload.items():
+            anonymizer_func: Optional[Callable] = anonymizer_funcs.get(key)
+            if anonymizer_func:
+                anonymized_key: str = f"anonymized_{key}"
+                anonymized_init_payload[anonymized_key] = anonymizer_func(val)
+            else:
+                anonymized_init_payload[key] = val
+
+        return anonymized_init_payload
+
+    def _anonymize_datasources_init_payload(self, payload: dict) -> List[dict]:
+        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
+            DatasourceAnonymizer,
+        )
+
+        anonymizer = self._anonymizers[DatasourceAnonymizer]
+
+        anonymized_values: List[dict] = []
+        for name, config in payload.items():
+            anonymize_value: dict = anonymizer._anonymize_datasource_info(
+                name=name, config=config
             )
+            anonymized_values.append(anonymize_value)
 
-        salted = self._salt + string_
-        return md5(salted.encode("utf-8")).hexdigest()
+        return anonymized_values
 
-    def anonymize_object_info(
-        self,
-        anonymized_info_dict,
-        ge_classes,
-        object_=None,
-        object_class=None,
-        object_config=None,
-        runtime_environment=None,
-    ) -> dict:
-        assert (
-            object_ or object_class or object_config
-        ), "Must pass either object_ or object_class or object_config."
+    def _anonymize_stores_init_payload(
+        self, payload: Dict[str, "Store"]  # noqa: F821
+    ) -> List[dict]:
+        from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
+            StoreAnonymizer,
+        )
 
-        if runtime_environment is None:
-            runtime_environment = {}
+        anonymizer = self._anonymizers[StoreAnonymizer]
 
-        object_class_name: Optional[str] = None
-        try:
-            if object_class is None and object_ is not None:
-                object_class = object_.__class__
-            elif object_class is None and object_config is not None:
-                object_class_name = object_config.get("class_name")
-                object_module_name = object_config.get(
-                    "module_name"
-                ) or runtime_environment.get("module_name")
-                object_class = load_class(object_class_name, object_module_name)
-            object_class_name = object_class.__name__
+        anonymized_values: List[dict] = []
+        for store_name, store_obj in payload.items():
+            anonymize_value: dict = anonymizer.anonymize(
+                store_name=store_name,
+                store_obj=store_obj,
+            )
+            anonymized_values.append(anonymize_value)
 
-            for ge_class in ge_classes:
-                if issubclass(object_class, ge_class):
-                    anonymized_info_dict["parent_class"] = ge_class.__name__
-                    if not object_class == ge_class:
-                        anonymized_info_dict["anonymized_class"] = self.anonymize(
-                            object_class_name
-                        )
-                    break
+        return anonymized_values
 
-            if not anonymized_info_dict.get("parent_class"):
-                anonymized_info_dict["parent_class"] = "__not_recognized__"
-                anonymized_info_dict["anonymized_class"] = self.anonymize(
-                    object_class_name
-                )
-        except AttributeError:
-            anonymized_info_dict["parent_class"] = "__not_recognized__"
-            anonymized_info_dict["anonymized_class"] = self.anonymize(object_class_name)
+    def _anonymize_validation_operator_init_payload(
+        self, payload: Dict[str, "ValidationOperator"]  # noqa: F821
+    ) -> List[dict]:
+        from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
+            ValidationOperatorAnonymizer,
+        )
 
-        return anonymized_info_dict
+        anonymizer = self._anonymizers[ValidationOperatorAnonymizer]
 
-    @staticmethod
-    def _is_parent_class_recognized(
-        classes_to_check,
-        object_=None,
-        object_class=None,
-        object_config=None,
-    ) -> Optional[str]:
-        """
-        Check if the parent class is a subclass of any core GE class.
-        This private method is intended to be used by anonymizers in a public `is_parent_class_recognized()` method. These anonymizers define and provide the core GE classes_to_check.
-        Returns:
-            The name of the parent class found, or None if no parent class was found
-        """
-        assert (
-            object_ or object_class or object_config
-        ), "Must pass either object_ or object_class or object_config."
-        try:
-            if object_class is None and object_ is not None:
-                object_class = object_.__class__
-            elif object_class is None and object_config is not None:
-                object_class_name = object_config.get("class_name")
-                object_module_name = object_config.get("module_name")
-                object_class = load_class(object_class_name, object_module_name)
+        anonymized_values: List[dict] = []
+        for validation_operator_name, validation_operator_obj in payload.items():
+            anonymize_value: dict = anonymizer.anonymize(
+                validation_operator_name=validation_operator_name,
+                validation_operator_obj=validation_operator_obj,
+            )
+            anonymized_values.append(anonymize_value)
 
-            for class_to_check in classes_to_check:
-                if issubclass(object_class, class_to_check):
-                    return class_to_check.__name__
+        return anonymized_values
 
-            return None
+    def _anonymize_data_docs_sites_init_payload(
+        self, payload: Dict[str, dict]
+    ) -> List[dict]:
+        from great_expectations.core.usage_statistics.anonymizers.data_docs_anonymizer import (
+            DataDocsAnonymizer,
+        )
 
-        except AttributeError:
-            return None
+        anonymizer = self._anonymizers[DataDocsAnonymizer]
+
+        anonymized_values: List[dict] = []
+        for site_name, site_config in payload.items():
+            anonymize_value: dict = anonymizer.anonymize(
+                site_name=site_name, site_config=site_config
+            )
+            anonymized_values.append(anonymize_value)
+
+        return anonymized_values
+
+    def _anonymize_expectation_suite_init_payload(
+        self, payload: List["ExpectationSuite"]  # noqa: F821
+    ) -> List[dict]:
+        from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
+            ExpectationSuiteAnonymizer,
+        )
+
+        anonymizer = self._anonymizers[ExpectationSuiteAnonymizer]
+
+        anonymized_values: List[dict] = []
+        for suite in payload:
+            anonymize_value: dict = anonymizer.anonymize(expectation_suite=suite)
+            anonymized_values.append(anonymize_value)
+
+        return anonymized_values

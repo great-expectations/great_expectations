@@ -10,7 +10,6 @@ import pytest
 import great_expectations as ge
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -118,7 +117,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
         )
-    except sqlalchemy.exc.OperationalError:
+    except (sqlalchemy.exc.OperationalError, ModuleNotFoundError):
         return None
 
     sql_dtypes = {}
@@ -453,7 +452,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
             ignored_columns=["col_few"],
         )
     assert e.value.args[0] == (
-        f"Column col_few is specified in both the semantic_types_dict and the list of ignored columns. Please remove "
+        "Column col_few is specified in both the semantic_types_dict and the list of ignored columns. Please remove "
         f"one of these entries to proceed."
     )
 

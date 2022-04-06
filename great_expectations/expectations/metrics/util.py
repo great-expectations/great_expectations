@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 from dateutil.parser import parse
+from packaging import version
 
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
@@ -75,18 +76,13 @@ except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
+        # deprecated-v0.14.7
         warnings.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
+            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        ###
-        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-        # to define an attribute "dialect". A PR has been submitted to fix this upstream
-        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-        # fix isn't present, add this "dialect" attribute here:
-        if not hasattr(sqla_bigquery, "dialect"):
-            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
@@ -205,6 +201,25 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
             else:
                 return sa.func.REGEXP_SIMILAR(column, literal(regex), literal("i")) == 0
     except (AttributeError, TypeError):
+        pass
+
+    try:
+        # sqlite
+        # regex_match for sqlite introduced in sqlalchemy v1.4
+        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(
+            sa.__version__
+        ) >= version.parse("1.4"):
+            if positive:
+                return column.regexp_match(literal(regex))
+            else:
+                return sa.not_(column.regexp_match(literal(regex)))
+        else:
+            logger.debug(
+                "regex_match is only enabled for sqlite when SQLAlchemy version is >= 1.4",
+                exc_info=True,
+            )
+            pass
+    except AttributeError:
         pass
 
     return None
@@ -571,7 +586,7 @@ def validate_distribution_parameters(distribution, params):
         "chi2",
         "expon",
     ]:
-        raise AttributeError("Unsupported  distribution provided: %s" % distribution)
+        raise AttributeError(f"Unsupported  distribution provided: {distribution}")
 
     if isinstance(params, dict):
         # `params` is a dictionary
@@ -582,11 +597,11 @@ def validate_distribution_parameters(distribution, params):
         if distribution == "beta" and (
             params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0
         ):
-            raise ValueError("Invalid parameters: %s" % beta_msg)
+            raise ValueError(f"Invalid parameters: {beta_msg}")
 
         # alpha is required and positive
         elif distribution == "gamma" and params.get("alpha", -1) <= 0:
-            raise ValueError("Invalid parameters: %s" % gamma_msg)
+            raise ValueError(f"Invalid parameters: {gamma_msg}")
 
         # lambda is a required and positive
         # elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
@@ -594,7 +609,7 @@ def validate_distribution_parameters(distribution, params):
 
         # df is necessary and required to be positive
         elif distribution == "chi2" and params.get("df", -1) <= 0:
-            raise ValueError("Invalid parameters: %s:" % chi2_msg)
+            raise ValueError(f"Invalid parameters: {chi2_msg}:")
 
     elif isinstance(params, tuple) or isinstance(params, list):
         scale = None
@@ -602,29 +617,29 @@ def validate_distribution_parameters(distribution, params):
         # `params` is a tuple or a list
         if distribution == "beta":
             if len(params) < 2:
-                raise ValueError("Missing required parameters: %s" % beta_msg)
+                raise ValueError(f"Missing required parameters: {beta_msg}")
             if params[0] <= 0 or params[1] <= 0:
-                raise ValueError("Invalid parameters: %s" % beta_msg)
+                raise ValueError(f"Invalid parameters: {beta_msg}")
             if len(params) == 4:
                 scale = params[3]
             elif len(params) > 4:
-                raise ValueError("Too many parameters provided: %s" % beta_msg)
+                raise ValueError(f"Too many parameters provided: {beta_msg}")
 
         elif distribution == "norm":
             if len(params) > 2:
-                raise ValueError("Too many parameters provided: %s" % norm_msg)
+                raise ValueError(f"Too many parameters provided: {norm_msg}")
             if len(params) == 2:
                 scale = params[1]
 
         elif distribution == "gamma":
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" % gamma_msg)
+                raise ValueError(f"Missing required parameters: {gamma_msg}")
             if len(params) == 3:
                 scale = params[2]
             if len(params) > 3:
-                raise ValueError("Too many parameters provided: %s" % gamma_msg)
+                raise ValueError(f"Too many parameters provided: {gamma_msg}")
             elif params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" % gamma_msg)
+                raise ValueError(f"Invalid parameters: {gamma_msg}")
 
         # elif distribution == 'poisson':
         #    if len(params) < 1:
@@ -638,24 +653,24 @@ def validate_distribution_parameters(distribution, params):
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" % uniform_msg)
+                raise ValueError(f"Too many arguments provided: {uniform_msg}")
 
         elif distribution == "chi2":
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" % chi2_msg)
+                raise ValueError(f"Missing required parameters: {chi2_msg}")
             elif len(params) == 3:
                 scale = params[2]
             elif len(params) > 3:
-                raise ValueError("Too many arguments provided: %s" % chi2_msg)
+                raise ValueError(f"Too many arguments provided: {chi2_msg}")
             if params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" % chi2_msg)
+                raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
 
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" % expon_msg)
+                raise ValueError(f"Too many arguments provided: {expon_msg}")
 
         if scale is not None and scale <= 0:
             raise ValueError("std_dev and scale must be positive.")

@@ -8,6 +8,9 @@ from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetGCSDataConnector
+from great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector import (
+    storage,
+)
 from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAML()
@@ -36,6 +39,10 @@ def expected_config_dict():
     return config
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
@@ -69,6 +76,10 @@ def test_instantiation_without_args(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
@@ -108,6 +119,10 @@ def test_instantiation_with_filename_arg(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
@@ -147,6 +162,10 @@ def test_instantiation_with_info_arg(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -188,6 +207,10 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         )
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -234,6 +257,10 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
         )
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -291,6 +318,10 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
     }
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -377,6 +408,10 @@ def test_complex_regex_example_with_implicit_data_asset_names(
     ]
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -427,6 +462,10 @@ def test_self_check(mock_gcs_conn, mock_list_keys, mock_emit):
     }
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -451,7 +490,7 @@ def test_test_yaml_config(
     context: DataContext = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
-        f"""
+        """
 module_name: great_expectations.datasource.data_connector
 class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE
@@ -459,7 +498,7 @@ name: TEST_DATA_CONNECTOR
 bucket_or_name: test_bucket
 prefix: ""
 default_regex:
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
     group_names:
         - year_dir
         - month_dir
@@ -498,6 +537,10 @@ default_regex:
     }
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -522,7 +565,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
     context: DataContext = empty_data_context_stats_enabled
 
     context.test_yaml_config(
-        f"""
+        """
 module_name: great_expectations.datasource.data_connector
 class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE
@@ -530,7 +573,7 @@ name: TEST_DATA_CONNECTOR
 bucket_or_name: test_bucket
 prefix: ""
 default_regex:
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
     group_names:
         - year_dir
         - month_dir
@@ -561,6 +604,10 @@ default_regex:
     assert mock_emit.call_args_list == expected_call_args_list
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -587,7 +634,7 @@ def test_yaml_config_excluding_non_regex_matching_files(
     context: DataContext = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
-        f"""
+        """
 module_name: great_expectations.datasource.data_connector
 class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE
@@ -597,7 +644,7 @@ bucket_or_name: test_bucket
 prefix: ""
 
 default_regex:
-    pattern: (\\d{{4}})/(\\d{{2}})/(.*)-.*\\.csv
+    pattern: (\\d{4})/(\\d{2})/(.*)-.*\\.csv
     group_names:
         - year_dir
         - month_dir
@@ -636,6 +683,10 @@ default_regex:
     }
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -665,7 +716,7 @@ def test_nested_directory_data_asset_name_in_folder(
     context = empty_data_context
 
     report_object = context.test_yaml_config(
-        f"""
+        """
     module_name: great_expectations.datasource.data_connector
     class_name: InferredAssetGCSDataConnector
     datasource_name: FAKE_DATASOURCE
@@ -677,7 +728,7 @@ def test_nested_directory_data_asset_name_in_folder(
             - data_asset_name
             - letter
             - number
-        pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
+        pattern: (\\w{1})\\/(\\w{1})-(\\d{1})\\.csv
         """,
         runtime_environment={
             "execution_engine": PandasExecutionEngine(),
@@ -708,6 +759,10 @@ def test_nested_directory_data_asset_name_in_folder(
     }
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -732,7 +787,7 @@ def test_redundant_information_in_naming_convention_random_hash(
     context = empty_data_context
 
     report_object = context.test_yaml_config(
-        f"""
+        """
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetGCSDataConnector
           datasource_name: FAKE_DATASOURCE
@@ -745,7 +800,7 @@ def test_redundant_information_in_naming_convention_random_hash(
                 - month
                 - day
                 - data_asset_name
-              pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
+              pattern: (\\d{4})/(\\d{2})/(\\d{2})/(log_file)-.*\\.txt\\.gz
               """,
         runtime_environment={
             "execution_engine": PandasExecutionEngine(),
@@ -772,6 +827,10 @@ def test_redundant_information_in_naming_convention_random_hash(
     }
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -796,7 +855,7 @@ def test_redundant_information_in_naming_convention_timestamp(
     context = empty_data_context
 
     report_object = context.test_yaml_config(
-        f"""
+        """
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetGCSDataConnector
           datasource_name: FAKE_DATASOURCE
@@ -809,7 +868,7 @@ def test_redundant_information_in_naming_convention_timestamp(
                 - year
                 - month
                 - day
-              pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
+              pattern: (log_file)-(\\d{4})-(\\d{2})-(\\d{2})-.*\\.*\\.txt\\.gz
       """,
         runtime_environment={
             "execution_engine": PandasExecutionEngine(),
@@ -835,6 +894,10 @@ def test_redundant_information_in_naming_convention_timestamp(
     }
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -859,7 +922,7 @@ def test_redundant_information_in_naming_convention_bucket(
     context = empty_data_context
 
     report_object = context.test_yaml_config(
-        f"""
+        """
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetGCSDataConnector
           datasource_name: FAKE_DATASOURCE
@@ -872,7 +935,7 @@ def test_redundant_information_in_naming_convention_bucket(
                   - year
                   - month
                   - day
-              pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
+              pattern: (\\w{11})/(\\d{4})/(\\d{2})/(\\d{2})/log_file-.*\\.txt\\.gz
               """,
         runtime_environment={
             "execution_engine": PandasExecutionEngine(),
@@ -899,6 +962,10 @@ def test_redundant_information_in_naming_convention_bucket(
     }
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -921,7 +988,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
     mock_gcs_conn, mock_list_keys, mock_emit
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetGCSDataConnector
           datasource_name: test_environment
@@ -935,7 +1002,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
                   - month
                   - day
                   - full_date
-              pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-(.*)\\.txt\\.gz
+              pattern: (\\w{11})/(\\d{4})/(\\d{2})/(\\d{2})/log_file-(.*)\\.txt\\.gz
           sorters:
               - orderby: desc
                 class_name: DateTimeSorter
@@ -1023,6 +1090,10 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
     assert expected == sorted_batch_definition_list
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1045,7 +1116,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
     mock_gcs_conn, mock_list_keys, mock_emit
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetGCSDataConnector
           datasource_name: test_environment
@@ -1059,7 +1130,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
                   - month
                   - day
                   - full_date
-              pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-(.*)\\.txt\\.gz
+              pattern: (\\w{11})/(\\d{4})/(\\d{2})/(\\d{2})/log_file-(.*)\\.txt\\.gz
           sorters:
               - orderby: desc
                 class_name: DateTimeSorter
@@ -1081,6 +1152,10 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
         )
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1103,7 +1178,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
     mock_gcs_conn, mock_list_keys, mock_emit
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
         module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetGCSDataConnector
         datasource_name: test_environment
@@ -1117,7 +1192,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
                 - month
                 - day
                 - full_date
-            pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-(.*)\\.txt\\.gz
+            pattern: (\\w{11})/(\\d{4})/(\\d{2})/(\\d{2})/log_file-(.*)\\.txt\\.gz
         sorters:
             - datetime_format: "%Y%m%d"
               orderby: desc
@@ -1142,6 +1217,10 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
         )
 
 
+@pytest.mark.skipif(
+    storage is None,
+    reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
+)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.storage.Client"
 )
@@ -1154,13 +1233,13 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
 def test_get_full_file_path(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    yaml_string = f"""
+    yaml_string = """
 class_name: InferredAssetGCSDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
 bucket_or_name: my_bucket
 prefix: my_base_directory/
 default_regex:
-   pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+   pattern: ^(.+)-(\\d{4})(\\d{2})\\.(csv|txt)$
    group_names:
        - data_asset_name
        - year_dir

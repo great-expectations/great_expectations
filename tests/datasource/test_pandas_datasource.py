@@ -17,7 +17,8 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.util import is_library_loadable
+from great_expectations.validator.validator import BridgeValidator
 
 yaml = YAML()
 
@@ -267,6 +268,11 @@ def test_pandas_source_read_csv(
     assert "😁" in list(batch["Μ"])
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyarrow")
+    and not is_library_loadable(library_name="fastparquet"),
+    reason="pyarrow and fastparquet are not installed",
+)
 @mock_s3
 def test_s3_pandas_source_read_parquet(
     data_context_parameterized_expectation_suite, tmp_path_factory
@@ -306,7 +312,7 @@ def test_s3_pandas_source_read_parquet(
     data_context_parameterized_expectation_suite.create_expectation_suite(
         expectation_suite_name="test_parquet"
     )
-    with pytest.deprecated_call():  # "Direct GE Support for the s3 BatchKwarg will be removed in a future release.
+    with pytest.deprecated_call():  # "Direct GE Support for the s3 BatchKwarg will be removed in v0.16.
         batch = data_context_parameterized_expectation_suite.get_batch(
             data_context_parameterized_expectation_suite.build_batch_kwargs(
                 "parquet_source",

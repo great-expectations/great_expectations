@@ -1,22 +1,24 @@
 import copy
 import logging
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
 import pandas as pd
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+)
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
-yaml = YAML()
-yaml.default_flow_style = False
 
 
 class NoOpDict:
@@ -136,6 +138,17 @@ class DataConnectorStorageDataReferenceResolver:
         ](
             template_arguments
         )
+
+
+@dataclass
+class SplitDomainKwargs:
+    """compute_domain_kwargs, accessor_domain_kwargs when split from domain_kwargs
+
+    The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+    """
+
+    compute: dict
+    accessor: dict
 
 
 class ExecutionEngine(ABC):
@@ -349,51 +362,39 @@ class ExecutionEngine(ABC):
                     )
                 )
                 continue
+
             metric_fn_type = getattr(
                 metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
             )
-            if metric_fn_type in [
-                MetricPartialFunctionTypes.MAP_SERIES,
+
+            if metric_fn_type not in [
                 MetricPartialFunctionTypes.MAP_FN,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
-                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
                 MetricPartialFunctionTypes.WINDOW_FN,
                 MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
                 MetricPartialFunctionTypes.AGGREGATE_FN,
+                MetricFunctionTypes.VALUE,
+                MetricPartialFunctionTypes.MAP_SERIES,
+                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
             ]:
-                # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
-                # than data to optimize compute in the future
-                try:
-                    resolved_metrics[metric_to_resolve.id] = metric_fn(
-                        **metric_provider_kwargs
-                    )
-                except Exception as e:
-                    raise ge_exceptions.MetricResolutionError(
-                        message=str(e), failed_metrics=(metric_to_resolve,)
-                    )
-            elif metric_fn_type == MetricFunctionTypes.VALUE:
-                try:
-                    resolved_metrics[metric_to_resolve.id] = metric_fn(
-                        **metric_provider_kwargs
-                    )
-                except Exception as e:
-                    raise ge_exceptions.MetricResolutionError(
-                        message=str(e), failed_metrics=(metric_to_resolve,)
-                    )
-            else:
                 logger.warning(
                     f"Unrecognized metric function type while trying to resolve {str(metric_to_resolve.id)}"
                 )
-                try:
-                    resolved_metrics[metric_to_resolve.id] = metric_fn(
-                        **metric_provider_kwargs
-                    )
-                except Exception as e:
-                    raise ge_exceptions.MetricResolutionError(
-                        message=str(e), failed_metrics=(metric_to_resolve,)
-                    )
+
+            try:
+                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
+                resolved_metrics[metric_to_resolve.id] = metric_fn(
+                    **metric_provider_kwargs
+                )
+            except Exception as e:
+                raise ge_exceptions.MetricResolutionError(
+                    message=str(e), failed_metrics=(metric_to_resolve,)
+                )
+
         if len(metric_fn_bundle) > 0:
             try:
+                # an engine-specific way of computing metrics together
+                # NOTE: DH 20220328: This is where we can introduce the Batch Metrics Store (BMS)
                 new_resolved = self.resolve_metric_bundle(metric_fn_bundle)
                 resolved_metrics.update(new_resolved)
             except Exception as e:
@@ -469,19 +470,19 @@ class ExecutionEngine(ABC):
                 "Base ExecutionEngine does not support adding nan condition filters"
             )
 
-        if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
-            raise ge_exceptions.GreatExpectationsError(
-                "ExecutionEngine does not support updating existing row_conditions."
-            )
-
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
-        assert "column" in domain_kwargs or column_name is not None
+        assert (
+            "column" in domain_kwargs or column_name is not None
+        ), "No column provided: A column must be provided in domain_kwargs or in the column_name parameter"
         if column_name is not None:
             column = column_name
         else:
             column = domain_kwargs["column"]
-        new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
-        new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
+        row_condition: RowCondition = RowCondition(
+            condition=f'col("{column}").notnull()',
+            condition_type=RowConditionParserType.GE,
+        )
+        new_domain_kwargs.setdefault("filter_conditions", []).append(row_condition)
         return new_domain_kwargs
 
     def resolve_data_reference(
@@ -493,6 +494,224 @@ class ExecutionEngine(ABC):
             execution_engine_name=self.__class__.__name__,
             template_arguments=template_arguments,
         )
+
+    def _split_domain_kwargs(
+        self,
+        domain_kwargs: Dict,
+        domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
+    ) -> SplitDomainKwargs:
+        """Split domain_kwargs for all domain types into compute and accessor domain kwargs.
+
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys: keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        # Extracting value from enum if it is given for future computation
+        domain_type = MetricDomainTypes(domain_type)
+
+        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        if (
+            domain_type != MetricDomainTypes.TABLE
+            and accessor_keys is not None
+            and len(list(accessor_keys)) > 0
+        ):
+            logger.warning(
+                'Accessor keys ignored since Metric Domain Type is not "table"'
+            )
+
+        split_domain_kwargs: SplitDomainKwargs
+        if domain_type == MetricDomainTypes.TABLE:
+            split_domain_kwargs = self._split_table_metric_domain_kwargs(
+                domain_kwargs, domain_type, accessor_keys
+            )
+
+        elif domain_type == MetricDomainTypes.COLUMN:
+            split_domain_kwargs = self._split_column_metric_domain_kwargs(
+                domain_kwargs,
+                domain_type,
+            )
+
+        elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+            split_domain_kwargs = self._split_column_pair_metric_domain_kwargs(
+                domain_kwargs,
+                domain_type,
+            )
+
+        elif domain_type == MetricDomainTypes.MULTICOLUMN:
+            split_domain_kwargs = self._split_multi_column_metric_domain_kwargs(
+                domain_kwargs,
+                domain_type,
+            )
+        else:
+            compute_domain_kwargs = copy.deepcopy(domain_kwargs)
+            accessor_domain_kwargs = {}
+            split_domain_kwargs = SplitDomainKwargs(
+                compute_domain_kwargs, accessor_domain_kwargs
+            )
+
+        return split_domain_kwargs
+
+    @staticmethod
+    def _split_table_metric_domain_kwargs(
+        domain_kwargs: Dict,
+        domain_type: MetricDomainTypes,
+        accessor_keys: Optional[Iterable[str]] = None,
+    ) -> SplitDomainKwargs:
+        """Split domain_kwargs for table domain types into compute and accessor domain kwargs.
+
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using.
+            accessor_keys: keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        assert (
+            domain_type == MetricDomainTypes.TABLE
+        ), "This method only supports MetricDomainTypes.TABLE"
+
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
+
+        if accessor_keys is not None and len(list(accessor_keys)) > 0:
+            for key in accessor_keys:
+                accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
+        if len(domain_kwargs.keys()) > 0:
+            # Warn user if kwarg not "normal".
+            unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
+                {
+                    "batch_id",
+                    "table",
+                    "row_condition",
+                    "condition_parser",
+                }
+            )
+            if len(unexpected_keys) > 0:
+                unexpected_keys_str: str = ", ".join(
+                    map(lambda element: f'"{element}"', unexpected_keys)
+                )
+                logger.warning(
+                    f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
+                )
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
+
+    @staticmethod
+    def _split_column_metric_domain_kwargs(
+        domain_kwargs: Dict,
+        domain_type: MetricDomainTypes,
+    ) -> SplitDomainKwargs:
+        """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
+
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using.
+
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        assert (
+            domain_type == MetricDomainTypes.COLUMN
+        ), "This method only supports MetricDomainTypes.COLUMN"
+
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
+
+        if "column" not in compute_domain_kwargs:
+            raise ge_exceptions.GreatExpectationsError(
+                "Column not provided in compute_domain_kwargs"
+            )
+
+        accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
+
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
+
+    @staticmethod
+    def _split_column_pair_metric_domain_kwargs(
+        domain_kwargs: Dict,
+        domain_type: MetricDomainTypes,
+    ) -> SplitDomainKwargs:
+        """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
+
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using.
+
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        assert (
+            domain_type == MetricDomainTypes.COLUMN_PAIR
+        ), "This method only supports MetricDomainTypes.COLUMN_PAIR"
+
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
+
+        if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
+            raise ge_exceptions.GreatExpectationsError(
+                "column_A or column_B not found within domain_kwargs"
+            )
+
+        accessor_domain_kwargs["column_A"] = compute_domain_kwargs.pop("column_A")
+        accessor_domain_kwargs["column_B"] = compute_domain_kwargs.pop("column_B")
+
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
+
+    @staticmethod
+    def _split_multi_column_metric_domain_kwargs(
+        domain_kwargs: Dict,
+        domain_type: MetricDomainTypes,
+    ) -> SplitDomainKwargs:
+        """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
+
+        Args:
+            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric domain the user would
+            like to be using.
+
+        Returns:
+            compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
+            The union of compute_domain_kwargs, accessor_domain_kwargs is the input domain_kwargs
+        """
+        assert (
+            domain_type == MetricDomainTypes.MULTICOLUMN
+        ), "This method only supports MetricDomainTypes.MULTICOLUMN"
+
+        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: Dict = {}
+
+        if "column_list" not in domain_kwargs:
+            raise ge_exceptions.GreatExpectationsError(
+                "column_list not found within domain_kwargs"
+            )
+
+        column_list = compute_domain_kwargs.pop("column_list")
+
+        if len(column_list) < 2:
+            raise ge_exceptions.GreatExpectationsError(
+                "column_list must contain at least 2 columns"
+            )
+
+        accessor_domain_kwargs["column_list"] = column_list
+
+        return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
 
 class MetricPartialFunctionTypes(Enum):

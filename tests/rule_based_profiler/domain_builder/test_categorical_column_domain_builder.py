@@ -1,5 +1,4 @@
 from typing import List
-from unittest import mock
 
 import pytest
 
@@ -14,8 +13,9 @@ from great_expectations.rule_based_profiler.domain_builder.categorical_column_do
 from great_expectations.rule_based_profiler.types import Domain
 
 
-def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_context):
-
+def test_instantiate_with_cardinality_limit_modes(
+    alice_columnar_table_single_batch_context,
+):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
@@ -25,21 +25,41 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        data_context=data_context,
+        exclude_column_name_suffixes="_id",
+        limit_mode=CategoricalColumnDomainBuilder.cardinality_limit_modes.VERY_FEW,
         batch_request=batch_request,
+        data_context=data_context,
+    )
+
+    domain_builder.get_domains()
+
+
+def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_context):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="alice_columnar_table_single_batch_datasource",
+        data_connector_name="alice_columnar_table_single_batch_data_connector",
+        data_asset_name="alice_columnar_table_single_batch_data_asset",
+    )
+
+    domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
+        exclude_column_name_suffixes="_id",
         limit_mode="very_few",
+        batch_request=batch_request,
+        data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains()
 
     alice_all_column_names: List[str] = [
-        "id",
         "event_type",
-        "user_id",
         "event_ts",
         "server_ts",
         "device_ts",
         "user_agent",
     ]
+
+    column_name: str
     alice_all_column_domains: List[Domain] = [
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
@@ -49,13 +69,11 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
         )
         for column_name in alice_all_column_names
     ]
+    assert len(domains) == 5
     assert domains == alice_all_column_domains
-
-    assert len(domains) == 7
 
 
 def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context):
-
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
@@ -65,15 +83,17 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        data_context=data_context,
-        batch_request=batch_request,
         limit_mode="ONE",
+        batch_request=batch_request,
+        data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains()
 
     alice_all_column_names: List[str] = [
         "user_agent",
     ]
+
+    column_name: str
     alice_all_column_domains: List[Domain] = [
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
@@ -83,45 +103,55 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
         )
         for column_name in alice_all_column_names
     ]
+    assert len(domains) == 1
     assert domains == alice_all_column_domains
 
-    assert len(domains) == 1
 
-
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch("great_expectations.core.batch.BatchRequest")
 def test_unsupported_cardinality_limit(
-    mock_data_context: mock.MagicMock,
-    mock_batch_request: mock.MagicMock,
+    alice_columnar_table_single_batch_context,
 ):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
     with pytest.raises(ProfilerConfigurationError) as excinfo:
-        _: DomainBuilder = CategoricalColumnDomainBuilder(
-            data_context=mock_data_context,
-            batch_request=mock_batch_request,
+        _: List[Domain] = CategoricalColumnDomainBuilder(
             limit_mode="&*#$&INVALID&*#$*&",
-        )
+            batch_request=batch_request,
+            data_context=data_context,
+        ).get_domains()
+
     assert "specify a supported cardinality mode" in str(excinfo.value)
     assert "REL_1" in str(excinfo.value)
     assert "MANY" in str(excinfo.value)
 
 
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-@mock.patch("great_expectations.core.batch.BatchRequest")
 def test_unspecified_cardinality_limit(
-    mock_data_context: mock.MagicMock,
-    mock_batch_request: mock.MagicMock,
+    alice_columnar_table_single_batch_context,
 ):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
     with pytest.raises(ProfilerConfigurationError) as excinfo:
-        _: DomainBuilder = CategoricalColumnDomainBuilder(
-            data_context=mock_data_context,
-            batch_request=mock_batch_request,
-        )
+        _: List[Domain] = CategoricalColumnDomainBuilder(
+            batch_request=batch_request,
+            data_context=data_context,
+        ).get_domains()
+
     assert "Please pass ONE of the following parameters" in str(excinfo.value)
     assert "you passed 0 parameters" in str(excinfo.value)
 
 
 def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context):
-
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
@@ -131,16 +161,16 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        data_context=data_context,
-        batch_request=batch_request,
         limit_mode="VERY_FEW",
-        exclude_columns=[
+        exclude_column_names=[
             "id",
             "event_type",
             "user_id",
             "event_ts",
             "server_ts",
         ],
+        batch_request=batch_request,
+        data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains()
 
@@ -148,6 +178,8 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
         "device_ts",
         "user_agent",
     ]
+
+    column_name: str
     alice_all_column_domains: List[Domain] = [
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
@@ -157,13 +189,11 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
         )
         for column_name in alice_all_column_names
     ]
-    assert domains == alice_all_column_domains
-
     assert len(domains) == 2
+    assert domains == alice_all_column_domains
 
 
 def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_context):
-
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     batch_request: BatchRequest = BatchRequest(
@@ -173,10 +203,10 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        data_context=data_context,
-        batch_request=batch_request,
         limit_mode="VERY_FEW",
-        exclude_columns=[],
+        exclude_column_names=[],
+        batch_request=batch_request,
+        data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains()
 
@@ -189,6 +219,8 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
         "device_ts",
         "user_agent",
     ]
+
+    column_name: str
     alice_all_column_domains: List[Domain] = [
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
@@ -198,9 +230,8 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
         )
         for column_name in alice_all_column_names
     ]
-    assert domains == alice_all_column_domains
-
     assert len(domains) == 7
+    assert domains == alice_all_column_domains
 
 
 def test_multi_batch_very_few_cardinality(
@@ -217,9 +248,9 @@ def test_multi_batch_very_few_cardinality(
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        data_context=data_context,
-        batch_request=batch_request,
         limit_mode="very_few",
+        batch_request=batch_request,
+        data_context=data_context,
     )
     observed_domains: List[Domain] = domain_builder.get_domains()
 
@@ -274,9 +305,8 @@ def test_multi_batch_very_few_cardinality(
         ),
     ]
 
-    assert observed_domains == expected_domains
-
     assert len(observed_domains) == 8
+    assert observed_domains == expected_domains
 
 
 def test_multi_batch_one_cardinality(
@@ -293,14 +323,13 @@ def test_multi_batch_one_cardinality(
     )
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
-        data_context=data_context,
-        batch_request=batch_request,
         limit_mode="ONE",
+        batch_request=batch_request,
+        data_context=data_context,
     )
     observed_domains: List[Domain] = domain_builder.get_domains()
 
     expected_domains: List[Domain] = []
 
-    assert observed_domains == expected_domains
-
     assert len(observed_domains) == 0
+    assert observed_domains == expected_domains

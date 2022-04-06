@@ -1,3 +1,6 @@
+import inspect
+import os
+import re
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import List, Tuple
@@ -18,9 +21,20 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationTestDiagnostics,
 )
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import camel_to_snake, lint_code
 
-# from pydantic.dataclasses import dataclass
+try:
+    import black
+except ImportError:
+    black = None
+
+try:
+    import isort
+except ImportError:
+    isort = None
 
 
 @dataclass(frozen=True)
@@ -80,10 +94,19 @@ class ExpectationDiagnostics(SerializableDictDot):
         library_metadata: AugmentedLibraryMetadata,
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
+        sub_messages = []
+        for problem in library_metadata.problems:
+            sub_messages.append(
+                {
+                    "message": problem,
+                    "passed": False,
+                }
+            )
 
         return ExpectationDiagnosticCheckMessage(
             message="Has a library_metadata object",
             passed=library_metadata.library_metadata_passed_checks,
+            sub_messages=sub_messages,
         )
 
     @staticmethod
@@ -102,7 +125,7 @@ class ExpectationDiagnostics(SerializableDictDot):
                 message=message,
                 sub_messages=[
                     {
-                        "message": '"' + short_description + '"',
+                        "message": f'"{short_description}"',
                         "passed": True,
                     }
                 ],
@@ -299,16 +322,16 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         for check in checks:
             if check["passed"]:
-                output_message += "\n ✔ " + check["message"]
+                output_message += f"\n ✔ {check['message']}"
             else:
-                output_message += "\n   " + check["message"]
+                output_message += f"\n   {check['message']}"
 
             if "sub_messages" in check:
                 for sub_message in check["sub_messages"]:
                     if sub_message["passed"]:
-                        output_message += "\n    ✔ " + sub_message["message"]
+                        output_message += f"\n    ✔ {sub_message['message']}"
                     else:
-                        output_message += "\n      " + sub_message["message"]
+                        output_message += f"\n      {sub_message['message']}"
         output_message += "\n"
 
         return output_message
@@ -318,24 +341,55 @@ class ExpectationDiagnostics(SerializableDictDot):
         expectation_instance,
         examples: List[ExpectationTestDataCases],
     ) -> ExpectationDiagnosticCheckMessage:
-        """Check that the validate_configuration method returns True"""
+        """Check that the validate_configuration exists and doesn't raise a config error"""
         passed = False
         sub_messages = []
+        rx = re.compile(r"^[\s]+assert", re.MULTILINE)
         try:
             first_test = examples[0]["tests"][0]
         except IndexError:
             sub_messages.append(
                 {
                     "message": "No example found to get kwargs for ExpectationConfiguration",
-                    "passed": False,
+                    "passed": passed,
                 }
             )
         else:
-            expectation_config = ExpectationConfiguration(
-                expectation_type=expectation_instance.expectation_type,
-                kwargs=first_test.input,
-            )
-            passed = expectation_instance.validate_configuration(expectation_config)
+            if "validate_configuration" not in expectation_instance.__class__.__dict__:
+                sub_messages.append(
+                    {
+                        "message": "No validate_configuration method defined on subclass",
+                        "passed": passed,
+                    }
+                )
+            else:
+                expectation_config = ExpectationConfiguration(
+                    expectation_type=expectation_instance.expectation_type,
+                    kwargs=first_test.input,
+                )
+                validate_configuration_source = inspect.getsource(
+                    expectation_instance.__class__.validate_configuration
+                )
+                if rx.search(validate_configuration_source):
+                    sub_messages.append(
+                        {
+                            "message": "Custom 'assert' statements in validate_configuration",
+                            "passed": True,
+                        }
+                    )
+                else:
+                    sub_messages.append(
+                        {
+                            "message": "Using default validate_configuration from template",
+                            "passed": False,
+                        }
+                    )
+                try:
+                    expectation_instance.validate_configuration(expectation_config)
+                except InvalidExpectationConfigurationError:
+                    pass
+                else:
+                    passed = True
 
         return ExpectationDiagnosticCheckMessage(
             message="Has basic input validation and type checking",
@@ -370,10 +424,108 @@ class ExpectationDiagnostics(SerializableDictDot):
     @staticmethod
     def _check_linting(expectation_instance) -> ExpectationDiagnosticCheckMessage:
         """Check if linting checks pass for Expectation"""
-        # TODO: Perform linting checks instead of just giving thumbs down
+        sub_messages: List[dict] = []
+        message: str = "Passes all linting checks"
+        passed: bool = False
+        black_ok: bool = False
+        isort_ok: bool = False
+        file_and_class_names_ok: bool = False
+        rx_expectation_instance_repr = re.compile(r"<.*\.([^\.]*) object at .*")
+
+        try:
+            expectation_camel_name = rx_expectation_instance_repr.match(
+                repr(expectation_instance)
+            ).group(1)
+        except AttributeError:
+            sub_messages.append(
+                {
+                    "message": "Arg passed to _check_linting was not an instance of an Expectation, so cannot check linting",
+                    "passed": False,
+                }
+            )
+            return ExpectationDiagnosticCheckMessage(
+                message=message,
+                passed=passed,
+                sub_messages=sub_messages,
+            )
+
+        impl = get_expectation_impl(camel_to_snake(expectation_camel_name))
+        try:
+            source_file_path = inspect.getfile(impl)
+        except TypeError:
+            sub_messages.append(
+                {
+                    "message": "inspect.getfile(impl) raised a TypeError (impl is a built-in class)",
+                    "passed": False,
+                }
+            )
+            return ExpectationDiagnosticCheckMessage(
+                message=message,
+                passed=passed,
+                sub_messages=sub_messages,
+            )
+
+        snaked_impl_name = camel_to_snake(impl.__name__)
+        source_file_base_no_ext = os.path.basename(source_file_path).rsplit(".", 1)[0]
+        with open(source_file_path) as fp:
+            code = fp.read()
+
+        if snaked_impl_name != source_file_base_no_ext:
+            sub_messages.append(
+                {
+                    "message": f"The snake_case of {impl.__name__} ({snaked_impl_name}) does not match filename part ({source_file_base_no_ext})",
+                    "passed": False,
+                }
+            )
+        else:
+            file_and_class_names_ok = True
+
+        if black is None:
+            sub_messages.append(
+                {
+                    "message": "Could not find 'black', so cannot check linting",
+                    "passed": False,
+                }
+            )
+
+        if isort is None:
+            sub_messages.append(
+                {
+                    "message": "Could not find 'isort', so cannot check linting",
+                    "passed": False,
+                }
+            )
+
+        if black and isort:
+            blacked_code = lint_code(code)
+            if code != blacked_code:
+                sub_messages.append(
+                    {
+                        "message": "Your code would be reformatted with black",
+                        "passed": False,
+                    }
+                )
+            else:
+                black_ok = True
+            isort_ok = isort.check_code(
+                code,
+                **isort.profiles.black,
+                ignore_whitespace=True,
+                known_local_folder=["great_expectations"],
+            )
+            if not isort_ok:
+                sub_messages.append(
+                    {
+                        "message": "Your code would be reformatted with isort",
+                        "passed": False,
+                    }
+                )
+
+        passed = black_ok and isort_ok and file_and_class_names_ok
         return ExpectationDiagnosticCheckMessage(
-            message="Passes all linting checks",
-            passed=False,
+            message=message,
+            passed=passed,
+            sub_messages=sub_messages,
         )
 
     @staticmethod

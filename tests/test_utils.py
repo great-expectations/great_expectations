@@ -9,21 +9,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.exc import SQLAlchemyError
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
-
 from great_expectations.data_context.store import (
     CheckpointStore,
     ProfilerStore,
@@ -44,9 +29,26 @@ from great_expectations.data_context.util import build_store_from_config
 
 logger = logging.getLogger(__name__)
 
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.exc import SQLAlchemyError
+
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sa = None
+    reflection = None
+    Table = None
+    Select = None
+    SQLAlchemyError = None
+
+logger = logging.getLogger(__name__)
+
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
+# noinspection PyPep8Naming
 def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
     """
     Assert that two complex structures have almost equal contents.
@@ -450,6 +452,8 @@ def load_data_into_test_database(
     """
     import pandas as pd
 
+    connection = None
+
     if sa:
         engine = sa.create_engine(connection_string)
     else:
@@ -470,7 +474,7 @@ def load_data_into_test_database(
         df.to_sql(name=table_name, con=engine, index=False)
     except SQLAlchemyError as e:
         logger.error(
-            f"""Docs integration tests encountered an error while loading test-data into test-database."""
+            """Docs integration tests encountered an error while loading test-data into test-database."""
         )
         raise
     finally:
@@ -509,20 +513,20 @@ def check_athena_table_count(
             "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "
             "install optional sqlalchemy dependency for support."
         )
-        return
+        return False
+
+    connection = None
     try:
-        athena_connection = engine.connect()
-        result = athena_connection.execute(
-            sa.text(f"SHOW TABLES in {db_name}")
-        ).fetchall()
+        connection = engine.connect()
+        result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         return len(result) == expected_table_count
     except SQLAlchemyError as e:
         logger.error(
-            f"""Docs integration tests encountered an error while loading test-data into test-database."""
+            """Docs integration tests encountered an error while loading test-data into test-database."""
         )
         raise
     finally:
-        athena_connection.close()
+        connection.close()
         engine.dispose()
 
 
@@ -538,15 +542,15 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
             "install optional sqlalchemy dependency for support."
         )
         return
+
+    connection = None
     try:
-        athena_connection = engine.connect()
-        result = athena_connection.execute(
-            sa.text(f"SHOW TABLES in {db_name}")
-        ).fetchall()
+        connection = engine.connect()
+        result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         for table_tuple in result:
             table = table_tuple[0]
             if table != table_to_keep:
-                athena_connection.execute(sa.text(f"DROP TABLE `{table}`;"))
+                connection.execute(sa.text(f"DROP TABLE `{table}`;"))
     finally:
-        athena_connection.close()
+        connection.close()
         engine.dispose()

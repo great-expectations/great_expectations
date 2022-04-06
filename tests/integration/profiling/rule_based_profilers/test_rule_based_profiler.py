@@ -1,4 +1,5 @@
 import os
+from unittest import mock
 
 from ruamel.yaml import YAML
 
@@ -125,7 +126,11 @@ def test_batches_are_accessible(
         assert metric_value_set == {"category0", "category1", "category2"}
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_profile_includes_citations(
+    mock_emit,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
@@ -146,7 +151,8 @@ def test_profile_includes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiler.run()
+    expectation_suite: ExpectationSuite = profiler.expectation_suite(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
@@ -155,8 +161,19 @@ def test_profile_includes_citations(
 
     assert len(expectation_suite.meta["citations"]) > 0
 
+    assert mock_emit.call_count == 43
+    assert all(
+        payload[0][0]["event"] == "data_context.get_batch_list"
+        for payload in mock_emit.call_args_list[:-1]
+    )
+    assert mock_emit.call_args_list[-1][0][0]["event"] == "profiler.run"
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_profile_excludes_citations(
+    mock_emit,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
@@ -183,7 +200,8 @@ def test_profile_excludes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiler.run()
+    expectation_suite: ExpectationSuite = profiler.expectation_suite(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
@@ -191,3 +209,10 @@ def test_profile_excludes_citations(
     )
 
     assert expectation_suite.meta.get("citations") is None
+
+    assert mock_emit.call_count == 43
+    assert all(
+        payload[0][0]["event"] == "data_context.get_batch_list"
+        for payload in mock_emit.call_args_list[:-1]
+    )
+    assert mock_emit.call_args_list[-1][0][0]["event"] == "profiler.run"

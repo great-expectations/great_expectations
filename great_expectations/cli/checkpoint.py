@@ -3,7 +3,6 @@ import sys
 from typing import List
 
 import click
-from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -27,9 +26,6 @@ try:
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     SQLAlchemyError = RuntimeError
-
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 """
@@ -296,7 +292,7 @@ def print_validation_operator_results_details(
         suite_name: str = str(vr.meta["expectation_suite_name"])
         if len(suite_name) > max_suite_display_width:
             suite_name = suite_name[0:max_suite_display_width]
-            suite_name = suite_name[:-1] + "…"
+            suite_name = f"{suite_name[:-1]}…"
         status_line: str = f"- {suite_name.ljust(max_suite_display_width)}   {status_slug}   {stats_slug}"
         cli_message(status_line)
 
