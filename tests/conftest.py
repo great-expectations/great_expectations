@@ -4361,6 +4361,7 @@ def build_in_memory_runtime_context():
     return context
 
 
+@pytest.fixture
 def in_memory_runtime_context():
     return build_in_memory_runtime_context()
 
