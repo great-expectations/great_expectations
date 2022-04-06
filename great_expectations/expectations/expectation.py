@@ -963,10 +963,13 @@ class Expectation(metaclass=MetaExpectation):
             registered_renderers=_registered_renderers,
         )
 
+        _expectation_config: ExpectationConfiguration = self._get_expectation_configuration_from_examples(
+            examples
+        )
         metric_diagnostics_list: List[
             ExpectationMetricDiagnostics
         ] = self._get_metric_diagnostics_list(
-            executed_test_cases=executed_test_cases,
+            expectation_config=_expectation_config,
         )
 
         introspected_execution_engines: ExpectationExecutionEngineDiagnostics = (
@@ -1127,6 +1130,22 @@ class Expectation(metaclass=MetaExpectation):
                 "docstring": docstring,
             }
         )
+
+    def _get_expectation_configuration_from_examples(
+        self,
+        examples: List[ExpectationTestDataCases],
+    ) -> ExpectationConfiguration:
+        """Return an ExpectationConfiguration instance using test input expected to succeed"""
+        if examples:
+            for example in examples:
+                tests = example.tests
+                if tests:
+                    for test in tests:
+                        if test.output.get("success"):
+                            return ExpectationConfiguration(
+                                expectation_type=self.expectation_type,
+                                kwargs=test.input
+                            )
 
     def _execute_test_examples(
         self,
@@ -1442,18 +1461,15 @@ class Expectation(metaclass=MetaExpectation):
 
     def _get_metric_diagnostics_list(
         self,
-        executed_test_cases: List[ExecutedExpectationTestCase],
+        expectation_config: ExpectationConfiguration,
     ) -> List[ExpectationMetricDiagnostics]:
         """Check to see which Metrics are upstream dependencies for this Expectation."""
 
         # NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
         # There's probably some part of get_validation_dependencies that can be factored out to remove the dependency.
 
-        if len(executed_test_cases) < 1:
+        if not expectation_config:
             return []
-
-        expectation_config = executed_test_cases[0]["expectation_configuration"]
-
         validation_dependencies = self.get_validation_dependencies(
             configuration=expectation_config
         )

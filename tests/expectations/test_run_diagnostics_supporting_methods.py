@@ -171,10 +171,10 @@ def test__execute_test_examples__with_a_single_example():
 
 ### Tests for _get_metric_diagnostics_list
 def test__get_metric_diagnostics_list_on_a_class_without_metrics():
-    executed_test_cases = []
+    _config = None
     metric_diagnostics_list = (
         ExpectColumnValuesToEqualThree()._get_metric_diagnostics_list(
-            executed_test_cases=executed_test_cases
+            expectation_config=_config
         )
     )
     assert len(metric_diagnostics_list) == 0
@@ -185,10 +185,10 @@ def test__get_metric_diagnostics_list_on_a_class_without_metrics():
 
 
 def test__get_metric_diagnostics_list_on_a_class_with_metrics():
-    executed_test_cases = []
+    _config = None
     metric_diagnostics_list = (
         ExpectColumnValuesToEqualThree__ThirdIteration()._get_metric_diagnostics_list(
-            executed_test_cases=executed_test_cases
+            expectation_config=_config
         )
     )
     assert len(metric_diagnostics_list) == 0
