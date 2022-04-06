@@ -1895,6 +1895,53 @@ data_connectors:
         create_expectation_suite_with_name="A_expectation_suite",
     )
 
+def test_get_validator_with_batch_list(
+    in_memory_runtime_context
+):
+    context = in_memory_runtime_context
+
+    my_batch_list = [
+        context.get_batch(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="pandas_datasource",
+                data_connector_name="runtime_data_connector",
+                data_asset_name="my_data_asset",
+                runtime_parameters={
+                    "batch_data": pd.DataFrame({
+                        "x": range(10)
+                    })
+                },
+                batch_identifiers={
+                    "id_key_0": "id_0_value_a",
+                    "id_key_1": "id_1_value_a",
+                },
+            )
+        ),
+        context.get_batch(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="pandas_datasource",
+                data_connector_name="runtime_data_connector",
+                data_asset_name="my_data_asset",
+                runtime_parameters={
+                    "batch_data": pd.DataFrame({
+                        "y": range(10)
+                    })
+                },
+                batch_identifiers={
+                    "id_key_0": "id_0_value_b",
+                    "id_key_1": "id_1_value_b",
+                },
+            )
+        ),
+    ]
+
+    my_validator = context.get_validator(
+        batch_list=my_batch_list,
+        create_expectation_suite_with_name="A_expectation_suite",
+    )
+    assert len(my_validator.batches) == 2
+
+
 def test_get_batch_multiple_datasources_do_not_scan_all(
     data_context_with_bad_datasource,
 ):

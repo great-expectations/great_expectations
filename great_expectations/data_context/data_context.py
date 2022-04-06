@@ -1760,6 +1760,7 @@ class BaseDataContext(ConfigPeer):
         data_asset_name: Optional[str] = None,
         *,
         batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[BatchRequestBase] = None,
         batch_request_list: List[Optional[BatchRequestBase]] = None,
         batch_data: Optional[Any] = None,
@@ -1819,6 +1820,7 @@ class BaseDataContext(ConfigPeer):
                 bool(x)
                 for x in [
                     batch is not None,
+                    batch_list is not None,
                     batch_request is not None,
                     batch_request_list is not None,
                 ]
@@ -1826,14 +1828,17 @@ class BaseDataContext(ConfigPeer):
             > 1
         ):
             raise ValueError(
-                "No more than one of batch, batch_request, or batch_request_list can be specified"
+                "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"
             )
 
-        batch_list: List = []
-        if batch:
-            batch_list = [batch]
+        if batch_list:
+            pass
+        
+        elif batch:
+            batch_list: List = [batch]
         
         else:
+            batch_list: List = []
             if not batch_request_list:
                 batch_request_list = [batch_request]
 
