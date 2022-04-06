@@ -464,9 +464,6 @@ class Validator:
             expectation_configurations: List[
                 ExpectationConfiguration
             ] = profiler.expectation_suite(
-                batch_list=list(self.batches.values()),
-                batch_request=None,
-                force_batch_data=False,
                 expectation_suite=None,
                 expectation_suite_name=None,
                 include_citation=True,
