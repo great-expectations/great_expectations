@@ -13,11 +13,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchRequest,
-    RuntimeBatchRequest,
-    get_batch_request_as_dict,
-)
+from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -543,9 +539,9 @@ configuration to continue.
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
-S3/Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
-continue.
-                """
+S3/Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration \
+to continue.
+"""
             )
         if ("prefix" in data) and not (
             data["class_name"]
@@ -597,9 +593,10 @@ continue.
             azure_options = data["azure_options"]
             if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
                 raise ge_exceptions.InvalidConfigError(
-                    """Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
-                    You must only select one between `conn_str` or `account_url`. Please update your configuration to continue.
-                    """
+                    """Your current configuration is either missing methods of authentication or is using too many for \
+the Azure type of data connector. You must only select one between `conn_str` or `account_url`. Please update your \
+configuration to continue.
+"""
                 )
         if (
             "gcs_options" in data or "bucket_or_name" in data or "max_results" in data
@@ -623,9 +620,10 @@ continue.
             gcs_options = data["gcs_options"]
             if "filename" in gcs_options and "info" in gcs_options:
                 raise ge_exceptions.InvalidConfigError(
-                    """Your current configuration can only use a single method of authentication for the GCS type of data connector.
-                    You must only select one between `filename` (from_service_account_file) and `info` (from_service_account_info). Please update your configuration to continue.
-                    """
+                    """Your current configuration can only use a single method of authentication for the GCS type of \
+data connector. You must only select one between `filename` (from_service_account_file) and `info` \
+(from_service_account_info). Please update your configuration to continue.
+"""
                 )
         if (
             "data_asset_name_prefix" in data
@@ -2577,7 +2575,7 @@ class CheckpointConfig(BaseYamlConfig):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -2653,9 +2651,9 @@ class CheckpointConfig(BaseYamlConfig):
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
             )
-            validation_batch_request: Union[
-                BatchRequest, RuntimeBatchRequest
-            ] = substituted_validation_dict.get("batch_request")
+            validation_batch_request: BatchRequestBase = (
+                substituted_validation_dict.get("batch_request")
+            )
             validation_dict["batch_request"] = validation_batch_request
             validation_expectation_suite_name: str = substituted_validation_dict.get(
                 "expectation_suite_name"

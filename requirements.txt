@@ -2,7 +2,6 @@ altair>=4.0.0,<5
 Click>=7.1.2
 colorama>=0.4.3
 cryptography>=3.2
-dataclasses
 importlib-metadata>=1.7.0 # (included in Python 3.8 by default.)
 Ipython>=7.16.3
 jinja2>=2.10,<3.1.0 # contextfilter has been renamed

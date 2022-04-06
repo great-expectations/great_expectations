@@ -2,11 +2,6 @@ import pytest
 
 from great_expectations.datasource.types import *
 
-try:
-    from unittest import mock
-except ImportError:
-    from unittest import mock
-
 
 def test_batch_kwargs_id():
     test_batch_kwargs = PathBatchKwargs({"path": "/data/test.csv"})
