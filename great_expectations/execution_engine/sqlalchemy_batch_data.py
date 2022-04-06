@@ -198,20 +198,28 @@ class SqlAlchemyBatchData(BatchData):
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param query:
         """
-        if self.sql_engine_dialect.name.lower() == "bigquery":
+        dialect = self.sql_engine_dialect.name.lower()
+        try:
+            # Sometimes `dialect`` is a byte string, e.g. `b"hive"`, it should be converted
+            # to string for proper comparison.
+            dialect = dialect.decode()
+        except (UnicodeDecodeError, AttributeError):
+            pass
+
+        if dialect == "bigquery":
             stmt = f"CREATE OR REPLACE TABLE `{temp_table_name}` AS {query}"
-        elif self.sql_engine_dialect.name.lower() == "dremio":
+        elif dialect == "dremio":
             stmt = f"CREATE OR REPLACE VDS {temp_table_name} AS {query}"
-        elif self.sql_engine_dialect.name.lower() == "snowflake":
+        elif dialect == "snowflake":
             if temp_table_schema_name is not None:
                 temp_table_name = f"{temp_table_schema_name}.{temp_table_name}"
 
             stmt = f"CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}"
-        elif self.sql_engine_dialect.name == "mysql":
-            # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the
-            # generic case.
+        elif dialect in ("mysql", "hive"):
+            # Note: We can keep the "MySQL" & "Hive" clause separate for clarity, even though
+            # it is the same as the generic case.
             stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS {query}"
-        elif self.sql_engine_dialect.name == "mssql":
+        elif dialect == "mssql":
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
             # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
@@ -230,12 +238,12 @@ class SqlAlchemyBatchData(BatchData):
             )
         # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
         # Similar message may be needed in the future for Trino backend.
-        elif self.sql_engine_dialect.name.lower() == "awsathena":
+        elif dialect == "awsathena":
             logger.warning(
                 f"GE has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"
-        elif self.sql_engine_dialect.name.lower() == "oracle":
+        elif dialect == "oracle":
             # oracle 18c introduced PRIVATE temp tables which are transient objects
             stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE DEFINITION AS {query}".format(
                 temp_table_name=temp_table_name, query=query
@@ -246,13 +254,13 @@ class SqlAlchemyBatchData(BatchData):
                 temp_table_name=temp_table_name, query=query
             )
         # Please note that Teradata is currently experimental (as of 0.13.43)
-        elif self.sql_engine_dialect.name.lower() == "teradatasql":
+        elif dialect == "teradatasql":
             stmt = 'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 temp_table_name=temp_table_name, query=query
             )
         else:
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
-        if self.sql_engine_dialect.name.lower() == "oracle":
+        if dialect == "oracle":
             try:
                 self._engine.execute(stmt_1)
             except DatabaseError:
