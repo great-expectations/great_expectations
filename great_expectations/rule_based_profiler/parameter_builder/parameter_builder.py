@@ -7,7 +7,12 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    BatchRequestBase,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -140,58 +145,85 @@ class ParameterBuilder(Builder, ABC):
 
     def build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         parameter_computation_impl: Optional[Callable] = None,
         json_serialize: Optional[bool] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
     ) -> None:
-        resolve_evaluation_dependencies(
-            parameter_builder=self,
-            parameter_container=parameter_container,
+        """
+        Args:
+            domain: Domain object that is context for execution of this ParameterBuilder object.
+            variables: attribute name/value pairs
+            parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
+            parameter_computation_impl: Object containing desired ParameterBuilder implementation.
+            json_serialize: If absent, use property value (in standard way, supporting variables look-up).
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
+        """
+        fully_qualified_parameter_names: List[
+            str
+        ] = get_fully_qualified_parameter_names(
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
+        if self.fully_qualified_parameter_name not in fully_qualified_parameter_names:
+            self.set_batch_list_or_batch_request(
+                batch_list=batch_list,
+                batch_request=batch_request,
+                force_batch_data=force_batch_data,
+            )
 
-        if parameter_computation_impl is None:
-            parameter_computation_impl = self._build_parameters
-
-        computed_parameter_value: Any
-        parameter_computation_details: dict
-        (
-            computed_parameter_value,
-            parameter_computation_details,
-        ) = parameter_computation_impl(
-            parameter_container=parameter_container,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        if json_serialize is None:
-            # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-            json_serialize = get_parameter_value_and_validate_return_type(
+            resolve_evaluation_dependencies(
+                parameter_builder=self,
                 domain=domain,
-                parameter_reference=self.json_serialize,
-                expected_return_type=bool,
+                variables=variables,
+                parameters=parameters,
+                fully_qualified_parameter_names=fully_qualified_parameter_names,
+            )
+
+            if parameter_computation_impl is None:
+                parameter_computation_impl = self._build_parameters
+
+            computed_parameter_value: Any
+            parameter_computation_details: dict
+            (
+                computed_parameter_value,
+                parameter_computation_details,
+            ) = parameter_computation_impl(
+                domain=domain,
                 variables=variables,
                 parameters=parameters,
             )
 
-        parameter_values: Dict[str, Any] = {
-            self.fully_qualified_parameter_name: {
-                "value": convert_to_json_serializable(data=computed_parameter_value)
-                if json_serialize
-                else computed_parameter_value,
-                "details": parameter_computation_details,
-            },
-        }
+            if json_serialize is None:
+                # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+                json_serialize = get_parameter_value_and_validate_return_type(
+                    domain=domain,
+                    parameter_reference=self.json_serialize,
+                    expected_return_type=bool,
+                    variables=variables,
+                    parameters=parameters,
+                )
 
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
-        )
+            parameter_values: Dict[str, Any] = {
+                self.fully_qualified_parameter_name: {
+                    "value": convert_to_json_serializable(data=computed_parameter_value)
+                    if json_serialize
+                    else computed_parameter_value,
+                    "details": parameter_computation_details,
+                },
+            }
+
+            build_parameter_container(
+                parameter_container=parameters[domain.id],
+                parameter_values=parameter_values,
+            )
 
     @property
     @abstractmethod
@@ -215,7 +247,6 @@ class ParameterBuilder(Builder, ABC):
     @abstractmethod
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -553,6 +584,45 @@ class ParameterBuilder(Builder, ABC):
 
         return metric_values
 
+    @staticmethod
+    def _get_best_candidate_above_threshold(
+        candidate_ratio_dict: Dict[str, float],
+        threshold: float,
+    ) -> Tuple[Optional[str], float]:
+        """
+        Helper method to calculate which candidate strings or patterns are the best match (ie. highest ratio),
+        provided they are also above the threshold.
+        """
+        best_candidate: Optional[str] = None
+        best_ratio: float = 0.0
+
+        candidate: str
+        ratio: float
+        for candidate, ratio in candidate_ratio_dict.items():
+            if ratio > best_ratio and ratio >= threshold:
+                best_candidate = candidate
+                best_ratio = ratio
+
+        return best_candidate, best_ratio
+
+    @staticmethod
+    def _get_sorted_candidates_and_ratios(
+        candidate_ratio_dict: Dict[str, float],
+    ) -> Dict[str, float]:
+        """
+        Helper method to sort all candidate strings or patterns by success ratio (how well they matched the domain).
+
+        Returns sorted dict of candidate as key and ratio as value
+        """
+        # noinspection PyTypeChecker
+        return dict(
+            sorted(
+                candidate_ratio_dict.items(),
+                key=lambda element: element[1],
+                reverse=True,
+            )
+        )
+
 
 def init_rule_parameter_builders(
     parameter_builder_configs: Optional[List[dict]] = None,
@@ -589,10 +659,10 @@ def init_parameter_builder(
 
 def resolve_evaluation_dependencies(
     parameter_builder: "ParameterBuilder",  # noqa: F821
-    parameter_container: ParameterContainer,
     domain: Domain,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
+    fully_qualified_parameter_names: Optional[List[str]] = None,
 ) -> None:
     """
     This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
@@ -609,11 +679,12 @@ def resolve_evaluation_dependencies(
     # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
     # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
     # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name").
-    fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
-    )
+    if fully_qualified_parameter_names is None:
+        fully_qualified_parameter_names = get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
 
     # Step-3: Check for presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
     # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
@@ -634,7 +705,6 @@ def resolve_evaluation_dependencies(
             )
 
             evaluation_parameter_builder.build_parameters(
-                parameter_container=parameter_container,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
@@ -644,7 +714,6 @@ def resolve_evaluation_dependencies(
             # configured with its own "evaluation_parameter_builders" list.  Recursive call handles such situations.
             resolve_evaluation_dependencies(
                 parameter_builder=evaluation_parameter_builder,
-                parameter_container=parameter_container,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,

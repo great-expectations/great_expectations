@@ -1,14 +1,10 @@
-import os
 from unittest import mock
 
 import pytest
 from ruamel import yaml
 
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    DatasourceConfig,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import DataContextError, GeCloudError
 from great_expectations.exceptions.exceptions import DatasourceInitializationError
 

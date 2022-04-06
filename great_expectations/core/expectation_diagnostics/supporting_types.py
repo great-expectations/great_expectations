@@ -14,8 +14,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.types import SerializableDictDot
 
-# from pydantic.dataclasses import dataclass
-
 
 class Maturity(Enum):
     """The four levels of maturity for features within Great Expectations"""
