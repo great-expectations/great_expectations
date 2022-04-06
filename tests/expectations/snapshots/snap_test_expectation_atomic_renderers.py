@@ -977,6 +977,26 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_null 1"] 
     "value_type": "StringValueType",
 }
 
+snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly_equals_1 1"] = {
+    "name": "atomic.prescriptive.summary",
+    "value": {
+        "graph": None,
+        "header": None,
+        "header_row": None,
+        "params": {
+            "column": {"schema": {"type": "string"}, "value": "my_column"},
+            "condition_parser": {"schema": {"type": "string"}, "value": None},
+            "mostly": {"schema": {"type": "number"}, "value": 1.0},
+            "mostly_pct": {"schema": {"type": "string"}, "value": None},
+            "row_condition": {"schema": {"type": "string"}, "value": None},
+        },
+        "schema": {"type": "com.superconductive.rendered.string"},
+        "table": None,
+        "template": "$column values must be null.",
+    },
+    "value_type": "StringValueType",
+}
+
 snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_of_type 1"] = {
     "name": "atomic.prescriptive.summary",
     "value": {
@@ -1258,7 +1278,7 @@ snapshots[
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "table": None,
-        "template": "Values must always be unique across columns, at least $mostly_pct % of the time: $column_list_0, $column_list_1, $column_list_2",
+        "template": "Values must be unique across columns, at least $mostly_pct % of the time: $column_list_0, $column_list_1, $column_list_2",
     },
     "value_type": "StringValueType",
 }
@@ -1286,7 +1306,7 @@ snapshots[
         },
         "schema": {"type": "com.superconductive.rendered.string"},
         "table": None,
-        "template": "Values must always be unique across columns, at least $mostly_pct % of the time: $column_list_0, $column_list_1",
+        "template": "Values must be unique across columns, at least $mostly_pct % of the time: $column_list_0, $column_list_1",
     },
     "value_type": "StringValueType",
 }

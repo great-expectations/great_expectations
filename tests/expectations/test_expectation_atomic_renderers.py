@@ -764,6 +764,22 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_null(
     pprint(res)
     snapshot.assert_match(res)
 
+def test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly_equals_1(
+    snapshot, get_prescriptive_rendered_content
+):
+    update_dict = {
+        "expectation_type": "expect_column_values_to_be_null",
+        "kwargs": {
+            "column": "my_column",
+            "mostly": 1.0,
+        },
+    }
+    rendered_content = get_prescriptive_rendered_content(update_dict)
+
+    res = rendered_content.to_json_dict()
+    pprint(res)
+    snapshot.assert_match(res)
+
 
 def test_atomic_prescriptive_summary_expect_column_values_to_be_of_type(
     snapshot, get_prescriptive_rendered_content
