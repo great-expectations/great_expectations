@@ -1,5 +1,3 @@
-import json
-
 import pytest
 
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -12,22 +10,10 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationDescriptionDiagnostics,
     ExpectationExecutionEngineDiagnostics,
     ExpectationMetricDiagnostics,
-    ExpectationRendererDiagnostics,
 )
-from great_expectations.execution_engine.pandas_execution_engine import (
-    PandasExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-)
-
-from .fixtures.expect_column_values_to_equal_three import (
+from great_expectations.expectations.expectation import ColumnMapExpectation
+from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
-    ExpectColumnValuesToEqualThree__BrokenIteration,
     ExpectColumnValuesToEqualThree__SecondIteration,
     ExpectColumnValuesToEqualThree__ThirdIteration,
 )
@@ -47,7 +33,7 @@ def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_obj
         library_metadata_passed_checks=False,
         has_full_test_suite=False,
         manually_reviewed_code=False,
-        package=None,
+        problems=["No library_metadata attribute found"],
     )
 
 
@@ -63,31 +49,6 @@ def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadat
         library_metadata_passed_checks=True,
         has_full_test_suite=False,
         manually_reviewed_code=False,
-        package=None,
-    )
-
-
-def test__get_augmented_library_metadata_on_a_class_with_a_package_in_its_library_metadata_object():
-    class MyExpectation(ExpectColumnValuesToEqualThree__SecondIteration):
-        library_metadata = {
-            "maturity": "EXPERIMENTAL",
-            "package": "whatsit_expectations",
-            "tags": ["tag", "other_tag"],
-            "contributors": [
-                "@abegong",
-            ],
-        }
-
-    augmented_library_metadata = MyExpectation()._get_augmented_library_metadata()
-    assert augmented_library_metadata == AugmentedLibraryMetadata(
-        maturity="EXPERIMENTAL",
-        tags=["tag", "other_tag"],
-        contributors=["@abegong"],
-        requirements=[],
-        library_metadata_passed_checks=True,
-        has_full_test_suite=False,
-        manually_reviewed_code=False,
-        package="whatsit_expectations",
     )
 
 

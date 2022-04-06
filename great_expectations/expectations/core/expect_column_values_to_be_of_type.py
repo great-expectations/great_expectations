@@ -77,13 +77,6 @@ except ImportError:
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        ###
-        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-        # to define an attribute "dialect". A PR has been submitted to fix this upstream
-        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-        # fix isn't present, add this "dialect" attribute here:
-        if not hasattr(sqla_bigquery, "dialect"):
-            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
 
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
@@ -170,10 +163,11 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.of_type"
@@ -195,13 +189,12 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert "type_" in configuration.kwargs, "type_ is required"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(

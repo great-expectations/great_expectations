@@ -66,14 +66,17 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         false_positive_rate: Union[str, float] = 5.0e-2,
         estimator: str = "bootstrap",
         num_bootstrap_samples: Optional[Union[str, int]] = None,
-        bootstrap_random_seed: Optional[int] = None,
+        bootstrap_random_seed: Optional[Union[str, int]] = None,
         round_decimals: Optional[Union[str, int]] = None,
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
         json_serialize: Union[str, bool] = True,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -98,9 +101,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
             data_context: DataContext
         """
         super().__init__(
@@ -111,9 +117,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             enforce_numeric_metric=enforce_numeric_metric,
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -180,7 +187,6 @@ detected.
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -224,41 +230,8 @@ detected.
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
 
-        # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        estimator: str = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.estimator,
-            expected_return_type=str,
-            variables=variables,
-            parameters=parameters,
-        )
-        if (
-            estimator
-            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
-{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
-"""
-            )
-
-        estimator_func: Callable
-        etimator_kwargs: dict
-        if estimator == "bootstrap":
-            estimator_func = self._get_bootstrap_estimate
-            estimator_kwargs = {
-                "false_positive_rate": false_positive_rate,
-                "num_bootstrap_samples": self.num_bootstrap_samples,
-            }
-        else:
-            estimator_func = self._get_deterministic_estimate
-            estimator_kwargs = {
-                "false_positive_rate": false_positive_rate,
-            }
-
         # Compute metric value for each Batch object.
         super().build_parameters(
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -289,6 +262,39 @@ detected.
         else:
             metric_values = parameter_node.value
 
+        # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        estimator: str = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.estimator,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
+        )
+        if (
+            estimator
+            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
+{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
+"""
+            )
+
+        estimator_func: Callable
+        etimator_kwargs: dict
+        if estimator == "bootstrap":
+            estimator_func = self._get_bootstrap_estimate
+            estimator_kwargs = {
+                "false_positive_rate": false_positive_rate,
+                "num_bootstrap_samples": self.num_bootstrap_samples,
+                "bootstrap_random_seed": self.bootstrap_random_seed,
+            }
+        else:
+            estimator_func = self._get_deterministic_estimate
+            estimator_kwargs = {
+                "false_positive_rate": false_positive_rate,
+            }
+
         metric_value_range: np.ndarray = self._estimate_metric_value_range(
             metric_values=metric_values,
             estimator_func=estimator_func,
@@ -299,9 +305,7 @@ detected.
         )
 
         return (
-            {
-                "value_range": metric_value_range,
-            },
+            metric_value_range,
             parameter_node.details,
         )
 

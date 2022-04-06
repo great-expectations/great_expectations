@@ -66,7 +66,6 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
@@ -94,7 +93,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -115,7 +114,6 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for regex_list kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
