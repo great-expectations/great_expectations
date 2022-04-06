@@ -977,7 +977,9 @@ snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_null 1"] 
     "value_type": "StringValueType",
 }
 
-snapshots["test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly_equals_1 1"] = {
+snapshots[
+    "test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly_equals_1 1"
+] = {
     "name": "atomic.prescriptive.summary",
     "value": {
         "graph": None,

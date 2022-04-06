@@ -764,6 +764,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_null(
     pprint(res)
     snapshot.assert_match(res)
 
+
 def test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly_equals_1(
     snapshot, get_prescriptive_rendered_content
 ):

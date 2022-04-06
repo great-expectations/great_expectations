@@ -89,9 +89,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-            template_str = (
-                f"Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
-            )
+            template_str = f"Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
         else:
             template_str = (
                 f"Values for given compound columns must be unique together: "
@@ -156,9 +154,7 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-            template_str = (
-                f"Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
-            )
+            template_str = f"Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
         else:
             template_str = (
                 f"Values for given compound columns must be unique together: "
