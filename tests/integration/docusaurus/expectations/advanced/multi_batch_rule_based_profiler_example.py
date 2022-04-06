@@ -114,7 +114,7 @@ rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
 )
 
 rule_based_profiler.run()
-profiled_expectation_suite: ExpectationSuite = rule_based_profiler.expectation_suite(
+suite: ExpectationSuite = rule_based_profiler.expectation_suite(
     expectation_suite_name="test_suite_name"
 )
 print(suite)
