@@ -31,12 +31,10 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     exclude_field_names: Set[str] = ColumnDomainBuilder.exclude_field_names | {
         "cardinality_checker",
     }
+    cardinality_limit_modes: CardinalityLimitMode = CardinalityLimitMode
 
     def __init__(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
@@ -55,6 +53,11 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """Create column domains where cardinality is within the specified limit.
 
@@ -72,9 +75,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         these will not be considered.
 
         Args:
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
-            data_context: DataContext associated with this profiler.
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             include_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to match.
@@ -90,10 +90,15 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
+                Accessible for convenience via CategoricalColumnDomainBuilder.cardinality_limit_modes e.g.:
+                limit_mode=CategoricalColumnDomainBuilder.cardinality_limit_modes.VERY_FEW,
             max_unique_values: number of max unique rows for a custom
                 cardinality limit to use when filtering columns.
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
+            batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
+            data_context: DataContext associated with this profiler.
         """
         if exclude_column_names is None:
             exclude_column_names = [
@@ -115,9 +120,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self._allowed_semantic_types_passthrough = allowed_semantic_types_passthrough
 
         super().__init__(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            data_context=data_context,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
             include_column_name_suffixes=include_column_name_suffixes,
@@ -126,6 +128,9 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             semantic_type_filter_class_name=semantic_type_filter_class_name,
             include_semantic_types=include_semantic_types,
             exclude_semantic_types=exclude_semantic_types,
+            batch_list=batch_list,
+            batch_request=batch_request,
+            data_context=data_context,
         )
 
         self._limit_mode = limit_mode

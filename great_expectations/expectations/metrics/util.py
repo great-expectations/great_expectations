@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 from dateutil.parser import parse
+from packaging import version
 
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
@@ -82,13 +83,6 @@ except ImportError:
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        ###
-        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-        # to define an attribute "dialect". A PR has been submitted to fix this upstream
-        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-        # fix isn't present, add this "dialect" attribute here:
-        if not hasattr(sqla_bigquery, "dialect"):
-            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
@@ -207,6 +201,25 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
             else:
                 return sa.func.REGEXP_SIMILAR(column, literal(regex), literal("i")) == 0
     except (AttributeError, TypeError):
+        pass
+
+    try:
+        # sqlite
+        # regex_match for sqlite introduced in sqlalchemy v1.4
+        if issubclass(dialect.dialect, sa.dialects.sqlite.dialect) and version.parse(
+            sa.__version__
+        ) >= version.parse("1.4"):
+            if positive:
+                return column.regexp_match(literal(regex))
+            else:
+                return sa.not_(column.regexp_match(literal(regex)))
+        else:
+            logger.debug(
+                "regex_match is only enabled for sqlite when SQLAlchemy version is >= 1.4",
+                exc_info=True,
+            )
+            pass
+    except AttributeError:
         pass
 
     return None

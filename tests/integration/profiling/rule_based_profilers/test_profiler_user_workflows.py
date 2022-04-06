@@ -444,18 +444,18 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiled_expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=bobby_columnar_table_multi_batch[
             "test_configuration_oneshot_estimator"
         ]["expectation_suite_name"],
         include_citation=True,
     )
 
-    assert sorted(expectation_suite) == sorted(
-        bobby_columnar_table_multi_batch["test_configuration_oneshot_estimator"][
-            "expected_expectation_suite"
-        ]
-    )
+    fixture_expectation_suite: ExpectationSuite = bobby_columnar_table_multi_batch[
+        "test_configuration_oneshot_estimator"
+    ]["expected_expectation_suite"]
+
+    assert profiled_expectation_suite == fixture_expectation_suite
 
     assert mock_emit.call_count == 99
 
@@ -1839,7 +1839,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "column": "$domain.domain_kwargs.column",
                         "quantile_ranges": {
                             "quantiles": "$variables.quantiles",
-                            "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                            "value_ranges": "$parameter.quantile_value_ranges.value",
                         },
                         "allow_relative_error": "$variables.allow_relative_error",
                         "meta": {
@@ -1938,7 +1938,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "column": "$domain.domain_kwargs.column",
                         "quantile_ranges": {
                             "quantiles": "$variables.quantiles",
-                            "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                            "value_ranges": "$parameter.quantile_value_ranges.value",
                         },
                         "allow_relative_error": "$variables.allow_relative_error",
                         "meta": {

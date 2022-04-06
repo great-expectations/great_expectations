@@ -229,7 +229,7 @@ data_context_config = DataContextConfig(
 ### 2. Pass this DataContextConfig as a project_config to BaseDataContext
 
 ```python
-from great_expectations.data_context.types.base import BaseDataContext
+from great_expectations.data_context import BaseDataContext
 context = BaseDataContext(project_config=data_context_config)
 ```
 
@@ -244,4 +244,4 @@ Additional resources
 --------------------
 
 - [How to instantiate a Data Context on an EMR Spark cluster](../../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
+- [How to use Great Expectations in Databricks](../../../deployment_patterns/how_to_use_great_expectations_in_databricks.md)

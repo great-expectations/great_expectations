@@ -2,6 +2,7 @@ import json
 import unittest
 
 import numpy as np
+import pytest
 
 import great_expectations as ge
 from great_expectations.data_context.util import file_relative_path
@@ -107,18 +108,27 @@ class TestUtilMethods(unittest.TestCase):
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
 
+    @pytest.mark.filterwarnings(
+        "ignore:Please use `gaussian_kde`*:DeprecationWarning:great_expectations.dataset.util"
+    )
     def test_partition_data_bimodal(self):
         test_partition = ge.dataset.util.continuous_partition_data(self.D.bimodal)
         for key, val in self.test_partitions["bimodal_auto"].items():
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
 
+    @pytest.mark.filterwarnings(
+        "ignore:Please use `gaussian_kde`*:DeprecationWarning:great_expectations.dataset.util"
+    )
     def test_kde_partition_data_norm_0_1(self):
         test_partition = ge.dataset.util.kde_partition_data(self.D.norm_0_1)
         for key, val in self.test_partitions["norm_0_1_kde"].items():
             self.assertEqual(len(val), len(test_partition[key]))
             self.assertTrue(np.allclose(test_partition[key], val))
 
+    @pytest.mark.filterwarnings(
+        "ignore:Please use `gaussian_kde`*:DeprecationWarning:great_expectations.dataset.util"
+    )
     def test_kde_partition_data_bimodal(self):
         test_partition = ge.dataset.util.kde_partition_data(self.D.bimodal)
         for key, val in self.test_partitions["bimodal_kde"].items():

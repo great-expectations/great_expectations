@@ -63,7 +63,6 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
@@ -83,9 +82,8 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
