@@ -55,13 +55,21 @@ class RuleOutput:
     def get_fully_qualified_parameter_names(self) -> Dict[Domain, List[str]]:
         domain: Domain
         return {
-            domain: self.get_fully_qualified_parameter_names_for_one_domain(
-                domain=domain
-            )
+            domain: self.get_fully_qualified_parameter_names_for_domain(domain=domain)
             for domain in self.rule_state.domains
         }
 
-    def get_fully_qualified_parameter_names_for_one_domain(
+    def get_fully_qualified_parameter_names_for_domain_id(
+        self, domain_id: str
+    ) -> List[str]:
+        domains_dict: Dict[str, Domain] = self.rule_state.get_domains_as_dict()
+        domain: Domain = domains_dict[domain_id]
+        fully_qualified_parameter_names: List[
+            str
+        ] = self.get_fully_qualified_parameter_names_for_domain(domain=domain)
+        return fully_qualified_parameter_names
+
+    def get_fully_qualified_parameter_names_for_domain(
         self,
         domain: Optional[Domain] = None,
     ) -> List[str]:
@@ -79,13 +87,25 @@ class RuleOutput:
     ) -> Dict[Domain, Dict[str, Any]]:
         domain: Domain
         return {
-            domain: self.get_parameter_values_for_fully_qualified_parameter_names_for_one_domain(
+            domain: self.get_parameter_values_for_fully_qualified_parameter_names_for_domain(
                 domain=domain
             )
             for domain in self.rule_state.domains
         }
 
-    def get_parameter_values_for_fully_qualified_parameter_names_for_one_domain(
+    def get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
+        self, domain_id: str
+    ) -> Dict[str, Any]:
+        domains_dict: Dict[str, Domain] = self.rule_state.get_domains_as_dict()
+        domain: Domain = domains_dict[domain_id]
+        parameter_values_for_fully_qualified_parameter_names: Dict[
+            str, Any
+        ] = self.get_parameter_values_for_fully_qualified_parameter_names_for_domain(
+            domain=domain
+        )
+        return parameter_values_for_fully_qualified_parameter_names
+
+    def get_parameter_values_for_fully_qualified_parameter_names_for_domain(
         self,
         domain: Optional[Domain] = None,
     ) -> Dict[str, Any]:
