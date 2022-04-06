@@ -27,12 +27,7 @@ class RuleOutput:
     def rule_state(self) -> RuleState:
         return self._rule_state
 
-    def expectation_configurations(
-        self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
-    ) -> List[ExpectationConfiguration]:
+    def expectation_configurations(self) -> List[ExpectationConfiguration]:
         expectation_configurations: List[ExpectationConfiguration] = []
 
         domains: List[Domain] = self.rule_state.domains
@@ -48,9 +43,6 @@ class RuleOutput:
                         domain=domain,
                         variables=self.rule_state.variables,
                         parameters=self.rule_state.parameters,
-                        batch_list=batch_list,
-                        batch_request=batch_request,
-                        force_batch_data=force_batch_data,
                     )
                 )
 

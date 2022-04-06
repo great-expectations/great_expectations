@@ -351,11 +351,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         expectation_configurations: List[
             ExpectationConfiguration
-        ] = self.expectation_configurations(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            force_batch_data=force_batch_data,
-        )
+        ] = self.expectation_configurations()
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expectation_configurations:
@@ -368,18 +364,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return expectation_suite
 
-    def expectation_configurations(
-        self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
-    ) -> List[ExpectationConfiguration]:
+    def expectation_configurations(self) -> List[ExpectationConfiguration]:
         """
-        Args:
-            batch_list: Explicit list of Batch objects to supply data at runtime.
-            batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
-
         Returns:
             List of ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
         """
@@ -389,13 +375,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rule_output: RuleOutput
         for rule_state in self.rule_states:
             rule_output = RuleOutput(rule_state=rule_state)
-            expectation_configurations.extend(
-                rule_output.expectation_configurations(
-                    batch_list=batch_list,
-                    batch_request=batch_request,
-                    force_batch_data=force_batch_data,
-                )
-            )
+            expectation_configurations.extend(rule_output.expectation_configurations())
 
         return expectation_configurations
 
