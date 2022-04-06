@@ -10,6 +10,7 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
+
 # This method compares a string to the valid semiprime number
 # Reference: https://rosettacode.org/wiki/Semiprime#Python
 def is_valid_semiprime(num: str) -> bool:
