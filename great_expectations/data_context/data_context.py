@@ -1436,7 +1436,7 @@ class BaseDataContext(ConfigPeer):
         # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
         # deprecated-v0.13.20
         warnings.warn(
-            "get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use"
+            "get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use "
             "get_batch_list instead.",
             DeprecationWarning,
         )
@@ -1759,6 +1759,8 @@ class BaseDataContext(ConfigPeer):
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
+        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[BatchRequestBase] = None,
         batch_request_list: List[Optional[BatchRequestBase]] = None,
         batch_data: Optional[Any] = None,
@@ -1799,10 +1801,10 @@ class BaseDataContext(ConfigPeer):
                     expectation_suite_ge_cloud_id is not None,
                 ]
             )
-            != 1
+            > 1
         ):
             raise ValueError(
-                f"Exactly one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name must be specified"
+                f"No more than one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
         if expectation_suite_ge_cloud_id is not None:
@@ -1819,43 +1821,55 @@ class BaseDataContext(ConfigPeer):
         if (
             sum(
                 bool(x)
-                for x in [batch_request is not None, batch_request_list is not None]
+                for x in [
+                    batch is not None,
+                    batch_list is not None,
+                    batch_request is not None,
+                    batch_request_list is not None,
+                ]
             )
             > 1
         ):
             raise ValueError(
-                "Only one of batch_request or batch_request_list may be specified"
+                "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"
             )
 
-        if not batch_request_list:
-            batch_request_list = [batch_request]
+        if batch_list:
+            pass
 
-        batch_list: List = []
-        for batch_request in batch_request_list:
-            batch_list.extend(
-                self.get_batch_list(
-                    datasource_name=datasource_name,
-                    data_connector_name=data_connector_name,
-                    data_asset_name=data_asset_name,
-                    batch_request=batch_request,
-                    batch_data=batch_data,
-                    data_connector_query=data_connector_query,
-                    batch_identifiers=batch_identifiers,
-                    limit=limit,
-                    index=index,
-                    custom_filter_function=custom_filter_function,
-                    sampling_method=sampling_method,
-                    sampling_kwargs=sampling_kwargs,
-                    splitter_method=splitter_method,
-                    splitter_kwargs=splitter_kwargs,
-                    runtime_parameters=runtime_parameters,
-                    query=query,
-                    path=path,
-                    batch_filter_parameters=batch_filter_parameters,
-                    batch_spec_passthrough=batch_spec_passthrough,
-                    **kwargs,
+        elif batch:
+            batch_list: List = [batch]
+
+        else:
+            batch_list: List = []
+            if not batch_request_list:
+                batch_request_list = [batch_request]
+
+            for batch_request in batch_request_list:
+                batch_list.extend(
+                    self.get_batch_list(
+                        datasource_name=datasource_name,
+                        data_connector_name=data_connector_name,
+                        data_asset_name=data_asset_name,
+                        batch_request=batch_request,
+                        batch_data=batch_data,
+                        data_connector_query=data_connector_query,
+                        batch_identifiers=batch_identifiers,
+                        limit=limit,
+                        index=index,
+                        custom_filter_function=custom_filter_function,
+                        sampling_method=sampling_method,
+                        sampling_kwargs=sampling_kwargs,
+                        splitter_method=splitter_method,
+                        splitter_kwargs=splitter_kwargs,
+                        runtime_parameters=runtime_parameters,
+                        query=query,
+                        path=path,
+                        batch_filter_parameters=batch_filter_parameters,
+                        batch_spec_passthrough=batch_spec_passthrough,
+                        **kwargs,
+                    )
                 )
-            )
 
         validator: Validator = self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,

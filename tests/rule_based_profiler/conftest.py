@@ -117,8 +117,6 @@ def column_Description_domain():
 # noinspection PyPep8Naming
 @pytest.fixture
 def column_pair_Age_Date_domain():
-    skip_if_python_below_minimum_version()
-
     return Domain(
         domain_type=MetricDomainTypes.COLUMN_PAIR,
         domain_kwargs={
@@ -132,8 +130,6 @@ def column_pair_Age_Date_domain():
 # noinspection PyPep8Naming
 @pytest.fixture
 def multi_column_Age_Date_Description_domain():
-    skip_if_python_below_minimum_version()
-
     return Domain(
         domain_type=MetricDomainTypes.MULTICOLUMN,
         domain_kwargs={

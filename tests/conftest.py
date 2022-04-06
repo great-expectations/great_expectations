@@ -25,12 +25,14 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     GeCloudConfig,
+    InMemoryStoreBackendDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -4306,7 +4308,59 @@ def sqlite_runtime_data_connector_missing_data_asset_data_context(
         "my_datasource",
         **config,
     )
+
+def build_in_memory_runtime_context():
+    data_context_config: DataContextConfig = DataContextConfig(
+        datasources={
+            "pandas_datasource": {
+                "execution_engine": {
+                    "class_name": "PandasExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "runtime_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
+                },
+            },
+            "spark_datasource": {
+                "execution_engine": {
+                    "class_name": "SparkDFExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "runtime_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
+                },
+            },
+        },
+        expectations_store_name="expectations_store",
+        validations_store_name="validations_store",
+        evaluation_parameter_store_name="evaluation_parameter_store",
+        checkpoint_store_name="checkpoint_store",
+        store_backend_defaults=InMemoryStoreBackendDefaults(),
+    )
+
+    context: BaseDataContext = BaseDataContext(project_config=data_context_config)
+
     return context
+
+ 
+def in_memory_runtime_context():
+    return build_in_memory_runtime_context()
 
 
 @pytest.fixture
