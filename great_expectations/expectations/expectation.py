@@ -926,7 +926,7 @@ class Expectation(metaclass=MetaExpectation):
         that do not exist). These errors are added under "errors" key in the report.
         """
 
-        # errors :List[ExpectationErrorDiagnostics] = []
+        errors :List[ExpectationErrorDiagnostics] = []
 
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
@@ -1000,6 +1000,13 @@ class Expectation(metaclass=MetaExpectation):
         else:
             library_metadata.maturity = "EXPERIMENTAL"
 
+        # Set the errors found when running tests
+        errors = [
+            test_result.error_diagnostics
+            for test_result in test_results
+            if test_result.error_diagnostics
+        ]
+
         return ExpectationDiagnostics(
             library_metadata=library_metadata,
             examples=examples,
@@ -1010,7 +1017,7 @@ class Expectation(metaclass=MetaExpectation):
             execution_engines=introspected_execution_engines,
             tests=test_results,
             maturity_checklist=maturity_checklist,
-            errors=[],  #!!!FIXME!!!
+            errors=errors,
         )
 
     def print_diagnostic_checklist(
@@ -1195,23 +1202,25 @@ class Expectation(metaclass=MetaExpectation):
         )
 
         for exp_test in exp_tests:
-            try:
-                validation_result = evaluate_json_test_cfe(
-                    validator=exp_test["validator_with_data"],
-                    expectation_type=exp_test["expectation_type"],
-                    test=exp_test["test"],
-                )
+            validation_result, error_message, stack_trace = evaluate_json_test_cfe(
+                validator=exp_test["validator_with_data"],
+                expectation_type=exp_test["expectation_type"],
+                test=exp_test["test"],
+                raise_exception=False,
+            )
+            if error_message is None:
                 test_passed = True
                 error_diagnostics = None
-
-            except Exception as e:
+            else:
                 error_diagnostics = ExpectationErrorDiagnostics(
-                    error_msg=str(e),
-                    stack_trace=traceback.format_exc(),
+                    error_msg=error_message,
+                    stack_trace=stack_trace,
+                    test_title=exp_test["test"]["title"],
+                    test_backend=exp_test["backend"],
                 )
                 test_passed = False
-                validation_result = []
-            else:
+
+            if validation_result:
                 # The ExpectationTestDiagnostics instance will error when calling it's to_dict()
                 # method (AttributeError: 'ExpectationConfiguration' object has no attribute 'raw_kwargs')
                 validation_result.expectation_config.raw_kwargs = (

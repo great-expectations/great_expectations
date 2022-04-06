@@ -122,6 +122,8 @@ class ExpectationExecutionEngineDiagnostics(SerializableDictDot):
 class ExpectationErrorDiagnostics(SerializableDictDot):
     error_msg: str
     stack_trace: str
+    test_title: Optional[str] = None
+    test_backend: Optional[str] = None
 
 
 @dataclass
