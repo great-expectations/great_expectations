@@ -4309,6 +4309,7 @@ def sqlite_runtime_data_connector_missing_data_asset_data_context(
         **config,
     )
 
+
 def build_in_memory_runtime_context():
     data_context_config: DataContextConfig = DataContextConfig(
         datasources={
@@ -4358,7 +4359,7 @@ def build_in_memory_runtime_context():
 
     return context
 
- 
+
 def in_memory_runtime_context():
     return build_in_memory_runtime_context()
 
