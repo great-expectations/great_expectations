@@ -9,6 +9,7 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
+
 # This method compares a string to the valid square-free number
 # Reference: https://rosettacode.org/wiki/Square-free_integers#Python
 def is_valid_square_free_number(num: str) -> bool:
