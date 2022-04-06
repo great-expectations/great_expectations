@@ -318,7 +318,7 @@ class SorterConfigSchema(Schema):
         return SorterConfig(**data)
 
 
-class DataConnectorConfig(DictDot):
+class DataConnectorConfig(SerializableDictDot):
     def __init__(
         self,
         class_name,
@@ -407,6 +407,17 @@ class DataConnectorConfig(DictDot):
     @property
     def module_name(self):
         return self._module_name
+
+    def to_json_dict(self) -> dict:
+        """
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
 
 class DataConnectorConfigSchema(Schema):
@@ -771,7 +782,7 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(DictDot):
+class DatasourceConfig(SerializableDictDot):
     def __init__(
         self,
         class_name=None,
@@ -855,6 +866,16 @@ class DatasourceConfig(DictDot):
     def module_name(self):
         return self._module_name
 
+    def to_json_dict(self) -> dict:
+        """
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
 class DatasourceConfigSchema(Schema):
     class Meta:

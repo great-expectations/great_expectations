@@ -140,7 +140,6 @@ def convert_to_json_serializable(data):
     Warning:
         test_obj may also be converted in place.
     """
-
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
