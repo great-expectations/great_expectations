@@ -32,7 +32,7 @@ def is_valid_dc_zip(zip: str):
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidDCZip(ColumnMapMetricProvider):
+class ColumnValuesToBeValidWashingtonDCZip(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_dc_zip"
@@ -54,7 +54,7 @@ class ColumnValuesToBeValidDCZip(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidDCZip(ColumnMapExpectation):
+class ExpectColumnValuesToBeValidWashingtonDCZip(ColumnMapExpectation):
     """Expect values in this column to be valid Washington D.C. zipcodes.
     See https://pypi.org/project/zipcodes/ for more information.
     """
@@ -141,4 +141,4 @@ class ExpectColumnValuesToBeValidDCZip(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidDCZip().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidWashingtonDCZip().print_diagnostic_checklist()
