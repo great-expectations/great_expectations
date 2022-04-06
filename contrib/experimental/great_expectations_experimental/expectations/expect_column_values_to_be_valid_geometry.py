@@ -68,9 +68,9 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
                     Point(0, 1),
                 ],
                 "invalid_geometry": [
-                    Polygon([(0, 0), (1, 1), (1, 0), (0, 1)]),
+                    1,
                     None,
-                    Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)]),
+                    "Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)])"
                 ],
             },
             "tests": [
@@ -133,7 +133,10 @@ class ExpectColumnValuesToBeValidGeometry(ColumnMapExpectation):
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["hackathon", "geospatial"],  # Tags for this Expectation in the Gallery
+        "tags": [
+            "hackathon-22",
+            "geospatial",
+        ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@luismdiaz01",
             "@derekma73",  # Don't forget to add your github handle here!
