@@ -139,20 +139,6 @@ class ExpectationTestDiagnostics(SerializableDictDot):
 
 
 @dataclass
-class ExecutedExpectationTestCase(SerializableDictDot):
-    """Captures information from executing Expectation test cases. Used within the ExpectationDiagnostic object.
-
-    This may turn out to be the same thing as ExpectationTestDiagnostics.
-    """
-
-    data: TestData
-    test_case: ExpectationTestCase
-    expectation_configuration: ExpectationConfiguration
-    validation_result: ExpectationValidationResult
-    error_diagnostics: ExpectationErrorDiagnostics
-
-
-@dataclass
 class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     """Summarizes the result of a diagnostic Check. Used within the ExpectationDiagnostic object."""
 

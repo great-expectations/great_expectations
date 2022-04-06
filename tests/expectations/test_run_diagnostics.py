@@ -5,7 +5,6 @@ import pytest
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_diagnostics.supporting_types import (
-    ExecutedExpectationTestCase,
     ExpectationRendererDiagnostics,
 )
 from great_expectations.expectations.expectation import (
@@ -338,40 +337,31 @@ def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_match_regex"
     my_expectation = _registered_expectations[expectation_name]()
 
-    from great_expectations.expectations.registry import _registered_renderers
+    from great_expectations.expectations.registry import _registered_metrics, _registered_renderers
 
     # supported_renderers = my_expectation._get_registered_renderers(
     #     expectation_name,
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    example_data, example_test = my_expectation._choose_example(examples)
-
-    my_batch = Batch(data=pd.DataFrame(example_data))
-
-    my_expectation_config = ExpectationConfiguration(
-        **{"expectation_type": expectation_name, "kwargs": example_test.input}
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
+    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(expectation_config=my_expectation_config)
+    my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
+        metric_diagnostics_list=my_metric_diagnostics_list,
+        registered_metrics=_registered_metrics,
     )
-
-    my_validation_results = my_expectation._instantiate_example_validation_results(
-        test_batch=my_batch,
-        expectation_config=my_expectation_config,
+    my_test_results = my_expectation._get_test_results(
+        expectation_type=expectation_name,
+        test_data_cases=examples,
+        execution_engine_diagnostics=my_execution_engine_diagnostics,
+        raise_exceptions_for_backends=False,
     )
-    my_validation_result = my_validation_results[0]
-
     renderer_diagnostics = my_expectation._get_renderer_diagnostics(
-        expectation_name,
-        [
-            ExecutedExpectationTestCase(
-                data=example_data,
-                test_case=example_test,
-                expectation_configuration=my_expectation_config,
-                validation_result=my_validation_result,
-                error_diagnostics=None,
-            )
-        ],
-        _registered_renderers,
+        expectation_type=expectation_name,
+        test_diagnostics=my_test_results,
+        registered_renderers=_registered_renderers,
     )
+
     assert isinstance(renderer_diagnostics, list)
     assert len(renderer_diagnostics) == 10
     for element in renderer_diagnostics:
@@ -411,33 +401,24 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    example_data, example_test = my_expectation._choose_example(examples)
-
-    my_batch = Batch(data=pd.DataFrame(example_data))
-
-    my_expectation_config = ExpectationConfiguration(
-        **{"expectation_type": expectation_name, "kwargs": example_test.input}
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
+    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(expectation_config=my_expectation_config)
+    my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
+        metric_diagnostics_list=my_metric_diagnostics_list,
+        registered_metrics=_registered_metrics,
     )
-
-    my_validation_results = my_expectation._instantiate_example_validation_results(
-        test_batch=my_batch,
-        expectation_config=my_expectation_config,
+    my_test_results = my_expectation._get_test_results(
+        expectation_type=expectation_name,
+        test_data_cases=examples,
+        execution_engine_diagnostics=my_execution_engine_diagnostics,
+        raise_exceptions_for_backends=False,
     )
-    my_validation_result = my_validation_results[0]
-
     renderer_diagnostics = my_expectation._get_renderer_diagnostics(
-        expectation_name,
-        [
-            ExecutedExpectationTestCase(
-                data=example_data,
-                test_case=example_test,
-                expectation_configuration=my_expectation_config,
-                validation_result=my_validation_result,
-                error_diagnostics=None,
-            )
-        ],
-        _registered_renderers,
+        expectation_type=expectation_name,
+        test_diagnostics=my_test_results,
+        registered_renderers=_registered_renderers,
     )
+
     assert isinstance(renderer_diagnostics, list)
     for element in renderer_diagnostics:
         print(json.dumps(element.to_dict(), indent=2))
@@ -467,32 +448,24 @@ def test_expectation__get_renderers():
     #     _registered_renderers,
     # )
     examples = my_expectation._get_examples()
-    example_data, example_test = my_expectation._choose_example(examples)
-    my_batch = Batch(data=pd.DataFrame(example_data))
-
-    my_expectation_config = ExpectationConfiguration(
-        **{"expectation_type": expectation_name, "kwargs": example_test.input}
+    my_expectation_config = my_expectation._get_expectation_configuration_from_examples(examples)
+    my_metric_diagnostics_list = my_expectation._get_metric_diagnostics_list(expectation_config=my_expectation_config)
+    my_execution_engine_diagnostics = my_expectation._get_execution_engine_diagnostics(
+        metric_diagnostics_list=my_metric_diagnostics_list,
+        registered_metrics=_registered_metrics,
     )
-
-    my_validation_results = my_expectation._instantiate_example_validation_results(
-        test_batch=my_batch,
-        expectation_config=my_expectation_config,
+    my_test_results = my_expectation._get_test_results(
+        expectation_type=expectation_name,
+        test_data_cases=examples,
+        execution_engine_diagnostics=my_execution_engine_diagnostics,
+        raise_exceptions_for_backends=False,
     )
-    my_validation_result = my_validation_results[0]
-
     renderer_diagnostics = my_expectation._get_renderer_diagnostics(
-        expectation_name,
-        [
-            ExecutedExpectationTestCase(
-                data=example_data,
-                test_case=example_test,
-                expectation_configuration=my_expectation_config,
-                validation_result=my_validation_result,
-                error_diagnostics=None,
-            )
-        ],
-        _registered_renderers,
+        expectation_type=expectation_name,
+        test_diagnostics=my_test_results,
+        registered_renderers=_registered_renderers,
     )
+
     assert isinstance(renderer_diagnostics, list)
     assert len(renderer_diagnostics) == 10
     for element in renderer_diagnostics:

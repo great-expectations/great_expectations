@@ -34,7 +34,6 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
-    ExecutedExpectationTestCase,
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticMaturityMessages,
     ExpectationErrorDiagnostics,
@@ -951,18 +950,6 @@ class Expectation(metaclass=MetaExpectation):
             self._get_description_diagnostics()
         )
 
-        executed_test_cases: ExecutedExpectationTestCase = self._execute_test_examples(
-            expectation_type=description_diagnostics.snake_name, examples=examples
-        )
-
-        renderers: List[
-            ExpectationRendererDiagnostics
-        ] = self._get_renderer_diagnostics(
-            expectation_type=description_diagnostics.snake_name,
-            executed_test_cases=executed_test_cases,
-            registered_renderers=_registered_renderers,
-        )
-
         _expectation_config: ExpectationConfiguration = self._get_expectation_configuration_from_examples(
             examples
         )
@@ -984,6 +971,14 @@ class Expectation(metaclass=MetaExpectation):
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
+        )
+
+        renderers: List[
+            ExpectationRendererDiagnostics
+        ] = self._get_renderer_diagnostics(
+            expectation_type=description_diagnostics.snake_name,
+            test_diagnostics=test_results,
+            registered_renderers=_registered_renderers,
         )
 
         maturity_checklist: ExpectationDiagnosticMaturityMessages = (
@@ -1147,66 +1142,6 @@ class Expectation(metaclass=MetaExpectation):
                                 kwargs=test.input
                             )
 
-    def _execute_test_examples(
-        self,
-        expectation_type: str,
-        examples: List[ExpectationTestDataCases],
-    ) -> List[ExecutedExpectationTestCase]:
-        """Executes a set of test examples.
-
-        This method is an internal, intermediate step within run_diagnostics.
-        """
-
-        if examples == []:
-            return []
-
-        example_data, example_test = self._choose_example(examples)
-
-        executed_expectation_test_cases: List[ExecutedExpectationTestCase] = []
-        for test_data, test_case in [(example_data, example_test)]:
-
-            # TODO: this should be creating a Batch using an engine
-            test_batch = Batch(data=pd.DataFrame(test_data))
-
-            expectation_config = ExpectationConfiguration(
-                **{"expectation_type": expectation_type, "kwargs": test_case.input}
-            )
-
-            try:
-                validation_results = self._instantiate_example_validation_results(
-                    test_batch=test_batch,
-                    expectation_config=expectation_config,
-                )
-            except (
-                GreatExpectationsError,
-                AttributeError,
-                ImportError,
-                LookupError,
-                ValueError,
-                SyntaxError,
-            ) as e:
-                error_diagnostics = ExpectationErrorDiagnostics(
-                    error_msg=str(e),
-                    stack_trace=traceback.format_exc(),
-                )
-                validation_result = None
-
-            else:
-                error_diagnostics = None
-                validation_result = validation_results[0]
-
-            executed_expectation_test_cases.append(
-                ExecutedExpectationTestCase(
-                    data=test_data,
-                    test_case=test_case,
-                    expectation_configuration=expectation_config,
-                    validation_result=validation_result,
-                    error_diagnostics=error_diagnostics,
-                )
-            )
-
-        return executed_expectation_test_cases
-
     @staticmethod
     def _choose_example(
         examples: List[ExpectationTestDataCases],
@@ -1221,19 +1156,6 @@ class Expectation(metaclass=MetaExpectation):
         example_test_case = example["tests"][0]
 
         return example_test_data, example_test_case
-
-    @staticmethod
-    def _instantiate_example_validation_results(
-        test_batch: Batch,
-        expectation_config: ExpectationConfiguration,
-    ) -> List[ExpectationValidationResult]:
-        """Convenience method to validate data and instantiate ExpectationValidationResults"""
-
-        validation_results = Validator(
-            execution_engine=PandasExecutionEngine(), batches=[test_batch]
-        ).graph_validate(configurations=[expectation_config])
-
-        return validation_results
 
     @staticmethod
     def _get_registered_renderers(
@@ -1353,7 +1275,7 @@ class Expectation(metaclass=MetaExpectation):
     def _get_renderer_diagnostics(
         self,
         expectation_type: str,
-        executed_test_cases: List[ExecutedExpectationTestCase],
+        test_diagnostics: List[ExpectationTestDiagnostics],
         registered_renderers: List[str],
         standard_renderers: List[str] = [
             "renderer.answer",
@@ -1365,7 +1287,7 @@ class Expectation(metaclass=MetaExpectation):
             "renderer.question",
         ],
     ) -> List[ExpectationRendererDiagnostics]:
-        """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExecutedExpectationTestCases."""
+        """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExpectationTestDiagnostics."""
 
         supported_renderers = self._get_registered_renderers(
             expectation_type=expectation_type,
@@ -1378,15 +1300,13 @@ class Expectation(metaclass=MetaExpectation):
             if renderer_name in supported_renderers:
                 _, renderer = registered_renderers[expectation_type][renderer_name]
 
-                for executed_test_case in executed_test_cases:
-                    test_title = executed_test_case["test_case"]["title"]
+                for test_diagnostic in test_diagnostics:
+                    test_title = test_diagnostic["test_title"]
 
                     try:
                         rendered_result = renderer(
-                            configuration=executed_test_case[
-                                "expectation_configuration"
-                            ],
-                            result=executed_test_case["validation_result"],
+                            configuration=test_diagnostic["validation_result"]["expectation_config"],
+                            result=test_diagnostic["validation_result"],
                         )
                         rendered_result_str = self._get_rendered_result_as_string(
                             rendered_result
