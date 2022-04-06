@@ -1,6 +1,7 @@
 from ruamel import yaml
 
 from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 profiler_config = r"""
@@ -112,7 +113,10 @@ rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
     data_context=data_context,
 )
 
-suite = rule_based_profiler.run(expectation_suite_name="test_suite_name")
+rule_based_profiler.run()
+profiled_expectation_suite: ExpectationSuite = rule_based_profiler.expectation_suite(
+    expectation_suite_name="test_suite_name"
+)
 print(suite)
 
 # Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.
