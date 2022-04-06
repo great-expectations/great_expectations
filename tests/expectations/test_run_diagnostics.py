@@ -28,7 +28,7 @@ def test_expectation_self_check():
     assert expectation_diagnostic.to_dict() == {
         "examples": [],
         "library_metadata": {
-            "maturity": "CONCEPT_ONLY",
+            "maturity": "EXPERIMENTAL",
             "tags": [],
             "contributors": [],
             "requirements": [],

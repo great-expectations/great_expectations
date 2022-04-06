@@ -989,6 +989,17 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
 
+        # Set final maturity level based on status of all checks
+        all_experimental = all([check.passed for check in maturity_checklist.experimental])
+        all_beta = all([check.passed for check in maturity_checklist.beta])
+        all_production = all([check.passed for check in maturity_checklist.production])
+        if all_production and all_beta and all_experimental:
+            library_metadata.maturity = "PRODUCTION"
+        elif all_beta and all_experimental:
+            library_metadata.maturity = "BETA"
+        else:
+            library_metadata.maturity = "EXPERIMENTAL"
+
         return ExpectationDiagnostics(
             library_metadata=library_metadata,
             examples=examples,
