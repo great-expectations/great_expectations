@@ -53,10 +53,9 @@ class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesGeometryNotToOverlap(ColumnExpectation):
-    """Expect geometries in this column Not to overlap with each other. If any two geometries do overlap, expectation will return False. 
-    For more information look here   
-    https://stackoverflow.com/questions/64042379/shapely-is-valid-returns-true-to-invalid-overlap-polygons
-"""
+    """Expect geometries in this column Not to overlap with each other. If any two geometries do overlap, expectation will return False.
+    For more information look here
+    https://stackoverflow.com/questions/64042379/shapely-is-valid-returns-true-to-invalid-overlap-polygons"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
