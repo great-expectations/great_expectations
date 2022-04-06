@@ -218,7 +218,7 @@ def test_include_in_gallery_flag():
         "title": "positive_test_with_mostly",
         "exact_match_out": False,
         "input": {"column": "mostly_threes", "mostly": 0.6},
-        "include_in_gallery": False,
+        "include_in_gallery": True,
         "suppress_test_for": [],
         "only_for": None,
         "output": {
@@ -533,6 +533,7 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "test_title": "positive_test_with_mostly",
         "backend": "pandas",
         "test_passed": True,
+        "include_in_gallery": True,
         "error_message": None,
         "stack_trace": None,
     }
@@ -541,6 +542,7 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "test_title",
         "backend",
         "test_passed",
+        "include_in_gallery",
         "error_message",
         "stack_trace",
     }
@@ -550,6 +552,7 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "test_title",
         "backend",
         "test_passed",
+        "include_in_gallery",
         "error_message",
         "stack_trace",
     }

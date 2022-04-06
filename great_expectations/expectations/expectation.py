@@ -932,12 +932,21 @@ class Expectation(metaclass=MetaExpectation):
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
         )
-        gallery_examples: List[ExpectationTestDataCases] = self._get_examples(
-            return_only_gallery_examples=True
-        )
         examples: List[ExpectationTestDataCases] = self._get_examples(
             return_only_gallery_examples=False
         )
+        gallery_examples: List[ExpectationTestDataCases] = []
+        for example in examples:
+            _tests_to_include = [
+                test
+                for test in example.tests
+                if test.include_in_gallery
+            ]
+            example = deepcopy(example)
+            if _tests_to_include:
+                example.tests = _tests_to_include
+                gallery_examples.append(example)
+
         description_diagnostics: ExpectationDescriptionDiagnostics = (
             self._get_description_diagnostics()
         )
@@ -1248,6 +1257,7 @@ class Expectation(metaclass=MetaExpectation):
                             "test_title": exp_test["test"]["title"],
                             "backend": exp_test["backend"],
                             "test_passed": True,
+                            "include_in_gallery": exp_test["test"]["include_in_gallery"],
                         }
                     )
                 )
@@ -1258,6 +1268,7 @@ class Expectation(metaclass=MetaExpectation):
                             "test_title": exp_test["test"]["title"],
                             "backend": exp_test["backend"],
                             "test_passed": False,
+                            "include_in_gallery": exp_test["test"]["include_in_gallery"],
                             "error_message": str(e),
                             "stack_trace": traceback.format_exc(),
                         }

@@ -127,6 +127,7 @@ class ExpectationTestDiagnostics(SerializableDictDot):
     test_title: str
     backend: str
     test_passed: bool
+    include_in_gallery: bool
     error_message: Union[str, None] = None
     stack_trace: Union[str, None] = None
 
