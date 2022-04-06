@@ -25,8 +25,10 @@ class Rule(SerializableDictDot):
         self,
         name: str,
         domain_builder: DomainBuilder,
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder],
         parameter_builders: Optional[List[ParameterBuilder]] = None,
+        expectation_configuration_builders: Optional[
+            List[ExpectationConfigurationBuilder]
+        ] = None,
     ):
         """
         Sets Profiler rule name, domain builders, parameters builders, configuration builders,
@@ -44,7 +46,7 @@ class Rule(SerializableDictDot):
 
         self._parameters = {}
 
-    def generate(
+    def run(
         self,
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
@@ -130,7 +132,7 @@ class Rule(SerializableDictDot):
     @property
     def expectation_configuration_builders(
         self,
-    ) -> List[ExpectationConfigurationBuilder]:
+    ) -> Optional[List[ExpectationConfigurationBuilder]]:
         return self._expectation_configuration_builders
 
     @property
@@ -225,8 +227,14 @@ class Rule(SerializableDictDot):
     def _get_expectation_configuration_builders_as_dict(
         self,
     ) -> Dict[str, ExpectationConfigurationBuilder]:
+        expectation_configuration_builders: List[
+            ExpectationConfigurationBuilder
+        ] = self.expectation_configuration_builders
+        if expectation_configuration_builders is None:
+            expectation_configuration_builders = []
+
         expectation_configuration_builder: ExpectationConfigurationBuilder
         return {
             expectation_configuration_builder.expectation_type: expectation_configuration_builder
-            for expectation_configuration_builder in self.expectation_configuration_builders
+            for expectation_configuration_builder in expectation_configuration_builders
         }

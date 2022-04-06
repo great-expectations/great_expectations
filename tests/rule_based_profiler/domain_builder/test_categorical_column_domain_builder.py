@@ -13,6 +13,27 @@ from great_expectations.rule_based_profiler.domain_builder.categorical_column_do
 from great_expectations.rule_based_profiler.types import Domain
 
 
+def test_instantiate_with_cardinality_limit_modes(
+    alice_columnar_table_single_batch_context,
+):
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="alice_columnar_table_single_batch_datasource",
+        data_connector_name="alice_columnar_table_single_batch_data_connector",
+        data_asset_name="alice_columnar_table_single_batch_data_asset",
+    )
+
+    domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
+        exclude_column_name_suffixes="_id",
+        limit_mode=CategoricalColumnDomainBuilder.cardinality_limit_modes.VERY_FEW,
+        batch_request=batch_request,
+        data_context=data_context,
+    )
+
+    domain_builder.get_domains()
+
+
 def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_context):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
