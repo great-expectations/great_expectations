@@ -15,25 +15,25 @@ class RuleState:
     def __init__(
         self,
         rule: "Rule",  # noqa: F821
-        domains: Optional[List[Domain]] = None,
         variables: Optional[ParameterContainer] = None,
+        domains: Optional[List[Domain]] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
         """
         Args:
             rule: Rule object for which present RuleState object corresponds (needed for various Rule properties).
-            domains: List of Domain objects, which DomainBuilder of associated Rule generated.
             variables: attribute name/value pairs (part of state, relevant for associated Rule).
+            domains: List of Domain objects, which DomainBuilder of associated Rule generated.
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
         """
         self._rule = rule
+
+        self._variables = variables
 
         if domains is None:
             domains = []
 
         self._domains = domains
-
-        self._variables = variables
 
         if parameters is None:
             parameters = {}
@@ -45,16 +45,16 @@ class RuleState:
         return self._rule
 
     @property
+    def variables(self) -> Optional[ParameterContainer]:
+        return self._variables
+
+    @property
     def domains(self) -> List[Domain]:
         return self._domains
 
     @domains.setter
     def domains(self, value: Optional[List[Domain]]) -> None:
         self._domains = value
-
-    @property
-    def variables(self) -> Optional[ParameterContainer]:
-        return self._variables
 
     @property
     def parameters(self) -> Dict[str, ParameterContainer]:

@@ -74,9 +74,8 @@ class Rule(SerializableDictDot):
         rule_state: RuleState = RuleState(
             rule=self,
             variables=variables,
+            domains=domains,
         )
-        rule_state.domains = domains
-
         rule_state.reset_parameter_containers()
 
         domain: Domain
