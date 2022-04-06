@@ -32,7 +32,7 @@ def is_valid_ga_zip(zip: str):
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidGAZip(ColumnMapMetricProvider):
+class ColumnValuesToBeValidGeorgiaZip(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_ga_zip"
@@ -54,7 +54,7 @@ class ColumnValuesToBeValidGAZip(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidGAZip(ColumnMapExpectation):
+class ExpectColumnValuesToBeValidGeorgiaZip(ColumnMapExpectation):
     """Expect values in this column to be valid Georgia zipcodes.
     See https://pypi.org/project/zipcodes/ for more information.
     """
@@ -141,4 +141,4 @@ class ExpectColumnValuesToBeValidGAZip(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidGAZip().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidGeorgiaZip().print_diagnostic_checklist()
