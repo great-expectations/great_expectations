@@ -17,14 +17,14 @@ from great_expectations.expectations.metrics import (
 )
 
 
-def is_valid_ct_zip(zip: str):
-    list_of_dicts_of_ct_zips = zipcodes.filter_by(state="CT")
-    list_of_ct_zips = [d["zip_code"] for d in list_of_dicts_of_ct_zips]
+def is_valid_connecticut_zip(zip: str):
+    list_of_dicts_of_connecticut_zips = zipcodes.filter_by(state="CT")
+    list_of_connecticut_zips = [d["zip_code"] for d in list_of_dicts_of_connecticut_zips]
     if len(zip) > 10:
         return False
     elif type(zip) != str:
         return False
-    elif zip in list_of_ct_zips:
+    elif zip in list_of_connecticut_zips:
         return True
     else:
         return False
@@ -35,12 +35,12 @@ def is_valid_ct_zip(zip: str):
 class ColumnValuesToBeValidCTZip(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.valid_ct_zip"
+    condition_metric_name = "column_values.valid_connecticut_zip"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return column.apply(lambda x: is_valid_ct_zip(x))
+        return column.apply(lambda x: is_valid_connecticut_zip(x))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -64,22 +64,22 @@ class ExpectColumnValuesToBeValidCTZip(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_ct_zip": ["06001", "06494", "06725", "06928"],
-                "invalid_ct_zip": ["-10000", "1234", "99999", "25487"],
+                "valid_connecticut_zip": ["06001", "06494", "06725", "06928"],
+                "invalid_connecticut_zip": ["-10000", "1234", "99999", "25487"],
             },
             "tests": [
                 {
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "valid_ct_zip"},
+                    "in": {"column": "valid_connecticut_zip"},
                     "out": {"success": True},
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "invalid_ct_zip"},
+                    "in": {"column": "invalid_connecticut_zip"},
                     "out": {"success": False},
                 },
             ],
@@ -88,7 +88,7 @@ class ExpectColumnValuesToBeValidCTZip(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_ct_zip"
+    map_metric = "column_values.valid_connecticut_zip"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
