@@ -1811,6 +1811,10 @@ class BaseDataContext(ConfigPeer):
             expectation_suite = self.create_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name
             )
+        if expectation_suite is None:
+            expectation_suite = self.create_expectation_suite(
+                expectation_suite_name="default"
+            )
 
         if (
             sum(
