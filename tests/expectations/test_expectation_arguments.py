@@ -30,6 +30,7 @@ except ImportError:
         "Unable to load pyspark; install optional spark dependency for support."
     )
 
+
 @pytest.fixture
 def test_pandas_df():
     df: pd.DataFrame = pd.DataFrame(

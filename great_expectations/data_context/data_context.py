@@ -1833,10 +1833,10 @@ class BaseDataContext(ConfigPeer):
 
         if batch_list:
             pass
-        
+
         elif batch:
             batch_list: List = [batch]
-        
+
         else:
             batch_list: List = []
             if not batch_request_list:

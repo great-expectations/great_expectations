@@ -1788,9 +1788,8 @@ data_connectors:
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 
-def test_get_validator_without_expectation_suite(
-    in_memory_runtime_context
-):
+
+def test_get_validator_without_expectation_suite(in_memory_runtime_context):
     context = in_memory_runtime_context
 
     batch = context.get_batch(
@@ -1798,11 +1797,7 @@ def test_get_validator_without_expectation_suite(
             datasource_name="pandas_datasource",
             data_connector_name="runtime_data_connector",
             data_asset_name="my_data_asset",
-            runtime_parameters={
-                "batch_data": pd.DataFrame({
-                    "x": range(10)
-                })
-            },
+            runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
             batch_identifiers={
                 "id_key_0": "id_0_value_a",
                 "id_key_1": "id_1_value_a",
@@ -1810,15 +1805,12 @@ def test_get_validator_without_expectation_suite(
         )
     )
 
-    my_validator = context.get_validator(
-        batch=batch
-    )
+    my_validator = context.get_validator(batch=batch)
     assert type(my_validator.get_expectation_suite()) == ExpectationSuite
     assert my_validator.expectation_suite_name == "default"
 
-def test_get_validator_with_batch(
-    in_memory_runtime_context
-):
+
+def test_get_validator_with_batch(in_memory_runtime_context):
     context = in_memory_runtime_context
 
     my_batch = context.get_batch(
@@ -1826,11 +1818,7 @@ def test_get_validator_with_batch(
             datasource_name="pandas_datasource",
             data_connector_name="runtime_data_connector",
             data_asset_name="my_data_asset",
-            runtime_parameters={
-                "batch_data": pd.DataFrame({
-                    "x": range(10)
-                })
-            },
+            runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
             batch_identifiers={
                 "id_key_0": "id_0_value_a",
                 "id_key_1": "id_1_value_a",
@@ -1843,9 +1831,8 @@ def test_get_validator_with_batch(
         create_expectation_suite_with_name="A_expectation_suite",
     )
 
-def test_get_validator_with_batch_list(
-    in_memory_runtime_context
-):
+
+def test_get_validator_with_batch_list(in_memory_runtime_context):
     context = in_memory_runtime_context
 
     my_batch_list = [
@@ -1854,11 +1841,7 @@ def test_get_validator_with_batch_list(
                 datasource_name="pandas_datasource",
                 data_connector_name="runtime_data_connector",
                 data_asset_name="my_data_asset",
-                runtime_parameters={
-                    "batch_data": pd.DataFrame({
-                        "x": range(10)
-                    })
-                },
+                runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
                 batch_identifiers={
                     "id_key_0": "id_0_value_a",
                     "id_key_1": "id_1_value_a",
@@ -1870,11 +1853,7 @@ def test_get_validator_with_batch_list(
                 datasource_name="pandas_datasource",
                 data_connector_name="runtime_data_connector",
                 data_asset_name="my_data_asset",
-                runtime_parameters={
-                    "batch_data": pd.DataFrame({
-                        "y": range(10)
-                    })
-                },
+                runtime_parameters={"batch_data": pd.DataFrame({"y": range(10)})},
                 batch_identifiers={
                     "id_key_0": "id_0_value_b",
                     "id_key_1": "id_1_value_b",

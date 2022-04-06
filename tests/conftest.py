@@ -25,12 +25,14 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     GeCloudConfig,
+    InMemoryStoreBackendDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -50,11 +52,6 @@ from great_expectations.datasource.new_datasource import BaseDatasource, Datasou
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
-)
-from great_expectations.data_context import BaseDataContext
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    InMemoryStoreBackendDefaults,
 )
 from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
     DEFAULT_CANDIDATE_STRINGS,
@@ -4257,6 +4254,7 @@ data_connectors:
     ]
     return context
 
+
 def build_in_memory_runtime_context():
     data_context_config: DataContextConfig = DataContextConfig(
         datasources={
@@ -4305,6 +4303,7 @@ def build_in_memory_runtime_context():
     context: BaseDataContext = BaseDataContext(project_config=data_context_config)
 
     return context
+
 
 @pytest.fixture
 def in_memory_runtime_context():
