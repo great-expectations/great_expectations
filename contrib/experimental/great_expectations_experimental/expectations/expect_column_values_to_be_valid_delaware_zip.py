@@ -17,14 +17,14 @@ from great_expectations.expectations.metrics import (
 )
 
 
-def is_valid_de_zip(zip: str):
-    list_of_dicts_of_de_zips = zipcodes.filter_by(state="DE")
-    list_of_de_zips = [d["zip_code"] for d in list_of_dicts_of_de_zips]
+def is_valid_delaware_zip(zip: str):
+    list_of_dicts_of_delaware_zips = zipcodes.filter_by(state="DE")
+    list_of_delaware_zips = [d["zip_code"] for d in list_of_dicts_of_delaware_zips]
     if len(zip) > 10:
         return False
     elif type(zip) != str:
         return False
-    elif zip in list_of_de_zips:
+    elif zip in list_of_delaware_zips:
         return True
     else:
         return False
@@ -32,15 +32,15 @@ def is_valid_de_zip(zip: str):
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidDEZip(ColumnMapMetricProvider):
+class ColumnValuesToBeValidDelawareZip(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.valid_de_zip"
+    condition_metric_name = "column_values.valid_delaware_zip"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return column.apply(lambda x: is_valid_de_zip(x))
+        return column.apply(lambda x: is_valid_delaware_zip(x))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -54,7 +54,7 @@ class ColumnValuesToBeValidDEZip(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidDEZip(ColumnMapExpectation):
+class ExpectColumnValuesToBeValidDelawareZip(ColumnMapExpectation):
     """Expect values in this column to be valid Deleware zipcodes.
     See https://pypi.org/project/zipcodes/ for more information.
     """
@@ -64,22 +64,22 @@ class ExpectColumnValuesToBeValidDEZip(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_de_zip": ["19701", "19801", "19904", "19975"],
-                "invalid_de_zip": ["-10000", "1234", "99999", "25487"],
+                "valid_delaware_zip": ["19701", "19801", "19904", "19975"],
+                "invalid_delaware_zip": ["-10000", "1234", "99999", "25487"],
             },
             "tests": [
                 {
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "valid_de_zip"},
+                    "in": {"column": "valid_delaware_zip"},
                     "out": {"success": True},
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "invalid_de_zip"},
+                    "in": {"column": "invalid_delaware_zip"},
                     "out": {"success": False},
                 },
             ],
@@ -88,7 +88,7 @@ class ExpectColumnValuesToBeValidDEZip(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_de_zip"
+    map_metric = "column_values.valid_delaware_zip"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
@@ -141,4 +141,4 @@ class ExpectColumnValuesToBeValidDEZip(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidDEZip().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidDelawareZip().print_diagnostic_checklist()
