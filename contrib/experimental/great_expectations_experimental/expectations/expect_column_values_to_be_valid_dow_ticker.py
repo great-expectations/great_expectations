@@ -1,4 +1,5 @@
 from typing import Optional
+
 import yahoo_fin.stock_info as si
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
