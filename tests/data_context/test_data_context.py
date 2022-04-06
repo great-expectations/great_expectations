@@ -1792,7 +1792,7 @@ data_connectors:
 def test_get_validator_without_expectation_suite(in_memory_runtime_context):
     context = in_memory_runtime_context
 
-    batch = context.get_batch(
+    batch = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="pandas_datasource",
             data_connector_name="runtime_data_connector",
@@ -1803,7 +1803,7 @@ def test_get_validator_without_expectation_suite(in_memory_runtime_context):
                 "id_key_1": "id_1_value_a",
             },
         )
-    )
+    )[0]
 
     my_validator = context.get_validator(batch=batch)
     assert isinstance(my_validator.get_expectation_suite(), ExpectationSuite)
@@ -1813,7 +1813,7 @@ def test_get_validator_without_expectation_suite(in_memory_runtime_context):
 def test_get_validator_with_batch(in_memory_runtime_context):
     context = in_memory_runtime_context
 
-    my_batch = context.get_batch(
+    my_batch = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="pandas_datasource",
             data_connector_name="runtime_data_connector",
@@ -1824,7 +1824,7 @@ def test_get_validator_with_batch(in_memory_runtime_context):
                 "id_key_1": "id_1_value_a",
             },
         )
-    )
+    )[0]
 
     my_validator = context.get_validator(
         batch=my_batch,
@@ -1836,7 +1836,7 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
     context = in_memory_runtime_context
 
     my_batch_list = [
-        context.get_batch(
+        context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="pandas_datasource",
                 data_connector_name="runtime_data_connector",
@@ -1847,8 +1847,8 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
                     "id_key_1": "id_1_value_a",
                 },
             )
-        ),
-        context.get_batch(
+        )[0],
+        context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="pandas_datasource",
                 data_connector_name="runtime_data_connector",
@@ -1859,7 +1859,7 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
                     "id_key_1": "id_1_value_b",
                 },
             )
-        ),
+        )[0],
     ]
 
     my_validator = context.get_validator(
