@@ -26,7 +26,7 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
 
     metric_name = "table.modeling.binary.model_bias"
-    value_keys = ("y_true", "y_pred", "reference_group")  # , "feature_columns")
+    value_keys = ("y_true", "y_pred", "reference_group", "alpha")
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
@@ -36,19 +36,16 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
-        alpha=0.05,
     ):
         y_true = metric_value_kwargs.get("y_true")
         y_pred = metric_value_kwargs.get("y_pred")
         reference_group = metric_value_kwargs.get("reference_group")
-        #      feature_columns = metric_value_kwargs.get("feature_columns")
+        alpha = metric_value_kwargs.get("alpha")
+
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         df = df.rename(columns={y_true: "label_value", y_pred: "score"})
-        #       feature_columns.append("label_value")
-        #       feature_columns.append("score")
-        #       df = df[[feature_columns]]
         df, _ = preprocess_input_df(df)
 
         # Group() class evaluates biases across all subgroups in dataset by assembling a confusion matrix
@@ -125,6 +122,9 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         reference_group (dict): \
             A JSON-serializable dictionary (nesting allowed) that will be used to compare in reference \
             to the group specified. Ex: {'race':'Caucasian', 'sex':'Male', 'age_cat':'25 - 45'}.
+        alpha (float): \
+            A float between 0 and 1 that determines statistical significance level to use in significance \
+            determination. Default is .05
 
     Returns:
         An ExpectationSuiteValidationResult
@@ -195,6 +195,8 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         "partial_success",  # might use this if people want to use specific features
         "y_true",
         "y_pred",
+        "reference_group",
+        "alpha",
     )
 
     default_kwarg_values = {
@@ -203,6 +205,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "reference_group": None,
+        "alpha": 0.05,
         "catch_exceptions": False,
         "partial_success": False,
         "meta": None,
@@ -229,12 +232,24 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         #        columns = configuration.kwargs.get("important_columns")
         y_true = configuration.kwargs.get("y_true")
         y_pred = configuration.kwargs.get("y_pred")
+        alpha = configuration.kwargs.get("alpha")
+        partial_success = configuration.kwargs.get("partial_success")
+        reference_group = configuration.kwargs.get("reference_group")
 
         try:
             assert y_true is not None, "target y_true must be specified"
             assert y_pred is not None, "target y_true must be specified"
             assert isinstance(y_pred, str), "y_pred must be a string column name"
             assert isinstance(y_true, str), "y_true must be a string column name"
+            assert (
+                isinstance(alpha, float) and (0 <= alpha <= 1)
+            ) or alpha is None, "alpha must be a float between 0 and 1"
+            assert (
+                isinstance(partial_success, bool)
+            ) or partial_success is None, "reference_group must be a boolean"
+            assert (
+                isinstance(reference_group, dict)
+            ) or reference_group is None, "reference_group must be a dictionary"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
