@@ -1768,7 +1768,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
               - unexpected_list
               - details
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
-    :return: None. asserts correctness of results.
+    :return: instance of ExpectationValidationResult. asserts correctness of results.
     """
     expectation_suite = ExpectationSuite(
         "json_test_suite", data_context=validator._data_context
@@ -1817,6 +1817,8 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
         result=result,
         data_asset=validator.execution_engine.active_batch_data,
     )
+
+    return result
 
 
 def check_json_test_result(test, result, data_asset=None):

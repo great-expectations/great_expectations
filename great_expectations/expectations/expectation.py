@@ -1265,34 +1265,36 @@ class Expectation(metaclass=MetaExpectation):
 
         for exp_test in exp_tests:
             try:
-                result = evaluate_json_test_cfe(
+                validation_result = evaluate_json_test_cfe(
                     validator=exp_test["validator_with_data"],
                     expectation_type=exp_test["expectation_type"],
                     test=exp_test["test"],
                 )
-                test_results.append(
-                    ExpectationTestDiagnostics(
-                        **{
-                            "test_title": exp_test["test"]["title"],
-                            "backend": exp_test["backend"],
-                            "test_passed": True,
-                            "include_in_gallery": exp_test["test"]["include_in_gallery"],
-                        }
-                    )
-                )
+                test_passed = True
+                error_diagnostics = None
+
             except Exception as e:
-                test_results.append(
-                    ExpectationTestDiagnostics(
-                        **{
-                            "test_title": exp_test["test"]["title"],
-                            "backend": exp_test["backend"],
-                            "test_passed": False,
-                            "include_in_gallery": exp_test["test"]["include_in_gallery"],
-                            "error_message": str(e),
-                            "stack_trace": traceback.format_exc(),
-                        }
-                    )
+                error_diagnostics = ExpectationErrorDiagnostics(
+                    error_msg=str(e),
+                    stack_trace=traceback.format_exc(),
                 )
+                test_passed = False
+                validation_result = []
+            else:
+                # The ExpectationTestDiagnostics instance will error when calling it's to_dict()
+                # method (AttributeError: 'ExpectationConfiguration' object has no attribute 'raw_kwargs')
+                validation_result.expectation_config.raw_kwargs = validation_result.expectation_config._raw_kwargs
+
+            test_results.append(
+                ExpectationTestDiagnostics(
+                    test_title=exp_test["test"]["title"],
+                    backend=exp_test["backend"],
+                    test_passed=test_passed,
+                    include_in_gallery=exp_test["test"]["include_in_gallery"],
+                    validation_result=validation_result,
+                    error_diagnostics=error_diagnostics,
+                )
+            )
 
         return test_results
 

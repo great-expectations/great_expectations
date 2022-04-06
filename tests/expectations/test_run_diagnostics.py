@@ -529,13 +529,14 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
     tests = expectation_diagnostics["tests"]
 
     assert len(tests) == 5
-    assert tests[0].to_dict() == {
+    first_to_dict = tests[0].to_dict()
+    del(first_to_dict["validation_result"])
+    assert first_to_dict == {
         "test_title": "positive_test_with_mostly",
         "backend": "pandas",
         "test_passed": True,
         "include_in_gallery": True,
-        "error_message": None,
-        "stack_trace": None,
+        "error_diagnostics": None,
     }
 
     assert set(tests[3].keys()) == {
@@ -543,8 +544,8 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "backend",
         "test_passed",
         "include_in_gallery",
-        "error_message",
-        "stack_trace",
+        "error_diagnostics",
+        "validation_result",
     }
     assert tests[3]["test_passed"] == False
 
@@ -553,7 +554,7 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "backend",
         "test_passed",
         "include_in_gallery",
-        "error_message",
-        "stack_trace",
+        "error_diagnostics",
+        "validation_result",
     }
     assert tests[4]["test_passed"] == False

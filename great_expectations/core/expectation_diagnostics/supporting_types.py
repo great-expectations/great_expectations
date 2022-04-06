@@ -121,6 +121,12 @@ class ExpectationExecutionEngineDiagnostics(SerializableDictDot):
 
 
 @dataclass
+class ExpectationErrorDiagnostics(SerializableDictDot):
+    error_msg: str
+    stack_trace: str
+
+
+@dataclass
 class ExpectationTestDiagnostics(SerializableDictDot):
     """Captures information from executing Expectation test cases. Used within the ExpectationDiagnostic object."""
 
@@ -128,14 +134,8 @@ class ExpectationTestDiagnostics(SerializableDictDot):
     backend: str
     test_passed: bool
     include_in_gallery: bool
-    error_message: Union[str, None] = None
-    stack_trace: Union[str, None] = None
-
-
-@dataclass
-class ExpectationErrorDiagnostics(SerializableDictDot):
-    error_msg: str
-    stack_trace: str
+    validation_result: ExpectationValidationResult
+    error_diagnostics: ExpectationErrorDiagnostics
 
 
 @dataclass
