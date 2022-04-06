@@ -16,6 +16,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 
 def compare(row):
+    """"""
     lat, lng = row[0]
     geohash = row[1]
     return gh.encode(lat, lng).startswith(geohash)
@@ -94,10 +95,7 @@ class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
         "ignore_row_if",
         "mostly",
     )
-    default_kwarg_values = {
-        "mostly": 1.0,
-        "ignore_row_if": "both_values_are_missing"
-    }
+    default_kwarg_values = {"mostly": 1.0, "ignore_row_if": "both_values_are_missing"}
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
