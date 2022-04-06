@@ -101,10 +101,35 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectTableBinaryLabelModelBias(TableExpectation):
-    """Using Aeqitas we evaluate predicted and true values to evaluate certain metrics
+    """Expect fairness in a model by calculating disparities among features, score (binary or continuous), and a label (binary) in a table using Aequitas .
+
+    Using Aeqitas we evaluate predicted and true values to evaluate certain metrics
     on how a classider model imposes bias on a given attribute group. Requirescolumns
     score (binary or continuous) and label_value (binary). For more information
-    go to https://dssg.github.io/aequitas/examples/compas_demo.html"""
+    go to https://dssg.github.io/aequitas/examples/compas_demo.html
+
+    expect_table_binary_label_model_bias is a :func:`expectation \
+    <great_expectations.validator.validator.Validator.expectation>`, not a
+    ``column_map_expectation`` or ``column_aggregate_expectation``.
+
+    Args:
+        y_true (str): \
+            The column name of the actual y vlaue. Must be binary
+        y_pred (str): \
+            The column name of the modeled y value. Must be binary or continuous
+
+    Other Parameters:
+        partial_success (boolean): \
+            If True, expectations will pass if supervised or supervised fairness are observed even \
+            if overall fairness was false.
+        reference_group (dict): \
+            A JSON-serializable dictionary (nesting allowed) that will be used to compare in reference \
+            to the group specified. Ex: {'race':'Caucasian', 'sex':'Male', 'age_cat':'25 - 45'}.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+        
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
