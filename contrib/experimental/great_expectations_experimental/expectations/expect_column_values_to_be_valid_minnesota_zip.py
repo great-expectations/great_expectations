@@ -55,7 +55,7 @@ class ColumnValuesToBeValidMinnesotaZip(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidMinnesotaZip(ColumnMapExpectation):
-    """Expect values in this column to be valid Kenucky zipcodes.
+    """Expect values in this column to be valid Minnesota zipcodes.
     See https://pypi.org/project/zipcodes/ for more information.
     """
 
