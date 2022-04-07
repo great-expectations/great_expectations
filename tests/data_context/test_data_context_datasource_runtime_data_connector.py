@@ -59,7 +59,7 @@ def data_context_with_datasource_spark_engine_batch_spec_passthrough(
 ):
     context = empty_data_context
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: SparkDFExecutionEngine
