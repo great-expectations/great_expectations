@@ -19,7 +19,9 @@ from great_expectations.expectations.metrics import (
 
 def is_valid_connecticut_zip(zip: str):
     list_of_dicts_of_connecticut_zips = zipcodes.filter_by(state="CT")
-    list_of_connecticut_zips = [d["zip_code"] for d in list_of_dicts_of_connecticut_zips]
+    list_of_connecticut_zips = [
+        d["zip_code"] for d in list_of_dicts_of_connecticut_zips
+    ]
     if len(zip) > 10:
         return False
     elif type(zip) != str:
@@ -32,7 +34,7 @@ def is_valid_connecticut_zip(zip: str):
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidCTZip(ColumnMapMetricProvider):
+class ColumnValuesToBeValidConnecticutZip(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_connecticut_zip"
@@ -54,7 +56,7 @@ class ColumnValuesToBeValidCTZip(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidCTZip(ColumnMapExpectation):
+class ExpectColumnValuesToBeValidConnecticutZip(ColumnMapExpectation):
     """Expect values in this column to be valid Connecticut zipcodes.
     See https://pypi.org/project/zipcodes/ for more information.
     """
