@@ -17,11 +17,6 @@ from tests.cli.utils import (
     assert_no_logging_messages_or_tracebacks,
 )
 
-try:
-    from unittest import mock
-except ImportError:
-    from unittest import mock
-
 
 @pytest.fixture
 def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_factory):

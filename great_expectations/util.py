@@ -28,6 +28,7 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
+import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
@@ -1418,3 +1419,18 @@ def get_pyathena_potential_type(type_module, type_):
         potential_type = type_module._TYPE_MAPPINGS.get(type_)
 
     return potential_type
+
+
+def pandas_series_between_inclusive(
+    series: pd.Series, min_value: int, max_value: int
+) -> pd.Series:
+    """
+    As of Pandas 1.3.0, the 'inclusive' arg in between() is an enum: {"left", "right", "neither", "both"}
+    """
+    metric_series: pd.Series
+    if version.parse(pd.__version__) >= version.parse("1.3.0"):
+        metric_series = series.between(min_value, max_value, inclusive="both")
+    else:
+        metric_series = series.between(min_value, max_value, inclusive=True)
+
+    return metric_series
