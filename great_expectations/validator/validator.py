@@ -453,9 +453,17 @@ class Validator:
                 override_profiler_config=override_profiler_config,
             )
 
+            profiler.run(
+                variables=None,
+                rules=None,
+                batch_list=list(self.batches.values()),
+                batch_request=None,
+                force_batch_data=False,
+                reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+            )
             expectation_configurations: List[
                 ExpectationConfiguration
-            ] = profiler.run().expectations
+            ] = profiler.get_expectation_configurations()
 
             configuration = expectation_configurations[0]
 
@@ -524,7 +532,10 @@ class Validator:
 
         effective_variables: Optional[
             ParameterContainer
-        ] = profiler.reconcile_profiler_variables(variables=override_variables)
+        ] = profiler.reconcile_profiler_variables(
+            variables=override_variables,
+            reconciliation_strategy=ReconciliationStrategy.UPDATE,
+        )
         profiler.variables = effective_variables
 
         override_rules: Optional[
@@ -571,13 +582,6 @@ class Validator:
             rule.expectation_configuration_builders[0].expectation_type
             == expectation_type
         ), "ExpectationConfigurationBuilder in profiler used to build an ExpectationConfiguration must have the same expectation_type as the expectation being invoked."
-
-        rule = profiler.generate_rule_overrides_from_batch_request(
-            rules=[rule],
-            batch_list=list(self.batches.values()),
-            batch_request=None,
-            force_batch_data=False,
-        )[0]
 
         # TODO: <Alex>Add "metric_domain_kwargs_override" when "Expectation" defines "domain_keys" separately.</Alex>
         key: str
