@@ -64,7 +64,7 @@ class ExpectColumnValuesToBeValidVirginiaZip(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_virginia_zip": ["20073", "20013", "20215", "20242"],
+                "valid_virginia_zip": ["20105", "22032", "22309", "22952"],
                 "invalid_virginia_zip": ["-10000", "1234", "99999", "25487"],
             },
             "tests": [
