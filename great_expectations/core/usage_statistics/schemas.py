@@ -8,6 +8,9 @@
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+from great_expectations.core.usage_statistics.execution_environment import (
+    InstallEnvironment,
+)
 
 SCHEMA: str = "http://json-schema.org/draft-04/schema#"
 
@@ -260,6 +263,21 @@ anonymized_expectation_suite_schema = {
     ],
 }
 
+package_info_schema = {
+    "$schema": SCHEMA,
+    "title": "package-info",
+    "type": "object",
+    "properties": {
+        "package_name": {"type": "string", "maxLength": 256},
+        "installed": {"type": "boolean"},
+        "install_environment": {
+            "enum": [ie.value for ie in InstallEnvironment],
+        },
+        "version": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]},
+    },
+    "additionalProperties": False,
+}
+
 anonymized_init_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-init-payload",
@@ -273,6 +291,7 @@ anonymized_init_payload_schema = {
         "anonymized_action": anonymized_action_schema,
         "anonymized_action_list": anonymized_action_list_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
+        "package_info": package_info_schema,
     },
     "type": "object",
     "properties": {
@@ -303,6 +322,11 @@ anonymized_init_payload_schema = {
         "anonymized_expectation_suites": {
             "type": "array",
             "items": {"$ref": "#/definitions/anonymized_expectation_suite"},
+        },
+        "dependencies": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {"$ref": "#/definitions/package_info"},
         },
     },
     "required": [
@@ -917,6 +941,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_expectation_configuration_builder": anonymized_expectation_configuration_builder_schema,
         "anonymized_rule": anonymized_rule_schema,
         "anonymized_rule_based_profiler_run": anonymized_rule_based_profiler_run_schema,
+        "package_info": package_info_schema,
     },
     "type": "object",
     "properties": {

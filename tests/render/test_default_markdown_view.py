@@ -5,7 +5,6 @@ from collections import OrderedDict
 import pytest
 
 import great_expectations as ge
-import great_expectations.render as render
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
