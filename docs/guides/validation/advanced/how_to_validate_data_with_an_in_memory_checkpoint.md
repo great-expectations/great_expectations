@@ -134,5 +134,5 @@ Once you have run your script you can verify that it has worked by checking your
 ## Notes
 
 To view the full example scripts used in this documentation, see:
-- [how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py]
-- [how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py]
+- [how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py)
+- [how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py)
