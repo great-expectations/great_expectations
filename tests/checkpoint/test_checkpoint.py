@@ -26,9 +26,6 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
 )
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
-)
 
 yaml = YAML()
 
@@ -71,7 +68,7 @@ def test_basic_checkpoint_config_validation(
     checkpoint_config: Union[CheckpointConfig, dict]
     checkpoint: Checkpoint
 
-    yaml_config_erroneous = f"""
+    yaml_config_erroneous = """
     name: misconfigured_checkpoint
     unexpected_property: UNKNOWN_PROPERTY_VALUE
     """
@@ -105,7 +102,7 @@ def test_basic_checkpoint_config_validation(
     actual_events = mock_emit.call_args_list
     assert actual_events == expected_events
 
-    yaml_config_erroneous = f"""
+    yaml_config_erroneous = """
     config_version: 1
     """
     config_erroneous = yaml.load(yaml_config_erroneous)
@@ -178,7 +175,7 @@ def test_basic_checkpoint_config_validation(
     actual_events = mock_emit.call_args_list
     assert actual_events == expected_events
 
-    yaml_config_erroneous = f"""
+    yaml_config_erroneous = """
     config_version: 1
     name: my_erroneous_checkpoint
     class_name: Checkpoint
@@ -252,7 +249,7 @@ def test_basic_checkpoint_config_validation(
     context.add_checkpoint(**yaml.load(yaml_config_erroneous))
     assert len(context.list_checkpoints()) == 1
 
-    yaml_config: str = f"""
+    yaml_config: str = """
     name: my_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -422,7 +419,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
 
     data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    yaml_config: str = f"""
+    yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -566,7 +563,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
 
     data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    yaml_config: str = f"""
+    yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -695,7 +692,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
 
     data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    yaml_config: str = f"""
+    yaml_config: str = """
     name: airflow_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -920,7 +917,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
     data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    yaml_config: str = f"""
+    yaml_config: str = """
     name: airflow_users_node_3
     config_version: 1
     class_name: Checkpoint
@@ -1067,7 +1064,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
 
     data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    yaml_config = f"""
+    yaml_config = """
     name: my_base_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -1180,7 +1177,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
 
-    yaml_config = f"""
+    yaml_config = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
