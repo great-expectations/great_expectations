@@ -230,6 +230,38 @@ detected.
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
 
+        # Compute metric value for each Batch object.
+        super().build_parameters(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+            parameter_computation_impl=super()._build_parameters,
+            json_serialize=False,
+        )
+
+        # Retrieve metric values for all Batch objects.
+        parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.fully_qualified_parameter_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+        metric_values: MetricValues
+        if isinstance(parameter_node.value, list):
+            num_parameter_node_value_elements: int = len(parameter_node.value)
+            if not (num_parameter_node_value_elements == 1):
+                raise ge_exceptions.ProfilerExecutionError(
+                    message=f'Length of "AttributedResolvedMetrics" list for {self.__class__.__name__} must be exactly 1 ({num_parameter_node_value_elements} elements found).'
+                )
+
+            attributed_resolved_metrics: AttributedResolvedMetrics = (
+                parameter_node.value[0]
+            )
+            metric_values = attributed_resolved_metrics.metric_values
+        else:
+            metric_values = parameter_node.value
+
         # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         estimator: str = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -262,38 +294,6 @@ detected.
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
             }
-
-        # Compute metric value for each Batch object.
-        super().build_parameters(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-            parameter_computation_impl=super()._build_parameters,
-            json_serialize=False,
-        )
-
-        # Retrieve metric values for all Batch objects.
-        parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.fully_qualified_parameter_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-        metric_values: MetricValues
-        if isinstance(parameter_node.value, list):
-            num_parameter_node_value_elements: int = len(parameter_node.value)
-            if not (num_parameter_node_value_elements == 1):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f'Length of "AttributedResolvedMetrics" list for {self.__class__.__name__} must be exactly 1 ({num_parameter_node_value_elements} elements found).'
-                )
-
-            attributed_resolved_metrics: AttributedResolvedMetrics = (
-                parameter_node.value[0]
-            )
-            metric_values = attributed_resolved_metrics.metric_values
-        else:
-            metric_values = parameter_node.value
 
         metric_value_range: np.ndarray = self._estimate_metric_value_range(
             metric_values=metric_values,
