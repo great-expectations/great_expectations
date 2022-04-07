@@ -126,6 +126,7 @@ class ExpectColumnValuesToBeValidSp500Ticker(ColumnMapExpectation):
         "contributors": [
             "@voidforall",
         ],
+        "requirements": ["yahoo_fin"],
     }
 
 
