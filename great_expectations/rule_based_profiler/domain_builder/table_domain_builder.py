@@ -45,7 +45,7 @@ class TableDomainBuilder(DomainBuilder):
         domains: List[Domain] = [
             Domain(
                 domain_type=self.domain_type,
-            )
+            ),
         ]
 
         return domains

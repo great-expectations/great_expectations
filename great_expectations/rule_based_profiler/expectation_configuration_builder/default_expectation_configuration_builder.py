@@ -18,6 +18,7 @@ from pyparsing import (
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
@@ -67,7 +68,9 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         expectation_type: str,
         meta: Optional[Dict[str, Any]] = None,
         condition: Optional[str] = None,
-        validation_parameter_builder_configs: Optional[List[dict]] = None,
+        validation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
+        ] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
             Union[str, BatchRequest, RuntimeBatchRequest, dict]
