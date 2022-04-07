@@ -178,13 +178,12 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
     data = {}
     schema = RuleConfigSchema()
 
-    with pytest.raises(ValidationError) as e:
-        schema.load(data)
+    config = schema.load(data)
 
-    assert (
-        "'expectation_configuration_builders': ['Missing data for required field.']"
-        in str(e.value)
-    )
+    assert isinstance(config, RuleConfig)
+    assert config.domain_builder is None
+    assert config.parameter_builders is None
+    assert config.expectation_configuration_builders is None
 
 
 def test_rule_based_profiler_config_successfully_loads_with_required_args():
