@@ -17,14 +17,14 @@ from great_expectations.expectations.metrics import (
 )
 
 
-def is_valid_new_carolina_zip(zip: str):
-    list_of_dicts_of_new_carolina_zips = zipcodes.filter_by(state="NC")
-    list_of_new_carolina_zips = [d["zip_code"] for d in list_of_dicts_of_new_carolina_zips]
+def is_valid_north_carolina_zip(zip: str):
+    list_of_dicts_of_north_carolina_zips = zipcodes.filter_by(state="NC")
+    list_of_north_carolina_zips = [d["zip_code"] for d in list_of_dicts_of_north_carolina_zips]
     if len(zip) > 10:
         return False
     elif type(zip) != str:
         return False
-    elif zip in list_of_new_carolina_zips:
+    elif zip in list_of_north_carolina_zips:
         return True
     else:
         return False
@@ -35,12 +35,12 @@ def is_valid_new_carolina_zip(zip: str):
 class ColumnValuesToBeValidNorthCarolinaZip(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.valid_new_carolina_zip"
+    condition_metric_name = "column_values.valid_north_carolina_zip"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return column.apply(lambda x: is_valid_new_carolina_zip(x))
+        return column.apply(lambda x: is_valid_north_carolina_zip(x))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -64,22 +64,22 @@ class ExpectColumnValuesToBeValidNorthCarolinaZip(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_new_carolina_zip": ["27248", "27612", "28077", "28901"],
-                "invalid_new_carolina_zip": ["-10000", "1234", "99999", "25487"],
+                "valid_north_carolina_zip": ["27248", "27612", "28077", "28901"],
+                "invalid_north_carolina_zip": ["-10000", "1234", "99999", "25487"],
             },
             "tests": [
                 {
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "valid_new_carolina_zip"},
+                    "in": {"column": "valid_north_carolina_zip"},
                     "out": {"success": True},
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "invalid_new_carolina_zip"},
+                    "in": {"column": "invalid_north_carolina_zip"},
                     "out": {"success": False},
                 },
             ],
@@ -88,7 +88,7 @@ class ExpectColumnValuesToBeValidNorthCarolinaZip(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_new_carolina_zip"
+    map_metric = "column_values.valid_north_carolina_zip"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
