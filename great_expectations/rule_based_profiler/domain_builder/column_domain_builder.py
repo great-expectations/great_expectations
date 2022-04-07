@@ -10,6 +10,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     ParameterContainer,
     SemanticDomainTypes,
@@ -27,11 +28,6 @@ class ColumnDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
@@ -44,15 +40,17 @@ class ColumnDomainBuilder(DomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         A semantic type is distinguished from the structured column type;
         An example structured column type would be "integer".  The inferred semantic type would be "id".
 
         Args:
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
-            data_context: DataContext
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             include_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to match.
@@ -63,6 +61,9 @@ class ColumnDomainBuilder(DomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
+            batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+            data_context: DataContext
 
         Inclusion/Exclusion Logic:
         (include_column_names|table_columns - exclude_column_names) + (include_semantic_types - exclude_semantic_types)
@@ -334,7 +335,7 @@ class ColumnDomainBuilder(DomainBuilder):
         if semantic_type_filter_class_name is None:
             semantic_type_filter_class_name = "SimpleSemanticTypeFilter"
 
-        self._semantic_type_filter: SemanticTypeFilter = instantiate_class_from_config(
+        semantic_type_filter: SemanticTypeFilter = instantiate_class_from_config(
             config={
                 "module_name": semantic_type_filter_module_name,
                 "class_name": semantic_type_filter_class_name,
@@ -346,6 +347,7 @@ class ColumnDomainBuilder(DomainBuilder):
             },
             config_defaults={},
         )
+        self._semantic_type_filter = semantic_type_filter
 
         # Obtain include_semantic_types from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         include_semantic_types: Optional[
@@ -429,7 +431,7 @@ class ColumnDomainBuilder(DomainBuilder):
                         "column": column_name,
                     },
                     details={
-                        "inferred_semantic_domain_type": self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
+                        INFERRED_SEMANTIC_TYPE_KEY: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
                             column_name
                         ],
                     },
