@@ -141,4 +141,4 @@ class ExpectColumnValuesToBeValidCTZip(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidCTZip().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidConnecticutZip().print_diagnostic_checklist()
