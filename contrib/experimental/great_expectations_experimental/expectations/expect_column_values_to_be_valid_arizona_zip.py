@@ -18,7 +18,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_valid_arizona_zip(zip: str):
-    list_of_dicts_of_arizona_zips = zipcodes.filter_by(state="AR")
+    list_of_dicts_of_arizona_zips = zipcodes.filter_by(state="AZ")
     list_of_arizona_zips = [d["zip_code"] for d in list_of_dicts_of_arizona_zips]
     if len(zip) > 10:
         return False
