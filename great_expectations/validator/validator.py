@@ -463,7 +463,7 @@ class Validator:
             )
             expectation_configurations: List[
                 ExpectationConfiguration
-            ] = profiler.expectation_configurations()
+            ] = profiler.get_expectation_configurations()
 
             configuration = expectation_configurations[0]
 

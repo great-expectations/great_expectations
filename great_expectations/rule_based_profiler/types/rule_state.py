@@ -96,6 +96,10 @@ or call "RuleState.remove_domain_if_exists()" with Domain having ID equal to "{d
             self.domains.remove(domain)
             self.remove_domain_if_exists(domain=domain)
 
+    def get_domains_as_dict(self) -> Dict[str, Domain]:
+        domain: Domain
+        return {domain.id: domain for domain in self.domains}
+
     def initialize_parameter_container_for_domain(
         self,
         domain: Domain,
