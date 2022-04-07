@@ -2,6 +2,36 @@
 title: Changelog
 ---
 
+### 0.14.13
+* [FEATURE] Convert Existing Self-Initializing Expectations to Make ExpectationConfigurationBuilder Self-Contained with its own validation_parameter_builder settings (#4547)
+* [FEATURE] Improve diagnostic checklist details (#4548)
+* [BUGFIX] Moves testing dependencies out of core reqs (#4522)
+* [BUGFIX] Adjust output of datetime `ParameterBuilder` to match Expectation (#4590)
+* [DOCS] Technical term tags for Adding features to Expectations section of the ToC (#4462)
+* [DOCS] Contributing integrations ToC update. (#4551)
+* [DOCS] Update intro page overview image (#4540)
+* [DOCS] clarifications on execution engines and scalability (#4539)
+* [DOCS] technical terms for validate data advanced (#4535)
+* [DOCS] technical terms for validate data actions docs (#4518)
+* [DOCS] correct code reference line numbers and snippet tags for how to create a batch of data from an in memory data frame (#4573)
+* [DOCS] Update links in page; fix markdown link in html block (#4585)
+* [MAINTENANCE] Don't return from validate configuration methods (#4545)
+* [MAINTENANCE] Rule-Based Profiler: Refactor utilities into appropriate modules/classes for better separation of concerns (#4553)
+* [MAINTENANCE] Refactor global `conftest` (#4534)
+* [MAINTENANCE] clean up docstrings (#4554)
+* [MAINTENANCE] Small formatting rearrangement for RegexPatternStringParameterBuilder (#4558)
+* [MAINTENANCE] Refactor Anonymizer utilizing the Strategy design pattern (#4485)
+* [MAINTENANCE] Remove duplicate `mistune` dependency (#4569)
+* [MAINTENANCE] Run PEP273 checks on a schedule or release cut (#4570)
+* [MAINTENANCE] Package dependencies usage stats instrumentation - part 1 (#4546)
+* [MAINTENANCE] Add DevRel team to GitHub auto-label action (#4575)
+* [MAINTENANCE] Add GitHub action to conditionally auto-update PR's  (#4574)
+* [MAINTENANCE] Bump version of `black` in response to hotfix for Click v8.1.0 (#4577)
+* [MAINTENANCE] Update overview.md (#4556)
+* [MAINTENANCE] Minor clean-up (#4571)
+* [MAINTENANCE] Instrument package dependencies (#4583)
+* [MAINTENANCE] Standardize DomainBuilder Constructor Arguments Ordering (#4599)
+
 ### 0.14.12
 * [FEATURE] Enables Regex-Based Column Map Expectations (#4315)
 * [FEATURE] Update diagnostic checklist to do linting checks (#4491)
