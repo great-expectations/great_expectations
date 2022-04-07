@@ -33,9 +33,7 @@ class ExpectationConfigurationBuilder(Builder, ABC):
     def __init__(
         self,
         expectation_type: str,
-        validation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        validation_parameter_builder_configs: Optional[List[dict]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
             Union[str, BatchRequest, RuntimeBatchRequest, dict]
