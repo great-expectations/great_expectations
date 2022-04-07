@@ -126,6 +126,7 @@ class ExpectColumnValuesToBeValidDowTicker(ColumnMapExpectation):
         "contributors": [
             "@voidforall",
         ],
+        "requirements": ["yahoo_fin"],
     }
 
 
