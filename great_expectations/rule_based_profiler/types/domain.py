@@ -12,6 +12,8 @@ from great_expectations.util import (
     filter_properties_dict,
 )
 
+INFERRED_SEMANTIC_TYPE_KEY: str = "inferred_semantic_domain_type"
+
 
 class SemanticDomainTypes(Enum):
     NUMERIC = "numeric"
@@ -124,13 +126,17 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         details: dict = {}
 
         key: str
-        semantic_type: Union[str, SemanticDomainTypes]
-        for key, semantic_type in self["details"].items():
-            if isinstance(semantic_type, str):
-                semantic_type = semantic_type.lower()
-                semantic_type = SemanticDomainTypes(semantic_type)
+        value: Any
+        for key, value in self["details"].items():
+            if key == INFERRED_SEMANTIC_TYPE_KEY:
+                semantic_type: Union[str, SemanticDomainTypes]
+                if isinstance(value, str):
+                    semantic_type = value.lower()
+                    semantic_type = SemanticDomainTypes(semantic_type)
+                else:
+                    semantic_type = value
 
-            details[key] = semantic_type.value
+                details[key] = semantic_type.value
 
         json_dict: dict = {
             "domain_type": self["domain_type"].value,
