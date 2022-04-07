@@ -32,7 +32,7 @@ def is_valid_new_york_state_zip(zip: str):
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidNewYorkZip(ColumnMapMetricProvider):
+class ColumnValuesToBeValidNewYorkStateZip(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_new_york_state_zip"
@@ -55,7 +55,7 @@ class ColumnValuesToBeValidNewYorkZip(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidNewYorkZip(ColumnMapExpectation):
-    """Expect values in this column to be valid New York zipcodes.
+    """Expect values in this column to be valid New York state zipcodes.
     See https://pypi.org/project/zipcodes/ for more information.
     """
 
@@ -141,4 +141,4 @@ class ExpectColumnValuesToBeValidNewYorkZip(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidNewYorkZip().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidNewYorkStateZip().print_diagnostic_checklist()
