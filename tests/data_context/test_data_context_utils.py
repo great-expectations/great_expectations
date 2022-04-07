@@ -244,12 +244,12 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     temp_dir.mkdir()
     monkeypatch.chdir(temp_dir)
     assert (
-        PasswordMasker.mask_db_url(f"sqlite:///something/foo.db")
-        == f"sqlite:///something/foo.db"
+        PasswordMasker.mask_db_url("sqlite:///something/foo.db")
+        == "sqlite:///something/foo.db"
     )
     assert (
-        PasswordMasker.mask_db_url(f"sqlite:///something/foo.db", use_urlparse=True)
-        == f"sqlite:///something/foo.db"
+        PasswordMasker.mask_db_url("sqlite:///something/foo.db", use_urlparse=True)
+        == "sqlite:///something/foo.db"
     )
 
     # absolute path
