@@ -1,9 +1,11 @@
 # Required imports for this script's purpose:
+# Import and setup for working with YAML strings:
 # <snippet>
-import great_expectations as ge
-from great_expectations.checkpoint import Checkpoint
+from ruamel import yaml
 
 # </snippet>
+import great_expectations as ge
+from great_expectations.checkpoint import Checkpoint
 
 # Imports used for testing purposes (and can be left out of typical scripts):
 from great_expectations.core.expectation_validation_result import (
@@ -15,10 +17,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 
-# Import and setup for working with YAML strings:
 # <snippet>
-from ruamel import yaml
-
 yaml = yaml.YAML(typ="safe")
 # </snippet>
 
