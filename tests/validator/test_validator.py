@@ -1106,7 +1106,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
             expectation_suite=suite,
         )
     assert ve.value.args == (
-        "Only one of batch_request or batch_request_list may be specified",
+        "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified",
     )
 
 
