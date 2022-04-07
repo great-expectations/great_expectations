@@ -6,6 +6,7 @@ import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     compute_bootstrap_quantiles_point_estimate,
@@ -71,7 +72,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
-        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
+        ] = None,
         json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
@@ -187,7 +190,6 @@ detected.
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -231,41 +233,8 @@ detected.
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
 
-        # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        estimator: str = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.estimator,
-            expected_return_type=str,
-            variables=variables,
-            parameters=parameters,
-        )
-        if (
-            estimator
-            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
-{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
-"""
-            )
-
-        estimator_func: Callable
-        etimator_kwargs: dict
-        if estimator == "bootstrap":
-            estimator_func = self._get_bootstrap_estimate
-            estimator_kwargs = {
-                "false_positive_rate": false_positive_rate,
-                "num_bootstrap_samples": self.num_bootstrap_samples,
-            }
-        else:
-            estimator_func = self._get_deterministic_estimate
-            estimator_kwargs = {
-                "false_positive_rate": false_positive_rate,
-            }
-
         # Compute metric value for each Batch object.
         super().build_parameters(
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -295,6 +264,39 @@ detected.
             metric_values = attributed_resolved_metrics.metric_values
         else:
             metric_values = parameter_node.value
+
+        # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        estimator: str = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.estimator,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
+        )
+        if (
+            estimator
+            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
+        ):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
+{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
+"""
+            )
+
+        estimator_func: Callable
+        etimator_kwargs: dict
+        if estimator == "bootstrap":
+            estimator_func = self._get_bootstrap_estimate
+            estimator_kwargs = {
+                "false_positive_rate": false_positive_rate,
+                "num_bootstrap_samples": self.num_bootstrap_samples,
+                "bootstrap_random_seed": self.bootstrap_random_seed,
+            }
+        else:
+            estimator_func = self._get_deterministic_estimate
+            estimator_kwargs = {
+                "false_positive_rate": false_positive_rate,
+            }
 
         metric_value_range: np.ndarray = self._estimate_metric_value_range(
             metric_values=metric_values,
