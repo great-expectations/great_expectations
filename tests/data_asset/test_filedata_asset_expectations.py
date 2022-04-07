@@ -1,6 +1,5 @@
 # Test File Expectations
 import os
-import platform
 
 import pytest
 
