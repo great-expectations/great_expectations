@@ -71,7 +71,7 @@ Normally, a Checkpoint configuration will include the keys `class_name` and `mod
 
   <TabItem value="yaml_str">
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py#L62-L83
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py#L62-L84
 ```
 
   </TabItem>
