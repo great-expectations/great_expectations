@@ -55,7 +55,7 @@ class Domain(SerializableDotDict):
     ):
         if isinstance(domain_type, str):
             try:
-                domain_type = MetricDomainTypes[domain_type]
+                domain_type = MetricDomainTypes(domain_type)
             except (TypeError, KeyError) as e:
                 raise ValueError(
                     f""" \
@@ -109,6 +109,11 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
 
     def __ne__(self, other):
         return not self.__eq__(other=other)
+
+    def __hash__(self) -> int:
+        """Overrides the default implementation"""
+        _result_hash: int = hash(self.id)
+        return _result_hash
 
     # Adding this property for convenience (also, in the future, arguments may not be all set to their default values).
     @property
