@@ -2,6 +2,7 @@
 # <snippet>
 import great_expectations as ge
 from great_expectations.checkpoint import Checkpoint
+
 # </snippet>
 
 # Imports used for testing purposes (and can be left out of typical scripts):

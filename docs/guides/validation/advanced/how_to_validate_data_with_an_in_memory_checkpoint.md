@@ -37,14 +37,14 @@ Importing `great_expectations` will give you access to your Data Context, while 
 
 If you are planning to use a YAML string to configure your in-memory Checkpoint you will also need to import `yaml` from `ruamel`:
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py#L19-L21
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py#L20-L22
 ```
 
 ### 2. Initialize your Data Context
 
 In the previous section you imported `great_expectations` in order to get access to your Data Context.  The line of code that does this is:
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py#L26
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py#L27
 ```
 
 Checkpoints require a Data Context in order to access necessary Stores from which to retrieve Expectation Suites and store Validation Results and Metrics, so you will pass `context` in as a parameter when you initialize your `Checkpoint` class later.
@@ -64,14 +64,14 @@ Normally, a Checkpoint configuration will include the keys `class_name` and `mod
 
   <TabItem value="python_dict">
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py#L60-L91
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py#L61-L91
 ```
 
   </TabItem>
 
   <TabItem value="yaml_str">
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py#L61-L83
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py#L62-L83
 ```
 
   </TabItem>
@@ -104,7 +104,7 @@ If you are using a Python dictionary as your configuration, you will need to unp
 
 If you are using a YAML string as your configuration, you will need to convert it into a dictionary and unpack it as parameters for the `Checkpoint` object's initialization.  This can be done with the code: 
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py#L89
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py#L90
 ```
 
   </TabItem>
@@ -117,7 +117,7 @@ Congratulations!  You now have an initialized `Checkpoint` object in memory.  Yo
 
 This will be done with the line:
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py#L94
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py#L95
 ```
 
 Congratulations!  Your script is now ready to be run.  Each time you run it, it will initialize and run a Checkpoint in memory, rather than retrieving a Checkpoint configuration from a Checkpoint Store.

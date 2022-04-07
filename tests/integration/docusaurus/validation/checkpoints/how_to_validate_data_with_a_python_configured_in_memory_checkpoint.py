@@ -2,6 +2,7 @@
 # <snippet>
 import great_expectations as ge
 from great_expectations.checkpoint import Checkpoint
+
 # </snippet>
 
 # Imports used for testing purposes (and can be left out of typical scripts):
@@ -69,12 +70,12 @@ python_config = {
         },
         {
             "name": "store_evaluation_params",
-            "action": {"class_name": "StoreEvaluationParametersAction"}
+            "action": {"class_name": "StoreEvaluationParametersAction"},
         },
         {
             "name": "update_data_docs",
-            "action": {"class_name": "UpdateDataDocsAction", "site_names": []}
-        }
+            "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+        },
     ],
     "validations": [
         {
@@ -82,12 +83,11 @@ python_config = {
                 "datasource_name": "my_datasource",
                 "data_connector_name": "default_inferred_data_connector_name",
                 "data_asset_name": "yellow_tripdata_sample_2019-02.csv",
-                "data_connector_query": {
-                    "index": -1}
+                "data_connector_query": {"index": -1},
             },
-            "expectation_suite_name": "yellow_1"
+            "expectation_suite_name": "yellow_1",
         }
-    ]
+    ],
 }
 # </snippet>
 
