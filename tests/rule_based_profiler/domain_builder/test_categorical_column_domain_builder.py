@@ -119,7 +119,8 @@ def test_unsupported_cardinality_limit(
     }
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
-        _: List[Domain] = CategoricalColumnDomainBuilder(
+        # noinspection PyUnusedLocal,PyArgumentList
+        domains: List[Domain] = CategoricalColumnDomainBuilder(
             limit_mode="&*#$&INVALID&*#$*&",
             batch_request=batch_request,
             data_context=data_context,
@@ -142,7 +143,8 @@ def test_unspecified_cardinality_limit(
     }
 
     with pytest.raises(ProfilerConfigurationError) as excinfo:
-        _: List[Domain] = CategoricalColumnDomainBuilder(
+        # noinspection PyUnusedLocal,PyArgumentList
+        domains: List[Domain] = CategoricalColumnDomainBuilder(
             batch_request=batch_request,
             data_context=data_context,
         ).get_domains()
