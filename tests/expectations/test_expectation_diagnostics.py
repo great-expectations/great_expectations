@@ -102,6 +102,7 @@ edr = ExpectationDiagnostics(
         "SparkDFExecutionEngine": True,
     },
     tests=[],
+    backend_test_result_counts=[],
     errors=[],
     maturity_checklist=ExpectationDiagnosticMaturityMessages(
         experimental=[

@@ -113,6 +113,7 @@ def test_expectation_self_check():
         ],
         "metrics": [],
         "tests": [],
+        "backend_test_result_counts": [],
         "errors": [],
         "maturity_checklist": {
             "beta": [
