@@ -137,6 +137,8 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
                     semantic_type = value
 
                 details[key] = semantic_type.value
+            else:
+                details[key] = convert_to_json_serializable(data=value)
 
         json_dict: dict = {
             "domain_type": self["domain_type"].value,

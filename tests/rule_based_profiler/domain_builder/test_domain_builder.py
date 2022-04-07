@@ -16,7 +16,6 @@ from great_expectations.rule_based_profiler.domain_builder import (
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
-    SemanticDomainTypes,
     build_parameter_container_for_variables,
 )
 
@@ -276,7 +275,6 @@ def test_column_domain_builder_with_simple_semantic_type_included(
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(variables=variables)
-    print(f"\n[ALEX_TEST] [WOUTPUT] WOUTPUT:\n{domains} ; TYPE: {str(type(domains))}")
 
     assert len(domains) == 2
     # Assert Domain object equivalence.
@@ -300,119 +298,6 @@ def test_column_domain_builder_with_simple_semantic_type_included(
             },
         },
     ]
-
-
-def test_semantic_domain_comparisons():
-    domain_a: Domain
-    domain_b: Domain
-    domain_c: Domain
-
-    domain_a = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "VendorID"},
-        details={"inferred_semantic_domain_type": "numeric"},
-    )
-    domain_b = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "passenger_count"},
-        details={"inferred_semantic_domain_type": "numeric"},
-    )
-    domain_c = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "passenger_count"},
-        details={"inferred_semantic_domain_type": "numeric"},
-    )
-
-    assert not (domain_a == domain_b)
-    assert domain_b == domain_c
-
-    domain_a = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "VendorID"},
-        details={"inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC},
-    )
-    domain_b = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "passenger_count"},
-        details={"inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC},
-    )
-    domain_c = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "passenger_count"},
-        details={"inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC},
-    )
-
-    assert not (domain_a == domain_b)
-    assert domain_b == domain_c
-
-    domain_d: Domain = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "passenger_count"},
-        details={"inferred_semantic_domain_type": "unknown_semantic_type_as_string"},
-    )
-
-    with pytest.raises(ValueError) as excinfo:
-        # noinspection PyUnusedLocal
-        domain_as_dict: dict = domain_d.to_json_dict()
-
-    assert (
-        "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"
-        in str(excinfo.value)
-    )
-
-    domain_e: Domain = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "passenger_count"},
-        details={
-            "estimator": "categorical",
-            "cardinality": "low",
-        },
-    )
-
-    assert domain_e.to_json_dict() is not None
-
-    domain_f: Domain = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "passenger_count"},
-        details={
-            "estimator": "categorical",
-            "cardinality": "low",
-            "inferred_semantic_domain_type": SemanticDomainTypes.CURRENCY,
-        },
-    )
-
-    assert domain_f.to_json_dict() is not None
-
-    domain_g: Domain = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "passenger_count"},
-        details={
-            "estimator": "categorical",
-            "cardinality": "low",
-            "inferred_semantic_domain_type": "currency",
-        },
-    )
-
-    assert domain_g.to_json_dict() is not None
-
-    domain_h: Domain = Domain(
-        domain_type="column",
-        domain_kwargs={"column": "passenger_count"},
-        details={
-            "estimator": "categorical",
-            "cardinality": "low",
-            "inferred_semantic_domain_type": "unknown_semantic_type_as_string",
-        },
-    )
-
-    with pytest.raises(ValueError) as excinfo:
-        # noinspection PyUnusedLocal
-        domain_as_dict: dict = domain_h.to_json_dict()
-
-    assert (
-        "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"
-        in str(excinfo.value)
-    )
 
 
 def test_column_pair_domain_builder_wrong_column_names(
