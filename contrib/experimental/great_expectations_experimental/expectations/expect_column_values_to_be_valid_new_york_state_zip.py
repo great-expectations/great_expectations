@@ -19,7 +19,9 @@ from great_expectations.expectations.metrics import (
 
 def is_valid_new_york_state_zip(zip: str):
     list_of_dicts_of_new_york_state_zips = zipcodes.filter_by(state="NY")
-    list_of_new_york_state_zips = [d["zip_code"] for d in list_of_dicts_of_new_york_state_zips]
+    list_of_new_york_state_zips = [
+        d["zip_code"] for d in list_of_dicts_of_new_york_state_zips
+    ]
     if len(zip) > 10:
         return False
     elif type(zip) != str:
