@@ -1,6 +1,0 @@
-,VendorID,lpep_pickup_datetime,lpep_dropoff_datetime,store_and_fwd_flag,RatecodeID,PULocationID,DOLocationID,passenger_count,trip_distance,fare_amount,extra,mta_tax,tip_amount,tolls_amount,ehail_fee,improvement_surcharge,total_amount,payment_type,trip_type,congestion_surcharge
-337596,1,2019-03-18 08:20:31,2019-03-18 09:12:55,N,1,49,35,1,6.1,33.5,0.0,0.5,0.0,0.0,,0.3,34.3,1,1,0.0
-378981,2,2019-03-20 13:03:10,2019-03-20 13:16:30,N,1,152,41,1,1.14,9.5,0.0,0.5,0.0,0.0,,0.3,10.3,1,1,0.0
-6063,2,2019-03-01 10:48:22,2019-03-01 10:56:05,N,1,260,7,1,1.58,7.5,0.0,0.5,0.0,0.0,,0.3,8.3,2,1,0.0
-76887,1,2019-03-05 08:07:59,2019-03-05 08:30:54,N,1,75,143,2,3.6,16.5,2.75,0.5,4.0,0.0,,0.3,24.05,1,1,2.75
-282323,2,2019-03-15 11:31:28,2019-03-15 12:08:48,N,5,72,150,1,7.98,24.14,0.0,0.5,0.0,0.0,,0.0,24.64,1,2,0.0

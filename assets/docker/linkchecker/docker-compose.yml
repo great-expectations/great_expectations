@@ -1,5 +1,0 @@
-version: '3.2'
-services:
-  linkchecker:
-    build: ./
-    image: linkchecker:1.0

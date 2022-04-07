@@ -1,6 +1,0 @@
-,vendor_id,pickup_datetime,dropoff_datetime,passenger_count,trip_distance,rate_code_id,store_and_fwd_flag,pickup_location_id,dropoff_location_id,payment_type,fare_amount,extra,mta_tax,tip_amount,tolls_amount,improvement_surcharge,total_amount,congestion_surcharge
-7201,2,2018-11-03 20:17:25,2018-11-03 20:25:26,1,1.15,1,N,166,238,1,7.5,0.5,0.5,2.2,0.0,0.3,11.0,
-2578,2,2018-11-14 09:03:52,2018-11-14 09:21:39,1,0.9,1,N,230,230,1,11.5,0.0,0.5,1.0,0.0,0.3,13.3,
-9216,1,2018-11-16 13:12:09,2018-11-16 13:24:41,1,1.5,1,N,238,143,2,9.5,0.0,0.5,0.0,0.0,0.3,10.3,
-5518,1,2018-11-15 20:44:20,2018-11-15 20:58:41,1,1.7,1,N,236,151,1,11.0,0.5,0.5,0.0,0.0,0.3,12.3,
-104,2,2018-11-07 00:01:14,2018-11-07 00:05:56,5,0.85,1,N,234,170,1,5.5,0.5,0.5,1.36,0.0,0.3,8.16,

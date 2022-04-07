@@ -1,5 +1,0 @@
-version: '3.2'
-services:
-  rtd:
-    image: readthedocs/build:6.0
-

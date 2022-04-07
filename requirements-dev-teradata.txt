@@ -1,1 +1,0 @@
-teradatasqlalchemy==17.0.0.1

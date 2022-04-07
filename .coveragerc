@@ -1,7 +1,0 @@
-[report]
-exclude_lines =
-    raise NotImplementedError
-
-[coverage:run]
-omit =
-    docker/build.py
