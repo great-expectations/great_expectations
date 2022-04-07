@@ -15,6 +15,7 @@ title: Changelog
 * [BUGFIX] Rule-Based Profiler: Only primitive type based BatchRequest is allowed for Builder classes (#4614)
 * [BUGFIX] Fix DataContext templates test (#4678)
 * [BUGFIX] update module_name in NoteBookConfigSchema from v2 path to v3 (#4589) (thanks @Josephmaclean)
+* [BUGFIX] request S3 bucket location only when necessary (#4526) (thanks @error418)
 * [DOCS] Update `ignored_columns` snippet in "Getting Started" (#4609)
 * [DOCS] Fixes import statement.  (#4694)
 * [DOCS] Update tutorial_review.md typo with intended word. (#4611) (thanks @cjbramble)
