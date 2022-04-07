@@ -109,7 +109,7 @@ def test_anonymize_datasource_info_v3_api_core_ge_class(
     datasource_anonymizer: DatasourceAnonymizer,
 ):
     name = "test_pandas_datasource"
-    yaml_config = f"""
+    yaml_config = """
 class_name: Datasource
 module_name: great_expectations.datasource
 
@@ -152,7 +152,7 @@ def test_anonymize_datasource_info_v2_api_custom_subclass(
     Custom v2 API Datasources should continue to be supported.
     """
     name = "test_pandas_datasource"
-    yaml_config = f"""
+    yaml_config = """
 module_name: tests.data_context.fixtures.plugins.my_custom_v2_api_datasource
 class_name: MyCustomV2ApiDatasource
 """
@@ -171,7 +171,7 @@ def test_anonymize_datasource_info_v3_api_custom_subclass(
     datasource_anonymizer: DatasourceAnonymizer,
 ):
     name = "test_pandas_datasource"
-    yaml_config = f"""
+    yaml_config = """
 module_name: tests.data_context.fixtures.plugins.my_custom_v3_api_datasource
 class_name: MyCustomV3ApiDatasource
 
@@ -209,7 +209,7 @@ def test_anonymize_simple_sqlalchemy_datasource(
     datasource_anonymizer: DatasourceAnonymizer,
 ):
     name = "test_simple_sqlalchemy_datasource"
-    yaml_config = f"""
+    yaml_config = """
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///some_db.db
 
