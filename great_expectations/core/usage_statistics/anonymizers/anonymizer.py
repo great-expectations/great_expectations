@@ -99,6 +99,7 @@ class Anonymizer(BaseAnonymizer):
             "validation_operators": self._anonymize_validation_operator_init_payload,
             "data_docs_sites": self._anonymize_data_docs_sites_init_payload,
             "expectation_suites": self._anonymize_expectation_suite_init_payload,
+            "dependencies": None,  # dependencies do not need anonymization
         }
 
         for key, val in init_payload.items():

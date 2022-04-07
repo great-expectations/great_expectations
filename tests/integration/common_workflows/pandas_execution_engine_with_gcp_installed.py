@@ -13,7 +13,7 @@ os.environ["GCLOUD_PROJECT"] = "some_project_id"
 
 context = ge.get_context()
 
-example_yaml = f"""
+example_yaml = """
 name: my_datasource
 class_name: Datasource
 execution_engine:

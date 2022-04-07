@@ -36,7 +36,6 @@ class GEDependencies:
             "Click",
             "colorama",
             "cryptography",
-            "dataclasses",
             "importlib-metadata",
             "Ipython",
             "jinja2",
