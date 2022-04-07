@@ -48,7 +48,7 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert "like_pattern" in configuration.kwargs, "Must provide like_pattern"
@@ -62,7 +62,6 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

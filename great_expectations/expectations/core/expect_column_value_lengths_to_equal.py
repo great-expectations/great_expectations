@@ -91,7 +91,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -108,7 +108,6 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -157,7 +156,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -207,7 +206,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )

@@ -7,17 +7,23 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List, Optional, Union
 
-import boto3
 import requests
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     get_batch_request_as_dict,
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.types import DictDot
+
+try:
+    import boto3
+except ImportError:
+    boto3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -210,9 +216,7 @@ def get_substituted_validation_dict(
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_substituted_batch_request(
     substituted_runtime_config: dict,
-    validation_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest, dict]
-    ] = None,
+    validation_batch_request: Optional[Union[BatchRequestBase, dict]] = None,
 ) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     substituted_runtime_batch_request = substituted_runtime_config.get("batch_request")
 
@@ -430,6 +434,7 @@ def batch_request_in_validations_contains_batch_data(
         for idx, val in enumerate(validations):
             if (
                 val.get("batch_request") is not None
+                and isinstance(val.get("batch_request"), (dict, DictDot))
                 and val["batch_request"].get("runtime_parameters") is not None
                 and val["batch_request"]["runtime_parameters"].get("batch_data")
                 is not None
@@ -498,6 +503,10 @@ def send_sns_notification(
     :return:  Message ID that was published
 
     """
+    if not boto3:
+        logger.warning("boto3 is not installed")
+        return "boto3 is not installed"
+
     message_dict = {
         "TopicArn": sns_topic_arn,
         "Subject": sns_subject,
