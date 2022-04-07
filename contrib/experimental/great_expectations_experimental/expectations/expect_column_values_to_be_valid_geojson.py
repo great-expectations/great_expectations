@@ -1,14 +1,12 @@
-from typing import Any, List, Optional, Union
+from typing import Any, List, Union
 
-import geopandas
-from shapely.geometry import Point
+import pygeos
 
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationConfiguration,
-    InvalidExpectationConfigurationError,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -27,92 +25,61 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesReverseGeocodedLatLonContain(ColumnMapMetricProvider):
+class ColumnValuesValidGeojson(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.reverse_geocoded_lat_lon_contain"
-    condition_value_keys = (
-        "word",
-        "provider",
-    )
+    condition_metric_name = "column_values.valid_geojson"
+    condition_value_keys = ()
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, word, provider=None, **kwargs):
-        column = column.apply(Point)
+    def _pandas(cls, column, **kwargs):
+        # Check if values is a valid GeoJSON by parsing it and returning False if there's an error
+        def valid_geojson(value):
+            try:
+                pygeos.from_geojson(value)
+                return True
+            except pygeos.GEOSException:
+                return False
 
-        def reverse(point):
-            # lat lon to lon lat for reverse_geocode
-            return Point(point.y, point.x)
-
-        column = column.apply(reverse)
-        reverse_geocoded_column = column.apply(geopandas.tools.reverse_geocode)
-
-        # check if lowercase reverse geocoded string contains word
-        return reverse_geocoded_column.apply(
-            lambda x: word in x["address"].values[0].lower()
-        )
+        column = column.apply(valid_geojson)
+        return column
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
-    """Expect values in a column to be tuples of degree-decimal (latitude, longitude) which contain a specific word when reverse geocoded.
+class ExpectColumnValuesToBeValidGeojson(ColumnMapExpectation):
+    """Expect values in a column to be valid geojson strings as defined in https://geojson.org/.
+    Note that this makes use of https://pygeos.readthedocs.io/en/stable/io.html#pygeos.io.from_geojson which has some limitations.
 
     Args:
         column (str): \
             The column name.
 
-
-    Keyword Args:
-        word (str) : \
-            The word to check if it's contained in the reverse geocoded string.
-            Must be a lowercase string.
-
-        provider (str or geopy.geocoder): \
-            The reverse geocoding service provider.
-            Default: photon
-            More info here: https://geopandas.org/en/stable/docs/reference/api/geopandas.tools.reverse_geocode.html
-
     """
-
-    def validate_configuration(
-        cls, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
-
-        # Setting up a configuration
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = cls.configuration
-
-        word = configuration.kwargs["word"]
-
-        try:
-            assert word is not None, "word must be provided"
-            assert isinstance(word, str), "word must be a string"
-            assert word.islower(), "word must be a lowercase string"
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "lat_lon_in_new_york": [
-                    (40.583455700, -74.149604800),
-                    (40.713507800, -73.828313200),
-                    (40.652600600, -73.949721100),
-                    (40.789623900, -73.959893900),
-                    (40.846650800, -73.878593700),
+                "valid_geojson": [
+                    """{
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [125.6, 10.1]
+                        },
+                        "properties": {
+                            "name": "Dinagat Islands"
+                        }
+                    }""",
+                    '{"type": "Point","coordinates": [1, 2]}',
+                    '{"type": "Point","coordinates": [5, 6]}',
+                ],
+                "invalid_geojson": [
+                    "{}",
+                    "{ 'type': 'Feature' }",
+                    "",
                 ],
             },
             "tests": [
@@ -121,8 +88,7 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "lat_lon_in_new_york",
-                        "word": "new york",
+                        "column": "valid_geojson",
                         "mostly": 1,
                     },
                     "out": {"success": True},
@@ -132,8 +98,7 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "lat_lon_in_new_york",
-                        "word": "california",
+                        "column": "invalid_geojson",
                         "mostly": 0.2,
                     },
                     "out": {"success": False},
@@ -144,18 +109,13 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.reverse_geocoded_lat_lon_contain"
+    map_metric = "column_values.valid_geojson"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    success_keys = (
-        "mostly",
-        "word",
-        "provider",
-    )
+    success_keys = ("mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {
-        "provider": None,
         "mostly": 1,
     }
 
@@ -168,7 +128,7 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@mmi333",  # Don't forget to add your github handle here!
         ],
-        "requirements": ["geopandas"],
+        "requirements": ["pygeos"],
     }
 
     @classmethod
@@ -202,14 +162,12 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
             configuration.kwargs,
             [
                 "column",
-                "word",
-                "provider",
                 "mostly",
             ],
         )
 
         if params["mostly"] is None:
-            template_str = "values must be lat lon and contain $word when reverse geocoded by $provider"
+            template_str = "values must be valid geojson strings"
         else:
             if params["mostly"] is not None:
                 params["mostly_pct"] = num_to_str(
@@ -237,4 +195,4 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesReverseGeocodedLatLonToContain().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidGeojson().print_diagnostic_checklist()
