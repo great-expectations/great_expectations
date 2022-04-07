@@ -2,7 +2,7 @@ import json
 from typing import Optional
 
 import geopandas
-from shapely.geometry import LineString, mapping, shape
+from shapely.geometry import Point, mapping, shape
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -17,27 +17,22 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
-class ColumnValuesLinestringMilesDistanceBetween(ColumnMapMetricProvider):
+class ColumnValuesHaveElevation(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.linestring_distance_miles"
-    condition_value_keys = (
-        "min_distance",
-        "max_distance",
-    )
+    condition_metric_name = "column_values.elevated"
+    condition_value_keys = ()
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, min_distance, max_distance, **kwargs):
+    def _pandas(cls, column, **kwargs):
         column = column.apply(shape)
         # Set crs to meters
         geo_ser = geopandas.GeoSeries(column, crs={"proj": "cea"})
         # access the length of the column
-        col_len = geo_ser.length * 0.000621371192
-        in_between = (col_len >= min_distance) & (col_len <= max_distance)
-        return in_between
+        return ~geo_ser.z.isnull()
 
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
@@ -53,64 +48,22 @@ class ColumnValuesLinestringMilesDistanceBetween(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToBeLineMilesDistanceBetween(ColumnMapExpectation):
-    """This expectation will check if the distance of Linestring is between two values in miles."""
+class ExpectColumnValuesToHaveElevation(ColumnMapExpectation):
+    """This expectation will check a point to see if it is elevated"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
             "data": {
-                "linestring_less_than_500_miles": [
-                    mapping(
-                        LineString(
-                            [(0, 0), (111319.490793, 110568.8124), (0, 110568.8124)]
-                        )
-                    ),
-                    mapping(
-                        LineString(
-                            [
-                                (0, 0),
-                                (111319.490793, 110568.8124),
-                                (111319.490793, 0),
-                                (0, 110568.8124),
-                            ]
-                        )
-                    ),
-                    mapping(
-                        LineString(
-                            [(0, 0), (222638.981587, 221104.845779), (222638.981587, 0)]
-                        )
-                    ),
+                "elevated": [
+                    mapping(Point(1, 1, 1),),
+                    mapping(Point(2, 2, 2),),
+                    mapping(Point(3, 3, 3)),
                 ],
-                "linestring_between_1000_and_2000_miles": [
-                    mapping(
-                        LineString(
-                            [
-                                (222638.981587, 552188.640112),
-                                (111319.490793, 772147.013102),
-                                (1113194.907933, 1209055.279421),
-                            ]
-                        )
-                    ),
-                    mapping(
-                        LineString(
-                            [
-                                (111319.490793, 881798.964757),
-                                (1001875.417139, 221104.845779),
-                                (111319.490793, 0),
-                                (556597.453966, 1317466.085138),
-                            ]
-                        )
-                    ),
-                    mapping(
-                        LineString(
-                            [
-                                (556597.453966, 552188.640112),
-                                (1224514.398726, 1209055.279421),
-                                (779236.435553, 881798.964757),
-                            ]
-                        )
-                    ),
+                "not_elevated": [
+                    mapping(Point(1, 1)),
+                    mapping(Point(2, 2)),
+                    mapping(Point(3, 3)),
                 ],
             },
             "tests": [
@@ -118,22 +71,14 @@ class ExpectColumnValuesToBeLineMilesDistanceBetween(ColumnMapExpectation):
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {
-                        "column": "linestring_less_than_500_miles",
-                        "min_distance": 0,
-                        "max_distance": 1000,
-                    },
+                    "in": {"column": "elevated",},
                     "out": {"success": True,},
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {
-                        "column": "linestring_between_1000_and_2000_miles",
-                        "min_distance": 1000,
-                        "max_distance": 2000,
-                    },
+                    "in": {"column": "not_elevated",},
                     "out": {"success": False,},
                 },
             ],
@@ -156,23 +101,17 @@ class ExpectColumnValuesToBeLineMilesDistanceBetween(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.linestring_distance_miles"
+    map_metric = "column_values.elevated"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
-    success_keys = (
-        "mostly",
-        "min_distance",
-        "max_distance",
-    )
+    success_keys = ("mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {
-        "min_distance": 0,
-        "max_distance": 0,
         "mostly": 1.0,
     }
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeLineMilesDistanceBetween().print_diagnostic_checklist()
+    ExpectColumnValuesToHaveElevation().print_diagnostic_checklist()
