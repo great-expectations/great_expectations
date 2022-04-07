@@ -123,7 +123,9 @@ class ExpectColumnValuesToBeLineMilesDistanceBetween(ColumnMapExpectation):
                         "min_distance": 0,
                         "max_distance": 1000,
                     },
-                    "out": {"success": True,},
+                    "out": {
+                        "success": True,
+                    },
                 },
                 {
                     "title": "basic_negative_test",
@@ -134,7 +136,9 @@ class ExpectColumnValuesToBeLineMilesDistanceBetween(ColumnMapExpectation):
                         "min_distance": 1000,
                         "max_distance": 2000,
                     },
-                    "out": {"success": False,},
+                    "out": {
+                        "success": False,
+                    },
                 },
             ],
         }
