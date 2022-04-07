@@ -6,9 +6,7 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.rule_based_profiler.helpers.util import (
-    _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method,
-    _compute_bootstrap_quantiles_point_estimate_custom_mean_method,
-    _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method,
+    compute_bootstrap_quantiles_point_estimate,
 )
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
@@ -127,7 +125,7 @@ def test_bootstrap_point_estimate_efficacy(
         (
             lower_quantile_point_estimate,
             upper_quantile_point_estimate,
-        ) = _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
+        ) = compute_bootstrap_quantiles_point_estimate(
             metric_values=distribution_samples[distribution],
             false_positive_rate=false_positive_rate,
             n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
@@ -137,111 +135,6 @@ def test_bootstrap_point_estimate_efficacy(
             - np.sum(
                 distribution_samples[distribution].between(
                     lower_quantile_point_estimate, upper_quantile_point_estimate
-                )
-            )
-            / distribution_samples.shape[0]
-        )
-        # Actual false-positives must be within the efficacy tolerance of desired (configured)
-        # false_positive_rate parameter value.
-        np.testing.assert_allclose(
-            actual=actual_false_positive_rates[distribution],
-            desired=false_positive_rate,
-            rtol=RTOL,
-            atol=EFFICACY_TOLERANCE,
-            err_msg=f"Actual value of {actual_false_positive_rates[distribution]} differs from expected value of {false_positive_rate} by more than {ATOL + EFFICACY_TOLERANCE * abs(actual_false_positive_rates[distribution])} tolerance.",
-        )
-
-
-def test_bootstrap_point_estimate_bias_corrected_efficacy(
-    bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
-):
-    """
-    Efficacy means the custom bootstrap bias corrected method approximates the sample +/- efficacy tolerance
-    """
-    false_positive_rate: np.float64 = (
-        bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "false_positive_rate"
-        ]
-    )
-    distribution_samples: pd.DataFrame = (
-        bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "distribution_samples"
-        ]
-    )
-
-    distribution_types: pd.Index = distribution_samples.columns
-    distribution: str
-    lower_quantile_point_estimate_bias_corrected: np.float64
-    upper_quantile_point_estimate_bias_corrected: np.float64
-    actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
-    for distribution in distribution_types:
-        (
-            lower_quantile_point_estimate_bias_corrected,
-            upper_quantile_point_estimate_bias_corrected,
-        ) = _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
-            metric_values=distribution_samples[distribution],
-            false_positive_rate=false_positive_rate,
-            n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
-        )
-        actual_false_positive_rates[distribution] = (
-            1.0
-            - np.sum(
-                distribution_samples[distribution].between(
-                    lower_quantile_point_estimate_bias_corrected,
-                    upper_quantile_point_estimate_bias_corrected,
-                )
-            )
-            / distribution_samples.shape[0]
-        )
-        # Actual false-positives must be within the efficacy tolerance of desired (configured)
-        # false_positive_rate parameter value.
-        np.testing.assert_allclose(
-            actual=actual_false_positive_rates[distribution],
-            desired=false_positive_rate,
-            rtol=RTOL,
-            atol=EFFICACY_TOLERANCE,
-            err_msg=f"Actual value of {actual_false_positive_rates[distribution]} differs from expected value of {false_positive_rate} by more than {ATOL + EFFICACY_TOLERANCE * abs(actual_false_positive_rates[distribution])} tolerance.",
-        )
-
-
-def test_bootstrap_point_estimate_scipy_efficacy(
-    bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
-):
-    """
-    Efficacy means the scipy.stats.bootstrap confidence interval midpoint method
-    approximates the sample +/- efficacy tolerance
-    """
-    false_positive_rate: np.float64 = (
-        bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "false_positive_rate"
-        ]
-    )
-    distribution_samples: pd.DataFrame = (
-        bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "distribution_samples"
-        ]
-    )
-
-    distribution_types: pd.Index = distribution_samples.columns
-    distribution: str
-    lower_quantile_point_estimate_scipy: np.float64
-    upper_quantile_point_estimate_scipy: np.float64
-    actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
-    for distribution in distribution_types:
-        (
-            lower_quantile_point_estimate_scipy,
-            upper_quantile_point_estimate_scipy,
-        ) = _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method(
-            metric_values=distribution_samples[distribution],
-            false_positive_rate=false_positive_rate,
-            n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
-        )
-        actual_false_positive_rates[distribution] = (
-            1.0
-            - np.sum(
-                distribution_samples[distribution].between(
-                    lower_quantile_point_estimate_scipy,
-                    upper_quantile_point_estimate_scipy,
                 )
             )
             / distribution_samples.shape[0]

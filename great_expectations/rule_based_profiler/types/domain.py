@@ -121,11 +121,23 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         return IDDict(self.to_json_dict()).to_id()
 
     def to_json_dict(self) -> dict:
+        details: dict = {}
+
+        key: str
+        semantic_type: Union[str, SemanticDomainTypes]
+        for key, semantic_type in self["details"].items():
+            if isinstance(semantic_type, str):
+                semantic_type = semantic_type.lower()
+                semantic_type = SemanticDomainTypes(semantic_type)
+
+            details[key] = semantic_type.value
+
         json_dict: dict = {
             "domain_type": self["domain_type"].value,
             "domain_kwargs": self["domain_kwargs"].to_json_dict(),
-            "details": {key: value.value for key, value in self["details"].items()},
+            "details": details,
         }
+
         return filter_properties_dict(properties=json_dict, clean_falsy=True)
 
     def _convert_dictionaries_to_domain_kwargs(
