@@ -128,6 +128,7 @@ class ExpectColumnValuesToBeValidNasdaqTicker(ColumnMapExpectation):
         "contributors": [
             "@voidforall",
         ],
+        "requirements": ["yahoo_fin"],
     }
 
 
