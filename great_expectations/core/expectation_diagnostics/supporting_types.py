@@ -4,11 +4,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional, Union
 
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestCase,
-    TestData,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
