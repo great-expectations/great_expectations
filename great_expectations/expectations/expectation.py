@@ -927,7 +927,7 @@ class Expectation(metaclass=MetaExpectation):
         that do not exist). These errors are added under "errors" key in the report.
         """
 
-        errors :List[ExpectationErrorDiagnostics] = []
+        errors: List[ExpectationErrorDiagnostics] = []
 
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
@@ -972,11 +972,9 @@ class Expectation(metaclass=MetaExpectation):
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
-        backend_test_result_counts: List[ExpectationBackendTestResultCounts] = (
-            ExpectationDiagnostics._get_backends_from_test_results(
-                test_results
-            )
-        )
+        backend_test_result_counts: List[
+            ExpectationBackendTestResultCounts
+        ] = ExpectationDiagnostics._get_backends_from_test_results(test_results)
 
         renderers: List[
             ExpectationRendererDiagnostics
@@ -998,7 +996,9 @@ class Expectation(metaclass=MetaExpectation):
         )
 
         # Set final maturity level based on status of all checks
-        all_experimental = all([check.passed for check in maturity_checklist.experimental])
+        all_experimental = all(
+            [check.passed for check in maturity_checklist.experimental]
+        )
         all_beta = all([check.passed for check in maturity_checklist.beta])
         all_production = all([check.passed for check in maturity_checklist.production])
         if all_production and all_beta and all_experimental:

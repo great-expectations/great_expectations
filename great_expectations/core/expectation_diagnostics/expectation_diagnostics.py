@@ -177,7 +177,8 @@ class ExpectationDiagnostics(SerializableDictDot):
         all_passing = [
             backend_test_result
             for backend_test_result in backend_test_result_counts
-            if backend_test_result.failing_names is None and backend_test_result.num_passed >= 1
+            if backend_test_result.failing_names is None
+            and backend_test_result.num_passed >= 1
         ]
 
         if len(all_passing) > 0:
@@ -216,14 +217,16 @@ class ExpectationDiagnostics(SerializableDictDot):
         for test_result in test_results:
             backend_results[test_result.backend].append(test_result.test_passed)
             if test_result.test_passed is False:
-                backend_failing_names[test_result.backend].append(test_result.test_title)
+                backend_failing_names[test_result.backend].append(
+                    test_result.test_title
+                )
 
         for backend in backend_results:
             result_counts = ExpectationBackendTestResultCounts(
                 backend=backend,
                 num_passed=backend_results[backend].count(True),
                 num_failed=backend_results[backend].count(False),
-                failing_names=backend_failing_names.get(backend)
+                failing_names=backend_failing_names.get(backend),
             )
             results.append(result_counts)
 
@@ -241,7 +244,8 @@ class ExpectationDiagnostics(SerializableDictDot):
         all_passing = [
             backend_test_result
             for backend_test_result in backend_test_result_counts
-            if backend_test_result.failing_names is None and backend_test_result.num_passed >= 1
+            if backend_test_result.failing_names is None
+            and backend_test_result.num_passed >= 1
         ]
         some_failing = [
             backend_test_result

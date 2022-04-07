@@ -1816,7 +1816,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
         if raise_exception:
             raise
         error_message = str(e)
-        stack_trace=traceback.format_exc(),
+        stack_trace = (traceback.format_exc(),)
         result = None
     else:
         try:
@@ -1829,7 +1829,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
             if raise_exception:
                 raise
             error_message = str(e)
-            stack_trace=traceback.format_exc(),
+            stack_trace = (traceback.format_exc(),)
 
     return (result, error_message, stack_trace)
 
