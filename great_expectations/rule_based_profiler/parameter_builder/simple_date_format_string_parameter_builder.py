@@ -97,7 +97,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[str, float] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
-        json_serialize: bool = True,
+        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
+        json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
             Union[str, BatchRequest, RuntimeBatchRequest, dict]
@@ -114,6 +115,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             metric_value_kwargs: used in MetricConfiguration
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_strings: a list of candidate date format strings that will replace the default
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
@@ -121,6 +125,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         """
         super().__init__(
             name=name,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
@@ -169,7 +174,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -268,9 +272,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 attributed_resolved_metrics.metric_attributes["strftime_format"]
             ] = success_ratio
 
-        best_fmt_string: Optional[str] = None
-        best_ratio: float = 0.0
-
         # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         threshold: float = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -280,17 +281,26 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        fmt_string: str
-        ratio: float
-        for fmt_string, ratio in format_string_success_ratios.items():
-            if ratio > best_ratio and ratio >= threshold:
-                best_fmt_string = fmt_string
-                best_ratio = ratio
+        best_fmt_string: Optional[str] = None
+        best_ratio: float = 0.0
 
+        # get best-matching datetime string that matches greater than threshold
+        (
+            best_fmt_string,
+            best_ratio,
+        ) = ParameterBuilder._get_best_candidate_above_threshold(
+            format_string_success_ratios, threshold
+        )
+        # dict of sorted datetime and ratios for all evaluated candidates
+        sorted_fmt_strings_and_ratios: dict = (
+            ParameterBuilder._get_sorted_candidates_and_ratios(
+                format_string_success_ratios
+            )
+        )
         return (
             best_fmt_string,
             {
                 "success_ratio": best_ratio,
-                "candidate_strings": sorted(candidate_strings),
+                "candidate_strings": sorted_fmt_strings_and_ratios,
             },
         )

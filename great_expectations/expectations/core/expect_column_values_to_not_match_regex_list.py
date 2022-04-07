@@ -93,7 +93,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -114,7 +114,6 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for regex_list kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -173,7 +172,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
             + values_string
         )
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -238,7 +237,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
             + values_string
         )
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )

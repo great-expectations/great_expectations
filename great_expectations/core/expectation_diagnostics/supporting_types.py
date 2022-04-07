@@ -14,8 +14,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.types import SerializableDictDot
 
-# from pydantic.dataclasses import dataclass
-
 
 class Maturity(Enum):
     """The four levels of maturity for features within Great Expectations"""
@@ -37,6 +35,7 @@ class AugmentedLibraryMetadata(SerializableDictDot):
     library_metadata_passed_checks: bool
     has_full_test_suite: bool
     manually_reviewed_code: bool
+    problems: List[str] = field(default_factory=list)
 
     legacy_maturity_level_substitutions = {
         "experimental": "EXPERIMENTAL",
