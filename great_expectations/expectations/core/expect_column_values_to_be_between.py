@@ -138,7 +138,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             json_serialize=True,
         )
     )
-    validation_parameter_builder_configs: List[dict] = [
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         min_estimato_parameter_builder_config,
         max_estimato_parameter_builder_config,
     ]
