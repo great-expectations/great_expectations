@@ -918,6 +918,15 @@ def test_run_profiler_without_dynamic_args(
     assert mock_profiler_run.call_args == mock.call(
         variables=None,
         rules=None,
+        batch_list=None,
+        batch_request=None,
+        force_batch_data=False,
+        reconciliation_directives=ReconciliationDirectives(
+            variables=ReconciliationStrategy.UPDATE,
+            domain_builder=ReconciliationStrategy.UPDATE,
+            parameter_builder=ReconciliationStrategy.UPDATE,
+            expectation_configuration_builder=ReconciliationStrategy.UPDATE,
+        ),
         expectation_suite=None,
         expectation_suite_name=None,
         include_citation=True,
@@ -952,19 +961,26 @@ def test_run_profiler_with_dynamic_args(
     assert mock_profiler_run.call_args == mock.call(
         variables=variables,
         rules=rules,
+        batch_list=None,
+        batch_request=None,
+        force_batch_data=False,
+        reconciliation_directives=ReconciliationDirectives(
+            variables=ReconciliationStrategy.UPDATE,
+            domain_builder=ReconciliationStrategy.UPDATE,
+            parameter_builder=ReconciliationStrategy.UPDATE,
+            expectation_configuration_builder=ReconciliationStrategy.UPDATE,
+        ),
         expectation_suite=None,
         expectation_suite_name=expectation_suite_name,
         include_citation=include_citation,
     )
 
 
-@mock.patch(
-    "great_expectations.rule_based_profiler.RuleBasedProfiler.generate_rule_overrides_from_batch_request"
-)
+@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_run_profiler_on_data_creates_suite_with_dict_arg(
     mock_data_context: mock.MagicMock,
-    mock_generate_rule_overrides_from_batch_request: mock.MagicMock,
+    mock_rule_based_profiler_run: mock.MagicMock,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -981,21 +997,17 @@ def test_run_profiler_on_data_creates_suite_with_dict_arg(
         batch_request=batch_request,
     )
 
-    assert mock_generate_rule_overrides_from_batch_request.called
+    assert mock_rule_based_profiler_run.called
 
-    resulting_batch_request = mock_generate_rule_overrides_from_batch_request.call_args[
-        1
-    ]["batch_request"]
+    resulting_batch_request = mock_rule_based_profiler_run.call_args[1]["batch_request"]
     assert resulting_batch_request == batch_request
 
 
-@mock.patch(
-    "great_expectations.rule_based_profiler.RuleBasedProfiler.generate_rule_overrides_from_batch_request"
-)
+@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
     mock_data_context: mock.MagicMock,
-    mock_generate_rule_overrides_from_batch_request: mock.MagicMock,
+    mock_rule_based_profiler_run: mock.MagicMock,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -1012,13 +1024,11 @@ def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
         batch_request=batch_request,
     )
 
-    assert mock_generate_rule_overrides_from_batch_request.called
+    assert mock_rule_based_profiler_run.called
 
-    resulting_batch_request: dict = (
-        mock_generate_rule_overrides_from_batch_request.call_args[1][
-            "batch_request"
-        ].to_json_dict()
-    )
+    resulting_batch_request: dict = mock_rule_based_profiler_run.call_args[1][
+        "batch_request"
+    ].to_json_dict()
     deep_filter_properties_iterable(resulting_batch_request, inplace=True)
     expected_batch_request: dict = batch_request.to_json_dict()
     deep_filter_properties_iterable(expected_batch_request, inplace=True)
@@ -1357,7 +1367,8 @@ def test_run_with_expectation_suite_arg(mock_data_context: mock.MagicMock):
     suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name="my_expectation_suite"
     )
-    result_suite: ExpectationSuite = profiler.run(expectation_suite=suite)
+    profiler.run()
+    result_suite: ExpectationSuite = profiler.expectation_suite(expectation_suite=suite)
 
     assert id(suite) == id(result_suite)
 
@@ -1374,7 +1385,8 @@ def test_run_with_conflicting_expectation_suite_args_raises_error(
     )
 
     with pytest.raises(AssertionError) as e:
-        profiler.run(
+        profiler.run()
+        suite = profiler.expectation_suite(
             expectation_suite=suite, expectation_suite_name="my_expectation_suite"
         )
 

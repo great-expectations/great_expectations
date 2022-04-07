@@ -129,17 +129,14 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
             },
         }
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            template_str = f"Values must be unique across columns, at least $mostly_pct % of the time: "
+        else:
+            template_str = f"Values must always be unique across columns: "
 
-        template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
             template_str += f"$column_list_{str(idx)}, "
             params[f"column_list_{str(idx)}"] = params["column_list"][idx]
