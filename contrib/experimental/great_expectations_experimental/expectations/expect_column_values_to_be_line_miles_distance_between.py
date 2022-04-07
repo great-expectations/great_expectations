@@ -2,7 +2,7 @@ import json
 from typing import Optional
 
 import geopandas
-from shapely.geometry import LineString
+from shapely.geometry import LineString, mapping, shape
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -31,11 +31,11 @@ class ColumnValuesLinestringMilesDistanceBetween(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, min_distance, max_distance, **kwargs):
-        column = geopandas.GeoSeries(column)
+        column = column.apply(shape)
         # Set crs to meters
-        column = column.set_crs({"proj": "cea"})
-        # access the length of the column. In meters so have to turn to miles
-        col_len = column.length * 0.000621371192
+        geo_ser = geopandas.GeoSeries(column, crs={"proj": "cea"})
+        # access the length of the column
+        col_len = geo_ser.length * 0.000621371192
         in_between = (col_len >= min_distance) & (col_len <= max_distance)
         return in_between
 
@@ -54,51 +54,62 @@ class ColumnValuesLinestringMilesDistanceBetween(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeLineMilesDistanceBetween(ColumnMapExpectation):
-    """This expectation will compute the distance of Linestring
-    in miles and check if it's between two values."""
+    """This expectation will check if the distance of Linestring is between two values in miles."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
             "data": {
                 "linestring_less_than_500_miles": [
-                    LineString(
-                        [(0, 0), (111319.490793, 110568.8124), (0, 110568.8124)]
+                    mapping(
+                        LineString(
+                            [(0, 0), (111319.490793, 110568.8124), (0, 110568.8124)]
+                        )
                     ),
-                    LineString(
-                        [
-                            (0, 0),
-                            (111319.490793, 110568.8124),
-                            (111319.490793, 0),
-                            (0, 110568.8124),
-                        ]
+                    mapping(
+                        LineString(
+                            [
+                                (0, 0),
+                                (111319.490793, 110568.8124),
+                                (111319.490793, 0),
+                                (0, 110568.8124),
+                            ]
+                        )
                     ),
-                    LineString(
-                        [(0, 0), (222638.981587, 221104.845779), (222638.981587, 0)]
+                    mapping(
+                        LineString(
+                            [(0, 0), (222638.981587, 221104.845779), (222638.981587, 0)]
+                        )
                     ),
                 ],
                 "linestring_between_1000_and_2000_miles": [
-                    LineString(
-                        [
-                            (222638.981587, 552188.640112),
-                            (111319.490793, 772147.013102),
-                            (1113194.907933, 1209055.279421),
-                        ]
+                    mapping(
+                        LineString(
+                            [
+                                (222638.981587, 552188.640112),
+                                (111319.490793, 772147.013102),
+                                (1113194.907933, 1209055.279421),
+                            ]
+                        )
                     ),
-                    LineString(
-                        [
-                            (111319.490793, 881798.964757),
-                            (1001875.417139, 221104.845779),
-                            (111319.490793, 0),
-                            (556597.453966, 1317466.085138),
-                        ]
+                    mapping(
+                        LineString(
+                            [
+                                (111319.490793, 881798.964757),
+                                (1001875.417139, 221104.845779),
+                                (111319.490793, 0),
+                                (556597.453966, 1317466.085138),
+                            ]
+                        )
                     ),
-                    LineString(
-                        [
-                            (556597.453966, 552188.640112),
-                            (1224514.398726, 1209055.279421),
-                            (779236.435553, 881798.964757),
-                        ]
+                    mapping(
+                        LineString(
+                            [
+                                (556597.453966, 552188.640112),
+                                (1224514.398726, 1209055.279421),
+                                (779236.435553, 881798.964757),
+                            ]
+                        )
                     ),
                 ],
             },
@@ -112,9 +123,7 @@ class ExpectColumnValuesToBeLineMilesDistanceBetween(ColumnMapExpectation):
                         "min_distance": 0,
                         "max_distance": 1000,
                     },
-                    "out": {
-                        "success": True,
-                    },
+                    "out": {"success": True,},
                 },
                 {
                     "title": "basic_negative_test",
@@ -125,9 +134,7 @@ class ExpectColumnValuesToBeLineMilesDistanceBetween(ColumnMapExpectation):
                         "min_distance": 1000,
                         "max_distance": 2000,
                     },
-                    "out": {
-                        "success": False,
-                    },
+                    "out": {"success": False,},
                 },
             ],
         }
