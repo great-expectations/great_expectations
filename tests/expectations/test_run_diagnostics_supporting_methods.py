@@ -1,5 +1,3 @@
-import json
-
 import pytest
 
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -12,22 +10,10 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationDescriptionDiagnostics,
     ExpectationExecutionEngineDiagnostics,
     ExpectationMetricDiagnostics,
-    ExpectationRendererDiagnostics,
 )
-from great_expectations.execution_engine.pandas_execution_engine import (
-    PandasExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-)
-
-from .fixtures.expect_column_values_to_equal_three import (
+from great_expectations.expectations.expectation import ColumnMapExpectation
+from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
-    ExpectColumnValuesToEqualThree__BrokenIteration,
     ExpectColumnValuesToEqualThree__SecondIteration,
     ExpectColumnValuesToEqualThree__ThirdIteration,
 )
