@@ -103,7 +103,9 @@ class ParameterBuilder(Builder, ABC):
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
+        ] = None,
         json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
