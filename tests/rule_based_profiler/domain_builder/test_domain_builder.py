@@ -16,6 +16,7 @@ from great_expectations.rule_based_profiler.domain_builder import (
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
+    SemanticDomainTypes,
     build_parameter_container_for_variables,
 )
 
@@ -298,6 +299,65 @@ def test_column_domain_builder_with_simple_semantic_type_included(
             },
         },
     ]
+
+
+def test_semantic_domain_comparisons():
+    domain_a: Domain
+    domain_b: Domain
+    domain_c: Domain
+
+    domain_a = Domain(
+        domain_type="column",
+        domain_kwargs={"column": "VendorID"},
+        details={"inferred_semantic_domain_type": "numeric"},
+    )
+    domain_b = Domain(
+        domain_type="column",
+        domain_kwargs={"column": "passenger_count"},
+        details={"inferred_semantic_domain_type": "numeric"},
+    )
+    domain_c = Domain(
+        domain_type="column",
+        domain_kwargs={"column": "passenger_count"},
+        details={"inferred_semantic_domain_type": "numeric"},
+    )
+
+    assert not (domain_a == domain_b)
+    assert domain_b == domain_c
+
+    domain_a = Domain(
+        domain_type="column",
+        domain_kwargs={"column": "VendorID"},
+        details={"inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC},
+    )
+    domain_b = Domain(
+        domain_type="column",
+        domain_kwargs={"column": "passenger_count"},
+        details={"inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC},
+    )
+    domain_c = Domain(
+        domain_type="column",
+        domain_kwargs={"column": "passenger_count"},
+        details={"inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC},
+    )
+
+    assert not (domain_a == domain_b)
+    assert domain_b == domain_c
+
+    domain_d: Domain = Domain(
+        domain_type="column",
+        domain_kwargs={"column": "passenger_count"},
+        details={"inferred_semantic_domain_type": "unknown_semantic_type_as_string"},
+    )
+
+    with pytest.raises(ValueError) as excinfo:
+        # noinspection PyUnusedLocal
+        domain_as_dict: dict = domain_d.to_json_dict()
+
+    assert (
+        "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"
+        in str(excinfo.value)
+    )
 
 
 def test_column_pair_domain_builder_wrong_column_names(

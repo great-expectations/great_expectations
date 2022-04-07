@@ -3660,7 +3660,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_regex",
-                "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "DOLocationID",
                     "regex": r"^\d{1}$",
