@@ -5,7 +5,6 @@ from unittest.mock import PropertyMock, patch
 import pytest
 
 import great_expectations as ge
-from great_expectations import DataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
