@@ -34,6 +34,7 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
+    ExpectationBackendTestResultCounts,
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticMaturityMessages,
     ExpectationErrorDiagnostics,
@@ -971,6 +972,12 @@ class Expectation(metaclass=MetaExpectation):
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts] = (
+            ExpectationDiagnostics._get_backends_from_test_results(
+                test_results
+            )
+        )
+
         renderers: List[
             ExpectationRendererDiagnostics
         ] = self._get_renderer_diagnostics(
@@ -985,6 +992,7 @@ class Expectation(metaclass=MetaExpectation):
                 description=description_diagnostics,
                 examples=examples,
                 tests=test_results,
+                backend_test_result_counts=backend_test_result_counts,
                 execution_engines=introspected_execution_engines,
             )
         )
@@ -1016,6 +1024,7 @@ class Expectation(metaclass=MetaExpectation):
             metrics=metric_diagnostics_list,
             execution_engines=introspected_execution_engines,
             tests=test_results,
+            backend_test_result_counts=backend_test_result_counts,
             maturity_checklist=maturity_checklist,
             errors=errors,
         )
@@ -1477,6 +1486,7 @@ class Expectation(metaclass=MetaExpectation):
         description: ExpectationDescriptionDiagnostics,
         examples: List[ExpectationTestDataCases],
         tests: List[ExpectationTestDiagnostics],
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
         execution_engines: ExpectationExecutionEngineDiagnostics,
     ) -> ExpectationDiagnosticMaturityMessages:
         """Generate maturity checklist messages"""
@@ -1493,7 +1503,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         experimental_checks.append(
             ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
-                tests
+                backend_test_result_counts
             )
         )
         experimental_checks.append(ExpectationDiagnostics._check_linting(self))
@@ -1504,7 +1514,7 @@ class Expectation(metaclass=MetaExpectation):
         beta_checks.append(ExpectationDiagnostics._check_renderer_methods(self))
         beta_checks.append(
             ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(
-                tests
+                backend_test_result_counts
             )
         )
 

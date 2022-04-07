@@ -139,6 +139,16 @@ class ExpectationTestDiagnostics(SerializableDictDot):
 
 
 @dataclass
+class ExpectationBackendTestResultCounts(SerializableDictDot):
+    """Has each tested backend and the number of passing/failing tests"""
+
+    backend: str
+    num_passed: int
+    num_failed: int
+    failing_names: Optional[List[str]]
+
+
+@dataclass
 class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     """Summarizes the result of a diagnostic Check. Used within the ExpectationDiagnostic object."""
 

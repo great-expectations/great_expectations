@@ -11,6 +11,7 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
+    ExpectationBackendTestResultCounts,
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticCheckMessage,
     ExpectationDiagnosticMaturityMessages,
@@ -67,6 +68,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     renderers: List[ExpectationRendererDiagnostics]
     metrics: List[ExpectationMetricDiagnostics]
     tests: List[ExpectationTestDiagnostics]
+    backend_test_result_counts: List[ExpectationBackendTestResultCounts]
     errors: List[ExpectationErrorDiagnostics]
     maturity_checklist: ExpectationDiagnosticMaturityMessages
 
@@ -165,34 +167,30 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_core_logic_for_at_least_one_execution_engine(
-        test_results: List[ExpectationTestDiagnostics],
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
 
         sub_messages = []
-        backends_passing_all_tests = []
-        backend_results = defaultdict(list)
         passed = False
         message = "Has core logic and passes tests on at least one Execution Engine"
+        all_passing = [
+            backend_test_result
+            for backend_test_result in backend_test_result_counts
+            if backend_test_result.failing_names is None and backend_test_result.num_passed >= 1
+        ]
 
-        for test_result in test_results:
-            backend_results[test_result.backend].append(test_result.test_passed)
-
-        for backend in backend_results:
-            if all(backend_results[backend]):
-                backends_passing_all_tests.append(backend)
-
-        if len(backends_passing_all_tests) > 0:
+        if len(all_passing) > 0:
             passed = True
-            backend = backends_passing_all_tests[0]
-            sub_messages.append(
-                {
-                    "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
-                    "passed": True,
-                }
-            )
+            for result in all_passing:
+                sub_messages.append(
+                    {
+                        "message": f"All {result.num_passed} tests for {result.backend} are passing",
+                        "passed": True,
+                    }
+                )
 
-        if not test_results:
+        if not backend_test_result_counts:
             sub_messages.append(
                 {
                     "message": "There are no test results",
@@ -207,59 +205,76 @@ class ExpectationDiagnostics(SerializableDictDot):
         )
 
     @staticmethod
-    def _check_core_logic_for_all_applicable_execution_engines(
+    def _get_backends_from_test_results(
         test_results: List[ExpectationTestDiagnostics],
+    ) -> List[ExpectationBackendTestResultCounts]:
+        """Has each tested backend and the number of passing/failing tests"""
+        backend_results = defaultdict(list)
+        backend_failing_names = defaultdict(list)
+        results: List[ExpectationBackendTestResultCounts] = []
+
+        for test_result in test_results:
+            backend_results[test_result.backend].append(test_result.test_passed)
+            if test_result.test_passed is False:
+                backend_failing_names[test_result.backend].append(test_result.test_title)
+
+        for backend in backend_results:
+            result_counts = ExpectationBackendTestResultCounts(
+                backend=backend,
+                num_passed=backend_results[backend].count(True),
+                num_failed=backend_results[backend].count(False),
+                failing_names=backend_failing_names.get(backend)
+            )
+            results.append(result_counts)
+
+        return results
+
+    @staticmethod
+    def _check_core_logic_for_all_applicable_execution_engines(
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""
 
         sub_messages = []
-        backends_passing_all_tests = []
-        backends_failing_any_tests = []
-        failing_names = []
-        backend_results = defaultdict(list)
         passed = False
         message = "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
-        for test_result in test_results:
-            backend_results[test_result.backend].append(test_result.test_passed)
-            if test_result.test_passed is False:
-                failing_names.append(test_result.test_title)
+        all_passing = [
+            backend_test_result
+            for backend_test_result in backend_test_result_counts
+            if backend_test_result.failing_names is None and backend_test_result.num_passed >= 1
+        ]
+        some_failing = [
+            backend_test_result
+            for backend_test_result in backend_test_result_counts
+            if backend_test_result.failing_names is not None
+        ]
 
-        for backend in backend_results:
-            if all(backend_results[backend]):
-                backends_passing_all_tests.append(backend)
-            else:
-                backends_failing_any_tests.append(backend)
-
-        if len(backends_passing_all_tests) > 0 and len(backends_failing_any_tests) == 0:
+        if len(all_passing) > 0 and len(some_failing) == 0:
             passed = True
 
-        for backend in backends_passing_all_tests:
+        for result in all_passing:
             sub_messages.append(
                 {
-                    "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
+                    "message": f"All {result.num_passed} tests for {result.backend} are passing",
                     "passed": True,
                 }
             )
 
-        for backend in backends_failing_any_tests:
-            num_tests = len(backend_results[backend])
-            num_passing = backend_results[backend].count(True)
+        for result in some_failing:
             sub_messages.append(
                 {
-                    "message": f"Only {num_passing} / {num_tests} tests for {backend} are passing",
+                    "message": f"Only {result.num_passed} / {result.num_passed + result.num_failed} tests for {result.backend} are passing",
+                    "passed": False,
+                }
+            )
+            sub_messages.append(
+                {
+                    "message": f"  - Failing: {', '.join(result.failing_names)}",
                     "passed": False,
                 }
             )
 
-        if len(failing_names) > 0:
-            sub_messages.append(
-                {
-                    "message": f"Failing: {', '.join(failing_names)}",
-                    "passed": False,
-                }
-            )
-
-        if not test_results:
+        if not backend_test_result_counts:
             sub_messages.append(
                 {
                     "message": "There are no test results",
