@@ -18,7 +18,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_valid_arkansas_zip(zip: str):
-    list_of_dicts_of_arkansas_zips = zipcodes.filter_by(state="AK")
+    list_of_dicts_of_arkansas_zips = zipcodes.filter_by(state="AR")
     list_of_arkansas_zips = [d["zip_code"] for d in list_of_dicts_of_arkansas_zips]
     if len(zip) > 10:
         return False
@@ -55,7 +55,7 @@ class ColumnValuesToBeValidArkansasZip(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidArkansasZip(ColumnMapExpectation):
-    """Expect values in this column to be valid Alaska zipcodes.
+    """Expect values in this column to be valid Arkansas zipcodes.
     See https://pypi.org/project/zipcodes/ for more information.
     """
 
