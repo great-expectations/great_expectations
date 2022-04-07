@@ -125,6 +125,7 @@ class ExpectColumnValuesToBeValidIsbn10(ColumnMapExpectation):
         "contributors": [
             "@voidforall",
         ],
+        "requirements": ["isbnlib"],
     }
 
 
