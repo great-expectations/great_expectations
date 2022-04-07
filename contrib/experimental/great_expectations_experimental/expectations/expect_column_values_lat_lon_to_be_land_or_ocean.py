@@ -1,6 +1,6 @@
 from typing import Any, List, Union
 
-import pygeos
+from global_land_mask import globe
 
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -25,35 +25,36 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesValidGeojson(ColumnMapMetricProvider):
+class ColumnValuesLatLonLandOrOcean(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.valid_geojson"
-    condition_value_keys = ()
+    condition_metric_name = "column_values.lat_lon_land_or_ocean"
+    condition_value_keys = ("land_or_ocean",)
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
-        # Check if values is a valid GeoJSON by parsing it and returning False if there's an error
-        def valid_geojson(value):
-            try:
-                pygeos.from_geojson(value)
-                return True
-            except pygeos.GEOSException:
-                return False
+    def _pandas(cls, column, land_or_ocean="land", **kwargs):
 
-        column = column.apply(valid_geojson)
-        return column
+        if land_or_ocean == "land":
+            return column.apply(lambda point: globe.is_land(point[0], point[1]))
+        elif land_or_ocean == "ocean":
+            return column.apply(lambda point: globe.is_ocean(point[0], point[1]))
+        else:
+            raise ValueError("land_or_ocean must be 'land' or 'ocean'")
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidGeojson(ColumnMapExpectation):
-    """Expect values in a column to be valid geojson strings as defined in https://geojson.org/.
-    Note that this makes use of https://pygeos.readthedocs.io/en/stable/io.html#pygeos.io.from_geojson which has some limitations.
+class ExpectColumnValuesLatLonToBeLandOrOcean(ColumnMapExpectation):
+    """Expect values in a column to be lat lon pairs that represent a point on land or in an ocean.
 
     Args:
         column (str): \
             The column name.
+
+        land_or_ocean (str): \
+            Either 'land' or 'ocean'. \
+            represents whether to check if each point is on land or in an ocean.
+
 
     """
 
@@ -62,43 +63,58 @@ class ExpectColumnValuesToBeValidGeojson(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_geojson": [
-                    """{
-                        "type": "Feature",
-                        "geometry": {
-                            "type": "Point",
-                            "coordinates": [125.6, 10.1]
-                        },
-                        "properties": {
-                            "name": "Dinagat Islands"
-                        }
-                    }""",
-                    '{"type": "Point","coordinates": [1, 2]}',
-                    '{"type": "Point","coordinates": [5, 6]}',
+                "lat_lon_on_land": [
+                    (32.699316, -117.063457),
+                    (33.570321, -116.884380),
+                    (33.598757, -117.721397),
                 ],
-                "invalid_geojson": [
-                    "{}",
-                    "{ 'type': 'Feature' }",
-                    "",
+                "lat_lon_in_ocean": [
+                    (20.699316, -117.063457),
+                    (50.699316, -45.063457),
+                    (-3.699316, 45.063457),
                 ],
             },
             "tests": [
                 {
-                    "title": "basic_positive_test",
+                    "title": "positive_for_lat_lon_on_land",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "valid_geojson",
+                        "column": "lat_lon_on_land",
+                        "land_or_ocean": "land",
                         "mostly": 1,
                     },
                     "out": {"success": True},
                 },
                 {
-                    "title": "basic_negative_test",
+                    "title": "negative_for_lat_lon_on_land",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "invalid_geojson",
+                        "column": "lat_lon_on_land",
+                        "land_or_ocean": "ocean",
+                        "mostly": 0.2,
+                    },
+                    "out": {"success": False},
+                },
+                {
+                    "title": "positive_for_lat_lon_in_ocean",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "lat_lon_in_ocean",
+                        "land_or_ocean": "ocean",
+                        "mostly": 1,
+                    },
+                    "out": {"success": True},
+                },
+                {
+                    "title": "negative_for_lat_lon_in_ocean",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "lat_lon_in_ocean",
+                        "land_or_ocean": "land",
                         "mostly": 0.2,
                     },
                     "out": {"success": False},
@@ -109,10 +125,13 @@ class ExpectColumnValuesToBeValidGeojson(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_geojson"
+    map_metric = "column_values.lat_lon_land_or_ocean"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    success_keys = ("mostly",)
+    success_keys = (
+        "mostly",
+        "land_or_ocean",
+    )
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {
@@ -128,7 +147,7 @@ class ExpectColumnValuesToBeValidGeojson(ColumnMapExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@mmi333",  # Don't forget to add your github handle here!
         ],
-        "requirements": ["pygeos"],
+        "requirements": ["global-land-mask"],
     }
 
     @classmethod
@@ -166,16 +185,20 @@ class ExpectColumnValuesToBeValidGeojson(ColumnMapExpectation):
             ],
         )
 
-        if params["mostly"] is None:
-            template_str = "values must be valid geojson strings"
+        template_str = "values must be lat lon pairs that represent a point"
+
+        if params["land_or_ocean"] == "land":
+            template_str += " on land"
+        elif params["land_or_ocean"] == "ocean":
+            template_str += " in an ocean"
+
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            template_str += ", at least $mostly_pct % of the time."
         else:
-            if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
-                )
-                template_str += ", at least $mostly_pct % of the time."
-            else:
-                template_str += "."
+            template_str += "."
 
         if include_column_name:
             template_str = f"$column {template_str}"
@@ -195,4 +218,4 @@ class ExpectColumnValuesToBeValidGeojson(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidGeojson().print_diagnostic_checklist()
+    ExpectColumnValuesLatLonToBeLandOrOcean().print_diagnostic_checklist()
