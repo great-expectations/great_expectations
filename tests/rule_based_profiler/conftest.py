@@ -12,11 +12,14 @@ from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBu
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
 from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     Domain,
     ParameterContainer,
     ParameterNode,
+    RuleState,
 )
 
 yaml = YAML()
@@ -477,25 +480,9 @@ def variables_multi_part_name_parameter_container():
     return variables
 
 
-@pytest.fixture
-def rule_without_parameters(
-    empty_data_context,
-):
-    rule: Rule = Rule(
-        name="rule_with_no_variables_no_parameters",
-        domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
-        expectation_configuration_builders=[
-            DefaultExpectationConfigurationBuilder(
-                expectation_type="expect_my_validation"
-            )
-        ],
-    )
-    return rule
-
-
 # noinspection PyPep8Naming
 @pytest.fixture
-def rule_with_parameters(
+def rule_without_variables(
     empty_data_context,
     column_Age_domain,
     column_Date_domain,
@@ -504,19 +491,49 @@ def rule_with_parameters(
     multi_part_name_parameter_container,
 ):
     rule: Rule = Rule(
-        name="rule_with_parameters",
+        name="rule_without_variables",
         domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
         expectation_configuration_builders=[
             DefaultExpectationConfigurationBuilder(
-                expectation_type="expect_my_validation"
-            )
+                expectation_type="expect_my_validation",
+                column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            ),
         ],
     )
-    rule._parameters = {
-        column_Age_domain.id: single_part_name_parameter_container,
-        column_Date_domain.id: multi_part_name_parameter_container,
-    }
     return rule
+
+
+# noinspection PyPep8Naming
+@pytest.fixture
+def rule_state_with_domains_and_parameters(
+    rule_without_variables,
+    column_Age_domain,
+    column_Date_domain,
+    single_part_name_parameter_container,
+    multi_part_name_parameter_container,
+):
+    rule_state: RuleState = RuleState(
+        rule=rule_without_variables,
+        domains=[
+            column_Age_domain,
+            column_Date_domain,
+        ],
+        parameters={
+            column_Age_domain.id: single_part_name_parameter_container,
+            column_Date_domain.id: multi_part_name_parameter_container,
+        },
+    )
+    return rule_state
+
+
+@pytest.fixture
+def rule_output_for_rule_state_with_domains_and_parameters(
+    rule_state_with_domains_and_parameters,
+):
+    rule_output: RuleOutput = RuleOutput(
+        rule_state=rule_state_with_domains_and_parameters
+    )
+    return rule_output
 
 
 @pytest.fixture
