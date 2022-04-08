@@ -1102,7 +1102,7 @@ class NotebookConfig(DictDot):
 class NotebookConfigSchema(Schema):
     class_name = fields.String(missing="SuiteEditNotebookRenderer")
     module_name = fields.String(
-        missing="great_expectations.render.renderer.suite_edit_notebook_renderer"
+        missing="great_expectations.render.renderer.v3.suite_edit_notebook_renderer"
     )
     custom_templates_module = fields.String(allow_none=True)
 
