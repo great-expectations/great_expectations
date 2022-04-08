@@ -1,9 +1,10 @@
 ---
-title: How to connect to a Athena database
+title: How to connect to an Athena database
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you add an Athena instance (or a database) as a Datasource. This will allow you to validate tables and queries within this instance. When you use an Athena Datasource, the validation is done in Athena itself. Your data is not downloaded.
+This guide will help you add an Athena instance (or a database) as a <TechnicalTag tag="datasource" text="Datasource" />. This will allow you to <TechnicalTag tag="validation" text="Validate" /> tables and queries within this instance. When you use an Athena Datasource, the validation is done in Athena itself. Your data is not downloaded.
 
 <Prerequisites>
 
@@ -12,42 +13,43 @@ This guide will help you add an Athena instance (or a database) as a Datasource.
 
 </Prerequisites>
 
-Steps
------
+## Steps
 
-1. Run the following CLI command to begin the interactive Datasource creation process:
+### 1. Run the following CLI command to begin the interactive Datasource creation process:
 
-    ```bash
-    great_expectations datasource new
-    ```
+```bash
+great_expectations datasource new
+```
 
-2. Choose "other" from the list of database engines, when prompted.
+When prompted to choose from the list of database engines, chose `other`.
 
-3. Identify the connection string you would like Great Expectations to use to connect to Athena, using the examples below and the [PyAthena](https://github.com/laughingman7743/PyAthena#sqlalchemy) documentation.
+### 2. Identify your connection string
 
-    The following urls dont include credentials as it is recommended to use either the instance profile or the boto3 configuration file.
+In order to for Great Expectations to connect to Athena, you will need to provide a connection string.  To determine your connection string, reference the examples below and the [PyAthena documentation](https://github.com/laughingman7743/PyAthena#sqlalchemy).
 
-    If you want Great Expectations to connect to your Athena instance (without specifying a particular database), the URL should be:
+The following urls don't include credentials as it is recommended to use either the instance profile or the boto3 configuration file.
 
-    ```bash
-    awsathena+rest://@athena.{region}.amazonaws.com/?s3_staging_dir={s3_path}
-    ```
+If you want Great Expectations to connect to your Athena instance (without specifying a particular database), the URL should be:
 
-    Note the url parameter "s3_staging_dir" needed for storing query results in S3.
+```bash
+awsathena+rest://@athena.{region}.amazonaws.com/?s3_staging_dir={s3_path}
+```
 
-    If you want Great Expectations to connect to a particular database inside your Athena, the URL should be:
+Note the url parameter "s3_staging_dir" needed for storing query results in S3.
 
-    ```bash
-    awsathena+rest://@athena.{region}.amazonaws.com/{database}?s3_staging_dir={s3_path}
-    ```
+If you want Great Expectations to connect to a particular database inside your Athena, the URL should be:
 
-5. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+```bash
+awsathena+rest://@athena.{region}.amazonaws.com/{database}?s3_staging_dir={s3_path}
+```
 
-6. Follow the steps in this Jupyter Notebook including entering the connection string in the yaml configuration.
+After providing your connection string, you will then be presented with a Jupyter Notebook.
 
+### 3. Follow the steps in the Jupyter Notebook
 
-Additional notes
-----------------
+The Jupyter Notebook will guide you through the remaining steps of creating a Datasource.  Follow the steps in the presented notebook, including entering the connection string in the yaml configuration.
+
+## Additional notes
 
 Environment variables can be used to store the SQLAlchemy URL instead of the file, if preferred - search documentation for "Managing Environment and Secrets".
 

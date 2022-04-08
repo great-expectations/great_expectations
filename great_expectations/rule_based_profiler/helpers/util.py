@@ -6,22 +6,25 @@ from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-from scipy import stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     materialize_batch_request,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
+    VARIABLES_PREFIX,
     Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
+    is_fully_qualified_parameter_name_literal_string_format,
 )
+from great_expectations.types import safe_deep_copy
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -35,7 +38,7 @@ def get_validator(
     *,
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -90,7 +93,7 @@ def get_validator(
 def get_batch_ids(
     data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -122,7 +125,7 @@ def get_batch_ids(
 
 
 def build_batch_request(
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
+    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -185,7 +188,7 @@ def get_parameter_value_and_validate_return_type(
     or as a fully-qualified parameter name.  In either case, it can optionally validate the type of the return value.
     """
     if isinstance(parameter_reference, dict):
-        parameter_reference = dict(copy.deepcopy(parameter_reference))
+        parameter_reference = safe_deep_copy(data=parameter_reference)
 
     parameter_reference = get_parameter_value(
         domain=domain,
@@ -224,21 +227,37 @@ def get_parameter_value(
                 variables=variables,
                 parameters=parameters,
             )
-    elif isinstance(parameter_reference, str) and parameter_reference.startswith("$"):
+    elif isinstance(parameter_reference, (list, set, tuple)):
+        parameter_reference_type: type = type(parameter_reference)
+        element: Any
+        return parameter_reference_type(
+            [
+                get_parameter_value(
+                    domain=domain,
+                    parameter_reference=element,
+                    variables=variables,
+                    parameters=parameters,
+                )
+                for element in parameter_reference
+            ]
+        )
+    elif isinstance(
+        parameter_reference, str
+    ) and is_fully_qualified_parameter_name_literal_string_format(
+        fully_qualified_parameter_name=parameter_reference
+    ):
         parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=parameter_reference,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-        if isinstance(parameter_reference, dict):
-            for key, value in parameter_reference.items():
-                parameter_reference[key] = get_parameter_value(
-                    domain=domain,
-                    parameter_reference=value,
-                    variables=variables,
-                    parameters=parameters,
-                )
+        parameter_reference = get_parameter_value(
+            domain=domain,
+            parameter_reference=parameter_reference,
+            variables=variables,
+            parameters=parameters,
+        )
 
     return parameter_reference
 
@@ -360,23 +379,17 @@ def build_simple_domains_from_column_names(
 
 
 def convert_variables_to_dict(
-    variables: Optional[ParameterContainer],
-) -> Optional[Dict[str, Any]]:
-    if variables is None:
-        return {}
+    variables: Optional[ParameterContainer] = None,
+) -> Dict[str, Any]:
+    variables: Optional[Dict[str, Any]] = get_parameter_value_and_validate_return_type(
+        domain=None,
+        parameter_reference=VARIABLES_PREFIX,
+        expected_return_type=None,
+        variables=variables,
+        parameters=None,
+    )
 
-    variables_dict: Optional[Dict[str, Any]] = None
-    try:
-        variables_dict = variables.to_dict()["parameter_nodes"]["variables"][
-            "variables"
-        ]
-    except (TypeError, KeyError) as e:
-        logger.warning("Could not convert existing variables to dict: %s", e)
-
-    if variables_dict is None:
-        variables_dict = {}
-
-    return variables_dict
+    return variables or {}
 
 
 def compute_quantiles(
@@ -402,68 +415,10 @@ def compute_bootstrap_quantiles_point_estimate(
     n_resamples: int,
     random_seed: Optional[int] = None,
 ) -> Tuple[Number, Number]:
-    """The winner of our performance testing is selected from the possible candidates:
-    - _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method
-    - _compute_bootstrap_quantiles_point_estimate_custom_mean_method
-    - _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method"""
-    return _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
-        metric_values=metric_values,
-        false_positive_rate=false_positive_rate,
-        n_resamples=n_resamples,
-        random_seed=random_seed,
-    )
-
-
-def _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
-    metric_values: np.ndarray,
-    false_positive_rate: np.float64,
-    n_resamples: int,
-    random_seed: Optional[int] = None,
-) -> Tuple[Number, Number]:
     """
-    An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
-    parameter of interest (lower and upper quantiles in this case). See
-    https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+    ML Flow Experiment: parameter_builders_bootstrap/bootstrap_quantiles
+    ML Flow Experiment ID: 4129654509298109
 
-    This implementation has been replaced by "_compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method"
-    and only remains to demonstrate the performance improvement achieved by correcting for bias. Upon the implementation
-    of a Machine Learning Lifecycle framework, the performance improvement can be documented and this legacy method can
-    be removed from the codebase.
-    """
-    if random_seed:
-        random_state: np.random.Generator = np.random.Generator(
-            np.random.PCG64(random_seed)
-        )
-        bootstraps: np.ndarray = random_state.choice(
-            metric_values, size=(n_resamples, metric_values.size)
-        )
-    else:
-        bootstraps: np.ndarray = np.random.choice(
-            metric_values, size=(n_resamples, metric_values.size)
-        )
-
-    lower_quantiles: Union[np.ndarray, Number] = np.quantile(
-        bootstraps,
-        q=false_positive_rate / 2,
-        axis=1,
-    )
-    lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
-    upper_quantiles: Union[np.ndarray, Number] = np.quantile(
-        bootstraps,
-        q=1.0 - (false_positive_rate / 2),
-        axis=1,
-    )
-    upper_quantile_point_estimate: Number = np.mean(upper_quantiles)
-    return lower_quantile_point_estimate, upper_quantile_point_estimate
-
-
-def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
-    metric_values: np.ndarray,
-    false_positive_rate: np.float64,
-    n_resamples: int,
-    random_seed: Optional[int] = None,
-) -> Tuple[Number, Number]:
-    """
     An internal implementation of the "bootstrap" estimator method, returning a point estimate for a population
     parameter of interest (lower and upper quantiles in this case). See
     https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
@@ -517,8 +472,8 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
     lower_quantile_pct: float = false_positive_rate / 2
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2
 
-    sample_lower_quantile: Number = np.quantile(metric_values, q=lower_quantile_pct)
-    sample_upper_quantile: Number = np.quantile(metric_values, q=upper_quantile_pct)
+    sample_lower_quantile: np.ndarray = np.quantile(metric_values, q=lower_quantile_pct)
+    sample_upper_quantile: np.ndarray = np.quantile(metric_values, q=upper_quantile_pct)
 
     if random_seed:
         random_state: np.random.Generator = np.random.Generator(
@@ -537,9 +492,9 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
         q=lower_quantile_pct,
         axis=1,
     )
-    bootstrap_lower_quantile_point_estimate: Number = np.mean(bootstrap_lower_quantiles)
-    bootstrap_lower_quantile_standard_error: Number = np.std(bootstrap_lower_quantiles)
-    bootstrap_lower_quantile_bias: Number = (
+    bootstrap_lower_quantile_point_estimate: float = np.mean(bootstrap_lower_quantiles)
+    bootstrap_lower_quantile_standard_error: float = np.std(bootstrap_lower_quantiles)
+    bootstrap_lower_quantile_bias: float = (
         bootstrap_lower_quantile_point_estimate - sample_lower_quantile
     )
 
@@ -562,9 +517,13 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
         q=upper_quantile_pct,
         axis=1,
     )
-    bootstrap_upper_quantile_point_estimate: Number = np.mean(bootstrap_upper_quantiles)
-    bootstrap_upper_quantile_standard_error: Number = np.std(bootstrap_upper_quantiles)
-    bootstrap_upper_quantile_bias: Number = (
+    bootstrap_upper_quantile_point_estimate: np.ndarray = np.mean(
+        bootstrap_upper_quantiles
+    )
+    bootstrap_upper_quantile_standard_error: np.ndarray = np.std(
+        bootstrap_upper_quantiles
+    )
+    bootstrap_upper_quantile_bias: float = (
         bootstrap_upper_quantile_point_estimate - sample_upper_quantile
     )
 
@@ -586,92 +545,3 @@ def _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
         lower_quantile_bias_corrected_point_estimate,
         upper_quantile_bias_corrected_point_estimate,
     )
-
-
-def _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method(
-    metric_values: np.ndarray,
-    false_positive_rate: np.float64,
-    n_resamples: int,
-    method: Optional[str] = "BCa",
-    random_seed: Optional[int] = None,
-):
-    """
-    SciPy implementation of the BCa confidence interval for the population quantile. Unfortunately, as of
-    March 4th, 2022, this implementation has two issues:
-        1) it only returns a confidence interval and not a point estimate for the population parameter of interest,
-           which is what we require for our use cases (the attempt below tries to "back out" the statistic from the
-           confidece interval by taking the midpoint of the interval).
-        2) It can not handle multi-dimensional statistics and correct for bias simultaneously. You must either use
-           one feature or the other.
-
-    This implementation could only be used if Great Expectations drops support for Python 3.6, thereby enabling us
-    to use a more up-to-date version of the "scipy" Python package (the currently used version does not have
-    "bootstrap"). Also, as discussed above, two contributions would need to be made to the SciPy package to enable
-    1) bias correction for multi-dimensional statistics and 2) a return value of a point estimate for the population
-    parameter of interest (lower and upper quantiles in this case).
-    """
-    bootstraps: tuple = (metric_values,)  # bootstrap samples must be in a sequence
-
-    if random_seed:
-        random_state = np.random.Generator(np.random.PCG64(random_seed))
-    else:
-        random_state = None
-
-    lower_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
-        bootstraps,
-        lambda data: np.quantile(
-            data,
-            q=false_positive_rate / 2,
-        ),
-        vectorized=False,
-        confidence_level=1.0 - false_positive_rate,
-        n_resamples=n_resamples,
-        method=method,
-        random_state=random_state,
-    )
-    upper_quantile_bootstrap_result: stats._bootstrap.BootstrapResult = stats.bootstrap(
-        bootstraps,
-        lambda data: np.quantile(
-            data,
-            q=1.0 - (false_positive_rate / 2),
-        ),
-        vectorized=False,
-        confidence_level=1.0 - false_positive_rate,
-        n_resamples=n_resamples,
-        method=method,
-        random_state=random_state,
-    )
-
-    # The idea that we can take the midpoint of the confidence interval is based on the fact that we think the
-    # confidence interval was built from a symmetrical distribution. We think the distribution is normal due to
-    # the implications of the Central Limit Theorem (CLT) (https://en.wikipedia.org/wiki/Central_limit_theorem) on
-    # the bootstrap samples.
-    # Unfortunately, the assumption that the CLT applies, does not hold in all cases. The bias-corrected and accelerated
-    # (BCa) confidence interval computed using scipy.stats.bootstrap attempts to compute the "acceleration" as a
-    # correction, because the standard normal approximation (CLT) assumes that the standard error of the bootstrap
-    # quantiles (theta-hat) is the same for all parameters (theta). The acceleration (which is the rate of change of
-    # the standard error of the quantile point estimate) is not a perfect correction, and therefore the assumption that
-    # this interval is built from a normal distribution does not always hold.
-    # See:
-    #
-    # Efron, B., & Tibshirani, R. J. (1993). The BCa method. An Introduction to the Bootstrap (pp. 184-188).
-    #     Springer Science and Business Media Dordrecht. DOI 10.1007/978-1-4899-4541-9
-    #
-    # For an in-depth look at how the BCa interval is constructed and you will find the points made above on page 186.
-    lower_quantile_confidence_interval: stats._bootstrap.BootstrapResult.ConfidenceInterval = (
-        lower_quantile_bootstrap_result.confidence_interval
-    )
-    lower_quantile_point_estimate: np.float64 = np.mean(
-        [
-            lower_quantile_confidence_interval.low,
-            lower_quantile_confidence_interval.high,
-        ]
-    )
-    upper_quantile_confidence_interal: stats._bootstrap.BootstrapResult.ConfidenceInterval = (
-        upper_quantile_bootstrap_result.confidence_interval
-    )
-    upper_quantile_point_estimate: np.float64 = np.mean(
-        [upper_quantile_confidence_interal.low, upper_quantile_confidence_interal.high]
-    )
-
-    return lower_quantile_point_estimate, upper_quantile_point_estimate
