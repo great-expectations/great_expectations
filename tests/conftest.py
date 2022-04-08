@@ -2144,6 +2144,22 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
 
 
 @pytest.fixture
+def data_context_with_datasource_postgresql_engine_no_data_connectors(
+    empty_data_context,
+):
+    context: DataContext = empty_data_context
+    context.add_datasource(
+        name="my_datasource",
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "connection_string": "postgresql+psycopg2://postgres:@localhost/test_ci",
+        },
+    )
+    return context
+
+
+@pytest.fixture
 def data_context_with_query_store(
     empty_data_context, titanic_sqlite_db_connection_string
 ):
