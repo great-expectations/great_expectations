@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 from collections import OrderedDict
@@ -14,9 +15,52 @@ from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.basic_suite_builder_profiler import (
     BasicSuiteBuilderProfiler,
 )
-from great_expectations.self_check.util import expectationSuiteValidationResultSchema
+from great_expectations.self_check.util import (
+    expectationSuiteValidationResultSchema,
+    get_dataset,
+)
 
 FALSEY_VALUES = [None, [], False]
+
+
+@pytest.fixture
+def datetime_dataset(test_backend):
+    data = {
+        "datetime": [
+            str(datetime.datetime(2020, 2, 4, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 5, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 6, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 7, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 8, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 9, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 10, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 11, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 12, 22, 12, 5, 943152)),
+            str(datetime.datetime(2020, 2, 13, 22, 12, 5, 943152)),
+        ]
+    }
+
+    schemas = {
+        "pandas": {
+            "datetime": "datetime64",
+        },
+        "postgresql": {
+            "datetime": "TIMESTAMP",
+        },
+        "sqlite": {
+            "datetime": "TIMESTAMP",
+        },
+        "mysql": {
+            "datetime": "TIMESTAMP",
+        },
+        "mssql": {
+            "datetime": "DATETIME",
+        },
+        "spark": {
+            "datetime": "TimestampType",
+        },
+    }
+    return get_dataset(test_backend, data, schemas=schemas)
 
 
 @pytest.mark.filterwarnings(

@@ -36,14 +36,14 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "multi-column expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_pair_values.in_set"
@@ -67,7 +67,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -81,4 +81,3 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
             ), "must provide value_pairs_set"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True

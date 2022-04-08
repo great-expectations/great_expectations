@@ -34,7 +34,7 @@ yaml = YAML()
 def datasource_with_runtime_data_connector_and_pandas_execution_engine():
     basic_datasource: Datasource = instantiate_class_from_config(
         yaml.load(
-            f"""
+            """
     class_name: Datasource
 
     execution_engine:
@@ -60,7 +60,7 @@ def datasource_with_runtime_data_connector_and_pandas_execution_engine():
 def datasource_with_runtime_data_connector_and_sparkdf_execution_engine(spark_session):
     basic_datasource: Datasource = instantiate_class_from_config(
         yaml.load(
-            f"""
+            """
     class_name: Datasource
 
     execution_engine:
