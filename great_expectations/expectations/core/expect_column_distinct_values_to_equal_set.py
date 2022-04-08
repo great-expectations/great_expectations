@@ -24,10 +24,11 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": False,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -55,7 +56,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
         if configuration is None:
@@ -71,7 +72,6 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
                 ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
