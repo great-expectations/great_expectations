@@ -183,7 +183,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",
-        "package": "experimental_expectation",
         "tags": ["experimental", "column map expectation"],
         "contributors": ["@austiezr"],
     }
@@ -222,8 +221,8 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
-        return super().validate_configuration(configuration=configuration)
+    ) -> None:
+        super().validate_configuration(configuration=configuration)
 
     def get_validation_dependencies(
         self,
