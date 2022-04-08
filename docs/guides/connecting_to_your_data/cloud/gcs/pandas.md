@@ -8,9 +8,10 @@ import Prerequisites from '../../components/prerequisites.jsx'
 import WhereToRunCode from '../../components/where_to_run_code.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you connect to your data stored on GCS using Pandas.
-This will allow you to validate and explore your data.
+This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
 <Prerequisites>
 
@@ -28,20 +29,20 @@ This will allow you to validate and explore your data.
 
 Import these necessary packages and modules.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L3-L6
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L4-L8
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L8
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L12
 ```
 
 ### 3. Configure your Datasource
 
 Great Expectations provides two types of `DataConnectors` classes for connecting to GCS: `InferredAssetGCSDataConnector` and `ConfiguredAssetGCSDataConnector`
 
-  - An `InferredAssetGCSDataConnector` utilizes regular expressions to infer `data_asset_names` by evaluating filename patterns that exist in your bucket. This `DataConnector`, along with a `RuntimeDataConnector`, is provided as a default when utilizing our Jupyter Notebooks.
-  - A `ConfiguredAssetGCSDataConnector` requires an explicit listing of each `DataAsset` you want to connect to. This allows for more granularity and control than its `Inferred` counterpart but also requires a more complex setup.
+- An `InferredAssetGCSDataConnector` utilizes regular expressions to infer `data_asset_names` by evaluating filename patterns that exist in your bucket. This `DataConnector`, along with a `RuntimeDataConnector`, is provided as a default when utilizing our Jupyter Notebooks.
+- A `ConfiguredAssetGCSDataConnector` requires an explicit listing of each `DataAsset` you want to connect to. This allows for more granularity and control than its `Inferred` counterpart but also requires a more complex setup.
 
 As the `InferredAssetDataConnectors` have fewer options and are generally simpler to use, we recommend starting with them.
 
@@ -50,16 +51,17 @@ We've detailed example configurations for both options in the next section for y
 :::info Authentication
 
 It is also important to note that GCS `DataConnectors` support various methods of authentication. You should be aware of the following options when configuring your own environment:
+
 * `gcloud` command line tool / `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
   - This is the default option and what is used throughout this guide.
 * Passing a `filename` argument to the optional `gcs_options` dictionary.
   - This argument should contain a specific filepath that leads to your credentials JSON.
   - This method utilizes `google.oauth2.service_account.Credentials.from_service_account_file` under the hood.
 * Passing an `info` argument to the optional `gcs_options` dictionary.
-  - This argument should contain the actual JSON data from your credentials file in the form of a string. 
+  - This argument should contain the actual JSON data from your credentials file in the form of a string.
   - This method utilizes `google.oauth2.service_account.Credentials.from_service_account_info` under the hood.
 
-Please note that if you use the `filename` or `info` options, you must supply these options to any GE objects that interact with GCS (i.e. `PandasExecutionEngine`). 
+Please note that if you use the `filename` or `info` options, you must supply these options to any GE objects that interact with GCS (i.e. `PandasExecutionEngine`).
 The `gcs_options` dictionary is also responsible for storing any `**kwargs` you wish to pass to the GCS `storage.Client()` connection object (i.e. `project`)
 
 For more details regarding storing credentials for use with Great Expectations see: [How to configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials.md)
@@ -71,6 +73,7 @@ For more details regarding authentication, please visit the following:
 :::
 
 Using these example configurations, add in your GCS bucket and path to a directory that contains some of your data:
+
 <Tabs
   groupId="inferred-or-configured"
   defaultValue='inferred'
@@ -80,68 +83,82 @@ Using these example configurations, add in your GCS bucket and path to a directo
   ]}>
 
 <TabItem value="inferred">
-  The below configuration is representative of the default setup you'll see when preparing your own environment.
 
-  <Tabs
-    groupId="yaml-or-python"
-    defaultValue='yaml'
-    values={[
-    {label: 'YAML', value:'yaml'},
-    {label: 'Python', value:'python'},
-    ]}>
-  <TabItem value="yaml">
+The below configuration is representative of the default setup you'll see when preparing your own environment.
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L10-L28
-  ```
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
 
-  Run this code to test your configuration.
+<TabItem value="yaml">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L39
-  ```
-  </TabItem>
-  <TabItem value="python">
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L16-L34
+```
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L10-L29
-  ```
+Run this code to test your configuration.
 
-  Run this code to test your configuration.
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L47
+```
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L40
-  ```
-  </TabItem>
-  </Tabs>
 </TabItem>
+ 
+<TabItem value="python">
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L11-L30
+```
+
+Run this code to test your configuration.
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L43
+```
+
+</TabItem>
+
+</Tabs>
+
+</TabItem>
+
 <TabItem value="configured">
-  The below configuration is highly tuned to the specific bucket and blobs relevant to this example. You'll have to fine-tune your own regular expressions and assets to fit your use-case.
-  <Tabs
-    groupId="yaml-or-python"
-    defaultValue='yaml'
-    values={[
-    {label: 'YAML', value:'yaml'},
-    {label: 'Python', value:'python'},
-    ]}>
-  <TabItem value="yaml">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L10-L27
-  ```
+The below configuration is highly tuned to the specific bucket and blobs relevant to this example. You'll have to fine-tune your own regular expressions and assets to fit your use-case.
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
 
-  Run this code to test your configuration.
+<TabItem value="yaml">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L38
-  ```
-  </TabItem>
-  <TabItem value="python">
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L10-L27
+```
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L10-L26
-  ```
+Run this code to test your configuration.
 
-  Run this code to test your configuration. 
-
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L37
-  ```
-  </TabItem>
-  </Tabs>
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L38
+```
 </TabItem>
+<TabItem value="python">
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L10-L26
+```
+
+Run this code to test your configuration.
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L37
+```
+
+</TabItem>
+
+</Tabs>
+
+</TabItem>
+
 </Tabs>
 
 If you specified a GCS path containing CSV files you will see them listed as `Available data_asset_names` in the output of `test_yaml_config()`.
@@ -159,23 +176,26 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L39
+<TabItem value="yaml">
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L47
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L42
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L47
 ```
 
 </TabItem>
+
 </Tabs>
 
 ### 5. Test your new Datasource
 
-Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
+Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a <TechnicalTag tag="batch_request" text="Batch Request" />.
 
 <Tabs
   defaultValue='runtime_batch_request'
@@ -183,32 +203,38 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
   {label: 'Specify a GCS path to single CSV', value:'runtime_batch_request'},
   {label: 'Specify a data_asset_name', value:'batch_request'},
   ]}>
-  <TabItem value="runtime_batch_request">
+
+<TabItem value="runtime_batch_request">
 
 Add the GCS path to your CSV in the `path` key under `runtime_parameters` in your `RuntimeBatchRequest`.
 
 Please note we support the following format for GCS URL's: `gs://<BUCKET_OR_NAME>/<BLOB>`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L42-L48
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L52-L58
 ```
+
 Then load data into the `Validator`.
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L56-L62
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L68-L74
 ```
 
-  </TabItem>
-  <TabItem value="batch_request">
+</TabItem>
 
-Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
+<TabItem value="batch_request">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L74-L78
+Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L88-L92
 ```
+
 Then load data into the `Validator`.
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L56-L62
+
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L68-L74
 ```
 
-  </TabItem>
+</TabItem>
+
 </Tabs>
-
 
 <Congratulations />
 
@@ -228,5 +254,6 @@ To view the full scripts used in this page, see them on GitHub:
 - [configured_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py)
 
 To review the source code of these `DataConnectors`, also visit GitHub:
+
 - [ConfiguredAssetGCSDataConnector](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/datasource/data_connector/configured_asset_gcs_data_connector.py)
 - [InferredAssetGCSDataConnector](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/datasource/data_connector/inferred_asset_gcs_data_connector.py)
