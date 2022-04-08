@@ -26,6 +26,7 @@
       },
       "tests": [{
           "title": "simple_mean_positive_range",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -39,6 +40,7 @@
         },
         {
           "title": "simple_mean_negative_range",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "x",
