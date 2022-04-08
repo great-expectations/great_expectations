@@ -13,7 +13,10 @@ from great_expectations.core.batch import (
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import DataConnector
+from great_expectations.datasource.data_connector import (
+    DataConnector,
+    InferredAssetSqlDataConnector,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -212,9 +215,10 @@ class BaseDatasource:
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> None:
         # if the data_asset_name is missing from a configured data connector config, add it as a table_name
-        if not self.config["data_connectors"][batch_request.data_connector_name][
-            "class_name"
-        ].startswith("Inferred"):
+        if not isinstance(
+            self.data_connectors[batch_request.data_connector_name],
+            InferredAssetSqlDataConnector,
+        ):
             if (
                 "assets"
                 not in self._datasource_config["data_connectors"][
