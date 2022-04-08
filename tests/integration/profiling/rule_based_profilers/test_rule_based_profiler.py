@@ -151,7 +151,8 @@ def test_profile_includes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiler.run()
+    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
@@ -160,7 +161,7 @@ def test_profile_includes_citations(
 
     assert len(expectation_suite.meta["citations"]) > 0
 
-    assert mock_emit.call_count == 45
+    assert mock_emit.call_count == 43
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]
@@ -199,7 +200,8 @@ def test_profile_excludes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    profiler.run()
+    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
@@ -208,7 +210,7 @@ def test_profile_excludes_citations(
 
     assert expectation_suite.meta.get("citations") is None
 
-    assert mock_emit.call_count == 45
+    assert mock_emit.call_count == 43
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
         for payload in mock_emit.call_args_list[:-1]

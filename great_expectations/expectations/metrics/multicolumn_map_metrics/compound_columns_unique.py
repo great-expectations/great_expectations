@@ -70,7 +70,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             "_table"
         )  # Note that here, "table" is of the "sqlalchemy.sql.selectable.Subquery" type.
 
-        # First, obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the
+        # Step-1: Obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the
         # "FromClause.c" attribute, which is a namespace of all the columns contained within the "FROM" clause (these
         # elements are themselves subclasses of the SQLAlchemy "ColumnElement" class).
         table_columns_selector = [
@@ -82,7 +82,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             .alias("original_table_clause")
         )
 
-        # Second, "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the
+        # Step-2: "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the
         # table and the count of occurrences of distinct "compound" (i.e., group, as specified by "column_list") values.
         # Give this aggregated group count a distinctive label.
         # Give the resulting sub-query a unique alias in order to disambiguate column names in subsequent queries.
