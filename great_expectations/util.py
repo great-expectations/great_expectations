@@ -28,6 +28,7 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
+import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
@@ -95,6 +96,9 @@ PLURAL_TO_SINGULAR_LOOKUP_DICT: dict = {
     "rendered_data_docs": "rendered_data_doc",
 }
 
+p1 = re.compile(r"(.)([A-Z][a-z]+)")
+p2 = re.compile(r"([a-z0-9])([A-Z])")
+
 
 def pluralize(singular_ge_noun):
     """
@@ -120,6 +124,11 @@ def singularize(plural_ge_noun):
             f"Unable to singularize '{plural_ge_noun}'. Please update "
             f"great_expectations.util.PLURAL_TO_SINGULAR_LOOKUP_DICT."
         )
+
+
+def camel_to_snake(name):
+    name = p1.sub(r"\1_\2", name)
+    return p2.sub(r"\1_\2", name).lower()
 
 
 def underscore(word: str) -> str:
@@ -1410,3 +1419,18 @@ def get_pyathena_potential_type(type_module, type_):
         potential_type = type_module._TYPE_MAPPINGS.get(type_)
 
     return potential_type
+
+
+def pandas_series_between_inclusive(
+    series: pd.Series, min_value: int, max_value: int
+) -> pd.Series:
+    """
+    As of Pandas 1.3.0, the 'inclusive' arg in between() is an enum: {"left", "right", "neither", "both"}
+    """
+    metric_series: pd.Series
+    if version.parse(pd.__version__) >= version.parse("1.3.0"):
+        metric_series = series.between(min_value, max_value, inclusive="both")
+    else:
+        metric_series = series.between(min_value, max_value, inclusive=True)
+
+    return metric_series

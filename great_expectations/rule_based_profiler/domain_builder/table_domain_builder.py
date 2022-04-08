@@ -10,7 +10,9 @@ class TableDomainBuilder(DomainBuilder):
     def __init__(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -43,7 +45,7 @@ class TableDomainBuilder(DomainBuilder):
         domains: List[Domain] = [
             Domain(
                 domain_type=self.domain_type,
-            )
+            ),
         ]
 
         return domains

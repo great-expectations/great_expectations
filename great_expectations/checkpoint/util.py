@@ -1,4 +1,5 @@
 import copy
+import json
 import logging
 import smtplib
 import ssl
@@ -11,11 +12,18 @@ import requests
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     get_batch_request_as_dict,
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.types import DictDot
+
+try:
+    import boto3
+except ImportError:
+    boto3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -36,20 +44,14 @@ def send_slack_notification(
     try:
         response = session.post(url=url, headers=headers, json=query)
     except requests.ConnectionError:
-        logger.warning(
-            f"Failed to connect to Slack webhook at {slack_webhook} after {10} retries."
-        )
+        logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:
             logger.warning(
-                "Request to Slack webhook at {url} "
-                "returned error {status_code}: {text}".format(
-                    url=slack_webhook,
-                    status_code=response.status_code,
-                    text=response.text,
-                )
+                "Request to Slack webhook "
+                f"returned error {response.status_code}: {response.text}"
             )
 
         else:
@@ -60,9 +62,7 @@ def send_slack_notification(
 def send_opsgenie_alert(query, suite_name, settings):
     """Creates an alert in Opsgenie."""
     if settings["region"] is not None:
-        url = "https://api.{region}.opsgenie.com/v2/alerts".format(
-            region=settings["region"]
-        )  # accommodate for Europeans
+        url = f"https://api.{settings['region']}.opsgenie.com/v2/alerts"  # accommodate for Europeans
     else:
         url = "https://api.opsgenie.com/v2/alerts"
 
@@ -84,12 +84,8 @@ def send_opsgenie_alert(query, suite_name, settings):
     else:
         if response.status_code != 202:
             logger.warning(
-                "Request to Opsgenie API at {url} "
-                "returned error {status_code}: {text}".format(
-                    url=url,
-                    status_code=response.status_code,
-                    text=response.text,
-                )
+                "Request to Opsgenie API "
+                f"returned error {response.status_code}: {response.text}"
             )
         else:
             return "success"
@@ -101,23 +97,15 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
     try:
         response = session.post(url=microsoft_teams_webhook, json=query)
     except requests.ConnectionError:
-        logger.warning(
-            "Failed to connect to Microsoft Teams webhook at {url} "
-            "after {max_retries} retries.".format(
-                url=microsoft_teams_webhook, max_retries=10
-            )
-        )
+        logger.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
+
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:
             logger.warning(
-                "Request to Microsoft Teams webhook at {url} "
-                "returned error {status_code}: {text}".format(
-                    url=microsoft_teams_webhook,
-                    status_code=response.status_code,
-                    text=response.text,
-                )
+                "Request to Microsoft Teams webhook "
+                f"returned error {response.status_code}: {response.text}"
             )
             return
         else:
@@ -130,25 +118,15 @@ def send_webhook_notifications(query, webhook, target_platform):
         response = session.post(url=webhook, json=query)
     except requests.ConnectionError:
         logger.warning(
-            "Failed to connect to {target_platform} webhook at {url} "
-            "after {max_retries} retries.".format(
-                url=webhook,
-                max_retries=10,
-                target_platform=target_platform,
-            )
+            f"Failed to connect to {target_platform} webhook after 10 retries."
         )
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:
             logger.warning(
-                "Request to {target_platform} webhook at {url} "
-                "returned error {status_code}: {text}".format(
-                    url=webhook,
-                    status_code=response.status_code,
-                    target_platform=target_platform,
-                    text=response.text,
-                )
+                f"Request to {target_platform} webhook "
+                f"returned error {response.status_code}: {response.text}"
             )
         else:
             return f"{target_platform} notification succeeded."
@@ -238,9 +216,7 @@ def get_substituted_validation_dict(
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_substituted_batch_request(
     substituted_runtime_config: dict,
-    validation_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest, dict]
-    ] = None,
+    validation_batch_request: Optional[Union[BatchRequestBase, dict]] = None,
 ) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     substituted_runtime_batch_request = substituted_runtime_config.get("batch_request")
 
@@ -458,6 +434,7 @@ def batch_request_in_validations_contains_batch_data(
         for idx, val in enumerate(validations):
             if (
                 val.get("batch_request") is not None
+                and isinstance(val.get("batch_request"), (dict, DictDot))
                 and val["batch_request"].get("runtime_parameters") is not None
                 and val["batch_request"]["runtime_parameters"].get("batch_data")
                 is not None
@@ -500,15 +477,50 @@ def send_cloud_notification(url: str, headers: dict):
     try:
         response = session.post(url=url, headers=headers)
     except requests.ConnectionError:
-        logger.error(
-            f"Failed to connect to Cloud backend at {url} " f"after {10} retries."
-        )
+        logger.error(f"Failed to connect to Cloud backend after {10} retries.")
     except Exception as e:
         logger.error(str(e))
     else:
         if response.status_code != 200:
-            message = f"Cloud Notification request at {url} returned error {response.status_code}: {response.text}"
+            message = f"Cloud Notification request returned error {response.status_code}: {response.text}"
             logger.error(message)
             return {"cloud_notification_result": message}
         else:
             return {"cloud_notification_result": "Cloud notification succeeded."}
+
+
+def send_sns_notification(
+    sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs
+) -> str:
+    """
+    Send JSON results to an SNS topic with a schema of:
+
+
+    :param sns_topic_arn:  The SNS Arn to publish messages to
+    :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
+    :param validation_results:  The results of the validation ran
+    :param kwargs:  Keyword arguments to pass to the boto3 Session
+    :return:  Message ID that was published
+
+    """
+    if not boto3:
+        logger.warning("boto3 is not installed")
+        return "boto3 is not installed"
+
+    message_dict = {
+        "TopicArn": sns_topic_arn,
+        "Subject": sns_subject,
+        "Message": json.dumps(validation_results),
+        "MessageAttributes": {
+            "String": {"DataType": "String.Array", "StringValue": "ValidationResults"},
+        },
+        "MessageStructure": "json",
+    }
+    session = boto3.Session(**kwargs)
+    sns = session.client("sns")
+    try:
+        response = sns.publish(**message_dict)
+    except sns.exceptions.InvalidParameterException:
+        logger.error(f"Received invalid for message: {validation_results}")
+    else:
+        return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"
