@@ -46,6 +46,10 @@ What are you processing your files with?
 
 For this tutorial we will use Pandas to process our files, so again answer with `1` and press enter to continue.
 
+:::note
+When you select `1. Pandas` from the above list, you are specifying your Datasource's <TechnicalTag tag="execution_engine" text="Execution Engine" />.  Although the tutorial uses Pandas, Spark and SqlAlchemy are also supported as Execution Engines.
+:::
+
 We're almost done with the CLI!  You'll be prompted once more, this time for the path of the directory where the data files are located.  The prompt will look like:
 
 ````console
@@ -76,7 +80,7 @@ Then **execute all cells in the notebook** in order to save the new Datasource. 
 
 When you completed those last few steps, you told Great Expectations that:
 
-+ You want to create a new Datasource called `getting_started_datasource`.
++ You want to create a new Datasource called `getting_started_datasource` (or whatever custom name you chose above).
 + You want to use Pandas to read the data from CSV.
 
 Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the `datasources` header:
