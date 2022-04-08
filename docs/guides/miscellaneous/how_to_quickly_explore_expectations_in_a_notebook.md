@@ -2,9 +2,11 @@
 title: How to quickly explore Expectations in a notebook
 ---
 
-Building [Expectations](../../reference/expectations/expectations.md) as you conduct exploratory data analysis is a great way to ensure that your insights about data processes and pipelines remain part of your team's knowledge.
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx'
 
-This guide will help you quickly get a taste of Great Expectations, without even setting up a [Data Context](../../reference/data_context.md). All you need is a notebook and some data.
+Building <TechnicalTag tag="expectation" text="Expectations" /> as you conduct exploratory data analysis is a great way to ensure that your insights about data processes and pipelines remain part of your team's knowledge.
+
+This guide will help you quickly get a taste of Great Expectations, without even setting up a <TechnicalTag tag="data_context" text="Data Context" />. All you need is a notebook and some data.
 
 :::note This how-to guide assumes you have already:
 - Installed Great Expectations (e.g. `pip install great_expectations`)
@@ -82,15 +84,15 @@ my_df[my_df.Sex=="male"].head()
 # etc., etc. 
 ```
 
-In addition, `my_df` has access to a wide array of Expectations. You can see the full list [in the Expectation Gallery](https://greatexpectations.io/expectations). By convention, every Expectation method name starts with the name `expect_...`, so you can quickly access the full list with tab-based autocomplete:
+In addition, `my_df` has access to a wide array of Expectations. You can see the full list [in the Expectation Gallery](https://greatexpectations.io/expectations). By convention, every <TechnicalTag tag="expectation" text="Expectation" /> method name starts with the name `expect_...`, so you can quickly access the full list with tab-based autocomplete:
 
 ![image](../images/expectation_autocomplete.gif)
 
-When you invoke an Expectation, it will immediately be validated against your data. The returned object will contain the result and a list of unexpected values. This instant feedback helps you zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration.
+When you invoke an Expectation, it will immediately be <TechnicalTag tag="validation" text="Validated" /> against your data. The returned object will contain the result and a list of unexpected values. This instant feedback helps you zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration.
 
 ![image](../images/expectation_notebook_interactive_loop.gif)
 
-Hint: it's common to encounter data issues where most cases match, but you can't guarantee 100% adherence. In these cases, consider using a `mostly` parameter. This parameter is an option for all Expectations that are applied on a row-by-row basis, and allows you to control the level of wiggle room you want built into your data validation.
+Hint: it's common to encounter data issues where most cases match, but you can't guarantee 100% adherence. In these cases, consider using a `mostly` parameter. This parameter is an option for all Expectations that are applied on a row-by-row basis, and allows you to control the level of wiggle room you want built into your data Validation.
 
 
 ![image](../images/interactive_mostly.gif)
@@ -109,9 +111,9 @@ You can get the config file for your Expectations by running:
 my_df.get_expectation_suite()
 ```
 
-which will return an [Expectation Suite](../../reference/expectation_suite_operations.md) object.
+which will return an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> object.
 
-By default, `get_expectation_suite()` only returns Expectations with `success=True` on their most recent validation. You can override this behavior with:
+By default, `get_expectation_suite()` only returns Expectations with `success=True` on their most recent Validation. You can override this behavior with:
 
 ```python
 my_df.get_expectation_suite(discard_failed_expectations=False)
@@ -130,9 +132,9 @@ with open( "my_expectation_file.json", "w") as my_file:
     )
 ```
 
-As you develop more Expectation Suites, you'll probably want some kind of system for naming and organizing them, not to mention matching them up with data, validating them, and keeping track of Validation Results.
+As you develop more Expectation Suites, you'll probably want some kind of system for naming and organizing them, not to mention matching them up with data, validating them, and keeping track of <TechnicalTag tag="validation_result" text="Validation Results" />.
 
-When you get to this stage, we recommend following the [getting started tutorial](../../tutorials/getting_started/intro.md) to set up a [Data Context](../../reference/data_context.md). You can get through the basics in less than half an hour, and setting up a Data Context will unlock many additional power tools within Great Expectations.
+When you get to this stage, we recommend following the [getting started tutorial](../../tutorials/getting_started/tutorial_overview.md) to set up a Data Context. You can get through the basics in less than half an hour, and setting up a Data Context will unlock many additional power tools within Great Expectations.
         
 ## Additional notes
 

@@ -1,15 +1,9 @@
-"""
-This is a template for creating custom ColumnMapExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
-"""
-import json
+from multiprocessing.sharedctypes import Value
 from typing import Optional
 
-import coinaddrvalidator
+from cryptoaddress import EthereumAddress
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -18,11 +12,12 @@ from great_expectations.expectations.metrics import (
 )
 
 
-def is_valid_eth_address(addr: str) -> bool:
+# This method compares a string to the valid ETH address.
+def is_valid_eth_address(address: str) -> bool:
     try:
-        res = coinaddrvalidator.validate("eth", addr).valid
-        return res
-    except Exception as e:
+        EthereumAddress(address)
+        return True
+    except ValueError:
         return False
 
 
@@ -51,24 +46,24 @@ class ColumnValuesToBeValidEthAddress(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidEthAddress(ColumnMapExpectation):
-    """Expect column values to be valid Ethereum address"""
+    """This Expectation validates data as conforming to the valid ETH address."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "all_valid": [
-                    "0xcb8bbfa45541a95c1de883eb3606708cae9fd45c",
-                    "0x24affae9c683b7615d4130300288e348e4b5d091",
-                    "0xfbddadd80fe7bda00b901fbaf73803f2238ae655",
-                    "0x9d96b0561be0440ebe93e79fe06a23bbe8270f90",
+                "well_formed_eth_address": [
+                    "b794f5ea0ba39494ce839613fffba74279579268",
+                    "0xb794f5ea0ba39494ce839613fffba74279579268",
+                    "0x73bceb1cd57c711feac4224d062b0f6ff338501e",
+                    "0x9bf4001d307dfd62b26a2f1307ee0c0307632d59",
                 ],
-                "some_other": [
-                    "0xcb8bbfa45541a95c1de883eb3606708cae9fd45c",
-                    "0x24affae9c683b7615d4130300288e348e4b5d091",
-                    "0xfbddadd80fe7bda00b901fbaf73803f2238ae655",
-                    "0x9d96b0561be0440ebe93e79fe06a23bbe8270f9x",
+                "malformed_eth_address": [
+                    "",
+                    "b794",
+                    "b794f5ea0ba39494ce839613fffba74279579260",
+                    "This is not a valid ETH address.",
                 ],
             },
             "tests": [
@@ -76,19 +71,15 @@ class ExpectColumnValuesToBeValidEthAddress(ColumnMapExpectation):
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "all_valid"},
-                    "out": {
-                        "success": True,
-                    },
+                    "in": {"column": "well_formed_eth_address"},
+                    "out": {"success": True},
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "some_other", "mostly": 1},
-                    "out": {
-                        "success": False,
-                    },
+                    "in": {"column": "malformed_eth_address"},
+                    "out": {"success": False},
                 },
             ],
         }
@@ -110,7 +101,6 @@ class ExpectColumnValuesToBeValidEthAddress(ColumnMapExpectation):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
-
         Args:
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
@@ -133,20 +123,14 @@ class ExpectColumnValuesToBeValidEthAddress(ColumnMapExpectation):
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
 
-        return True
-
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "maturity": "experimental",
-        "tags": [
-            "hackathon-22",
-            "experimental",
-            "typed-entities",
-        ],  # Tags for this Expectation in the Gallery
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            "@szecsip",  # Don't forget to add your github handle here!
+        "tags": ["experimental", "hackathon", "typed-entities"],
+        "contributors": [
+            "@voidforall",
         ],
-        "requirements": ["coinaddrvalidator"],
+        "requirements": ["cryptoaddress"],
     }
 
 
