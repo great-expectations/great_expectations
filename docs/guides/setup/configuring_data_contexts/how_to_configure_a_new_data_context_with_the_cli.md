@@ -2,6 +2,7 @@
 title: How to configure a new Data Context with the CLI
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
 <Prerequisites>
 
@@ -9,7 +10,7 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 
 </Prerequisites>
 
-We recommend that you create new Data Contexts by using the a ``great_expectations init`` command in the directory where you want to deploy Great Expectations.
+We recommend that you create new <TechnicalTag relative="../../../" tag="data_context" text="Data Contexts" /> by using the a ``great_expectations init`` command in the directory where you want to deploy Great Expectations.
 
 ```bash
 great_expectations init

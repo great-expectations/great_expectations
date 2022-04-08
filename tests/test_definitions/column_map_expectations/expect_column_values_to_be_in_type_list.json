@@ -107,6 +107,7 @@
       "tests": [
         {
           "title": "positive_test_pandas_integer_column",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -155,6 +156,7 @@
         },
         {
           "title": "negative_test_pandas_float_values_are_not_strings",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "x",
