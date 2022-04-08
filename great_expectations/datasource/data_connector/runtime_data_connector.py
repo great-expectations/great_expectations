@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
@@ -13,6 +13,9 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
+from great_expectations.data_context.types.base import assetConfigSchema
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -25,7 +28,6 @@ class RuntimeDataConnector(DataConnector):
     """
     A DataConnector that allows users to specify a Batch's data directly using a RuntimeBatchRequest that contains
     either an in-memory Pandas or Spark DataFrame, a filesystem or S3 path, or an arbitrary SQL query
-
     Args:
         name (str): The name of this DataConnector
         datasource_name (str): The name of the Datasource that contains it
@@ -41,6 +43,8 @@ class RuntimeDataConnector(DataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         batch_identifiers: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        # usually a dict, but str in sqldataconnector (need to investigate why)
+        assets: Optional[Union[str, dict]] = None,
     ):
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
@@ -50,9 +54,68 @@ class RuntimeDataConnector(DataConnector):
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
         )
+        # build base with
+        self._batch_identifiers: dict = {}
+        self._add_batch_identifiers(batch_identifiers)
 
-        self._batch_identifiers = batch_identifiers
         self._refresh_data_references_cache()
+
+        if assets is None:
+            assets = {}
+        _assets: Dict[str, Union[dict, Asset]] = assets
+        self._assets = _assets
+        self._build_assets_from_config(config=assets)
+
+    @property
+    def assets(self):
+        return self._assets
+
+    def _add_batch_identifiers(
+        self, batch_identifiers: List[str], data_asset_name: Optional[str] = None
+    ):
+        if batch_identifiers is None or len(batch_identifiers) == 0:
+            raise ge_exceptions.DataConnectorError(
+                "Asset configured but no batch_identifiers"
+            )
+
+        if data_asset_name:
+            self._batch_identifiers[data_asset_name] = batch_identifiers
+        else:
+            self._batch_identifiers[self.name] = batch_identifiers
+
+    # <WILL> Marker this was pulled from other file
+    def _build_assets_from_config(self, config: Dict[str, dict]):
+        for name, asset_config in config.items():
+            if asset_config is None:
+                asset_config = {}
+            asset_config.update({"name": name})
+            new_asset: Asset = self._build_asset_from_config(
+                config=asset_config,
+            )
+            self.assets[name] = new_asset
+            # adding batch_identifiers
+            self._add_batch_identifiers(
+                batch_identifiers=new_asset.batch_identifiers,
+                data_asset_name=new_asset.name,
+            )
+
+    # <WILL> marker this was pulled from the other file
+    def _build_asset_from_config(self, config: dict):
+        runtime_environment: dict = {"data_connector": self}
+        config = assetConfigSchema.load(config)
+        config = assetConfigSchema.dump(config)
+        asset: Asset = instantiate_class_from_config(
+            config=config,
+            runtime_environment=runtime_environment,
+            config_defaults={},
+        )
+        if not asset:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name="great_expectations.datasource.data_connector.asset",
+                package_name=None,
+                class_name=config["class_name"],
+            )
+        return asset
 
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
@@ -105,8 +168,16 @@ class RuntimeDataConnector(DataConnector):
         return []
 
     def get_available_data_asset_names(self) -> List[str]:
-        """Please see note in : _get_batch_definition_list_from_batch_request()"""
-        return list(self._data_references_cache.keys())
+        # """Please see note in : _get_batch_definition_list_from_batch_request()"""
+        # return list(self._data_references_cache.keys())
+        # TODO: this needs to be a set of defined assets + things passed into cache
+        defined_assets: List[str] = []
+        data_reference_keys: List[str] = []
+
+        defined_assets = list(self.assets.keys())
+        data_reference_keys = list(self._data_references_cache.keys())
+
+        return defined_assets + data_reference_keys
 
     # noinspection PyMethodOverriding
     def get_batch_data_and_metadata(
@@ -155,12 +226,15 @@ class RuntimeDataConnector(DataConnector):
         batch_identifiers: Optional[dict] = None
         if batch_request.batch_identifiers:
             self._validate_batch_identifiers(
-                batch_identifiers=batch_request.batch_identifiers
+                data_asset_name=batch_request.data_asset_name,
+                batch_identifiers=batch_request.batch_identifiers,
             )
             batch_identifiers = batch_request.batch_identifiers
 
         if not batch_identifiers:
-            batch_identifiers = {}
+            ge_exceptions.DataConnectorError(
+                "Passed in a RuntimeBatchRequest with no batch_identifiers"
+            )
 
         batch_definition_list: List[BatchDefinition]
         batch_definition: BatchDefinition = BatchDefinition(
@@ -286,81 +360,102 @@ class RuntimeDataConnector(DataConnector):
         if runtime_parameters:
             self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
 
-    def _validate_batch_identifiers(self, batch_identifiers: dict):
-        if batch_identifiers is None:
-            batch_identifiers = {}
+    def _validate_batch_identifiers(
+        self, data_asset_name: str, batch_identifiers: dict
+    ):
+        if not batch_identifiers:
+            raise ge_exceptions.DataConnectorError(
+                "we need to have batch_identifiers for RuntimeDataConnector"
+            )
+        if not data_asset_name:
+            raise ge_exceptions.DataConnectorError(
+                "we need data_asset_name for RuntimeDataConnector"
+            )
 
-        self._validate_batch_identifiers_configuration(
-            batch_identifiers=list(batch_identifiers.keys())
-        )
+        batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
+        configured_asset_names: List[str] = list(self.assets.keys())
 
-    def _validate_batch_identifiers_configuration(self, batch_identifiers: List[str]):
-        if batch_identifiers and len(batch_identifiers) > 0:
-            if not (
-                self._batch_identifiers
-                and set(batch_identifiers) <= set(self._batch_identifiers)
+        # then we know that we are referencing a configured asset
+        if data_asset_name in configured_asset_names:
+            asset: Asset = self.assets[data_asset_name]
+            if not set(batch_identifiers_keys) == set(asset.batch_identifiers):
+                raise ge_exceptions.DataConnectorError(
+                    # make this a little clearer
+                    f"""
+                    Data Asset {data_asset_name} was invoked with one or more batch_identifiers that were not configured for the asset.
+                    """
+                )
+        else:
+            # TODO: make clear that this behavior is different.. you can only define a few identifiers
+
+            if not set(batch_identifiers_keys) <= set(
+                self._batch_identifiers[self.name]
             ):
                 raise ge_exceptions.DataConnectorError(
                     f"""RuntimeDataConnector "{self.name}" was invoked with one or more batch identifiers that do not
-appear among the configured batch identifiers.
-                    """
+        appear among the configured batch identifiers.
+                            """
                 )
 
     def self_check(self, pretty_print=True, max_examples=3):
         """
         Overrides the self_check method for RuntimeDataConnector. Normally the `self_check()` method will check
         the configuration of the DataConnector by doing the following :
-
         1. refresh or create data_reference_cache
         2. print batch_definition_count and example_data_references for each data_asset_names
         3. also print unmatched data_references, and allow the user to modify the regex or glob configuration if necessary
-
         However, in the case of the RuntimeDataConnector there is no example data_asset_names until the data is passed
         in through the RuntimeBatchRequest. Therefore, there will be a note displayed to the user saying that
         RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest.
-
+        The exception is if the user configured named Assets as part of the RuntimeDataConnector configuration. In that
+        case we will output them as available data_asset_names
         Args:
             pretty_print (bool): should the output be printed?
             max_examples (int): how many data_references should be printed?
-
         Returns:
             report_obj (dict): dictionary containing self_check output
         """
+        if len(self._data_references_cache) == 0:
+            self._refresh_data_references_cache()
+
         if pretty_print:
             print(f"\t{self.name}:{self.__class__.__name__}\n")
         asset_names = self.get_available_data_asset_names()
         asset_names.sort()
         len_asset_names = len(asset_names)
 
-        report_obj = {
-            "class_name": self.__class__.__name__,
-            "data_asset_count": len_asset_names,
-            "example_data_asset_names": asset_names[:max_examples],
-            "data_assets": {},
-            "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
-            # "data_reference_count": self.
-        }
-        if pretty_print:
-            print(
-                f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):"
-            )
-            print(
-                "\t\t"
-                + "Note : RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
-            )
-
-        unmatched_data_references = self.get_unmatched_data_references()
-        len_unmatched_data_references = len(unmatched_data_references)
-
-        if pretty_print:
+        if len_asset_names > 0:
+            return super().self_check()
+        else:
+            report_obj = {
+                "class_name": self.__class__.__name__,
+                "data_asset_count": len_asset_names,
+                "example_data_asset_names": asset_names[:max_examples],
+                "data_assets": {},
+                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
+                # "data_reference_count": self.
+            }
             if pretty_print:
                 print(
-                    f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}): {unmatched_data_references[:max_examples]}\n"
+                    f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):"
+                )
+                print(
+                    "\t\t"
+                    + "Note : RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
                 )
 
-        report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
-        report_obj["example_unmatched_data_references"] = unmatched_data_references[
-            :max_examples
-        ]
+            unmatched_data_references = self.get_unmatched_data_references()
+            len_unmatched_data_references = len(unmatched_data_references)
 
-        return report_obj
+            if pretty_print:
+                if pretty_print:
+                    print(
+                        f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}): {unmatched_data_references[:max_examples]}\n"
+                    )
+
+            report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
+            report_obj["example_unmatched_data_references"] = unmatched_data_references[
+                :max_examples
+            ]
+
+            return report_obj

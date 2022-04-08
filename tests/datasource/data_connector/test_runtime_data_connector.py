@@ -19,9 +19,55 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
+from great_expectations.data_context.types.resource_identifiers import BatchIdentifier
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import RuntimeDataConnector
 
 yaml = YAML()
+
+
+@pytest.fixture()
+def test_df_pandas():
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    return test_df
+
+
+@pytest.fixture
+def basic_datasource_with_assets(tmp_path_factory):
+    basic_datasource: Datasource = instantiate_class_from_config(
+        config=yaml.load(
+            """
+class_name: Datasource
+
+data_connectors:
+    runtime:
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+            - hour
+            - minute
+        assets:
+            asset_a:
+                batch_identifiers:
+                    - day
+                    - month
+            asset_b:
+                batch_identifiers:
+                    - day
+                    - month
+                    - year
+execution_engine:
+    class_name: PandasExecutionEngine
+    """,
+        ),
+        runtime_environment={
+            "name": "my_datasource",
+        },
+        config_defaults={
+            "module_name": "great_expectations.datasource",
+        },
+    )
+    return basic_datasource
 
 
 def test_self_check(basic_datasource):
@@ -38,6 +84,87 @@ def test_self_check(basic_datasource):
         "passed in through RuntimeBatchRequest",
         "unmatched_data_reference_count": 0,
     }
+
+
+# <TODO> this will need to output the data_asset_names that we have created
+def test_new_self_check(basic_datasource_with_assets):
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    assert test_runtime_data_connector.self_check() == {
+        "class_name": "RuntimeDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": ["asset_a", "asset_b"],
+        "data_assets": {
+            "asset_a": {"batch_definition_count": 0, "example_data_references": []},
+            "asset_b": {"batch_definition_count": 0, "example_data_references": []},
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+    }
+
+
+# Test where there is an incorrect configuration: where there is an asset but the batch_ids are missing
+
+
+def test_add_batch_identifiers_correct(basic_datasource_with_assets):
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    assert test_runtime_data_connector._batch_identifiers == {
+        "runtime": ["hour", "minute"],
+        "asset_a": ["day", "month"],
+        "asset_b": ["day", "month", "year"],
+    }
+
+
+def test_add_batch_identifiers_missing():
+    # missing from base DataConnector
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        instantiate_class_from_config(
+            config=yaml.load(
+                """
+class_name: Datasource
+data_connectors:
+    runtime:
+        class_name: RuntimeDataConnector
+execution_engine:
+    class_name: PandasExecutionEngine
+    """,
+            ),
+            runtime_environment={
+                "name": "my_datasource",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource",
+            },
+        )
+
+    # missing from Asset
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        basic_datasource: Datasource = instantiate_class_from_config(
+            config=yaml.load(
+                """
+class_name: Datasource
+data_connectors:
+    runtime:
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+            - hour
+            - minute
+        assets:
+            asset_a:
+execution_engine:
+    class_name: PandasExecutionEngine
+    """,
+            ),
+            runtime_environment={
+                "name": "my_datasource",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource",
+            },
+        )
 
 
 def test_error_checking_unknown_datasource(basic_datasource):
@@ -102,6 +229,138 @@ def test_error_checking_missing_runtime_parameters(basic_datasource):
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
                 batch_identifiers={"pipeline_stage_name": "munge"},
+            )
+        )
+
+
+# <TODO> test where we are using the configuration with both batch_identifiers
+# and assets, but we are using something named in assets that is not in the
+# X 0. Simplest Asset is named and batch_identifier is in the Asset itself
+# X 1. Asset is named, but the batch_identifier is in the other Asset
+# x 2. Asset is named, but batch_identifier is not defined anywhere
+# x 3. Asset is named, but we are trying to use something the base_batch_identifier
+# x 4. Asset is not named, and we are passing in, but we are trying to use an identifer that is only in Asset
+
+
+def test_asset_is_name_batch_identifier_correctly_used(
+    basic_datasource_with_assets, test_df_pandas
+):
+    """
+    Using asset_a, which is named in the RuntimeDataConnector configuration, and using batch_identifier that is named.
+    """
+    runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    res: List[
+        BatchDefinition
+    ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=RuntimeBatchRequest(
+            datasource_name=basic_datasource_with_assets.name,
+            data_connector_name="runtime",
+            data_asset_name="asset_a",
+            batch_identifiers={"month": 4, "day": 1},
+            runtime_parameters={"batch_data": test_df_pandas},
+        )
+    )
+    assert len(res) == 1
+    assert res[0] == BatchDefinition(
+        datasource_name="my_datasource",
+        data_connector_name="runtime",
+        data_asset_name="asset_a",
+        batch_identifiers=IDDict({"month": 4, "day": 1}),
+    )
+
+
+def test_asset_is_named_but_batch_identifier_in_other_asset(
+    basic_datasource_with_assets,
+):
+    """
+    What does this test and why?
+
+    Asset is passing in a batch_identifier but it is defined int he other
+    """
+    runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=RuntimeBatchRequest(
+                datasource_name=basic_datasource_with_assets.name,
+                data_connector_name="runtime",
+                data_asset_name="asset_a",
+                batch_identifiers={
+                    "year": 2022,
+                    "month": 4,
+                    "day": 1,
+                },  # year is only defined for asset_b
+                runtime_parameters={"batch_data": test_df_pandas},
+            )
+        )
+
+
+def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
+    basic_datasource_with_assets,
+):
+    """
+    What does this test and why?
+
+    Asset is passing in a batch_identifier but it is defined int he other
+    """
+    runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=RuntimeBatchRequest(
+                datasource_name=basic_datasource_with_assets.name,
+                data_connector_name="runtime",
+                data_asset_name="asset_a",
+                batch_identifiers={"blorg": 2022},
+                runtime_parameters={"batch_data": test_df_pandas},
+            )
+        )
+
+
+def test_asset_is_named_trying_to_use_batch_identifier_define_at_data_connector(
+    basic_datasource_with_assets, test_df_pandas
+):
+    runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=RuntimeBatchRequest(
+                datasource_name=basic_datasource_with_assets.name,
+                data_connector_name="runtime",
+                data_asset_name="asset_a",
+                batch_identifiers={
+                    "month": 4,
+                    "day": 1,
+                    "hour": 12,
+                },  # hour is a data-connector level batch identifier
+                runtime_parameters={"batch_data": test_df_pandas},
+            )
+        )
+
+
+def test_asset_is_runtime_trying_to_use_batch_identifier_define_at_asset_level(
+    basic_datasource_with_assets, test_df_pandas
+):
+    runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=RuntimeBatchRequest(
+                datasource_name=basic_datasource_with_assets.name,
+                data_connector_name="runtime",
+                data_asset_name="new_asset",
+                batch_identifiers={
+                    "year": 2022,
+                    "hour": 12,
+                    "minute": 30,
+                },  # year is a asset_a level batch identifier
+                runtime_parameters={"batch_data": test_df_pandas},
             )
         )
 
@@ -241,23 +500,40 @@ def test_get_available_data_asset_names(basic_datasource):
     assert available_data_asset_names == expected_available_data_asset_names
 
 
-def test_get_available_data_asset_names_updating_after_batch_request(basic_datasource):
+# TODO: this test will ensure the data_assets will initially contain the named assets
+def test_get_available_data_asset_names_named_assets(basic_datasource_with_assets):
+    runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    assert runtime_data_connector.get_available_data_asset_names() == [
+        "asset_a",
+        "asset_b",
+    ]
+
+
+def test_get_available_data_asset_names_updating_after_batch_request(
+    basic_datasource_with_assets,
+):
     test_runtime_data_connector: RuntimeDataConnector = (
-        basic_datasource.data_connectors["test_runtime_data_connector"]
+        basic_datasource_with_assets.data_connectors["runtime"]
     )
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # empty if data_connector has not been used
-    assert test_runtime_data_connector.get_available_data_asset_names() == []
+    assert test_runtime_data_connector.get_available_data_asset_names() == [
+        "asset_a",
+        "asset_b",
+    ]
 
     batch_identifiers = {
-        "airflow_run_id": 1234567890,
+        "hour": 12,
+        "minute": 15,
     }
 
     batch_request: dict = {
-        "datasource_name": basic_datasource.name,
+        "datasource_name": basic_datasource_with_assets.name,
         "data_connector_name": test_runtime_data_connector.name,
-        "data_asset_name": "my_data_asset_1",
+        "data_asset_name": "my_new_data_asset_1",
         "runtime_parameters": {
             "batch_data": test_df,
         },
@@ -272,16 +548,20 @@ def test_get_available_data_asset_names_updating_after_batch_request(basic_datas
 
     # updated to my_data_asset_1
     assert test_runtime_data_connector.get_available_data_asset_names() == [
-        "my_data_asset_1"
+        "asset_a",
+        "asset_b",
+        "my_new_data_asset_1",
     ]
 
     batch_identifiers = {
-        "airflow_run_id": 1234567890,
+        "hour": 12,
+        "minute": 30,
     }
+
     batch_request: dict = {
-        "datasource_name": basic_datasource.name,
+        "datasource_name": basic_datasource_with_assets.name,
         "data_connector_name": test_runtime_data_connector.name,
-        "data_asset_name": "my_data_asset_2",
+        "data_asset_name": "my_new_data_asset_2",
         "runtime_parameters": {
             "batch_data": test_df,
         },
@@ -296,8 +576,10 @@ def test_get_available_data_asset_names_updating_after_batch_request(basic_datas
 
     # updated to my_data_asset_1 and my_data_asset_2
     assert test_runtime_data_connector.get_available_data_asset_names() == [
-        "my_data_asset_1",
-        "my_data_asset_2",
+        "asset_a",
+        "asset_b",
+        "my_new_data_asset_1",
+        "my_new_data_asset_2",
     ]
 
 

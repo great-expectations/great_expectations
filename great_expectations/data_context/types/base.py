@@ -154,6 +154,7 @@ class AssetConfig(DictDot):
         max_keys=None,
         schema_name=None,
         batch_spec_passthrough=None,
+        batch_identifiers=None,
         **kwargs,
     ):
         if name is not None:
@@ -172,6 +173,8 @@ class AssetConfig(DictDot):
             self.schema_name = schema_name
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
+        if batch_identifiers is not None:
+            self.batch_identifiers = batch_identifiers
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -215,6 +218,11 @@ class AssetConfigSchema(Schema):
     # Necessary addition for Cloud assets
     table_name = fields.String(required=False, allow_none=True)
     type = fields.String(required=False, allow_none=True)
+
+    # batch_identifiers are inputted as a List but stored as a Dict RuntimeDataConnector because the assets and data_connector identifiers need to be separated
+    batch_identifiers = fields.List(
+        cls_or_instance=fields.Str(), required=False, allow_none=True
+    )
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
