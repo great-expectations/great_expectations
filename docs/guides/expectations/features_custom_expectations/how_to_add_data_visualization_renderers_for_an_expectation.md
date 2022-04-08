@@ -4,32 +4,30 @@ title: How to add data visualization renderers for custom Expectations
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 :::warning
-This guide only applies to Great Expectations versions 0.13 and above, which make use of the new modular <TechnicalTag tag="expectation" text="Expectation" /> architecture. If you have implemented a <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> but have not yet migrated it using the new modular patterns, you can still use this guide to implement custom <TechnicalTag tag="renderer" text="Renderers" /> for your Expectation.
+This guide only applies to Great Expectations versions 0.13 and above, which make use of the new modular Expectation architecture. If you have implemented a custom Expectation but have not yet migrated it using the new modular patterns, you can still use this guide to implement custom renderers for your Expectation.
 :::
 
-This guide will help you add data visualization <TechnicalTag tag="renderer" text="Renderers" /> to a <TechnicalTag tag="custom_expectation" text="Custom Expectation" />. 
+This guide will help you add data visualization renderers to a custom Expectation. 
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_setup.md#install-great-expectations-and-dependencies)
-- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md#create-a-data-context).
-- [Implemented a Custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
-- [Set up a Data Docs](../../../tutorials/getting_started/tutorial_create_expectations.md#viewing-your-expectations-in-data-docs) site.
-- [Configured an Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md#title-tutorial-step-3-create-expectations) containing your Custom Expectation.
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
+- Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
+- Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
+- Set up a [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md) site.
+- Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md) containing your custom Expectation.
 - Have installed and are familiarized with [Altair](https://altair-viz.github.io/)
  
 </Prerequisites>
 
 See also this [complete custom expectation with renderer example](https://github.com/superconductive/ge_tutorials/blob/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py).
 
-## Steps
+Steps
+-----
 
-### 1. Input
-
-Enter the following in a Jupyter Notebook:
+**Input:**
 
 ```python
 example_expectation_config = ExpectationConfiguration(**{
@@ -63,11 +61,11 @@ example_expectation_config = ExpectationConfiguration(**{
 })
 ```
 
-### 2. Rendered Output
+**Rendered Output:**
 
 ![Graph Example](../../../images/kl_divergence.png)
 
-### 3. Implementation
+**Implementation:**
 
 ```python
 import altair as alt
@@ -235,8 +233,6 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             return expected_distribution
 ```
 
-### 4. Test Renderers
+Finally, test that your renderers are providing the desired output by building your Data Docs site:
 
-Finally, test that your renderers are providing the desired output by building your <TechnicalTag tag="data_docs" text="Data Docs" /> site:
-
-Use the following <TechnicalTag tag="cli" text="CLI" /> command: ``great_expectations docs build``.
+Use the following CLI command: ``great_expectations docs build``.

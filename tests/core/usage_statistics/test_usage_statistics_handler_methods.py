@@ -245,7 +245,6 @@ def test_build_init_payload(
         "anonymized_validation_operators",
         "anonymized_data_docs_sites",
         "anonymized_expectation_suites",
-        "dependencies",
     ]
     assert init_payload["anonymized_datasources"] == [
         {

@@ -81,9 +81,9 @@ def test_domain_builder(data_context_with_taxi_data):
         data_connector_query={"index": -1},
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        include_column_name_suffixes=["_amount"],
-        batch_request=batch_request,
         data_context=context,
+        batch_request=batch_request,
+        include_column_name_suffixes=["_amount"],
     )
     domains: list = domain_builder.get_domains()
     assert len(domains) == 4
@@ -115,9 +115,9 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
         data_connector_query={"index": -1},
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        include_column_name_suffixes=["_amount"],
-        batch_request=batch_request.to_json_dict(),
         data_context=context,
+        batch_request=batch_request.to_json_dict(),
+        include_column_name_suffixes=["_amount"],
     )
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_not_be_null",
@@ -154,9 +154,9 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
         data_connector_query={"index": -1},
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        include_column_name_suffixes=["_amount"],
-        batch_request=batch_request.to_json_dict(),
         data_context=context,
+        batch_request=batch_request.to_json_dict(),
+        include_column_name_suffixes=["_amount"],
     )
     # parameter_builder
     numeric_range_parameter_builder: MetricMultiBatchParameterBuilder = (
@@ -208,9 +208,9 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         data_connector_query={"index": -1},
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        include_column_name_suffixes=["_amount"],
-        batch_request=batch_request.to_json_dict(),
         data_context=context,
+        batch_request=batch_request.to_json_dict(),
+        include_column_name_suffixes=["_amount"],
     )
     # parameter_builder
     numeric_range_parameter_builder: MetricMultiBatchParameterBuilder = (
@@ -242,10 +242,8 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
     )
     res: dict = my_rbp.config.to_json_dict()
     assert res == {
-        "class_name": "RuleBasedProfiler",
-        "module_name": "great_expectations.rule_based_profiler.rule_based_profiler",
-        "name": "my_rbp",
         "config_version": 1.0,
+        "name": "my_rbp",
         "rules": None,
         "variables": None,
     }
@@ -257,19 +255,13 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
 
     res = my_loaded_profiler.config.to_json_dict()
     assert res == {
-        "module_name": "great_expectations.rule_based_profiler.rule_based_profiler",
-        "class_name": "RuleBasedProfiler",
-        "name": "my_rbp",
-        "config_version": 1.0,
         "variables": None,
         "rules": {
             "rule_with_no_variables_no_parameters": {
                 "domain_builder": {
                     "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                     "class_name": "ColumnDomainBuilder",
-                    "include_column_name_suffixes": [
-                        "_amount",
-                    ],
+                    "include_column_name_suffixes": ["_amount"],
                     "batch_request": {
                         "datasource_name": "taxi_multibatch_datasource_other_possibility",
                         "data_connector_name": "default_inferred_data_connector_name",
@@ -281,15 +273,14 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                        "class_name": "MetricMultiBatchParameterBuilder",
                         "name": "my_column_min",
                         "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
                         "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,
-                        "evaluation_parameter_builder_configs": None,
                         "json_serialize": True,
                         "batch_request": {
                             "datasource_name": "taxi_multibatch_datasource_other_possibility",
@@ -299,22 +290,22 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                             "data_connector_query": {"index": -1},
                             "limit": None,
                         },
-                    },
+                    }
                 ],
                 "expectation_configuration_builders": [
                     {
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_values_to_be_greater_than",
-                        "meta": {},
+                        "class_name": "DefaultExpectationConfigurationBuilder",
                         "column": "$domain.domain_kwargs.column",
-                        "validation_parameter_builder_configs": None,
+                        "meta": {},
                         "value": "$parameter.my_column_min.value[-1]",
-                        "batch_request": None,
-                    },
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    }
                 ],
-            },
+            }
         },
+        "config_version": 1.0,
+        "name": "my_rbp",
     }
 
 
@@ -329,9 +320,9 @@ def test_profiler_run_with_expectation_suite_arg(
         data_connector_query={"index": -1},
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        include_column_name_suffixes=["_amount"],
-        batch_request=batch_request.to_json_dict(),
         data_context=context,
+        batch_request=batch_request.to_json_dict(),
+        include_column_name_suffixes=["_amount"],
     )
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
         expectation_type="expect_column_values_to_not_be_null",

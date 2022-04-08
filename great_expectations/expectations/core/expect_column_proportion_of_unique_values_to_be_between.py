@@ -81,8 +81,6 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
-        "has_full_test_suite": True,
-        "manually_reviewed_code": True,
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -111,7 +109,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -120,10 +118,12 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            True if the configuration has been validated successfully. Otherwise, raises an exception
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
+
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

@@ -43,7 +43,7 @@ class ColumnValuesToBeValidIPv4(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidIpv4(ColumnMapExpectation):
+class ExpectColumnValuesToBeValidIPv4(ColumnMapExpectation):
     """This Expectation validates data as conforming to the valid IPv4 address format."""
 
     # These examples will be shown in the public gallery.
@@ -112,9 +112,7 @@ class ExpectColumnValuesToBeValidIpv4(ColumnMapExpectation):
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -122,7 +120,7 @@ class ExpectColumnValuesToBeValidIpv4(ColumnMapExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            True if the configuration has been validated successfully. Otherwise, raises an exception
         """
 
         super().validate_configuration(configuration)
@@ -140,6 +138,8 @@ class ExpectColumnValuesToBeValidIpv4(ColumnMapExpectation):
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
 
+        return True
+
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "maturity": "experimental",
@@ -147,8 +147,9 @@ class ExpectColumnValuesToBeValidIpv4(ColumnMapExpectation):
         "contributors": [
             "@voidforall",
         ],
+        "package": "experimental_expectations",
     }
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidIpv4().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidIPv4().print_diagnostic_checklist()

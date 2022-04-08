@@ -1,5 +1,4 @@
 import copy
-import json
 import logging
 import os
 
@@ -15,26 +14,6 @@ from great_expectations.util import (
     hyphen,
     lint_code,
 )
-
-
-@pytest.fixture
-def empty_expectation_suite():
-    expectation_suite = {
-        "expectation_suite_name": "default",
-        "meta": {},
-        "expectations": [],
-    }
-    return expectation_suite
-
-
-@pytest.fixture
-def file_data_asset(tmp_path):
-    tmp_path = str(tmp_path)
-    path = os.path.join(tmp_path, "file_data_asset.txt")
-    with open(path, "w+") as file:
-        file.write(json.dumps([0, 1, 2, 3, 4]))
-
-    return ge.data_asset.FileDataAsset(file_path=path)
 
 
 def test_validate_non_dataset(file_data_asset, empty_expectation_suite):

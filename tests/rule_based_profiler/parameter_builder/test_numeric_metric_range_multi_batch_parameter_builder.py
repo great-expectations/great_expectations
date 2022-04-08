@@ -64,7 +64,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
     expected_value_dict: dict = {
-        "value": None,
+        "value": {"value_range": None},
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {},
@@ -82,8 +82,8 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         parameters={domain.id: parameter_container},
     )
 
-    actual_value = actual_value_dict.pop("value")
-    actual_value_dict["value"] = None
+    actual_value = actual_value_dict.pop("value").pop("value_range")
+    actual_value_dict["value"] = {"value_range": None}
 
     assert actual_value_dict == expected_value_dict
 

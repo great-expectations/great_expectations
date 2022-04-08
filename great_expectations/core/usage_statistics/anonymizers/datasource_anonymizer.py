@@ -1,6 +1,6 @@
-from typing import Any, Optional
+from typing import Optional
 
-from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.datasource import (
     BaseDatasource,
     Datasource,
@@ -12,39 +12,28 @@ from great_expectations.datasource import (
 )
 
 
-class DatasourceAnonymizer(BaseAnonymizer):
-    # ordered bottom up in terms of inheritance order
-    _legacy_ge_classes = [
-        PandasDatasource,
-        SqlAlchemyDatasource,
-        SparkDFDatasource,
-        LegacyDatasource,
-    ]
-
-    # ordered bottom up in terms of inheritance order
-    _ge_classes = [
-        SimpleSqlalchemyDatasource,
-        Datasource,
-        BaseDatasource,
-    ]
-
-    def __init__(
-        self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
-        salt: Optional[str] = None,
-    ) -> None:
+class DatasourceAnonymizer(Anonymizer):
+    def __init__(self, salt=None):
         super().__init__(salt=salt)
 
-        self._aggregate_anonymizer = aggregate_anonymizer
+        # ordered bottom up in terms of inheritance order
+        self._legacy_ge_classes = [
+            PandasDatasource,
+            SqlAlchemyDatasource,
+            SparkDFDatasource,
+            LegacyDatasource,
+        ]
 
-    def anonymize(self, obj: Optional[object] = None, *args, **kwargs) -> Any:
-        if obj is not None and isinstance(obj, SimpleSqlalchemyDatasource):
-            return self._anonymize_simple_sqlalchemy_datasource(*args, **kwargs)
-        return self._anonymize_datasource_info(*args, **kwargs)
+        # ordered bottom up in terms of inheritance order
+        self._ge_classes = [
+            SimpleSqlalchemyDatasource,
+            Datasource,
+            BaseDatasource,
+        ]
 
-    def _anonymize_datasource_info(self, name: str, config: dict) -> dict:
+    def anonymize_datasource_info(self, name, config):
         anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self._anonymize_string(name)
+        anonymized_info_dict["anonymized_name"] = self.anonymize(name)
 
         # Legacy Datasources (<= v0.12 v2 BatchKwargs API)
         if self.get_parent_class_v2_api(config=config) is not None:
@@ -67,7 +56,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
             )
             data_connector_configs = config.get("data_connectors")
             anonymized_info_dict["anonymized_data_connectors"] = [
-                self._aggregate_anonymizer.anonymize(
+                self.anonymize_data_connector_info(
                     name=data_connector_name, config=data_connector_config
                 )
                 for data_connector_name, data_connector_config in data_connector_configs.items()
@@ -75,12 +64,12 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
         return anonymized_info_dict
 
-    def _anonymize_simple_sqlalchemy_datasource(self, name: str, config: dict) -> dict:
+    def anonymize_simple_sqlalchemy_datasource(self, name, config):
         """
         SimpleSqlalchemyDatasource requires a separate anonymization scheme.
         """
         anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self._anonymize_string(name)
+        anonymized_info_dict["anonymized_name"] = self.anonymize(name)
         if config.get("module_name") is None:
             config["module_name"] = "great_expectations.datasource"
         self._anonymize_object_info(
@@ -112,7 +101,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
                         "module_name"
                     ] = "great_expectations.datasource.data_connector"
                 introspection_data_connector_anonymized_configs.append(
-                    self._aggregate_anonymizer.anonymize(
+                    self.anonymize_data_connector_info(
                         name=data_connector_name, config=data_connector_config
                     )
                 )
@@ -132,7 +121,7 @@ class DatasourceAnonymizer(BaseAnonymizer):
                         "module_name"
                     ] = "great_expectations.datasource.data_connector"
                 tables_data_connector_anonymized_configs.append(
-                    self._aggregate_anonymizer.anonymize(
+                    self.anonymize_data_connector_info(
                         name=data_connector_name, config=data_connector_config
                     )
                 )
@@ -144,51 +133,20 @@ class DatasourceAnonymizer(BaseAnonymizer):
 
         return anonymized_info_dict
 
-    def _anonymize_execution_engine_info(self, name: str, config: dict) -> dict:
-        anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self._anonymize_string(name)
-
-        from great_expectations.data_context.types.base import (
-            ExecutionEngineConfig,
-            executionEngineConfigSchema,
-        )
-
-        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-        execution_engine_config: ExecutionEngineConfig = (
-            executionEngineConfigSchema.load(config)
-        )
-        execution_engine_config_dict: dict = executionEngineConfigSchema.dump(
-            execution_engine_config
-        )
-
-        self._anonymize_object_info(
-            anonymized_info_dict=anonymized_info_dict,
-            object_config=execution_engine_config_dict,
-        )
-
-        return anonymized_info_dict
-
-    def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
-        return obj is not None and isinstance(obj, BaseDatasource)
-
-    @staticmethod
-    def get_parent_class(config: dict) -> Optional[str]:
-        return BaseAnonymizer.get_parent_class(
-            classes_to_check=DatasourceAnonymizer._ge_classes
-            + DatasourceAnonymizer._legacy_ge_classes,
+    def get_parent_class(self, config) -> Optional[str]:
+        return super().get_parent_class(
+            classes_to_check=self._ge_classes + self._legacy_ge_classes,
             object_config=config,
         )
 
-    @staticmethod
-    def get_parent_class_v2_api(config: dict) -> Optional[str]:
-        return BaseAnonymizer.get_parent_class(
-            classes_to_check=DatasourceAnonymizer._legacy_ge_classes,
+    def get_parent_class_v2_api(self, config) -> Optional[str]:
+        return super().get_parent_class(
+            classes_to_check=self._legacy_ge_classes,
             object_config=config,
         )
 
-    @staticmethod
-    def get_parent_class_v3_api(config: dict) -> Optional[str]:
-        return BaseAnonymizer.get_parent_class(
-            classes_to_check=DatasourceAnonymizer._ge_classes,
+    def get_parent_class_v3_api(self, config) -> Optional[str]:
+        return super().get_parent_class(
+            classes_to_check=self._ge_classes,
             object_config=config,
         )

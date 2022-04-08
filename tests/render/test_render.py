@@ -77,18 +77,6 @@ def titanic_dataset_profiler_expectations_with_distribution(
         return ExpectationSuite(**expectations_dict, data_context=context)
 
 
-@pytest.fixture
-def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
-    with open(
-        file_relative_path(
-            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
-        ),
-    ) as infile:
-        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(infile))
-        return ExpectationSuite(**expectation_suite_dict, data_context=context)
-
-
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):

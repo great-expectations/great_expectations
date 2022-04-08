@@ -102,7 +102,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    ) -> bool:
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
         if configuration is None:
@@ -118,6 +118,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
                 ), 'Evaluation Parameter dict for value_set_kwarg must have "$PARAMETER" key'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

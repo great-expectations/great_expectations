@@ -10,26 +10,11 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
 from great_expectations.data_context.types.base import DataContextConfigDefaults
-from great_expectations.data_context.util import file_relative_path
 from tests.cli.v012.utils import (
     LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
+    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
-
-
-@pytest.fixture
-def titanic_data_context_stats_enabled_config_version_2_with_checkpoint(
-    tmp_path_factory, monkeypatch, titanic_data_context_stats_enabled_config_version_2
-):
-    context = titanic_data_context_stats_enabled_config_version_2
-    root_dir = context.root_directory
-    fixture_name = "my_checkpoint.yml"
-    fixture_path = file_relative_path(
-        __file__, f"../../data_context/fixtures/contexts/{fixture_name}"
-    )
-    checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
-    shutil.copy(fixture_path, checkpoints_file)
-    return context
 
 
 @pytest.fixture

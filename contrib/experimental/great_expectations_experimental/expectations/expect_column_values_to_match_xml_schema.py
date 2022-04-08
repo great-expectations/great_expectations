@@ -151,10 +151,10 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         "catch_exceptions": True,
     }
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
+
+        return True
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

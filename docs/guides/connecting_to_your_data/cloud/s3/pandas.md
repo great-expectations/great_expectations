@@ -8,10 +8,9 @@ import Prerequisites from '../../components/prerequisites.jsx'
 import WhereToRunCode from '../../components/where_to_run_code.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you connect to your data stored on AWS S3 using Pandas.
-This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
+This will allow you to validate and explore your data.
 
 <Prerequisites>
 
@@ -48,8 +47,7 @@ Using this example configuration, add in your S3 bucket and path to a directory 
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-
-<TabItem value="yaml">
+  <TabItem value="yaml">
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L9-L28
 ```
@@ -60,7 +58,6 @@ Run this code to test your configuration.
 ```
 
 </TabItem>
-
 <TabItem value="python">
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py#L9-L28
@@ -72,7 +69,6 @@ Run this code to test your configuration.
 ```
 
 </TabItem>
-
 </Tabs>
 
 If you specified an S3 path containing CSV files you will see them listed as `Available data_asset_names` in the output of `test_yaml_config()`.
@@ -90,26 +86,23 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-
-<TabItem value="yaml">
+  <TabItem value="yaml">
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L41
 ```
 
 </TabItem>
-
 <TabItem value="python">
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py#L42
 ```
 
 </TabItem>
-
 </Tabs>
 
 ### 5. Test your new Datasource
 
-Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a <TechnicalTag tag="batch_request" text="Batch Request" />.
+Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
 
 <Tabs
   defaultValue='runtime_batch_request'
@@ -117,36 +110,30 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
   {label: 'Specify an S3 path to single CSV', value:'runtime_batch_request'},
   {label: 'Specify a data_asset_name', value:'batch_request'},
   ]}>
-
-<TabItem value="runtime_batch_request">
+  <TabItem value="runtime_batch_request">
 
 Add the S3 path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L42-L50
 ```
-
 Then load data into the `Validator`.
-
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L58-L64
 ```
 
-</TabItem>
+  </TabItem>
+  <TabItem value="batch_request">
 
-<TabItem value="batch_request">
-
-Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
+Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
 
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L76-L81
 ```
-
 Then load data into the `Validator`.
-
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L88-L94
 ```
 
-</TabItem>
-
+  </TabItem>
 </Tabs>
+
 
 <Congratulations />
 

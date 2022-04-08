@@ -94,8 +94,8 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        super().validate_configuration(configuration)
+    ) -> bool:
+        return super().validate_configuration(configuration)
 
     @classmethod
     def _atomic_prescriptive_template(

@@ -16,9 +16,11 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     materialize_batch_request,
 )
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
     VARIABLES_PREFIX,
+    Builder,
     Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
@@ -388,6 +390,88 @@ def convert_variables_to_dict(
     )
 
     return variables or {}
+
+
+def init_rule_parameter_builders(
+    parameter_builder_configs: Optional[List[dict]] = None,
+    data_context: Optional["DataContext"] = None,  # noqa: F821
+) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
+    if parameter_builder_configs is None:
+        return None
+
+    return [
+        init_parameter_builder(
+            parameter_builder_config=parameter_builder_config,
+            data_context=data_context,
+        )
+        for parameter_builder_config in parameter_builder_configs
+    ]
+
+
+def init_parameter_builder(
+    parameter_builder_config: Union["ParameterBuilderConfig", dict],  # noqa: F821
+    data_context: Optional["DataContext"] = None,  # noqa: F821
+) -> "ParameterBuilder":  # noqa: F821
+    if not isinstance(parameter_builder_config, dict):
+        parameter_builder_config = parameter_builder_config.to_dict()
+
+    parameter_builder: "ParameterBuilder" = instantiate_class_from_config(  # noqa: F821
+        config=parameter_builder_config,
+        runtime_environment={"data_context": data_context},
+        config_defaults={
+            "module_name": "great_expectations.rule_based_profiler.parameter_builder"
+        },
+    )
+    return parameter_builder
+
+
+def init_rule_expectation_configuration_builders(
+    expectation_configuration_builder_configs: List[dict],
+    data_context: Optional["DataContext"] = None,  # noqa: F821
+) -> List["ExpectationConfigurationBuilder"]:  # noqa: F821
+    expectation_configuration_builder_config: dict
+    return [
+        init_expectation_configuration_builder(
+            expectation_configuration_builder_config=expectation_configuration_builder_config,
+            data_context=data_context,
+        )
+        for expectation_configuration_builder_config in expectation_configuration_builder_configs
+    ]
+
+
+def init_expectation_configuration_builder(
+    expectation_configuration_builder_config: Union[
+        "ExpectationConfigurationBuilder", dict  # noqa: F821
+    ],
+    data_context: Optional["DataContext"] = None,  # noqa: F821
+) -> "ExpectationConfigurationBuilder":  # noqa: F821
+    if not isinstance(expectation_configuration_builder_config, dict):
+        expectation_configuration_builder_config = (
+            expectation_configuration_builder_config.to_dict()
+        )
+
+    expectation_configuration_builder: "ExpectationConfigurationBuilder" = instantiate_class_from_config(  # noqa: F821
+        config=expectation_configuration_builder_config,
+        runtime_environment={"data_context": data_context},
+        config_defaults={
+            "class_name": "DefaultExpectationConfigurationBuilder",
+            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+        },
+    )
+    return expectation_configuration_builder
+
+
+def set_batch_list_or_batch_request_on_builder(
+    builder: Builder,
+    batch_list: Optional[List[Batch]] = None,
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+    force_batch_data: bool = False,
+) -> None:
+    if force_batch_data or builder.batch_request is None:
+        builder.set_batch_data(
+            batch_list=batch_list,
+            batch_request=batch_request,
+        )
 
 
 def compute_quantiles(

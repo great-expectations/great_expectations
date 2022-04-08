@@ -1,4 +1,4 @@
-black==22.3.0        # Linting / code style
+black==22.1.0        # Linting / code style
 Click>=7.1.2         # CLI tooling
 cookiecutter==1.7.3  # Project templating
 isort==5.4.2         # Linting / code style

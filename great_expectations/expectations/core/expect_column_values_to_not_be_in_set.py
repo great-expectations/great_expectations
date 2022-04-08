@@ -119,7 +119,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    ) -> bool:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -134,6 +134,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

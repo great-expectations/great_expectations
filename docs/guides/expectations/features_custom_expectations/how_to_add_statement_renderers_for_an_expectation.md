@@ -5,27 +5,25 @@ title: How to add Statement Renderers for Custom Expectations
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you implement Statement <TechnicalTag tag="renderer" text="Renderers" /> for your <TechnicalTag tag="custom_expectation" text="Custom Expectations" />.
-
+This guide will help you implement Statement Renderers for your Custom Expectations.
 
 <Prerequisites>
 
- - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
+ - Created a [Custom Expectation](../creating_custom_expectations/overview.md)
 
 </Prerequisites>
 
 We will add Statement Renderers to the Custom Expectations built in the guides for [creating Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
 and [creating Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
 
-Great Expectations supports a number of Renderers, allowing you to control how your Custom Expectations are displayed in your <TechnicalTag tag="data_docs" text="Data Docs" />.
+Great Expectations supports a number of Renderers, allowing you to control how your Custom Expectations are displayed in your [Data Docs](../../../reference/data_docs.md).
 
-Implementing Renderers as part of your Custom Expectations is not strictly required - if not provided, Great Expectations will render your Custom Expectation using a basic default renderer:
+Implementing renderers as part of your Custom Expectations is not strictly required - if not provided, Great Expectations will render your Custom Expectation using a basic default renderer:
 
 ![Expectation rendered using default renderer](../../../images/expectation_fallback.png)
 
-If you decide to contribute your <TechnicalTag tag="expectation" text="Expectation" />, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Renderers that it supports.
+If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Renderers that it supports.
 
 ## Steps
 
@@ -44,7 +42,8 @@ delivering further insights about your data.
 
 <details>
 <summary>But what do they look like?</summary>
-There are several ways to implement Prescriptive and Diagnostic Renderers. The image below gives some examples of what these Renderers look like in action!
+There are several ways to implement Prescriptive and Diagnostic Renderers. The image below gives some examples of what 
+these Renderers look like in action!
 <br/><br/>
 
 ![Annotated Validation Result Example](../../../images/validation_result_example.png)
@@ -74,7 +73,7 @@ Both of these implementations will share the `@renderer(renderer_type="renderer.
 :::note
 While not strictly necessary for all Custom Expectations, 
 adding the ``@render_evaluation_parameter_string`` decorator allows [Expectations that use Evaluation Parameters](../../../guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.md) 
-to render the values of the <TechnicalTag tag="evaluation_parameter" text="Evaluation Parameters" /> along with the rest of the output.
+to render the values of the Evaluation Parameters along with the rest of the output.
 :::
 
 <Tabs
@@ -109,7 +108,9 @@ Then we return our string template, including the parameters that will populate 
 ### 4. Verifying your implementation
 <br/>
 
-If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and <TechnicalTag tag="validation" text="Validate" /> against your data with a <TechnicalTag tag="checkpoint" text="Checkpoint" />, and see something similar to the following in your Data Docs:
+If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an [Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) 
+and validate against your data with a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md), 
+and see something similar to the following in your Data Docs:
 
 ![String Template Example](../../../images/string_template.png)
 
@@ -144,7 +145,9 @@ Finally, we return both our template string and our table:
 ### 4. Verifying your implementation
 <br/>
 
-If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and <TechnicalTag tag="validation" text="Validate" /> against your data with a <TechnicalTag tag="checkpoint" text="Checkpoint" />, and see something similar to the following in your Data Docs:
+If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an [Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) 
+and validate against your data with a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md), 
+and see something similar to the following in your Data Docs:
 
 ![Table Example](../../../images/table.png)
 
@@ -221,7 +224,9 @@ And return the observed value or unexpected percent in our results, transforming
 ### 4. Verifying your implementation
 <br/>
 
-If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and <TechnicalTag tag="validation" text="Validate" /> against your data with a <TechnicalTag tag="checkpoint" text="Checkpoint" />.  When you build your Data Docs you should see an observed value or unexpected percent populating the `Observed Value` column of your <TechnicalTag tag="validation_result" text="Validation Results" />.
+If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an [Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) 
+and validate against your data with a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md), when you build your Data Docs
+you should see an observed value or unexpected percent populating the `Observed Value` column of your validation results.
 
 </TabItem>
 
@@ -264,7 +269,10 @@ Otherwise, we build a template string summarizing our unexpected results, and re
 ### 4. Verifying your implementation
 <br/>
 
-If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and <TechnicalTag tag="validation" text="Validate" /> against your data with a <TechnicalTag tag="checkpoint" text="Checkpoint" />. When you build your Data Docs, if your Custom Expectation encountered unexpected values, you should see a statement in the `Expectation` column of your <TechnicalTag tag="validation_result" text="Validation Results" /> detailing summary statistics about those unexpected values.
+If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an [Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) 
+and validate against your data with a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md). When you build your Data Docs, 
+if your Custom Expectation encountered unexpected values, you should see a statement in the `Expectation` column of your validation results detailing 
+summary statistics about those unexpected values.
 
 </TabItem>
 
@@ -308,8 +316,9 @@ And return the rendered table:
 ### 4. Verifying your implementation
 <br/>
 
-If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />
-and <TechnicalTag tag="validation" text="Validate" /> against your data with a <TechnicalTag tag="checkpoint" text="Checkpoint" />. When you build your Data Docs, if your Custom Expectation encountered unexpected values, you should see a table in the `Expectation` column of your <TechnicalTag tag="validation_result" text="Validation Results" /> with a sampling of those values.
+If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an [Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) 
+and validate against your data with a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md). When you build your Data Docs, 
+if your Custom Expectation encountered unexpected values, you should see a table in the `Expectation` column of your validation results with a sampling of those values.
 
 </TabItem>
 </Tabs>

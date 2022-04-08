@@ -1,5 +1,3 @@
-import os
-import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
 from uuid import UUID
@@ -23,7 +21,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.data_context.types.base import ProgressBarsConfig
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
@@ -40,94 +37,6 @@ from great_expectations.validator.validator import (
     MAX_METRIC_COMPUTATION_RETRIES,
     Validator,
 )
-
-
-@pytest.fixture()
-def yellow_trip_pandas_data_context(
-    tmp_path_factory,
-    monkeypatch,
-) -> DataContext:
-    """
-    Provides a data context with a data_connector for a pandas datasource which can connect to three months of
-    yellow trip taxi data in csv form. This data connector enables access to all three months through a BatchRequest
-    where the "year" in batch_filter_parameters is set to "2019", or to individual months if the "month" in
-    batch_filter_parameters is set to "01", "02", or "03"
-    """
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "..",
-                "integration",
-                "fixtures",
-                "yellow_tripdata_pandas_fixture",
-                "great_expectations",
-                "great_expectations.yml",
-            ),
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "..",
-                "test_sets",
-                "taxi_yellow_tripdata_samples",
-                "yellow_tripdata_sample_2019-01.csv",
-            ),
-        ),
-        str(
-            os.path.join(
-                context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "..",
-                "test_sets",
-                "taxi_yellow_tripdata_samples",
-                "yellow_tripdata_sample_2019-02.csv",
-            ),
-        ),
-        str(
-            os.path.join(
-                context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            os.path.join(
-                "..",
-                "test_sets",
-                "taxi_yellow_tripdata_samples",
-                "yellow_tripdata_sample_2019-03.csv",
-            ),
-        ),
-        str(
-            os.path.join(
-                context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
-            )
-        ),
-    )
-
-    context: DataContext = DataContext(context_root_dir=context_path)
-    assert context.root_directory == context_path
-
-    return context
 
 
 def test_parse_validation_graph():

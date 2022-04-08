@@ -88,7 +88,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -102,6 +102,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

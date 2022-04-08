@@ -55,7 +55,7 @@ rules:
         column: $domain.domain_kwargs.column
         quantile_ranges:
           quantiles: $variables.quantiles
-          value_ranges: $parameter.quantile_value_ranges.value
+          value_ranges: $parameter.quantile_value_ranges.value.value_range
         allow_relative_error: $variables.allow_relative_error
         meta:
           profiler_details: $parameter.quantile_value_ranges.details

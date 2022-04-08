@@ -221,8 +221,8 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
-        super().validate_configuration(configuration=configuration)
+    ) -> bool:
+        return super().validate_configuration(configuration=configuration)
 
     def get_validation_dependencies(
         self,

@@ -23,6 +23,11 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
     def __init__(
         self,
         map_metric_name: str,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
@@ -38,11 +43,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         max_unexpected_values: Union[str, int] = 0,
         max_unexpected_ratio: Optional[Union[str, float]] = None,
         min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Create column domains using tolerance for inter-Batch proportion of adherence to intra-Batch "unexpected_count"
@@ -51,6 +51,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         Args:
             map_metric_name: the name of a map metric (must be a supported and registered map metric); the suffix
             ".unexpected_count" will be appended to "map_metric_name" to be used in MetricConfiguration to get values.
+            batch_list: explicitly specified Batch objects for use in DomainBuilder
+            batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
+            data_context: DataContext associated with this profiler.
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             include_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to match.
@@ -66,9 +69,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             (intra-Batch); if both "max_unexpected_values" and "max_unexpected_ratio" are specified, then
             "max_unexpected_ratio" is used (and "max_unexpected_values" is ignored).
             min_max_unexpected_values_proportion: minimum fraction of Batch objects adhering to "max_unexpected_values"
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
-            data_context: DataContext associated with this profiler.
 
         For example (using default values of "max_unexpected_values" and "min_max_unexpected_values_proportion"):
         Suppose that "map_metric_name" is "column_values.nonnull" and consider the following three Batches of data:
@@ -95,6 +95,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         Alternatively, if "min_max_unexpected_values_proportion" is lowered to 0.66, Domain will also be emitted.
         """
         super().__init__(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            data_context=data_context,
             include_column_names=include_column_names,
             exclude_column_names=exclude_column_names,
             include_column_name_suffixes=include_column_name_suffixes,
@@ -103,9 +106,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             semantic_type_filter_class_name=semantic_type_filter_class_name,
             include_semantic_types=include_semantic_types,
             exclude_semantic_types=exclude_semantic_types,
-            batch_list=batch_list,
-            batch_request=batch_request,
-            data_context=data_context,
         )
 
         self._map_metric_name = map_metric_name

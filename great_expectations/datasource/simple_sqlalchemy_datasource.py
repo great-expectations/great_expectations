@@ -58,7 +58,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         table_configs: dict,
     ):
 
-        # Step-1: Build DataConnectors for introspected assets
+        # First, build DataConnectors for introspected assets
         for name, config in introspection_configs.items():
             data_connector_config: dict = dict(
                 **{
@@ -72,7 +72,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
                 data_connector_config,
             )
 
-        # Step-2: Build DataConnectors for tables. They will map to configured assets
+        # Second, build DataConnectors for tables. They will map to configured assets
         for table_name, table_config in table_configs.items():
             for partitioner_name, partitioner_config in table_config[
                 "partitioners"

@@ -196,12 +196,13 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert "type_" in configuration.kwargs, "type_ is required"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

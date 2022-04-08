@@ -66,12 +66,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         false_positive_rate: Union[str, float] = 5.0e-2,
         estimator: str = "bootstrap",
         num_bootstrap_samples: Optional[Union[str, int]] = None,
-        bootstrap_random_seed: Optional[Union[str, int]] = None,
+        bootstrap_random_seed: Optional[int] = None,
         round_decimals: Optional[Union[str, int]] = None,
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
-        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
         json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
@@ -101,9 +100,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
-            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
-            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
-            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
             batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
@@ -117,7 +113,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             enforce_numeric_metric=enforce_numeric_metric,
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
@@ -306,7 +301,9 @@ detected.
         )
 
         return (
-            metric_value_range,
+            {
+                "value_range": metric_value_range,
+            },
             parameter_node.details,
         )
 

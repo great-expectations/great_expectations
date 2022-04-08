@@ -1,15 +1,12 @@
 ---
-title: How to trigger Slack notifications as an Action
+title: How to trigger Slack notifications as a Validation Action
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you trigger Slack notifications as an <TechnicalTag tag="action" text="Action" />.
-It will allow you to send a Slack message including information about a <TechnicalTag tag="validation_result" text="Validation Result" />, including whether or not the <TechnicalTag tag="validation" text="Validation" /> succeeded.
+This guide will help you trigger Slack notifications as a [Validation Action](../../../reference/validation.md).
+It will allow you to send a Slack message including information about a Validation Result, including whether or not the Validation succeeded.
 
-Great Expectations is able to use a Slack webhook or Slack app to send notifications.
-
-## Prerequisites 
+Great Expectations is able to use a slack webhook or slack app to send notifications.
 
 ### For webhook
 
@@ -21,7 +18,7 @@ Great Expectations is able to use a Slack webhook or Slack app to send notificat
 
 </Prerequisites>
 
-### For Slack app
+### For slack app
 
 <Prerequisites>
 
@@ -31,22 +28,19 @@ Great Expectations is able to use a Slack webhook or Slack app to send notificat
 
 </Prerequisites>
 
-## Steps
+Steps
+-----
 
-### 1. Edit your configuration variables to include the Slack webhook
-
-Open `uncommitted/config_variables.yml` file and add `validation_notification_slack_webhook` variable by adding the following line:
+1. Open `uncommitted/config_variables.yml` file and add `validation_notification_slack_webhook` variable by adding the following line:
 
 ```yaml
 validation_notification_slack_webhook: [address to web hook]
 ```
 
-### 2. Edit your `validation_operators` configuration to include the `send_slack_notification_on_validation_result` Action
 
-Open `great_expectations.yml` and add `send_slack_notification_on_validation_result` Action to `validation_operators`. Make sure the following section exists in the `great_expectations.yml` file.
+2. Open `great_expectations.yml` and add `send_slack_notification_on_validation_result` action to `validation_operators`. Make sure the following section exists in the `great_expectations.yml` file.
 
-#### Webhook config
-
+### Webhook config
 ```yaml
 validation_operators:
     action_list_operator:
@@ -69,8 +63,7 @@ validation_operators:
               class_name: SlackRenderer
 ```
 
-#### Slack bot config
-
+### Slack bot config
 ```yaml
 validation_operators:
     action_list_operator:
@@ -94,9 +87,7 @@ validation_operators:
               class_name: SlackRenderer
 ```
 
-### 4. Test your Slack notifications
-
-Run your `action_list_operator`, to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and receive Slack notification on the success or failure of the <TechnicalTag tag="expectation_suite" text="Expectation Suite's" /> Validation.  
+3. Run your `action_list_operator`, to validate a batch of data and receive Slack notification on the success or failure of validation suite.  
 
 ```python
 context.run_validation_operator('action_list_operator', assets_to_validate=batch, run_name="slack_test")
@@ -110,7 +101,7 @@ context.run_validation_operator('action_list_operator', assets_to_validate=batch
 Additional notes
 --------------------
 
-- If your `great_expectations.yml` contains multiple configurations for <TechnicalTag tag="data_docs" text="Data Docs" /> sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the `notify_with` variable in your `great_expectations.yml`.
+- If your `great_expectations.yml` contains multiple configurations for Data Docs sites, all of them will be included in the Slack notification by default. If you would like to be more specific, you can configure the `notify_with` variable in your `great_expectations.yml`.
 - The following example will configure the Slack message to include links Data Docs at `local_site` and `s3_site`.
 
 ```yaml

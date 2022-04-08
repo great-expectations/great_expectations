@@ -37,7 +37,6 @@ class AugmentedLibraryMetadata(SerializableDictDot):
     library_metadata_passed_checks: bool
     has_full_test_suite: bool
     manually_reviewed_code: bool
-    problems: List[str] = field(default_factory=list)
 
     legacy_maturity_level_substitutions = {
         "experimental": "EXPERIMENTAL",

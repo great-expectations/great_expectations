@@ -2,29 +2,25 @@ from typing import Dict
 
 import pytest
 
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
-    ProfilerAnonymizer,
+from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
+    ProfilerRunAnonymizer,
 )
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 
 
 @pytest.fixture
-def profiler_anonymizer() -> ProfilerAnonymizer:
+def profiler_run_anonymizer() -> ProfilerRunAnonymizer:
     # Standardize the salt so our tests are deterimistic
     salt: str = "00000000-0000-0000-0000-00000000a004"
-    aggregate_anonymizer: Anonymizer = Anonymizer(salt=salt)
-    anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
-        salt=salt, aggregate_anonymizer=aggregate_anonymizer
-    )
+    anonymizer: ProfilerRunAnonymizer = ProfilerRunAnonymizer(salt=salt)
     return anonymizer
 
 
 def test_anonymize_profiler_run(
-    profiler_anonymizer: ProfilerAnonymizer,
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
-    anonymized_result: dict = profiler_anonymizer.anonymize(
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
         profiler_config_with_placeholder_args
     )
     assert anonymized_result == {
@@ -54,10 +50,10 @@ def test_anonymize_profiler_run(
 
 
 def test_anonymize_profiler_run_custom_values(
-    profiler_anonymizer: ProfilerAnonymizer,
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
     profiler_config_with_placeholder_args_custom_values: RuleBasedProfilerConfig,
 ) -> None:
-    anonymized_result: dict = profiler_anonymizer.anonymize(
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
         profiler_config_with_placeholder_args_custom_values
     )
     assert anonymized_result == {
@@ -92,10 +88,10 @@ def test_anonymize_profiler_run_custom_values(
 
 
 def test_anonymize_profiler_run_multiple_rules(
-    profiler_anonymizer: ProfilerAnonymizer,
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
     profiler_config_with_placeholder_args_multiple_rules: RuleBasedProfilerConfig,
 ) -> None:
-    anonymized_result: dict = profiler_anonymizer.anonymize(
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
         profiler_config_with_placeholder_args_multiple_rules
     )
     assert anonymized_result == {
@@ -141,10 +137,10 @@ def test_anonymize_profiler_run_multiple_rules(
 
 
 def test_anonymize_profiler_run_multiple_rules_custom_values(
-    profiler_anonymizer: ProfilerAnonymizer,
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
     profiler_config_with_placeholder_args_multiple_rules_custom_values: RuleBasedProfilerConfig,
 ) -> None:
-    anonymized_result: dict = profiler_anonymizer.anonymize(
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
         profiler_config_with_placeholder_args_multiple_rules_custom_values
     )
     assert anonymized_result == {
@@ -200,7 +196,7 @@ def test_anonymize_profiler_run_multiple_rules_custom_values(
 
 
 def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
-    profiler_anonymizer: ProfilerAnonymizer,
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
     # Add batch requests to fixture before running method
@@ -214,7 +210,7 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
     rule["domain_builder"]["batch_request"] = batch_request
     rule["parameter_builders"][0]["batch_request"] = batch_request
 
-    anonymized_result: dict = profiler_anonymizer.anonymize(
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
         profiler_config_with_placeholder_args
     )
     assert anonymized_result == {
@@ -260,7 +256,7 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
 
 
 def test_anonymize_profiler_run_with_condition_in_expectation_configuration_builder(
-    profiler_anonymizer: ProfilerAnonymizer,
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
     rules: Dict[str, dict] = profiler_config_with_placeholder_args.rules
@@ -269,7 +265,7 @@ def test_anonymize_profiler_run_with_condition_in_expectation_configuration_buil
     ][0]
     expectation_configuration_builder["condition"] = "my_condition"
 
-    anonymized_result: dict = profiler_anonymizer.anonymize(
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
         profiler_config_with_placeholder_args
     )
     assert anonymized_result == {

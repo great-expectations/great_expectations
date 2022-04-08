@@ -4,20 +4,19 @@ title: How to add SQLAlchemy support for Custom Expectations
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you implement native SQLAlchemy support for your <TechnicalTag tag="custom_expectation" text="Custom Expectation" />.
+This guide will help you implement native SQLAlchemy support for your [Custom Expectation](../creating_custom_expectations/overview.md). 
 
 <Prerequisites>
 
- - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
+ - Created a [Custom Expectation](../creating_custom_expectations/overview.md)
 
 </Prerequisites>
 
-Great Expectations supports a number of <TechnicalTag tag="execution_engine" text="Execution Engines" />, including a SQLAlchemy Execution Engine. 
-These Execution Engines provide the computing resources used to calculate the <TechnicalTag tag="metric" text="Metrics" /> defined in the `Metric` class of your Custom Expectation.
+Great Expectations supports a number of [Execution Engines](../../../reference/execution_engine.md), including a SQLAlchemy Execution Engine. 
+These Execution Engines provide the computing resources used to calculate the [Metrics](../../../reference/metrics.md) defined in the Metric class of your Custom Expectation.
 
-If you decide to contribute your <TechnicalTag tag="expectation" text="Expectation" />, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Execution Engines that it supports.
+If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Execution Engines that it supports.
 
 We will add SQLAlchemy support for the Custom Expectations implemented in our guides on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
 and [how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
@@ -42,10 +41,9 @@ If not specified, Great Expectations will attempt to determine the implemented b
 
 ### 2. Implement the SQLAlchemy logic for your Custom Expectation
 
-Great Expectations provides a variety of ways to implement an Expectation in SQLAlchemy. Two of the most common include:  
-
-1. Defining a partial function that takes a SQLAlchemy column as input
-2. Directly executing queries using SQLAlchemy objects to determine the value of your Expectation's metric directly 
+Great Expectations provides a variety of ways to implement an Expectation in SQLAlchemy. Two of the most common include: 
+1.  Defining a partial function that takes a SQLAlchemy column as input
+2.  Directly executing queries using SQLAlchemy objects to determine the value of your Expectation's metric directly 
 
 <Tabs
   groupId="metric-type"

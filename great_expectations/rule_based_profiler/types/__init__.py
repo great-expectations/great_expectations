@@ -1,5 +1,6 @@
 from .attributes import Attributes  # isort:skip
 from .builder import Builder  # isort:skip
+
 from .domain import (  # isort:skip
     Domain,
     SemanticDomainTypes,

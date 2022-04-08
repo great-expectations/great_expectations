@@ -96,19 +96,10 @@ class ExpectationDiagnostics(SerializableDictDot):
         library_metadata: AugmentedLibraryMetadata,
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
-        sub_messages = []
-        for problem in library_metadata.problems:
-            sub_messages.append(
-                {
-                    "message": problem,
-                    "passed": False,
-                }
-            )
 
         return ExpectationDiagnosticCheckMessage(
             message="Has a library_metadata object",
             passed=library_metadata.library_metadata_passed_checks,
-            sub_messages=sub_messages,
         )
 
     @staticmethod
@@ -346,7 +337,6 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Check that the validate_configuration exists and doesn't raise a config error"""
         passed = False
         sub_messages = []
-        rx = re.compile(r"^[\s]+assert", re.MULTILINE)
         try:
             first_test = examples[0]["tests"][0]
         except IndexError:
@@ -360,7 +350,7 @@ class ExpectationDiagnostics(SerializableDictDot):
             if "validate_configuration" not in expectation_instance.__class__.__dict__:
                 sub_messages.append(
                     {
-                        "message": "No validate_configuration method defined on subclass",
+                        "message": "No validate_configuration method defined",
                         "passed": passed,
                     }
                 )
@@ -369,23 +359,6 @@ class ExpectationDiagnostics(SerializableDictDot):
                     expectation_type=expectation_instance.expectation_type,
                     kwargs=first_test.input,
                 )
-                validate_configuration_source = inspect.getsource(
-                    expectation_instance.__class__.validate_configuration
-                )
-                if rx.search(validate_configuration_source):
-                    sub_messages.append(
-                        {
-                            "message": "Custom 'assert' statements in validate_configuration",
-                            "passed": True,
-                        }
-                    )
-                else:
-                    sub_messages.append(
-                        {
-                            "message": "Using default validate_configuration from template",
-                            "passed": False,
-                        }
-                    )
                 try:
                     expectation_instance.validate_configuration(expectation_config)
                 except InvalidExpectationConfigurationError:
@@ -475,7 +448,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         if snaked_impl_name != source_file_base_no_ext:
             sub_messages.append(
                 {
-                    "message": f"The snake_case of {impl.__name__} ({snaked_impl_name}) does not match filename part ({source_file_base_no_ext})",
+                    "message": f"The snake_case of {impl.__name__} does not match filename part {source_file_base_no_ext}",
                     "passed": False,
                 }
             )

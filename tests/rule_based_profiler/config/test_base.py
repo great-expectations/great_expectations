@@ -293,7 +293,6 @@ def test_resolve_config_using_acceptable_arguments(
 ) -> None:
     old_config: RuleBasedProfilerConfig = profiler_with_placeholder_args.config
     old_config.module_name = profiler_with_placeholder_args.__class__.__module__
-    old_config.class_name = profiler_with_placeholder_args.__class__.__name__
 
     # Roundtrip through schema validation to add/or restore any missing fields.
     old_deserialized_config: dict = ruleBasedProfilerConfigSchema.load(

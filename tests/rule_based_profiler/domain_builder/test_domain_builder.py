@@ -25,8 +25,8 @@ def test_table_domain_builder(
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     domain_builder: DomainBuilder = TableDomainBuilder(
-        batch_request=None,
         data_context=data_context,
+        batch_request=None,
     )
     domains: List[Domain] = domain_builder.get_domains()
 
@@ -73,8 +73,8 @@ def test_column_domain_builder(
     }
 
     domain_builder: DomainBuilder = ColumnDomainBuilder(
-        batch_request=batch_request,
         data_context=data_context,
+        batch_request=batch_request,
     )
     domains: List[Domain] = domain_builder.get_domains(variables=variables)
 
@@ -159,11 +159,11 @@ def test_column_domain_builder_with_simple_semantic_type_included(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
     domain_builder: DomainBuilder = ColumnDomainBuilder(
+        data_context=data_context,
+        batch_request=batch_request,
         include_semantic_types=[
             "numeric",
         ],
-        batch_request=batch_request,
-        data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(variables=variables)
 

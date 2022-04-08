@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.expectation import ColumnMapExpectation
@@ -11,18 +11,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.types import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
-    VARIABLES_KEY,
-)
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 
 class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
@@ -108,40 +97,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "profiler_config",
     )
 
-    min_estimato_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricMultiBatchParameterBuilder",
-            name="min_estimator",
-            metric_name="column.min",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            json_serialize=True,
-        )
-    )
-    max_estimato_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricMultiBatchParameterBuilder",
-            name="max_estimator",
-            metric_name="column.max",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            json_serialize=True,
-        )
-    )
-    validation_parameter_builder_configs: List[dict] = [
-        min_estimato_parameter_builder_config,
-        max_estimato_parameter_builder_config,
-    ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -158,22 +113,47 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 },
+                "parameter_builders": [
+                    {
+                        "name": "min_estimator",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_name": "column.min",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": True,
+                        "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "json_serialize": True,
+                    },
+                    {
+                        "name": "max_estimator",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_name": "column.max",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": True,
+                        "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "json_serialize": True,
+                    },
+                ],
                 "expectation_configuration_builders": [
                     {
                         "expectation_type": "expect_column_values_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
-                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": f"{PARAMETER_KEY}{min_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[-1]",
-                        "max_value": f"{PARAMETER_KEY}{max_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[-1]",
-                        "mostly": f"{VARIABLES_KEY}mostly",
-                        "strict_min": f"{VARIABLES_KEY}strict_min",
-                        "strict_max": f"{VARIABLES_KEY}strict_max",
+                        "column": "$domain.domain_kwargs.column",
+                        "min_value": "$parameter.min_estimator.value[-1]",
+                        "max_value": "$parameter.max_estimator.value[-1]",
+                        "mostly": "$variables.mostly",
+                        "strict_min": "$variables.strict_min",
+                        "strict_max": "$variables.strict_max",
                         "meta": {
                             "profiler_details": {
-                                "min_estimator": f"{PARAMETER_KEY}{min_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                                "max_estimator": f"{PARAMETER_KEY}{max_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                                "min_estimator": "$parameter.min_estimator.details",
+                                "max_estimator": "$parameter.max_estimator.details",
                             },
                         },
                     },
@@ -209,7 +189,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -218,7 +198,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            True if the configuration has been validated successfully. Otherwise, raises an exception
         """
 
         # Setting up a configuration
@@ -235,6 +215,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         ), "min_value and max_value cannot both be None"
 
         self.validate_metric_value_between_configuration(configuration=configuration)
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

@@ -40,16 +40,17 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
-from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
-    init_rule_expectation_configuration_builders,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
-)
-from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,
+    init_rule_expectation_configuration_builders,
     init_rule_parameter_builders,
+    set_batch_list_or_batch_request_on_builder,
+)
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.rule.rule import Rule
 from great_expectations.rule_based_profiler.types import (
@@ -840,7 +841,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         expectation_configuration_builder: ExpectationConfigurationBuilder
         for rule in rules:
             domain_builder = rule.domain_builder
-            domain_builder.set_batch_list_or_batch_request(
+            set_batch_list_or_batch_request_on_builder(
+                builder=domain_builder,
                 batch_list=batch_list,
                 batch_request=batch_request,
                 force_batch_data=force_batch_data,
@@ -848,7 +850,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
             parameter_builders = rule.parameter_builders or []
             for parameter_builder in parameter_builders:
-                parameter_builder.set_batch_list_or_batch_request(
+                set_batch_list_or_batch_request_on_builder(
+                    builder=parameter_builder,
                     batch_list=batch_list,
                     batch_request=batch_request,
                     force_batch_data=force_batch_data,
@@ -858,7 +861,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 rule.expectation_configuration_builders or []
             )
             for expectation_configuration_builder in expectation_configuration_builders:
-                expectation_configuration_builder.set_batch_list_or_batch_request(
+                set_batch_list_or_batch_request_on_builder(
+                    builder=expectation_configuration_builder,
                     batch_list=batch_list,
                     batch_request=batch_request,
                     force_batch_data=force_batch_data,
@@ -1050,10 +1054,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._name
 
     @property
-    def config_version(self) -> float:
-        return self._config_version
-
-    @property
     def variables(self) -> Optional[ParameterContainer]:
         # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
         return copy.deepcopy(self._variables)
@@ -1080,7 +1080,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             "class_name": self.__class__.__name__,
             "module_name": self.__class__.__module__,
             "name": self.name,
-            "config_version": self.config_version,
             "variables": variables_dict,
             "rules": [rule.to_json_dict() for rule in self.rules],
         }
@@ -1191,8 +1190,6 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-            class_name=self.__class__.__name__,
-            module_name=self.__class__.__module__,
             name=name,
             config_version=config_version,
             variables=variables,

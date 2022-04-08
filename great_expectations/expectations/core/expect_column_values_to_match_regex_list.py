@@ -104,7 +104,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    ) -> bool:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -125,6 +125,7 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for regex_list kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

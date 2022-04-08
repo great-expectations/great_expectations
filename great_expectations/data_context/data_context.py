@@ -3674,7 +3674,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self.config["stores"][store_name] = config
 
         anonymizer = Anonymizer(self.data_context_id)
-        usage_stats_event_payload = anonymizer.anonymize(
+        usage_stats_event_payload = anonymizer.anonymize_store_info(
             store_name=store_name, store_obj=instantiated_class
         )
         return instantiated_class, usage_stats_event_payload
@@ -3697,21 +3697,21 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ),
         )
 
-        anonymizer = Anonymizer(self.data_context_id)
+        datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
 
         if class_name == "SimpleSqlalchemyDatasource":
             # Use the raw config here, defaults will be added in the anonymizer
-            usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class, name=datasource_name, config=config
+            usage_stats_event_payload = (
+                datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+                    name=datasource_name, config=config
+                )
             )
         else:
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             datasource_config = datasourceConfigSchema.load(instantiated_class.config)
             full_datasource_config = datasourceConfigSchema.dump(datasource_config)
-            usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class,
-                name=datasource_name,
-                config=full_datasource_config,
+            usage_stats_event_payload = datasource_anonymizer.anonymize_datasource_info(
+                name=datasource_name, config=full_datasource_config
             )
         return instantiated_class, usage_stats_event_payload
 
@@ -3749,8 +3749,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config
+        usage_stats_event_payload = anonymizer.anonymize_checkpoint_info(
+            name=checkpoint_name, config=checkpoint_config
         )
 
         return instantiated_class, usage_stats_event_payload
@@ -3783,8 +3783,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=data_connector_name, config=config
+        usage_stats_event_payload = anonymizer.anonymize_data_connector_info(
+            name=data_connector_name, config=config
         )
         return instantiated_class, usage_stats_event_payload
 
@@ -3816,8 +3816,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         anonymizer: Anonymizer = Anonymizer(self.data_context_id)
 
-        usage_stats_event_payload: dict = anonymizer.anonymize(
-            obj=instantiated_class, name=profiler_name, config=profiler_config
+        usage_stats_event_payload: dict = anonymizer.anonymize_profiler_info(
+            name=profiler_name, config=profiler_config
         )
 
         return instantiated_class, usage_stats_event_payload
@@ -3850,6 +3850,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         # If a subclass of a supported type, find the parent class and anonymize
         anonymizer: Anonymizer = Anonymizer(self.data_context_id)
+        datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
+            self.data_context_id
+        )
 
         parent_class_from_object = anonymizer.get_parent_class(
             object_=instantiated_class
@@ -3861,14 +3864,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ):
             store_name: str = name or config.get("name") or "my_temp_store"
             store_name = instantiated_class.store_name or store_name
-            usage_stats_event_payload = anonymizer.anonymize(
+            usage_stats_event_payload = anonymizer.anonymize_store_info(
                 store_name=store_name, store_obj=instantiated_class
             )
         elif parent_class_from_config is not None and parent_class_from_config.endswith(
             "Datasource"
         ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
-            if DatasourceAnonymizer.get_parent_class_v3_api(config=config):
+            if datasource_anonymizer.get_parent_class_v3_api(config=config):
                 # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
                 datasource_config = datasourceConfigSchema.load(
                     instantiated_class.config
@@ -3879,14 +3882,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 full_datasource_config = config
             if parent_class_from_config == "SimpleSqlalchemyDatasource":
                 # Use the raw config here, defaults will be added in the anonymizer
-                usage_stats_event_payload = anonymizer.anonymize(
-                    obj=instantiated_class, name=datasource_name, config=config
+                usage_stats_event_payload = (
+                    datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+                        name=datasource_name, config=config
+                    )
                 )
             else:
-                usage_stats_event_payload = anonymizer.anonymize(
-                    obj=instantiated_class,
-                    name=datasource_name,
-                    config=full_datasource_config,
+                usage_stats_event_payload = (
+                    datasource_anonymizer.anonymize_datasource_info(
+                        name=datasource_name, config=full_datasource_config
+                    )
                 )
 
         elif parent_class_from_config is not None and parent_class_from_config.endswith(
@@ -3900,8 +3905,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             checkpoint_config = checkpoint_config.to_json_dict()
             checkpoint_config.update({"name": checkpoint_name})
-            usage_stats_event_payload = anonymizer.anonymize(
-                obj=checkpoint_config, name=checkpoint_name, config=checkpoint_config
+            usage_stats_event_payload = anonymizer.anonymize_checkpoint_info(
+                name=checkpoint_name, config=checkpoint_config
             )
 
         elif parent_class_from_config is not None and parent_class_from_config.endswith(
@@ -3910,8 +3915,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             data_connector_name: str = (
                 name or config.get("name") or "my_temp_data_connector"
             )
-            usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class, name=data_connector_name, config=config
+            usage_stats_event_payload = anonymizer.anonymize_data_connector_info(
+                name=data_connector_name, config=config
             )
 
         else:

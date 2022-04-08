@@ -128,7 +128,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert "type_list" in configuration.kwargs, "type_list is required"
@@ -142,6 +142,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for type_list kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

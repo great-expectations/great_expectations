@@ -1,67 +1,11 @@
-import os
-import shutil
-
 import nbformat
 import pytest
 
-import great_expectations as ge
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
     CheckpointNewNotebookRenderer,
 )
-
-
-@pytest.fixture
-def assetless_dataconnector_context(
-    tmp_path_factory,
-    monkeypatch,
-):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data", "titanic")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            "../../test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-    context = ge.data_context.DataContext(context_path)
-    assert context.root_directory == context_path
-
-    datasource_config = f"""
-            class_name: Datasource
-
-            execution_engine:
-                class_name: PandasExecutionEngine
-
-            data_connectors:
-                my_other_data_connector:
-                    class_name: ConfiguredAssetFilesystemDataConnector
-                    base_directory: {data_path}
-                    glob_directive: "*.csv"
-
-                    default_regex:
-                        pattern: (.+)\\.csv
-                        group_names:
-                            - name
-                    assets:
-                        {{}}
-            """
-
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
-    context._save_project_config()
-    return context
 
 
 def test_find_datasource_with_asset_on_context_with_no_datasources(

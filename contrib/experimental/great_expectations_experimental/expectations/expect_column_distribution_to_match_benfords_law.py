@@ -299,7 +299,7 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
     #         configuration (OPTIONAL[ExpectationConfiguration]): \
     #             An optional Expectation Configuration entry that will be used to configure the expectation
     #     Returns:
-    #         None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+    #         True if the configuration has been validated successfully. Otherwise, raises an exception
     #     """
     #     super().validate_configuration(configuration)
     #     # self.validate_metric_value_between_configuration(configuration=configuration)

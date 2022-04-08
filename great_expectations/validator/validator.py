@@ -50,9 +50,6 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-    ExpectationConfigurationBuilder,
-)
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
@@ -609,23 +606,8 @@ class Validator:
                 metric_value_kwargs=metric_value_kwargs_override,
             )
 
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
-            rule.expectation_configuration_builders or []
-        )
-
-        expectation_configuration_builder: ExpectationConfigurationBuilder
-        for expectation_configuration_builder in expectation_configuration_builders:
-            validation_parameter_builders: List[ParameterBuilder] = (
-                expectation_configuration_builder.validation_parameter_builders or []
-            )
-            for parameter_builder in validation_parameter_builders:
-                self._update_metric_value_kwargs_for_success_keys(
-                    parameter_builder=parameter_builder,
-                    metric_value_kwargs=metric_value_kwargs_override,
-                )
-
+    @staticmethod
     def _update_metric_value_kwargs_for_success_keys(
-        self,
         parameter_builder: ParameterBuilder,
         metric_value_kwargs: Optional[dict] = None,
     ):
@@ -639,23 +621,14 @@ class Validator:
                 parameter_builder.metric_value_kwargs or {}
             )
 
+            key: str
+            value: Any
             parameter_builder_metric_value_kwargs = {
                 key: metric_value_kwargs.get(key) or value
                 for key, value in parameter_builder_metric_value_kwargs.items()
             }
             parameter_builder.metric_value_kwargs = (
                 parameter_builder_metric_value_kwargs
-            )
-
-        evaluation_parameter_builders: List[ParameterBuilder] = (
-            parameter_builder.evaluation_parameter_builders or []
-        )
-
-        evaluation_parameter_builder: ParameterBuilder
-        for evaluation_parameter_builder in evaluation_parameter_builders:
-            self._update_metric_value_kwargs_for_success_keys(
-                parameter_builder=evaluation_parameter_builder,
-                metric_value_kwargs=metric_value_kwargs,
             )
 
     @property
@@ -701,9 +674,11 @@ class Validator:
             )
 
         resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
-
-        # updates graph with aborted metrics
-        self.resolve_validation_graph(
+        # noinspection PyUnusedLocal
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, List[Exception], int]],
+        ] = self.resolve_validation_graph(
             graph=graph,
             metrics=resolved_metrics,
         )
@@ -719,6 +694,7 @@ class Validator:
             metric_configurations=list(metrics.values())
         )
 
+        metric_configuration: MetricConfiguration
         return {
             metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
             for metric_configuration in metrics.values()
@@ -1114,7 +1090,7 @@ class Validator:
         exception_info: ExceptionInfo
 
         # noinspection SpellCheckingInspection
-        progress_bar = None
+        pbar = None
 
         done: bool = False
         while not done:
@@ -1136,14 +1112,14 @@ class Validator:
             if len(graph.edges) < min_graph_edges_pbar_enable:
                 disable = True
 
-            if progress_bar is None:
+            if pbar is None:
                 # noinspection PyProtectedMember,SpellCheckingInspection
-                progress_bar = tqdm(
+                pbar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
                     disable=disable,
                 )
-                progress_bar.update(0)
+                pbar.update(0)
 
             computable_metrics = set()
 
@@ -1166,7 +1142,7 @@ class Validator:
                         runtime_configuration=runtime_configuration,
                     )
                 )
-                progress_bar.update(len(computable_metrics))
+                pbar.update(len(computable_metrics))
             except MetricResolutionError as err:
                 if catch_exceptions:
                     exception_traceback = traceback.format_exc()
@@ -1208,7 +1184,7 @@ aborting graph resolution.
             ):
                 done = True
 
-        progress_bar.close()
+        pbar.close()
 
         return aborted_metrics_info
 
@@ -1759,7 +1735,7 @@ set as active.
                     # noinspection PyProtectedMember
                     handler.send_usage_message(
                         event="data_asset.validate",
-                        event_payload=handler.anonymizer.anonymize(obj=self),
+                        event_payload=handler.anonymizer.anonymize_batch_info(self),
                         success=False,
                     )
                 return ExpectationValidationResult(success=False)
@@ -1869,7 +1845,7 @@ set as active.
                 # noinspection PyProtectedMember
                 handler.send_usage_message(
                     event="data_asset.validate",
-                    event_payload=handler.anonymizer.anonymize(obj=self),
+                    event_payload=handler.anonymizer.anonymize_batch_info(self),
                     success=False,
                 )
             raise
@@ -1882,7 +1858,7 @@ set as active.
             # noinspection PyProtectedMember
             handler.send_usage_message(
                 event="data_asset.validate",
-                event_payload=handler.anonymizer.anonymize(obj=self),
+                event_payload=handler.anonymizer.anonymize_batch_info(self),
                 success=True,
             )
         return result

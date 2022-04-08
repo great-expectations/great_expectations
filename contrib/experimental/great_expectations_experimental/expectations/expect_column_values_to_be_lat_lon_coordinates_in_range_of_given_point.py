@@ -225,9 +225,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             a spherical earth projected to a plane. Very fast but error increases rapidly as distances increase.
     """
 
-    def validate_configuration(
-        cls, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(cls, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -235,7 +233,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            True if the configuration has been validated successfully. Otherwise, raises an exception
         """
 
         # Setting up a configuration
@@ -271,6 +269,8 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             ], "projection must be a string specifying fcc or pythagorean"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+
+        return True
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

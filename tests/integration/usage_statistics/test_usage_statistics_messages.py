@@ -13,9 +13,6 @@ from great_expectations.data_context import BaseDataContext
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
-from tests.integration.usage_statistics.usage_stats_event_examples import (
-    data_context_init_with_dependencies,
-)
 
 
 def generate_messages_with_defaults(
@@ -353,7 +350,6 @@ valid_usage_statistics_messages = {
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
             "ge_version": "0.13.0.manual_test",
         },
-        data_context_init_with_dependencies,
     ],
     "data_asset.validate": [
         {

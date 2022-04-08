@@ -48,8 +48,8 @@ def test_anonymizer_no_salt():
 
     test_name = "i_am_a_name"
 
-    anon_name_1 = anonymizer1._anonymize_string(test_name)
-    anon_name_2 = anonymizer2._anonymize_string(test_name)
+    anon_name_1 = anonymizer1.anonymize(test_name)
+    anon_name_2 = anonymizer2.anonymize(test_name)
     assert anon_name_1 != anon_name_2
     assert len(anon_name_1) == 32
     assert len(anon_name_2) == 32
@@ -60,8 +60,8 @@ def test_anonymizer_no_salt():
 
     test_name = "i_am_a_name"
 
-    anon_name_1 = anonymizer1._anonymize_string(test_name)
-    anon_name_2 = anonymizer2._anonymize_string(test_name)
+    anon_name_1 = anonymizer1.anonymize(test_name)
+    anon_name_2 = anonymizer2.anonymize(test_name)
     assert anon_name_1 != anon_name_2
     assert len(anon_name_1) == 32
     assert len(anon_name_2) == 32
@@ -75,8 +75,8 @@ def test_anonymizer_consistent_salt():
 
     test_name = "i_am_a_name"
 
-    anon_name_1 = anonymizer1._anonymize_string(test_name)
-    anon_name_2 = anonymizer2._anonymize_string(test_name)
+    anon_name_1 = anonymizer1.anonymize(test_name)
+    anon_name_2 = anonymizer2.anonymize(test_name)
     assert anon_name_1 == anon_name_2
     assert len(anon_name_1) == 32
     assert len(anon_name_2) == 32

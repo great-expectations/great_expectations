@@ -1,7 +1,5 @@
-import gzip
 import json
 import os
-from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -16,20 +14,6 @@ from tests.cli.v012.utils import (
     assert_no_logging_messages_or_tracebacks,
 )
 from tests.test_utils import set_directory
-
-
-@pytest.fixture
-def filesystem_csv_2_gz(filesystem_csv_2):
-    _compress_csv_in_dir(filesystem_csv_2)
-    return filesystem_csv_2
-
-
-def _compress_csv_in_dir(dir: os.PathLike):
-    dir = Path(dir)
-    for file in dir.glob("*.csv"):
-        file_gz = file.with_name(file.name + ".gz")
-        file_gz.write_bytes(gzip.compress(file.read_bytes(), compresslevel=1))
-        file.unlink()
 
 
 def test_suite_help_output(caplog):
