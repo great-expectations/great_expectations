@@ -17,6 +17,10 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+)
 from great_expectations.self_check.util import build_spark_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
@@ -100,6 +104,51 @@ def test_sparkdf(spark_session):
     return spark_df
 
 
+@pytest.fixture
+def spark_df_from_pandas_df():
+    """
+    Construct a spark dataframe from pandas dataframe.
+    Returns:
+        Function that can be used in your test e.g.:
+        spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+    """
+
+    def _construct_spark_df_from_pandas(
+        spark_session,
+        pandas_df,
+    ):
+
+        spark_df = spark_session.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in pandas_df.to_records(index=False)
+            ],
+            pandas_df.columns.tolist(),
+        )
+        return spark_df
+
+    return _construct_spark_df_from_pandas
+
+
+@pytest.fixture
+def test_folder_connection_path_tsv(tmp_path_factory):
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path_tsv"))
+    df1.to_csv(path_or_buf=os.path.join(path, "test.tsv"), sep="\t", index=False)
+    return str(path)
+
+
+@pytest.fixture
+def test_folder_connection_path_parquet(tmp_path_factory):
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path_parquet"))
+    df1.to_parquet(path=os.path.join(path, "test.parquet"))
+    return str(path)
+
+
 def test_reader_fn(spark_session, basic_spark_df_execution_engine):
     engine = basic_spark_df_execution_engine
     # Testing that can recognize basic csv file
@@ -142,21 +191,12 @@ def test_reader_fn_parameters(
 
 
 def test_get_domain_records_with_column_domain(
-    spark_session, basic_spark_df_execution_engine
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
 ):
     pd_df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=df)
     data = engine.get_domain_records(
@@ -168,16 +208,104 @@ def test_get_domain_records_with_column_domain(
     )
 
     expected_column_pd_df = pd_df.iloc[:3]
-    expected_column_df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in expected_column_pd_df.to_records(index=False)
-        ],
-        expected_column_pd_df.columns.tolist(),
+    expected_column_df = spark_df_from_pandas_df(spark_session, expected_column_pd_df)
+
+    assert dataframes_equal(
+        data, expected_column_df
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_column_domain_and_filter_conditions(
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
+):
+    pd_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": 'col("b")<5',
+            "condition_parser": "great_expectations__experimental__",
+            "filter_conditions": [
+                RowCondition(
+                    condition="b IS NOT NULL",
+                    condition_type=RowConditionParserType.SPARK_SQL,
+                )
+            ],
+        }
+    )
+
+    expected_column_pd_df = pd_df.iloc[:3]
+    expected_column_df = spark_df_from_pandas_df(spark_session, expected_column_pd_df)
+
+    assert dataframes_equal(
+        data, expected_column_df
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_different_column_domain_and_filter_conditions(
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
+):
+    pd_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": 'col("a")<2',
+            "condition_parser": "great_expectations__experimental__",
+            "filter_conditions": [
+                RowCondition(
+                    condition="b IS NOT NULL",
+                    condition_type=RowConditionParserType.SPARK_SQL,
+                )
+            ],
+        }
+    )
+
+    expected_column_pd_df = pd_df.iloc[:1]
+    expected_column_df = spark_df_from_pandas_df(spark_session, expected_column_pd_df)
+
+    assert dataframes_equal(
+        data, expected_column_df
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_different_column_domain_and_multiple_filter_conditions(
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
+):
+    pd_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": 'col("a")<10',
+            "condition_parser": "great_expectations__experimental__",
+            "filter_conditions": [
+                RowCondition(
+                    condition="b IS NOT NULL",
+                    condition_type=RowConditionParserType.SPARK_SQL,
+                ),
+                RowCondition(
+                    condition="NOT isnan(b)",
+                    condition_type=RowConditionParserType.SPARK_SQL,
+                ),
+            ],
+        }
+    )
+
+    expected_column_pd_df = pd_df.iloc[:4]
+    expected_column_df = spark_df_from_pandas_df(spark_session, expected_column_pd_df)
 
     assert dataframes_equal(
         data, expected_column_df
@@ -185,7 +313,7 @@ def test_get_domain_records_with_column_domain(
 
 
 def test_get_domain_records_with_column_pair_domain(
-    spark_session, basic_spark_df_execution_engine
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
 ):
     pd_df = pd.DataFrame(
         {
@@ -194,16 +322,7 @@ def test_get_domain_records_with_column_pair_domain(
             "c": [1, 2, 3, 4, 5, None],
         }
     )
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=df)
     data = engine.get_domain_records(
@@ -219,15 +338,8 @@ def test_get_domain_records_with_column_pair_domain(
     expected_column_pair_pd_df = pd.DataFrame(
         {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
     )
-    expected_column_pair_df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in expected_column_pair_pd_df.to_records(index=False)
-        ],
-        expected_column_pair_pd_df.columns.tolist(),
+    expected_column_pair_df = spark_df_from_pandas_df(
+        spark_session, expected_column_pair_pd_df
     )
 
     assert dataframes_equal(
@@ -241,16 +353,7 @@ def test_get_domain_records_with_column_pair_domain(
             "c": [1, 2, 3, 4, 5, None],
         }
     )
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=df)
     data = engine.get_domain_records(
@@ -268,15 +371,8 @@ def test_get_domain_records_with_column_pair_domain(
     expected_column_pair_pd_df = pd.DataFrame(
         {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
     )
-    expected_column_pair_df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in expected_column_pair_pd_df.to_records(index=False)
-        ],
-        expected_column_pair_pd_df.columns.tolist(),
+    expected_column_pair_df = spark_df_from_pandas_df(
+        spark_session, expected_column_pair_pd_df
     )
 
     assert dataframes_equal(
@@ -290,16 +386,7 @@ def test_get_domain_records_with_column_pair_domain(
             "c": [1, 2, 3, 4, 5, None],
         }
     )
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=df)
     data = engine.get_domain_records(
@@ -319,15 +406,8 @@ def test_get_domain_records_with_column_pair_domain(
             "c": [1.0, 2.0, 3.0, 4.0, 5.0],
         }
     )
-    expected_column_pair_df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in expected_column_pair_pd_df.to_records(index=False)
-        ],
-        expected_column_pair_pd_df.columns.tolist(),
+    expected_column_pair_df = spark_df_from_pandas_df(
+        spark_session, expected_column_pair_pd_df
     )
 
     assert dataframes_equal(
@@ -336,7 +416,7 @@ def test_get_domain_records_with_column_pair_domain(
 
 
 def test_get_domain_records_with_multicolumn_domain(
-    spark_session, basic_spark_df_execution_engine
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
 ):
     pd_df = pd.DataFrame(
         {
@@ -345,16 +425,7 @@ def test_get_domain_records_with_multicolumn_domain(
             "c": [1, 2, 3, 4, None, 6],
         }
     )
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=df)
     data = engine.get_domain_records(
@@ -371,16 +442,10 @@ def test_get_domain_records_with_multicolumn_domain(
     expected_multicolumn_pd_df = pd.DataFrame(
         {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
     )
-    expected_multicolumn_df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in expected_multicolumn_pd_df.to_records(index=False)
-        ],
-        expected_multicolumn_pd_df.columns.tolist(),
+    expected_multicolumn_df = spark_df_from_pandas_df(
+        spark_session, expected_multicolumn_pd_df
     )
+
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=expected_multicolumn_df)
 
@@ -395,16 +460,7 @@ def test_get_domain_records_with_multicolumn_domain(
             "c": [1, 2, 3, 4, 5, None],
         }
     )
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=df)
     data = engine.get_domain_records(
@@ -422,15 +478,8 @@ def test_get_domain_records_with_multicolumn_domain(
         {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}, index=[0, 1, 2, 3]
     )
 
-    expected_multicolumn_df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in expected_multicolumn_pd_df.to_records(index=False)
-        ],
-        expected_multicolumn_pd_df.columns.tolist(),
+    expected_multicolumn_df = spark_df_from_pandas_df(
+        spark_session, expected_multicolumn_pd_df
     )
 
     assert dataframes_equal(
@@ -444,16 +493,7 @@ def test_get_domain_records_with_multicolumn_domain(
             "c": [1, 2, 3, 4, None, 6],
         }
     )
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=df)
     data = engine.get_domain_records(
@@ -472,15 +512,8 @@ def test_get_domain_records_with_multicolumn_domain(
         index=[0, 1, 2, 3, 4, 5],
     )
 
-    expected_multicolumn_df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in expected_multicolumn_pd_df.to_records(index=False)
-        ],
-        expected_multicolumn_pd_df.columns.tolist(),
+    expected_multicolumn_df = spark_df_from_pandas_df(
+        spark_session, expected_multicolumn_pd_df
     )
 
     assert dataframes_equal(
@@ -489,19 +522,10 @@ def test_get_domain_records_with_multicolumn_domain(
 
 
 def test_get_compute_domain_with_no_domain_kwargs(
-    spark_session, basic_spark_df_execution_engine
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
 ):
     pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=df)
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
@@ -514,19 +538,10 @@ def test_get_compute_domain_with_no_domain_kwargs(
 
 
 def test_get_compute_domain_with_column_domain(
-    spark_session, basic_spark_df_execution_engine
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
 ):
     pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     engine = basic_spark_df_execution_engine
     engine.load_batch_data(batch_id="1234", batch_data=df)
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
@@ -539,19 +554,10 @@ def test_get_compute_domain_with_column_domain(
 
 
 def test_get_compute_domain_with_row_condition(
-    spark_session, basic_spark_df_execution_engine
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
 ):
     pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     expected_df = df.filter(F.col("b") > 2)
 
     engine = basic_spark_df_execution_engine
@@ -574,19 +580,10 @@ def test_get_compute_domain_with_row_condition(
 
 # What happens when we filter such that no value meets the condition?
 def test_get_compute_domain_with_unmeetable_row_condition(
-    spark_session, basic_spark_df_execution_engine
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
 ):
     pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     expected_df = df.filter(F.col("b") > 24)
 
     engine = basic_spark_df_execution_engine
@@ -605,18 +602,11 @@ def test_get_compute_domain_with_unmeetable_row_condition(
     assert accessor_kwargs == {}
 
 
-def test_basic_setup(spark_session, basic_spark_df_execution_engine):
+def test_basic_setup(
+    spark_session, basic_spark_df_execution_engine, spark_df_from_pandas_df
+):
     pd_df = pd.DataFrame({"x": range(10)})
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in pd_df.to_records(index=False)
-        ],
-        pd_df.columns.tolist(),
-    )
+    df = spark_df_from_pandas_df(spark_session, pd_df)
     batch_data = basic_spark_df_execution_engine.get_batch_data(
         batch_spec=RuntimeDataBatchSpec(
             batch_data=df,
@@ -1145,7 +1135,11 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=False
     )
-    assert new_domain_kwargs["row_condition"] == "foo IS NOT NULL"
+    assert new_domain_kwargs["filter_conditions"] == [
+        RowCondition(
+            condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL
+        )
+    ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
@@ -1153,7 +1147,14 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=True
     )
-    assert new_domain_kwargs["row_condition"] == "NOT isnan(foo) AND foo IS NOT NULL"
+    assert new_domain_kwargs["filter_conditions"] == [
+        RowCondition(
+            condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL
+        ),
+        RowCondition(
+            condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL
+        ),
+    ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
@@ -1161,7 +1162,11 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=False, filter_nan=True
     )
-    assert new_domain_kwargs["row_condition"] == "NOT isnan(foo)"
+    assert new_domain_kwargs["filter_conditions"] == [
+        RowCondition(
+            condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL
+        )
+    ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (None,), (2,), (3,), (4,), (5,), (6,)]
@@ -1175,7 +1180,11 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=False, filter_nan=True
     )
-    assert new_domain_kwargs["row_condition"] == "NOT isnan(foo)"
+    assert new_domain_kwargs["filter_conditions"] == [
+        RowCondition(
+            condition="NOT isnan(foo)", condition_type=RowConditionParserType.SPARK_SQL
+        )
+    ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
@@ -1183,7 +1192,11 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=False
     )
-    assert new_domain_kwargs["row_condition"] == "foo IS NOT NULL"
+    assert new_domain_kwargs["filter_conditions"] == [
+        RowCondition(
+            condition="foo IS NOT NULL", condition_type=RowConditionParserType.SPARK_SQL
+        ),
+    ]
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     expected = [(1,), (2,), (3,), (3,), (np.nan,), (2,), (3,), (4,), (5,), (6,)]
