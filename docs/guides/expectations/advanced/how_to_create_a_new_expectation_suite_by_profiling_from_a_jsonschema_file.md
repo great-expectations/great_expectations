@@ -2,13 +2,14 @@
 title: How to create a new Expectation Suite by profiling from a jsonschema file
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-The ``JsonSchemaProfiler`` helps you quickly create [Expectation Suites](../../../reference/expectations/expectations.md) from jsonschema files.
+The ``JsonSchemaProfiler`` helps you quickly create <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> from jsonschema files.
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-  - Have a valid jsonschema file that has top level object of type `object`
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- Have a valid jsonschema file that has top level object of type `object`
 
 </Prerequisites>
 
@@ -16,63 +17,61 @@ The ``JsonSchemaProfiler`` helps you quickly create [Expectation Suites](../../.
 This implementation does not traverse any levels of nesting.
 :::
 
-Steps
------
+## Steps
 
-1. **Set a filename and a suite name**
+### 1. Set a filename and a suite name
 
-    ```python
-    jsonschema_file = "YOUR_JSON_SCHEMA_FILE.json"
-    suite_name = "YOUR_SUITE_NAME"
-    ```
+```python
+jsonschema_file = "YOUR_JSON_SCHEMA_FILE.json"
+suite_name = "YOUR_SUITE_NAME"
+```
 
-2. **Load a DataContext**
+### 2. Load a DataContext
 
-    ```python
-    context = ge.data_context.DataContext()
-    ```
+```python
+context = ge.data_context.DataContext()
+```
 
-3. **Load the jsonschema file**
+### 3. Load the jsonschema file
 
-    ```python
-    with open(jsonschema_file, "r") as f:
-        schema = json.load(f)
-    ```
+```python
+with open(jsonschema_file, "r") as f:
+  schema = json.load(f)
+```
 
-4. **Instantiate the profiler**
+### 4. Instantiate the profiler
 
-    ```python
-    profiler = JsonSchemaProfiler()
-    ```
+```python
+profiler = JsonSchemaProfiler()
+```
 
-5. **Create the suite**
+### 5. Create the suite
 
-    ```python
-    suite = profiler.profile(schema, suite_name)
-    ```
+```python
+suite = profiler.profile(schema, suite_name)
+```
 
-6. **Save the suite**
+### 6. Save the suite
 
-    ```python
-    context.save_expectation_suite(suite)
-    ```
+```python
+context.save_expectation_suite(suite)
+```
 
-7. **Optionally, generate Data Docs and review the results there.**
+## 7. (Optional) Generate Data Docs and review the results
 
-    Data Docs provides a concise and useful way to review the Expectation Suite that has been created.
+<TechnicalTag tag="data_docs" text="Data Docs" /> provides a concise and useful way to review the Expectation Suite that has been created.
 
-    ```bash
-    context.build_data_docs()
-    ```
+```bash
+context.build_data_docs()
+```
 
-     You can also review and update the Expectations created by the profiler to get to the Expectation Suite you want using ``great_expectations suite edit``.
+You can also review and update the <TechnicalTag tag="expectation" text="Expectations" /> created by the <TechnicalTag tag="profiler" text="Profiler" /> to get to the Expectation Suite you want using ``great_expectations suite edit``.
 
-Additional notes
-----------------
+## Additional notes
 
 :::important
 
-Note that JsonSchemaProfiler generates Expectation Suites using column map expectations, which assumes a tabular data structure, because Great Expectations does not currently support nested data structures.
+Note that JsonSchemaProfiler generates Expectation Suites using column map Expectations, which assumes a tabular data structure, because Great Expectations does not currently support nested data structures.
 
 :::
 

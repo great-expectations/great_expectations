@@ -88,12 +88,13 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.not_in_set"
@@ -118,7 +119,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -133,7 +134,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for value_set kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -169,7 +169,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "parse_strings_as_datetimes": {
@@ -198,7 +198,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
         template_str = f"values must not belong to this set: {values_string}"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -271,7 +271,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
         template_str = f"values must not belong to this set: {values_string}"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
