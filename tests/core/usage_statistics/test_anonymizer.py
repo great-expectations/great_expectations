@@ -48,8 +48,8 @@ def test_anonymizer_no_salt():
 
     test_name = "i_am_a_name"
 
-    anon_name_1 = anonymizer1.anonymize(test_name)
-    anon_name_2 = anonymizer2.anonymize(test_name)
+    anon_name_1 = anonymizer1._anonymize_string(test_name)
+    anon_name_2 = anonymizer2._anonymize_string(test_name)
     assert anon_name_1 != anon_name_2
     assert len(anon_name_1) == 32
     assert len(anon_name_2) == 32
@@ -60,8 +60,8 @@ def test_anonymizer_no_salt():
 
     test_name = "i_am_a_name"
 
-    anon_name_1 = anonymizer1.anonymize(test_name)
-    anon_name_2 = anonymizer2.anonymize(test_name)
+    anon_name_1 = anonymizer1._anonymize_string(test_name)
+    anon_name_2 = anonymizer2._anonymize_string(test_name)
     assert anon_name_1 != anon_name_2
     assert len(anon_name_1) == 32
     assert len(anon_name_2) == 32
@@ -75,37 +75,37 @@ def test_anonymizer_consistent_salt():
 
     test_name = "i_am_a_name"
 
-    anon_name_1 = anonymizer1.anonymize(test_name)
-    anon_name_2 = anonymizer2.anonymize(test_name)
+    anon_name_1 = anonymizer1._anonymize_string(test_name)
+    anon_name_2 = anonymizer2._anonymize_string(test_name)
     assert anon_name_1 == anon_name_2
     assert len(anon_name_1) == 32
     assert len(anon_name_2) == 32
 
 
-def test_anonymizer__is_parent_class_recognized():
+def test_anonymizer_get_parent_class():
     """
     What does this test and why?
-    The method Anonymizer._is_parent_class_recognized() should return the name of the parent class if it is or is a subclass of one of the classes_to_check. If not, it should return None. It should do so regardless of the parameter used to pass in the object definition (object_, object_class, object_config). It should also return the first matching class in classes_to_check, even if a later class also matches.
+    The method Anonymizer.get_parent_class() should return the name of the parent class if it is or is a subclass of one of the classes_to_check. If not, it should return None. It should do so regardless of the parameter used to pass in the object definition (object_, object_class, object_config). It should also return the first matching class in classes_to_check, even if a later class also matches.
     """
     anonymizer = Anonymizer()
 
     # classes_to_check in order of inheritance hierarchy
     classes_to_check = [TestClass, BaseTestClass]
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_class=MyCustomTestClass
         )
         == "TestClass"
     )
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_class=SomeOtherClass
         )
         is None
     )
     classes_to_check = [BaseTestClass]
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_class=TestClass
         )
         == "BaseTestClass"
@@ -117,20 +117,20 @@ def test_anonymizer__is_parent_class_recognized():
     some_other_class = SomeOtherClass()
     classes_to_check = [TestClass, BaseTestClass]
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_=my_custom_test_class
         )
         == "TestClass"
     )
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_=some_other_class
         )
         is None
     )
     classes_to_check = [BaseTestClass]
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_=test_class
         )
         == "BaseTestClass"
@@ -151,20 +151,20 @@ def test_anonymizer__is_parent_class_recognized():
     }
     classes_to_check = [TestClass, BaseTestClass]
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_config=my_custom_test_class_config
         )
         == "TestClass"
     )
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_config=some_other_class_config
         )
         is None
     )
     classes_to_check = [BaseTestClass]
     assert (
-        anonymizer._is_parent_class_recognized(
+        anonymizer.get_parent_class(
             classes_to_check=classes_to_check, object_config=test_class_config
         )
         == "BaseTestClass"
@@ -174,7 +174,7 @@ def test_anonymizer__is_parent_class_recognized():
 def test_anonymize_object_info_with_core_ge_object(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt.anonymize_object_info(
+    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
         anonymized_info_dict={},
         object_=ExpectationSuite(expectation_suite_name="my_suite"),
     )
@@ -185,7 +185,7 @@ def test_anonymize_object_info_with_core_ge_object(
 def test_anonymize_object_info_with_custom_user_defined_object_with_single_parent(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt.anonymize_object_info(
+    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
         anonymized_info_dict={},
         object_=MyCustomExpectationSuite(expectation_suite_name="my_suite"),
     )
@@ -199,7 +199,7 @@ def test_anonymize_object_info_with_custom_user_defined_object_with_single_paren
 def test_anonymize_object_info_with_custom_user_defined_object_with_no_parent(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt.anonymize_object_info(
+    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
         anonymized_info_dict={}, object_=BaseTestClass()
     )
 
@@ -212,7 +212,7 @@ def test_anonymize_object_info_with_custom_user_defined_object_with_no_parent(
 def test_anonymize_object_info_with_custom_user_defined_object_with_multiple_parents(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
-    anonymized_result: dict = anonymizer_with_consistent_salt.anonymize_object_info(
+    anonymized_result: dict = anonymizer_with_consistent_salt._anonymize_object_info(
         anonymized_info_dict={},
         object_=MyCustomMultipleInheritanceClass(expectation_suite_name="my_name"),
     )
@@ -227,7 +227,7 @@ def test_anonymize_object_info_with_missing_args_raises_error(
     anonymizer_with_consistent_salt: Anonymizer,
 ):
     with pytest.raises(AssertionError) as e:
-        anonymizer_with_consistent_salt.anonymize_object_info(
+        anonymizer_with_consistent_salt._anonymize_object_info(
             anonymized_info_dict={},
             object_=None,
             object_class=None,

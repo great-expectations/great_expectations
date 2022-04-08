@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 
@@ -18,7 +18,18 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
+    VARIABLES_KEY,
+)
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
@@ -123,7 +134,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
@@ -137,6 +147,33 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
+    quantile_value_ranges_estimator_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="NumericMetricRangeMultiBatchParameterBuilder",
+            name="quantile_value_ranges_estimator",
+            metric_name="column.quantile_values",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs={
+                "quantiles": f"{VARIABLES_KEY}quantiles",
+                "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
+            },
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+            estimator=f"{VARIABLES_KEY}estimator",
+            num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
+            bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
+            round_decimals=f"{VARIABLES_KEY}round_decimals",
+            truncate_values=f"{VARIABLES_KEY}truncate_values",
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+    )
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        quantile_value_ranges_estimator_parameter_builder_config,
+    ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -149,14 +186,15 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 0.75,
             ],
             "allow_relative_error": "linear",
+            "false_positive_rate": 0.05,
+            "estimator": "bootstrap",
             "num_bootstrap_samples": 9999,
             "bootstrap_random_seed": None,
-            "false_positive_rate": 0.05,
+            "round_decimals": 1,
             "truncate_values": {
                 "lower_bound": None,
                 "upper_bound": None,
             },
-            "round_decimals": 1,
         },
         rules={
             "default_expect_column_quantile_values_to_be_between_rule": {
@@ -164,36 +202,20 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 },
-                "parameter_builders": [
-                    {
-                        "name": "quantile_value_ranges",
-                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "column.quantile_values",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "metric_value_kwargs": {
-                            "quantiles": "$variables.quantiles",
-                            "allow_relative_error": "$variables.allow_relative_error",
-                        },
-                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                        "false_positive_rate": "$variables.false_positive_rate",
-                        "round_decimals": "$variables.round_decimals",
-                    }
-                ],
                 "expectation_configuration_builders": [
                     {
                         "expectation_type": "expect_column_quantile_values_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "column": "$domain.domain_kwargs.column",
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
                         "quantile_ranges": {
-                            "quantiles": "$variables.quantiles",
-                            "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                            "quantiles": f"{VARIABLES_KEY}quantiles",
+                            "value_ranges": f"{PARAMETER_KEY}{quantile_value_ranges_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
                         },
-                        "allow_relative_error": "$variables.allow_relative_error",
+                        "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
                         "meta": {
-                            "profiler_details": "$parameter.quantile_value_ranges.details"
+                            "profiler_details": f"{PARAMETER_KEY}{quantile_value_ranges_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     }
                 ],
@@ -221,7 +243,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -250,7 +272,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             raise ValueError(
                 "quantile_values and quantiles must have the same number of elements"
             )
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
