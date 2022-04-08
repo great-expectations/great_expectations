@@ -3,7 +3,7 @@ import os
 import uuid
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator, List, Union, cast
+from typing import Generator, List, Optional, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -442,14 +442,24 @@ def delete_config_from_filesystem(
 
 def load_data_into_test_database(
     table_name: str,
-    csv_path: str,
     connection_string: str,
+    csv_path: Optional[str] = None,
+    csv_paths: Optional[List[str]] = None,
     load_full_dataset: bool = False,
+    convert_colnames_to_datetime: Optional[List[str]] = None,
 ) -> None:
     """
     Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
     This includes local Dockerized DBs like postgres, but also cloud-dbs like BigQuery and Redshift.
     """
+    if csv_path and csv_paths:
+        csv_paths.append(csv_path)
+    elif csv_path and not csv_paths:
+        csv_paths = [csv_path]
+
+    if convert_colnames_to_datetime is None:
+        convert_colnames_to_datetime = []
+
     import pandas as pd
 
     connection = None
@@ -466,12 +476,15 @@ def load_data_into_test_database(
         connection = engine.connect()
         print(f"Dropping table {table_name}")
         connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-        df = pd.read_csv(csv_path)
-        if not load_full_dataset:
-            # Improving test performance by only loading the first 10 rows of our test data into the db
-            df = df.head(10)
-        print(f"Creating table {table_name} from {csv_path}")
-        df.to_sql(name=table_name, con=engine, index=False)
+        for csv_path in csv_paths:
+            df = pd.read_csv(csv_path)
+            for colname_to_convert in convert_colnames_to_datetime:
+                df[colname_to_convert] = pd.to_datetime(df[colname_to_convert])
+            if not load_full_dataset:
+                # Improving test performance by only loading the first 10 rows of our test data into the db
+                df = df.head(10)
+            print(f"Creating table {table_name} and adding data from {csv_path}")
+            df.to_sql(name=table_name, con=engine, index=False, if_exists="append")
     except SQLAlchemyError as e:
         logger.error(
             """Docs integration tests encountered an error while loading test-data into test-database."""
