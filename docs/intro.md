@@ -9,7 +9,7 @@ Great Expectations is the leading tool for [validating](./reference/core_concept
 
 Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and data engineering teams.
 
-![overview](../docs/guides/images/ge_overview.png)
+![overview](../docs/guides/images/GE_OSS_process.png)
 
 ### Why would I use Great Expectations?
 
@@ -101,7 +101,7 @@ Slack is good for that, too: [join slack](https://greatexpectations.io/slack).
 If you have bugfix or feature request, please [upvote an existing issue](https://github.com/great-expectations/great_expectations/issues) or [open a new issue](https://github.com/great-expectations/great_expectations/issues/new) on GitHub and we’ll see what we can do.
 
 #### Contribute code or documentation
-We welcome contributions to Great Expectations. Please start with our [Contributing guide](/docs/contributing/contributing) and don’t be shy with questions!
+We welcome contributions to Great Expectations. Please start with our [Contributing guide](./contributing/contributing.md) and don’t be shy with questions!
 
 #### Not interested in managing your own configuration or infrastructure? 
 Learn more about Great Expectations Cloud — our fully managed SaaS offering. Sign up for [our weekly cloud workshop](https://greatexpectations.io/cloud)! You’ll get to see our newest features and apply for our private Alpha program!

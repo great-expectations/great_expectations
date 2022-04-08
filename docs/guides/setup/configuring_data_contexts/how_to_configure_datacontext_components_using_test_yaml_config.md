@@ -2,8 +2,9 @@
 title: How to configure DataContext components using test_yaml_config
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-``test_yaml_config`` is a convenience method for configuring the moving parts of a Great Expectations deployment. It allows you to quickly test out configs for Datasources and Stores. For many deployments of Great Expectations, these components (plus Expectations) are the only ones you'll need.
+``test_yaml_config`` is a convenience method for configuring the moving parts of a Great Expectations deployment. It allows you to quickly test out configs for <TechnicalTag relative="../../../" tag="datasource" text="Datasources" /> and <TechnicalTag relative="../../../" tag="store" text="Stores" />. For many deployments of Great Expectations, these components (plus <TechnicalTag relative="../../../" tag="expectation" text="Expectations" />) are the only ones you'll need.
 
 <Prerequisites>
 
@@ -60,7 +61,7 @@ Steps
 
     1. confirming that the connection works,
     2. gathering a list of available DataAssets (e.g. tables in SQL; files or folders in a filesystem), and
-    3. verifying that it can successfully fetch at least one Batch from the source.
+    3. verifying that it can successfully fetch at least one <TechnicalTag relative="../../../" tag="batch" text="Batch" /> from the source.
 
     The output will look something like this:
 
@@ -121,11 +122,11 @@ Steps
 
 4. **Iterate as necessary.**
 
-    From here, iterate by editing your config and re-running ``test_yaml_config``, adding config blocks for additional introspection, data assets, sampling, etc.
+    From here, iterate by editing your config and re-running ``test_yaml_config``, adding config blocks for additional introspection, <TechnicalTag relative="../../../" tag="data_asset" text="Data Assets" />, sampling, etc.
 
 5. **(Optional:) Test additional methods.**
 
-    Note that when ``test_yaml_config`` runs successfully, it adds the specified Datasource to your DataContext. This means that you can also test other methods, such as ``context.get_validator``, right within your notebook:
+    Note that when ``test_yaml_config`` runs successfully, it adds the specified Datasource to your `DataContext`. This means that you can also test other methods, such as ``context.get_validator``, right within your notebook:
 
     ```python
     validator = context.get_validator(
