@@ -20,11 +20,12 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 
 # Function to test for spark dataframe equality
-from great_expectations.self_check.util import build_sa_engine
-from great_expectations.util import (
-    get_sqlalchemy_domain_data,
-    get_sqlalchemy_selectable,
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
 )
+from great_expectations.self_check.util import build_sa_engine
+from great_expectations.util import get_sqlalchemy_domain_data
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
@@ -262,6 +263,95 @@ def test_get_domain_records_with_column_domain(sa):
     assert (
         domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
+    df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": 'col("b")<5',
+            "condition_parser": "great_expectations__experimental__",
+            "filter_conditions": [
+                RowCondition(
+                    condition=f'col("b").notnull()',
+                    condition_type=RowConditionParserType.GE,
+                )
+            ],
+        }
+    )
+    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
+
+    expected_column_df = df.iloc[:3]
+    engine = build_sa_engine(expected_column_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_different_column_domain_and_filter_conditions(sa):
+    df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": 'col("a")<2',
+            "condition_parser": "great_expectations__experimental__",
+            "filter_conditions": [
+                RowCondition(
+                    condition=f'col("b").notnull()',
+                    condition_type=RowConditionParserType.GE,
+                )
+            ],
+        }
+    )
+    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
+
+    expected_column_df = df.iloc[:1]
+    engine = build_sa_engine(expected_column_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_column_domain_and_filter_conditions_raises_error_on_multiple_conditions(
+    sa,
+):
+    df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    engine = build_sa_engine(df, sa)
+    with pytest.raises(ge_exceptions.GreatExpectationsError) as e:
+        data = engine.get_domain_records(
+            domain_kwargs={
+                "column": "a",
+                "row_condition": 'col("a")<2',
+                "condition_parser": "great_expectations__experimental__",
+                "filter_conditions": [
+                    RowCondition(
+                        condition=f'col("b").notnull()',
+                        condition_type=RowConditionParserType.GE,
+                    ),
+                    RowCondition(
+                        condition=f'col("c").notnull()',
+                        condition_type=RowConditionParserType.GE,
+                    ),
+                ],
+            }
+        )
 
 
 def test_get_domain_records_with_column_pair_domain(sa):
