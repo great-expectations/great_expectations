@@ -37,42 +37,45 @@ def test_rule_output_get_get_expectation_configurations(
     assert expectation_configurations == expected_expectation_configurations
 
 
-def test_rule_output_get_fully_qualified_parameter_names(
+def test_rule_output_get_fully_qualified_parameter_names_by_domain(
     rule_output_for_rule_state_with_domains_and_parameters,
 ):
-    expected_fully_qualified_parameter_names: Dict[Domain, List[str]] = {
+    expected_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = {
         Domain(domain_type="column", domain_kwargs={"column": "Age",}, details={},): [
             "$mean",
         ],
         Domain(domain_type="column", domain_kwargs={"column": "Date",}, details={},): [
-            "$mean",
-            "$parameter.daily_taxi_fairs.mean_values.details",
-            "$parameter.daily_taxi_fairs.mean_values.value",
-            "$parameter.date_strings.mm_yyyy_dd_date_format.details",
-            "$parameter.date_strings.mm_yyyy_dd_date_format.value",
-            "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.details",
-            "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.value",
-            "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds",
-            "$parameter.date_strings.tolerances.max_num_conversion_attempts",
-            "$parameter.date_strings.yyyy_mm_dd_date_format.details",
-            "$parameter.date_strings.yyyy_mm_dd_date_format.value",
-            "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.details",
-            "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.value",
-            "$parameter.monthly_taxi_fairs.mean_values.details",
-            "$parameter.monthly_taxi_fairs.mean_values.value",
-            "$parameter.tolerances.financial.usd",
-            "$parameter.tolerances.mostly",
-            "$parameter.weekly_taxi_fairs.mean_values.details",
             "$parameter.weekly_taxi_fairs.mean_values.value",
+            "$parameter.weekly_taxi_fairs.mean_values.details",
+            "$parameter.tolerances.mostly",
+            "$parameter.tolerances.financial.usd",
+            "$parameter.monthly_taxi_fairs.mean_values.value",
+            "$parameter.monthly_taxi_fairs.mean_values.details",
+            "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.value",
+            "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.details",
+            "$parameter.date_strings.yyyy_mm_dd_date_format.value",
+            "$parameter.date_strings.yyyy_mm_dd_date_format.details",
+            "$parameter.date_strings.tolerances.max_num_conversion_attempts",
+            "$parameter.date_strings.tolerances.max_abs_error_time_milliseconds",
+            "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.value",
+            "$parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.details",
+            "$parameter.date_strings.mm_yyyy_dd_date_format.value",
+            "$parameter.date_strings.mm_yyyy_dd_date_format.details",
+            "$parameter.daily_taxi_fairs.mean_values.value",
+            "$parameter.daily_taxi_fairs.mean_values.details",
+            "$mean",
         ],
     }
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters
-    fully_qualified_parameter_names: Dict[
+    fully_qualified_parameter_names_by_domain: Dict[
         Domain, List[str]
-    ] = rule_output.get_fully_qualified_parameter_names()
+    ] = rule_output.get_fully_qualified_parameter_names_by_domain()
 
-    assert fully_qualified_parameter_names == expected_fully_qualified_parameter_names
+    assert (
+        fully_qualified_parameter_names_by_domain
+        == expected_fully_qualified_parameter_names_by_domain
+    )
 
 
 # noinspection PyPep8Naming
@@ -94,10 +97,10 @@ def test_rule_output_get_fully_qualified_parameter_names_for_domain_id(
     assert fully_qualified_parameter_names == expected_fully_qualified_parameter_names
 
 
-def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names(
+def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_by_domain(
     rule_output_for_rule_state_with_domains_and_parameters,
 ):
-    expected_parameter_values_for_fully_qualified_parameter_names: Dict[
+    expected_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
         Domain, Dict[str, Any]
     ] = {
         Domain(domain_type="column", domain_kwargs={"column": "Age",}, details={},): {
@@ -457,13 +460,13 @@ def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names(
     }
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters
-    parameter_values_for_fully_qualified_parameter_names: Dict[
+    parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
         Domain, Dict[str, Any]
-    ] = rule_output.get_parameter_values_for_fully_qualified_parameter_names()
+    ] = rule_output.get_parameter_values_for_fully_qualified_parameter_names_by_domain()
 
     assert (
-        parameter_values_for_fully_qualified_parameter_names
-        == expected_parameter_values_for_fully_qualified_parameter_names
+        parameter_values_for_fully_qualified_parameter_names_by_domain
+        == expected_parameter_values_for_fully_qualified_parameter_names_by_domain
     )
 
 

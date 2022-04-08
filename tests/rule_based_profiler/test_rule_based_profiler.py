@@ -1368,7 +1368,9 @@ def test_run_with_expectation_suite_arg(mock_data_context: mock.MagicMock):
         expectation_suite_name="my_expectation_suite"
     )
     profiler.run()
-    result_suite: ExpectationSuite = profiler.expectation_suite(expectation_suite=suite)
+    result_suite: ExpectationSuite = profiler.get_expectation_suite(
+        expectation_suite=suite
+    )
 
     assert id(suite) == id(result_suite)
 
@@ -1386,7 +1388,7 @@ def test_run_with_conflicting_expectation_suite_args_raises_error(
 
     with pytest.raises(AssertionError) as e:
         profiler.run()
-        suite = profiler.expectation_suite(
+        suite = profiler.get_expectation_suite(
             expectation_suite=suite, expectation_suite_name="my_expectation_suite"
         )
 
