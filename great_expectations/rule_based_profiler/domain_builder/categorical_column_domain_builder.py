@@ -140,7 +140,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self._cardinality_checker = None
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN
 
     @property
