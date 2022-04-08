@@ -21,6 +21,7 @@
       },
       "tests": [{
         "title": "simple_positive_test",
+        "include_in_gallery": true,
         "exact_match_out" : false,
         "in":{
           "column": "a",
@@ -70,6 +71,7 @@
       },
       {
         "title": "simple_negative_test",
+        "include_in_gallery": true,
         "exact_match_out" : false,
         "in":{
           "column": "c",
