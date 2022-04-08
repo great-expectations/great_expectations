@@ -43,7 +43,7 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
         )
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN_PAIR
 
     def _get_domains(
