@@ -14,8 +14,10 @@ from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
+    ConfiguredAssetFilePathDataConnector,
+    ConfiguredAssetSqlDataConnector,
     DataConnector,
-    InferredAssetSqlDataConnector,
+    RuntimeDataConnector,
 )
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -214,10 +216,20 @@ class BaseDatasource:
     def _update_missing_data_asset_name(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> None:
-        # if the data_asset_name is missing from a configured data connector config, add it as a table_name
-        if not isinstance(
-            self.data_connectors[batch_request.data_connector_name],
-            InferredAssetSqlDataConnector,
+        # if the data_asset_name is missing from a configured or runtime data connector config, add it as a table_name
+        if (
+            isinstance(
+                self.data_connectors[batch_request.data_connector_name],
+                ConfiguredAssetSqlDataConnector,
+            )
+            or isinstance(
+                self.data_connectors[batch_request.data_connector_name],
+                ConfiguredAssetFilePathDataConnector,
+            )
+            or isinstance(
+                self.data_connectors[batch_request.data_connector_name],
+                RuntimeDataConnector,
+            )
         ):
             if (
                 "assets"
