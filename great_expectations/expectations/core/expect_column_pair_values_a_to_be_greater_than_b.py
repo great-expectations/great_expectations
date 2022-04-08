@@ -161,7 +161,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
             params["row_condition"] = None
 
-        if params["mostly"] is None:
+        if params["mostly"] is None or params["mostly"] == 1.0:
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must always be greater than those in $column_B."
             else:
@@ -231,7 +231,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
             params["row_condition"] = None
 
-        if params["mostly"] is None:
+        if params["mostly"] is None or params["mostly"] == 1.0:
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must always be greater than those in $column_B."
             else:

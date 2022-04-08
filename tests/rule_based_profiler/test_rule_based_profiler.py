@@ -918,6 +918,15 @@ def test_run_profiler_without_dynamic_args(
     assert mock_profiler_run.call_args == mock.call(
         variables=None,
         rules=None,
+        batch_list=None,
+        batch_request=None,
+        force_batch_data=False,
+        reconciliation_directives=ReconciliationDirectives(
+            variables=ReconciliationStrategy.UPDATE,
+            domain_builder=ReconciliationStrategy.UPDATE,
+            parameter_builder=ReconciliationStrategy.UPDATE,
+            expectation_configuration_builder=ReconciliationStrategy.UPDATE,
+        ),
         expectation_suite=None,
         expectation_suite_name=None,
         include_citation=True,
@@ -952,6 +961,15 @@ def test_run_profiler_with_dynamic_args(
     assert mock_profiler_run.call_args == mock.call(
         variables=variables,
         rules=rules,
+        batch_list=None,
+        batch_request=None,
+        force_batch_data=False,
+        reconciliation_directives=ReconciliationDirectives(
+            variables=ReconciliationStrategy.UPDATE,
+            domain_builder=ReconciliationStrategy.UPDATE,
+            parameter_builder=ReconciliationStrategy.UPDATE,
+            expectation_configuration_builder=ReconciliationStrategy.UPDATE,
+        ),
         expectation_suite=None,
         expectation_suite_name=expectation_suite_name,
         include_citation=include_citation,
@@ -1349,7 +1367,10 @@ def test_run_with_expectation_suite_arg(mock_data_context: mock.MagicMock):
     suite: ExpectationSuite = ExpectationSuite(
         expectation_suite_name="my_expectation_suite"
     )
-    result_suite: ExpectationSuite = profiler.run(expectation_suite=suite)
+    profiler.run()
+    result_suite: ExpectationSuite = profiler.get_expectation_suite(
+        expectation_suite=suite
+    )
 
     assert id(suite) == id(result_suite)
 
@@ -1366,7 +1387,8 @@ def test_run_with_conflicting_expectation_suite_args_raises_error(
     )
 
     with pytest.raises(AssertionError) as e:
-        profiler.run(
+        profiler.run()
+        suite = profiler.get_expectation_suite(
             expectation_suite=suite, expectation_suite_name="my_expectation_suite"
         )
 
