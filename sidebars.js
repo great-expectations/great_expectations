@@ -219,17 +219,21 @@ module.exports = {
                 'guides/expectations/creating_custom_expectations/overview',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
+                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
                 {
                   type: 'category',
                   label: 'Adding Features to Custom Expectations',
                   items: [
                     'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                    'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
+                    // 'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
                     'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
                     'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
-                    'guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation',
+                    // 'guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation',
                     'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
                     'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
                   ]
@@ -284,7 +288,8 @@ module.exports = {
               items: [
                 'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
                 'guides/validation/advanced/how_to_implement_custom_notifications',
-                'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
+                'guides/validation/advanced/how_to_validate_data_without_a_checkpoint',
+                'guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint'
               ]
             },
             { type: 'doc', id: 'guides/validation/index', label: 'Index' }
@@ -303,6 +308,8 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
+        'deployment_patterns/how_to_use_great_expectations_with_prefect',
+        'deployment_patterns/how_to_use_great_expectations_with_meltano',
         { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
       ]
     },
@@ -334,6 +341,14 @@ module.exports = {
               items: [
                 { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
                 { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
+              ]
+            },
+            {
+              type: 'category',
+              label: 'How to contribute integration documentation',
+              items: [
+                'integrations/contributing_integration',
+                { type: 'doc', id: 'integrations/integration_template', label: 'TEMPLATE Integration Document' }
               ]
             },
             'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'

@@ -20,8 +20,9 @@ def render_multiple_validation_result_pages_markdown(
         string containing formatted markdown validation results
     """
 
+    # deprecated-v0.12.1
     warnings.warn(
-        "This 'render_multiple_validation_result_pages_markdown' function will be deprecated "
+        "This 'render_multiple_validation_result_pages_markdown' function is deprecated as of v0.12.1 and will be removed in v0.16."
         "Please use ValidationResultsPageRenderer.render_validation_operator_result() instead."
         "E.g. to replicate the functionality of rendering a ValidationOperatorResult to markdown:"
         "validation_results_page_renderer = ValidationResultsPageRenderer("
@@ -30,8 +31,7 @@ def render_multiple_validation_result_pages_markdown(
         "rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result("
         "   validation_operator_result=validation_operator_result"
         ")"
-        'return " ".join(DefaultMarkdownPageView().render(rendered_document_content_list))'
-        "Please update code accordingly.",
+        'return " ".join(DefaultMarkdownPageView().render(rendered_document_content_list))',
         DeprecationWarning,
     )
 

@@ -133,7 +133,6 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["xml", "glam"],
         "contributors": ["@mielvds"],
-        "package": "experimental_expectations",
         "requirements": ["lxml"],
     }
 
@@ -152,10 +151,10 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         "catch_exceptions": True,
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
-
-        return True
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
