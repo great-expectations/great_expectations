@@ -1,7 +1,13 @@
 name: Test PEP 273 compatibility
 
 on:
-  - push
+  pull_request_target:
+    types:
+      - opened
+    branches:
+      - 'main'
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   run:
@@ -9,7 +15,7 @@ jobs:
     runs-on: '${{ matrix.os }}'
     strategy:
       matrix:
-        python: [ 3.6, 3.9 ]
+        python: [ 3.7, 3.8, 3.9 ]
         os: [ ubuntu-20.04, windows-2019 ]
         type: [directory, zip]
 
@@ -28,27 +34,14 @@ jobs:
         with:
           python-version: ${{matrix.python}}
 
-      - name: Setup base system (Linux)
-        if: runner.os == 'Linux'
+      - name: Setup base system
         run: |
           pip install --upgrade wheel setuptools
           pip install -r requirements.txt
 
-      - name: Install GE from sources into extra_libraries_dir (Linux)
-        if: runner.os == 'Linux'
+      - name: Install GE from sources into extra_libraries_dir
         run: |
           pip install . -t extra_libraries_dir
-
-      - name: Setup base system (Win)
-        if: runner.os == 'Windows'
-        run: |
-          pip install --upgrade wheel setuptools -c constraints_py36.txt
-          pip install -r requirements.txt -c constraints_py36.txt
-
-      - name: Install GE from sources into extra_libraries_dir (Win)
-        if: runner.os == 'Windows'
-        run: |
-          pip install . -t extra_libraries_dir -c constraints_py36.txt
 
       - name: Remove sources
         shell: bash

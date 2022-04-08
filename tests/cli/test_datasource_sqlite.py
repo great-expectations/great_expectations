@@ -196,7 +196,7 @@ def test_cli_datasource_new_connection_string(
     result = runner.invoke(
         cli,
         "--v3-api datasource new",
-        input=f"2\n6\n",
+        input="2\n6\n",
         catch_exceptions=False,
     )
     stdout = result.stdout

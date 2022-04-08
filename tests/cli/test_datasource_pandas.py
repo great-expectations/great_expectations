@@ -77,7 +77,7 @@ def test_cli_datasource_list_on_project_with_one_datasource(
         catch_exceptions=False,
     )
 
-    expected_output = f"""Using v3 (Batch Request) API\x1b[0m
+    expected_output = """Using v3 (Batch Request) API\x1b[0m
 1 Datasource found:[0m
 [0m
  - [36mname:[0m my_datasource[0m

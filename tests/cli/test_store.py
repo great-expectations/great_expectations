@@ -18,7 +18,7 @@ def test_store_list_stores(
     monkeypatch.chdir(os.path.dirname(project_dir))
     result = runner.invoke(
         cli,
-        f"--v3-api store list",
+        "--v3-api store list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

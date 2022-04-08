@@ -242,6 +242,10 @@ local_tests = [
         name="expect_column_values_to_equal_three",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py",
     ),
+    IntegrationTestFixture(
+        name="expect_table_columns_to_be_unique",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py",
+    ),
 ]
 
 
