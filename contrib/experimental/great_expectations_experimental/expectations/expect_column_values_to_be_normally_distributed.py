@@ -200,7 +200,6 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
 
     library_metadata = {
         "maturity": "experimental",
-        "package": "great_expectations_experimental",
         "tags": ["experimental"],
         "contributors": [
             "@ljohnston931",
@@ -231,7 +230,9 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
         "catch_exceptions": False,
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -240,7 +241,7 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
