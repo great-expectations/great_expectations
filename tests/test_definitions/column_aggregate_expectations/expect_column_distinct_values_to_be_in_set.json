@@ -1,0 +1,229 @@
+{
+  "expectation_type": "expect_column_distinct_values_to_be_in_set",
+  "datasets": [{
+    "data": {
+            "dist1" : [1,2,3,4,5,6,7,8],
+            "dist2" : [1,2,3,4,5,null,null,null],
+            "dist3" : [2,2,2,2,5,6,7,8],
+            "dist4" : [1,1,1,1,2,null,null,null]
+        },
+    "tests": [
+      {
+        "title": "basic_positive_test",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "in": {
+          "column": "dist1",
+          "value_set": [1,2,3,4,5,6,7,8,9]
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1,2,3,4,5,6,7,8],
+          "value_counts": [
+            {"value": 1,
+              "count": 1
+            },
+            {"value": 2,
+              "count": 1
+              },
+            {"value": 3,
+              "count": 1
+            },
+            {"value": 4,
+              "count": 1
+            },
+            {"value": 5,
+              "count": 1
+            },
+            {"value": 6,
+              "count": 1
+            },
+            {"value": 7,
+              "count": 1
+            },
+            {"value": 8,
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "title": "vacuously_true_universal_set",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist1",
+          "value_set": null
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1,2,3,4,5,6,7,8],
+          "value_counts": [
+            {"value": 1,
+              "count": 1
+            },
+            {"value": 2,
+              "count": 1
+              },
+            {"value": 3,
+              "count": 1
+            },
+            {"value": 4,
+              "count": 1
+            },
+            {"value": 5,
+              "count": 1
+            },
+            {"value": 6,
+              "count": 1
+            },
+            {"value": 7,
+              "count": 1
+            },
+            {"value": 8,
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "title": "positive_test_with_null_values_in_column",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist2",
+          "value_set": [1,2,3,4,5]
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1,2,3,4,5],
+          "value_counts": [
+            {"value": 1,
+              "count": 1
+            },
+            {"value": 2,
+              "count": 1
+              },
+            {"value": 3,
+              "count": 1
+            },
+            {"value": 4,
+              "count": 1
+            },
+            {"value": 5,
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "title": "positive_test_with_duplicate_values_in_column",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist3",
+          "value_set": [2,5,6,7,8,9]
+        },
+        "out": {
+          "success": true,
+          "observed_value": [2,5,6,7,8],
+          "value_counts": [
+            {"value": 2,
+              "count": 4
+            },
+            {"value": 5,
+              "count": 1
+            },
+            {"value": 6,
+              "count": 1
+            },
+            {"value": 7,
+              "count": 1
+            },
+            {"value": 8,
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "title": "positive_test_duplicate_and_null_values",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist4",
+          "value_set": [1,2,9]
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1, 2],
+          "value_counts": [
+            {"value": 1,
+              "count": 4
+            },
+            {"value": 2,
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "title": "basic_negative_test_no_set_intersection",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "in": {
+          "column": "dist1",
+          "value_set": [9]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1,2,3,4,5,6,7,8]
+        }
+      },
+      {
+        "title": "negative_test_some_set_intersection_and_extra",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist1",
+          "value_set": [2,3,4,5,6,7,8,9]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1,2,3,4,5,6,7,8]
+        }
+      },
+      {
+        "title": "negative_test_with_null_values_in_column",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist2",
+          "value_set": [1,2,3,4]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1,2,3,4,5]
+        }
+      },
+      {
+        "title": "negative_test_with_duplicate_values_in_column",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist3",
+          "value_set": [2,5,6,7]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [2,5,6,7,8]
+        }
+      },
+      {
+        "title": "negative_test_duplicate_and_null_values",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist4",
+          "value_set": [1]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1, 2]
+        }
+      }
+    ]
+  }]
+}

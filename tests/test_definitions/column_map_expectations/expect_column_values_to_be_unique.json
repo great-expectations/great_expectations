@@ -1,0 +1,200 @@
+{
+  "expectation_type": "expect_column_values_to_be_unique",
+  "datasets" : [{
+    "data" : {
+      "a" : ["2", "2", "2", null],
+      "b" : [1, "2", 2, null],
+      "c" : [1, 1, 2, null],
+      "d" : [1, "1", 2, null],
+      "n" : [null, null, 2, null],
+      "unique" : [1, 2, 3, null],
+      "null": [null, null, null, null],
+      "mult_dup": ["1", "1", "2", "2"]
+    },
+    "schemas": {
+      "spark": {
+        "a": "StringType",
+        "b": "StringType",
+        "c": "IntegerType",
+        "d": "StringType",
+        "n": "IntegerType",
+        "unique": "IntegerType",
+        "null": "NullType",
+        "mult_dup": "StringType"
+      },
+      "mssql": {
+        "a": "VARCHAR",
+        "b": "NVARCHAR",
+        "c": "INTEGER",
+        "d": "NVARCHAR",
+        "n": "INTEGER",
+        "unique": "INTEGER",
+        "null": "NVARCHAR",
+        "mult_dup": "VARCHAR"
+      },
+      "mysql": {
+        "a": "CHAR",
+        "b": "CHAR",
+        "c": "INTEGER",
+        "d": "CHAR",
+        "n": "INTEGER",
+        "unique": "INTEGER",
+        "null": "CHAR",
+        "mult_dup": "CHAR"
+      },
+      "bigquery": {
+        "a": "STRING",
+        "b": "STRING",
+        "c": "NUMERIC",
+        "d": "STRING",
+        "n": "NUMERIC",
+        "unique": "NUMERIC",
+        "null": "STRING",
+        "mult_dup": "STRING"
+      }
+    },
+    "tests" : [
+      {
+        "title": "basic_positive_test_case",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "in": {
+          "column": "unique"
+        },
+        "out": {
+          "success": true,
+          "unexpected_list": [],
+          "unexpected_index_list": []
+        }
+      },{
+        "title": "basic_negative_case_all_non_unique_character_values",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "in": {
+          "column": "a"
+        },
+        "out": {
+          "success": false,
+          "unexpected_list": ["2", "2", "2"],
+          "unexpected_index_list": [0, 1, 2]
+        }
+      },{
+        "title": "multi_type_column_contains_2_and_quoted_2_suppressed_for_sqalchemy",
+        "suppress_test_for": ["sqlalchemy"],
+        "exact_match_out": false,
+        "in": {
+          "column": "c",
+          "mostly": 0.3
+        },
+        "out": {
+          "success": true,
+          "unexpected_list": [1, 1],
+          "unexpected_index_list": [0, 1]
+        }
+      },{
+        "title": "positive_case_using_mostly",
+        "exact_match_out": false,
+        "in": {
+          "column": "c",
+          "mostly": 0.3
+        },
+        "out": {
+          "success": true,
+          "unexpected_list": [1, 1],
+          "unexpected_index_list": [0, 1]
+        }
+      },{
+        "title": "negative_case_using_mostly",
+        "exact_match_out": false,
+        "in": {
+          "column": "c",
+          "mostly": 0.4
+        },
+        "out": {
+          "success": false,
+          "unexpected_list": [1, 1],
+          "unexpected_index_list": [0, 1]
+        }
+      },{
+        "title": "positive_case_multiple_null_values",
+        "exact_match_out": false,
+        "in": {
+          "column": "n"
+        },
+        "out": {
+          "success": true,
+          "unexpected_list": [],
+          "unexpected_index_list": []
+        }
+      },{
+        "title": "negative_case_non_unique_numeric_values",
+        "exact_match_out": false,
+        "in": {
+          "column": "c"
+        },
+        "out": {
+          "success": false,
+          "unexpected_list": [1, 1],
+          "unexpected_index_list": [0, 1]
+        }
+      },{
+        "title": "positive_case_all_null_values",
+        "exact_match_out": false,
+        "in": {
+          "column": "null"
+        },
+        "out": {
+          "success": true,
+          "unexpected_list": [],
+          "unexpected_index_list": []
+        }
+      },{
+        "title": "negative_multiple_duplicate_values",
+        "exact_match_out": false,
+        "in": {
+          "column": "mult_dup"
+        },
+        "out": {
+          "success": false,
+          "unexpected_list": ["1", "1", "2", "2"],
+          "unexpected_index_list": [0, 1, 2, 3]
+        }
+      }
+    ]
+  },
+   {
+    "data" : {
+      "0": [1, 2, 3, 4],
+      "_c0": [1, 2, 3, 4]
+    },
+    "schemas": {
+      "spark": {
+        "0": "IntegerType",
+        "_c0": "IntegerType"
+      }
+    },
+    "only_for": ["spark"],
+    "tests" : [
+      {
+        "title": "positive_integer_column_name",
+        "exact_match_out": false,
+        "in": {
+          "column": "0"
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "positive_spark_headerless_column_name",
+        "exact_match_out": false,
+        "in": {
+          "column": "_c0"
+      },
+        "out": {
+          "success": true
+        }
+      }
+    ]
+  }]
+}

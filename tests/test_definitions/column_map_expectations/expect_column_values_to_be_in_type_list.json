@@ -1,0 +1,510 @@
+{
+  "expectation_type": "expect_column_values_to_be_in_type_list",
+  "datasets": [
+    {
+      "data": {
+        "x": [
+          1,
+          2,
+          4
+        ],
+        "y": [
+          1.0,
+          2.2,
+          5.3
+        ],
+        "z": [
+          "hello",
+          "jello",
+          "mello"
+        ],
+        "n": [
+          null,
+          null,
+          null
+        ],
+        "b": [
+          false,
+          true,
+          false
+        ],
+        "s": [
+          "hello",
+          "jello",
+          1
+        ],
+        "s1": [
+          "hello",
+          2.0,
+          1
+        ]
+      },
+      "schemas": {
+        "pandas": {
+          "x": "int",
+          "y": "float",
+          "z": "str",
+          "n": "str",
+          "b": "bool",
+          "s": "str",
+          "s1": "str"
+        },
+        "postgresql": {
+          "x": "INTEGER",
+          "y": "DOUBLE_PRECISION",
+          "z": "TEXT",
+          "n": "TEXT",
+          "b": "BOOLEAN",
+          "s": "TEXT",
+          "s1": "TEXT"
+        },
+        "spark": {
+          "x": "IntegerType",
+          "y": "FloatType",
+          "z": "StringType",
+          "n": "StringType",
+          "b": "BooleanType",
+          "s": "StringType",
+          "s1": "StringType"
+        },
+        "sqlite": {
+          "x": "INTEGER",
+          "y": "FLOAT",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BOOLEAN",
+          "s": "VARCHAR",
+          "s1": "VARCHAR"
+        },
+        "mysql": {
+          "x": "INTEGER",
+          "y": "FLOAT",
+          "z": "TEXT",
+          "n": "TEXT",
+          "b": "TINYINT",
+          "s": "TEXT",
+          "s1": "TEXT"
+        },
+        "mssql": {
+          "x": "INTEGER",
+          "y": "FLOAT",
+          "z": "TEXT",
+          "n": "VARCHAR",
+          "b": "BIT",
+          "s": "VARCHAR",
+          "s1": "VARCHAR"
+        },
+        "bigquery": {
+          "x": "INTEGER",
+          "y": "NUMERIC",
+          "z": "STRING",
+          "n": "STRING",
+          "b": "BOOL",
+          "s": "STRING",
+          "s1": "STRING"
+        }
+      },
+      "tests": [
+        {
+          "title": "positive_test_pandas_integer_column",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "type_list": [
+              "int"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "pandas"
+          ]
+        },
+        {
+          "title": "positive_test_sqlalchemy_integer_column",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "type_list": [
+              "INTEGER"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "sqlalchemy"
+          ]
+        },
+        {
+          "title": "positive_test_spark_integer_column",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "type_list": [
+              "IntegerType"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "spark"
+          ]
+        },
+        {
+          "title": "negative_test_pandas_float_values_are_not_strings",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "type_list": [
+              "string"
+            ]
+          },
+          "out": {
+            "success": false
+          },
+          "only_for": [
+            "pandas"
+          ]
+        },
+        {
+          "title": "negative_test_sqlalchemy_float_values_are_not_text",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "type_list": [
+              "TEXT"
+            ]
+          },
+          "out": {
+            "success": false
+          },
+          "only_for": [
+            "sqlalchemy"
+          ]
+        },
+        {
+          "title": "negative_test_spark_float_values_are_not_stringtype",
+          "exact_match_out": false,
+          "in": {
+            "column": "x",
+            "type_list": [
+              "StringType"
+            ]
+          },
+          "out": {
+            "success": false
+          },
+          "only_for": [
+            "spark"
+          ]
+        },
+        {
+          "title": "positive_test_float_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "y",
+            "type_list": [
+              "float"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "pandas"
+          ]
+        },
+        {
+          "title": "positive_test_float_values",
+          "exact_match_out": false,
+          "suppress_test_for": ["bigquery"],
+          "in": {
+            "column": "y",
+            "type_list": [
+              "DOUBLE_PRECISION",
+              "FLOAT"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "sqlalchemy"
+          ]
+        },
+                {
+          "title": "positive_test_float_values_bigquery",
+          "exact_match_out": false,
+          "in": {
+            "column": "y",
+            "type_list": [
+              "NUMERIC",
+              "DECIMAL",
+              "FLOAT64"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "bigquery"
+          ]
+        },
+        {
+          "title": "positive_test_float_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "y",
+            "type_list": [
+              "FloatType"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "spark"
+          ]
+        },
+        {
+          "title": "positive_test_string_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "z",
+            "type_list": [
+              "str"
+            ]
+          },
+          "out": {
+            "success": true,
+            "unexpected_list": [],
+            "unexpected_index_list": []
+          },
+          "only_for": [
+            "pandas"
+          ]
+        },
+        {
+          "title": "positive_test_text_values",
+          "exact_match_out": false,
+          "suppress_test_for": ["bigquery"],
+          "in": {
+            "column": "z",
+            "type_list": [
+              "TEXT",
+              "VARCHAR"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "sqlalchemy"
+          ]
+        },
+        {
+          "title": "positive_test_text_values_bigquery",
+          "exact_match_out": false,
+          "in": {
+            "column": "z",
+            "type_list": [
+              "STRING"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "bigquery"
+          ]
+        },
+        {
+          "title": "positive_test_stringtype_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "z",
+            "type_list": [
+              "StringType"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "spark"
+          ]
+        },
+        {
+          "title": "positive_test_boolean_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "type_list": [
+              "bool"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "pandas"
+          ]
+        },
+        {
+          "title": "positive_test_boolean_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "type_list": [
+              "BOOLEAN"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "sqlalchemy"
+          ],
+          "suppress_test_for": ["mysql", "mssql"]
+        },
+        {
+          "title": "positive_test_boolean_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "type_list": [
+              "BIT"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "mssql"
+          ]
+        },
+        {
+          "title": "positive_test_boolean_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "type_list": [
+              "TINYINT"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "mysql"
+          ]
+        },
+        {
+          "title": "positive_test_boolean_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "type_list": [
+              "BooleanType"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "spark"
+          ]
+        },
+        {
+          "title": "positive_test_string_and_int_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "s",
+            "type_list": [
+              "str",
+              "int"
+            ]
+          },
+          "out": {
+            "success": true,
+            "unexpected_list": [],
+            "unexpected_index_list": []
+          },
+          "only_for": [
+            "pandas"
+          ]
+        },
+        {
+          "title": "positive_test_text_and_integer_values",
+          "exact_match_out": false,
+          "suppress_test_for": ["bigquery"],
+          "in": {
+            "column": "s",
+            "type_list": [
+              "TEXT",
+              "VARCHAR",
+              "INTEGER"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "sqlalchemy"
+          ]
+        },
+        {
+          "title": "positive_test_text_and_integer_values_bigquery",
+          "exact_match_out": false,
+          "suppress_test_for": ["bigquery"],
+          "in": {
+            "column": "s",
+            "type_list": [
+              "STRING",
+              "INTEGER"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "bigquery"
+          ]
+        },
+        {
+          "title": "positive_test_stringtype_and_integertype_values",
+          "exact_match_out": false,
+          "in": {
+            "column": "s",
+            "type_list": [
+              "StringType",
+              "IntegerType"
+            ]
+          },
+          "out": {
+            "success": true
+          },
+          "only_for": [
+            "spark"
+          ]
+        },
+        {
+          "title": "positive_test_placeholder_expectation",
+          "exact_match_out": false,
+          "in": {
+            "column": "s",
+            "type_list": null
+          },
+          "out": {
+            "success": true
+          }
+        }
+      ]
+    }
+  ]
+}

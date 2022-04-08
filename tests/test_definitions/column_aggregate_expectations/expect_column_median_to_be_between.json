@@ -1,0 +1,184 @@
+{
+  "expectation_type" : "expect_column_median_to_be_between",
+  "datasets" : [
+    {
+      "data": {
+        "a": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "b": [
+          1,
+          2,
+          2,
+          3
+        ],
+        "c": [
+          5,
+          7,
+          6,
+          null
+        ]
+      },
+      "schemas": {
+        "spark": {
+          "a": "IntegerType",
+          "b": "IntegerType",
+          "c": "IntegerType"
+        }
+      },
+      "tests": [
+        {
+          "title": "positive_test_min_equal_max",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "a",
+            "min_value": 2.5,
+            "max_value": 2.5
+          },
+          "out": {
+            "success": true,
+            "observed_value": 2.5
+          }
+        },
+        {
+          "title": "positive_test_null_min",
+          "exact_match_out": false,
+          "in": {
+            "column": "a",
+            "min_value": null,
+            "max_value": 3
+          },
+          "out": {
+            "success": true,
+            "observed_value": 2.5
+          }
+        },
+        {
+          "title": "positive_test_null_max",
+          "exact_match_out": false,
+          "in": {
+            "column": "a",
+            "min_value": 2,
+            "max_value": null
+          },
+          "out": {
+            "success": true,
+            "observed_value": 2.5
+          }
+        },
+        {
+          "title": "negative_test_min_equal_max",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "min_value": 5,
+            "max_value": 5
+          },
+          "out": {
+            "success": false,
+            "observed_value": 2
+          }
+        },
+        {
+          "title": "negative_test_null_min",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "min_value": null,
+            "max_value": 1
+          },
+          "out": {
+            "success": false,
+            "observed_value": 2
+          }
+        },
+        {
+          "title": "negative_test_null_max",
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "min_value": 2.5,
+            "max_value": null
+          },
+          "out": {
+            "success": false,
+            "observed_value": 2
+          }
+        },
+        {
+          "title": "positive_test_missing_value_in_column_exact_min_and_max",
+          "exact_match_out": false,
+          "in": {
+            "column": "c",
+            "min_value": 6,
+            "max_value": 6,
+            "catch_exceptions": true
+          },
+          "out": {
+            "success": true,
+            "observed_value": 6
+          }
+        },
+        {
+          "title": "negative_test_missing_value_in_column_complete_result_format",
+          "exact_match_out": true,
+          "in": {
+            "column": "c",
+            "min_value": 7,
+            "max_value": 7,
+            "result_format": "COMPLETE"
+          },
+          "out": {
+            "success": false,
+            "result": {
+              "observed_value": 6.0,
+              "element_count": 4,
+              "missing_count": 1,
+              "missing_percent": 25.0
+            }
+          }
+        },
+        {
+          "title": "vacuously_true_both_min_and_max_null",
+          "exact_match_out": false,
+          "in": {
+            "column": "c",
+            "min_value": null,
+            "max_value": null,
+            "catch_exceptions": true
+          },
+          "out": {
+            "success": true
+          }
+        }
+      ]},
+    {
+      "data": {
+        "empty_column": []
+      },
+      "schemas": {
+        "spark": {
+          "empty_column": "IntegerType"
+        }
+      },
+      "tests": [{
+        "title": "test_empty_column_should_be_false_no_observed_value_with_which_to_compare",
+        "exact_match_out": false,
+        "in": {
+          "column": "empty_column",
+          "min_value": 0,
+          "max_value": 0,
+          "catch_exceptions": false
+        },
+        "out": {
+          "success": false,
+          "observed_value": null
+        }
+      }]
+  }]
+}

@@ -1,0 +1,327 @@
+{
+  "expectation_type" : "expect_column_values_to_match_like_pattern",
+  "datasets" : [{
+    "data" : {
+      "a" : ["aaa", "abb", "acc", "add", "bee"],
+      "b" : ["aaa", "abb", "acc", "bdd", null],
+      "c" : [ null,  null,  null,  null, null],
+      "column_name with space": ["aaa", "abb", "acc", "add", "bee"]
+    },
+    "schemas": {
+      "spark": {
+        "a": "StringType",
+        "b": "StringType",
+        "c": "StringType",
+        "column_name with space": "StringType"
+      },
+      "mssql": {
+        "a": "VARCHAR",
+        "b": "NVARCHAR",
+        "c": "NVARCHAR",
+        "column_name with space": "VARCHAR"
+      }
+    },
+    "tests": [
+    {
+      "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "[a]%",
+        "mostly": 0.9
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "positive_test_exact_mostly_w_one_non_matching_value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "[a]%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "positive_test_column_name_has_space",
+      "exact_match_out" : false,
+      "in": {
+        "column": "column_name with space",
+        "like_pattern": "[a]%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "positive_test_sufficient_mostly_w_one_non_matching_value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "[a]%",
+        "mostly": 0.7
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "negative_test_one_missing_value_and_insufficent_mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "[a]%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "positive_test_one_missing_value_and_exact_mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "[a]%",
+        "mostly": 0.75
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "positive_test_one_missing_value_and_sufficent_mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "[a]%",
+        "mostly": 0.7
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "positive_test_all_missing_values",
+      "exact_match_out" : false,
+      "in": {
+        "column": "c",
+        "like_pattern": "[a]%"
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "positive_test_all_missing_values_mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "c",
+        "like_pattern": "[a]%",
+        "mostly": 0.2
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "positive_test_match_characters_not_at_the_beginning_of_string",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "%[b]%",
+        "mostly": 0.4
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [0, 2, 3],
+        "unexpected_list": ["aaa", "acc", "add"]
+      },
+      "only_for": ["mssql"]
+    },
+    {
+      "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "a%",
+        "mostly": 0.9
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["sqlite", "postgresql", "mysql"]
+    },
+    {
+      "title": "positive_test_exact_mostly_w_one_non_matching_value",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "a%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["sqlite", "postgresql", "mysql"]
+    },
+    {
+      "title": "positive_test_column_name_has_space",
+      "exact_match_out" : false,
+      "in": {
+        "column": "column_name with space",
+        "like_pattern": "a%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["sqlite", "postgresql", "mysql"]
+    },
+    {
+      "title": "positive_test_sufficient_mostly_w_one_non_matching_value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "a%",
+        "mostly": 0.7
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [4],
+        "unexpected_list": ["bee"]
+      },
+      "only_for": ["sqlite", "postgresql", "mysql"]
+    },
+    {
+      "title": "negative_test_one_missing_value_and_insufficent_mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "a%",
+        "mostly": 0.8
+      },
+      "out": {
+        "success":false,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["sqlite", "postgresql", "mysql"]
+    },
+    {
+      "title": "positive_test_one_missing_value_and_exact_mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "a%",
+        "mostly": 0.75
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["sqlite", "postgresql", "mysql"]
+    },
+    {
+      "title": "positive_test_one_missing_value_and_sufficent_mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "b",
+        "like_pattern": "a%",
+        "mostly": 0.7
+      },
+      "out": {
+        "success":true,
+        "unexpected_index_list": [3],
+        "unexpected_list": ["bdd"]
+      },
+      "only_for": ["sqlite", "postgresql", "mysql"]
+    },
+    {
+      "title": "positive_test_all_missing_values",
+      "exact_match_out" : false,
+      "in": {
+        "column": "c",
+        "like_pattern": "a%"
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      },
+      "only_for": ["sqlite", "postgresql", "mysql"]
+    },
+    {
+      "title": "positive_test_all_missing_values_mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "c",
+        "like_pattern": "a%",
+        "mostly": 0.2
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [],
+        "unexpected_list": []
+      },
+      "only_for": ["sqlite", "postgresql", "mysql"]
+    },
+    {
+      "title": "positive_test_match_characters_not_at_the_beginning_of_string",
+      "exact_match_out" : false,
+      "in": {
+        "column": "a",
+        "like_pattern": "%b%",
+        "mostly": 0.4
+      },
+      "out": {
+        "success": true,
+        "unexpected_index_list": [0, 2, 3],
+        "unexpected_list": ["aaa", "acc", "add"]
+      },
+      "only_for": ["sqlite", "postgresql", "mysql"]
+    }
+   ]
+  }]
+}

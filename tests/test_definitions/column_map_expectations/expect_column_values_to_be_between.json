@@ -1,0 +1,609 @@
+{
+  "expectation_type": "expect_column_values_to_be_between",
+  "datasets": [{
+    "data": {
+      "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "y": [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
+      "z": [1, 2, 3, 4, 5, null, null, null, null, null],
+      "ts": [
+        "Jan 01 1970 12:00:01",
+        "Dec 31 1999 12:00:01",
+        "Jan 01 2000 12:00:01",
+        "Feb 01 2000 12:00:01",
+        "Mar 01 2000 12:00:01",
+        "Apr 01 2000 12:00:01",
+        "May 01 2000 12:00:01",
+        "Jun 01 2000 12:00:01",
+        null,
+        "Jan 01 2001 12:00:01"
+      ],
+      "alpha": ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
+      "numeric": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    },
+    "schemas": {
+      "spark": {
+        "x": "IntegerType",
+        "y": "StringType",
+        "z": "IntegerType",
+        "ts": "TimestampType",
+        "alpha": "StringType",
+        "numeric": "IntegerType"
+      },
+      "sqlite": {
+        "x": "INTEGER",
+        "y": "VARCHAR",
+        "z": "INTEGER",
+        "ts": "DATETIME",
+        "alpha": "VARCHAR",
+        "numeric": "INTEGER"
+      },
+      "postgresql": {
+        "x": "INTEGER",
+        "y": "TEXT",
+        "z": "INTEGER",
+        "ts": "TIMESTAMP",
+        "alpha": "TEXT",
+        "numeric": "INTEGER"
+      },
+      "mysql": {
+        "x": "INTEGER",
+        "y": "TEXT",
+        "z": "INTEGER",
+        "ts": "TIMESTAMP",
+        "alpha": "TEXT",
+        "numeric": "INTEGER"
+      },
+      "mssql": {
+        "x": "INTEGER",
+        "y": "VARCHAR",
+        "z": "INTEGER",
+        "ts": "DATETIME",
+        "alpha": "VARCHAR",
+        "numeric": "INTEGER"
+      },
+      "bigquery": {
+        "x": "NUMERIC",
+        "y": "STRING",
+        "z": "NUMERIC",
+        "ts": "DATETIME",
+        "alpha": "STRING",
+        "numeric": "NUMERIC"
+      }
+    },
+    "tests": [
+      {
+        "title": "basic_positive_test",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 1
+        }
+      },
+      {
+        "title" : "another_basic_positive_test",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 20,
+          "min_value": 0
+        }
+      },
+      {
+        "title": "basic_positive_test_with_timestamps",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "ts",
+          "max_value": "Jan 01 2020 12:00:02",
+          "min_value": "Jan 01 1970 12:00:00",
+          "parse_strings_as_datetimes": true
+        }
+      },
+      {
+        "title" : "missing_min_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 20
+        }
+      },
+      {
+        "title" : "null_min_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "min_value": null,
+          "max_value": 20
+        }
+      },
+      {
+        "title" : "missing_max_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "min_value": 0
+        }
+      },
+      {
+        "title" : "null_max_value",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "min_value": 0,
+          "max_value": null
+        }
+      },
+      {
+        "title" : "basic_negative_test",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            10
+          ],
+          "unexpected_index_list": [9],
+          "success": false
+        },
+        "in": {
+          "column": "x",
+          "max_value": 9,
+          "min_value": 1
+        }
+      },
+      {
+        "title" : "another_negative_test",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            1,
+            2
+          ],
+          "unexpected_index_list": [0, 1],
+          "success": false
+        },
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 3
+        }
+      },
+      {
+        "title": "basic_negative_test_with_timestamps",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_index_list": [0, 9],
+          "success": false
+        },
+        "in": {
+          "column": "ts",
+          "max_value": "Jan 01 2001 12:00:00",
+          "min_value": "Jan 01 1990 12:00:00",
+          "parse_strings_as_datetimes": true
+        }
+      },
+      {
+        "title" : "positive_test_with_result_format__boolean_only",
+        "exact_match_out": false,
+        "out": {"success": true},
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 1,
+          "result_format": "BOOLEAN_ONLY"
+        }
+      },
+      {
+        "title" : "another_positive_test_with_result_format__boolean_only",
+        "exact_match_out": false,
+        "out": {"success": true},
+        "in": {
+          "column": "x",
+          "max_value": 20,
+          "min_value": 0,
+          "result_format": "BOOLEAN_ONLY"
+        }
+      },
+      {
+        "title" : "negative_test_with_result_format__boolean_only",
+        "exact_match_out": false,
+        "out": {"success": false},
+        "in": {
+          "column": "x",
+          "max_value": 9,
+          "min_value": 1,
+          "result_format": "BOOLEAN_ONLY"
+        }
+      },
+      {
+        "title" : "another_negative_test_with_result_format__boolean_only",
+        "exact_match_out": false,
+        "out": {"success": false},
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 3,
+          "result_format": "BOOLEAN_ONLY"
+        }
+      },
+      {
+        "title" : "positive_test_with_mostly",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 1,
+          "mostly": 0.9
+        }
+      },
+      {
+        "title" : "2nd_positive_test_with_mostly",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 20,
+          "min_value": 0,
+          "mostly": 0.9
+        }
+      },
+      {
+        "title" : "3rd_positive_test_with_mostly",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            10
+          ],
+          "unexpected_index_list": [
+            9
+          ],
+          "success": true
+        },
+        "in": {
+          "column": "x",
+          "max_value": 9,
+          "min_value": 1,
+          "mostly": 0.9
+        }
+      },
+      {
+        "title" : "negative_test_with_mostly",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            1,
+            2
+          ],
+          "unexpected_index_list": [
+            0,
+            1
+          ],
+          "success": false
+        },
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 3,
+          "mostly": 0.9
+        }
+      },
+      {
+        "title" : "error:_improperly_mixed_types",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "max_value": 10,
+          "min_value": 1,
+          "mostly": 0.95,
+          "catch_exceptions": true
+        },
+        "out": {},
+        "error":{
+          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        }
+      },
+      {
+        "title" : "error:_improperly_mixed_types_again",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "max_value": 10,
+          "min_value": 1,
+          "mostly": 0.9,
+          "catch_exceptions": true
+        },
+        "out": {},
+        "error":{
+          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        }
+      },
+      {
+        "title" : "error:_improperly_mixed_types_once_more",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "max_value": 10,
+          "min_value": 1,
+          "mostly": 0.8,
+          "catch_exceptions": true
+        },
+        "out": {},
+        "error":{
+          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        }
+      },
+      {
+        "title" : "error:_missing_both_min_value_and_max_value",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "max_value": null,
+          "min_value": null,
+          "catch_exceptions": true
+        },
+        "out": {},
+        "error":{
+          "traceback_substring" : "min_value and max_value cannot both be None"
+        }
+      },
+      {
+        "title" : "negative_test_to_verify_that_the_denominator_for_mostly_works_with_missing_values",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            5
+          ],
+          "unexpected_index_list": [
+            4
+          ],
+          "success": false
+        },
+        "in": {
+          "column": "z",
+          "max_value": 4,
+          "min_value": 1,
+          "mostly": 0.9
+        }
+      },
+      {
+        "title" : "positive_test_to_verify_that_the_denominator_for_mostly_works_with_missing_values",
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [
+            5
+          ],
+          "unexpected_index_list": [
+            4
+          ],
+          "success": true
+        },
+        "in": {
+          "column": "z",
+          "max_value": 4,
+          "min_value": 1,
+          "mostly": 0.8
+        }
+      },
+      {
+        "title" : "error_on_string-to-int_comparisons",
+        "exact_match_out": false,
+        "in": {
+          "column": "numeric",
+          "max_value": 10,
+          "min_value": 0,
+          "catch_exceptions": true
+        },
+        "out":{},
+        "error":{
+          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        }
+      },
+      {
+        "title" : "test_min_value_is_greater_than_max_value",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "min_value": 10,
+          "max_value": 0,
+          "catch_exceptions": true
+        },
+        "out":{},
+        "error":{
+          "traceback_substring" : "ValueError: min_value cannot be greater than max_value"
+        }
+      },
+      {
+        "title": "test_allow_cross_type_comparisons",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "min_value": 0,
+          "max_value": 10,
+          "allow_cross_type_comparisons": true
+        },
+        "out": {
+          "unexpected_list": [
+            "abc"
+          ],
+          "unexpected_index_list": [
+            9
+          ],
+          "success": false
+        },
+        "suppress_test_for": ["spark"]
+      },
+      {
+        "title": "test_allow_cross_type_comparisons_again",
+        "exact_match_out": false,
+        "in": {
+          "column": "numeric",
+          "min_value": 0,
+          "max_value": 10,
+          "allow_cross_type_comparisons": true
+        },
+        "out": {
+          "unexpected_list": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+          "unexpected_index_list": [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+          ],
+          "success": false
+        },
+        "suppress_test_for": ["spark"]
+      },
+      {
+        "title": "test_strict_min_failure",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 1,
+          "strict_min": true
+        },
+        "out": {
+          "unexpected_list": [1],
+          "unexpected_index_list": [0],
+          "success": false
+        }
+      },
+      {
+        "title": "test_strict_min_success",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 1,
+          "strict_min": false
+        },
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        }
+      },
+      {
+        "title": "test_strict_max_failure",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 0,
+          "strict_max": true
+        },
+        "out": {
+          "unexpected_list": [10],
+          "unexpected_index_list": [9],
+          "success": false
+        }
+      },
+      {
+        "title": "test_strict_max_success",
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 0,
+          "strict_max": false
+        },
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        }
+      },{
+        "title": "test_conditional_expectation_passes",
+        "only_for": ["pandas"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "strict_max": false,
+          "row_condition": "y == \"abc\"",
+          "condition_parser": "pandas"
+        },
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        }
+      },{
+        "title": "test_conditional_expectation_fails",
+        "only_for": ["pandas"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "strict_max": false,
+          "row_condition": "y == 9",
+          "condition_parser": "pandas"
+        },
+        "out": {
+          "unexpected_list": [9],
+          "unexpected_index_list": [8],
+          "success": false
+        }
+      },{
+        "title": "test_conditional_expectation_parser_errors",
+        "only_for": ["pandas"],
+        "exact_match_out": false,
+        "in": {
+          "column": "x",
+          "max_value": 10,
+          "min_value": 10,
+          "catch_exceptions": true,
+          "strict_max": false,
+          "row_condition": "y == 9",
+          "condition_parser": "bad_parser"
+        },
+        "out": {
+          "traceback_substring": "must be 'python' or 'pandas'"
+        }
+      }
+    ]
+  }]
+}
