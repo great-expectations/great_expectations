@@ -30,4 +30,4 @@ validator.expect_nelsons_column_to_exist()
 
 3. Tag your work with Metadata! Adding `library_metadata` helps others understand the Expectation better in the documentation (and helps give you credit too!). Follow the how-to guide on authoring custom Expectations to learn more about the metadata format.
 
-4. Don't forget renderers. Renderers are a powerful part of the new Expectation. Make sure to add renderers that help users understand what the Expectation is validating. See [the how-to guide](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html) for more details.
+4. Don't forget renderers. Renderers are a powerful part of the new Expectation. Make sure to add renderers that help users understand what the Expectation is validating. See [the how-to guide](https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations) for more details.
