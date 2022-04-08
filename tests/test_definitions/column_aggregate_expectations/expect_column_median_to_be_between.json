@@ -32,6 +32,7 @@
       "tests": [
         {
           "title": "positive_test_min_equal_max",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "a",
@@ -71,6 +72,7 @@
         },
         {
           "title": "negative_test_min_equal_max",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "b",

@@ -257,7 +257,6 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@edjoesu",
         ],
-        "package": "experimental_expectations",
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -282,7 +281,9 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
         "base": 2,
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         neccessary configuration arguments have been provided for the validation of the expectation.
@@ -291,7 +292,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
