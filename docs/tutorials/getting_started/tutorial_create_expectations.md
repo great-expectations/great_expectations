@@ -4,7 +4,7 @@ title: 'Tutorial, Step 3: Create Expectations'
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-<UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/> 
+<UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
 :::note Prerequisites
 
@@ -95,9 +95,9 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 **Cell 2**
 ![Cell2](../../images/getting_started_tutorial/tutorial_create_expectations_cell2.png)
 
-2. The second cell allows you to specify which columns you want to **ignore** when creating Expectations. For our tutorial, we're going to ensure that the number of passengers recorded in our data is reasonable.  To do this, we'll want our Profiler to examine the `passenger_count` column and determine just what a reasonable range _is_ based our February data. **Let’s comment just this one line to include it**:
+2. The second cell allows you to specify which columns you want to **ignore** when creating Expectations. For our tutorial, we're going to ensure that the number of passengers recorded in our data is reasonable.  To do this, we'll want our Profiler to examine the `passenger_count` column and determine just what a reasonable range _is_ based on our January data. **Let’s comment just this one line to include it**:
 
-```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L86-L90
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L86-L105
 ```
 
 **Cell 3**
@@ -124,7 +124,7 @@ In particular, take a look at the Expectations that were created for the `passen
 
 ### How did we get those Expectations?
 
-You can create and edit Expectations using several different workflows. Using an automated [Profiler](/docs/reference/profilers) as we just did is one of the quickest options to get started with an Expectation Suite.
+You can create and edit Expectations using several different workflows. Using an automated [Profiler](../../reference/profilers.md) as we just did is one of the quickest options to get started with an Expectation Suite.
 
 This Profiler connected to your data (using the Datasource you configured in the previous step), took a quick look at the contents of the data, and produced an initial set of Expectations. The Profiler considers the following properties, amongst others:
 
@@ -142,7 +142,7 @@ These Expectations are not intended to be very smart. Instead, the goal is to qu
   <summary>Creating Custom Expectations</summary>
   <div>
     <p>
-      Later, you should also take a look at other workflows for <a href="https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations">creating Custom Expectations</a>. Creating Custom Expectations is an active area of work in the Great Expectations community. Stay tuned for improvements over time.
+      Later, you should also take a look at other workflows for <a href="https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview/">creating Custom Expectations</a>. Creating Custom Expectations is an active area of work in the Great Expectations community. Stay tuned for improvements over time.
     </p>
   </div>
 </details>
