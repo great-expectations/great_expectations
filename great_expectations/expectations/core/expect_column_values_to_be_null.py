@@ -74,7 +74,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -83,12 +83,10 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
-
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -126,7 +124,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             },
         }
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -172,7 +170,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )

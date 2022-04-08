@@ -88,7 +88,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -102,7 +102,6 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -145,7 +144,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
         else:
             template_str = "values must be unique"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -193,7 +192,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
         else:
             template_str = "values must be unique"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )

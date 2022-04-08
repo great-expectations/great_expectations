@@ -163,6 +163,8 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     success_keys = (
@@ -187,6 +189,22 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         "partition_object",
         "threshold",
     )
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+        super().validate_configuration(configuration)
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     def get_validation_dependencies(
         self,
@@ -245,7 +263,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     metric_value_kwargs=None,
                 )
                 #
-                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuraiton here,
+                # NOTE 20201117 - JPC - Would prefer not to include partition_metric_configuration here,
                 # since we have already evaluated it, and its result is in the kwargs for the histogram.
                 # However, currently the dependencies' configurations are not passed to the _validate method
                 #
