@@ -164,6 +164,7 @@ class ExpectColumnValuesImsiBelongToCountryCode(ColumnMapExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@szecsip",  # Don't forget to add your github handle here!
         ],
+        "requirements": ["stdnum"],
     }
 
     success_keys = (
