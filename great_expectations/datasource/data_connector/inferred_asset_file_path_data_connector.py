@@ -2,18 +2,10 @@ import copy
 import logging
 from typing import List, Optional
 
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequest,
-    BatchRequestBase,
-    IDDict,
-)
+from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
-)
-from great_expectations.datasource.data_connector.util import (
-    batch_definition_matches_batch_request,
 )
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -154,32 +146,3 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
         regex_config: dict = copy.deepcopy(self._default_regex)
         return regex_config
-
-    def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):
-        sub_cache: dict
-
-        self._validate_batch_request(batch_request=batch_request)
-
-        if len(self._data_references_cache) == 0:
-            self._refresh_data_references_cache()
-
-        batch_definition_list: List[BatchDefinition] = []
-        try:
-            sub_cache = self._data_references_cache[batch_request.data_asset_name]
-        except KeyError:
-            raise KeyError(
-                f"data_asset_name {batch_request.data_asset_name} is not recognized."
-            )
-
-        for batch_identifiers in sub_cache:
-            batch_definition: BatchDefinition = BatchDefinition(
-                datasource_name=self.datasource_name,
-                data_connector_name=self.name,
-                data_asset_name=batch_request.data_asset_name,
-                batch_identifiers=IDDict(batch_identifiers),
-                batch_spec_passthrough=batch_request.batch_spec_passthrough,
-            )
-            if batch_definition_matches_batch_request(batch_definition, batch_request):
-                batch_definition_list.append(batch_definition)
-
-        return batch_definition_list
