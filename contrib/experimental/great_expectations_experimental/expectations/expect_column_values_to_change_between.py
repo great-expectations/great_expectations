@@ -150,7 +150,6 @@ class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["experimental"],  # Tags for this Expectation in the gallery
         "contributors": ["@maikelpenz"],  # Don't forget to add your github handle here!
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.

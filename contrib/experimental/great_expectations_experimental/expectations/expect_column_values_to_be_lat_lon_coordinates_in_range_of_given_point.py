@@ -4,13 +4,10 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-import json
-import math
 from math import cos, pi, sqrt
-from typing import Optional
+from typing import Any, List, Optional, Union
 
-import numpy as np
-
+from great_expectations.core import ExpectationValidationResult
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -22,11 +19,18 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.import_manager import F, sparktypes
+from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import (
+    RenderedBulletListContent,
+    RenderedGraphContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
+from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
 
 # This class defines a Metric to support your Expectation.
@@ -225,7 +229,9 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             a spherical earth projected to a plane. Very fast but error increases rapidly as distances increase.
     """
 
-    def validate_configuration(cls, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        cls, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -233,7 +239,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         # Setting up a configuration
@@ -269,8 +275,6 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             ], "projection must be a string specifying fcc or pythagorean"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-
-        return True
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -436,9 +440,76 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             "distance projection",
         ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@austiezr",  # Don't forget to add your github handle here!
+            "@austiezr",
+            "@mmi333",  # Don't forget to add your github handle here!
         ],
     }
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration: ExpectationConfiguration = None,
+        result: ExpectationValidationResult = None,
+        language: str = None,
+        runtime_configuration: dict = None,
+        **kwargs,
+    ) -> List[
+        Union[
+            dict,
+            str,
+            RenderedStringTemplateContent,
+            RenderedTableContent,
+            RenderedBulletListContent,
+            RenderedGraphContent,
+            Any,
+        ]
+    ]:
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "center_point",
+                "range",
+                "unit",
+                "projection",
+                "mostly",
+            ],
+        )
+
+        if params["mostly"] is None:
+            template_str = "values must be in $projection projection within $range $unit of $center_point"
+        else:
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                template_str += ", at least $mostly_pct % of the time."
+            else:
+                template_str += "."
+
+        if include_column_name:
+            template_str = f"$column {template_str}"
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
 
 if __name__ == "__main__":

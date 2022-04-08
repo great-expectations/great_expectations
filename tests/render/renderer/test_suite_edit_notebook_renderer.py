@@ -1,11 +1,12 @@
 import json
 import os
-from unittest import mock
+import shutil
 
 import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
+import great_expectations as ge
 from great_expectations import DataContext
 
 # noinspection PyProtectedMember
@@ -14,12 +15,97 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
+
+
+@pytest.fixture
+def data_context_with_bad_notebooks(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "../../test_fixtures")
+    custom_notebook_assets_dir = "notebook_assets"
+
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node", "default.json"),
+    )
+
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copytree(
+        os.path.join(fixture_dir, custom_notebook_assets_dir),
+        str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+def _create_custom_notebooks_context(path, ge_yml_name):
+    project_path = str(path.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "../../test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, ge_yml_name),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node", "default.json"),
+    )
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    return context_path
+
+
+@pytest.fixture
+def data_context_custom_notebooks(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    ge_yml_fixture = "great_expectations_custom_notebooks.yml"
+    context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
+
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_custom_notebooks_defaults(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    ge_yml_fixture = "great_expectations_custom_notebooks_defaults.yml"
+    context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
+
+    return ge.data_context.DataContext(context_path)
 
 
 @pytest.fixture
@@ -461,7 +547,7 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -531,7 +617,7 @@ def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_c
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -615,7 +701,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -700,7 +786,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -784,7 +870,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -867,7 +953,7 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -970,7 +1056,7 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -1306,7 +1392,7 @@ def test_complex_suite(warning_suite, empty_data_context):
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -1495,7 +1581,7 @@ def test_notebook_execution_with_custom_notebooks(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {

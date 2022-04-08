@@ -2,6 +2,7 @@
 title: How to configure a DataConnector for splitting and sampling a file system or blob store
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you configure `Splitting` and `Sampling` for any files type data store (e.g., filesystem, cloud
 blob storage) using a `Configured Asset Data Connector` (the same `Splitting` and `Sampling` configuration options can
@@ -9,7 +10,7 @@ be readily applied to an `Inferred Asset Data Connector`).
 
 The `Splitting` and `Sampling` mechanisms provided by Great Expectations serve as additional tools for `Partitioning`
 your data at various levels of granularity:
-- `Splitting` provides the means of focusing the batch data on the values of certain dimensions of the data of interest.
+- `Splitting` provides the means of focusing the <TechnicalTag tag="batch" text="Batch" /> data on the values of certain dimensions of the data of interest.
 - `Sampling` provides a means for reducing the amount of data in the retrieved batch to facilitate data analysis.
 
 <Prerequisites>
@@ -20,7 +21,7 @@ your data at various levels of granularity:
 
 </Prerequisites>
 
-This guide will use the `Data Connector` named `configured_data_connector_name` that is part of the following
+This guide will use the <TechnicalTag tag="data_connector" text="Data Connector" /> named `configured_data_connector_name` that is part of the following
 `Datasource` configuration as an example:
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L10-L48
