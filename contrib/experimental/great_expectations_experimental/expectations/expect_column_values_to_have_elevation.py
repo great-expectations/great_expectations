@@ -56,8 +56,12 @@ class ExpectColumnValuesToHaveElevation(ColumnMapExpectation):
         {
             "data": {
                 "elevated": [
-                    mapping(Point(1, 1, 1),),
-                    mapping(Point(2, 2, 2),),
+                    mapping(
+                        Point(1, 1, 1),
+                    ),
+                    mapping(
+                        Point(2, 2, 2),
+                    ),
                     mapping(Point(3, 3, 3)),
                 ],
                 "not_elevated": [
@@ -71,15 +75,23 @@ class ExpectColumnValuesToHaveElevation(ColumnMapExpectation):
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "elevated",},
-                    "out": {"success": True,},
+                    "in": {
+                        "column": "elevated",
+                    },
+                    "out": {
+                        "success": True,
+                    },
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "not_elevated",},
-                    "out": {"success": False,},
+                    "in": {
+                        "column": "not_elevated",
+                    },
+                    "out": {
+                        "success": False,
+                    },
                 },
             ],
         }
