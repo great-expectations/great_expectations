@@ -70,12 +70,13 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": False,
     }
 
     map_metric = "column_values.match_regex"
@@ -90,6 +91,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
+        "regex": "(?s).*",
     }
     args_keys = (
         "column",
@@ -98,22 +100,25 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
+
+        # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
+        regex = configuration.kwargs.get("regex") or self.default_kwarg_values.get(
+            "regex"
+        )
+
         try:
-            assert "regex" in configuration.kwargs, "regex is required"
-            assert isinstance(
-                configuration.kwargs["regex"], (str, dict)
-            ), "regex must be a string"
-            if isinstance(configuration.kwargs["regex"], dict):
+            assert "regex" in configuration.kwargs or regex, "regex is required"
+            assert isinstance(regex, (str, dict)), "regex must be a string"
+            if isinstance(regex, dict):
                 assert (
-                    "$PARAMETER" in configuration.kwargs["regex"]
+                    "$PARAMETER" in regex
                 ), 'Evaluation Parameter dict for regex kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     @renderer(renderer_type="renderer.question")
@@ -162,7 +167,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "regex": {"schema": {"type": "string"}, "value": params.get("regex")},
@@ -182,7 +187,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             )
         else:
             template_str = "values must match this regular expression: $regex"
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -234,7 +239,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             )
         else:
             template_str = "values must match this regular expression: $regex"
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -285,38 +290,38 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             )
         ]
 
-    examples = [
-        {
-            "data": {
-                "a": ["aaa", "abb", "acc", "add", "bee"],
-                "b": ["aaa", "abb", "acc", "bdd", None],
-                "column_name with space": ["aaa", "abb", "acc", "add", "bee"],
-            },
-            "tests": [
-                {
-                    "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
-                    "exact_match_out": False,
-                    "in": {"column": "a", "regex": "^a", "mostly": 0.9},
-                    "out": {
-                        "success": False,
-                        "unexpected_index_list": [4],
-                        "unexpected_list": ["bee"],
-                    },
-                    "include_in_gallery": True,
-                    "suppress_test_for": ["sqlite", "mssql"],
-                },
-                {
-                    "title": "positive_test_exact_mostly_w_one_non_matching_value",
-                    "exact_match_out": False,
-                    "in": {"column": "a", "regex": "^a", "mostly": 0.8},
-                    "out": {
-                        "success": True,
-                        "unexpected_index_list": [4],
-                        "unexpected_list": ["bee"],
-                    },
-                    "include_in_gallery": True,
-                    "suppress_test_for": ["sqlite", "mssql"],
-                },
-            ],
-        }
-    ]
+    # examples = [
+    #     {
+    #         "data": {
+    #             "a": ["aaa", "abb", "acc", "add", "bee"],
+    #             "b": ["aaa", "abb", "acc", "bdd", None],
+    #             "column_name with space": ["aaa", "abb", "acc", "add", "bee"],
+    #         },
+    #         "tests": [
+    #             {
+    #                 "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
+    #                 "exact_match_out": False,
+    #                 "in": {"column": "a", "regex": "^a", "mostly": 0.9},
+    #                 "out": {
+    #                     "success": False,
+    #                     "unexpected_index_list": [4],
+    #                     "unexpected_list": ["bee"],
+    #                 },
+    #                 "include_in_gallery": True,
+    #                 "suppress_test_for": ["sqlite", "mssql"],
+    #             },
+    #             {
+    #                 "title": "positive_test_exact_mostly_w_one_non_matching_value",
+    #                 "exact_match_out": False,
+    #                 "in": {"column": "a", "regex": "^a", "mostly": 0.8},
+    #                 "out": {
+    #                     "success": True,
+    #                     "unexpected_index_list": [4],
+    #                     "unexpected_list": ["bee"],
+    #                 },
+    #                 "include_in_gallery": True,
+    #                 "suppress_test_for": ["sqlite", "mssql"],
+    #             },
+    #         ],
+    #     }
+    # ]
