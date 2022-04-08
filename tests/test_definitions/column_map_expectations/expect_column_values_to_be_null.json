@@ -21,6 +21,7 @@
       "tests": [
         {
           "title": "basic_positive_case_basic_result_format",
+          "include_in_gallery": true,
           "exact_match_out": true,
           "in": {
             "column": "all_null",
@@ -37,6 +38,7 @@
           }
         },{
           "title": "negative_no_missing_values",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "no_null"

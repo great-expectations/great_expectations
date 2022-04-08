@@ -950,7 +950,7 @@ def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_facto
     )
 
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
             module_name: great_expectations.datasource.data_connector
             class_name: ConfiguredAssetFilesystemDataConnector
             datasource_name: BASE

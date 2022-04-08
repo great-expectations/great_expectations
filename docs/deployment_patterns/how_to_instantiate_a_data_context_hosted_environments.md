@@ -26,12 +26,12 @@ The following guide gives an overview of creating an in-code Data Context includ
 The following guides will contain examples for each environment we have tested out:
 
 - [How to instantiate a Data Context on an EMR Spark cluster](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
+- [How to use Great Expectations in Databricks](./how_to_use_great_expectations_in_databricks.md)
 
 Step 2: Create Expectation Suites and add Expectations
 -------------------------------------------------------
 
-If you want to create an Expectation Suite in your environment without using the CLI, you can follow this guide from step 5 onward to add a Datasource and an Expectation Suite: [How to connect to a PostgreSQL database](/docs/guides/connecting_to_your_data/database/postgres/#5-configure-your-datasource)
+If you want to create an Expectation Suite in your environment without using the CLI, you can follow this guide from step 5 onward to add a Datasource and an Expectation Suite: [How to connect to a PostgreSQL database](../guides/connecting_to_your_data/database/postgres.md#5-configure-your-datasource)
 
 You can then add Expectations to your Suite one at a time like this example:
 
