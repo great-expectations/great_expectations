@@ -89,7 +89,7 @@ class ColumnDomainBuilder(DomainBuilder):
         self._semantic_type_filter = None
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN
 
     """
