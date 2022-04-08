@@ -201,7 +201,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     result = runner.invoke(
         cli,
         ["--v3-api", "init"],
-        input=f"Y\n",
+        input="Y\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -297,7 +297,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     result: Result = runner.invoke(
         cli,
         ["--v3-api", "init"],
-        input=f"Y\n",
+        input="Y\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

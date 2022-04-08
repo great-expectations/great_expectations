@@ -7,6 +7,7 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 
 context = ge.get_context()
 
+# <snippet>
 datasource_config = {
     "name": "my_gcs_datasource",
     "class_name": "Datasource",
@@ -27,6 +28,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -37,9 +39,13 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"
 ] = "data/taxi_yellow_tripdata_samples/"
 
+# <snippet>
 context.test_yaml_config(yaml.dump(datasource_config))
+# </snippet>
 
+# <snippet>
 context.add_datasource(**datasource_config)
+# </snippet>
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
 batch_request = RuntimeBatchRequest(
