@@ -41,6 +41,7 @@ DAYS_IN_TAXI_DATA = (
 )
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "splitter_method,num_expected_batch_definitions,expected_pickup_datetimes",
     [
@@ -102,3 +103,9 @@ def test__split_on_year_configured_asset_sql_data_connector(
     ]
 
     assert set(batch_definition_list) == set(expected_batch_definition_list)
+
+    batch_spec = data_connector.build_batch_spec(batch_definition_list[0])
+
+    context.datasources["my_datasource"].execution_engine.get_batch_data_and_markers(
+        batch_spec=batch_spec
+    )

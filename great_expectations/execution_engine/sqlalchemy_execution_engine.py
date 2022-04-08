@@ -6,6 +6,8 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+from dateutil.parser import parse
+
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
@@ -951,6 +953,33 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 sa.column(column_name),
             )
             == batch_identifiers[column_name]
+        )
+
+    def _split_on_year(
+        self,
+        table_name: str,
+        column_name: str,
+        batch_identifiers: dict,
+    ) -> bool:
+        """Split on year-truncated values in column_name.
+
+        Truncated values are rounded down to the beginning of the year.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+            batch_identifiers: should contain a dateutil parseable datetime whose year
+                will be used for splitting.
+
+        Returns:
+            Select query for distinct split values.
+        """
+        parsed_batch_identifier_datetime: datetime.datetime = parse(
+            batch_identifiers[column_name]
+        )
+        return (
+            sa.func.date_trunc("year", sa.column(column_name))
+            == parsed_batch_identifier_datetime.year
         )
 
     def _split_on_divided_integer(
