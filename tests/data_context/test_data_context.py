@@ -1789,6 +1789,86 @@ data_connectors:
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 
 
+def test_get_validator_without_expectation_suite(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    batch = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="pandas_datasource",
+            data_connector_name="runtime_data_connector",
+            data_asset_name="my_data_asset",
+            runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
+            batch_identifiers={
+                "id_key_0": "id_0_value_a",
+                "id_key_1": "id_1_value_a",
+            },
+        )
+    )[0]
+
+    my_validator = context.get_validator(batch=batch)
+    assert isinstance(my_validator.get_expectation_suite(), ExpectationSuite)
+    assert my_validator.expectation_suite_name == "default"
+
+
+def test_get_validator_with_batch(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    my_batch = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="pandas_datasource",
+            data_connector_name="runtime_data_connector",
+            data_asset_name="my_data_asset",
+            runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
+            batch_identifiers={
+                "id_key_0": "id_0_value_a",
+                "id_key_1": "id_1_value_a",
+            },
+        )
+    )[0]
+
+    my_validator = context.get_validator(
+        batch=my_batch,
+        create_expectation_suite_with_name="A_expectation_suite",
+    )
+
+
+def test_get_validator_with_batch_list(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    my_batch_list = [
+        context.get_batch_list(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="pandas_datasource",
+                data_connector_name="runtime_data_connector",
+                data_asset_name="my_data_asset",
+                runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
+                batch_identifiers={
+                    "id_key_0": "id_0_value_a",
+                    "id_key_1": "id_1_value_a",
+                },
+            )
+        )[0],
+        context.get_batch_list(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="pandas_datasource",
+                data_connector_name="runtime_data_connector",
+                data_asset_name="my_data_asset",
+                runtime_parameters={"batch_data": pd.DataFrame({"y": range(10)})},
+                batch_identifiers={
+                    "id_key_0": "id_0_value_b",
+                    "id_key_1": "id_1_value_b",
+                },
+            )
+        )[0],
+    ]
+
+    my_validator = context.get_validator(
+        batch_list=my_batch_list,
+        create_expectation_suite_with_name="A_expectation_suite",
+    )
+    assert len(my_validator.batches) == 2
+
+
 def test_get_batch_multiple_datasources_do_not_scan_all(
     data_context_with_bad_datasource,
 ):
@@ -2261,7 +2341,7 @@ def test_add_datasource_from_yaml_sql_datasource(
 
     datasource_name: str = "my_datasource"
 
-    example_yaml = f"""
+    example_yaml = """
     class_name: SimpleSqlalchemyDatasource
     introspection:
       whole_table:
@@ -2455,7 +2535,7 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
 
     datasource_name: str = "my_datasource"
 
-    example_yaml = f"""
+    example_yaml = """
     class_name: Datasource
     execution_engine:
       class_name: SqlAlchemyExecutionEngine
