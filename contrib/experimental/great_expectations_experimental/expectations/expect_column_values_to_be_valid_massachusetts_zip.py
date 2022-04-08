@@ -19,7 +19,9 @@ from great_expectations.expectations.metrics import (
 
 def is_valid_massachusetts_zip(zip: str):
     list_of_dicts_of_massachusetts_zips = zipcodes.filter_by(state="MA")
-    list_of_massachusetts_zips = [d["zip_code"] for d in list_of_dicts_of_massachusetts_zips]
+    list_of_massachusetts_zips = [
+        d["zip_code"] for d in list_of_dicts_of_massachusetts_zips
+    ]
     if len(zip) > 10:
         return False
     elif type(zip) != str:
@@ -102,7 +104,6 @@ class ExpectColumnValuesToBeValidMassachusettsZip(ColumnMapExpectation):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
-
         Args:
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
