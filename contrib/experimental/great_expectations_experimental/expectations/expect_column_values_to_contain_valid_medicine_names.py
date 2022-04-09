@@ -190,7 +190,7 @@ class ExpectColumnValuesToContainValidMedicineNames(ColumnMapExpectation):
     # This object contains metadata for display in the public Gallery
         library_metadata = {
             "maturity": "experimental", 
-            "tags": ["experimental", "hackathon-22", "medicines", "test"], 
+            "tags": ["experimental", "hackathon-22", "medicines"], 
             "contributors": [
                 "@CypherCrow"
             ], 
