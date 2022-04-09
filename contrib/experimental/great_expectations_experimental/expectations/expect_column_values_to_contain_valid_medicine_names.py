@@ -7,11 +7,12 @@ For detailed instructions on how to use it, please see:
 import json
 import matplotlib.colors as mcolors
 
-from typing import Optional
+from typing import Optional, Dict
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
+    ExecutionEngine,
     PandasExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
@@ -20,14 +21,18 @@ from great_expectations.expectations.metrics import (
     column_condition_partial
 )
 
-# medicine list from https://www.webmd.com/pill-identification/default.htm
+"""
+Medicine list from https://www.webmd.com/pill-identification/default.htm
+"""
 
 medicines = ['tylenol', 'vicodin', 'ms_contin', 'atenolol', 'oxycodone', 'hydrocodone', 'cetirizine',
      'ibuprofin', 'tizanidine', 'tramadol', 'naproxen', 'clonazapem', 'alprazolam']
 colors = list(mcolors.CSS4_COLORS)
 shapes = ['oblong', 'round', 'oval', 'rectangle']
 
-# function to check if x is in either of the three lists
+"""
+Method checks whether input x is in one or all of the three above lists
+"""
 
 def check_validity(x):
     return x in medicines or x in colors or x in shapes
@@ -36,6 +41,10 @@ def check_validity(x):
 # Main business logic for calculation will live in this class for most ColumnExpecations
 
 class ColumnMapContainsMedicineNames(ColumnMapMetricProvider):
+    """
+    Contains metric to check validity of medicine names.
+        It also considers colors and shapes of medicine by means of the check_validity() function
+    """
     # This is the id string that will be used to reference your Metric.
     condition_metric_name = "column_values.valid_medicine_names"
 
