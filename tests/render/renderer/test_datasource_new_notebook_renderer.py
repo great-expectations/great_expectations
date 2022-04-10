@@ -51,10 +51,10 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "markdown",
                 "source": """## Customize Your Datasource Configuration
 
-**If you are new to Great Expectations Datasources,** you should check out our [how-to documentation](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources.html)
+**If you are new to Great Expectations Datasources,** you should check out our [how-to documentation](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview)
 
 **My configuration is not so simple - are there more advanced options?**
-Glad you asked! Datasources are versatile. Please see our [How To Guides](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources.html)!
+Glad you asked! Datasources are versatile. Please see our [How To Guides](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview)!
 
 Give your datasource a unique name:""",
                 "metadata": {},
@@ -78,7 +78,7 @@ Give your datasource a unique name:""",
                 "source": """### For files based Datasources:
 Here we are creating an example configuration.  The configuration contains an **InferredAssetFilesystemDataConnector** which will add a Data Asset for each file in the base directory you provided. It also contains a **RuntimeDataConnector** which can accept filepaths.   This is just an example, and you may customize this as you wish!
 
-Also, if you would like to learn more about the **DataConnectors** used in this configuration, including other methods to organize assets, handle multi-file assets, name assets based on parts of a filename, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_inferredassetdataconnector.html) and [RuntimeDataConnectors](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches/how_to_configure_a_runtime_data_connector.html).
+Also, if you would like to learn more about the **DataConnectors** used in this configuration, including other methods to organize assets, handle multi-file assets, name assets based on parts of a filename, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector) and [RuntimeDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector).
 """,
                 "metadata": {},
             }
@@ -90,7 +90,7 @@ Also, if you would like to learn more about the **DataConnectors** used in this 
 
 Here we are creating an example configuration based on the database backend you specified in the CLI.  The configuration contains an **InferredAssetSqlDataConnector**, which will add a Data Asset for each table in the database, and a **RuntimeDataConnector** which can accept SQL queries. This is just an example, and you may customize this as you wish!
 
-Also, if you would like to learn more about the **DataConnectors** used in this configuration, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_inferredassetdataconnector.html) and [RuntimeDataConnectors](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches/how_to_configure_a_runtime_data_connector.html).
+Also, if you would like to learn more about the **DataConnectors** used in this configuration, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector) and [RuntimeDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector).
 
 Credentials will not be saved until you run the last cell. The credentials will be saved in `uncommitted/config_variables.yml` which should not be added to source control.""",
                 "metadata": {},
