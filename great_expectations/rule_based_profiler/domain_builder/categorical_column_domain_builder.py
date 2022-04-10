@@ -31,6 +31,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     exclude_field_names: Set[str] = ColumnDomainBuilder.exclude_field_names | {
         "cardinality_checker",
     }
+    cardinality_limit_modes: CardinalityLimitMode = CardinalityLimitMode
 
     def __init__(
         self,
@@ -89,6 +90,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
+                Accessible for convenience via CategoricalColumnDomainBuilder.cardinality_limit_modes e.g.:
+                limit_mode=CategoricalColumnDomainBuilder.cardinality_limit_modes.VERY_FEW,
             max_unique_values: number of max unique rows for a custom
                 cardinality limit to use when filtering columns.
             max_proportion_unique: proportion of unique values for a
@@ -137,7 +140,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self._cardinality_checker = None
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN
 
     @property
