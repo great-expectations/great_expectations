@@ -33,7 +33,7 @@ This will open a Jupyter Notebook with a framework for creating and saving a new
 
 The Checkpoint configuration that was created when your Jupyter Notebook loaded uses an arbitrary <TechnicalTag tag="batch" text="Batch" /> of data and <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> to generate a basic Checkpoint configuration in the second code cell.  You can edit this configuration to point to add additional entries under the `validations` key, or to edit the existing one.  You can even replace this configuration entirely.  
 
-In the [Additional Information](#additional-information) section at the end of this guide you will find examples of other Checkpoint configurations you can use as your starting point, as well as explanations of the various ways you can arrange the keys and values in your Checkpoint's `config_yaml`.
+In the [Additional Information](#additional-information) section at the end of this guide you will find examples of other Checkpoint configurations you can use as your starting point, as well as explanations of the various ways you can arrange the keys and values in your Checkpoint's `yaml_config`.
 
 :::important
 After you make edits to the `yaml_config` variable, don't forget to re-run the cell that contains it!
@@ -53,7 +53,7 @@ If your Checkpoint configuration is valid, you will see an output stating that y
 
 ### 4. (Optional) Repeat from step 2
 
-From here you can continue to edit your Checkpoint. After each change you should re-run the cell that contains the edited `config_yaml` and then verify that your configuration remains valid by re-running `test_yaml_config(...)`.
+From here you can continue to edit your Checkpoint. After each change you should re-run the cell that contains the edited `yaml_config` and then verify that your configuration remains valid by re-running `test_yaml_config(...)`.
 
 ### 5. Save your edited Checkpoint
 
