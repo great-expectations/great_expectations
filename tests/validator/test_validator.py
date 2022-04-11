@@ -35,7 +35,7 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validation_graph import MetricEdge, ValidationGraph
+from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import (
     MAX_METRIC_COMPUTATION_RETRIES,
     Validator,
@@ -1106,7 +1106,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
             expectation_suite=suite,
         )
     assert ve.value.args == (
-        "Only one of batch_request or batch_request_list may be specified",
+        "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified",
     )
 
 

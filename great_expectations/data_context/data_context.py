@@ -38,9 +38,8 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
-    BatchRequest,
+    BatchRequestBase,
     IDDict,
-    RuntimeBatchRequest,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -475,12 +474,7 @@ class BaseDataContext(ConfigPeer):
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
-                if self._ge_cloud_mode:
-                    # when running in cloud mode, we want to know if a datasource has been improperly configured at
-                    # init time.
-                    raise
-                else:
-                    pass
+                pass
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
@@ -883,7 +877,7 @@ class BaseDataContext(ConfigPeer):
             raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
     @property
-    def checkpoint_store(self) -> "CheckpointStore":
+    def checkpoint_store(self) -> "CheckpointStore":  # noqa: F821
         checkpoint_store_name: str = self.checkpoint_store_name
         try:
             return self.stores[checkpoint_store_name]
@@ -1358,7 +1352,7 @@ class BaseDataContext(ConfigPeer):
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
@@ -1437,7 +1431,7 @@ class BaseDataContext(ConfigPeer):
         # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
         # deprecated-v0.13.20
         warnings.warn(
-            "get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use"
+            "get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use "
             "get_batch_list instead.",
             DeprecationWarning,
         )
@@ -1661,7 +1655,7 @@ class BaseDataContext(ConfigPeer):
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[dict] = None,
         batch_identifiers: Optional[dict] = None,
@@ -1760,10 +1754,10 @@ class BaseDataContext(ConfigPeer):
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
-        batch_request_list: List[
-            Optional[Union[BatchRequest, RuntimeBatchRequest]]
-        ] = None,
+        batch: Optional[Batch] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        batch_request_list: List[Optional[BatchRequestBase]] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
@@ -1799,10 +1793,10 @@ class BaseDataContext(ConfigPeer):
                     expectation_suite_ge_cloud_id is not None,
                 ]
             )
-            != 1
+            > 1
         ):
             raise ValueError(
-                f"Exactly one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name must be specified"
+                f"No more than one of expectation_suite_name,{'expectation_suite_ge_cloud_id,' if self.ge_cloud_mode else ''} expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
         if expectation_suite_ge_cloud_id is not None:
@@ -1819,43 +1813,55 @@ class BaseDataContext(ConfigPeer):
         if (
             sum(
                 bool(x)
-                for x in [batch_request is not None, batch_request_list is not None]
+                for x in [
+                    batch is not None,
+                    batch_list is not None,
+                    batch_request is not None,
+                    batch_request_list is not None,
+                ]
             )
             > 1
         ):
             raise ValueError(
-                "Only one of batch_request or batch_request_list may be specified"
+                "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"
             )
 
-        if not batch_request_list:
-            batch_request_list = [batch_request]
+        if batch_list:
+            pass
 
-        batch_list: List = []
-        for batch_request in batch_request_list:
-            batch_list.extend(
-                self.get_batch_list(
-                    datasource_name=datasource_name,
-                    data_connector_name=data_connector_name,
-                    data_asset_name=data_asset_name,
-                    batch_request=batch_request,
-                    batch_data=batch_data,
-                    data_connector_query=data_connector_query,
-                    batch_identifiers=batch_identifiers,
-                    limit=limit,
-                    index=index,
-                    custom_filter_function=custom_filter_function,
-                    sampling_method=sampling_method,
-                    sampling_kwargs=sampling_kwargs,
-                    splitter_method=splitter_method,
-                    splitter_kwargs=splitter_kwargs,
-                    runtime_parameters=runtime_parameters,
-                    query=query,
-                    path=path,
-                    batch_filter_parameters=batch_filter_parameters,
-                    batch_spec_passthrough=batch_spec_passthrough,
-                    **kwargs,
+        elif batch:
+            batch_list: List = [batch]
+
+        else:
+            batch_list: List = []
+            if not batch_request_list:
+                batch_request_list = [batch_request]
+
+            for batch_request in batch_request_list:
+                batch_list.extend(
+                    self.get_batch_list(
+                        datasource_name=datasource_name,
+                        data_connector_name=data_connector_name,
+                        data_asset_name=data_asset_name,
+                        batch_request=batch_request,
+                        batch_data=batch_data,
+                        data_connector_query=data_connector_query,
+                        batch_identifiers=batch_identifiers,
+                        limit=limit,
+                        index=index,
+                        custom_filter_function=custom_filter_function,
+                        sampling_method=sampling_method,
+                        sampling_kwargs=sampling_kwargs,
+                        splitter_method=splitter_method,
+                        splitter_kwargs=splitter_kwargs,
+                        runtime_parameters=runtime_parameters,
+                        query=query,
+                        path=path,
+                        batch_filter_parameters=batch_filter_parameters,
+                        batch_spec_passthrough=batch_spec_passthrough,
+                        **kwargs,
+                    )
                 )
-            )
 
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
@@ -2268,7 +2274,9 @@ class BaseDataContext(ConfigPeer):
             )
 
         if self.expectations_store.has_key(key):
-            expectations_schema_dict: dict = self.expectations_store.get(key)
+            expectations_schema_dict: dict = cast(
+                dict, self.expectations_store.get(key)
+            )
             # create the ExpectationSuite from constructor
             return ExpectationSuite(**expectations_schema_dict, data_context=self)
 
@@ -2461,7 +2469,7 @@ class BaseDataContext(ConfigPeer):
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
         for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = self.expectations_store.get(key)
+            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
             if not expectation_suite_dict:
                 continue
             expectation_suite: ExpectationSuite = ExpectationSuite(
@@ -3097,6 +3105,7 @@ class BaseDataContext(ConfigPeer):
 
         self.save_expectation_suite(expectation_suite)
         duration = (datetime.datetime.now() - start_time).total_seconds()
+        # noinspection PyUnboundLocalVariable
         logger.info(
             "\tProfiled %d columns using %d rows from %s (%.3f sec)"
             % (new_column_count, row_count, name, duration)
@@ -3214,7 +3223,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -3395,7 +3404,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def run_profiler_on_data(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -3405,8 +3414,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
         Args:
-            batch_list: List of Batch objects used to supply arguments at runtime.
-            batch_request: The batch_request used to supply arguments at runtime.
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
             name: Identifier used to retrieve the profiler from a store.
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GE Cloud specific).
             expectation_suite: An existing ExpectationSuite to update.

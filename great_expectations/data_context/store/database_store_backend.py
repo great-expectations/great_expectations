@@ -322,10 +322,11 @@ class DatabaseStoreBackend(StoreBackend):
             .select_from(self._table)
             .where(
                 and_(
+                    True,
                     *(
                         getattr(self._table.columns, key_col) == val
                         for key_col, val in zip(self.key_columns[: len(prefix)], prefix)
-                    )
+                    ),
                 )
             )
         )

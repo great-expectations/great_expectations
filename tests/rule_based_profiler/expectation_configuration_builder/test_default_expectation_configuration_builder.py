@@ -48,16 +48,20 @@ def test_meta_not_dict_exception(
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        domain=domain,
+        parameters=parameters,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition = None
@@ -106,16 +110,20 @@ def test_condition_not_string_exception(
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        domain=domain,
+        parameters=parameters,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     condition: dict = {"condition": "$variables.tolerance<0.8"}
@@ -163,14 +171,14 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -192,7 +200,6 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         parameters=parameters,
     )
@@ -217,7 +224,6 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -253,7 +259,6 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         parameters=parameters,
     )
@@ -288,14 +293,14 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -317,7 +322,6 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         parameters=parameters,
     )
@@ -349,18 +353,17 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     )
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -382,7 +385,6 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         parameters=parameters,
     )
@@ -413,21 +415,21 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         )
     )
 
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        {"max_user_id": 999999999999}
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -449,7 +451,6 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -481,21 +482,21 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         )
     )
 
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        {"max_user_id": 999999999999}
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -517,7 +518,6 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -549,21 +549,21 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         )
     )
 
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        {"max_user_id": 999999999999}
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -585,7 +585,6 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -617,21 +616,21 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         )
     )
 
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        {"max_user_id": 999999999999}
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -653,7 +652,6 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -685,21 +683,21 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         )
     )
 
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        {"max_user_id": 999999999999}
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -721,7 +719,6 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -753,21 +750,21 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         )
     )
 
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        {"max_user_id": 999999999999}
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999}
-    )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -789,7 +786,6 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -821,21 +817,21 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         )
     )
 
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        {"max_user_id": 999999999999, "answer": 42}
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999, "answer": 42}
-    )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -857,7 +853,6 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -889,21 +884,21 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         )
     )
 
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        {"max_user_id": 999999999999, "answer": 42}
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999, "answer": 42}
-    )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -925,7 +920,6 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -957,21 +951,21 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         )
     )
 
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        {"max_user_id": 999999999999, "answer": 42}
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999, "answer": 42}
-    )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -993,7 +987,6 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -1025,21 +1018,21 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         )
     )
 
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        {"max_user_id": 999999999999, "answer": 42}
+    )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    min_user_id_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    variables: ParameterContainer = build_parameter_container_for_variables(
-        {"max_user_id": 999999999999, "answer": 42}
-    )
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    min_user_id_parameter.build_parameters(
+        domain=domain,
+        parameters=parameters,
+    )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
     parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
@@ -1061,7 +1054,6 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
     expectation_configuration: Optional[
         ExpectationConfiguration
     ] = default_expectation_configuration_builder.build_expectation_configuration(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,

@@ -36,8 +36,6 @@ try:
 except ImportError:
     isort = None
 
-# from pydantic.dataclasses import dataclass
-
 
 @dataclass(frozen=True)
 class ExpectationDiagnostics(SerializableDictDot):

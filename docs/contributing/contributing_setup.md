@@ -46,10 +46,10 @@ In order to contribute to Great Expectations, you will need the following:
 
 * We do not currently follow a strict naming convention for branches. Please pick something clear and self-explanatory, so that it will be easy for others to get the gist of your work.
 
-### Install Python dependencies 
+### Install Python dependencies
 ### (Easy version of steps 5-7 below for Mac/Linux users)
 
-Create a virtual environment in your locally cloned repo, use the same version of `pip` that we use in our CI/CD pipelines (for Python 3.6 - 3.9), and install the fewest dependencies needed for a dev environment (to minimize potential setup headaches).
+Create a virtual environment in your locally cloned repo, use the same version of `pip` that we use in our CI/CD pipelines (for Python 3.7 - 3.9), and install the fewest dependencies needed for a dev environment (to minimize potential setup headaches).
 
 ```
 python3 -m venv ge_dev
@@ -140,7 +140,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 	(Background on this error at: http://sqlalche.me/e/e3q8)
 	````
 
-* Once the local PostgreSQL container is working, the tests against the PostgreSQL backend can be run using the `--postgresql` flag. 
+* Once the local PostgreSQL container is working, the tests against the PostgreSQL backend can be run using the `--postgresql` flag.
 
   ````console
   pytest -v --postgresql
@@ -159,7 +159,7 @@ Depending on which features of Great Expectations you want to work on, you may w
 	mysql_mysql_db_1   docker-entrypoint.sh mysqld   Up      0.0.0.0:3306->3306/tcp, 33060/tcp
 	````
 
-* Once the local MySQL container is working, the tests against the MySQL backend can be run using the `--mysql` flag. 
+* Once the local MySQL container is working, the tests against the MySQL backend can be run using the `--mysql` flag.
 
   ````console
   pytest -v --mysql

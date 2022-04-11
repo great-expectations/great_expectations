@@ -28,7 +28,8 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
-    _: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
+    # noinspection PyUnusedLocal
+    parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
         MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             name="my_name",
             map_metric_name="column_values.nonnull",
@@ -46,8 +47,8 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
     )
 
     with pytest.raises(TypeError) as excinfo:
-        # noinspection PyArgumentList
-        _: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
+        # noinspection PyUnusedLocal,PyArgumentList
+        parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
             MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 name="my_name",
                 map_metric_name="column_values.nonnull",
@@ -61,8 +62,8 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
     )
 
     with pytest.raises(TypeError) as excinfo:
-        # noinspection PyArgumentList
-        _: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
+        # noinspection PyUnusedLocal,PyArgumentList
+        parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
             MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 name="my_name",
                 total_count_parameter_builder_name="my_total_count",
@@ -137,28 +138,25 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-
     variables: Optional[ParameterContainer] = None
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
 
     my_total_count_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
     )
     my_null_count_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -254,15 +252,14 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-
     variables: Optional[ParameterContainer] = None
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -356,22 +353,20 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-
     variables: Optional[ParameterContainer] = None
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
 
     my_null_count_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -461,28 +456,25 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-
     variables: Optional[ParameterContainer] = None
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
 
     my_total_count_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
     )
     my_null_count_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -578,15 +570,14 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-
     variables: Optional[ParameterContainer] = None
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -680,22 +671,20 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-
     variables: Optional[ParameterContainer] = None
+
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
 
     my_total_count_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,

@@ -98,7 +98,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     assert context.anonymous_usage_statistics.data_context_id == DATA_CONTEXT_ID
 
     # Note module_name fields are omitted purposely to ensure we are still able to send events
-    datasource_yaml = f"""
+    datasource_yaml = """
     name: example_datasource
     class_name: Datasource
     module_name: great_expectations.datasource

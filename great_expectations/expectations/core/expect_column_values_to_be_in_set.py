@@ -142,7 +142,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             json_serialize=True,
         )
     )
-    validation_parameter_builder_configs: List[dict] = [
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         value_set_estimator_parameter_builder_config,
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
@@ -247,7 +247,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         template_str = f"values must belong to this set: {values_string}"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -321,7 +321,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         template_str = f"values must belong to this set: {values_string}"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )

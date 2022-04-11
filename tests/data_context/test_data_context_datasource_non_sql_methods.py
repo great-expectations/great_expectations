@@ -175,7 +175,7 @@ def test_get_batch_list_from_new_style_datasource_with_runtime_data_connector(
 ):
     context = empty_data_context
     config = yaml.load(
-        f"""
+        """
 class_name: Datasource
 
 execution_engine:
