@@ -350,33 +350,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             ]
         ).select_from(sa.text(table_name))
 
-    def _split_on_year(
-        self,
-        table_name: str,
-        column_name: str,
-    ) -> "sa.sql.expression.Select":  # noqa: F821
-        """Split on year values in column_name.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-
-        Returns:
-            Select query for distinct split values.
-        """
-        return sa.select(
-            [
-                sa.func.distinct(
-                    sa.func.date_trunc(
-                        DatePart.YEAR.value,
-                        sa.column(column_name),
-                    )
-                )
-            ]
-        ).select_from(sa.text(table_name))
-        # TODO: AJB 20220411 the below line should replace the lines above in this method
-        # return self._split_on_date_part(table_name=table_name, column_name=column_name, date_part=DatePart.YEAR)
-
     def _split_on_truncated_year(
         self,
         table_name: str,
@@ -397,6 +370,112 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             table_name=table_name, column_name=column_name, date_part=DatePart.YEAR
         )
 
+    def _split_on_truncated_month(
+        self,
+        table_name: str,
+        column_name: str,
+    ) -> "sa.sql.expression.Select":  # noqa: F821
+        """Split on month-truncated values in column_name.
+
+        Truncated values are rounded down to the beginning of the month.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            Select query for distinct split values.
+        """
+        return self._split_on_truncated_date_part(
+            table_name=table_name, column_name=column_name, date_part=DatePart.MONTH
+        )
+
+    def _split_on_truncated_week(
+        self,
+        table_name: str,
+        column_name: str,
+    ) -> "sa.sql.expression.Select":  # noqa: F821
+        """Split on week-truncated values in column_name.
+
+        Truncated values are rounded down to the beginning of the week.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            Select query for distinct split values.
+        """
+        return self._split_on_truncated_date_part(
+            table_name=table_name, column_name=column_name, date_part=DatePart.WEEK
+        )
+
+    def _split_on_truncated_day(
+        self,
+        table_name: str,
+        column_name: str,
+    ) -> "sa.sql.expression.Select":  # noqa: F821
+        """Split on day-truncated values in column_name.
+
+        Truncated values are rounded down to the beginning of the day.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            Select query for distinct split values.
+        """
+        return self._split_on_truncated_date_part(
+            table_name=table_name, column_name=column_name, date_part=DatePart.DAY
+        )
+
+    def _split_on_truncated_date_part(
+        self,
+        table_name: str,
+        column_name: str,
+        date_part: DatePart,
+    ) -> "sa.sql.expression.Select":
+        """Split on truncated values in column_name using provided date_trunc_directive.
+
+        Truncated values are rounded down to the beginning of the interval. For
+        example, if date_trunc_directive = "month" then all datetime values are
+        rounded down to the beginning of their month in their respective year.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+            date_part: part of the date to be used for splitting e.g. DatePart.DAY
+
+        Returns:
+            Select query for distinct split values.
+        """
+        return sa.select(
+            [
+                sa.func.distinct(
+                    sa.func.date_trunc(date_part.value, sa.column(column_name))
+                )
+            ]
+        ).select_from(sa.text(table_name))
+
+    def _split_on_year(
+        self,
+        table_name: str,
+        column_name: str,
+    ) -> "sa.sql.expression.Select":  # noqa: F821
+        """Split on year values in column_name.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            Select query for distinct split values.
+        """
+        return self._split_on_date_part(
+            table_name=table_name, column_name=column_name, date_part=DatePart.YEAR
+        )
+
     def _split_on_month(
         self,
         table_name: str,
@@ -413,43 +492,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Returns:
             Select query for distinct split values.
         """
-        return sa.select(
-            [
-                sa.func.distinct(
-                    sa.func.date_trunc(
-                        DatePart.MONTH.value,
-                        sa.column(column_name),
-                    )
-                )
-            ]
-        ).select_from(sa.text(table_name))
-
-    def _split_on_day(
-        self,
-        table_name: str,
-        column_name: str,
-    ) -> "sa.sql.expression.Select":  # noqa: F821
-        """Split on day-truncated values in column_name.
-
-        Truncated values are rounded down to the beginning of the day.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-
-        Returns:
-            Select query for distinct split values.
-        """
-        return sa.select(
-            [
-                sa.func.distinct(
-                    sa.func.date_trunc(
-                        DatePart.DAY.value,
-                        sa.column(column_name),
-                    )
-                )
-            ]
-        ).select_from(sa.text(table_name))
+        return self._split_on_date_part(
+            table_name=table_name, column_name=column_name, date_part=DatePart.MONTH
+        )
 
     def _split_on_week(
         self,
@@ -467,16 +512,29 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Returns:
             Select query for distinct split values.
         """
-        return sa.select(
-            [
-                sa.func.distinct(
-                    sa.func.date_trunc(
-                        DatePart.WEEK.value,
-                        sa.column(column_name),
-                    )
-                )
-            ]
-        ).select_from(sa.text(table_name))
+        return self._split_on_date_part(
+            table_name=table_name, column_name=column_name, date_part=DatePart.WEEK
+        )
+
+    def _split_on_day(
+        self,
+        table_name: str,
+        column_name: str,
+    ) -> "sa.sql.expression.Select":  # noqa: F821
+        """Split on day-truncated values in column_name.
+
+        Truncated values are rounded down to the beginning of the day.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            Select query for distinct split values.
+        """
+        return self._split_on_date_part(
+            table_name=table_name, column_name=column_name, date_part=DatePart.DAY
+        )
 
     def _split_on_date_part(
         self,
@@ -492,37 +550,15 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             date_part: part of the date to be used for splitting e.g. DatePart.DAY
 
         Returns:
-            Select query for distinct split values.
-        """
-        return sa.select(
-            [sa.func.distinct(sa.extract(date_part.value, sa.column(column_name)))]
-        ).select_from(sa.text(table_name))
-
-    def _split_on_truncated_date_part(
-        self,
-        table_name: str,
-        column_name: str,
-        date_part: DatePart,
-    ) -> "sa.sql.expression.Select":
-        """Split on truncated values in column_name using custom date_trunc_directive.
-
-        Truncated values are rounded down to the beginning of the interval. For
-        example, if date_trunc_directive = "month" then all datetime values are
-        rounded down to the beginning of their month.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            date_part: part of the date to be used for splitting e.g. DatePart.DAY
-
-        Returns:
-            Select query for distinct split values.
+            Select query for distinct split values, converted to string.
         """
         return sa.select(
             [
                 sa.func.distinct(
-                    sa.func.date_trunc(date_part.value, sa.column(column_name))
-                )
+                    sa.func.cast(
+                        sa.extract(date_part.value, sa.column(column_name)), sa.String
+                    )
+                ),
             ]
         ).select_from(sa.text(table_name))
 
