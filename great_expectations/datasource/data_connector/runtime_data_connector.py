@@ -244,11 +244,23 @@ class RuntimeDataConnector(DataConnector):
             batch_identifiers=IDDict(batch_identifiers),
             batch_spec_passthrough=batch_request.batch_spec_passthrough,
         )
+        # this is the problem. we aren't updating anything
         batch_definition_list = [batch_definition]
         self._update_data_references_cache(
             batch_request.data_asset_name, batch_definition_list, batch_identifiers
         )
-        return batch_definition_list
+        # TODO: this is the fix! you have to return all the batches.
+        # build batch_definition_list
+
+        data_asset_name: str = batch_request.data_asset_name
+        # {'asset_a': {'1-1': [{'datasource_name': 'my_datasource', 'data_connector_name': 'runtime', 'data_asset_name': 'asset_a', 'batch_identifiers': {'day': 1, 'month': 1}}], '1-2': [{'datasource_name': 'my_datasource', 'data_connector_name': 'runtime', 'data_asset_name': 'asset_a', 'batch_identifiers': {'day': 1, 'month': 2}}]}}
+        batch_definition_list_new: List[BatchDefinition] = []
+
+        subdict: dict = self._data_references_cache[data_asset_name]
+        # TODO: this logic is terrible. but this is how we are appending all of the BatchDefinitions that come in.
+        for k in subdict:
+            batch_definition_list_new.append(subdict[k][0])
+        return batch_definition_list_new
 
     def _update_data_references_cache(
         self,
@@ -256,10 +268,14 @@ class RuntimeDataConnector(DataConnector):
         batch_definition_list: List,
         batch_identifiers: IDDict,
     ):
+        # TODO: this doesn't update to the same asset
         data_reference = self._get_data_reference_name(batch_identifiers)
-
+        # this is the terrible name where things are concatenated.
         if data_asset_name not in self._data_references_cache:
             # add
+            # TODO: do an actual add so that we can keep adding to the same thing?
+            # how do you keep track of everything though?
+            # where is the batch_data_actually stored
             self._data_references_cache[data_asset_name] = {
                 data_reference: batch_definition_list
             }

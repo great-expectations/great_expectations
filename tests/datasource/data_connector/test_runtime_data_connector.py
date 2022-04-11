@@ -583,7 +583,120 @@ def test_get_available_data_asset_names_updating_after_batch_request(
     ]
 
 
-def test_data_references_cache_updating_after_batch_request(
+def test_data_references_cache_updating_after_batch_request_named_assets(
+    basic_datasource_with_assets,
+):
+    runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    # if data_connector contains the assets in configuration
+    assert runtime_data_connector.get_available_data_asset_names() == [
+        "asset_a",
+        "asset_b",
+    ]
+
+    batch_identifiers: dict = {"day": 1, "month": 1}
+    batch_request: dict = {
+        "datasource_name": basic_datasource_with_assets.name,
+        "data_connector_name": runtime_data_connector.name,
+        "data_asset_name": "asset_a",
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    # run with my_data_asset_1
+    batch_definitions: List[
+        BatchDefinition
+    ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert batch_definitions == [
+        BatchDefinition(
+            datasource_name="my_datasource",
+            data_connector_name="runtime",
+            data_asset_name="asset_a",
+            batch_identifiers=IDDict({"month": 1, "day": 1}),
+        )
+    ]
+    assert runtime_data_connector._data_references_cache == {
+        "asset_a": {
+            "1-1": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="runtime",
+                    data_asset_name="asset_a",
+                    batch_identifiers=IDDict({"day": 1, "month": 1}),
+                )
+            ],
+        }
+    }
+
+    # second batch
+
+    batch_identifiers: dict = {"day": 1, "month": 2}
+    batch_request: dict = {
+        "datasource_name": basic_datasource_with_assets.name,
+        "data_connector_name": runtime_data_connector.name,
+        "data_asset_name": "asset_a",
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    # run with my_data_asset_1
+    batch_definitions: List[
+        BatchDefinition
+    ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=batch_request
+    )
+    # print(batch_definitions)
+    assert batch_definitions == [
+        BatchDefinition(
+            datasource_name="my_datasource",
+            data_connector_name="runtime",
+            data_asset_name="asset_a",
+            batch_identifiers=IDDict({"month": 1, "day": 1}),
+        ),
+        BatchDefinition(
+            datasource_name="my_datasource",
+            data_connector_name="runtime",
+            data_asset_name="asset_a",
+            batch_identifiers=IDDict({"month": 2, "day": 1}),
+        ),
+    ]
+
+    assert runtime_data_connector._data_references_cache == {
+        "asset_a": {
+            "1-1": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="runtime",
+                    data_asset_name="asset_a",
+                    batch_identifiers=IDDict({"day": 1, "month": 1}),
+                )
+            ],
+            "1-2": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="runtime",
+                    data_asset_name="asset_a",
+                    batch_identifiers=IDDict({"day": 1, "month": 2}),
+                )
+            ],
+        }
+    }
+
+
+def old_test_data_references_cache_updating_after_batch_request(
     basic_datasource,
 ):
     test_runtime_data_connector: RuntimeDataConnector = (
@@ -644,7 +757,7 @@ def test_data_references_cache_updating_after_batch_request(
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    # run with with new_data_asset but a new batch
+    # run with new_data_asset but a new batch
     test_runtime_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=batch_request
     )

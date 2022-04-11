@@ -29,6 +29,11 @@ def taxi_test_file():
     )
 
 
+# TODO:
+# adding tests where we keep adding files and have the assets populate correctly
+# this is because we know that everything should be correctly accessible at the Datacontext level.
+
+
 @pytest.fixture
 def taxi_test_file_directory():
     return file_relative_path(

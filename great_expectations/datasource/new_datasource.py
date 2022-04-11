@@ -155,7 +155,7 @@ class BaseDatasource:
                 raise ValueError(
                     "RuntimeBatchRequests must specify exactly one corresponding BatchDefinition"
                 )
-
+            # <WILL> this is somewhat concerning
             batch_definition = batch_definition_list[0]
             runtime_parameters = batch_request.runtime_parameters
 
