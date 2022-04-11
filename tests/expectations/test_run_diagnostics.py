@@ -13,8 +13,7 @@ from great_expectations.expectations.expectation import (
     ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import _registered_expectations
-
-from .fixtures.expect_column_values_to_equal_three import (
+from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__BrokenIteration,
     ExpectColumnValuesToEqualThree__SecondIteration,
@@ -37,6 +36,7 @@ def test_expectation_self_check():
             "has_full_test_suite": False,
             "manually_reviewed_code": False,
             "library_metadata_passed_checks": False,
+            "problems": ["No library_metadata attribute found"],
         },
         "description": {
             "camel_name": "ExpectColumnValuesToEqualThree",
@@ -151,7 +151,12 @@ def test_expectation_self_check():
                     "doc_url": None,
                     "message": "Has a library_metadata object",
                     "passed": False,
-                    "sub_messages": [],
+                    "sub_messages": [
+                        {
+                            "message": "No library_metadata attribute found",
+                            "passed": False,
+                        },
+                    ],
                 },
                 {
                     "doc_url": None,

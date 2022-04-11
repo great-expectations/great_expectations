@@ -3,15 +3,15 @@ title: How to add input validation and type checking for a Custom Expectation
 ---
 
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <Prerequisites>
 
- - Created a [Custom Expectation](../creating_custom_expectations/overview.md)
+ - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
 
 </Prerequisites>
 
-[Expectations](../../../reference/expectations/expectations.md) will typically be configured using input parameters. These parameters are required to provide your Custom Expectation with the context it needs to validate your data. 
-Ensuring that these requirements are fulfilled is the purpose of type checking and validating your input parameters.
+<p class="markdown"><TechnicalTag tag="expectation" text="Expectations" /> will typically be configured using input parameters. These parameters are required to provide your <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> with the context it needs to <TechnicalTag tag="validation" text="Validate" /> your data.  Ensuring that these requirements are fulfilled is the purpose of type checking and validating your input parameters.</p>
 
 For example, we might expect the fraction of null values to be `mostly=.05`, in which case any value above 1 would indicate an impossible fraction of a single whole (since a value above one indicates more than a single whole), and should throw an error. Another example would be if we want to indicate that the the mean of a row adheres to a minimum value bound, such as `min_value=5`. In this case, attempting to pass in a non numerical value should clearly throw an error!
 

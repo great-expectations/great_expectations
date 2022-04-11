@@ -429,7 +429,7 @@ def test_instantiation_with_test_yaml_config(
     context: DataContext = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
-        f"""
+        """
         module_name: great_expectations.datasource.data_connector
         class_name: ConfiguredAssetAzureDataConnector
         datasource_name: FAKE_DATASOURCE
@@ -471,7 +471,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
     context: DataContext = empty_data_context_stats_enabled
 
     context.test_yaml_config(
-        f"""
+        """
         module_name: great_expectations.datasource.data_connector
         class_name: ConfiguredAssetAzureDataConnector
         datasource_name: FAKE_DATASOURCE
@@ -529,7 +529,7 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
     context: DataContext = empty_data_context_stats_enabled
 
     report_object = context.test_yaml_config(
-        f"""
+        """
         module_name: great_expectations.datasource.data_connector
         class_name: ConfiguredAssetAzureDataConnector
         datasource_name: FAKE_DATASOURCE
@@ -624,7 +624,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
            class_name: ConfiguredAssetAzureDataConnector
            datasource_name: test_environment
            container: my_container
@@ -690,7 +690,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
            class_name: ConfiguredAssetAzureDataConnector
            datasource_name: test_environment
            container: my_container
@@ -750,7 +750,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     expected_batch_definitions_unsorted,
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
            class_name: ConfiguredAssetAzureDataConnector
            datasource_name: test_environment
            container: my_container
@@ -831,7 +831,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     expected_batch_definitions_unsorted,
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
            class_name: ConfiguredAssetAzureDataConnector
            datasource_name: test_environment
            container: my_container
@@ -912,7 +912,7 @@ def test_return_all_batch_definitions_basic_sorted(
     expected_batch_definitions_sorted,
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
        class_name: ConfiguredAssetAzureDataConnector
        datasource_name: test_environment
        container: my_container
@@ -1000,7 +1000,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
        class_name: ConfiguredAssetAzureDataConnector
        datasource_name: test_environment
        container: my_container
@@ -1118,7 +1118,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
     expected_batch_definitions_sorted,
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
        class_name: ConfiguredAssetAzureDataConnector
        datasource_name: test_environment
        container: my_container
@@ -1206,7 +1206,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
        class_name: ConfiguredAssetAzureDataConnector
        datasource_name: test_environment
        container: my_container
@@ -1279,7 +1279,7 @@ def test_return_all_batch_definitions_too_many_sorters(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
        class_name: ConfiguredAssetAzureDataConnector
        datasource_name: test_environment
        container: my_container
@@ -1347,13 +1347,13 @@ def test_return_all_batch_definitions_too_many_sorters(
 def test_example_with_explicit_data_asset_names(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    yaml_string = f"""
+    yaml_string = """
 class_name: ConfiguredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
 container: my_container
 name_starts_with: my_base_directory/
 default_regex:
-   pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.(csv|txt)$
+   pattern: ^(.+)-(\\d{4})(\\d{2})\\.(csv|txt)$
    group_names:
        - data_asset_name
        - year_dir
@@ -1361,12 +1361,12 @@ default_regex:
 assets:
    alpha:
        name_starts_with: my_base_directory/alpha/files/go/here/
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
+       pattern: ^(.+)-(\\d{4})(\\d{2})\\.csv$
    beta:
        name_starts_with: my_base_directory/beta_here/
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.txt$
+       pattern: ^(.+)-(\\d{4})(\\d{2})\\.txt$
    gamma:
-       pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
+       pattern: ^(.+)-(\\d{4})(\\d{2})\\.csv$
 
 azure_options:
    account_url: my_account_url.blob.core.windows.net
@@ -1486,7 +1486,7 @@ azure_options:
 def test_get_full_file_path(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    yaml_string = f"""
+    yaml_string = """
 class_name: ConfiguredAssetAzureDataConnector
 datasource_name: FAKE_DATASOURCE_NAME
 container: my_container

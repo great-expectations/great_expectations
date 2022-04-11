@@ -2,6 +2,7 @@
 title: How to implement custom notifications
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 If you would like to implement custom notifications that include a link to Data Docs, you can access the Data Docs URL for the respective Validation Results page from your Data Context after a validation run following the steps below. This will work to get the URLs for any type of Data Docs site setup, e.g. S3 or local setup.
 

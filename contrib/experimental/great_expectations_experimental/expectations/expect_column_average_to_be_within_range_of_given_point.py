@@ -6,22 +6,25 @@ For detailed instructions on how to use it, please see:
 
 from math import cos, sqrt
 from statistics import mean
-from typing import Dict, Optional
+from typing import Any, Dict, List, Union
 
+from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
-    column_aggregate_partial,
     column_aggregate_value,
 )
+from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import (
+    RenderedBulletListContent,
+    RenderedGraphContent,
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
+from great_expectations.render.util import substitute_none_for_missing
 
 
 # This class defines a Metric to support your Expectation.
@@ -140,9 +143,66 @@ class ExpectColumnAverageToBeWithinRangeOfGivenPoint(ColumnExpectation):
             "hackathon-22",
         ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@austiezr",  # Don't forget to add your github handle here!
+            "@austiezr",
+            "@mmi333",  # Don't forget to add your github handle here!
         ],
     }
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration: ExpectationConfiguration = None,
+        result: ExpectationValidationResult = None,
+        language: str = None,
+        runtime_configuration: dict = None,
+        **kwargs,
+    ) -> List[
+        Union[
+            dict,
+            str,
+            RenderedStringTemplateContent,
+            RenderedTableContent,
+            RenderedBulletListContent,
+            RenderedGraphContent,
+            Any,
+        ]
+    ]:
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "range",
+                "center_point",
+            ],
+        )
+
+        template_str = (
+            "column average must be in fcc projection within $range of $center_point."
+        )
+
+        if include_column_name:
+            template_str = f"$column {template_str}"
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
 
 if __name__ == "__main__":

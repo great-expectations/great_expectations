@@ -115,8 +115,9 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        strftime_format: $parameter.my_date_format
+        strftime_format: $parameter.my_date_format.value
         meta:
+          details: $parameter.my_date_format.details
           notes:
             format: markdown
             content:
@@ -151,8 +152,9 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        regex: $parameter.my_regex
+        regex: $parameter.my_regex.value
         meta:
+          details: $parameter.my_regex.details
           notes:
             format: markdown
             content:

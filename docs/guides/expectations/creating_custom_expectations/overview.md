@@ -48,9 +48,7 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 ### How these docs are organized
 
 The docs in `Creating Custom Expectations` focus on completing the four steps required for Experimental Expectations. 
-Completing them will leave your with a Custom Expectation that can be executed against one backend, with a couple tests to verify correctness, and a basic docstring and metadata to support diagonstics. 
-
-Optionally, you can also publish Custom Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md).
+Completing them will leave you with a Custom Expectation that can be executed against one backend, with a couple tests to verify correctness, and a basic docstring and metadata to support diagonstics. 
 
 The code to achieve the first four steps looks somewhat different depending on the class of Expectation you're developing. Accordingly, there are separate how-to guides and templates for each class of Expectation.
 
@@ -58,6 +56,9 @@ The code to achieve the first four steps looks somewhat different depending on t
 |-----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [Column Map Expectation](./how_to_create_custom_column_map_expectations.md)             | [column_map_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py)       |
 | [Column Aggregate Expectation](./how_to_create_custom_column_aggregate_expectations.md) | [column_aggregate_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py) |
+| [Regex-Based Column Map Expectation](./how_to_create_custom_regex_based_column_map_expectations.md) | [regex-based map column_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/regex_based_column_map_expectation_template.py) |
+| [Set-Based Column Map Expectation](./how_to_create_custom_set_based_column_map_expectations.md) | [set-based map_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/set_based_column_map_expectation_template.py) |
+
 
 :::note 
 Not all classes of Expectation currently have guides and templates. <br></br>
@@ -75,12 +76,10 @@ Beyond the first four steps, additional features are generally similar across al
 
 The final two checks required for acceptance into the Great Expectations codebase at a Production level require manual review and guidance by a code owner.
 
-If you believe your Custom Expectation is otherwise ready for contribution at a Production level, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls), and we will work with you to ensure your Custom Expectation meets these standards.
+### Using your Expectation
+
+You can find instructions for using your Custom Expectation in our guide: [how to use a Custom Expectation](./how_to_use_custom_expectations.md).
 
 ### Publishing your Expectation as an open source contribution
 
-You can find more detailed instructions in our guide on [contributing Custom Expectations](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md).
-
-### Utilizing your Expectation
-
-You can find more detailed instructions on utilizing your Custom Expectations in our guide on [how to use a Custom Expectation](./how_to_use_custom_expectations.md).
+Optionally, you can also publish Custom Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md).

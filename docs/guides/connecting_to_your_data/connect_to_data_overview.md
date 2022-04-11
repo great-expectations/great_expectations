@@ -107,7 +107,7 @@ The `name` and `class_name` top level keys will be the first you need to define.
 
 After your Datasource's configuration has a `name` and `class_name` defined, you will need to define a single `execution_engine`.  In your configuration the value of your `execution_engine` will at the very least contain the `class_name` of your Execution Engine, and may also include a `connection_string` if your source data system requires one.
 
-Great Expectations supports Pandas, Spark, and SqlAlchemy as execution engines.
+Great Expectations supports Pandas, Spark, and SqlAlchemy as execution engines.  The corresponding Execution Engine class names are `PandasExecutionEngine`, `SparkDFExecutionEngine`, and `SqlAlchemyExecutionEngine`.
 
 #### Configuring your Datasource's Data Connectors
 
