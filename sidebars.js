@@ -376,6 +376,7 @@ module.exports = {
           items: [
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+            { type: 'doc', id: 'reference/customize_your_deployment' },
             { type: 'doc', id: 'reference/data_discovery' },
             { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]

@@ -7,7 +7,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <Prerequisites>
 
-- Configured a [Data Context](../../tutorials/getting_started/initialize_a_data_context.md).
+- [Configured a Data Context](../../tutorials/getting_started/tutorial_setup.md).
 
 </Prerequisites>
 
