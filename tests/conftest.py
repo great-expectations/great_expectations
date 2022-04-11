@@ -3616,7 +3616,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_regex",
-                "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "RatecodeID",
                     "regex": r"^\d{1}$",
@@ -3638,7 +3637,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_regex",
-                "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "PULocationID",
                     "regex": r"^\d{1}$",
@@ -4923,7 +4921,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     of a batch sampled from a normal distribution with the mean of 5,000 rows and the standard deviation of 1,000 rows.
     """
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))

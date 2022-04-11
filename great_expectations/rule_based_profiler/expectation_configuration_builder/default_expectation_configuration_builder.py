@@ -123,6 +123,10 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
         self._condition = condition
 
+        self._validation_parameter_builder_configs = (
+            validation_parameter_builder_configs
+        )
+
         self._kwargs = kwargs
 
     @property
@@ -132,6 +136,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     @property
     def condition(self) -> Optional[str]:
         return self._condition
+
+    @property
+    def validation_parameter_builder_configs(
+        self,
+    ) -> Optional[List[ParameterBuilderConfig]]:
+        return self._validation_parameter_builder_configs
 
     @property
     def kwargs(self) -> dict:
