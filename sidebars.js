@@ -442,7 +442,8 @@ module.exports = {
       label: 'Updates and migration',
       items: [
         { type: 'doc', id: 'changelog' },
-        { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
+        { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+        { type: 'doc', id: 'api_docs/great_expectations/checkpoint/checkpoint/BaseCheckpoint__auto_api' }
       ]
     }
   ]

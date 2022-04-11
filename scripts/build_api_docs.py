@@ -91,6 +91,7 @@ def parse_subscript(ast_obj: ast.Subscript, input_str: str = "") -> str:
     out_str = f"{out_str}]"
     return out_str
 
+
 def generate_function_documentation(ast_obj):
     api_doc = []
     api_doc.append(f"## Method: {ast_obj.name}")
@@ -299,6 +300,9 @@ if __name__ == "__main__":
             print(relevant_source_file)
             print(get_top_level_classes_and_methods(relevant_source_file))
             folder_path = get_or_create_doc_folder(relevant_source_file)
+            # TODO: Create an 'Overview' page for each source file. (display file docstring;
+            #  list and link classes, methods)
             for ast_obj in get_top_level_classes_and_methods(relevant_source_file):
                 write_doc_file(get_doc_file_path(folder_path, ast_obj), ast_obj)
+            # TODO: Create an automatic update to the ToC.
     main_run()
