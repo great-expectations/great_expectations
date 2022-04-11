@@ -46,7 +46,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         self._column_name_suffixes = column_name_suffixes
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN
 
     @property

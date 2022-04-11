@@ -30,6 +30,7 @@ my_df = ge.read_csv("./tests/test_sets/Titanic.csv")
 my_df.expect_column_values_to_be_in_set(
     column='Sex',
     value_set=['male'],
+    condition_parser='pandas',
     row_condition='SexCode==0'
 )
 ```
@@ -63,6 +64,7 @@ my_df.expect_column_values_to_be_in_set(
 my_df.expect_column_values_to_be_in_set(
         column='Survived',
         value_set=[1],
+        condition_parser='pandas',
         row_condition='PClass=="1st"'
     )
 # The second Expectation fails, but we want to include it in the output:

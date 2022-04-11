@@ -1,84 +1,100 @@
-from multiprocessing.sharedctypes import Value
 from typing import Optional
 
-from cryptoaddress import EthereumAddress
+from timezonefinder import TimezoneFinder
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-
-
-# This method compares a string to the valid ETH address.
-def is_valid_eth_address(address: str) -> bool:
-    try:
-        EthereumAddress(address)
-        return True
-    except ValueError:
-        return False
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidEthAddress(ColumnMapMetricProvider):
+class ColumnValuesLatLonInTimezone(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.valid_eth_address"
+    condition_metric_name = "column_values.lat_lon_in_timezone"
+    condition_value_keys = ("timezone",)
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
-        return column.apply(lambda x: is_valid_eth_address(x))
+    def _pandas(cls, column, timezone, **kwargs):
+        def is_in_timezone(point, timezone):
+            try:
+                tf = TimezoneFinder()
+                detected_timezone = tf.timezone_at(lat=point[0], lng=point[1])
+                return detected_timezone == timezone
+            except ValueError:
+                return False
+
+        return column.apply(lambda x: is_in_timezone(x, timezone))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(cls, column, _dialect, **kwargs):
     #     raise NotImplementedError
 
-    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-    # @column_condition_partial(engine=SparkDFExecutionEngine)
-    # def _spark(cls, column, **kwargs):
-    #     raise NotImplementedError
+    # # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, timezone, **kwargs):
+        def is_in_timezone(point, timezone):
+            try:
+                tf = TimezoneFinder()
+                detected_timezone = tf.timezone_at(lat=point[0], lng=point[1])
+                return detected_timezone == timezone
+            except ValueError:
+                return False
+
+        tz_udf = F.udf(lambda x: is_in_timezone(x, timezone), sparktypes.BooleanType())
+
+        return tz_udf(column)
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidEthAddress(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid ETH address."""
+class ExpectColumnValuesToBeLatLonInTimezone(ColumnMapExpectation):
+    """Expect each lat lon pair in this column to be a point inside a given timezone.
+    Timezone names can be found in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones under 'TZ database name'.
+    This works offline, so it isn't 100% accurate as timezones change but it should be enough for most purposes.
+    """
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "well_formed_eth_address": [
-                    "b794f5ea0ba39494ce839613fffba74279579268",
-                    "0xb794f5ea0ba39494ce839613fffba74279579268",
-                    "0x73bceb1cd57c711feac4224d062b0f6ff338501e",
-                    "0x9bf4001d307dfd62b26a2f1307ee0c0307632d59",
-                ],
-                "malformed_eth_address": [
-                    "",
-                    "b794",
-                    "b794f5ea0ba39494ce839613fffba74279579260",
-                    "This is not a valid ETH address.",
+                "lat_lon_in_los_angeles_timezone": [
+                    (33.570321, -116.884380),
+                    (32.699316, -117.063457),
+                    (32.699316, -117.063457),
+                    (33.598757, -117.721397),
                 ],
             },
             "tests": [
                 {
-                    "title": "basic_positive_test",
+                    "title": "positive_test_with_valid_timezone",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "well_formed_eth_address"},
+                    "in": {
+                        "column": "lat_lon_in_los_angeles_timezone",
+                        "timezone": "America/Los_Angeles",
+                    },
                     "out": {"success": True},
                 },
                 {
-                    "title": "basic_negative_test",
+                    "title": "negative_test_with_invalid_timezone",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "malformed_eth_address"},
+                    "in": {
+                        "column": "lat_lon_in_los_angeles_timezone",
+                        "timezone": "Etc/UTC",
+                    },
                     "out": {"success": False},
                 },
             ],
@@ -87,25 +103,27 @@ class ExpectColumnValuesToBeValidEthAddress(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_eth_address"
+    map_metric = "column_values.lat_lon_in_timezone"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    success_keys = ("mostly",)
+    success_keys = (
+        "mostly",
+        "timezone",
+    )
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
-    def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> None:
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
+
         Args:
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            True if the configuration has been validated successfully. Otherwise, raises an exception
         """
 
         super().validate_configuration(configuration)
@@ -123,16 +141,17 @@ class ExpectColumnValuesToBeValidEthAddress(ColumnMapExpectation):
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
 
+        return True
+
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "maturity": "experimental",
-        "tags": ["experimental", "hackathon", "typed-entities"],
+        "tags": ["geospatial", "hackathon-22", "timezone"],
         "contributors": [
-            "@voidforall",
+            "@mmi333",
         ],
-        "requirements": ["cryptoaddress"],
+        "requirements": ["timezonefinder"],
     }
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidEthAddress().print_diagnostic_checklist()
+    ExpectColumnValuesToBeLatLonInTimezone().print_diagnostic_checklist()
