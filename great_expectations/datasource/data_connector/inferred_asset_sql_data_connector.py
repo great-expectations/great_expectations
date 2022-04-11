@@ -1,6 +1,14 @@
-from typing import Dict, List, Optional, Tuple
+from copy import deepcopy
+from typing import Dict, List, Optional, Tuple, cast
 
-from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchRequest,
+    BatchSpec,
+    IDDict,
+)
+from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     DataConnector,
@@ -8,7 +16,10 @@ from great_expectations.datasource.data_connector.configured_asset_sql_data_conn
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 
 try:
     import sqlalchemy as sa
