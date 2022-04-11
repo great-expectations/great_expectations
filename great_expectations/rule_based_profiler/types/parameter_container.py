@@ -130,7 +130,7 @@ class ParameterNode(SerializableDotDict):
     """
 
     def to_dict(self) -> dict:
-        return dict(self)
+        return convert_parameter_nodes_to_dictionaries(source=dict(self))
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
@@ -220,7 +220,7 @@ class ParameterContainer(SerializableDictDot):
 
 
 def convert_dictionaries_to_parameter_nodes(
-    source: Optional[Any] = None,
+    source: Optional[Any],
 ) -> Optional[ParameterNode]:
     if source is None:
         return None
@@ -244,7 +244,7 @@ def convert_dictionaries_to_parameter_nodes(
 
 
 def convert_parameter_nodes_to_dictionaries(
-    source: Optional[Any] = None,
+    source: Optional[Any],
 ) -> Optional[dict]:
     if source is None:
         return None

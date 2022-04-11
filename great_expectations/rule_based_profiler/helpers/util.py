@@ -22,7 +22,6 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     ParameterNode,
-    convert_parameter_nodes_to_dictionaries,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
@@ -393,7 +392,7 @@ def convert_variables_to_dict(
         parameters=None,
     )
     if isinstance(variables_as_dict, ParameterNode):
-        return convert_parameter_nodes_to_dictionaries(source=variables_as_dict)
+        return variables_as_dict.to_dict()
 
     if variables_as_dict is None:
         return {}
