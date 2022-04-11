@@ -33,6 +33,23 @@ class DataAssistant(ABC):
     """
     DataAssistant is an application built on top of the Rule-Based Profiler component.
     DataAssistant subclasses provide exploration and validation of particular aspects of specified data Batch objects.
+
+    DataAssustant usage (e.g., in Jupyter notebook) adheres to the following pattern:
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="my_volume_data_assistant",
+        batch_request=batch_request,
+        data_context=context,
+    )
+    data_assistant.build()
+    # TODO: <Alex>ALEX -- "DataAssistantResult" is Work-In-Progress</Alex>
+    result: DataAssistantResult = data_assistant.run()
+
+    Then:
+        metrics: Dict[Domain, Dict[str, Any]] = result.metrics
+        expectation_configurations: List[ExpectationConfiguration] = result.expectation_configurations
+        expectation_suite: ExpectationSuite = result.expectation_suite
+        expectation_suite_meta: Dict[str, Any] = expectation_suite.meta
     """
 
     def __init__(

@@ -1,7 +1,10 @@
 from typing import Any, Dict
 
 from great_expectations import DataContext
-from great_expectations.rule_based_profiler.data_assistant import VolumeDataAssistant
+from great_expectations.rule_based_profiler.data_assistant import (
+    DataAssistant,
+    VolumeDataAssistant,
+)
 from great_expectations.rule_based_profiler.types import Domain
 
 
@@ -68,16 +71,15 @@ def test_get_metrics(
         },
     }
 
-    volume_data_assistant_name: str = "test_volume_data_assistant"
-    volume_data_assistant: VolumeDataAssistant = VolumeDataAssistant(
-        name=volume_data_assistant_name,
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
         batch_request=batch_request,
         data_context=context,
     )
-    volume_data_assistant.build()
+    data_assistant.build()
     # TODO: <Alex>ALEX -- WILL_RETURN_RESULT_OBJECT</Alex>
-    volume_data_assistant.run()
+    data_assistant.run()
     # TODO: <Alex>ALEX -- WILL_RETURN_RESULT_OBJECT</Alex>
-    actual_metrics: Dict[Domain, Dict[str, Any]] = volume_data_assistant.get_metrics()
+    actual_metrics: Dict[Domain, Dict[str, Any]] = data_assistant.get_metrics()
 
     assert actual_metrics == expected_metrics
