@@ -18,7 +18,7 @@ Partitioning enables you to select the desired subsets of your dataset for [Vali
 
 <Prerequisites>
 
-- [Configured and loaded a Data Context](../../tutorials/getting_started/initialize_a_data_context.md)
+- [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
 - [Configured a Datasource and Data Connector](../../reference/datasources.md)
 
 </Prerequisites>
