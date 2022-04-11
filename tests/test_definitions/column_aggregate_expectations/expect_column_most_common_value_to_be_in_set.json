@@ -21,6 +21,7 @@
     "tests" : [
       {
         "title": "negative_test_tie_for_most_common_with_missing_values_and_complete_result_format",
+        "include_in_gallery": true,
         "exact_match_out": true,
         "in": {
           "column": "x",
@@ -48,6 +49,7 @@
       }
     },{
         "title" : "positive_test__tie_for_most_common__ties_okay__true",
+        "include_in_gallery": true,
         "exact_match_out" : false,
         "in": {
           "column": "x",

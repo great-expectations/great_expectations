@@ -2,8 +2,6 @@ import copy
 import logging
 import warnings
 
-from ruamel.yaml import YAML
-
 from great_expectations.data_context.util import (
     instantiate_class_from_config,
     load_class,
@@ -12,8 +10,6 @@ from great_expectations.data_context.util import (
 from great_expectations.exceptions import ClassInstantiationError
 
 logger = logging.getLogger(__name__)
-yaml = YAML()
-yaml.default_flow_style = False
 
 
 class LegacyDatasource:

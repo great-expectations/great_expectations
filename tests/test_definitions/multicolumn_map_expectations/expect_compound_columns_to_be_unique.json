@@ -21,6 +21,7 @@
     },
     "tests" : [{
       "title": "basic_test_ignore_if_all_are_missing_the_default_behavior",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column_list": ["w", "x"]
@@ -44,6 +45,7 @@
       }
     },{
       "title": "row_condition_with_ignore_if_any_are_missing",
+      "include_in_gallery": true,
       "exact_match_out" : true,
       "only_for": ["pandas"],
       "in": {

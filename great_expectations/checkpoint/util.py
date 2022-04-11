@@ -1,4 +1,5 @@
 import copy
+import json
 import logging
 import smtplib
 import ssl
@@ -11,11 +12,18 @@ import requests
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     get_batch_request_as_dict,
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.types import DictDot
+
+try:
+    import boto3
+except ImportError:
+    boto3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -208,9 +216,7 @@ def get_substituted_validation_dict(
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_substituted_batch_request(
     substituted_runtime_config: dict,
-    validation_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest, dict]
-    ] = None,
+    validation_batch_request: Optional[Union[BatchRequestBase, dict]] = None,
 ) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     substituted_runtime_batch_request = substituted_runtime_config.get("batch_request")
 
@@ -428,6 +434,7 @@ def batch_request_in_validations_contains_batch_data(
         for idx, val in enumerate(validations):
             if (
                 val.get("batch_request") is not None
+                and isinstance(val.get("batch_request"), (dict, DictDot))
                 and val["batch_request"].get("runtime_parameters") is not None
                 and val["batch_request"]["runtime_parameters"].get("batch_data")
                 is not None
@@ -480,3 +487,40 @@ def send_cloud_notification(url: str, headers: dict):
             return {"cloud_notification_result": message}
         else:
             return {"cloud_notification_result": "Cloud notification succeeded."}
+
+
+def send_sns_notification(
+    sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs
+) -> str:
+    """
+    Send JSON results to an SNS topic with a schema of:
+
+
+    :param sns_topic_arn:  The SNS Arn to publish messages to
+    :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
+    :param validation_results:  The results of the validation ran
+    :param kwargs:  Keyword arguments to pass to the boto3 Session
+    :return:  Message ID that was published
+
+    """
+    if not boto3:
+        logger.warning("boto3 is not installed")
+        return "boto3 is not installed"
+
+    message_dict = {
+        "TopicArn": sns_topic_arn,
+        "Subject": sns_subject,
+        "Message": json.dumps(validation_results),
+        "MessageAttributes": {
+            "String": {"DataType": "String.Array", "StringValue": "ValidationResults"},
+        },
+        "MessageStructure": "json",
+    }
+    session = boto3.Session(**kwargs)
+    sns = session.client("sns")
+    try:
+        response = sns.publish(**message_dict)
+    except sns.exceptions.InvalidParameterException:
+        logger.error(f"Received invalid for message: {validation_results}")
+    else:
+        return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"

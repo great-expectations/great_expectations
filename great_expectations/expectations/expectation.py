@@ -833,7 +833,6 @@ class Expectation(metaclass=MetaExpectation):
             ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def validate(
         self,
@@ -906,6 +905,7 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
+        return_only_gallery_examples: bool = False,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -933,9 +933,11 @@ class Expectation(metaclass=MetaExpectation):
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
         )
-        gallery_examples: List[ExpectationTestDataCases] = self._get_examples()
+        gallery_examples: List[ExpectationTestDataCases] = self._get_examples(
+            return_only_gallery_examples=True
+        )
         examples: List[ExpectationTestDataCases] = self._get_examples(
-            return_only_gallery_examples=False
+            return_only_gallery_examples=return_only_gallery_examples
         )
         description_diagnostics: ExpectationDescriptionDiagnostics = (
             self._get_description_diagnostics()
@@ -1046,13 +1048,11 @@ class Expectation(metaclass=MetaExpectation):
         :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
         :return: list of examples or [], if no examples exist
         """
-        is_core_expectation = False
         try:
             # Currently, only community contrib expectations have an examples attribute
             all_examples = self.examples
         except AttributeError:
             all_examples = self._get_examples_from_json()
-            is_core_expectation = True
             if all_examples == []:
                 return []
 
@@ -1069,7 +1069,6 @@ class Expectation(metaclass=MetaExpectation):
                 if (
                     test.get("include_in_gallery") == True
                     or return_only_gallery_examples == False
-                    or is_core_expectation == True
                 ):
                     copied_test = deepcopy(test)
                     if top_level_only_for and "only_for" not in copied_test:
@@ -1487,28 +1486,35 @@ class Expectation(metaclass=MetaExpectation):
             "has_full_test_suite": False,
             "manually_reviewed_code": False,
         }
+        required_keys = {"contributors", "tags"}
+        allowed_keys = {
+            "contributors",
+            "has_full_test_suite",
+            "manually_reviewed_code",
+            "maturity",
+            "requirements",
+            "tags",
+        }
+        problems = []
 
         if hasattr(self, "library_metadata"):
             augmented_library_metadata.update(self.library_metadata)
+            keys = set(self.library_metadata.keys())
+            missing_required_keys = required_keys - keys
+            forbidden_keys = keys - allowed_keys
 
-            keys = self.library_metadata.keys()
-            has_all_required_keys = all(key in keys for key in {"tags", "contributors"})
-            has_no_forbidden_keys = all(
-                key
-                in {
-                    "maturity",
-                    "tags",
-                    "contributors",
-                    "requirements",
-                    "package",
-                    "has_full_test_suite",
-                    "manually_reviewed_code",
-                }
-                for key in keys
-            )
-            if has_all_required_keys and has_no_forbidden_keys:
+            if missing_required_keys:
+                problems.append(
+                    f"Missing required key(s): {sorted(missing_required_keys)}"
+                )
+            if forbidden_keys:
+                problems.append(f"Extra key(s) found: {sorted(forbidden_keys)}")
+            if not problems:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
+        else:
+            problems.append("No library_metadata attribute found")
 
+        augmented_library_metadata["problems"] = problems
         return AugmentedLibraryMetadata.from_legacy_dict(augmented_library_metadata)
 
     def _get_maturity_checklist(
@@ -1719,7 +1725,6 @@ class ColumnExpectation(TableExpectation, ABC):
             ), "'column' parameter is required for column expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
 
 class ColumnMapExpectation(TableExpectation, ABC):
@@ -1754,7 +1759,6 @@ class ColumnMapExpectation(TableExpectation, ABC):
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def get_validation_dependencies(
         self,
@@ -1970,7 +1974,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def get_validation_dependencies(
         self,
@@ -2159,7 +2162,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             ), "'column_list' parameter is required for multicolumn map expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     def get_validation_dependencies(
         self,

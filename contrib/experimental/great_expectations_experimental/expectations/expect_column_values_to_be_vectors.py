@@ -141,7 +141,6 @@ class ExpectColumnValuesToBeVectors(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["experimental", "datatypes", "column map expectation"],
         "contributors": ["@manyshapes"],
-        "package": "experimental_expectations",
         "requirements": [],
     }
 

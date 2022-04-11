@@ -348,7 +348,6 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
             "@maximetokman",
             "@Harriee02",  # Don't forget to add your github handle here!
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.

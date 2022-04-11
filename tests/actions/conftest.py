@@ -1,6 +1,9 @@
+import os
 from uuid import UUID
 
+import boto3
 import pytest
+from moto import mock_sns
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context import BaseDataContext
@@ -155,3 +158,20 @@ def validation_result_suite_extended_id():
             batch_identifier="1234", data_asset_name="asset"
         ),
     )
+
+
+@pytest.fixture
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+
+
+@pytest.fixture
+def sns(aws_credentials):
+    with mock_sns():
+        conn = boto3.client("sns")
+        yield conn

@@ -22,7 +22,6 @@ class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     """TODO: Add a docstring here"""
 
     # These values will be used to configure the metric created by your expectation
-    regex_snake_name = "regex_name"
     regex_camel_name = "RegexName"
     regex = "regex pattern"
     semantic_type_name_plural = None
@@ -31,38 +30,8 @@ class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     # They will also be executed as unit tests for your Expectation.
     examples = []
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
-        """
-
-        super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
-        return True
-
     # Here your regex is used to create a custom metric for this expectation
     map_metric = RegexBasedColumnMapExpectation.register_metric(
-        regex_snake_name=regex_snake_name,
         regex_camel_name=regex_camel_name,
         regex_=regex,
     )

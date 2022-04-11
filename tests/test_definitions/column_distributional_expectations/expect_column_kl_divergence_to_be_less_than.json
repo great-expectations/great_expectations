@@ -7,6 +7,7 @@
     },
     "tests" : [{
       "title": "discrete_baseline_categorical_fixed_partition",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in": {
         "column": "categorical_fixed",
@@ -42,6 +43,7 @@
     },
     {
       "title": "internal_holdout_with_categorical_partition",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in": {
         "column": "categorical_fixed",

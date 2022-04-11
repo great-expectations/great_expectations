@@ -39,19 +39,19 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         batch_request=batch_request,
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    variables: Optional[ParameterContainer] = None
+
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.TABLE,
     )
-
-    assert parameter_container.parameter_nodes is None
-
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
-    variables: Optional[ParameterContainer] = None
+
+    assert parameter_container.parameter_nodes is None
+
     numeric_metric_range_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -64,7 +64,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
     expected_value_dict: dict = {
-        "value": {"value_range": None},
+        "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {},
@@ -79,11 +79,11 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     actual_value_dict: dict = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
-    actual_value = actual_value_dict.pop("value").pop("value_range")
-    actual_value_dict["value"] = {"value_range": None}
+    actual_value = actual_value_dict.pop("value")
+    actual_value_dict["value"] = None
 
     assert actual_value_dict == expected_value_dict
 

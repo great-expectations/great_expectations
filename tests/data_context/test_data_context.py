@@ -8,11 +8,12 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
+import great_expectations as ge
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
@@ -31,7 +32,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.data_context.util import PasswordMasker, file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     Datasource,
@@ -66,6 +67,62 @@ def parameterized_expectation_suite():
         fixture_path,
     ) as suite:
         return json.load(suite)
+
+
+@pytest.fixture(scope="function")
+def titanic_multibatch_data_context(
+    tmp_path,
+) -> DataContext:
+    """
+    Based on titanic_data_context, but with 2 identical batches of
+    data asset "titanic"
+    """
+    project_path = tmp_path / "titanic_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data", "titanic")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(__file__, "../test_fixtures/great_expectations_titanic.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "../test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "../test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_with_bad_datasource(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+
+    This DataContext has a connection to a datasource named my_postgres_db
+    which is not a valid datasource.
+
+    It is used by test_get_batch_multiple_datasources_do_not_scan_all()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "../test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_bad_datasource.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    return ge.data_context.DataContext(context_path)
 
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
@@ -365,7 +422,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
                     "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "65432",
                     "username": "username_str",
-                    "password": "***",
+                    "password": PasswordMasker.MASKED_PASSWORD_STRING,
                     "database": "database_str",
                 },
             },
@@ -378,7 +435,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
                     "module_name": "great_expectations.dataset",
                 },
                 "credentials": {
-                    "url": "postgresql+psycopg2://username:***@host:65432/database",
+                    "url": f"postgresql+psycopg2://username:{PasswordMasker.MASKED_PASSWORD_STRING}@host:65432/database",
                 },
             },
         ]
@@ -1732,6 +1789,86 @@ data_connectors:
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 
 
+def test_get_validator_without_expectation_suite(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    batch = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="pandas_datasource",
+            data_connector_name="runtime_data_connector",
+            data_asset_name="my_data_asset",
+            runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
+            batch_identifiers={
+                "id_key_0": "id_0_value_a",
+                "id_key_1": "id_1_value_a",
+            },
+        )
+    )[0]
+
+    my_validator = context.get_validator(batch=batch)
+    assert isinstance(my_validator.get_expectation_suite(), ExpectationSuite)
+    assert my_validator.expectation_suite_name == "default"
+
+
+def test_get_validator_with_batch(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    my_batch = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="pandas_datasource",
+            data_connector_name="runtime_data_connector",
+            data_asset_name="my_data_asset",
+            runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
+            batch_identifiers={
+                "id_key_0": "id_0_value_a",
+                "id_key_1": "id_1_value_a",
+            },
+        )
+    )[0]
+
+    my_validator = context.get_validator(
+        batch=my_batch,
+        create_expectation_suite_with_name="A_expectation_suite",
+    )
+
+
+def test_get_validator_with_batch_list(in_memory_runtime_context):
+    context = in_memory_runtime_context
+
+    my_batch_list = [
+        context.get_batch_list(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="pandas_datasource",
+                data_connector_name="runtime_data_connector",
+                data_asset_name="my_data_asset",
+                runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
+                batch_identifiers={
+                    "id_key_0": "id_0_value_a",
+                    "id_key_1": "id_1_value_a",
+                },
+            )
+        )[0],
+        context.get_batch_list(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="pandas_datasource",
+                data_connector_name="runtime_data_connector",
+                data_asset_name="my_data_asset",
+                runtime_parameters={"batch_data": pd.DataFrame({"y": range(10)})},
+                batch_identifiers={
+                    "id_key_0": "id_0_value_b",
+                    "id_key_1": "id_1_value_b",
+                },
+            )
+        )[0],
+    ]
+
+    my_validator = context.get_validator(
+        batch_list=my_batch_list,
+        create_expectation_suite_with_name="A_expectation_suite",
+    )
+    assert len(my_validator.batches) == 2
+
+
 def test_get_batch_multiple_datasources_do_not_scan_all(
     data_context_with_bad_datasource,
 ):
@@ -2204,7 +2341,7 @@ def test_add_datasource_from_yaml_sql_datasource(
 
     datasource_name: str = "my_datasource"
 
-    example_yaml = f"""
+    example_yaml = """
     class_name: SimpleSqlalchemyDatasource
     introspection:
       whole_table:
@@ -2398,7 +2535,7 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
 
     datasource_name: str = "my_datasource"
 
-    example_yaml = f"""
+    example_yaml = """
     class_name: Datasource
     execution_engine:
       class_name: SqlAlchemyExecutionEngine

@@ -72,12 +72,13 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.not_match_regex"
@@ -100,7 +101,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -115,7 +116,6 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for regex kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -162,7 +162,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 "values must not match a regular expression but none was specified."
             )
         else:
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -220,7 +220,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 "values must not match a regular expression but none was specified."
             )
         else:
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
