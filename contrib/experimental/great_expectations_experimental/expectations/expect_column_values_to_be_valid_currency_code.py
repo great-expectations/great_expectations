@@ -1,10 +1,15 @@
-from multiprocessing.sharedctypes import Value
-from typing import Optional
+import json
+from typing import Optional, Tuple
 
-from cryptoaddress import EthereumAddress
+from moneyed import list_all_currencies
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -12,26 +17,28 @@ from great_expectations.expectations.metrics import (
 )
 
 
-# This method compares a string to the valid ETH address.
-def is_valid_eth_address(address: str) -> bool:
-    try:
-        EthereumAddress(address)
-        return True
-    except ValueError:
-        return False
+def generate_all_currency_codes() -> Tuple[str]:
+    return [str(currency_code) for currency_code in list_all_currencies()]
+
+
+def is_valid_currency_code(code: str, currency_codes: Tuple[str]) -> bool:
+    return code in currency_codes
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidEthAddress(ColumnMapMetricProvider):
+class ColumnValuesCurrencyCode(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.valid_eth_address"
+    condition_metric_name = "column_values.currency_code"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return column.apply(lambda x: is_valid_eth_address(x))
+
+        currency_codes: Tuple[str] = generate_all_currency_codes()
+
+        return column.apply(lambda x: is_valid_currency_code(x, currency_codes))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -45,40 +52,38 @@ class ColumnValuesToBeValidEthAddress(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidEthAddress(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid ETH address."""
+class ExpectColumnValuesToBeValidCurrencyCode(ColumnMapExpectation):
+    """Expect values in this column to be valid currency codes (three capital letters).
+    See ISO-4217 for more information.
+    """
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "well_formed_eth_address": [
-                    "b794f5ea0ba39494ce839613fffba74279579268",
-                    "0xb794f5ea0ba39494ce839613fffba74279579268",
-                    "0x73bceb1cd57c711feac4224d062b0f6ff338501e",
-                    "0x9bf4001d307dfd62b26a2f1307ee0c0307632d59",
-                ],
-                "malformed_eth_address": [
-                    "",
-                    "b794",
-                    "b794f5ea0ba39494ce839613fffba74279579260",
-                    "This is not a valid ETH address.",
+                "valid_currency_codes": ["USD", "EUR", "BEL", "HKD", "GBP"],
+                "invalid_currency_codes": [
+                    "us dollars",
+                    "pounds",
+                    "Renminbi",
+                    "$",
+                    "EURO",
                 ],
             },
             "tests": [
                 {
-                    "title": "basic_positive_test",
+                    "title": "positive_test_with_currency_codes",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "well_formed_eth_address"},
+                    "in": {"column": "valid_currency_codes"},
                     "out": {"success": True},
                 },
                 {
-                    "title": "basic_negative_test",
+                    "title": "negative_test_with_currency_codes",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "malformed_eth_address"},
+                    "in": {"column": "invalid_currency_codes"},
                     "out": {"success": False},
                 },
             ],
@@ -87,7 +92,7 @@ class ExpectColumnValuesToBeValidEthAddress(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_eth_address"
+    map_metric = "column_values.currency_code"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
@@ -125,14 +130,13 @@ class ExpectColumnValuesToBeValidEthAddress(ColumnMapExpectation):
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "maturity": "experimental",
-        "tags": ["experimental", "hackathon", "typed-entities"],
+        "tags": ["hackathon", "currency", "type-entities", "semantic-types"],
         "contributors": [
-            "@voidforall",
+            "@lucasasmith",
         ],
-        "requirements": ["cryptoaddress"],
+        "requirements": ["py-moneyed"],
     }
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidEthAddress().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidCurrencyCode().print_diagnostic_checklist()
