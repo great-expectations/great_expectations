@@ -18,6 +18,7 @@ from .parameter_container import (  # isort:skip
     ParameterContainer,
     build_parameter_container,
     build_parameter_container_for_variables,
+    convert_parameter_nodes_to_dictionaries,
     is_fully_qualified_parameter_name_literal_string_format,
     get_parameter_value_by_fully_qualified_parameter_name,
     get_parameter_values_for_fully_qualified_parameter_names,
