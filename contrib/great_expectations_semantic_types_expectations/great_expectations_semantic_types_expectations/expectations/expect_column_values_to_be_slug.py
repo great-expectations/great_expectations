@@ -18,7 +18,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_valid_slug(slug: str) -> bool:
-    slug_pattern = re.compile("^[-a-zA-Z0-9_]+\Z")
+    slug_pattern = re.compile(r"^[-a-zA-Z0-9_]+\Z")
     if slug_pattern.match(slug):
         return True
     else:

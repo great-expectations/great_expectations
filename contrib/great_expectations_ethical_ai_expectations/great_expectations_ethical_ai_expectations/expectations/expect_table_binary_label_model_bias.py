@@ -128,7 +128,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
 
     Returns:
         An ExpectationSuiteValidationResult
-        
+
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation

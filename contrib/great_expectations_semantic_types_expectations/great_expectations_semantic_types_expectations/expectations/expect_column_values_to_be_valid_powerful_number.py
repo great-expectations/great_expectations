@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_powerful_number(num: str) -> bool:
     try:
         n = int(num)
-        unique_factors = set(f for f in primefac(n))
+        unique_factors = {f for f in primefac(n)}
 
         for p in unique_factors:
             if n % (p * p) != 0:
