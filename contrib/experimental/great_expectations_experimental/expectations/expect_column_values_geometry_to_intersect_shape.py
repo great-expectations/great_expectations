@@ -3,15 +3,18 @@ from typing import Optional
 import pandas as pd
 import pygeos as geos
 
-from great_expectations.core.expectation_configuration import \
-    ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (PandasExecutionEngine,
-                                                 SparkDFExecutionEngine,
-                                                 SqlAlchemyExecutionEngine)
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.metrics import (ColumnMapMetricProvider,
-                                                     column_condition_partial)
+from great_expectations.expectations.metrics import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
 
 
 # This class defines a Metric to support your Expectation.

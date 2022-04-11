@@ -1,26 +1,35 @@
+import json
 from typing import Optional
 
 import pandas as pd
 import pygeos as geos
 
-from great_expectations.core.expectation_configuration import \
-    ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (PandasExecutionEngine,
-                                                 SparkDFExecutionEngine,
-                                                 SqlAlchemyExecutionEngine)
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.metrics import (ColumnMapMetricProvider,
-                                                     column_condition_partial)
+from great_expectations.expectations.metrics import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesGeometryCentroidsWithinShape(ColumnMapMetricProvider):
+class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.geometry.centroids_within_shape"
-    condition_value_keys = ("shape", "shape_format", "column_shape_format")
+    condition_metric_name = "column_values.geometry.near_shape"
+    condition_value_keys = (
+        "shape",
+        "shape_format",
+        "column_shape_format",
+        "distance_tol",
+    )
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -29,6 +38,7 @@ class ColumnValuesGeometryCentroidsWithinShape(ColumnMapMetricProvider):
         shape = kwargs.get("shape")
         shape_format = kwargs.get("shape_format")
         column_shape_format = kwargs.get("column_shape_format")
+        distance_tol = kwargs.get("distance_tol")
 
         # Check that shape is given and given in the correct format
         if shape is not None:
@@ -62,11 +72,9 @@ class ColumnValuesGeometryCentroidsWithinShape(ColumnMapMetricProvider):
         # Prepare the geometries
         geos.prepare(shape_ref)
         geos.prepare(shape_test)
-        column_centroids = geos.centroid(shape_test)
 
-        print(column_centroids)
-
-        return pd.Series(geos.within(column_centroids, shape_ref))
+        # Return whether the distance is below the tolerance.
+        return pd.Series(geos.dwithin(shape_test, shape_ref, distance_tol))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -80,11 +88,11 @@ class ColumnValuesGeometryCentroidsWithinShape(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
+class ExpectColumnValuesGeometryToBeNearShape(ColumnMapExpectation):
     """
-    Expect that column values as geometries each have a centroid that are within a given reference shape.
+    Expect that column values as geometries are near (within a given distance) of a given reference shape in the units of the provided geometries.
 
-    expect_column_values_geometry_centroids_to_be_within_shape is a :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+    expect_column_values_geometry_to_be_near_shape is a :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
 
     Args:
         column (str): \
@@ -105,14 +113,21 @@ class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
             Geometry format for 'column'. Column values must be provided in WKT or WKB format, which are commom formats for GIS Database formats.
             WKT can be accessed thhrough the ST_AsText() or ST_AsBinary() functions in queries for PostGIS and MSSQL.
 
+        distance_tol: float
+            Distance tolerance for the column value geometries to the reference shape. Note that 0 evaluates to expect_column_values_to_be_within_shape.
+            Distance values are always positive. Negative tolerances will always evaluate to False.
+            Default: 0
+
     Returns:
         An ExpectationSuiteValidationResult
 
     Notes:
+        The distance returned and specified is based on the coordinate system of the points, not Latitude and Longitude.
+        The user is responsible for the projection method and units (e.g. UTM in m).
+        The distance calculation is based on a cartesian coordinate system.
         Convention is (X Y Z) for points, which would map to (Longitude Latitude Elevation) for geospatial cases.
         Any convention can be followed as long as the test and reference shapes are consistent.
         The reference shape allows for an array, but will union (merge) all the shapes into 1 and check the contains condition.
-        MultiLinestrings and Multipolygons area weighted by their length and areas, respectively. See the pygeos docs for reference.
     """
 
     # These examples will be shown in the public gallery.
@@ -120,45 +135,92 @@ class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "lines": [
-                    "LINESTRING(0 0, 10 10)",
-                    "LINESTRING(5 5, 8 10)",
-                    "LINESTRING(0 0, 18 2)",
-                    "LINESTRING(3 4, 0 7, 10 0, 15 10)",
+                "points_only": [
+                    "POINT(1 1)",
+                    "POINT(2 2)",
+                    "POINT(6 4)",
+                    "POINT(3 9)",
+                    "POINT(8 9.999)",
                 ],
-                "polygons": [
-                    "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))",
-                    "POLYGON ((0 0, 0 5, 5 5, 5 0, 0 0))",
-                    "POLYGON ((10 10, 10 15, 15 15, 15 10, 10 10))",
-                    None,
+                "points_and_lines": [
+                    "POINT(1 1)",
+                    "POINT(2 2)",
+                    "POINT(6 4)",
+                    "POINT(3 9)",
+                    "LINESTRING(5 5, 8 10)",
                 ],
             },
             "tests": [
                 {
-                    "title": "positive_test_with_lines",
+                    "title": "positive_test_with_points",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "lines",
-                        "shape": "POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))",
+                        "column": "points_only",
+                        "shape": "POINT(0 0)",
                         "shape_format": "wkt",
+                        "column_shape_format": "wkt",
+                        "distance_tol": 15.0,
                     },
                     "out": {
                         "success": True,
                     },
                 },
                 {
-                    "title": "negative_test_with_polygons",
+                    "title": "positive_test_with_points_and_lines",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "polygons",
-                        "shape": "POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))",
+                        "column": "points_and_lines",
+                        "shape": "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))",
                         "shape_format": "wkt",
+                        "column_shape_format": "wkt",
+                        "distance_tol": 10.0,
                     },
                     "out": {
-                        "success": False,
+                        "success": True,
                     },
+                },
+                {
+                    "title": "positive_test_with_points_and_lines_geojson_reference_shape",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "points_and_lines",
+                        "shape": '{"type":"Polygon","coordinates":[[[0.0,0.0],[0.0,10.0],[10.0,10.0],[10.0,0.0],[0.0,0.0]]]}',
+                        "shape_format": "geojson",
+                        "column_shape_format": "wkt",
+                        "distance_tol": 10.0,
+                    },
+                    "out": {
+                        "success": True,
+                    },
+                },
+                {
+                    "title": "negative_test_with_points",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "points_only",
+                        "shape": "POINT(0 0)",
+                        "shape_format": "wkt",
+                        "column_shape_format": "wkt",
+                        "distance_tol": 6.0,
+                    },
+                    "out": {"success": False, "unexpected_index_list": [2, 3, 4]},
+                },
+                {
+                    "title": "negative_test_with_points_and_lines_and_array_reference_shape",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "points_and_lines",
+                        "shape": ["POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", "POINT(0 10)"],
+                        "shape_format": "wkt",
+                        "column_shape_format": "wkt",
+                        "distance_tol": 5.0,
+                    },
+                    "out": {"success": False, "unexpected_index_list": [2, 4]},
                 },
             ],
         }
@@ -166,16 +228,23 @@ class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.geometry.centroids_within_shape"
+    map_metric = "column_values.geometry.near_shape"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    success_keys = ("mostly", "shape", "shape_format", "column_shape_format")
+    success_keys = (
+        "mostly",
+        "shape",
+        "shape_format",
+        "column_shape_format",
+        "distance_tol",
+    )
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {
         "mostly": 1,
         "shape_format": "wkt",
         "column_shape_format": "wkt",
+        "distance_tol": 0.0,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -221,4 +290,4 @@ class ExpectColumnValuesGeometryCentroidsToBeWithinShape(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesGeometryCentroidsToBeWithinShape().print_diagnostic_checklist()
+    ExpectColumnValuesGeometryToBeNearShape().print_diagnostic_checklist()
