@@ -23,6 +23,7 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.core.usage_statistics.util import (
@@ -118,7 +119,7 @@ def test_alice_profiler_user_workflow_single_batch(
     )
 
     profiler.run()
-    expectation_suite: ExpectationSuite = profiler.expectation_suite(
+    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
@@ -446,7 +447,10 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     profiler.run()
-    profiled_expectation_suite: ExpectationSuite = profiler.expectation_suite(
+
+    domain: Domain
+
+    profiled_expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=bobby_columnar_table_multi_batch[
             "test_configuration_oneshot_estimator"
         ]["expectation_suite_name"],
@@ -458,6 +462,86 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     ]["expected_expectation_suite"]
 
     assert profiled_expectation_suite == fixture_expectation_suite
+
+    profiled_fully_qualified_parameter_names_by_domain: Dict[
+        Domain, List[str]
+    ] = profiler.get_fully_qualified_parameter_names_by_domain()
+
+    fixture_fully_qualified_parameter_names_by_domain: Dict[
+        Domain, List[str]
+    ] = bobby_columnar_table_multi_batch["test_configuration_oneshot_estimator"][
+        "expected_fixture_fully_qualified_parameter_names_by_domain"
+    ]
+
+    assert (
+        profiled_fully_qualified_parameter_names_by_domain
+        == fixture_fully_qualified_parameter_names_by_domain
+    )
+
+    domain = Domain(
+        domain_type="table",
+    )
+
+    profiled_fully_qualified_parameter_names_for_domain_id: List[
+        str
+    ] = profiler.get_fully_qualified_parameter_names_for_domain_id(domain.id)
+
+    fixture_fully_qualified_parameter_names_for_domain_id: List[
+        str
+    ] = bobby_columnar_table_multi_batch["test_configuration_oneshot_estimator"][
+        "expected_fixture_fully_qualified_parameter_names_by_domain"
+    ][
+        domain
+    ]
+
+    assert (
+        profiled_fully_qualified_parameter_names_for_domain_id
+        == fixture_fully_qualified_parameter_names_for_domain_id
+    )
+
+    profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
+        Domain, Dict[str, Any]
+    ] = profiler.get_parameter_values_for_fully_qualified_parameter_names_by_domain()
+
+    fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
+        Domain, Dict[str, Any]
+    ] = bobby_columnar_table_multi_batch[
+        "test_configuration_oneshot_estimator"
+    ][
+        "expected_parameter_values_for_fully_qualified_parameter_names_by_domain"
+    ]
+
+    assert (
+        profiled_parameter_values_for_fully_qualified_parameter_names_by_domain
+        == fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain
+    )
+
+    domain = Domain(
+        domain_type="column",
+        domain_kwargs={"column": "VendorID"},
+        details={"inferred_semantic_domain_type": "numeric"},
+    )
+
+    profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
+        str, Any
+    ] = profiler.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
+        domain_id=domain.id
+    )
+
+    fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
+        str, Any
+    ] = bobby_columnar_table_multi_batch[
+        "test_configuration_oneshot_estimator"
+    ][
+        "expected_parameter_values_for_fully_qualified_parameter_names_by_domain"
+    ][
+        domain
+    ]
+
+    assert (
+        profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
+        == fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id
+    )
 
     assert mock_emit.call_count == 99
 
@@ -1431,7 +1515,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     )
 
     profiler.run()
-    expectation_suite: ExpectationSuite = profiler.expectation_suite(
+    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
             "test_configuration_bootstrap_estimator"
         ][
@@ -1615,7 +1699,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     )
 
     profiler.run()
-    expectation_suite: ExpectationSuite = profiler.expectation_suite(
+    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=quentin_columnar_table_multi_batch["test_configuration"][
             "expectation_suite_name"
         ],

@@ -6,7 +6,6 @@ from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-from scipy import stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite

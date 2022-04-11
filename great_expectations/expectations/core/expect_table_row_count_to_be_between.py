@@ -108,7 +108,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             json_serialize=True,
         )
     )
-    validation_parameter_builder_configs: List[dict] = [
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         row_count_range_estimator_parameter_builder_config,
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(

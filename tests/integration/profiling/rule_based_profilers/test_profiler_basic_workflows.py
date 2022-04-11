@@ -135,7 +135,7 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
     )
     my_rbp.add_rule(rule=simple_rule)
     my_rbp.run()
-    res: ExpectationSuite = my_rbp.expectation_suite()
+    res: ExpectationSuite = my_rbp.get_expectation_suite()
     assert len(res.expectations) == 4
 
 
@@ -189,7 +189,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     )
     my_rbp.add_rule(rule=simple_rule)
     my_rbp.run()
-    res: ExpectationSuite = my_rbp.expectation_suite()
+    res: ExpectationSuite = my_rbp.get_expectation_suite()
     assert len(res.expectations) == 4
 
 
@@ -370,7 +370,7 @@ def test_profiler_run_with_expectation_suite_arg(
     assert basic_expectation_suite.expectations == existing_expectations
 
     my_rbp.run()
-    res: ExpectationSuite = my_rbp.expectation_suite(
+    res: ExpectationSuite = my_rbp.get_expectation_suite(
         expectation_suite=basic_expectation_suite
     )
 

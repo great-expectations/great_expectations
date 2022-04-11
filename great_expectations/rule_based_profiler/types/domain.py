@@ -12,6 +12,8 @@ from great_expectations.util import (
     filter_properties_dict,
 )
 
+INFERRED_SEMANTIC_TYPE_KEY: str = "inferred_semantic_domain_type"
+
 
 class SemanticDomainTypes(Enum):
     NUMERIC = "numeric"
@@ -121,11 +123,29 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         return IDDict(self.to_json_dict()).to_id()
 
     def to_json_dict(self) -> dict:
+        details: dict = {}
+
+        key: str
+        value: Any
+        for key, value in self["details"].items():
+            if key == INFERRED_SEMANTIC_TYPE_KEY:
+                semantic_type: Union[str, SemanticDomainTypes]
+                if isinstance(value, str):
+                    semantic_type = value.lower()
+                    semantic_type = SemanticDomainTypes(semantic_type)
+                else:
+                    semantic_type = value
+
+                details[key] = semantic_type.value
+            else:
+                details[key] = convert_to_json_serializable(data=value)
+
         json_dict: dict = {
             "domain_type": self["domain_type"].value,
             "domain_kwargs": self["domain_kwargs"].to_json_dict(),
-            "details": {key: value.value for key, value in self["details"].items()},
+            "details": details,
         }
+
         return filter_properties_dict(properties=json_dict, clean_falsy=True)
 
     def _convert_dictionaries_to_domain_kwargs(

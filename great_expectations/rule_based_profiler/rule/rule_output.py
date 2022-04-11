@@ -52,7 +52,7 @@ class RuleOutput:
 
         return expectation_configurations
 
-    def get_fully_qualified_parameter_names(self) -> Dict[Domain, List[str]]:
+    def get_fully_qualified_parameter_names_by_domain(self) -> Dict[Domain, List[str]]:
         domain: Domain
         return {
             domain: self.get_fully_qualified_parameter_names_for_domain(domain=domain)
@@ -82,7 +82,7 @@ class RuleOutput:
         )
         return fully_qualified_parameter_names
 
-    def get_parameter_values_for_fully_qualified_parameter_names(
+    def get_parameter_values_for_fully_qualified_parameter_names_by_domain(
         self,
     ) -> Dict[Domain, Dict[str, Any]]:
         domain: Domain

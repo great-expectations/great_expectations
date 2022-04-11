@@ -3,6 +3,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -52,7 +53,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[str, float] = 1.0,
         candidate_regexes: Optional[Union[str, Iterable[str]]] = None,
-        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
+        ] = None,
         json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
