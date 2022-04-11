@@ -10,9 +10,9 @@ This how-to guide demonstrates advanced examples for configuring a <TechnicalTag
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- [Configured a Datasource using the v3 API](../../../tutorials/getting_started/connect_to_data.md)
-- [Created an Expectation Suite](../../../tutorials/getting_started/create_your_first_expectations.md)
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- [Configured a Datasource using the v3 API](../../../tutorials/getting_started/tutorial_connect_to_data.md)
+- [Created an Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md)
 
 </Prerequisites>
 
