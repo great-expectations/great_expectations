@@ -8,8 +8,8 @@ If you would like to implement custom notifications that include a link to Data 
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-  - [Created an Expectation Suite to use for validation](../../../tutorials/getting_started/create_your_first_expectations.md)
+  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+  - [Created an Expectation Suite to use for validation](../../../tutorials/getting_started/tutorial_create_expectations.md)
 
 </Prerequisites>
 
