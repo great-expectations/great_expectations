@@ -458,10 +458,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 expectation_configuration_builder=ReconciliationStrategy.UPDATE,
             ),
         )
+        self.rules = effective_rules
         updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
             rule.name: rule.to_json_dict() for rule in effective_rules
         }
-        self.rules: List[Rule] = effective_rules
         self._profiler_config.rules = updated_rules
 
     def reconcile_profiler_variables(
@@ -933,9 +933,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_request=batch_request,
             force_batch_data=True,
             reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
         )
 
         result: ExpectationSuite = profiler.get_expectation_suite(
@@ -1138,6 +1135,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @variables.setter
     def variables(self, value: Optional[ParameterContainer]):
         self._variables = value
+        self.config.variables = convert_variables_to_dict(variables=value)
 
     @property
     def rules(self) -> List[Rule]:
