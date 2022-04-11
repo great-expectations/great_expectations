@@ -1091,7 +1091,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Split on date_part values in column_name, truncated to date_part.
 
         For example if date_part = DatePart.DAY, then days with unique higher significance date parts e.g. months, years
-        will be treated as distinct values.
+        will be treated as distinct values, and lower significance parts will be ignored (truncated) e.g. hours, minutes.
 
         Args:
             table_name: table to split.
@@ -1119,6 +1119,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     ) -> bool:
         """Split on year values in column_name.
 
+        Values are NOT truncated, however this method returns the same results
+        as _split_on_truncated_year but is included for completeness.
+
         Args:
             table_name: table to split.
             column_name: column in table to use in determining split.
@@ -1142,9 +1145,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         column_name: str,
         batch_identifiers: dict,
     ) -> bool:
-        """Split on month-truncated values in column_name.
+        """Split on month values in column_name.
 
-        Truncated values are rounded down to the beginning of the month.
+        Values are NOT truncated, for example this will return data for a
+        given month for ALL years. This may be useful for viewing seasonality.
 
         Args:
             table_name: table to split.
@@ -1168,9 +1172,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         column_name: str,
         batch_identifiers: dict,
     ) -> bool:
-        """Split on week-truncated values in column_name.
+        """Split on week values in column_name.
 
-        Truncated values are rounded down to the beginning of the week.
+        Values are NOT truncated, for example this will return data for a
+        given week for ALL years. This may be useful for viewing seasonality.
 
         Args:
             table_name: table to split.
@@ -1194,9 +1199,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         column_name: str,
         batch_identifiers: dict,
     ) -> bool:
-        """Split on day-truncated values in column_name.
+        """Split on day values in column_name.
 
-        Truncated values are rounded down to the beginning of the day.
+        Values are NOT truncated, for example this will return data for a
+        given day of the month for ALL months and years. I.e. the first of
+        the month for every month in every year of the data set.
 
         Args:
             table_name: table to split.
@@ -1222,6 +1229,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         date_part: DatePart,
     ) -> bool:
         """Split on date_part values in column_name.
+
+        Values are NOT truncated, for example this will return data for a
+        given month (if month is chosen as the date_part) for ALL years.
+        This may be useful for viewing seasonality.
 
         Args:
             table_name: table to split.

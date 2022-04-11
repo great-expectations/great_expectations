@@ -436,10 +436,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         column_name: str,
         date_part: DatePart,
     ) -> "sa.sql.expression.Select":
-        """Split on truncated values in column_name using provided date_trunc_directive.
+        """Split on truncated values in column_name using provided date_part.
 
         Truncated values are rounded down to the beginning of the interval. For
-        example, if date_trunc_directive = "month" then all datetime values are
+        example, if date_part = DatePart.MONTH then all datetime values are
         rounded down to the beginning of their month in their respective year.
 
         Args:
@@ -465,6 +465,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     ) -> "sa.sql.expression.Select":  # noqa: F821
         """Split on year values in column_name.
 
+        Values are NOT truncated, however this method returns the same results
+        as _split_on_truncated_year but is included for completeness.
+
         Args:
             table_name: table to split.
             column_name: column in table to use in determining split.
@@ -481,9 +484,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         table_name: str,
         column_name: str,
     ) -> "sa.sql.expression.Select":  # noqa: F821
-        """Split on month-truncated values in column_name.
+        """Split on month values in column_name.
 
-        Truncated values are rounded down to the beginning of the month.
+        Values are NOT truncated, for example this will return data for a
+        given month for ALL years. This may be useful for viewing seasonality.
 
         Args:
             table_name: table to split.
@@ -501,9 +505,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         table_name: str,
         column_name: str,
     ) -> "sa.sql.expression.Select":  # noqa: F821
-        """Split on week-truncated values in column_name.
+        """Split on week values in column_name.
 
-        Truncated values are rounded down to the beginning of the week.
+        Values are NOT truncated, for example this will return data for a
+        given week for ALL years. This may be useful for viewing seasonality.
 
         Args:
             table_name: table to split.
@@ -521,9 +526,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         table_name: str,
         column_name: str,
     ) -> "sa.sql.expression.Select":  # noqa: F821
-        """Split on day-truncated values in column_name.
+        """Split on day values in column_name.
 
-        Truncated values are rounded down to the beginning of the day.
+        Values are NOT truncated, for example this will return data for a
+        given day of the month for ALL months and years. I.e. the first of
+        the month for every month in every year of the data set.
 
         Args:
             table_name: table to split.
@@ -543,6 +550,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         date_part: DatePart,
     ) -> "sa.sql.expression.Select":
         """Split on date_part values in column_name.
+
+        Values are NOT truncated, for example this will return data for a
+        given month (if month is chosen as the date_part) for ALL years.
+        This may be useful for viewing seasonality.
 
         Args:
             table_name: table to split.
