@@ -43,6 +43,7 @@ class GEDependencies:
             "jsonschema",
             "mistune",
             "nbformat",
+            "notebook",
             "numpy",
             "packaging",
             "pandas",
