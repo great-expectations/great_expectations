@@ -17,6 +17,7 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.sqlalchemy_execution_engine import DatePart
 
 try:
     import sqlalchemy as sa
@@ -354,9 +355,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         table_name: str,
         column_name: str,
     ) -> "sa.sql.expression.Select":  # noqa: F821
-        """Split on year-truncated values in column_name.
-
-        Truncated values are rounded down to the beginning of the year.
+        """Split on year values in column_name.
 
         Args:
             table_name: table to split.
@@ -369,12 +368,34 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             [
                 sa.func.distinct(
                     sa.func.date_trunc(
-                        "year",
+                        DatePart.YEAR.value,
                         sa.column(column_name),
                     )
                 )
             ]
         ).select_from(sa.text(table_name))
+        # TODO: AJB 20220411 the below line should replace the lines above in this method
+        # return self._split_on_date_part(table_name=table_name, column_name=column_name, date_part=DatePart.YEAR)
+
+    def _split_on_truncated_year(
+        self,
+        table_name: str,
+        column_name: str,
+    ) -> "sa.sql.expression.Select":  # noqa: F821
+        """Split on year-truncated values in column_name.
+
+        Truncated values are rounded down to the beginning of the year.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            Select query for distinct split values.
+        """
+        return self._split_on_truncated_date_part(
+            table_name=table_name, column_name=column_name, date_part=DatePart.YEAR
+        )
 
     def _split_on_month(
         self,
@@ -396,7 +417,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             [
                 sa.func.distinct(
                     sa.func.date_trunc(
-                        "month",
+                        DatePart.MONTH.value,
                         sa.column(column_name),
                     )
                 )
@@ -423,7 +444,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             [
                 sa.func.distinct(
                     sa.func.date_trunc(
-                        "day",
+                        DatePart.DAY.value,
                         sa.column(column_name),
                     )
                 )
@@ -450,18 +471,38 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             [
                 sa.func.distinct(
                     sa.func.date_trunc(
-                        "week",
+                        DatePart.WEEK.value,
                         sa.column(column_name),
                     )
                 )
             ]
         ).select_from(sa.text(table_name))
 
-    def _split_on_date_trunc_directive(
+    def _split_on_date_part(
         self,
         table_name: str,
         column_name: str,
-        date_trunc_directive: str,
+        date_part: DatePart,
+    ) -> "sa.sql.expression.Select":
+        """Split on date_part values in column_name.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+            date_part: part of the date to be used for splitting e.g. DatePart.DAY
+
+        Returns:
+            Select query for distinct split values.
+        """
+        return sa.select(
+            [sa.func.distinct(sa.extract(date_part.value, sa.column(column_name)))]
+        ).select_from(sa.text(table_name))
+
+    def _split_on_truncated_date_part(
+        self,
+        table_name: str,
+        column_name: str,
+        date_part: DatePart,
     ) -> "sa.sql.expression.Select":
         """Split on truncated values in column_name using custom date_trunc_directive.
 
@@ -472,8 +513,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Args:
             table_name: table to split.
             column_name: column in table to use in determining split.
-            date_trunc_directive: string determining interval for truncation, from
-                SQL date_trunc. E.g. year, quarter, month, week, day, hour, minute...
+            date_part: part of the date to be used for splitting e.g. DatePart.DAY
 
         Returns:
             Select query for distinct split values.
@@ -481,7 +521,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         return sa.select(
             [
                 sa.func.distinct(
-                    sa.func.date_trunc(date_trunc_directive, sa.column(column_name))
+                    sa.func.date_trunc(date_part.value, sa.column(column_name))
                 )
             ]
         ).select_from(sa.text(table_name))

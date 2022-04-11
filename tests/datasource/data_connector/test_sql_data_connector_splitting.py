@@ -51,8 +51,18 @@ DAYS_IN_TAXI_DATA = (
     [
         pytest.param("_split_on_year", 3, 120, YEARS_IN_TAXI_DATA, id="_split_on_year"),
         pytest.param(
-            "_split_on_month", 36, 30, MONTHS_IN_TAXI_DATA, id="_split_on_month"
+            "_split_on_truncated_year",
+            3,
+            120,
+            YEARS_IN_TAXI_DATA,
+            id="_split_on_truncated_year",
         ),
+        # pytest.param(
+        #     "_split_on_month", 12, 30, [f"{mo:02d}" for mo in range(1, 12 + 1)], id="_split_on_month"
+        # ),
+        # pytest.param(
+        #     "_split_on_truncated_month", 36, 10, MONTHS_IN_TAXI_DATA, id="_split_on_truncated_month"
+        # ),
     ],
 )
 def test__split_on_year_configured_asset_sql_data_connector(
