@@ -10,15 +10,15 @@ This reference guide is designed to present you with clear options for upgrading
 Here’s an overview of the components of a typical Great Expectations deployment:
 
 * Great Expectations configs and metadata
-  * [Options for storing Great Expectations configuration](customize_your_deployment.md#options-for-storing-great-expectations-configuration)
-  * [Options for storing Expectations](customize_your_deployment.md#options-for-storing-expectations)
-  * [Options for storing Validation Results](customize_your_deployment.md#options-for-storing-validation-results)
-  * [Options for customizing generated notebooks](customize_your_deployment.md#options-for-customizing-generated-notebooks)
+  * [Options for storing Great Expectations configuration](#options-for-storing-great-expectations-configuration)
+  * [Options for storing Expectations](#options-for-storing-expectations)
+  * [Options for storing Validation Results](#options-for-storing-validation-results)
+  * [Options for customizing generated notebooks](#options-for-customizing-generated-notebooks)
 
 * Integrations to related systems
-  * [Connecting to Data](customize_your_deployment.md#connecting-to-data)
-  * [Options for hosting Data Docs](customize_your_deployment.md#options-for-hosting-data-docs)
-  * [Additional Checkpoints and Actions](customize_your_deployment.md#additional-checkpoints-and-actions)
+  * [Connecting to Data](#connecting-to-data)
+  * [Options for hosting Data Docs](#options-for-hosting-data-docs)
+  * [Additional Checkpoints and Actions](#additional-checkpoints-and-actions)
   * [How to update Data Docs as a Validation Action](../guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action.md)
 
 ## Options for storing Great Expectations configuration
