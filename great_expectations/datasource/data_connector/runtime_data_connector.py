@@ -1,4 +1,5 @@
 import logging
+import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -54,9 +55,13 @@ class RuntimeDataConnector(DataConnector):
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
         )
-        # build base with
         self._batch_identifiers: dict = {}
-        self._add_batch_identifiers(batch_identifiers)
+        assets_configured: bool = False
+        if assets:
+            assets_configured = True
+        self._add_batch_identifiers(
+            batch_identifiers, assets_configured=assets_configured
+        )
 
         self._refresh_data_references_cache()
 
@@ -71,16 +76,26 @@ class RuntimeDataConnector(DataConnector):
         return self._assets
 
     def _add_batch_identifiers(
-        self, batch_identifiers: List[str], data_asset_name: Optional[str] = None
+        self,
+        batch_identifiers: List[str],
+        data_asset_name: Optional[str] = None,
+        assets_configured: bool = False,
     ):
-        if batch_identifiers is None or len(batch_identifiers) == 0:
+        if not batch_identifiers and not assets_configured:
             raise ge_exceptions.DataConnectorError(
                 "Asset configured but no batch_identifiers"
             )
 
-        if data_asset_name:
+        if not data_asset_name:
+            # TODO check this actual version
+            # deprecated 0.15.01
+            warnings.warn(
+                "We dont want you to do batch_identifiers on your own. Please name them as part of data_assets",
+                DeprecationWarning,
+            )
+        if data_asset_name and batch_identifiers:
             self._batch_identifiers[data_asset_name] = batch_identifiers
-        else:
+        elif batch_identifiers:
             self._batch_identifiers[self.name] = batch_identifiers
 
     # <WILL> Marker this was pulled from other file
@@ -249,11 +264,7 @@ class RuntimeDataConnector(DataConnector):
         self._update_data_references_cache(
             batch_request.data_asset_name, batch_definition_list, batch_identifiers
         )
-        # TODO: this is the fix! you have to return all the batches.
-        # build batch_definition_list
-
         data_asset_name: str = batch_request.data_asset_name
-        # {'asset_a': {'1-1': [{'datasource_name': 'my_datasource', 'data_connector_name': 'runtime', 'data_asset_name': 'asset_a', 'batch_identifiers': {'day': 1, 'month': 1}}], '1-2': [{'datasource_name': 'my_datasource', 'data_connector_name': 'runtime', 'data_asset_name': 'asset_a', 'batch_identifiers': {'day': 1, 'month': 2}}]}}
         batch_definition_list_new: List[BatchDefinition] = []
 
         subdict: dict = self._data_references_cache[data_asset_name]

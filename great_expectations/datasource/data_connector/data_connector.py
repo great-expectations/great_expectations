@@ -94,6 +94,7 @@ class DataConnector:
     def data_context_root_directory(self, data_context_root_directory: str):
         self._data_context_root_directory = data_context_root_directory
 
+    # <WILL> This is hte final critical step where the Batch is translated into a Batchdata
     def get_batch_data_and_metadata(
         self,
         batch_definition: BatchDefinition,

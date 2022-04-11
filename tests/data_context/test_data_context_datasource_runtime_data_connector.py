@@ -32,6 +32,8 @@ def taxi_test_file():
 # TODO:
 # adding tests where we keep adding files and have the assets populate correctly
 # this is because we know that everything should be correctly accessible at the Datacontext level.
+# 1. get_batch_list() should work correctly
+# 2. get_validator() should work correctly
 
 
 @pytest.fixture
@@ -86,9 +88,103 @@ def data_context_with_datasource_spark_engine_batch_spec_passthrough(
     return context
 
 
+@pytest.fixture
+def data_context_with_datasource_pandas_engine_assets_named(empty_data_context):
+    context = empty_data_context
+    config = yaml.load(
+        """
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        runtime:
+            class_name: RuntimeDataConnector
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+# TODO : Better check with batch_identifiers. You have to have both apparently
+#
 #########################################
 # Tests with data passed in as batch_data
 #########################################
+# Tests with PandasExecutionEngine: batch_data
+def test_get_batch_successful_specification_pandas_engine_asset(
+    data_context_with_datasource_pandas_engine_assets_named, test_df_pandas
+):
+    context: "DataContext" = data_context_with_datasource_pandas_engine_assets_named
+    test_df: pd.DataFrame = test_df_pandas
+
+    batch_list: list = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="runtime",
+            data_asset_name="asset_a",
+            runtime_parameters={"batch_data": test_df},
+            batch_identifiers={"month": 4, "day": 1},
+        )
+    )
+    assert len(batch_list) == 1
+    assert isinstance(batch_list[0], Batch)
+
+
+def test_get_batch_successful_specification_pandas_engine_asset_adding_more(
+    data_context_with_datasource_pandas_engine_assets_named, test_df_pandas
+):
+    context: "DataContext" = data_context_with_datasource_pandas_engine_assets_named
+    test_df: pd.DataFrame = test_df_pandas
+    context.create_expectation_suite("my_expectations")
+    my_validator: Validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="runtime",
+            data_asset_name="asset_a",
+            runtime_parameters={"batch_data": test_df},
+            batch_identifiers={"month": 4, "day": 1},
+        ),
+        expectation_suite_name="my_expectations",
+    )
+    print(my_validator)
+
+    my_validator: Validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="runtime",
+            data_asset_name="asset_a",
+            runtime_parameters={"batch_data": test_df},
+            batch_identifiers={"month": 4, "day": 2},
+        ),
+        expectation_suite_name="my_expectations",
+    )
+    # it is always going to be the most recent batch
+    # batch_list: list = context.get_batch_list(
+    #     batch_request=RuntimeBatchRequest(
+    #         datasource_name="my_datasource",
+    #         data_connector_name="runtime",
+    #         data_asset_name="asset_a",
+    #         runtime_parameters={"batch_data": test_df},
+    #         batch_identifiers={"month": 4, "day": 2},
+    #     )
+    # )
+    # assert len(batch_list) == 2
+    # assert isinstance(batch_list[0], Batch)
+    # batch_list
+
 
 # Tests with PandasExecutionEngine : batch_data
 def test_get_batch_successful_specification_pandas_engine(
@@ -108,6 +204,12 @@ def test_get_batch_successful_specification_pandas_engine(
     )
     assert len(batch_list) == 1
     assert isinstance(batch_list[0], Batch)
+
+
+# what are the tests that we want to include here? If this works then we are done
+# 1. getting pandas, but with the new configuration.
+# 2. Primary way of interacting with the
+#
 
 
 def test_get_batch_ambiguous_parameter_pandas_engine(
