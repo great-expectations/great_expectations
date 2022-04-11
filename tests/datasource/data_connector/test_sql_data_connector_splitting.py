@@ -6,7 +6,11 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
+)
 from tests.test_utils import load_data_into_test_database
 
 CONNECTION_STRING: str = "postgresql+psycopg2://postgres:@localhost/test_ci"
@@ -43,17 +47,21 @@ DAYS_IN_TAXI_DATA = (
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "splitter_method,num_expected_batch_definitions,expected_pickup_datetimes",
+    "splitter_method,num_expected_batch_definitions,num_expected_rows_in_first_batch_definition,expected_pickup_datetimes",
     [
-        pytest.param("_split_on_year", 3, YEARS_IN_TAXI_DATA, id="_split_on_year"),
-        pytest.param("_split_on_month", 36, MONTHS_IN_TAXI_DATA, id="_split_on_month"),
+        pytest.param("_split_on_year", 3, 120, YEARS_IN_TAXI_DATA, id="_split_on_year"),
+        pytest.param(
+            "_split_on_month", 36, 30, MONTHS_IN_TAXI_DATA, id="_split_on_month"
+        ),
     ],
 )
 def test__split_on_year_configured_asset_sql_data_connector(
     splitter_method,
     num_expected_batch_definitions,
+    num_expected_rows_in_first_batch_definition,
     expected_pickup_datetimes,
     data_context_with_datasource_postgresql_engine_no_data_connectors,
+    sa,
 ):
 
     # 1. Get conftest data_context with datasource which connects to TAXI_DATA_TABLE_NAME
@@ -104,8 +112,17 @@ def test__split_on_year_configured_asset_sql_data_connector(
 
     assert set(batch_definition_list) == set(expected_batch_definition_list)
 
-    batch_spec = data_connector.build_batch_spec(batch_definition_list[0])
+    # 4. Check that loaded data is as expected
 
-    context.datasources["my_datasource"].execution_engine.get_batch_data_and_markers(
-        batch_spec=batch_spec
+    batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(
+        batch_definition_list[0]
     )
+
+    batch_data: SqlAlchemyBatchData = context.datasources[
+        "my_datasource"
+    ].execution_engine.get_batch_data(batch_spec=batch_spec)
+
+    num_rows: int = batch_data.execution_engine.engine.execute(
+        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == num_expected_rows_in_first_batch_definition

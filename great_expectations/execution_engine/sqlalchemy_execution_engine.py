@@ -974,13 +974,53 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             Select query for distinct split values.
         """
-        parsed_batch_identifier_datetime: datetime.datetime = parse(
+        batch_identifier_datetime: datetime.datetime = self._parse_datetime_if_str(
             batch_identifiers[column_name]
         )
         return (
-            sa.func.date_trunc("year", sa.column(column_name))
-            == parsed_batch_identifier_datetime.year
+            sa.extract("year", sa.column(column_name)) == batch_identifier_datetime.year
         )
+
+    def _split_on_month(
+        self,
+        table_name: str,
+        column_name: str,
+        batch_identifiers: dict,
+    ) -> bool:
+        """Split on month-truncated values in column_name.
+
+        Truncated values are rounded down to the beginning of the month.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+            batch_identifiers: should contain a dateutil parseable datetime whose month
+                will be used for splitting.
+
+        Returns:
+            Select query for distinct split values.
+        """
+        batch_identifier_datetime: datetime.datetime = self._parse_datetime_if_str(
+            batch_identifiers[column_name]
+        )
+        return (
+            sa.extract("month", sa.column(column_name))
+            == batch_identifier_datetime.month
+        )
+
+    @staticmethod
+    def _parse_datetime_if_str(dt: Union[datetime.datetime, str]) -> datetime.datetime:
+        """Parse string to datetime or return if already datetime
+
+        Args:
+            dt: string to convert or datetime
+
+        Returns:
+            datetime.datetime of either parsed string or passthrough
+        """
+        if not isinstance(dt, datetime.datetime):
+            dt: datetime.datetime = parse(dt)
+        return dt
 
     def _split_on_divided_integer(
         self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict
