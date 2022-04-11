@@ -8,8 +8,8 @@ By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag
 
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- [Configured an Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
+- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
+- [Configured an Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md).
 - Installed [boto3](https://github.com/boto/boto3) in your local environment.
 - Identified the S3 bucket and prefix where Expectations will be stored.
 
