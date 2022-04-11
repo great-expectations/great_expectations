@@ -86,6 +86,8 @@ class InferredAssetSqlDataConnector(DataConnector):
 
         self._introspection_directives = introspection_directives or {}
 
+        self._assets = {}
+
         super().__init__(
             name=name,
             datasource_name=datasource_name,
