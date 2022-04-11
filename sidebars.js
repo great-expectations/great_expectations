@@ -288,7 +288,8 @@ module.exports = {
               items: [
                 'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
                 'guides/validation/advanced/how_to_implement_custom_notifications',
-                'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
+                'guides/validation/advanced/how_to_validate_data_without_a_checkpoint',
+                'guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint'
               ]
             },
             { type: 'doc', id: 'guides/validation/index', label: 'Index' }

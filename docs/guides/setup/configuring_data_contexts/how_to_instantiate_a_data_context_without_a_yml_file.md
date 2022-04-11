@@ -229,7 +229,7 @@ data_context_config = DataContextConfig(
 ### 2. Pass this DataContextConfig as a project_config to BaseDataContext
 
 ```python
-from great_expectations.data_context.types.base import BaseDataContext
+from great_expectations.data_context import BaseDataContext
 context = BaseDataContext(project_config=data_context_config)
 ```
 

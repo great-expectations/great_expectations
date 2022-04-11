@@ -50,9 +50,11 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     init_rule_parameter_builders,
 )
-from great_expectations.rule_based_profiler.rule.rule import Rule
+from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
 from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
+    RuleState,
     build_parameter_container_for_variables,
 )
 from great_expectations.types import SerializableDictDot
@@ -136,7 +138,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         self._usage_statistics_handler = usage_statistics_handler
 
-        # Necessary to annotate ExpectationSuite during `run()`
+        # Necessary to annotate ExpectationSuite during `get_expectation_suite()`
         self._citation = {
             "name": name,
             "config_version": config_version,
@@ -153,6 +155,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self._data_context = data_context
 
         self._rules = self._init_profiler_rules(rules=rules)
+
+        self._rule_states = []
 
     def _init_profiler_rules(
         self,
@@ -243,10 +247,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         force_batch_data: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
+    ) -> None:
         """
         Args:
             variables: attribute name/value pairs (overrides), commonly-used in Builder objects.
@@ -255,17 +256,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_request: Explicit batch_request used to supply data at runtime.
             force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
             reconciliation_directives: directives for how each rule component should be overwritten
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
-
-        Returns:
-            Set of rule evaluation results in the form of an ExpectationSuite
         """
-        assert not (
-            expectation_suite and expectation_suite_name
-        ), "Ambiguous arguments provided; you may pass in an ExpectationSuite or provide a name to instantiate a new one (but you may not do both)."
-
         effective_variables: Optional[
             ParameterContainer
         ] = self.reconcile_profiler_variables(
@@ -276,6 +267,58 @@ class BaseRuleBasedProfiler(ConfigPeer):
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
             rules=rules, reconciliation_directives=reconciliation_directives
         )
+
+        rule_state: RuleState
+        rule: Rule
+        for rule in effective_rules:
+            rule_state = rule.run(
+                variables=effective_variables,
+                batch_list=batch_list,
+                batch_request=batch_request,
+                force_batch_data=force_batch_data,
+            )
+            self.rule_states.append(rule_state)
+
+    def get_expectation_suite_meta(
+        self,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        Args:
+            expectation_suite: An existing ExpectationSuite to update.
+            expectation_suite_name: A name for returned ExpectationSuite.
+            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
+
+        Returns:
+            Dictionary corresponding to meta property of ExpectationSuite using ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
+        """
+        expectation_suite: ExpectationSuite = self.get_expectation_suite(
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+        return expectation_suite.meta
+
+    def get_expectation_suite(
+        self,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> ExpectationSuite:
+        """
+        Args:
+            expectation_suite: An existing ExpectationSuite to update.
+            expectation_suite_name: A name for returned ExpectationSuite.
+            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
+
+        Returns:
+            ExpectationSuite using ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
+        """
+        assert not (
+            expectation_suite and expectation_suite_name
+        ), "Ambiguous arguments provided; you may pass in an ExpectationSuite or provide a name to instantiate a new one (but you may not do both)."
 
         if expectation_suite is None:
             if expectation_suite_name is None:
@@ -292,24 +335,113 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 profiler_config=self._citation,
             )
 
-        rule: Rule
-        for rule in effective_rules:
-            expectation_configurations: List[ExpectationConfiguration] = rule.generate(
-                variables=effective_variables,
-                batch_list=batch_list,
-                batch_request=batch_request,
-                force_batch_data=force_batch_data,
+        expectation_configurations: List[
+            ExpectationConfiguration
+        ] = self.get_expectation_configurations()
+
+        expectation_configuration: ExpectationConfiguration
+        for expectation_configuration in expectation_configurations:
+            expectation_suite._add_expectation(
+                expectation_configuration=expectation_configuration,
+                send_usage_event=False,
+                match_type="domain",
+                overwrite_existing=True,
             )
-            expectation_configuration: ExpectationConfiguration
-            for expectation_configuration in expectation_configurations:
-                expectation_suite._add_expectation(
-                    expectation_configuration=expectation_configuration,
-                    send_usage_event=False,
-                    match_type="domain",
-                    overwrite_existing=True,
-                )
 
         return expectation_suite
+
+    def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
+        """
+        Returns:
+            List of ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
+        """
+        expectation_configurations: List[ExpectationConfiguration] = []
+
+        rule_state: RuleState
+        rule_output: RuleOutput
+        for rule_state in self.rule_states:
+            rule_output = RuleOutput(rule_state=rule_state)
+            expectation_configurations.extend(
+                rule_output.get_expectation_configurations()
+            )
+
+        return expectation_configurations
+
+    def get_fully_qualified_parameter_names_by_domain(self) -> Dict[Domain, List[str]]:
+        """
+        Returns:
+            Dictionary of fully-qualified parameter names by Domain, accumulated from RuleState of every Rule executed.
+        """
+        fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = {}
+
+        rule_state: RuleState
+        rule_output: RuleOutput
+        for rule_state in self.rule_states:
+            rule_output = RuleOutput(rule_state=rule_state)
+            fully_qualified_parameter_names_by_domain.update(
+                rule_output.get_fully_qualified_parameter_names_by_domain()
+            )
+
+        return fully_qualified_parameter_names_by_domain
+
+    def get_fully_qualified_parameter_names_for_domain_id(
+        self, domain_id: str
+    ) -> List[str]:
+        """
+        Args:
+            domain_id: ID of desired Domain object.
+
+        Returns:
+            List of fully-qualified parameter names for Domain with domain_id as specified, accumulated from RuleState of corresponding Rule executed.
+        """
+        rule_state: RuleState
+        for rule_state in self.rule_states:
+            domain: Domain = rule_state.get_domains_as_dict().get(domain_id)
+            if domain is not None:
+                rule_output: RuleOutput = RuleOutput(rule_state=rule_state)
+                return rule_output.get_fully_qualified_parameter_names_for_domain_id(
+                    domain_id=domain_id
+                )
+
+    def get_parameter_values_for_fully_qualified_parameter_names_by_domain(
+        self,
+    ) -> Dict[Domain, Dict[str, Any]]:
+        """
+        Returns:
+            Dictionaries of values for fully-qualified parameter names by Domain, accumulated from RuleState of every Rule executed.
+        """
+        values_for_fully_qualified_parameter_names_by_domain: Dict[
+            Domain, Dict[str, Any]
+        ] = {}
+
+        rule_state: RuleState
+        rule_output: RuleOutput
+        for rule_state in self.rule_states:
+            rule_output = RuleOutput(rule_state=rule_state)
+            values_for_fully_qualified_parameter_names_by_domain.update(
+                rule_output.get_parameter_values_for_fully_qualified_parameter_names_by_domain()
+            )
+
+        return values_for_fully_qualified_parameter_names_by_domain
+
+    def get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
+        self, domain_id: str
+    ) -> Dict[str, Any]:
+        """
+        Args:
+            domain_id: ID of desired Domain object.
+
+        Returns:
+            Dictionary of values for fully-qualified parameter names for Domain with domain_id as specified, accumulated from RuleState of corresponding Rule executed.
+        """
+        rule_state: RuleState
+        for rule_state in self.rule_states:
+            domain: Domain = rule_state.get_domains_as_dict().get(domain_id)
+            if domain is not None:
+                rule_output: RuleOutput = RuleOutput(rule_state=rule_state)
+                return rule_output.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
+                    domain_id=domain_id
+                )
 
     def add_rule(self, rule: Rule) -> None:
         """
@@ -750,9 +882,19 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ge_cloud_id=ge_cloud_id,
         )
 
-        result: ExpectationSuite = profiler.run(
+        profiler.run(
             variables=variables,
             rules=rules,
+            batch_list=None,
+            batch_request=None,
+            force_batch_data=False,
+            reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+
+        result: ExpectationSuite = profiler.get_expectation_suite(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
@@ -784,13 +926,19 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rule.name: rule.to_json_dict() for rule in profiler.rules
         }
 
-        result: ExpectationSuite = profiler.run(
+        profiler.run(
             variables=None,
             rules=rules,
             batch_list=batch_list,
             batch_request=batch_request,
             force_batch_data=True,
             reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+
+        result: ExpectationSuite = profiler.get_expectation_suite(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
@@ -998,6 +1146,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @rules.setter
     def rules(self, value: List[Rule]):
         self._rules = value
+
+    @property
+    def rule_states(self) -> List[RuleState]:
+        return self._rule_states
 
     def to_json_dict(self) -> dict:
         rule: Rule

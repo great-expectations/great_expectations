@@ -570,7 +570,7 @@ def get_fully_qualified_parameter_names(
                     )
                 )
 
-    return fully_qualified_parameter_names
+    return sorted(fully_qualified_parameter_names, reverse=True)
 
 
 def _get_parameter_node_attribute_names(
