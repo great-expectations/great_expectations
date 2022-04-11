@@ -90,7 +90,6 @@ class InferredAssetSqlDataConnector(DataConnector):
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
-            assets=None,
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
