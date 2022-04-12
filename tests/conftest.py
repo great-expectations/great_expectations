@@ -314,7 +314,7 @@ def basic_expectation_suite(empty_data_context_stats_enabled):
                 kwargs={"column": "infinities"},
             ),
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "None"}
+                expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
             ),
             ExpectationConfiguration(
                 expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
@@ -509,28 +509,28 @@ def dataset_sample_data(test_backend):
     if test_backend == "mysql":
         data = {
             # "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10/2.2, np.inf],
-            "None": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
+            "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
             "naturals": [1, 2, 3, 4, 5, 6, 7],
         }
     else:
         data = {
             "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10 / 2.2, np.inf],
-            "None": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
+            "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
             "naturals": [1, 2, 3, 4, 5, 6, 7],
         }
     schemas = {
-        "pandas": {"infinities": "float64", "None": "float64", "naturals": "float64"},
+        "pandas": {"infinities": "float64", "nulls": "float64", "naturals": "float64"},
         "postgresql": {
             "infinities": "DOUBLE_PRECISION",
-            "None": "DOUBLE_PRECISION",
+            "nulls": "DOUBLE_PRECISION",
             "naturals": "NUMERIC",
         },
-        "sqlite": {"infinities": "FLOAT", "None": "FLOAT", "naturals": "FLOAT"},
-        "mysql": {"None": "DOUBLE", "naturals": "DOUBLE"},
-        "mssql": {"infinities": "FLOAT", "None": "FLOAT", "naturals": "FLOAT"},
+        "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
+        "mysql": {"nulls": "DOUBLE", "naturals": "DOUBLE"},
+        "mssql": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
         "spark": {
             "infinities": "FloatType",
-            "None": "FloatType",
+            "nulls": "FloatType",
             "naturals": "FloatType",
         },
     }
@@ -565,16 +565,16 @@ def sqlalchemy_dataset(test_backends):
 
     data = {
         "infinities": [-np.inf, -10, -np.pi, 0, np.pi, 10 / 2.2, np.inf],
-        "None": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
+        "nulls": [np.nan, None, 0, 1.1, 2.2, 3.3, None],
         "naturals": [1, 2, 3, 4, 5, 6, 7],
     }
     schemas = {
         "postgresql": {
             "infinities": "DOUBLE_PRECISION",
-            "None": "DOUBLE_PRECISION",
+            "nulls": "DOUBLE_PRECISION",
             "naturals": "DOUBLE_PRECISION",
         },
-        "sqlite": {"infinities": "FLOAT", "None": "FLOAT", "naturals": "FLOAT"},
+        "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
     }
     return get_dataset(backend, data, schemas=schemas, profiler=None)
 

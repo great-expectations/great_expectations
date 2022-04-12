@@ -143,10 +143,10 @@ def test_get_metrics(
                             },
                             "parameter_builders": [
                                 {
-                                    "evaluation_parameter_builder_configs": None,
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                     "batch_request": None,
                                     "metric_name": "table.row_count",
+                                    "evaluation_parameter_builder_configs": None,
                                     "json_serialize": True,
                                     "class_name": "MetricMultiBatchParameterBuilder",
                                     "metric_value_kwargs": None,
@@ -164,11 +164,11 @@ def test_get_metrics(
                                     "batch_request": None,
                                     "validation_parameter_builder_configs": [
                                         {
-                                            "evaluation_parameter_builder_configs": None,
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                                             "batch_request": None,
                                             "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                                             "metric_name": "table.row_count",
+                                            "evaluation_parameter_builder_configs": None,
                                             "json_serialize": True,
                                             "replace_nan_with_zero": True,
                                             "metric_value_kwargs": None,
