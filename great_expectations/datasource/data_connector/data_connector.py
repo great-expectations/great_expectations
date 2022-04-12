@@ -94,7 +94,6 @@ class DataConnector:
     def data_context_root_directory(self, data_context_root_directory: str):
         self._data_context_root_directory = data_context_root_directory
 
-    # <WILL> This is hte final critical step where the Batch is translated into a Batchdata
     def get_batch_data_and_metadata(
         self,
         batch_definition: BatchDefinition,
@@ -111,10 +110,6 @@ class DataConnector:
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
-        print(batch_data)
-        print("HI WILl")
-        print(batch_definition.id)
-        print("where do we get this ID?")
         self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,
