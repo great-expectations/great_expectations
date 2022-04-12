@@ -104,23 +104,25 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
 
 
-def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
+def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
-    # BatchRequest yielding two batches (January, 2019 and February, 2019 trip data)
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
+    metric_domain_kwargs: dict = {"column": "fare_amount"}
+
     numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="row_count_range",
-        metric_name="table.row_count",
+        name="column_min_range",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
         estimator="oneshot",
         false_positive_rate=1.0e-2,
         round_decimals=0,
@@ -131,7 +133,8 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.TABLE,
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -151,13 +154,13 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
+    fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
     expected_value_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
-                "domain_kwargs": {},
-                "metric_name": "table.row_count",
+                "domain_kwargs": {"column": "fare_amount"},
+                "metric_name": "column.min",
                 "metric_value_kwargs": None,
                 "metric_dependencies": None,
             },
@@ -178,15 +181,16 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
-    expected_value_01_lower: float = 7510.0
-    expected_value_01_upper: float = 8995.0
+    expected_value_01_lower: float = -52.0
+    expected_value_01_upper: float = -21.0
 
     assert actual_value_01_lower == expected_value_01_lower
     assert actual_value_01_upper == expected_value_01_upper
 
     numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="row_count_range",
-        metric_name="table.row_count",
+        name="column_min_range",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
         estimator="oneshot",
         false_positive_rate=5.0e-2,
         round_decimals=0,
@@ -213,12 +217,12 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
-    expected_value_05_lower: float = 7550.0
-    expected_value_05_upper: float = 8975.0
+    expected_value_05_lower: float = -51.0
+    expected_value_05_upper: float = -21.0
 
     assert actual_value_05_lower == expected_value_05_lower
     assert actual_value_05_upper == expected_value_05_upper
 
     # if false positive rate is higher, our range should be more narrow
-    assert actual_value_01_lower < actual_value_05_lower
-    assert actual_value_01_upper > actual_value_05_upper
+    assert actual_value_01_lower <= actual_value_05_lower
+    assert actual_value_01_upper >= actual_value_05_upper
