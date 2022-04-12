@@ -171,8 +171,6 @@ class RuntimeDataConnector(DataConnector):
         batch_definition: BatchDefinition,
         runtime_parameters: dict,
     ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
-        # TODO: this is the method that aren't changing the behavior of. ensure that everything else works accordingly
-        # thi
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
             batch_definition=batch_definition,
             runtime_parameters=runtime_parameters,
@@ -350,39 +348,37 @@ class RuntimeDataConnector(DataConnector):
     def _validate_batch_identifiers(
         self, data_asset_name: str, batch_identifiers: dict
     ):
-        if not batch_identifiers:
-            raise ge_exceptions.DataConnectorError(
-                "we need to have batch_identifiers for RuntimeDataConnector"
-            )
-        if not data_asset_name:
-            raise ge_exceptions.DataConnectorError(
-                "we need data_asset_name for RuntimeDataConnector"
-            )
-
-        batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
         configured_asset_names: List[str] = list(self.assets.keys())
-
-        # then we know that we are referencing a configured asset
         if data_asset_name in configured_asset_names:
-            asset: Asset = self.assets[data_asset_name]
-            if not set(batch_identifiers_keys) == set(asset.batch_identifiers):
-                raise ge_exceptions.DataConnectorError(
-                    # make this a little clearer
-                    f"""
-                    Data Asset {data_asset_name} was invoked with one or more batch_identifiers that were not configured for the asset.
-                    """
-                )
+            self._validate_asset_level_batch_identifiers(
+                data_asset_name=data_asset_name, batch_identifiers=batch_identifiers
+            )
         else:
-            # TODO: make clear that this behavior is different.. you can only define a few identifiers
+            self._validate_data_connector_level_batch_identifiers(
+                batch_identifiers=batch_identifiers
+            )
 
-            if not set(batch_identifiers_keys) <= set(
-                self._batch_identifiers[self.name]
-            ):
-                raise ge_exceptions.DataConnectorError(
-                    f"""RuntimeDataConnector "{self.name}" was invoked with one or more batch identifiers that do not
+    def _validate_asset_level_batch_identifiers(
+        self, data_asset_name: str, batch_identifiers: dict
+    ):
+        asset: Asset = self.assets[data_asset_name]
+        batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
+        if not set(batch_identifiers_keys) == set(asset.batch_identifiers):
+            raise ge_exceptions.DataConnectorError(
+                f"""
+                Data Asset {data_asset_name} was invoked with one or more batch_identifiers that were not configured for the asset.
+                """
+            )
+
+    def _validate_data_connector_level_batch_identifiers(self, batch_identifiers: dict):
+        batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
+        # TODO: do we do a warning here?
+        if not set(batch_identifiers_keys) <= set(self._batch_identifiers[self.name]):
+            raise ge_exceptions.DataConnectorError(
+                f"""RuntimeDataConnector "{self.name}" was invoked with one or more batch identifiers that do not
         appear among the configured batch identifiers.
                             """
-                )
+            )
 
     def self_check(self, pretty_print=True, max_examples=3):
         """
