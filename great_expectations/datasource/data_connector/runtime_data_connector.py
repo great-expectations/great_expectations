@@ -199,6 +199,7 @@ class RuntimeDataConnector(DataConnector):
         runtime_parameters: dict,
     ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
         # TODO: this is the method that aren't changing the behavior of. ensure that everything else works accordingly
+        # thi
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
             batch_definition=batch_definition,
             runtime_parameters=runtime_parameters,
@@ -206,6 +207,9 @@ class RuntimeDataConnector(DataConnector):
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
+        # as long as we find the batch definition and pull it, then we are good.
+        #
+        print(batch_definition)
         self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,
@@ -271,9 +275,16 @@ class RuntimeDataConnector(DataConnector):
         batch_identifiers: IDDict,
     ):
         data_reference = self._get_data_reference_name(batch_identifiers)
-        self._data_references_cache[data_asset_name] = {
-            data_reference: batch_definition_list
-        }
+        if data_asset_name not in self._data_references_cache:
+            # add
+            self._data_references_cache[data_asset_name] = {
+                data_reference: batch_definition_list
+            }
+            # or replace
+        else:
+            self._data_references_cache[data_asset_name][
+                data_reference
+            ] = batch_definition_list
 
     def _self_check_fetch_batch(
         self,

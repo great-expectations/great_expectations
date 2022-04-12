@@ -637,9 +637,6 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
             ],
         }
     }
-
-    # second batch
-
     batch_identifiers: dict = {"day": 1, "month": 2}
     batch_request: dict = {
         "datasource_name": basic_datasource_with_assets.name,
@@ -672,6 +669,14 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
     # is that how things were before too?
     assert runtime_data_connector._data_references_cache == {
         "asset_a": {
+            "1-1": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="runtime",
+                    data_asset_name="asset_a",
+                    batch_identifiers=IDDict({"day": 1, "month": 1}),
+                )
+            ],
             "1-2": [
                 BatchDefinition(
                     datasource_name="my_datasource",
@@ -682,13 +687,6 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
             ],
         }
     }
-
-
-# this is
-def test_data_references_cache_updating_after_batch_request_named_assets(
-    basic_datasource_with_assets,
-):
-    pass
 
 
 def test_get_batch_definition_list_from_batch_request_length_one(
