@@ -25,6 +25,7 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    DataAssistantResult,
     Domain,
 )
 
@@ -42,7 +43,6 @@ class DataAssistant(ABC):
         data_context=context,
     )
     data_assistant.build()
-    # TODO: <Alex>ALEX -- "DataAssistantResult" is Work-In-Progress</Alex>
     result: DataAssistantResult = data_assistant.run()
 
     Then:
@@ -50,6 +50,7 @@ class DataAssistant(ABC):
         expectation_configurations: List[ExpectationConfiguration] = result.expectation_configurations
         expectation_suite: ExpectationSuite = result.expectation_suite
         expectation_suite_meta: Dict[str, Any] = expectation_suite.meta
+        profiler_config: RuleBasedProfilerConfig = result.profiler_config
     """
 
     def __init__(
@@ -150,8 +151,12 @@ class DataAssistant(ABC):
             reconciliation_strategy=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES.variables,
         )
 
-    def run(self) -> None:
-        # TODO: <Alex>ALEX -- WILL_RETURN_RESULT_OBJECT</Alex>
+    def run(
+        self,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> DataAssistantResult:
         self.profiler.run(
             variables=None,
             rules=None,
@@ -160,7 +165,16 @@ class DataAssistant(ABC):
             force_batch_data=False,
             reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
         )
-        # TODO: <Alex>ALEX -- WILL_RETURN_RESULT_OBJECT</Alex>
+        return DataAssistantResult(
+            profiler_config=self.profiler.config,
+            metrics=self.get_metrics(),
+            expectation_configurations=self.get_expectation_configurations(),
+            expectation_suite=self.get_expectation_suite(
+                expectation_suite=expectation_suite,
+                expectation_suite_name=expectation_suite_name,
+                include_citation=include_citation,
+            ),
+        )
 
     @property
     def name(self) -> str:
