@@ -138,13 +138,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         self._usage_statistics_handler = usage_statistics_handler
 
-        # Necessary to annotate ExpectationSuite during `get_expectation_suite()`
-        self._citation = {
-            "name": name,
-            "config_version": config_version,
-            "variables": variables,
-            "rules": rules,
-        }
+        self._citation = None
 
         # Convert variables argument to ParameterContainer
         _variables: ParameterContainer = build_parameter_container_for_variables(
@@ -268,6 +262,17 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules, reconciliation_directives=reconciliation_directives
         )
 
+        rule: Rule
+        effective_rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
+            rule.name: rule.to_json_dict() for rule in effective_rules
+        }
+        self.citation = {
+            "name": self.name,
+            "config_version": self.config_version,
+            "variables": convert_variables_to_dict(variables=self.variables),
+            "rules": effective_rules_configs,
+        }
+
         rule_state: RuleState
         rule: Rule
         for rule in effective_rules:
@@ -332,7 +337,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if include_citation:
             expectation_suite.add_citation(
                 comment="Suite created by Rule-Based Profiler with the configuration included.",
-                profiler_config=self._citation,
+                profiler_config=self.citation,
             )
 
         expectation_configurations: List[
@@ -1102,12 +1107,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
             Dictionary that contains RuleBasedProfiler state
         """
         # Provide visibility into parameters that RuleBasedProfiler was instantiated with.
-        report_object: dict = {"config": self._citation}
+        report_object: dict = {"config": self.citation}
 
         if pretty_print:
             print(f"\nRuleBasedProfiler class name: {self.name}")
 
-            if not self._variables:
+            if not self.variables:
                 print(
                     'Your current RuleBasedProfiler configuration has an empty "variables" attribute. \
                     Please ensure you populate it if you\'d like to reference values in your "rules" attribute.'
@@ -1144,6 +1149,14 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @rules.setter
     def rules(self, value: List[Rule]):
         self._rules = value
+
+    @property
+    def citation(self) -> Optional[Dict[str, Any]]:
+        return self._citation
+
+    @citation.setter
+    def citation(self, value: Optional[Dict[str, Any]]):
+        self._citation = value
 
     @property
     def rule_states(self) -> List[RuleState]:
