@@ -482,9 +482,20 @@ def load_data_into_test_database(
     load_full_dataset: bool = False,
     convert_colnames_to_datetime: Optional[List[str]] = None,
 ) -> None:
-    """
-    Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
+    """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
+
     This includes local Dockerized DBs like postgres, but also cloud-dbs like BigQuery and Redshift.
+
+    Args:
+        table_name: name of the table to write to.
+        connection_string: used to connect to the database.
+        csv_path: path of a single csv to write.
+        csv_paths: list of paths of csvs to write.
+        load_full_dataset: if False, load only the first 10 rows.
+        convert_colnames_to_datetime: List of column names to convert to datetime before writing to db.
+
+    Returns:
+        None
     """
     if csv_path and csv_paths:
         csv_paths.append(csv_path)
@@ -510,6 +521,7 @@ def load_data_into_test_database(
         connection = engine.connect()
         print(f"Dropping table {table_name}")
         connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+        dfs: List[pd.DataFrame] = []
         for csv_path in csv_paths:
             df = pd.read_csv(csv_path)
             for colname_to_convert in convert_colnames_to_datetime:
@@ -517,8 +529,14 @@ def load_data_into_test_database(
             if not load_full_dataset:
                 # Improving test performance by only loading the first 10 rows of our test data into the db
                 df = df.head(10)
-            print(f"Creating table {table_name} and adding data from {csv_path}")
-            df.to_sql(name=table_name, con=engine, index=False, if_exists="append")
+
+            dfs.append(df)
+
+        print(f"Creating table {table_name} and adding data from {csv_paths}")
+        all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
+        all_dfs_concatenated.to_sql(
+            name=table_name, con=engine, index=False, if_exists="append"
+        )
     except SQLAlchemyError as e:
         logger.error(
             """Docs integration tests encountered an error while loading test-data into test-database."""

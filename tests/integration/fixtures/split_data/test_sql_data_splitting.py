@@ -56,10 +56,8 @@ def _load_data(connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME):
     )
 
 dialect, CONNECTION_STRING = _get_connection_string_and_dialect()
-# TODO: AJB 202204 we need to fix the issue with writing the taxi data to
-#  bigquery and enable bigquery tests.
-if dialect != "bigquery":
-    _load_data(connection_string=CONNECTION_STRING)
+
+_load_data(connection_string=CONNECTION_STRING)
 
 print(f"Testing dialect: {dialect}")
 
@@ -123,12 +121,10 @@ truncating_test_cases: List[TestCase] = [
     ),
 ]
 
-# TODO: AJB 20220412 Enable these tests after fixing bigquery.
-if dialect not in ["bigquery"]:
-    test_cases.extend(non_truncating_test_cases)
-    # TODO: AJB 20220412 Enable these tests after enabling truncating in these dialects.
-    if dialect not in ["mysql", "mssql"]:
-        test_cases.extend(truncating_test_cases)
+test_cases.extend(non_truncating_test_cases)
+# TODO: AJB 20220412 Enable these tests after enabling truncating in these dialects.
+if dialect not in ["mysql", "mssql"]:
+    test_cases.extend(truncating_test_cases)
 
 
 for test_case in test_cases:
