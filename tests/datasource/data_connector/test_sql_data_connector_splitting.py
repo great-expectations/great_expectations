@@ -49,6 +49,7 @@ DAYS_IN_TAXI_DATA = (
 )
 
 
+# TODO: AJB 20220412 move this test to integration tests
 @pytest.mark.integration
 @pytest.mark.parametrize(
     "splitter_method,num_expected_batch_definitions,num_expected_rows_in_first_batch_definition,expected_pickup_datetimes",
@@ -75,7 +76,7 @@ DAYS_IN_TAXI_DATA = (
         ),
     ],
 )
-def test__split_on_year_configured_asset_sql_data_connector(
+def test__split_on_x_configured_asset_sql_data_connector(
     splitter_method,
     num_expected_batch_definitions,
     num_expected_rows_in_first_batch_definition,

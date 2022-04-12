@@ -440,6 +440,40 @@ def delete_config_from_filesystem(
     )
 
 
+def get_snowflake_connection_url() -> str:
+    """Get snowflake connection url from environment variables.
+
+    Returns:
+        String of the snowflake connection url.
+    """
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
+    sfUser = os.environ.get("SNOWFLAKE_USER")
+    sfPswd = os.environ.get("SNOWFLAKE_PW")
+    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
+    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+
+    return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+
+
+def get_bigquery_connection_url() -> str:
+    """Get bigquery connection url from environment variables.
+
+    Note: dataset defaults to "demo" if not set.
+
+    Returns:
+        String of the bigquery connection url.
+    """
+    gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+        )
+    bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "demo")
+
+    return f"bigquery://{gcp_project}/{bigquery_dataset}"
+
+
 def load_data_into_test_database(
     table_name: str,
     connection_string: str,
