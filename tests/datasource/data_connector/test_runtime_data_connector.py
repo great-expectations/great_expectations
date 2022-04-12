@@ -86,8 +86,7 @@ def test_self_check(basic_datasource):
     }
 
 
-# <TODO> this will need to output the data_asset_names that we have created
-def test_new_self_check(basic_datasource_with_assets):
+def test_self_check_named_assets(basic_datasource_with_assets):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
@@ -104,7 +103,69 @@ def test_new_self_check(basic_datasource_with_assets):
     }
 
 
-# Test where there is an incorrect configuration: where there is an asset but the batch_ids are missing
+def test_new_self_check_after_adding_named_asset_a(
+    basic_datasource_with_assets, test_df_pandas
+):
+    runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    res: List[
+        BatchDefinition
+    ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=RuntimeBatchRequest(
+            datasource_name=basic_datasource_with_assets.name,
+            data_connector_name="runtime",
+            data_asset_name="asset_a",
+            batch_identifiers={"month": 4, "day": 1},
+            runtime_parameters={"batch_data": test_df_pandas},
+        )
+    )
+    assert runtime_data_connector.self_check() == {
+        "class_name": "RuntimeDataConnector",
+        "data_asset_count": 2,
+        "example_data_asset_names": ["asset_a", "asset_b"],
+        "data_assets": {
+            "asset_a": {
+                "batch_definition_count": 1,
+                "example_data_references": ["4-1"],
+            },
+            "asset_b": {"batch_definition_count": 0, "example_data_references": []},
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+    }
+
+
+def test_new_self_check_after_adding_new_asset_c(basic_datasource_with_assets):
+    runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource_with_assets.data_connectors["runtime"]
+    )
+    res: List[
+        BatchDefinition
+    ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=RuntimeBatchRequest(
+            datasource_name=basic_datasource_with_assets.name,
+            data_connector_name="runtime",
+            data_asset_name="asset_c",
+            batch_identifiers={"hour": 12, "minute": 15},
+            runtime_parameters={"batch_data": test_df_pandas},
+        )
+    )
+    assert runtime_data_connector.self_check() == {
+        "class_name": "RuntimeDataConnector",
+        "data_asset_count": 3,
+        "example_data_asset_names": ["asset_a", "asset_b", "asset_c"],
+        "data_assets": {
+            "asset_a": {"batch_definition_count": 0, "example_data_references": []},
+            "asset_b": {"batch_definition_count": 0, "example_data_references": []},
+            "asset_c": {
+                "batch_definition_count": 1,
+                "example_data_references": ["12-15"],
+            },
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+    }
 
 
 def test_add_batch_identifiers_correct(basic_datasource_with_assets):
@@ -118,7 +179,7 @@ def test_add_batch_identifiers_correct(basic_datasource_with_assets):
     }
 
 
-def test_add_batch_identifiers_missing():
+def test_batch_identifiers_missing_completely():
     # missing from base DataConnector
     with pytest.raises(ge_exceptions.DataConnectorError):
         instantiate_class_from_config(
@@ -140,7 +201,8 @@ execution_engine:
             },
         )
 
-    # missing from Asset
+
+def test_batch_identifiers_missing_from_named_asset():
     with pytest.raises(ge_exceptions.DataConnectorError):
         basic_datasource: Datasource = instantiate_class_from_config(
             config=yaml.load(
@@ -233,15 +295,6 @@ def test_error_checking_missing_runtime_parameters(basic_datasource):
         )
 
 
-# <TODO> test where we are using the configuration with both batch_identifiers
-# and assets, but we are using something named in assets that is not in the
-# X 0. Simplest Asset is named and batch_identifier is in the Asset itself
-# X 1. Asset is named, but the batch_identifier is in the other Asset
-# x 2. Asset is named, but batch_identifier is not defined anywhere
-# x 3. Asset is named, but we are trying to use something the base_batch_identifier
-# x 4. Asset is not named, and we are passing in, but we are trying to use an identifer that is only in Asset
-
-
 def test_asset_is_name_batch_identifier_correctly_used(
     basic_datasource_with_assets, test_df_pandas
 ):
@@ -274,11 +327,6 @@ def test_asset_is_name_batch_identifier_correctly_used(
 def test_asset_is_named_but_batch_identifier_in_other_asset(
     basic_datasource_with_assets,
 ):
-    """
-    What does this test and why?
-
-    Asset is passing in a batch_identifier but it is defined int he other
-    """
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
@@ -301,11 +349,6 @@ def test_asset_is_named_but_batch_identifier_in_other_asset(
 def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
     basic_datasource_with_assets,
 ):
-    """
-    What does this test and why?
-
-    Asset is passing in a batch_identifier but it is defined int he other
-    """
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
@@ -315,13 +358,13 @@ def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
                 datasource_name=basic_datasource_with_assets.name,
                 data_connector_name="runtime",
                 data_asset_name="asset_a",
-                batch_identifiers={"blorg": 2022},
+                batch_identifiers={"blorg": 2022},  # blorg is not defined anywhere
                 runtime_parameters={"batch_data": test_df_pandas},
             )
         )
 
 
-def test_asset_is_named_trying_to_use_batch_identifier_define_at_data_connector(
+def test_named_asset_is_trying_to_use_batch_identifier_defined_in_data_connector(
     basic_datasource_with_assets, test_df_pandas
 ):
     runtime_data_connector: RuntimeDataConnector = (
@@ -343,7 +386,7 @@ def test_asset_is_named_trying_to_use_batch_identifier_define_at_data_connector(
         )
 
 
-def test_asset_is_runtime_trying_to_use_batch_identifier_define_at_asset_level(
+def test_runtime_batch_request_trying_to_use_batch_identifier_defined_at_asset_level(
     basic_datasource_with_assets, test_df_pandas
 ):
     runtime_data_connector: RuntimeDataConnector = (
@@ -442,9 +485,8 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    # Insure that keys in batch_identifiers["batch_identifiers"] that are not among batch_identifiers declared in
-    # configuration
-    # are not accepted.  In this test, all legal keys plus a single illegal key are present.
+    # Ensure that keys in batch_identifiers["batch_identifiers"] that are not among batch_identifiers declared in
+    # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
         "data_connector_name": test_runtime_data_connector.name,
@@ -468,8 +510,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    # Insure that keys in batch_identifiers["batch_identifiers"] that are not among batch_identifiers declared in
-    # configuration
+    # Ensure that keys in batch_identifiers["batch_identifiers"] that are not among batch_identifiers declared in configuration
     # are not accepted.  In this test, a single illegal key is present.
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
@@ -500,7 +541,6 @@ def test_get_available_data_asset_names(basic_datasource):
     assert available_data_asset_names == expected_available_data_asset_names
 
 
-# TODO: this test will ensure the data_assets will initially contain the named assets
 def test_get_available_data_asset_names_named_assets(basic_datasource_with_assets):
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
@@ -649,13 +689,12 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    # run with my_data_asset_1
+    # run with another batch under asset_a
     batch_definitions: List[
         BatchDefinition
     ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=batch_request
     )
-    # print(batch_definitions)
     assert batch_definitions == [
         BatchDefinition(
             datasource_name="my_datasource",
@@ -664,9 +703,6 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
             batch_identifiers=IDDict({"month": 2, "day": 1}),
         ),
     ]
-
-    # so the problem here is that we are going to pop the other one from the _data_references cache? i
-    # is that how things were before too?
     assert runtime_data_connector._data_references_cache == {
         "asset_a": {
             "1-1": [

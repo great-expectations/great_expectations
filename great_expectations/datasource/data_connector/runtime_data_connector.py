@@ -163,7 +163,8 @@ class RuntimeDataConnector(DataConnector):
         """Returns a list of data_assets that are both defined at runtime, and defined in DataConnector configuration"""
         defined_assets: List[str] = list(self.assets.keys())
         data_reference_keys: List[str] = list(self._data_references_cache.keys())
-        return defined_assets + data_reference_keys
+        available_assets: List[str] = list(set(defined_assets + data_reference_keys))
+        return available_assets
 
     # noinspection PyMethodOverriding
     def get_batch_data_and_metadata(
@@ -380,6 +381,8 @@ class RuntimeDataConnector(DataConnector):
                             """
             )
 
+    # TODO: Add self check where we are adding more data_assets. can this update?
+    # what happens to data references? do these get updated too?
     def self_check(self, pretty_print=True, max_examples=3):
         """
         Overrides the self_check method for RuntimeDataConnector. Normally the `self_check()` method will check
