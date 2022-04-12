@@ -60,10 +60,11 @@ class RuntimeDataConnector(DataConnector):
             assets = {}
         _assets: Dict[str, Union[dict, Asset]] = assets
         self._assets = _assets
+        self._batch_identifiers: dict = {}
+
         self._build_assets_from_config(config=assets)
 
         # handle batch_identifiers that are defined at the DataConnector-level
-        self._batch_identifiers: dict = {}
         self._add_batch_identifiers(batch_identifiers)
 
         self._refresh_data_references_cache()
@@ -76,7 +77,6 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_identifiers: List[str],
         data_asset_name: Optional[str] = None,
-        assets_configured: bool = False,
     ):
         # TODO: clean up this logic before submitting PR
         if not batch_identifiers and len(self.assets) == 0:
@@ -94,6 +94,10 @@ class RuntimeDataConnector(DataConnector):
             self._batch_identifiers[self.name] = batch_identifiers
         if data_asset_name and batch_identifiers:
             self._batch_identifiers[data_asset_name] = batch_identifiers
+        if data_asset_name and not batch_identifiers:
+            raise ge_exceptions.DataConnectorError(
+                "DataConnector has no batch_identifiers, either at the data connector or asset level. This is a problem"
+            )
 
     # <WILL> Marker this was pulled from other file
     def _build_assets_from_config(self, config: Dict[str, dict]):
@@ -257,19 +261,18 @@ class RuntimeDataConnector(DataConnector):
             batch_identifiers=IDDict(batch_identifiers),
             batch_spec_passthrough=batch_request.batch_spec_passthrough,
         )
-        # this is the problem. we aren't updating anything
         batch_definition_list = [batch_definition]
         self._update_data_references_cache(
             batch_request.data_asset_name, batch_definition_list, batch_identifiers
         )
-        data_asset_name: str = batch_request.data_asset_name
-        batch_definition_list_new: List[BatchDefinition] = []
-
-        subdict: dict = self._data_references_cache[data_asset_name]
-        # TODO: this logic is terrible. but this is how we are appending all of the BatchDefinitions that come in.
-        for k in subdict:
-            batch_definition_list_new.append(subdict[k][0])
-        return batch_definition_list_new
+        # data_asset_name: str = batch_request.data_asset_name
+        # batch_definition_list_new: List[BatchDefinition] = []
+        #
+        # subdict: dict = self._data_references_cache[data_asset_name]
+        # # TODO: this logic is terrible. but this is how we are appending all of the BatchDefinitions that come in.
+        # for k in subdict:
+        #     batch_definition_list_new.append(subdict[k][0])
+        return batch_definition_list
 
     def _update_data_references_cache(
         self,
@@ -277,22 +280,27 @@ class RuntimeDataConnector(DataConnector):
         batch_definition_list: List,
         batch_identifiers: IDDict,
     ):
-        # TODO: this doesn't update to the same asset
+        # always update:
+        # what does it mean to update?
+        # would you still want to update?
         data_reference = self._get_data_reference_name(batch_identifiers)
+        self._data_references_cache[data_asset_name] = {
+            data_reference: batch_definition_list
+        }
         # this is the terrible name where things are concatenated.
-        if data_asset_name not in self._data_references_cache:
-            # add
-            # TODO: do an actual add so that we can keep adding to the same thing?
-            # how do you keep track of everything though?
-            # where is the batch_data_actually stored
-            self._data_references_cache[data_asset_name] = {
-                data_reference: batch_definition_list
-            }
-            # or replace
-        else:
-            self._data_references_cache[data_asset_name][
-                data_reference
-            ] = batch_definition_list
+        # if data_asset_name not in self._data_references_cache:
+        #     # add
+        #     # TODO: do an actual add so that we can keep adding to the same thing?
+        #     # how do you keep track of everything though?
+        #     # where is the batch_data_actually stored
+        #     self._data_references_cache[data_asset_name] = {
+        #         data_reference: batch_definition_list
+        #     }
+        #     # or replace
+        # else:
+        #     self._data_references_cache[data_asset_name][
+        #         data_reference
+        #     ] = batch_definition_list
 
     def _self_check_fetch_batch(
         self,

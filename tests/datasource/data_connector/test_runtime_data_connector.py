@@ -668,166 +668,27 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
         ),
     ]
 
+    # so the problem here is that we are going to pop the other one from the _data_references cache? i
+    # is that how things were before too?
     assert runtime_data_connector._data_references_cache == {
-        "1-2": [
-            BatchDefinition(
-                datasource_name="my_datasource",
-                data_connector_name="runtime",
-                data_asset_name="asset_a",
-                batch_identifiers=IDDict({"day": 1, "month": 2}),
-            )
-        ],
-    }
-
-
-def old_test_data_references_cache_updating_after_batch_request(
-    basic_datasource,
-):
-    test_runtime_data_connector: RuntimeDataConnector = (
-        basic_datasource.data_connectors["test_runtime_data_connector"]
-    )
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    # empty if data_connector has not been used
-    assert test_runtime_data_connector.get_available_data_asset_names() == []
-
-    batch_identifiers = {
-        "airflow_run_id": 1234567890,
-    }
-
-    batch_request: dict = {
-        "datasource_name": basic_datasource.name,
-        "data_connector_name": test_runtime_data_connector.name,
-        "data_asset_name": "my_data_asset_1",
-        "runtime_parameters": {
-            "batch_data": test_df,
-        },
-        "batch_identifiers": batch_identifiers,
-    }
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-
-    # run with my_data_asset_1
-    test_runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=batch_request
-    )
-
-    assert test_runtime_data_connector._data_references_cache == {
-        "my_data_asset_1": {
-            "1234567890": [
+        "asset_a": {
+            "1-2": [
                 BatchDefinition(
                     datasource_name="my_datasource",
-                    data_connector_name="test_runtime_data_connector",
-                    data_asset_name="my_data_asset_1",
-                    batch_identifiers=IDDict({"airflow_run_id": 1234567890}),
+                    data_connector_name="runtime",
+                    data_asset_name="asset_a",
+                    batch_identifiers=IDDict({"day": 1, "month": 2}),
                 )
             ],
         }
     }
 
-    # update with
-    test_df_new: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
-    batch_identifiers = {
-        "airflow_run_id": 987654321,
-    }
 
-    batch_request: dict = {
-        "datasource_name": basic_datasource.name,
-        "data_connector_name": test_runtime_data_connector.name,
-        "data_asset_name": "my_data_asset_1",
-        "runtime_parameters": {
-            "batch_data": test_df_new,
-        },
-        "batch_identifiers": batch_identifiers,
-    }
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-
-    # run with new_data_asset but a new batch
-    test_runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=batch_request
-    )
-
-    assert test_runtime_data_connector._data_references_cache == {
-        "my_data_asset_1": {
-            "1234567890": [
-                BatchDefinition(
-                    datasource_name="my_datasource",
-                    data_connector_name="test_runtime_data_connector",
-                    data_asset_name="my_data_asset_1",
-                    batch_identifiers=IDDict({"airflow_run_id": 1234567890}),
-                )
-            ],
-            "987654321": [
-                BatchDefinition(
-                    datasource_name="my_datasource",
-                    data_connector_name="test_runtime_data_connector",
-                    data_asset_name="my_data_asset_1",
-                    batch_identifiers=IDDict({"airflow_run_id": 987654321}),
-                )
-            ],
-        },
-    }
-
-    # new data_asset_name
-    test_df_new_asset: pd.DataFrame = pd.DataFrame(
-        data={"col1": [9, 10], "col2": [11, 12]}
-    )
-    batch_identifiers = {
-        "airflow_run_id": 5555555,
-    }
-
-    batch_request: dict = {
-        "datasource_name": basic_datasource.name,
-        "data_connector_name": test_runtime_data_connector.name,
-        "data_asset_name": "my_data_asset_2",
-        "runtime_parameters": {
-            "batch_data": test_df_new_asset,
-        },
-        "batch_identifiers": batch_identifiers,
-    }
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-
-    # run with with new_data_asset but a new batch
-    test_runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=batch_request
-    )
-
-    assert test_runtime_data_connector._data_references_cache == {
-        "my_data_asset_1": {
-            "1234567890": [
-                BatchDefinition(
-                    datasource_name="my_datasource",
-                    data_connector_name="test_runtime_data_connector",
-                    data_asset_name="my_data_asset_1",
-                    batch_identifiers=IDDict({"airflow_run_id": 1234567890}),
-                )
-            ],
-            "987654321": [
-                BatchDefinition(
-                    datasource_name="my_datasource",
-                    data_connector_name="test_runtime_data_connector",
-                    data_asset_name="my_data_asset_1",
-                    batch_identifiers=IDDict({"airflow_run_id": 987654321}),
-                )
-            ],
-        },
-        "my_data_asset_2": {
-            "5555555": [
-                BatchDefinition(
-                    datasource_name="my_datasource",
-                    data_connector_name="test_runtime_data_connector",
-                    data_asset_name="my_data_asset_2",
-                    batch_identifiers=IDDict({"airflow_run_id": 5555555}),
-                )
-            ]
-        },
-    }
-
-    assert test_runtime_data_connector.get_available_data_asset_names() == [
-        "my_data_asset_1",
-        "my_data_asset_2",
-    ]
-
-    assert test_runtime_data_connector.get_data_reference_list_count() == 3
+# this is
+def test_data_references_cache_updating_after_batch_request_named_assets(
+    basic_datasource_with_assets,
+):
+    pass
 
 
 def test_get_batch_definition_list_from_batch_request_length_one(
