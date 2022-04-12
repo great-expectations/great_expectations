@@ -136,6 +136,10 @@ class ParameterBuilder(Builder, ABC):
 
         self._name = name
 
+        self._evaluation_parameter_builder_configs = (
+            evaluation_parameter_builder_configs
+        )
+
         self._evaluation_parameter_builders = init_rule_parameter_builders(
             parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=self._data_context,
@@ -239,6 +243,12 @@ class ParameterBuilder(Builder, ABC):
         self,
     ) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
         return self._evaluation_parameter_builders
+
+    @property
+    def evaluation_parameter_builder_configs(
+        self,
+    ) -> Optional[List[ParameterBuilderConfig]]:
+        return self._evaluation_parameter_builder_configs
 
     @property
     def json_serialize(self) -> Union[str, bool]:
