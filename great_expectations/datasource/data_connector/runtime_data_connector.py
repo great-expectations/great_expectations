@@ -164,6 +164,7 @@ class RuntimeDataConnector(DataConnector):
         defined_assets: List[str] = list(self.assets.keys())
         data_reference_keys: List[str] = list(self._data_references_cache.keys())
         available_assets: List[str] = list(set(defined_assets + data_reference_keys))
+        available_assets.sort()
         return available_assets
 
     # noinspection PyMethodOverriding
@@ -407,7 +408,6 @@ class RuntimeDataConnector(DataConnector):
         if pretty_print:
             print(f"\t{self.name}:{self.__class__.__name__}\n")
         asset_names = self.get_available_data_asset_names()
-        asset_names.sort()
         len_asset_names = len(asset_names)
 
         if len_asset_names > 0:
