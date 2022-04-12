@@ -99,7 +99,7 @@ class RuntimeDataConnector(DataConnector):
                 "DataConnector has no batch_identifiers, either at the data connector or asset level. This is a problem"
             )
 
-    # <WILL> Marker this was pulled from other file
+    # <WILL> Clean up or add to shared method
     def _build_assets_from_config(self, config: Dict[str, dict]):
         for name, asset_config in config.items():
             if asset_config is None:
@@ -115,7 +115,7 @@ class RuntimeDataConnector(DataConnector):
                 data_asset_name=new_asset.name,
             )
 
-    # <WILL> marker this was pulled from the other file
+    # <WILL> Clean up or add to shared method.
     def _build_asset_from_config(self, config: dict):
         runtime_environment: dict = {"data_connector": self}
         config = assetConfigSchema.load(config)
@@ -185,14 +185,11 @@ class RuntimeDataConnector(DataConnector):
 
     def get_available_data_asset_names(self) -> List[str]:
         # """Please see note in : _get_batch_definition_list_from_batch_request()"""
-        # return list(self._data_references_cache.keys())
-        # TODO: this needs to be a set of defined assets + things passed into cache
+        # UPDATE NOTE: this is now a list of defined assets + things passed into the cache
         defined_assets: List[str] = []
         data_reference_keys: List[str] = []
-
         defined_assets = list(self.assets.keys())
         data_reference_keys = list(self._data_references_cache.keys())
-
         return defined_assets + data_reference_keys
 
     # noinspection PyMethodOverriding
@@ -265,13 +262,6 @@ class RuntimeDataConnector(DataConnector):
         self._update_data_references_cache(
             batch_request.data_asset_name, batch_definition_list, batch_identifiers
         )
-        # data_asset_name: str = batch_request.data_asset_name
-        # batch_definition_list_new: List[BatchDefinition] = []
-        #
-        # subdict: dict = self._data_references_cache[data_asset_name]
-        # # TODO: this logic is terrible. but this is how we are appending all of the BatchDefinitions that come in.
-        # for k in subdict:
-        #     batch_definition_list_new.append(subdict[k][0])
         return batch_definition_list
 
     def _update_data_references_cache(
@@ -280,27 +270,10 @@ class RuntimeDataConnector(DataConnector):
         batch_definition_list: List,
         batch_identifiers: IDDict,
     ):
-        # always update:
-        # what does it mean to update?
-        # would you still want to update?
         data_reference = self._get_data_reference_name(batch_identifiers)
         self._data_references_cache[data_asset_name] = {
             data_reference: batch_definition_list
         }
-        # this is the terrible name where things are concatenated.
-        # if data_asset_name not in self._data_references_cache:
-        #     # add
-        #     # TODO: do an actual add so that we can keep adding to the same thing?
-        #     # how do you keep track of everything though?
-        #     # where is the batch_data_actually stored
-        #     self._data_references_cache[data_asset_name] = {
-        #         data_reference: batch_definition_list
-        #     }
-        #     # or replace
-        # else:
-        #     self._data_references_cache[data_asset_name][
-        #         data_reference
-        #     ] = batch_definition_list
 
     def _self_check_fetch_batch(
         self,

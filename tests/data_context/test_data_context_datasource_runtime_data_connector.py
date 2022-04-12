@@ -171,19 +171,8 @@ def test_get_batch_successful_specification_pandas_engine_asset_adding_more(
         ),
         expectation_suite_name="my_expectations",
     )
-    # it is always going to be the most recent batch
-    # batch_list: list = context.get_batch_list(
-    #     batch_request=RuntimeBatchRequest(
-    #         datasource_name="my_datasource",
-    #         data_connector_name="runtime",
-    #         data_asset_name="asset_a",
-    #         runtime_parameters={"batch_data": test_df},
-    #         batch_identifiers={"month": 4, "day": 2},
-    #     )
-    # )
-    # assert len(batch_list) == 2
-    # assert isinstance(batch_list[0], Batch)
-    # batch_list
+    # TODO : add assertion
+    # TODO : add second batch
 
 
 # Tests with PandasExecutionEngine : batch_data
