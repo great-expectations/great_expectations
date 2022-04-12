@@ -210,15 +210,9 @@ detected.
          5. Using the configured directives and heuristics, determine whether or not the ranges should be clipped.
          6. Using the configured directives and heuristics, determine if return values should be rounded to an integer.
          7. Convert the multi-dimensional metric computation results to a numpy array (for further computations).
-         Steps 8 -- 10 are for the "oneshot" sampling method only (the "bootstrap" method achieves same automatically):
-         8. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
-         9. Compute number of standard deviations (as floating point) needed (around the mean) to achieve the specified
-            false_positive_rate (note that false_positive_rate of 0.0 would result in infinite number of standard deviations,
-            hence it is "nudged" by small quantity "epsilon" above 0.0 if false_positive_rate of 0.0 appears as argument).
-            (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
-        10. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
-        11. Return [low, high] for the desired metric as estimated by the specified sampling method.
-        12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
+         8. Compute [low, high] for the desired metric using the chosen estimator method
+         9. Return [low, high] for the desired metric as estimated by the specified sampling method.
+        10. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
         # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
