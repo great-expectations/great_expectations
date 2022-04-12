@@ -210,7 +210,7 @@ detected.
          5. Using the configured directives and heuristics, determine whether or not the ranges should be clipped.
          6. Using the configured directives and heuristics, determine if return values should be rounded to an integer.
          7. Convert the multi-dimensional metric computation results to a numpy array (for further computations).
-         8. Compute [low, high] for the desired metric using the chosen estimator method
+         8. Compute [low, high] for the desired metric using the chosen estimator method.
          9. Return [low, high] for the desired metric as estimated by the specified sampling method.
         10. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
