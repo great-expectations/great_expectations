@@ -355,7 +355,7 @@ def test_profiler_run_with_expectation_suite_arg(
             kwargs={"column": "infinities"},
         ),
         ExpectationConfiguration(
-            expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
+            expectation_type="expect_column_to_exist", kwargs={"column": "None"}
         ),
         ExpectationConfiguration(
             expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
