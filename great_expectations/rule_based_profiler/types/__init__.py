@@ -25,3 +25,4 @@ from .parameter_container import (  # isort:skip
     get_fully_qualified_parameter_names,
 )
 from .rule_state import RuleState  # isort:skip
+from .data_assistant_result import DataAssistantResult  # isort:skip
