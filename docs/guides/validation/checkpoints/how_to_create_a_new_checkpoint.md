@@ -13,9 +13,9 @@ Note: As of Great Expectations version 0.13.7, we have updated and improved the 
 
 This how-to guide assumes you have already:
 
-* [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-* [Configured a Datasource using the BatchRequest (v3) API](../../../tutorials/getting_started/connect_to_data.md)
-* [Created an Expectation Suite](../../../tutorials/getting_started/create_your_first_expectations.md)
+* [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+* [Configured a Datasource using the BatchRequest (v3) API](../../../tutorials/getting_started/tutorial_connect_to_data.md)
+* [Created an Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md)
 
 :::
 
