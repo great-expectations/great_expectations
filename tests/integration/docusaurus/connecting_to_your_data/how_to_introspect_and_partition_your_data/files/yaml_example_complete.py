@@ -23,7 +23,7 @@ data_connectors:
           pattern: (.*)
           group_names:
             - data_asset_name
-            
+
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>

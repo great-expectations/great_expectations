@@ -132,7 +132,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             unexpected_table = None
             observed_value = ["--"]
 
-            data_docs_exception_message = f"""\
+            data_docs_exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
@@ -223,8 +223,10 @@ diagnose and repair the underlying issue.  Detailed information follows:
             # If no legacy rendering is present, return None.
             return None
 
+        # deprecated-v0.13.28
         warnings.warn(
-            "V2 API style custom rendering is deprecated and is not fully supported anymore; please switch to V3 API and associated rendering style",
+            "V2 API style custom rendering is deprecated as of v0.13.28 and is not fully supported anymore; "
+            "As it will be removed in v0.16, please transition to V3 API and associated rendering style",
             DeprecationWarning,
         )
 

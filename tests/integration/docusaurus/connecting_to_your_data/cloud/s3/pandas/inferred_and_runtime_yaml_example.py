@@ -7,7 +7,7 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 
 context = ge.get_context()
 
-datasource_yaml = fr"""
+datasource_yaml = rf"""
 name: my_s3_datasource
 class_name: Datasource
 execution_engine:
@@ -30,7 +30,7 @@ data_connectors:
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace(
-    "<YOUR_S3_BUCKET_HERE>", "superconductive-public"
+    "<YOUR_S3_BUCKET_HERE>", "superconductive-docs-test"
 )
 datasource_yaml = datasource_yaml.replace(
     "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
@@ -53,7 +53,7 @@ batch_request = RuntimeBatchRequest(
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters[
     "path"
-] = "s3a://superconductive-public/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
+] = "s3a://superconductive-docs-test/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True

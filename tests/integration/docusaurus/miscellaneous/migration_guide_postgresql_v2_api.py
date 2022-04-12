@@ -28,7 +28,7 @@ with open(great_expectations_yaml_file_path) as f:
 actual_datasource = great_expectations_yaml["datasources"]
 
 # expected Datasource
-expected_existing_datasource_yaml = """
+expected_existing_datasource_yaml = r"""
   my_postgres_datasource:
     class_name: SqlAlchemyDatasource
     module_name: great_expectations.datasource

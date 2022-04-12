@@ -16,6 +16,7 @@
       },
     "tests": [{
       "title": "basic_positive_test",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in":{
         "column_list": ["c1", "c2", "c3"]
@@ -25,6 +26,7 @@
       }
     },{
       "title": "negative_test_column_is_missing",
+      "include_in_gallery": true,
       "exact_match_out": false,
       "in":{
         "column_list": ["c1", "c2"]

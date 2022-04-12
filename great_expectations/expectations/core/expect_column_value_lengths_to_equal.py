@@ -1,16 +1,18 @@
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
 
 
 class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
@@ -63,10 +65,11 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.value_length.equals"
@@ -86,7 +89,9 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         "value",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -103,7 +108,6 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for value kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -135,7 +139,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 "value": params.get("mostly"),
             },
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
@@ -152,7 +156,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -162,7 +166,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 template_str += "."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -171,7 +175,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -202,7 +206,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -212,14 +216,14 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 template_str += "."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [

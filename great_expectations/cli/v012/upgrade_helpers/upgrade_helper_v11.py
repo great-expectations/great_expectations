@@ -464,7 +464,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             ].keys()
         ]
 
-        upgrade_overview = f"""\
+        upgrade_overview = """\
 <cyan>\
 ++=====================================================++
 || UpgradeHelperV11: Upgrade Overview (V2-API Version) ||
@@ -610,7 +610,7 @@ Would you like to proceed with the project upgrade?\
             increment_version = False
         else:
             increment_version = True
-        upgrade_report = f"""\
+        upgrade_report = """\
 <cyan>\
 ++================++
 || Upgrade Report ||

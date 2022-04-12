@@ -3,15 +3,14 @@ import datetime
 import json
 import logging
 import os
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 from uuid import UUID
-
-from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
+    batch_request_in_validations_contains_batch_data,
     get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
     substitute_runtime_config,
@@ -21,25 +20,24 @@ from great_expectations.core import RunIdentifier
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
 from great_expectations.core.batch import (
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
+    batch_request_contains_batch_data,
     get_batch_request_as_dict,
 )
+from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    get_datetime_string_from_strftime_format,
-)
+from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.types.base import (
-    Attributes,
-    CheckpointConfig,
-    object_to_yaml_str,
-)
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
-from great_expectations.data_context.util import substitute_all_config_variables
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+    substitute_all_config_variables,
+)
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
@@ -53,45 +51,16 @@ from great_expectations.validator.validator import Validator
 logger = logging.getLogger(__name__)
 
 
-class Checkpoint:
+class BaseCheckpoint(ConfigPeer):
     """
-    --ge-feature-maturity-info--
-
-        id: checkpoint
-        title: Newstyle Class-based Checkpoints
-        short_description: Run a configured checkpoint from a notebook.
-        description: Run a configured checkpoint from a notebook.
-        how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
-        maturity: Beta
-        maturity_details:
-            api_stability: Mostly stable (transitioning ValidationOperators to Checkpoints)
-            implementation_completeness: Complete
-            unit_test_coverage: Partial ("golden path"-focused tests; error checking tests need to be improved)
-            integration_infrastructure_test_coverage: N/A
-            documentation_completeness: Complete
-            bug_risk: Medium
-
-    --ge-feature-maturity-info--
+    BaseCheckpoint class is initialized from CheckpointConfig typed object and contains all functionality
+    in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
     """
 
     def __init__(
         self,
-        name: str,
+        checkpoint_config: CheckpointConfig,
         data_context: "DataContext",  # noqa: F821
-        config_version: Optional[Union[int, float]] = None,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[UUID] = None,
-        expectation_suite_ge_cloud_id: Optional[UUID] = None,
     ):
         # Note the gross typechecking to avoid a circular import
         if "DataContext" not in str(type(data_context)):
@@ -101,26 +70,7 @@ class Checkpoint:
 
         self._data_context = data_context
 
-        config_kwargs: dict = {
-            "name": name,
-            "config_version": config_version,
-            "template_name": template_name,
-            "run_name_template": run_name_template,
-            "expectation_suite_name": expectation_suite_name,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
-            "batch_request": batch_request or {},
-            "action_list": action_list or [],
-            "evaluation_parameters": evaluation_parameters or {},
-            "runtime_configuration": runtime_configuration or {},
-            "profilers": profilers or [],
-            "validations": validations or [],
-            "ge_cloud_id": ge_cloud_id,
-            # Next two fields are for LegacyCheckpoint configuration
-            "validation_operator_name": validation_operator_name,
-            "batches": batches,
-        } or {}
-
-        self._config_kwargs = Attributes(config_kwargs)
+        self._checkpoint_config = checkpoint_config
 
     # TODO: Add eval param processing using new TBD parser syntax and updated EvaluationParameterParser and
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
@@ -135,7 +85,7 @@ class Checkpoint:
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -225,14 +175,16 @@ class Checkpoint:
                     run_id=run_id,
                 )
 
-            run_results = {}
+            run_results: dict = {}
             for async_validation_operator_result in async_validation_operator_results:
                 run_results.update(
                     async_validation_operator_result.result().run_results
                 )
 
         return CheckpointResult(
-            run_id=run_id, run_results=run_results, checkpoint_config=self.config_kwargs
+            run_id=run_id,
+            run_results=run_results,
+            checkpoint_config=self.config,
         )
 
     def get_substituted_config(
@@ -242,9 +194,9 @@ class Checkpoint:
         if runtime_kwargs is None:
             runtime_kwargs = {}
 
-        config_kwargs: dict = copy.deepcopy(self.config_kwargs)
+        config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)
 
-        template_name = runtime_kwargs.get("template_name")
+        template_name: Optional[str] = runtime_kwargs.get("template_name")
         if template_name:
             config_kwargs["template_name"] = template_name
 
@@ -268,7 +220,7 @@ class Checkpoint:
             checkpoint: Checkpoint = self.data_context.get_checkpoint(
                 name=template_name
             )
-            template_config: dict = checkpoint.config_kwargs
+            template_config: dict = checkpoint.config.to_json_dict()
 
             if template_config["config_version"] != source_config["config_version"]:
                 raise ge_exceptions.CheckpointError(
@@ -426,7 +378,7 @@ class Checkpoint:
 
     def self_check(self, pretty_print=True) -> dict:
         # Provide visibility into parameters that Checkpoint was instantiated with.
-        report_object: dict = {"config": self.config_kwargs}
+        report_object: dict = {"config": self.config.to_json_dict()}
 
         if pretty_print:
             print(f"\nCheckpoint class name: {self.__class__.__name__}")
@@ -457,14 +409,14 @@ class Checkpoint:
         if pretty_print:
             if not validations_present:
                 print(
-                    f"""Your current Checkpoint configuration has an empty or missing "validations" attribute.  This
+                    """Your current Checkpoint configuration has an empty or missing "validations" attribute.  This
 means you must either update your Checkpoint configuration or provide an appropriate validations
 list programmatically (i.e., when your Checkpoint is run).
                     """
                 )
             if not action_list_present:
                 print(
-                    f"""Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This
+                    """Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This
 means you must provide an appropriate validations list programmatically (i.e., when your Checkpoint
 is run), with each validation having its own defined "action_list" attribute.
                     """
@@ -472,79 +424,322 @@ is run), with each validation having its own defined "action_list" attribute.
 
         return report_object
 
-    # noinspection PyShadowingBuiltins
-    def get_config(
-        self,
-        reconcile: bool = False,
-        runtime_kwargs: Optional[dict] = None,
-        format: str = "dict",
-        clean_falsy: bool = False,
-    ) -> Union[dict, str]:
-        if reconcile or runtime_kwargs:
-            config_kwargs: dict = self.get_substituted_config(
-                runtime_kwargs=runtime_kwargs
-            )
-        else:
-            config_kwargs = copy.deepcopy(self.config_kwargs)
-
-        if clean_falsy:
-            filter_properties_dict(
-                properties=config_kwargs,
-                clean_falsy=True,
-                inplace=True,
-            )
-
-        if format == "dict":
-            return config_kwargs
-
-        if format in ["str", "dir", "repr"]:
-            json_dict: dict = convert_to_json_serializable(data=config_kwargs)
-            deep_filter_properties_iterable(
-                properties=json_dict,
-                inplace=True,
-            )
-            return json.dumps(json_dict, indent=2)
-
-        if format == "yaml":
-            return object_to_yaml_str(obj=CommentedMap(**config_kwargs))
-
-        raise ValueError(f"Unknown format {format} in LegacyCheckpoint.get_config.")
+    @property
+    def config(self) -> CheckpointConfig:
+        return self._checkpoint_config
 
     @property
-    def config_kwargs(self) -> Attributes:
-        return self._config_kwargs
+    def name(self) -> Optional[str]:
+        try:
+            return self.config.name
+        except AttributeError:
+            return None
 
     @property
-    def name(self) -> str:
-        return self.config_kwargs.name
-
-    @property
-    def config_version(self) -> float:
-        return self.config_kwargs.config_version
+    def config_version(self) -> Optional[float]:
+        try:
+            return self.config.config_version
+        except AttributeError:
+            return None
 
     @property
     def action_list(self) -> List[Dict]:
-        return self.config_kwargs.action_list
+        try:
+            return self.config.action_list
+        except AttributeError:
+            return []
 
     @property
     def validations(self) -> List[Dict]:
-        return self.config_kwargs.validations
+        try:
+            return self.config.validations
+        except AttributeError:
+            return []
 
     @property
-    def ge_cloud_id(self) -> UUID:
-        return self.config_kwargs.ge_cloud_id
+    def ge_cloud_id(self) -> Optional[UUID]:
+        try:
+            return self.config.ge_cloud_id
+        except AttributeError:
+            return None
 
     @property
     def data_context(self) -> "DataContext":  # noqa: F821
         return self._data_context
 
     def __repr__(self) -> str:
-        json_dict: dict = convert_to_json_serializable(data=self.get_config())
-        deep_filter_properties_iterable(
-            properties=json_dict,
+        return str(self.get_config())
+
+
+class Checkpoint(BaseCheckpoint):
+    """
+    --ge-feature-maturity-info--
+
+        id: checkpoint
+        title: Newstyle Class-based Checkpoints
+        short_description: Run a configured checkpoint from a notebook.
+        description: Run a configured checkpoint from a notebook.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Mostly stable (transitioning ValidationOperators to Checkpoints)
+            implementation_completeness: Complete
+            unit_test_coverage: Partial ("golden path"-focused tests; error checking tests need to be improved)
+            integration_infrastructure_test_coverage: N/A
+            documentation_completeness: Complete
+            bug_risk: Medium
+
+    --ge-feature-maturity-info--
+    """
+
+    def __init__(
+        self,
+        name: str,
+        data_context: "DataContext",  # noqa: F821
+        config_version: Optional[Union[int, float]] = None,
+        template_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        ge_cloud_id: Optional[UUID] = None,
+        expectation_suite_ge_cloud_id: Optional[UUID] = None,
+    ):
+        # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
+        if batch_request_contains_batch_data(batch_request=batch_request):
+            raise ValueError(
+                f"""Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
+constructor arguments.
+"""
+            )
+
+        if batch_request_in_validations_contains_batch_data(validations=validations):
+            raise ValueError(
+                f"""Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
+constructor arguments.
+"""
+            )
+
+        checkpoint_config: CheckpointConfig = CheckpointConfig(
+            name=name,
+            config_version=config_version,
+            template_name=template_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            validation_operator_name=validation_operator_name,
+            batches=batches,
+            ge_cloud_id=ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+        )
+        super().__init__(
+            checkpoint_config=checkpoint_config,
+            data_context=data_context,
+        )
+
+    def run_with_runtime_args(
+        self,
+        template_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        run_id: Optional[Union[str, int, float]] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[datetime.datetime] = None,
+        result_format: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ) -> CheckpointResult:
+        checkpoint_config_from_store: CheckpointConfig = cast(
+            CheckpointConfig, self.get_config()
+        )
+
+        if (
+            "runtime_configuration" in checkpoint_config_from_store
+            and checkpoint_config_from_store.runtime_configuration
+            and "result_format" in checkpoint_config_from_store.runtime_configuration
+        ):
+            result_format = (
+                result_format
+                or checkpoint_config_from_store.runtime_configuration.get(
+                    "result_format"
+                )
+            )
+
+        if result_format is None:
+            result_format = {"result_format": "SUMMARY"}
+
+        batch_request = get_batch_request_as_dict(batch_request=batch_request)
+        validations = get_validations_with_batch_request_as_dict(
+            validations=validations
+        )
+
+        checkpoint_config_from_call_args: dict = {
+            "template_name": template_name,
+            "run_name_template": run_name_template,
+            "expectation_suite_name": expectation_suite_name,
+            "batch_request": batch_request,
+            "action_list": action_list,
+            "evaluation_parameters": evaluation_parameters,
+            "runtime_configuration": runtime_configuration,
+            "validations": validations,
+            "profilers": profilers,
+            "run_id": run_id,
+            "run_name": run_name,
+            "run_time": run_time,
+            "result_format": result_format,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+        }
+
+        checkpoint_config: dict = {
+            key: value
+            for key, value in checkpoint_config_from_store.items()
+            if key in checkpoint_config_from_call_args
+        }
+        checkpoint_config.update(checkpoint_config_from_call_args)
+
+        checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
+        filter_properties_dict(
+            properties=checkpoint_run_arguments,
+            clean_falsy=True,
             inplace=True,
         )
-        return json.dumps(json_dict, indent=2)
+
+        return self.run(**checkpoint_run_arguments)
+
+    @staticmethod
+    def construct_from_config_args(
+        data_context: "DataContext",  # noqa: F821
+        checkpoint_store_name: str,
+        name: str,
+        config_version: Optional[Union[int, float]] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[dict] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: Optional[Union[str, List[str]]] = None,
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = None,
+        notify_with: Optional[Union[str, List[str]]] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+    ) -> "Checkpoint":
+        checkpoint_config: Union[CheckpointConfig, dict]
+
+        # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
+        batch_request = get_batch_request_as_dict(batch_request=batch_request)
+        validations = get_validations_with_batch_request_as_dict(
+            validations=validations
+        )
+
+        # DataFrames shouldn't be saved to CheckpointStore
+        if batch_request_contains_batch_data(batch_request=batch_request):
+            raise ge_exceptions.InvalidConfigError(
+                f'batch_data found in batch_request cannot be saved to CheckpointStore "{checkpoint_store_name}"'
+            )
+
+        if batch_request_in_validations_contains_batch_data(validations=validations):
+            raise ge_exceptions.InvalidConfigError(
+                f'batch_data found in validations cannot be saved to CheckpointStore "{checkpoint_store_name}"'
+            )
+
+        checkpoint_config = {
+            "name": name,
+            "config_version": config_version,
+            "template_name": template_name,
+            "module_name": module_name,
+            "class_name": class_name,
+            "run_name_template": run_name_template,
+            "expectation_suite_name": expectation_suite_name,
+            "batch_request": batch_request,
+            "action_list": action_list,
+            "evaluation_parameters": evaluation_parameters,
+            "runtime_configuration": runtime_configuration,
+            "validations": validations,
+            "profilers": profilers,
+            # Next two fields are for LegacyCheckpoint configuration
+            "validation_operator_name": validation_operator_name,
+            "batches": batches,
+            # the following four keys are used by SimpleCheckpoint
+            "site_names": site_names,
+            "slack_webhook": slack_webhook,
+            "notify_on": notify_on,
+            "notify_with": notify_with,
+            "ge_cloud_id": ge_cloud_id,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+        }
+
+        checkpoint_config = deep_filter_properties_iterable(
+            properties=checkpoint_config,
+            clean_falsy=True,
+        )
+
+        new_checkpoint: Checkpoint = instantiate_class_from_config(
+            config=checkpoint_config,
+            runtime_environment={
+                "data_context": data_context,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
+        )
+
+        return new_checkpoint
+
+    @staticmethod
+    def instantiate_from_config_with_runtime_args(
+        checkpoint_config: CheckpointConfig,
+        data_context: "DataContext",  # noqa: F821
+        **runtime_kwargs,
+    ) -> "Checkpoint":
+        config: dict = checkpoint_config.to_json_dict()
+
+        key: str
+        value: Any
+        for key, value in runtime_kwargs.items():
+            if value is not None:
+                config[key] = value
+
+        config = filter_properties_dict(properties=config, clean_falsy=True)
+
+        checkpoint: Checkpoint = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                "data_context": data_context,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
+        )
+
+        return checkpoint
 
 
 class LegacyCheckpoint(Checkpoint):
@@ -830,7 +1025,7 @@ class SimpleCheckpoint(Checkpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -888,7 +1083,7 @@ class SimpleCheckpoint(Checkpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,

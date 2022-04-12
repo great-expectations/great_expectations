@@ -3,15 +3,13 @@ An action is a way to take an arbitrary method and make it configurable and runn
 
 The only requirement from an action is for it to have a take_action method.
 """
+
 import logging
 import warnings
 from typing import Dict, Optional, Union
 from urllib.parse import urljoin
 
-from great_expectations.core import (
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-)
+from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 
 try:
@@ -19,16 +17,17 @@ try:
 except ImportError:
     pypd = None
 
-
 from great_expectations.checkpoint.util import (
     send_cloud_notification,
     send_email,
     send_microsoft_teams_notifications,
     send_opsgenie_alert,
     send_slack_notification,
+    send_sns_notification,
 )
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
     GeCloudIdentifier,
     ValidationResultIdentifier,
 )
@@ -56,7 +55,7 @@ class ValidationAction:
             ValidationResultIdentifier, GeCloudIdentifier
         ],
         data_asset,
-        expectation_suite_identifier=None,
+        expectation_suite_identifier: ExpectationSuiteIdentifier = None,
         checkpoint_identifier=None,
         **kwargs,
     ):
@@ -65,6 +64,8 @@ class ValidationAction:
         :param validation_result_suite:
         :param validation_result_suite_identifier:
         :param data_asset:
+        :param expectation_suite_identifier:  The ExpectationSuiteIdentifier to use
+        :param checkpoint_identifier:  The Checkpoint to use
         :param: kwargs - any additional arguments the child might use
         :return:
         """
@@ -1019,8 +1020,9 @@ class UpdateDataDocsAction(ValidationAction):
         """
         super().__init__(data_context)
         if target_site_names:
+            # deprecated-v0.10.10
             warnings.warn(
-                "target_site_names is deprecated. Please use site_names instead.",
+                "target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
                 DeprecationWarning,
             )
             if site_names:
@@ -1129,7 +1131,7 @@ class CloudNotificationAction(ValidationAction):
 
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
-            f"/accounts/{self.data_context.ge_cloud_config.account_id}/contracts/"
+            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/contracts/"
             f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
         )
         auth_headers = {
@@ -1137,3 +1139,51 @@ class CloudNotificationAction(ValidationAction):
             "Authorization": f"Bearer {self.data_context.ge_cloud_config.access_token}",
         }
         return send_cloud_notification(url=ge_cloud_url, headers=auth_headers)
+
+
+class SNSNotificationAction(ValidationAction):
+    """
+    Action that pushes validations results to an SNS topic with a subject of passed or failed.
+    """
+
+    def __init__(
+        self, data_context: "DataContext", sns_topic_arn: str, sns_message_subject
+    ):
+        super().__init__(data_context)
+        self.sns_topic_arn = sns_topic_arn
+        self.sns_message_subject = sns_message_subject
+
+    def _run(
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
+        expectation_suite_identifier=None,
+        checkpoint_identifier=None,
+        data_asset=None,
+        **kwargs,
+    ) -> str:
+        logger.debug("SNSNotificationAction.run")
+
+        if validation_result_suite is None:
+            logger.warning(
+                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
+            )
+
+        if self.sns_message_subject is None:
+            logger.warning(
+                f"No message subject was passed checking for expectation_suite_name"
+            )
+            if expectation_suite_identifier is None:
+                subject = validation_result_suite_identifier.run_id
+                logger.warning(
+                    f"No expectation_suite_identifier was passed. Defaulting to validation run_id: {subject}."
+                )
+            else:
+                subject = expectation_suite_identifier.expectation_suite_name
+                logger.info(f"Using expectation_suite_name: {subject}")
+        else:
+            subject = self.sns_message_subject
+
+        return send_sns_notification(
+            self.sns_topic_arn, subject, validation_result_suite.__str__(), **kwargs
+        )

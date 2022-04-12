@@ -1,10 +1,10 @@
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+import warnings
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -82,14 +82,14 @@ def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F82
     if expectation_type in _registered_expectations:
         if _registered_expectations[expectation_type] == expectation:
             logger.info(
-                "Multiple declarations of expectation " + expectation_type + " found."
+                f"Multiple declarations of expectation {expectation_type} found."
             )
             return
         else:
             logger.warning(
-                "Overwriting declaration of expectation " + expectation_type + "."
+                f"Overwriting declaration of expectation {expectation_type}."
             )
-    logger.debug("Registering expectation: " + expectation_type)
+    logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
 
 
@@ -263,6 +263,19 @@ def get_domain_metrics_dict_by_name(
 
 
 def get_expectation_impl(expectation_name):
+    renamed = {
+        "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
+        "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
+        "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",
+    }
+    if expectation_name in renamed:
+        # deprecated-v0.14.12
+        warnings.warn(
+            f"Expectation {expectation_name} was renamed to {renamed['expectation_name']} as of v0.14.12 "
+            "Please update usage in your pipeline(s) before the v0.17 release",
+            DeprecationWarning,
+        )
+        expectation_name = renamed[expectation_name]
     return _registered_expectations.get(expectation_name)
 
 

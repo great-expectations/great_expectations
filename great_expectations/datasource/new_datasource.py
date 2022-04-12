@@ -331,7 +331,7 @@ class BaseDatasource:
             )
 
         if pretty_print:
-            print(f"Data Connectors:")
+            print("Data Connectors:")
 
         data_connector_list = list(self.data_connectors.keys())
         data_connector_list.sort()

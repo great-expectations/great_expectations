@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import List, Optional
 
 try:
@@ -111,7 +110,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         elif "." in path_parts[-1]:  # File, not folder
             return text
         else:  # Folder, should have trailing /
-            return text.rstrip("/") + "/"
+            return f"{text.rstrip('/')}/"
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
         """

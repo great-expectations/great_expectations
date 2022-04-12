@@ -2,7 +2,6 @@ import datetime
 import logging
 from pathlib import Path
 from string import Template
-from urllib.parse import urlparse
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import nested_update
@@ -289,9 +288,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
                 handler.send_usage_message(
                     event="datasource.sqlalchemy.connect",
                     event_payload={
-                        "anonymized_name": handler._datasource_anonymizer.anonymize(
-                            self.name
-                        ),
+                        "anonymized_name": handler.anonymizer.anonymize(obj=self.name),
                         "sqlalchemy_dialect": self.engine.name,
                     },
                     success=True,

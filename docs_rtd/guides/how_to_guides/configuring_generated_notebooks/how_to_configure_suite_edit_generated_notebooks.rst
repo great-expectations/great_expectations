@@ -67,6 +67,15 @@ Overwriting a section
     with the file "HEADER.md", which contains the Jinja variable "company_name".
 
     The file should be in your package "notebook_assets.suite_edit".
+    Note this needs to be a package so `__init__.py` files need to be included.
+
+    .. code-block::
+
+        great_expectations/plugins/notebook_assets/
+        ├── __init__.py
+        └── suite_edit
+            ├── __init__.py
+            └── HEADER.md
 
     For example:
 

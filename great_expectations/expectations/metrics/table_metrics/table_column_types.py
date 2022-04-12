@@ -107,14 +107,14 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
 def _get_spark_column_metadata(field, parent_name="", include_nested=True):
     cols = []
     if parent_name != "":
-        parent_name = parent_name + "."
+        parent_name = f"{parent_name}."
 
     if isinstance(field, sparktypes.StructType):
         for child in field.fields:
             cols += _get_spark_column_metadata(child, parent_name=parent_name)
     elif isinstance(field, sparktypes.StructField):
         if "." in field.name:
-            name = parent_name + "`" + field.name + "`"
+            name = f"{parent_name}`{field.name}`"
         else:
             name = parent_name + field.name
         field_metadata = {"name": name, "type": field.dataType}

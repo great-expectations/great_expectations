@@ -3,8 +3,8 @@ import textwrap
 
 logger = logging.getLogger(__name__)
 
-from ...core.id_dict import BatchKwargs
-from .renderer import Renderer
+from great_expectations.core.id_dict import BatchKwargs
+from great_expectations.render.renderer.renderer import Renderer
 
 
 class EmailRenderer(Renderer):

@@ -1,14 +1,10 @@
-import os
 from unittest import mock
 
 import pytest
 from ruamel import yaml
 
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    DatasourceConfig,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import DataContextError, GeCloudError
 from great_expectations.exceptions.exceptions import DatasourceInitializationError
 
@@ -16,7 +12,7 @@ from great_expectations.exceptions.exceptions import DatasourceInitializationErr
 @pytest.fixture
 def ge_cloud_data_context_config(
     ge_cloud_runtime_base_url,
-    ge_cloud_runtime_account_id,
+    ge_cloud_runtime_organization_id,
     ge_cloud_runtime_access_token,
 ):
     """
@@ -62,7 +58,7 @@ def ge_cloud_data_context_config(
           ge_cloud_resource_type: expectation_suite
           ge_cloud_credentials:
             access_token: {ge_cloud_runtime_access_token}
-            account_id: {ge_cloud_runtime_account_id}
+            organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
 
       default_validations_store:
@@ -73,7 +69,7 @@ def ge_cloud_data_context_config(
           ge_cloud_resource_type: suite_validation_result
           ge_cloud_credentials:
             access_token: {ge_cloud_runtime_access_token}
-            account_id: {ge_cloud_runtime_account_id}
+            organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
 
       default_checkpoint_store:
@@ -84,7 +80,7 @@ def ge_cloud_data_context_config(
           ge_cloud_resource_type: contract
           ge_cloud_credentials:
             access_token: {ge_cloud_runtime_access_token}
-            account_id: {ge_cloud_runtime_account_id}
+            organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
 
     evaluation_parameter_store_name: default_evaluation_parameter_store
@@ -102,7 +98,7 @@ def ge_cloud_data_context_config(
           ge_cloud_resource_type: rendered_data_doc
           ge_cloud_credentials:
             access_token: {ge_cloud_runtime_access_token}
-            account_id: {ge_cloud_runtime_account_id}
+            organization_id: {ge_cloud_runtime_organization_id}
           suppress_store_backend_id: True
         site_index_builder:
           class_name: DefaultSiteIndexBuilder
@@ -135,7 +131,7 @@ def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_er
 def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     mock_request,
     ge_cloud_runtime_base_url,
-    ge_cloud_runtime_account_id,
+    ge_cloud_runtime_organization_id,
     ge_cloud_runtime_access_token,
 ):
     # Ensure that the request goes through
@@ -144,13 +140,13 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
         DataContext(
             ge_cloud_mode=True,
             ge_cloud_base_url=ge_cloud_runtime_base_url,
-            ge_cloud_account_id=ge_cloud_runtime_account_id,
+            ge_cloud_organization_id=ge_cloud_runtime_organization_id,
             ge_cloud_access_token=ge_cloud_runtime_access_token,
         )
     except:  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
         pass
 
-    called_with_url = f"{ge_cloud_runtime_base_url}/accounts/{ge_cloud_runtime_account_id}/data-context-configuration"
+    called_with_url = f"{ge_cloud_runtime_base_url}/organizations/{ge_cloud_runtime_organization_id}/data-context-configuration"
     called_with_header = {
         "headers": {
             "Content-Type": "application/vnd.api+json",
@@ -168,7 +164,7 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
 def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_error(
     mock_request,
     ge_cloud_runtime_base_url,
-    ge_cloud_runtime_account_id,
+    ge_cloud_runtime_organization_id,
     ge_cloud_runtime_access_token,
 ):
     # Ensure that the request fails
@@ -178,38 +174,6 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
         DataContext(
             ge_cloud_mode=True,
             ge_cloud_base_url=ge_cloud_runtime_base_url,
-            ge_cloud_account_id=ge_cloud_runtime_account_id,
+            ge_cloud_organization_id=ge_cloud_runtime_organization_id,
             ge_cloud_access_token=ge_cloud_runtime_access_token,
         )
-
-
-def test_datasource_initialization_error_thrown_in_cloud_mode(
-    ge_cloud_data_context_config: DataContextConfig,
-    ge_cloud_runtime_base_url,
-    ge_cloud_runtime_account_id,
-    ge_cloud_runtime_access_token,
-):
-    # normally the DataContext swallows exceptions when there is an error raised from get_datasource
-    # (which is used during initialization). In cloud mode, we want a DatasourceInitializationError to
-    # propogate.
-
-    # normally in cloud mode configuration is retrieved from an endpoint; we're providing it here in-line
-    with mock.patch(
-        "great_expectations.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
-        return_value=ge_cloud_data_context_config,
-    ):
-        # DataContext._init_datasources calls get_datasource, which may generate a DatasourceInitializationError
-        # that normally gets swallowed.
-        with mock.patch(
-            "great_expectations.data_context.DataContext.get_datasource"
-        ) as get_datasource:
-            get_datasource.side_effect = DatasourceInitializationError(
-                "mock_datasource", "mock_message"
-            )
-            with pytest.raises(DatasourceInitializationError):
-                DataContext(
-                    ge_cloud_mode=True,
-                    ge_cloud_base_url=ge_cloud_runtime_base_url,
-                    ge_cloud_account_id=ge_cloud_runtime_account_id,
-                    ge_cloud_access_token=ge_cloud_runtime_access_token,
-                )

@@ -189,7 +189,6 @@ class ExpectColumnValuesToNotContainCharacter(ColumnMapExpectation):
             "@vraimondi04",
             "@talagluck",
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
@@ -295,5 +294,4 @@ class ExpectColumnValuesToNotContainCharacter(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToNotContainCharacter().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToNotContainCharacter().print_diagnostic_checklist()

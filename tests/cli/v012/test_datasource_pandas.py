@@ -6,7 +6,6 @@ from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
 from tests.cli.v012.test_cli import yaml
 from tests.cli.v012.utils import (
-    assert_dict_key_and_val_in_stdout,
     assert_no_logging_messages_or_tracebacks,
     assert_no_tracebacks,
 )

@@ -1,4 +1,6 @@
 import logging
+from typing import Dict
+from unittest import mock
 
 import pytest
 
@@ -8,9 +10,11 @@ from great_expectations.core.usage_statistics.schemas import (
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
+    get_profiler_run_usage_statistics,
 )
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from tests.core.usage_statistics.util import usage_stats_invalid_messages_exist
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -241,6 +245,7 @@ def test_build_init_payload(
         "anonymized_validation_operators",
         "anonymized_data_docs_sites",
         "anonymized_expectation_suites",
+        "dependencies",
     ]
     assert init_payload["anonymized_datasources"] == [
         {
@@ -271,3 +276,142 @@ def test_build_init_payload(
         }
     ]
     assert init_payload["anonymized_expectation_suites"] == []
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_get_profiler_run_usage_statistics_with_handler_valid_payload(
+    mock_data_context: mock.MagicMock,
+):
+    # Ensure that real handler gets passed down by the context
+    handler: UsageStatisticsHandler = UsageStatisticsHandler(
+        mock_data_context, "my_id", "my_url"
+    )
+    mock_data_context.usage_statistics_handler = handler
+
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_profiler", config_version=1.0, data_context=mock_data_context
+    )
+
+    override_rules: Dict[str, dict] = {
+        "my_override_rule": {
+            "domain_builder": {
+                "class_name": "ColumnDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder",
+            },
+            "parameter_builders": [
+                {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                    "name": "my_parameter",
+                    "metric_name": "my_metric",
+                },
+                {
+                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                    "name": "my_other_parameter",
+                    "metric_name": "my_other_metric",
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+            ],
+        },
+    }
+
+    payload: dict = get_profiler_run_usage_statistics(
+        profiler=profiler, rules=override_rules
+    )
+
+    assert payload == {
+        "anonymized_name": "a0061ec021855cd2b3a994dd8d90fe5d",
+        "anonymized_rules": [
+            {
+                "anonymized_domain_builder": {"parent_class": "ColumnDomainBuilder"},
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
+                    },
+                    {
+                        "expectation_type": "expect_column_min_to_be_between",
+                        "parent_class": "DefaultExpectationConfigurationBuilder",
+                    },
+                ],
+                "anonymized_name": "bd8a8b4465a94b363caf2b307c080547",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_name": "25dac9e56a1969727bc0f90db6eaa833",
+                        "parent_class": "MetricMultiBatchParameterBuilder",
+                    },
+                    {
+                        "anonymized_name": "be5baa3f1064e6e19356f2168968cbeb",
+                        "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
+                    },
+                ],
+            }
+        ],
+        "config_version": 1.0,
+        "rule_count": 1,
+        "variable_count": 0,
+    }
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_get_profiler_run_usage_statistics_with_handler_invalid_payload(
+    mock_data_context: mock.MagicMock,
+):
+    # Ensure that real handler gets passed down by the context
+    handler: UsageStatisticsHandler = UsageStatisticsHandler(
+        mock_data_context, "my_id", "my_url"
+    )
+    mock_data_context.usage_statistics_handler = handler
+
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_profiler", config_version=1.0, data_context=mock_data_context
+    )
+
+    payload: dict = get_profiler_run_usage_statistics(profiler=profiler)
+
+    # Payload won't pass schema validation due to a lack of rules but we can confirm that it is anonymized
+    assert payload == {
+        "anonymized_name": "a0061ec021855cd2b3a994dd8d90fe5d",
+        "config_version": 1.0,
+        "rule_count": 0,
+        "variable_count": 0,
+    }
+
+
+def test_get_profiler_run_usage_statistics_without_handler():
+    # Without a DataContext, the usage stats handler is not propogated down to the RBP
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_profiler",
+        config_version=1.0,
+    )
+    payload: dict = get_profiler_run_usage_statistics(profiler=profiler)
+    assert payload == {}

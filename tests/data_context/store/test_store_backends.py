@@ -34,7 +34,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.self_check.util import expectationSuiteSchema
-from great_expectations.util import gen_directory_tree_str
+from great_expectations.util import gen_directory_tree_str, is_library_loadable
 
 
 @pytest.fixture()
@@ -1006,6 +1006,10 @@ def test_TupleS3StoreBackend_with_s3_put_options():
     assert my_store.list_keys() == [(".ge_store_backend_id",), ("AAA",)]
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google"),
+    reason="google is not installed",
+)
 def test_TupleGCSStoreBackend_base_public_path():
     """
     What does this test and why?
@@ -1053,6 +1057,10 @@ def test_TupleGCSStoreBackend_base_public_path():
     )
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google"),
+    reason="google is not installed",
+)
 def test_TupleGCSStoreBackend():
     # pytest.importorskip("google-cloud-storage")
     """
@@ -1313,7 +1321,7 @@ def test_GeCloudStoreBackend():
     ge_cloud_base_url = "https://app.greatexpectations.io/"
     ge_cloud_credentials = {
         "access_token": "1234",
-        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
     }
     ge_cloud_resource_type = "contract"
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
@@ -1336,12 +1344,12 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.set(("contract", ""), my_simple_checkpoint_config_serialized)
         mock_post.assert_called_with(
-            "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
             json={
                 "data": {
                     "type": "contract",
                     "attributes": {
-                        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
                         "checkpoint_config": OrderedDict(
                             [
                                 ("name", "my_minimal_simple_checkpoint"),
@@ -1384,7 +1392,7 @@ def test_GeCloudStoreBackend():
                 )
             )
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
                 "-4bdd-8a42-3c35cce574c6",
                 headers={
                     "Content-Type": "application/vnd.api+json",
@@ -1401,7 +1409,7 @@ def test_GeCloudStoreBackend():
             )
             my_store_backend.list_keys()
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts",
                 headers={
                     "Content-Type": "application/vnd.api+json",
                     "Authorization": "Bearer 1234",
@@ -1425,7 +1433,7 @@ def test_GeCloudStoreBackend():
                 )
             )
             mock_patch.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/contracts/0ccac18e-7631"
                 "-4bdd"
                 "-8a42-3c35cce574c6",
                 json={
@@ -1450,12 +1458,12 @@ def test_GeCloudStoreBackend():
         )
         my_store_backend.set(("rendered_data_doc", ""), OrderedDict())
         mock_post.assert_called_with(
-            "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
+            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
             json={
                 "data": {
                     "type": "rendered_data_doc",
                     "attributes": {
-                        "account_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
                         "rendered_data_doc": OrderedDict(),
                     },
                 }
@@ -1480,7 +1488,7 @@ def test_GeCloudStoreBackend():
                 )
             )
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
                 "-4bdd-8a42-3c35cce574c6",
                 headers={
                     "Content-Type": "application/vnd.api+json",
@@ -1497,7 +1505,7 @@ def test_GeCloudStoreBackend():
             )
             my_store_backend.list_keys()
             mock_get.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
                 headers={
                     "Content-Type": "application/vnd.api+json",
                     "Authorization": "Bearer 1234",
@@ -1521,7 +1529,7 @@ def test_GeCloudStoreBackend():
                 )
             )
             mock_patch.assert_called_with(
-                "https://app.greatexpectations.io/accounts/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
+                "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
                 "-4bdd"
                 "-8a42-3c35cce574c6",
                 json={

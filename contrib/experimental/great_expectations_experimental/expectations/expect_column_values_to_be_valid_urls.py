@@ -129,7 +129,6 @@ class ExpectColumnValuesToBeValidUrls(ColumnMapExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation
             "@ckathleen"
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
@@ -232,5 +231,4 @@ class ExpectColumnValuesToBeValidUrls(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToBeValidUrls().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToBeValidUrls().print_diagnostic_checklist()

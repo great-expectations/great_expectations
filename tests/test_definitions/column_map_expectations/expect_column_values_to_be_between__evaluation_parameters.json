@@ -121,6 +121,7 @@
       "tests": [
         {
           "title": "basic_positive_now_test",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "out": {
             "unexpected_list": [],
@@ -136,6 +137,7 @@
         },
         {
           "title": "basic_negative_now_test",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "out": {
             "unexpected_index_list": [0, 1, 2, 3, 4, 5, 6, 7, 9],

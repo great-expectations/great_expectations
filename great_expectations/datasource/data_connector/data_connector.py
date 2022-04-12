@@ -238,7 +238,7 @@ class DataConnector:
             self._refresh_data_references_cache()
 
         if pretty_print:
-            print("\t" + self.name, ":", self.__class__.__name__)
+            print(f"	{self.name}", ":", self.__class__.__name__)
             print()
 
         asset_names = self.get_available_data_asset_names()
@@ -351,7 +351,7 @@ class DataConnector:
 
         """
         if pretty_print:
-            print(f"\n\t\tFetching batch data...")
+            print("\n\t\tFetching batch data...")
 
         batch_definition_list: List[
             BatchDefinition
@@ -396,7 +396,7 @@ class DataConnector:
         )
 
         if pretty_print and data is not None:
-            print(f"\n\t\tShowing 5 rows")
+            print("\n\t\tShowing 5 rows")
             print(data)
 
         return {

@@ -1,21 +1,19 @@
 from itertools import zip_longest
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import (
+    InvalidExpectationConfigurationError,
+    TableExpectation,
+)
 from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import substitute_none_for_missing
-from ..expectation import InvalidExpectationConfigurationError, TableExpectation
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import substitute_none_for_missing
 
 
 class ExpectTableColumnsToMatchOrderedList(TableExpectation):
@@ -53,12 +51,13 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "table expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     metric_dependencies = ("table.columns",)
@@ -82,7 +81,9 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
     }
     args_keys = ("column_list",)
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -91,7 +92,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         # Setting up a configuration
@@ -111,7 +112,6 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -136,12 +136,12 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         else:
             template_str = "Must have these columns in this order: "
             for idx in range(len(params["column_list"]) - 1):
-                template_str += "$column_list_" + str(idx) + ", "
-                params["column_list_" + str(idx)] = params["column_list"][idx]
+                template_str += f"$column_list_{str(idx)}, "
+                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
             last_idx = len(params["column_list"]) - 1
-            template_str += "$column_list_" + str(last_idx)
-            params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+            template_str += f"$column_list_{str(last_idx)}"
+            params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
 
         params_with_json_schema = {
             "column_list": {
@@ -181,12 +181,12 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         else:
             template_str = "Must have these columns in this order: "
             for idx in range(len(params["column_list"]) - 1):
-                template_str += "$column_list_" + str(idx) + ", "
-                params["column_list_" + str(idx)] = params["column_list"][idx]
+                template_str += f"$column_list_{str(idx)}, "
+                params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
             last_idx = len(params["column_list"]) - 1
-            template_str += "$column_list_" + str(last_idx)
-            params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+            template_str += f"$column_list_{str(last_idx)}"
+            params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
 
         return [
             RenderedStringTemplateContent(

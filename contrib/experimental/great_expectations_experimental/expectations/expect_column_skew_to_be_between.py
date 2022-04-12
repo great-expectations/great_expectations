@@ -136,7 +136,7 @@ class ColumnSkew(ColumnMetricProvider):
             sqlalchemy_engine=sqlalchemy_engine,
         )
 
-        column_skew = column_third_moment / (column_std ** 3) / (column_count - 1)
+        column_skew = column_third_moment / (column_std**3) / (column_count - 1)
         if metric_value_kwargs["abs"]:
             return np.abs(column_skew)
         else:
@@ -376,7 +376,6 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
             "@rexboyce",
             "@bragleg",
         ],
-        "package": "experimental_expectations",
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
@@ -404,7 +403,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
     #         configuration (OPTIONAL[ExpectationConfiguration]): \
     #             An optional Expectation Configuration entry that will be used to configure the expectation
     #     Returns:
-    #         True if the configuration has been validated successfully. Otherwise, raises an exception
+    #         None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
     #     """
     #     super().validate_configuration(configuration)
     #     self.validate_metric_value_between_configuration(configuration=configuration)
@@ -491,6 +490,4 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnSkewToBeBetween().run_diagnostics()
-
-    print(json.dumps(self_check_report, indent=2))
+    ExpectColumnSkewToBeBetween().print_diagnostic_checklist()

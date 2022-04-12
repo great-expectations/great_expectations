@@ -10,14 +10,13 @@ from great_expectations.expectations.registry import (
     _registered_renderers,
     get_renderer_impl,
 )
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     CollapseContent,
     RenderedMarkdownContent,
     RenderedStringTemplateContent,
     TextContent,
 )
-
-from ..renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +42,7 @@ class ContentBlockRenderer(Renderer):
             "exception_list_content_block", False
         )
 
-        data_docs_exception_message = f"""\
+        data_docs_exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:

@@ -60,6 +60,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self._ge_cloud_resource_type = ge_cloud_resource_type or singularize(
             ge_cloud_resource_name
         )
+
+        # TOTO: remove when account_id is deprecated
+        if ge_cloud_credentials.get("account_id"):
+            logger.warning(
+                'The "account_id" ge_cloud_credentials key has been renamed to "organization_id" and will '
+                "be deprecated in the next major release."
+            )
+            ge_cloud_credentials["organization_id"] = ge_cloud_credentials["account_id"]
+            ge_cloud_credentials.pop("account_id")
         self._ge_cloud_credentials = ge_cloud_credentials
 
         # Initialize with store_backend_id if not part of an HTMLSiteStore
@@ -99,15 +108,16 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 str(response.text),
                 str(jsonError),
             )
-            raise StoreBackendError("Unable to get object in GE Cloud Store Backend.")
+            raise StoreBackendError(
+                f"Unable to get object in GE Cloud Store Backend: {jsonError}"
+            )
 
     def _move(self):
         pass
 
     def _update(self, ge_cloud_id, value, **kwargs):
         resource_type = self.ge_cloud_resource_type
-        account_id = self.ge_cloud_credentials["account_id"]
-
+        organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
         data = {
@@ -116,15 +126,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "id": ge_cloud_id,
                 "attributes": {
                     attributes_key: value,
-                    "account_id": account_id,
+                    "organization_id": organization_id,
                 },
             }
         }
 
         url = urljoin(
             self.ge_cloud_base_url,
-            f"accounts/"
-            f"{account_id}/"
+            f"organizations/"
+            f"{organization_id}/"
             f"{hyphen(self.ge_cloud_resource_name)}/"
             f"{ge_cloud_id}",
         )
@@ -138,7 +148,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
-                "Unable to update object in GE Cloud Store Backend."
+                f"Unable to update object in GE Cloud Store Backend: {e}"
             )
 
     @property
@@ -167,7 +177,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
-        account_id = self.ge_cloud_credentials["account_id"]
+        organization_id = self.ge_cloud_credentials["organization_id"]
 
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
@@ -175,7 +185,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             "data": {
                 "type": resource_type,
                 "attributes": {
-                    "account_id": account_id,
+                    "organization_id": organization_id,
                     attributes_key: value,
                     **(kwargs if self.validate_set_kwargs(kwargs) else {}),
                 },
@@ -184,7 +194,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         url = urljoin(
             self.ge_cloud_base_url,
-            f"accounts/" f"{account_id}/" f"{hyphen(resource_name)}",
+            f"organizations/" f"{organization_id}/" f"{hyphen(resource_name)}",
         )
         try:
             response = requests.post(url, json=data, headers=self.auth_headers)
@@ -200,7 +210,9 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # TODO Show more detailed error messages
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError("Unable to set object in GE Cloud Store Backend.")
+            raise StoreBackendError(
+                f"Unable to set object in GE Cloud Store Backend: {e}"
+            )
 
     @property
     def ge_cloud_base_url(self):
@@ -221,8 +233,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def list_keys(self):
         url = urljoin(
             self.ge_cloud_base_url,
-            f"accounts/"
-            f"{self.ge_cloud_credentials['account_id']}/"
+            f"organizations/"
+            f"{self.ge_cloud_credentials['organization_id']}/"
             f"{hyphen(self.ge_cloud_resource_name)}",
         )
         try:
@@ -238,13 +250,15 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return keys
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError("Unable to list keys in GE Cloud Store Backend.")
+            raise StoreBackendError(
+                f"Unable to list keys in GE Cloud Store Backend: {e}"
+            )
 
     def get_url_for_key(self, key, protocol=None):
         ge_cloud_id = key[1]
         url = urljoin(
             self.ge_cloud_base_url,
-            f"accounts/{self.ge_cloud_credentials['account_id']}/{hyphen(self.ge_cloud_resource_name)}/{ge_cloud_id}",
+            f"organizations/{self.ge_cloud_credentials['organization_id']}/{hyphen(self.ge_cloud_resource_name)}/{ge_cloud_id}",
         )
         return url
 
@@ -266,8 +280,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         url = urljoin(
             self.ge_cloud_base_url,
-            f"accounts/"
-            f"{self.ge_cloud_credentials['account_id']}/"
+            f"organizations/"
+            f"{self.ge_cloud_credentials['organization_id']}/"
             f"{hyphen(self.ge_cloud_resource_name)}/"
             f"{ge_cloud_id}",
         )
@@ -281,7 +295,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
-                "Unable to delete object in GE Cloud Store Backend."
+                f"Unable to delete object in GE Cloud Store Backend: {e}"
             )
 
     def _has_key(self, key):

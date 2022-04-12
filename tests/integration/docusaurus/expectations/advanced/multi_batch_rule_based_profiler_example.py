@@ -1,11 +1,15 @@
 from ruamel import yaml
 
 from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
-profiler_config = """
+profiler_config = r"""
 # This profiler is meant to be used on the NYC taxi data (yellow_tripdata_sample_<YEAR>-<MONTH>.csv)
 # located in tests/test_sets/taxi_yellow_tripdata_samples/
+
+name: My Profiler
+config_version: 1.0
 
 variables:
   false_positive_rate: 0.01
@@ -16,7 +20,7 @@ rules:
     domain_builder:
         class_name: TableDomainBuilder
     parameter_builders:
-      - parameter_name: row_count_range
+      - name: row_count_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request:
             datasource_name: taxi_pandas
@@ -34,15 +38,15 @@ rules:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        min_value: $parameter.row_count_range.value.min_value
-        max_value: $parameter.row_count_range.value.max_value
+        min_value: $parameter.row_count_range.value[0]
+        max_value: $parameter.row_count_range.value[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.row_count_range.details
   column_ranges_rule:
     domain_builder:
-      class_name: SimpleSemanticTypeColumnDomainBuilder
-      semantic_types:
+      class_name: ColumnDomainBuilder
+      include_semantic_types:
         - numeric
       # BatchRequest yielding exactly one batch (March, 2019 trip data)
       batch_request:
@@ -52,7 +56,7 @@ rules:
         data_connector_query:
           index: -1
     parameter_builders:
-      - parameter_name: min_range
+      - name: min_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request:
             datasource_name: taxi_pandas
@@ -64,7 +68,7 @@ rules:
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
-      - parameter_name: max_range
+      - name: max_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request:
             datasource_name: taxi_pandas
@@ -81,8 +85,8 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $parameter.min_range.value.min_value
-        max_value: $parameter.min_range.value.max_value
+        min_value: $parameter.min_range.value[0]
+        max_value: $parameter.min_range.value[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.min_range.details
@@ -90,8 +94,8 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $parameter.max_range.value.min_value
-        max_value: $parameter.max_range.value.max_value
+        min_value: $parameter.max_range.value[0]
+        max_value: $parameter.max_range.value[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.max_range.details
@@ -109,7 +113,10 @@ rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
     data_context=data_context,
 )
 
-suite = rule_based_profiler.run(expectation_suite_name="test_suite_name")
+rule_based_profiler.run()
+suite: ExpectationSuite = rule_based_profiler.get_expectation_suite(
+    expectation_suite_name="test_suite_name"
+)
 print(suite)
 
 # Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.

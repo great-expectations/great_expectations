@@ -265,7 +265,7 @@ def _invert_regex_to_data_reference_template(
             if not (group_name_index < num_groups):
                 break
             # Replace the captured group with "{next_group_name}" in the template
-            data_reference_template += "{" + group_names[group_name_index] + "}"
+            data_reference_template += f"{{{group_names[group_name_index]}}}"
             group_name_index += 1
 
         elif token in [

@@ -1,23 +1,14 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...data_asset.util import parse_result_format
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import handle_strict_min_max, substitute_none_for_missing
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
+    handle_strict_min_max,
+    substitute_none_for_missing,
 )
 
 
@@ -67,12 +58,13 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "table expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     metric_dependencies = ("table.column_count",)
@@ -95,7 +87,9 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
 
     """ A Metric Decorator for the Column Count"""
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -104,7 +98,7 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)

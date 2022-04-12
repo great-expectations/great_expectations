@@ -1,11 +1,13 @@
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.util import substitute_none_for_missing
-from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.util import substitute_none_for_missing
 
 
 class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
@@ -57,12 +59,13 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.not_match_like_pattern"
@@ -84,7 +87,9 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         "like_pattern",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert "like_pattern" in configuration.kwargs, "Must provide like_pattern"
@@ -97,7 +102,6 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for like_pattern kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

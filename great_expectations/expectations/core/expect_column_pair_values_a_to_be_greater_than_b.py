@@ -1,16 +1,18 @@
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation import (
+    ColumnPairMapExpectation,
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnPairMapExpectation, InvalidExpectationConfigurationError
 
 
 class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
@@ -46,14 +48,14 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "multi-column expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_pair_values.a_greater_than_b"
@@ -83,7 +85,9 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "or_equal",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -94,7 +98,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             ), "both columns must be provided"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -137,7 +140,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "or_equal": {
@@ -158,7 +161,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
             params["row_condition"] = None
 
-        if params["mostly"] is None:
+        if params["mostly"] is None or params["mostly"] == 1.0:
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must always be greater than those in $column_B."
             else:
@@ -228,7 +231,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
             params["row_condition"] = None
 
-        if params["mostly"] is None:
+        if params["mostly"] is None or params["mostly"] == 1.0:
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must always be greater than those in $column_B."
             else:

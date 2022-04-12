@@ -7,7 +7,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 context = ge.get_context()
 
 # Please note the naming of this datasource is only to provide good UX for docs and tests.
-datasource_yaml = fr"""
+datasource_yaml = rf"""
 name: insert_your_datasource_name_here
 module_name: great_expectations.datasource
 class_name: Datasource

@@ -16,7 +16,7 @@ load_data_into_test_database(
 
 context = ge.get_context()
 
-datasource_yaml = """
+datasource_yaml = r"""
 name: my_postgres_datasource
 class_name: Datasource
 execution_engine:

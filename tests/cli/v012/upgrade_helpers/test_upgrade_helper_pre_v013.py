@@ -19,11 +19,6 @@ from tests.cli.v012.utils import (
     assert_no_logging_messages_or_tracebacks,
 )
 
-try:
-    from unittest import mock
-except ImportError:
-    from unittest import mock
-
 
 def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     # test great_expectations project upgrade command with project with config_version 2
