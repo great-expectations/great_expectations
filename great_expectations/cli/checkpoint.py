@@ -3,7 +3,6 @@ import sys
 from typing import List
 
 import click
-from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -27,9 +26,6 @@ try:
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     SQLAlchemyError = RuntimeError
-
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 """

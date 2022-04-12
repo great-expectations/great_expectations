@@ -28,7 +28,7 @@ from great_expectations.cli import cli
 
 def _run_notebook(context: DataContext) -> None:
     uncommitted_dir = os.path.join(context.root_directory, context.GE_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(uncommitted_dir, f"datasource_new.ipynb")
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     with open(expected_notebook) as f:
         nb = nbformat.read(f, as_version=4)
     ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
@@ -68,7 +68,7 @@ def _run_cli_datasource_new_path_test(
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
-                    f"base_directory": f"../../{base_path}",
+                    "base_directory": f"../../{base_path}",
                     "class_name": "InferredAssetFilesystemDataConnector",
                 },
                 "default_runtime_data_connector_name": {

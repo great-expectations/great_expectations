@@ -1,4 +1,5 @@
 dataprofiler
 great_expectations
 numpy
+scikit-learn
 tensorflow

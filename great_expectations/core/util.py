@@ -184,7 +184,7 @@ def convert_to_json_serializable(data):
     if isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
 
-    if isinstance(data, uuid.UUID):
+    if isinstance(data, (uuid.UUID, bytes)):
         return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html

@@ -50,7 +50,7 @@ def test_update_expectations(
     assert package.expectation_count == 3
     assert package.expectations and all(
         isinstance(expectation, ExpectationDiagnostics)
-        for expectation in package.expectations
+        for expectation in package.expectations.values()
     )
     assert (
         package.status and package.status.production == 3 and package.status.total == 3

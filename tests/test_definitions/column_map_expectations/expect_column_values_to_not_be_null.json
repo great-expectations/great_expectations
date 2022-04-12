@@ -21,6 +21,7 @@
       "tests": [
         {
           "title": "basic_positive_case_complete_result_format",
+          "include_in_gallery": true,
           "exact_match_out": true,
           "in": {
             "column": "no_null",
@@ -62,6 +63,7 @@
           }
         },{
           "title": "negative_no_mostly_one_missing",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "column": "one_null",

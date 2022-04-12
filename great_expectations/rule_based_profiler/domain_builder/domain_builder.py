@@ -1,7 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    BatchRequestBase,
+    RuntimeBatchRequest,
+)
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
@@ -28,7 +33,9 @@ class DomainBuilder(Builder, ABC):
     def __init__(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -46,16 +53,34 @@ class DomainBuilder(Builder, ABC):
     def get_domains(
         self,
         variables: Optional[ParameterContainer] = None,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        force_batch_data: bool = False,
     ) -> List[Domain]:
         """
+        Args:
+            variables: attribute name/value pairs
+            batch_list: Explicit list of Batch objects to supply data at runtime.
+            batch_request: Explicit batch_request used to supply data at runtime.
+            force_batch_data: Whether or not to overwrite existing batch_request value in DomainBuilder components.
+
+        Returns:
+            List of Domain objects.
+
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
         """
+        self.set_batch_list_or_batch_request(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            force_batch_data=force_batch_data,
+        )
+
         return self._get_domains(variables=variables)
 
     @property
     @abstractmethod
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         pass
 
     @abstractmethod

@@ -905,7 +905,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         )
 
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
         class_name: ConfiguredAssetS3DataConnector
         datasource_name: test_environment
         bucket: bucket

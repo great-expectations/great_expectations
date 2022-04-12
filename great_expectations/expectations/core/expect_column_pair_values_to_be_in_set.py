@@ -11,6 +11,44 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     """
     Expect paired values from columns A and B to belong to a set of valid pairs.
 
+        For example:
+        ::
+            >>>d = {'fruit': ['appple','apple','apple','banana','banana'], 
+                    'color': ['red','green','yellow','yellow','red']}
+            >>>my_df = pd.DataFrame(data=d)
+            >>> my_df.expect_column_pair_values_to_be_in_set('fruit',
+                                                             'color',
+                                                            [ ('apple','red'),
+                                                              ('apple','green'),
+                                                              ('apple','yellow'),
+                                                              ('banana','yellow'),
+                                                            ]
+                                                            )
+            {
+                "success": false,
+                "meta": {},
+                "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                },
+                "result": {
+                    "element_count": 5,
+                    "unexpected_count": 1,
+                    "unexpected_percent": 20.0,
+                    "partial_unexpected_list": [
+                    [
+                        "banana",
+                        "red"
+                    ]
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 20.0,
+                    "unexpected_percent_nonmissing": 20.0
+                }
+            }
+
     Args:
         column_A (str): The first column name
         column_B (str): The second column name
@@ -36,14 +74,14 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "multi-column expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_pair_values.in_set"
@@ -67,7 +105,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -81,4 +119,3 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
             ), "must provide value_pairs_set"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True

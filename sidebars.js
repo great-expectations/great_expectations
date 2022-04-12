@@ -220,7 +220,10 @@ module.exports = {
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations',
-                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
                 {
                   type: 'category',
@@ -285,7 +288,8 @@ module.exports = {
               items: [
                 'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
                 'guides/validation/advanced/how_to_implement_custom_notifications',
-                'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
+                'guides/validation/advanced/how_to_validate_data_without_a_checkpoint',
+                'guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint'
               ]
             },
             { type: 'doc', id: 'guides/validation/index', label: 'Index' }
@@ -304,6 +308,8 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
+        'deployment_patterns/how_to_use_great_expectations_with_prefect',
+        'deployment_patterns/how_to_use_great_expectations_with_meltano',
         { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
       ]
     },
@@ -337,6 +343,14 @@ module.exports = {
                 { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
               ]
             },
+            {
+              type: 'category',
+              label: 'How to contribute integration documentation',
+              items: [
+                'integrations/contributing_integration',
+                { type: 'doc', id: 'integrations/integration_template', label: 'TEMPLATE Integration Document' }
+              ]
+            },
             'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
           ]
         },
@@ -362,6 +376,7 @@ module.exports = {
           items: [
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+            { type: 'doc', id: 'reference/customize_your_deployment' },
             { type: 'doc', id: 'reference/data_discovery' },
             { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]

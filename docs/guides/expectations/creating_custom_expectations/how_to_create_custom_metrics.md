@@ -4,19 +4,20 @@ title: How to create a custom Metric
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you implement a custom Metric in Pandas using the appropriate MetricProvider class. 
+This guide will help you implement a custom <TechnicalTag tag="metric" text="Metric" /> in Pandas using the appropriate `MetricProvider` class. 
 
 <Prerequisites>
 
-  * [Set up your dev environment](/docs/contributing/contributing_setup) to contribute
-  * [Signed the Contributor License Agreement](/docs/contributing/contributing_checklist) (CLA)
+  * [Set up your dev environment](../../../contributing/contributing_setup.md) to contribute
+  * [Signed the Contributor License Agreement](../../../contributing/contributing_checklist.md) (CLA)
 
 </Prerequisites>
 
-### Steps
+## Steps
 
-The details of this process differ based on the type of Expectations you are implementing. 
+The details of this process differ based on the type of <TechnicalTag tag="expectation" text="Expectations" /> you are implementing. 
 
 <Tabs
   groupId="expectation-type"
@@ -35,7 +36,7 @@ Expectations that extend ColumnMapExpectation class work as follows:
 * First they ask a yes/no question from every row in that column (that’s the “map”).
 * Then they ask what percentage of rows gave a positive answer to the first question. If the answer to the second question is above a specified threshold (controlled by the mostly argument), the Expectation considers the data valid.
  
-`ColumnMapExpectation class` (the parent of your Expectation’s class) does all the work of the second step. It leaves you to define the yes/no question that the Expectation asks about every row in the column. “Questions” are modeled as Metrics in Great Expectations. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](/docs/reference/metrics).
+`ColumnMapExpectation class` (the parent of your Expectation’s class) does all the work of the second step. It leaves you to define the yes/no question that the Expectation asks about every row in the column. “Questions” are modeled as Metrics in Great Expectations. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](../../../reference/metrics.md).
 
 * `ExpectColumnValuesToEqualThree` class that the template implements declares that the metric that maps each row in the column to the answer to its yes/no question is called `column_values.equal_three`:
 
@@ -63,7 +64,7 @@ The parent class expects the variable `condition_metric_name` to be set. Change 
 
 The Expectation declares that it needs a yes/no Metric “X” and the Metric Provider declares that it can compute this Metric. A match made in heaven.
 
-* Implement the computation of the Metric in your new Metric Provider class for at least one Execution Engines that Great Expectations supports, such as pandas, sqlalchemy, or Spark. Most contributors find that starting with Pandas is the easiest and fastest way to build.
+* Implement the computation of the Metric in your new Metric Provider class for at least one <TechnicalTag tag="execution_engine" text="Execution Engines" /> that Great Expectations supports, such as pandas, sqlalchemy, or Spark. Most contributors find that starting with Pandas is the easiest and fastest way to build.
 
 The parent class of your Metric Provider class is `ColumnMapMetricProvider`. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
 
@@ -156,7 +157,7 @@ Define success_keys of your Expectation
 success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 ````
 
-Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](/docs/reference/metrics).
+Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](../../../reference/metrics.md).
 
 * `ExpectColumnCustomMedianToBeBetween` class that the template implements declares the list of Metrics it needs computes for producing its result:
 

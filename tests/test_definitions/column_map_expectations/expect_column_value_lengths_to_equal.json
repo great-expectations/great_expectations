@@ -10,6 +10,7 @@
     },
     "tests": [{
       "title": "positive_test_string_one_character_length",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_string",
@@ -22,6 +23,7 @@
       }
     },{
       "title": "negative_test_string_value_is_1_too_high",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in":{
         "column": "equal_length_string",

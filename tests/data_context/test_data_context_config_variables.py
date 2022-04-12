@@ -1,10 +1,12 @@
 import os
+import shutil
 from collections import OrderedDict
 
 import pytest
 from ruamel.yaml import YAML
 
 import great_expectations as ge
+from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
@@ -12,6 +14,7 @@ from great_expectations.data_context.types.base import (
     DatasourceConfigSchema,
 )
 from great_expectations.data_context.util import (
+    PasswordMasker,
     file_relative_path,
     substitute_config_variable,
 )
@@ -23,6 +26,24 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 dataContextConfigSchema = DataContextConfigSchema()
+
+
+@pytest.fixture
+def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
+    monkeypatch.setenv("FOO", "BAR")
+    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
+    root_dir = empty_data_context.root_directory
+    ge_config_path = file_relative_path(
+        __file__,
+        "../test_fixtures/great_expectations_basic_with_variables.yml",
+    )
+    shutil.copy(ge_config_path, os.path.join(root_dir, "great_expectations.yml"))
+    config_variables_path = file_relative_path(
+        __file__,
+        "../test_fixtures/config_variables.yml",
+    )
+    shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
+    return DataContext(context_root_dir=root_dir)
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(
@@ -807,7 +828,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
         "database": "DB_NAME",
         "username": "DB_USER",
         # Note masking of "password" field
-        "password": "***",
+        "password": PasswordMasker.MASKED_PASSWORD_STRING,
     }
 
     # Check context substitutes escaped variables appropriately

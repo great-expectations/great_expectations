@@ -9,6 +9,7 @@
     "tests" : [
       {
         "title": "basic_positive_test_case_number_set",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "in": {
           "column": "x",
@@ -31,6 +32,7 @@
       },
       {
         "title": "negative_test_case_exclude_existing_column_value",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "in": {
           "column": "x",

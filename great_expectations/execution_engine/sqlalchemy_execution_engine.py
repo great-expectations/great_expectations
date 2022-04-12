@@ -36,7 +36,11 @@ from great_expectations.execution_engine.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+    parse_condition_to_sqlalchemy,
+)
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_selectable,
@@ -114,14 +118,6 @@ except ImportError:
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        ###
-        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-        # to define an attribute "dialect". A PR has been submitted to fix this upstream
-        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-        # fix isn't present, add this "dialect" attribute here:
-        if not hasattr(sqla_bigquery, "dialect"):
-            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
-
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
@@ -483,6 +479,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     f"Unable to find batch with batch_id {batch_id}"
                 )
 
+        selectable: Selectable
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
@@ -529,9 +526,31 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
                 )
 
+        # Filtering by filter_conditions
+        filter_conditions: List[RowCondition] = domain_kwargs.get(
+            "filter_conditions", []
+        )
+        # For SqlAlchemyExecutionEngine only one filter condition is allowed
+        if len(filter_conditions) == 1:
+            filter_condition = filter_conditions[0]
+            assert (
+                filter_condition.condition_type == RowConditionParserType.GE
+            ), "filter_condition must be of type GE for SqlAlchemyExecutionEngine"
+
+            selectable = (
+                sa.select([sa.text("*")])
+                .select_from(selectable)
+                .where(parse_condition_to_sqlalchemy(filter_condition.condition))
+            )
+        elif len(filter_conditions) > 1:
+            raise GreatExpectationsError(
+                "SqlAlchemyExecutionEngine currently only supports a single filter condition."
+            )
+
         if "column" in domain_kwargs:
             return selectable
 
+        # Filtering by ignore_row_if directive
         if (
             "column_A" in domain_kwargs
             and "column_B" in domain_kwargs
