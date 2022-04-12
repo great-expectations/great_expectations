@@ -664,35 +664,19 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
             datasource_name="my_datasource",
             data_connector_name="runtime",
             data_asset_name="asset_a",
-            batch_identifiers=IDDict({"month": 1, "day": 1}),
-        ),
-        BatchDefinition(
-            datasource_name="my_datasource",
-            data_connector_name="runtime",
-            data_asset_name="asset_a",
             batch_identifiers=IDDict({"month": 2, "day": 1}),
         ),
     ]
 
     assert runtime_data_connector._data_references_cache == {
-        "asset_a": {
-            "1-1": [
-                BatchDefinition(
-                    datasource_name="my_datasource",
-                    data_connector_name="runtime",
-                    data_asset_name="asset_a",
-                    batch_identifiers=IDDict({"day": 1, "month": 1}),
-                )
-            ],
-            "1-2": [
-                BatchDefinition(
-                    datasource_name="my_datasource",
-                    data_connector_name="runtime",
-                    data_asset_name="asset_a",
-                    batch_identifiers=IDDict({"day": 1, "month": 2}),
-                )
-            ],
-        }
+        "1-2": [
+            BatchDefinition(
+                datasource_name="my_datasource",
+                data_connector_name="runtime",
+                data_asset_name="asset_a",
+                batch_identifiers=IDDict({"day": 1, "month": 2}),
+            )
+        ],
     }
 
 

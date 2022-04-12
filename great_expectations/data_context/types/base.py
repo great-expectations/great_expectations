@@ -219,7 +219,6 @@ class AssetConfigSchema(Schema):
     table_name = fields.String(required=False, allow_none=True)
     type = fields.String(required=False, allow_none=True)
 
-    # batch_identifiers are inputted as a List but stored as a Dict RuntimeDataConnector because the assets and data_connector identifiers need to be separated
     batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )

@@ -55,21 +55,18 @@ class RuntimeDataConnector(DataConnector):
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
         )
-        self._batch_identifiers: dict = {}
-        assets_configured: bool = False
-        if assets:
-            assets_configured = True
-        self._add_batch_identifiers(
-            batch_identifiers, assets_configured=assets_configured
-        )
-
-        self._refresh_data_references_cache()
 
         if assets is None:
             assets = {}
         _assets: Dict[str, Union[dict, Asset]] = assets
         self._assets = _assets
         self._build_assets_from_config(config=assets)
+
+        # handle batch_identifiers that are defined at the DataConnector-level
+        self._batch_identifiers: dict = {}
+        self._add_batch_identifiers(batch_identifiers)
+
+        self._refresh_data_references_cache()
 
     @property
     def assets(self):
@@ -81,22 +78,22 @@ class RuntimeDataConnector(DataConnector):
         data_asset_name: Optional[str] = None,
         assets_configured: bool = False,
     ):
-        if not batch_identifiers and not assets_configured:
+        # TODO: clean up this logic before submitting PR
+        if not batch_identifiers and len(self.assets) == 0:
             raise ge_exceptions.DataConnectorError(
-                "Asset configured but no batch_identifiers"
+                "DataConnector has no batch_identifiers, either at the data connector or asset level. This is a problem"
             )
 
-        if not data_asset_name:
-            # TODO check this actual version
+        if batch_identifiers and not data_asset_name:
+            # check batch_identifiers being specified at DataConnector-level and warn accordingly
             # deprecated 0.15.01
             warnings.warn(
                 "We dont want you to do batch_identifiers on your own. Please name them as part of data_assets",
                 DeprecationWarning,
             )
+            self._batch_identifiers[self.name] = batch_identifiers
         if data_asset_name and batch_identifiers:
             self._batch_identifiers[data_asset_name] = batch_identifiers
-        elif batch_identifiers:
-            self._batch_identifiers[self.name] = batch_identifiers
 
     # <WILL> Marker this was pulled from other file
     def _build_assets_from_config(self, config: Dict[str, dict]):
@@ -200,6 +197,7 @@ class RuntimeDataConnector(DataConnector):
         batch_definition: BatchDefinition,
         runtime_parameters: dict,
     ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
+        # TODO: this is the method that aren't changing the behavior of. ensure that everything else works accordingly
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
             batch_definition=batch_definition,
             runtime_parameters=runtime_parameters,
