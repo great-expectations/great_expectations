@@ -160,12 +160,9 @@ class RuntimeDataConnector(DataConnector):
         return []
 
     def get_available_data_asset_names(self) -> List[str]:
-        # """Please see note in : _get_batch_definition_list_from_batch_request()"""
-        # UPDATE NOTE: this is now a list of defined assets + things passed into the cache
-        defined_assets: List[str] = []
-        data_reference_keys: List[str] = []
-        defined_assets = list(self.assets.keys())
-        data_reference_keys = list(self._data_references_cache.keys())
+        """Returns a list of data_assets that are both defined at runtime, and defined in DataConnector configuration"""
+        defined_assets: List[str] = list(self.assets.keys())
+        data_reference_keys: List[str] = list(self._data_references_cache.keys())
         return defined_assets + data_reference_keys
 
     # noinspection PyMethodOverriding
