@@ -207,9 +207,6 @@ class RuntimeDataConnector(DataConnector):
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
-        # as long as we find the batch definition and pull it, then we are good.
-        #
-        print(batch_definition)
         self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,

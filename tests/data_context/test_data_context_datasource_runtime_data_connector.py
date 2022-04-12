@@ -159,7 +159,6 @@ def test_get_batch_successful_specification_pandas_engine_asset_adding_more(
         ),
         expectation_suite_name="my_expectations",
     )
-    print(my_validator)
 
     my_validator: Validator = context.get_validator(
         batch_request=RuntimeBatchRequest(
@@ -173,6 +172,10 @@ def test_get_batch_successful_specification_pandas_engine_asset_adding_more(
     )
     # TODO : add assertion
     # TODO : add second batch
+    assert my_validator.active_batch.batch_definition.batch_identifiers == {
+        "day": 2,
+        "month": 4,
+    }
 
 
 # Tests with PandasExecutionEngine : batch_data
