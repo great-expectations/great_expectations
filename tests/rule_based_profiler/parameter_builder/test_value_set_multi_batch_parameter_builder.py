@@ -19,9 +19,12 @@ def test_instantiation_value_set_multi_batch_parameter_builder(
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
-    _: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder(
-        name="my_name",
-        data_context=data_context,
+    # noinspection PyUnusedLocal
+    parameter_builder: ValueSetMultiBatchParameterBuilder = (
+        ValueSetMultiBatchParameterBuilder(
+            name="my_name",
+            data_context=data_context,
+        )
     )
 
 
@@ -31,8 +34,11 @@ def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     with pytest.raises(TypeError) as excinfo:
-        _: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder(
-            data_context=data_context,
+        # noinspection PyUnusedLocal,PyArgumentList
+        parameter_builder: ValueSetMultiBatchParameterBuilder = (
+            ValueSetMultiBatchParameterBuilder(
+                data_context=data_context,
+            )
         )
     assert "__init__() missing 1 required positional argument: 'name'" in str(
         excinfo.value
@@ -61,20 +67,19 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
     )
-
-    assert parameter_container.parameter_nodes is None
-
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    assert parameter_container.parameter_nodes is None
+
     variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -92,6 +97,8 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
             "metric_configuration": {
                 "domain_kwargs": {"column": "event_type"},
                 "metric_name": "column.distinct_values",
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
             },
             "num_batches": 1,
         },
@@ -138,20 +145,19 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
     )
-
-    assert parameter_container.parameter_nodes is None
-
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
+
+    assert parameter_container.parameter_nodes is None
+
     variables: Optional[ParameterContainer] = None
     value_set_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -171,6 +177,8 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
             "metric_configuration": {
                 "domain_kwargs": {"column": "user_agent"},
                 "metric_name": "column.distinct_values",
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
             },
             "num_batches": 1,
         },
@@ -214,21 +222,20 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    variables: Optional[ParameterContainer] = None
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    assert parameter_container.parameter_nodes is None
-
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
-    variables: Optional[ParameterContainer] = None
+
+    assert parameter_container.parameter_nodes is None
+
     value_set_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -246,6 +253,8 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
             "metric_configuration": {
                 "metric_name": "column.distinct_values",
                 "domain_kwargs": {"column": "passenger_count"},
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -291,21 +300,20 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    variables: Optional[ParameterContainer] = None
 
     metric_domain_kwargs: dict = {"column": "store_and_fwd_flag"}
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
-
-    assert parameter_container.parameter_nodes is None
-
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
-    variables: Optional[ParameterContainer] = None
+
+    assert parameter_container.parameter_nodes is None
+
     value_set_multi_batch_parameter_builder.build_parameters(
-        parameter_container=parameter_container,
         domain=domain,
         variables=variables,
         parameters=parameters,
@@ -323,6 +331,8 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
             "metric_configuration": {
                 "metric_name": "column.distinct_values",
                 "domain_kwargs": {"column": "store_and_fwd_flag"},
+                "metric_value_kwargs": None,
+                "metric_dependencies": None,
             },
             "num_batches": 3,
         },

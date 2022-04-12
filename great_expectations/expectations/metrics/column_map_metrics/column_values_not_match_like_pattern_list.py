@@ -31,7 +31,7 @@ class ColumnValuesNotMatchLikePatternList(ColumnMapMetricProvider):
         )
         if like_pattern_expression is None:
             logger.warning(
-                "Like patterns are not supported for dialect %s" % str(_dialect.name)
+                f"Like patterns are not supported for dialect {str(_dialect.name)}"
             )
             raise NotImplementedError
 

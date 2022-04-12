@@ -172,7 +172,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             else:
                 shape = "[SCHEMA.]TABLE"
                 if self.engine.dialect.name.lower() == "bigquery":
-                    shape = "[PROJECT_ID.]{}".format(shape)
+                    shape = f"[PROJECT_ID.]{shape}"
 
                 raise ValueError(
                     "Table name must be of shape '{}'. Passed: {}".format(
@@ -252,7 +252,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                         [
                             (table_name, "table")
                             if default_schema_name == schema_name
-                            else (schema_name + "." + table_name, "table")
+                            else (f"{schema_name}.{table_name}", "table")
                             for table_name in self.inspector.get_table_names(
                                 schema=schema_name
                             )
@@ -264,7 +264,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                         [
                             (table_name, "view")
                             if default_schema_name == schema_name
-                            else (schema_name + "." + table_name, "view")
+                            else (f"{schema_name}.{table_name}", "view")
                             for table_name in self.inspector.get_view_names(
                                 schema=schema_name
                             )
@@ -293,9 +293,10 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
+                "Please use 'data_asset_name' instead.",
                 DeprecationWarning,
             )
         raise BatchKwargsError(

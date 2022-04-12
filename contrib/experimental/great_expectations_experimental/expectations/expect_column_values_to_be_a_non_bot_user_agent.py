@@ -123,7 +123,6 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["experimental"],  # Tags for this Expectation in the gallery
         "contributors": ["@ktshannon"],
-        "package": "experimental_expectations",
         "requirements": ["user_agents"],
     }
 

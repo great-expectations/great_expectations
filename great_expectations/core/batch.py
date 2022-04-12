@@ -7,11 +7,19 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
-from great_expectations.types import SerializableDictDot, safe_deep_copy
+from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
+
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
+    )
 
 
 class BatchDefinition(SerializableDictDot):
@@ -260,8 +268,23 @@ class BatchRequestBase(SerializableDictDot):
         due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
         make this refactoring infeasible at the present time.
         """
-        dict_obj: dict = self.to_dict()
-        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+
+        # if batch_data appears in BatchRequest, temporarily replace it with
+        # str placeholder before calling convert_to_json_serializable so that
+        # batch_data is not serialized
+        if batch_request_contains_batch_data(batch_request=self):
+            batch_data: Union[BatchRequestBase, dict] = self.runtime_parameters[
+                "batch_data"
+            ]
+            self.runtime_parameters["batch_data"]: str = str(type(batch_data))
+            serializeable_dict: dict = convert_to_json_serializable(data=self.to_dict())
+            # after getting serializable_dict, restore original batch_data
+            self.runtime_parameters["batch_data"]: Union[
+                BatchRequestBase, dict
+            ] = batch_data
+        else:
+            serializeable_dict: dict = convert_to_json_serializable(data=self.to_dict())
+
         return serializeable_dict
 
     def __deepcopy__(self, memo):
@@ -480,7 +503,7 @@ class Batch(SerializableDictDot):
     def __init__(
         self,
         data,
-        batch_request: Union[BatchRequest, RuntimeBatchRequest] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         batch_definition: BatchDefinition = None,
         batch_spec: BatchSpec = None,
         batch_markers: BatchMarkers = None,
@@ -606,7 +629,7 @@ class Batch(SerializableDictDot):
 
 
 def materialize_batch_request(
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, dict]] = None,
 ) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     effective_batch_request: dict = get_batch_request_as_dict(
         batch_request=batch_request
@@ -625,7 +648,7 @@ def materialize_batch_request(
 
 
 def batch_request_contains_batch_data(
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, dict]] = None
 ) -> bool:
     return (
         batch_request_contains_runtime_parameters(batch_request=batch_request)
@@ -634,16 +657,17 @@ def batch_request_contains_batch_data(
 
 
 def batch_request_contains_runtime_parameters(
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, dict]] = None
 ) -> bool:
     return (
         batch_request is not None
+        and isinstance(batch_request, (dict, DictDot))
         and batch_request.get("runtime_parameters") is not None
     )
 
 
 def get_batch_request_as_dict(
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, dict]] = None
 ) -> Optional[dict]:
     if batch_request is None:
         return None
@@ -659,7 +683,7 @@ def get_batch_request_from_acceptable_arguments(
     data_connector_name: Optional[str] = None,
     data_asset_name: Optional[str] = None,
     *,
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
+    batch_request: Optional[BatchRequestBase] = None,
     batch_data: Optional[Any] = None,
     data_connector_query: Optional[dict] = None,
     batch_identifiers: Optional[dict] = None,
@@ -676,7 +700,7 @@ def get_batch_request_from_acceptable_arguments(
     path: Optional[str] = None,
     batch_filter_parameters: Optional[dict] = None,
     **kwargs,
-) -> BatchRequest:
+) -> Union[BatchRequest, RuntimeBatchRequest]:
     """Obtain formal BatchRequest typed object from allowed attributes (supplied as arguments).
     This method applies only to the new (V3) Datasource schema.
 
@@ -709,7 +733,7 @@ def get_batch_request_from_acceptable_arguments(
         **kwargs
 
     Returns:
-        (BatchRequest) The formal BatchRequest object
+        (BatchRequest or RuntimeBatchRequest) The formal BatchRequest or RuntimeBatchRequest object
     """
 
     if batch_request:

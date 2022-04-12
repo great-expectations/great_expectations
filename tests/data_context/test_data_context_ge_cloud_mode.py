@@ -1,14 +1,10 @@
-import os
 from unittest import mock
 
 import pytest
 from ruamel import yaml
 
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    DatasourceConfig,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.exceptions import DataContextError, GeCloudError
 from great_expectations.exceptions.exceptions import DatasourceInitializationError
 
@@ -181,35 +177,3 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
             ge_cloud_organization_id=ge_cloud_runtime_organization_id,
             ge_cloud_access_token=ge_cloud_runtime_access_token,
         )
-
-
-def test_datasource_initialization_error_thrown_in_cloud_mode(
-    ge_cloud_data_context_config: DataContextConfig,
-    ge_cloud_runtime_base_url,
-    ge_cloud_runtime_organization_id,
-    ge_cloud_runtime_access_token,
-):
-    # normally the DataContext swallows exceptions when there is an error raised from get_datasource
-    # (which is used during initialization). In cloud mode, we want a DatasourceInitializationError to
-    # propogate.
-
-    # normally in cloud mode configuration is retrieved from an endpoint; we're providing it here in-line
-    with mock.patch(
-        "great_expectations.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
-        return_value=ge_cloud_data_context_config,
-    ):
-        # DataContext._init_datasources calls get_datasource, which may generate a DatasourceInitializationError
-        # that normally gets swallowed.
-        with mock.patch(
-            "great_expectations.data_context.DataContext.get_datasource"
-        ) as get_datasource:
-            get_datasource.side_effect = DatasourceInitializationError(
-                "mock_datasource", "mock_message"
-            )
-            with pytest.raises(DatasourceInitializationError):
-                DataContext(
-                    ge_cloud_mode=True,
-                    ge_cloud_base_url=ge_cloud_runtime_base_url,
-                    ge_cloud_organization_id=ge_cloud_runtime_organization_id,
-                    ge_cloud_access_token=ge_cloud_runtime_access_token,
-                )

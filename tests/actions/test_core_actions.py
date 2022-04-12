@@ -7,6 +7,7 @@ import pytest
 from freezegun import freeze_time
 from requests import Session
 
+from great_expectations.checkpoint.actions import SNSNotificationAction
 from great_expectations.checkpoint.util import smtplib
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -443,10 +444,7 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
         data_asset=None,
     ) == {"microsoft_teams_notification_result": None}
 
-    assert (
-        "Request to Microsoft Teams webhook at http://testing returned error 400"
-        in caplog.text
-    )
+    assert "Request to Microsoft Teams webhook returned error 400" in caplog.text
 
 
 class MockSMTPServer:
@@ -675,9 +673,7 @@ def test_cloud_notification_action_bad_response(
         "Authorization": f"Bearer {ge_cloud_access_token}",
     }
     expected_result = {
-        "cloud_notification_result": "Cloud Notification request at "
-        "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/contracts/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/suite-validation-results/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/notification-actions "
-        "returned error 418: test_text"
+        "cloud_notification_result": "Cloud Notification request returned error 418: test_text"
     }
 
     assert (
@@ -691,3 +687,25 @@ def test_cloud_notification_action_bad_response(
     mock_post_method.assert_called_with(
         url=expected_ge_cloud_url, headers=expected_headers
     )
+
+
+def test_cloud_sns_notification_action(
+    sns,
+    validation_result_suite,
+    cloud_data_context_with_datasource_pandas_engine,
+    validation_result_suite_id,
+    aws_credentials,
+):
+    subj_topic = "test-subj"
+    created_subj = sns.create_topic(Name=subj_topic)
+    arn = created_subj.get("TopicArn")
+    sns_action = SNSNotificationAction(
+        sns_topic_arn=arn,
+        sns_message_subject="Subject",
+        data_context=cloud_data_context_with_datasource_pandas_engine,
+    )
+    assert sns_action.run(
+        validation_result_suite=validation_result_suite,
+        validation_result_suite_identifier=validation_result_suite_id,
+        data_asset=None,
+    ).endswith("Subject")

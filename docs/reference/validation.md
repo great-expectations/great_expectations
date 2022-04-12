@@ -6,7 +6,7 @@ title: Validation
 Once you've constructed and stored Expectations, you can use them to validate new data. Validation generates a report
 that details any specific deviations from expected values.
 
-We recommend using a [Data Context](/docs/reference/data_context) to manage Expectation Suites and coordinate validation across runs.
+We recommend using a [Data Context](./data_context.md) to manage Expectation Suites and coordinate validation across runs.
 
 ## Validation Results
 
@@ -107,7 +107,7 @@ The resulting report returned looks like this:
 
 The easiest way to review Validation Results is to view them from your local Data Docs site, where you can also
 conveniently view Expectation Suites and with additional configuration, Profiling Results
-(see [Data Docs site configuration](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)). Out of the box, Great Expectations Data Docs is configured to compile a local
+(see [Data Docs site configuration](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md)). Out of the box, Great Expectations Data Docs is configured to compile a local
 data documentation site when you start a new project by running `great_expectations init`. By default, this local site
 is saved to the `uncommitted/data_docs/local_site/` directory of your project and will contain pages for Expectation
 Suites and Validation Results.
@@ -131,9 +131,9 @@ Checkpoints are mini-applications that can be configured to implement these scen
 
 Read [Checkpoints and Actions](./checkpoints_and_actions.md) to learn more.
 
-## Deployment patterns
+## Reference Architectures
 
-Useful deployment patterns for validation include:
+Useful Reference Architectures for validation include:
 
 * Include validation at the end of a complex data transformation, to verify that no cases were lost, duplicated, or
   improperly merged.
@@ -145,5 +145,5 @@ Useful deployment patterns for validation include:
 * Validate as part of an Airflow task: if Expectations are violated, raise an error and stop DAG propagation until the
   problem is resolved. Alternatively, you can implement Expectations that raise warnings without halting the DAG.
 
-For certain deployment patterns, it may be useful to parameterize Expectations, and supply Evaluation Parameters at
+For certain Reference Architectures, it may be useful to parameterize Expectations, and supply Evaluation Parameters at
 validation time. See [Evaluation Parameters](./evaluation_parameters.md) for more information.

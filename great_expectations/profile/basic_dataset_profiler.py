@@ -85,9 +85,7 @@ class BasicDatasetProfilerBase(DatasetProfiler):
             ).result["observed_value"]
         except KeyError:  # if observed_value value is not set
             logger.error(
-                "Failed to get cardinality of column {:s} - continuing...".format(
-                    column
-                )
+                f"Failed to get cardinality of column {column:s} - continuing..."
             )
 
         if num_unique is None or num_unique == 0 or pct_unique is None:
@@ -144,9 +142,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
         number_of_columns = len(columns)
         for i, column in enumerate(columns):
             logger.info(
-                "            Preparing column {} of {}: {}".format(
-                    i + 1, number_of_columns, column
-                )
+                f"            Preparing column {i + 1} of {number_of_columns}: {column}"
             )
 
             # df.expect_column_to_exist(column)

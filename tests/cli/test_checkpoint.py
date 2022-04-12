@@ -223,7 +223,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint delete my_checkpoint",
+        "--v3-api checkpoint delete my_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -281,7 +281,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint delete my_v1_checkpoint",
+        "--v3-api checkpoint delete my_v1_checkpoint",
         input="\n",
         catch_exceptions=False,
     )
@@ -325,7 +325,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "--v3-api checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -400,7 +400,7 @@ def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "--v3-api checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -425,7 +425,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint delete my_v1_checkpoint",
+        "--v3-api checkpoint delete my_v1_checkpoint",
         input="n\n",
         catch_exceptions=False,
     )
@@ -469,7 +469,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "--v3-api checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -493,7 +493,7 @@ def test_checkpoint_list_with_no_checkpoints(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "--v3-api checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -549,7 +549,7 @@ def test_checkpoint_list_with_single_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "--v3-api checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -608,7 +608,7 @@ def test_checkpoint_list_with_eight_checkpoints(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "--v3-api checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -682,7 +682,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint new my_minimal_simple_checkpoint",
+        "--v3-api checkpoint new my_minimal_simple_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -762,7 +762,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint new passengers",
+        "--v3-api checkpoint new passengers",
         input="1\n1\n",
         catch_exceptions=False,
     )
@@ -879,7 +879,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_checkpoint",
+        "--v3-api checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -945,7 +945,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_nested_checkpoint_template_1",
+        "--v3-api checkpoint run my_nested_checkpoint_template_1",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1079,7 +1079,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         "bad_batch.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: bad_batch
     config_version: 1
     class_name: Checkpoint
@@ -1123,7 +1123,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run bad_batch",
+        "--v3-api checkpoint run bad_batch",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1283,7 +1283,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         "no_suite.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -1323,7 +1323,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run no_suite",
+        "--v3-api checkpoint run no_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1398,7 +1398,7 @@ def test_checkpoint_run_on_non_existent_validations(
         "no_validations.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_base_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -1431,7 +1431,7 @@ def test_checkpoint_run_on_non_existent_validations(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run no_validations",
+        "--v3-api checkpoint run no_validations",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1510,7 +1510,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -1551,7 +1551,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1727,7 +1727,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -1766,7 +1766,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1979,7 +1979,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2166,7 +2166,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -2206,7 +2206,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2372,7 +2372,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -2411,7 +2411,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2615,7 +2615,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2796,7 +2796,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -2837,7 +2837,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2999,7 +2999,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -3038,7 +3038,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3244,7 +3244,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3398,7 +3398,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script not_a_checkpoint",
+        "--v3-api checkpoint script not_a_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3459,7 +3459,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script my_v1_checkpoint",
+        "--v3-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3515,7 +3515,7 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script my_v1_checkpoint",
+        "--v3-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3600,7 +3600,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -3640,7 +3640,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script my_fancy_checkpoint",
+        "--v3-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3724,7 +3724,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -3764,7 +3764,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script my_fancy_checkpoint",
+        "--v3-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3845,7 +3845,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -3886,7 +3886,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script my_fancy_checkpoint",
+        "--v3-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

@@ -1,0 +1,85 @@
+# This file is responsible for configuring the `packaging_and_installation` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# The pipeline is run under the following conditions:
+#   - On the main branch when a weekly release is being cut
+#   - On the develop branch as scheduled by the below cron job
+#
+#  `packaging_and_installation` is meant to test the installation and packaging of Great Expectations in a variety of environments.
+#
+#  This includes:
+#  * Linux, MacOS, and Windows
+#  * Python 3.7-3.10
+#  * pip and conda
+#  * User and developer workflows
+
+schedules:
+- cron: 0 8 * * *
+  displayName: Scheduled Runs
+  branches:
+    include:
+    - develop
+    exclude:
+    - main
+  always: true # As this is run once a day, we always want to run it (regardless of whether or not changes have occurred)
+
+trigger:
+  branches:
+    include:
+    - pre_pr-*
+    - main
+    exclude:
+    - develop
+
+# The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
+variables:
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
+
+stages:
+  - stage: user_install_linux
+    dependsOn: []
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    jobs:
+      - template: azure/user-install-matrix.yml
+        parameters:
+          vmImage: "ubuntu-latest"
+
+  - stage: dev_install_linux
+    dependsOn: user_install_linux
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    jobs:
+      - template: azure/dev-install-matrix.yml
+        parameters:
+          vmImage: "ubuntu-latest"
+
+  - stage: user_install_macOS
+    dependsOn: []
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    jobs:
+      - template: azure/user-install-matrix.yml
+        parameters:
+          vmImage: "macOS-latest"
+
+  - stage: dev_install_macOS
+    dependsOn: user_install_macOS
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    jobs:
+      - template: azure/dev-install-matrix.yml
+        parameters:
+          vmImage: "macOS-latest"
+
+  - stage: user_install_windows
+    dependsOn: []
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    jobs:
+      - template: azure/user-install-matrix.yml
+        parameters:
+          vmImage: "windows-latest"
+
+  - stage: dev_install_windows
+    dependsOn: user_install_windows
+    condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+    jobs:
+      - template: azure/dev-install-matrix.yml
+        parameters:
+          vmImage: "windows-latest"

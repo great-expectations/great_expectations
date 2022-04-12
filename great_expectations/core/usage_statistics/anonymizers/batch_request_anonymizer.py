@@ -2,43 +2,47 @@ import copy
 import logging
 from typing import Any, Dict, List, Optional, Set, Union
 
-from great_expectations.core.batch import (
-    BatchRequest,
-    get_batch_request_from_acceptable_arguments,
-    standardize_batch_request_display_ordering,
-)
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.util import deep_filter_properties_iterable
-
-from great_expectations.core.usage_statistics.anonymizers.types.base import (  # isort:skip
+from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    BATCH_REQUEST_FLATTENED_KEYS,
+    BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS,
+    BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS,
+    BATCH_SPEC_PASSTHROUGH_KEYS,
+    DATA_CONNECTOR_QUERY_KEYS,
+    GETTING_STARTED_CHECKPOINT_NAME,
     GETTING_STARTED_DATASOURCE_NAME,
     GETTING_STARTED_EXPECTATION_SUITE_NAME,
-    GETTING_STARTED_CHECKPOINT_NAME,
-    BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS,
-    BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS,
-    DATA_CONNECTOR_QUERY_KEYS,
     RUNTIME_PARAMETERS_KEYS,
-    BATCH_SPEC_PASSTHROUGH_KEYS,
-    BATCH_REQUEST_FLATTENED_KEYS,
 )
+from great_expectations.util import deep_filter_properties_iterable
 
 logger = logging.getLogger(__name__)
 
 
-class BatchRequestAnonymizer(Anonymizer):
-    def __init__(self, salt=None):
+class BatchRequestAnonymizer(BaseAnonymizer):
+    def __init__(
+        self,
+        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        salt: Optional[str] = None,
+    ) -> None:
         super().__init__(salt=salt)
 
-    def anonymize_batch_request(
-        self, *args, **kwargs
-    ) -> Optional[Dict[str, List[str]]]:
+        self._aggregate_anonymizer = aggregate_anonymizer
+
+    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         anonymized_batch_request_properties_dict: Optional[Dict[str, List[str]]] = None
 
         # noinspection PyBroadException
         try:
-            batch_request: Union[
-                BatchRequest
-            ] = get_batch_request_from_acceptable_arguments(*args, **kwargs)
+            from great_expectations.core.batch import (
+                BatchRequest,
+                get_batch_request_from_acceptable_arguments,
+                standardize_batch_request_display_ordering,
+            )
+
+            batch_request: BatchRequest = get_batch_request_from_acceptable_arguments(
+                **kwargs
+            )
             batch_request_dict: dict = batch_request.to_json_dict()
 
             anonymized_batch_request_dict: Optional[
@@ -113,7 +117,7 @@ class BatchRequestAnonymizer(Anonymizer):
                             source=value
                         )
                 else:
-                    anonymized_key: str = self.anonymize(key)
+                    anonymized_key: str = self._anonymize_string(key)
                     source_copy[
                         anonymized_key
                     ] = self._anonymize_batch_request_properties(source=value)
@@ -124,13 +128,13 @@ class BatchRequestAnonymizer(Anonymizer):
 
             return source_copy
 
-        return self.anonymize(str(source))
+        return self._anonymize_string(str(source))
 
     def _build_anonymized_batch_request(
         self,
         destination: Optional[Dict[str, Union[Dict[str, str], List[str]]]],
         source: Optional[Any] = None,
-    ):
+    ) -> None:
         if isinstance(source, dict):
             key: str
             value: Any
@@ -155,9 +159,20 @@ class BatchRequestAnonymizer(Anonymizer):
                 )
 
     @staticmethod
-    def _is_getting_started_keyword(value: str):
+    def _is_getting_started_keyword(value: str) -> bool:
         return value in [
             GETTING_STARTED_DATASOURCE_NAME,
             GETTING_STARTED_EXPECTATION_SUITE_NAME,
             GETTING_STARTED_CHECKPOINT_NAME,
         ]
+
+    def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+
+        attrs: Set[str] = BatchRequest.include_field_names.union(
+            RuntimeBatchRequest.include_field_names
+        )
+        for kwarg in kwargs:
+            if kwarg in attrs or kwarg == "batch_request":
+                return True
+        return False

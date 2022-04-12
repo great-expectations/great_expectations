@@ -204,6 +204,18 @@ local_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
     IntegrationTestFixture(
+        name="how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTestFixture(
+        name="how_to_validate_data_with_a_python_configured_in_memory_checkpoint",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTestFixture(
         name="how_to_configure_credentials",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -241,6 +253,10 @@ local_tests = [
     IntegrationTestFixture(
         name="expect_column_values_to_equal_three",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py",
+    ),
+    IntegrationTestFixture(
+        name="expect_table_columns_to_be_unique",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py",
     ),
 ]
 
@@ -793,7 +809,7 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
     if not dependencies:
         return
     elif dependencies == BackendDependencies.POSTGRESQL and (
-        pytest_args.no_postgresql or pytest_args.no_sqlalchemy
+        not pytest_args.postgresql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping postgres tests")
     elif dependencies == BackendDependencies.MYSQL and (
@@ -814,7 +830,7 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
         pytest.skip("Skipping AWS tests")
     elif dependencies == BackendDependencies.REDSHIFT and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping redshift tests")
-    elif dependencies == BackendDependencies.SPARK and pytest_args.no_spark:
+    elif dependencies == BackendDependencies.SPARK and not pytest_args.spark:
         pytest.skip("Skipping spark tests")
     elif dependencies == BackendDependencies.SNOWFLAKE and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping snowflake tests")

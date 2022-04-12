@@ -202,7 +202,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
         metric_name = metric.metric_name
         dependencies = {}
         for metric_fn_type in MetricPartialFunctionTypes:
-            metric_suffix = "." + metric_fn_type.metric_suffix
+            metric_suffix = f".{metric_fn_type.metric_suffix}"
             try:
                 _ = get_metric_provider(metric_name + metric_suffix, execution_engine)
                 has_aggregate_fn = True

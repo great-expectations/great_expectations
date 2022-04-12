@@ -24,6 +24,8 @@ class TestBackend:
     backend: str
     dialects: Optional[List[str]]
 
+    __test__ = False  # Tell pytest not to try to collect this class as a test
+
     def __post_init__(self):
         allowed_backend_names = ("pandas", "spark", "sqlalchemy")
         allowed_sql_dialects = ("sqlite", "postgresql", "mysql", "mssql", "bigquery")

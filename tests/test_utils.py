@@ -474,7 +474,7 @@ def load_data_into_test_database(
         df.to_sql(name=table_name, con=engine, index=False)
     except SQLAlchemyError as e:
         logger.error(
-            f"""Docs integration tests encountered an error while loading test-data into test-database."""
+            """Docs integration tests encountered an error while loading test-data into test-database."""
         )
         raise
     finally:
@@ -522,7 +522,7 @@ def check_athena_table_count(
         return len(result) == expected_table_count
     except SQLAlchemyError as e:
         logger.error(
-            f"""Docs integration tests encountered an error while loading test-data into test-database."""
+            """Docs integration tests encountered an error while loading test-data into test-database."""
         )
         raise
     finally:

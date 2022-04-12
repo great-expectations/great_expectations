@@ -13,8 +13,11 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
+# <snippet>
 context = ge.get_context()
+# </snippet>
 
+# <snippet>
 datasource_config = {
     "name": "my_postgres_datasource",
     "class_name": "Datasource",
@@ -33,14 +36,19 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
+# <snippet>
 context.test_yaml_config(yaml.dump(datasource_config))
+# </snippet>
 
+# <snippet>
 context.add_datasource(**datasource_config)
+# </snippet>
 
 # Here is a RuntimeBatchRequest using a query
 batch_request = RuntimeBatchRequest(

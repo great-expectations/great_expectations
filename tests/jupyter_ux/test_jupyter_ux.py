@@ -219,5 +219,3 @@ def test_configure_logging(caplog):
     root.info("do_not_show")
     res = caplog.text
     assert "do_not_show" not in res
-
-    assert "expectation_suite" in res

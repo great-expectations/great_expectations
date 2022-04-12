@@ -25,8 +25,8 @@ rules:
       - expectation_type: expect_column_values_to_not_be_null
   my_rule_for_timestamps:
     domain_builder:
-      class_name: SimpleColumnSuffixDomainBuilder
-      column_name_suffixes:
+      class_name: ColumnDomainBuilder
+      include_column_name_suffixes:
         - _ts
     parameter_builders:
       - parameter_name: my_max_event_ts

@@ -13,6 +13,9 @@ from great_expectations.data_context import BaseDataContext
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
+from tests.integration.usage_statistics.usage_stats_event_examples import (
+    data_context_init_with_dependencies,
+)
 
 
 def generate_messages_with_defaults(
@@ -350,6 +353,7 @@ valid_usage_statistics_messages = {
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
             "ge_version": "0.13.0.manual_test",
         },
+        data_context_init_with_dependencies,
     ],
     "data_asset.validate": [
         {
@@ -2639,8 +2643,12 @@ for message_type, messages in valid_usage_statistics_messages.items():
 
 @pytest.mark.aws_integration
 @pytest.mark.parametrize("message", test_messages, ids=message_test_ids)
-def test_usage_statistics_message(message):
+def test_usage_statistics_message(
+    message: dict, requests_session_with_retries: requests.Session
+):
     """known message formats should be valid"""
-    res = requests.post(USAGE_STATISTICS_QA_URL, json=message, timeout=2)
+    res = requests_session_with_retries.post(
+        USAGE_STATISTICS_QA_URL, json=message, timeout=2
+    )
     assert res.status_code == 201
     assert res.json() == {"event_count": 1}

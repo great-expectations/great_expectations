@@ -4,6 +4,7 @@ title: How to configure a ConfiguredAssetDataConnector
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide demonstrates how to configure a ConfiguredAssetDataConnector, and provides several examples you can use for configuration.
 
@@ -14,7 +15,7 @@ This guide demonstrates how to configure a ConfiguredAssetDataConnector, and pro
 
 </Prerequisites>
 
-Great Expectations provides two `DataConnector` classes for connecting to Data Assets stored as file-system-like data (this includes files on disk, but also S3 object stores, etc) as well as relational database data:
+Great Expectations provides two `DataConnector` classes for connecting to <TechnicalTag tag="data_asset" text="Data Assets" /> stored as file-system-like data (this includes files on disk, but also S3 object stores, etc) as well as relational database data:
 
 - A ConfiguredAssetDataConnector allows you to specify that you have multiple Data Assets in a `Datasource`, but also requires an explicit listing of each Data Asset you want to connect to. This allows more fine-tuning, but also requires more setup.
 - An InferredAssetDataConnector infers `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.
@@ -27,25 +28,28 @@ If you're not sure which one to use, please check out [How to choose which DataC
 
 Import these necessary packages and modules:
 
-<Tabs
+<Tabs 
   groupId="yaml-or-python"
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L1-L4
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L3-L4
 ```
 
 </TabItem>
+
 </Tabs>
 
 ### 2. Set up a Datasource
@@ -59,6 +63,7 @@ All of the examples below assume you’re testing configuration using something 
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python
@@ -96,6 +101,7 @@ context.test_yaml_config(yaml.dump(datasource_config))
 ```
 
 </TabItem>
+
 </Tabs>
 
 If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
@@ -115,30 +121,27 @@ Imagine you have the following files in `<MY DIRECTORY>/`:
 We could create a Data Asset `yellow_tripdata` that contains 3 data_references (`yellow_tripdata_2019-01.csv`, `yellow_tripdata_2019-02.csv`, and `yellow_tripdata_2019-03.csv`).
 In that case, the configuration would look like the following:
 
-<Tabs
-  groupId="yaml-or-python"
-  defaultValue='yaml'
-  values={[
-  {label: 'YAML', value:'yaml'},
-  {label: 'Python', value:'python'},
-  ]}>
+<Tabs groupId="yaml-or-python" defaultValue='yaml' values={[{label: 'YAML', value:'yaml'}, {label: 'Python', value:'python'}]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L9-L25
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L36-L56
 ```
 
 </TabItem>
+
 </Tabs>
 
 Notice that we have specified a pattern that captures the year-month combination after `yellow_tripdata_` in the filename and assigns it to the `group_name` `month`.
 
-The configuration would also work with a regex capturing the entire filename (e.g. `pattern: (.*)\.csv`).  However, capturing the month on its own allows for `batch_identifiers` to be used to retrieve a specific Batch of the Data Asset. For more information about capture groups, refer to the Python documentation on [regular expressions](https://docs.python.org/3/library/re.html#re.Match.group).
+The configuration would also work with a regex capturing the entire filename (e.g. `pattern: (.*)\.csv`).  However, capturing the month on its own allows for `batch_identifiers` to be used to retrieve a specific <TechnicalTag tag="batch" text="Batch" /> of the Data Asset. For more information about capture groups, refer to the Python documentation on [regular expressions](https://docs.python.org/3/library/re.html#re.Match.group).
 
 Later on we could retrieve the data in `yellow_tripdata_2019-02.csv` of `yellow_tripdata` as its own batch using `context.get_validator()` by specifying `{"month": "2019-02"}` as the `batch_identifier`.
 
@@ -157,6 +160,7 @@ A corresponding configuration for `ConfiguredAssetS3DataConnector` would look si
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L99-L116
@@ -169,6 +173,7 @@ A corresponding configuration for `ConfiguredAssetS3DataConnector` would look si
 ```
 
 </TabItem>
+
 </Tabs>
 
 The following examples will show scenarios that ConfiguredAssetDataConnectors can help you analyze, using `ConfiguredAssetFilesystemDataConnector`.
@@ -192,6 +197,7 @@ Then this configuration:
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L176-L192
@@ -204,6 +210,7 @@ Then this configuration:
 ```
 
 </TabItem>
+
 </Tabs>
 
 will make available `yelow_tripdata` as a single Data Asset with the following data_references:
@@ -215,7 +222,7 @@ Available data_asset_names (1 of 1):
 Unmatched data_references (0 of 0):[]
 ```
 
-Once configured, you can get a `Validator` from the `Data Context` as follows:
+Once configured, you can get a <TechnicalTag tag="validator" text="Validator" /> from the <TechnicalTag tag="data_context" text="Data Context" /> as follows:
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L239-L249
 ```
@@ -231,6 +238,7 @@ Then this configuration:
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L261-L277
@@ -243,6 +251,7 @@ Then this configuration:
 ```
 
 </TabItem>
+
 </Tabs>
 
 will give you this output
@@ -283,6 +292,7 @@ Then this configuration:
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L330-L352
@@ -295,6 +305,7 @@ Then this configuration:
 ```
 
 </TabItem>
+
 </Tabs>
 
 will now make `yellow_tripdata` and `green_tripdata` both available as Data Assets, with the following data_references:
@@ -329,6 +340,7 @@ The following configuration:
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L415-L439
@@ -341,6 +353,7 @@ The following configuration:
 ```
 
 </TabItem>
+
 </Tabs>
 
 will now make `yellow_tripdata` and `green_tripdata` available a Data Assets, with the following data_references:
@@ -375,6 +388,7 @@ The following configuration:
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
+
 <TabItem value="yaml">
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L503-L527
@@ -387,6 +401,7 @@ The following configuration:
 ```
 
 </TabItem>
+
 </Tabs>
 
 will make `yellow_tripdata` and `green_tripdata` available as Data Assets, with the following data_references:

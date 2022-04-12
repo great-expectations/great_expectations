@@ -199,28 +199,18 @@ class SqlAlchemyBatchData(BatchData):
         :param query:
         """
         if self.sql_engine_dialect.name.lower() == "bigquery":
-            stmt = "CREATE OR REPLACE TABLE `{temp_table_name}` AS {query}".format(
-                temp_table_name=temp_table_name, query=query
-            )
+            stmt = f"CREATE OR REPLACE TABLE `{temp_table_name}` AS {query}"
         elif self.sql_engine_dialect.name.lower() == "dremio":
-            stmt = "CREATE OR REPLACE VDS {temp_table_name} AS {query}".format(
-                temp_table_name=temp_table_name, query=query
-            )
+            stmt = f"CREATE OR REPLACE VDS {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name.lower() == "snowflake":
             if temp_table_schema_name is not None:
-                temp_table_name = temp_table_schema_name + "." + temp_table_name
+                temp_table_name = f"{temp_table_schema_name}.{temp_table_name}"
 
-            stmt = (
-                "CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}".format(
-                    temp_table_name=temp_table_name, query=query
-                )
-            )
+            stmt = f"CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name == "mysql":
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the
             # generic case.
-            stmt = "CREATE TEMPORARY TABLE {temp_table_name} AS {query}".format(
-                temp_table_name=temp_table_name, query=query
-            )
+            stmt = f"CREATE TEMPORARY TABLE {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name == "mssql":
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
@@ -235,7 +225,7 @@ class SqlAlchemyBatchData(BatchData):
             else:
                 strsep = "FROM"
             querymod = query.split(strsep, maxsplit=1)
-            stmt = (querymod[0] + "into {temp_table_name} from" + querymod[1]).format(
+            stmt = f"{querymod[0]}into {{temp_table_name}} from{querymod[1]}".format(
                 temp_table_name=temp_table_name
             )
         # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
@@ -244,9 +234,7 @@ class SqlAlchemyBatchData(BatchData):
             logger.warning(
                 f"GE has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
-            stmt = "CREATE TABLE {temp_table_name} AS {query}".format(
-                temp_table_name=temp_table_name, query=query
-            )
+            stmt = f"CREATE TABLE {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name.lower() == "oracle":
             # oracle 18c introduced PRIVATE temp tables which are transient objects
             stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE DEFINITION AS {query}".format(
@@ -263,9 +251,7 @@ class SqlAlchemyBatchData(BatchData):
                 temp_table_name=temp_table_name, query=query
             )
         else:
-            stmt = 'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'.format(
-                temp_table_name=temp_table_name, query=query
-            )
+            stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
         if self.sql_engine_dialect.name.lower() == "oracle":
             try:
                 self._engine.execute(stmt_1)

@@ -129,7 +129,6 @@ class ExpectColumnValuesToBeValidUrls(ColumnMapExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation
             "@ckathleen"
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.

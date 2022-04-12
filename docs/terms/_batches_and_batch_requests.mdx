@@ -1,0 +1,97 @@
+### Batches and Batch Requests: Design Motivation
+
+You do not generally need to access the metadata that Great Expectations uses to define a Batch.
+Typically, a user need specify only the Batch Request. The Batch Request will describe what data Great
+Expectations should fetch, including the name of the Data Asset and other identifiers (see more detail below).
+
+A **Batch Definition** includes all the information required to precisely identify a set of data from the external data
+source that should be translated into a Batch. One or more BatchDefinitions are always *returned* from the Datasource,
+as a result of processing the Batch Request. A Batch Definition includes several key components:
+
+* **Batch Identifiers**: contains information that uniquely identifies a specific batch from the Data Asset, such as the
+  delivery date or query time.
+* **Engine Passthrough**: contains information that will be passed directly to the Execution Engine as part of the Batch
+  Spec.
+* **Sample Definition**: contains information about sampling or limiting done on the Data Asset to create a Batch.
+
+:::info Best practice
+We recommend that you make every Data Asset Name **unique** in your Data Context configuration. Even though a Batch
+Definition includes the Data Connector Name and Datasource Name, choosing a unique Data Asset name makes it
+easier to navigate quickly through Data Docs and ensures your logical data assets are not confused with any particular
+view of them provided by an Execution Engine.
+:::
+
+A **Batch Spec** is an Execution Engine-specific description of the Batch. The Data Connector is responsible for working
+with the Execution Engine to translate the Batch Definition into a spec that enables Great Expectations to access the
+data using that Execution Engine.
+
+Finally, the **BatchMarkers** are additional pieces of metadata that can be useful to understand reproducibility, such
+as the time the batch was constructed, or hash of an in-memory DataFrame.
+
+### Batches and Batch Requests: A full journey
+
+Let's follow the outline in this diagram to follow the journey from BatchRequest to Batch list:
+
+![Image](https://lucid.app/publicSegments/view/e70e54b6-60af-4a30-8626-f61dc3b3c3ee/image.png)
+
+1. A Datasource's `get_batch_list_from_batch_request` method is passed a BatchRequest.
+    * A BatchRequest can include `data_connector_query` params with values relative to the latest Batch (e.g. the "latest" slice).
+      Conceptually, this enables "fetch the latest Batch" behavior. It is the key thing that differentiates
+      a BatchRequest, which does NOT necessarily uniquely identify the Batch(es) to be fetched, from a
+      BatchDefinition.
+    * The BatchRequest can also include a section called `batch_spec_passthrough` to make it easy to directly
+      communicate parameters to a specific Execution Engine.
+    * When resolved, the BatchRequest may point to many BatchDefinitions and Batches.
+    * BatchRequests can be defined as dictionaries, or by instantiating a BatchRequest object.
+    
+    ```python
+    batch_request = {
+        "datasource": "myds",
+        "data_connector": "pipeline",
+        "in_memory_dataset": df,
+        "data_connector_query" : {
+          "batch_filter_parameters" : {
+              "airflow_run_id": my_run_id,
+              "other_key": my_other_key
+          }
+          "custom_filter_function": my_filter_fn,
+          "limit": 10,
+          "index": Optional[Union[int, list, tuple, slice, str]],  # examples: 0; "-1"; [3:7]; "[2:4]"
+        },
+        "sampling": {
+            "limit": 1000,
+            "sample": 0.1
+        }
+    }
+    ```
+    
+2. The Datasource finds the Data Connector indicated by the BatchRequest, and uses it to obtain a BatchDefinition list.
+
+```python
+DataSource.get_batch_list_from_batch_request(batch_request=batch_request)
+```
+
+* A BatchDefinition resolves any ambiguity in BatchRequest to uniquely identify a single Batch to be
+  fetched. BatchDefinitions are Datasource -- and Execution Engine -- agnostic. That means that its parameters may depend on
+  the configuration of the Datasource, but they do not otherwise depend on the specific Data Connector type (e.g.
+  filesystem, SQL, etc.) or Execution Engine being used to instantiate Batches.
+
+```yaml
+BatchDefinition
+    datasource: str
+    data_connector: str
+    data_asset_name: str
+    batch_identifiers:
+        ** contents depend on the configuration of the DataConnector **
+        ** provides a persistent, unique identifier for the Batch within the context of the Data Asset **
+```
+
+3. The Datasource then requests that the Data Connector transform the BatchDefinition list into BatchData, BatchSpec, and BatchMarkers.
+
+4. When the Data Connector receives this request, it first builds the BatchSpec, then calls its Execution Engine to create BatchData and BatchMarkers.
+  * A `BatchSpec` is a set of specific instructions for the Execution Engine to fetch specific data; it is the
+    ExecutionEngine-specific version of the BatchDefinition. For example, a `BatchSpec` could include the path to files,
+    information about headers, or other configuration required to ensure the data is loaded properly for validation.
+  * Batch Markers are metadata that can be used to calculate performance characteristics, ensure reproducibility of Validation Results, and provide indicators of the state of the underlying data system.
+
+5. After the Data Connector returns the BatchSpec, BatchData, and BatchMarkers, the Datasource builds and returns a list of Batches.

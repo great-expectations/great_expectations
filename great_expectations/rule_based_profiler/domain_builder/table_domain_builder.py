@@ -9,24 +9,26 @@ from great_expectations.rule_based_profiler.types import Domain, ParameterContai
 class TableDomainBuilder(DomainBuilder):
     def __init__(
         self,
-        data_context: "DataContext",  # noqa: F821
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        batch_request: Optional[
+            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        ] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Args:
-            data_context: DataContext
             batch_list: explicitly specified Batch objects for use in DomainBuilder
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
+            data_context: DataContext
         """
         super().__init__(
-            data_context=data_context,
             batch_list=batch_list,
             batch_request=batch_request,
+            data_context=data_context,
         )
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.TABLE
 
     """
@@ -43,7 +45,7 @@ class TableDomainBuilder(DomainBuilder):
         domains: List[Domain] = [
             Domain(
                 domain_type=self.domain_type,
-            )
+            ),
         ]
 
         return domains

@@ -1,28 +1,30 @@
-import importlib
-from types import ModuleType
-from typing import Any, Dict, List
+from typing import Dict
 
 import pytest
 
-from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
-    ProfilerRunAnonymizer,
+from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
+    ProfilerAnonymizer,
 )
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 
 
 @pytest.fixture
-def profiler_run_anonymizer() -> ProfilerRunAnonymizer:
+def profiler_anonymizer() -> ProfilerAnonymizer:
     # Standardize the salt so our tests are deterimistic
     salt: str = "00000000-0000-0000-0000-00000000a004"
-    anonymizer: ProfilerRunAnonymizer = ProfilerRunAnonymizer(salt=salt)
+    aggregate_anonymizer: Anonymizer = Anonymizer(salt=salt)
+    anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
+        salt=salt, aggregate_anonymizer=aggregate_anonymizer
+    )
     return anonymizer
 
 
 def test_anonymize_profiler_run(
-    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
-    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+    anonymized_result: dict = profiler_anonymizer.anonymize(
         profiler_config_with_placeholder_args
     )
     assert anonymized_result == {
@@ -52,10 +54,10 @@ def test_anonymize_profiler_run(
 
 
 def test_anonymize_profiler_run_custom_values(
-    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args_custom_values: RuleBasedProfilerConfig,
 ) -> None:
-    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+    anonymized_result: dict = profiler_anonymizer.anonymize(
         profiler_config_with_placeholder_args_custom_values
     )
     assert anonymized_result == {
@@ -90,10 +92,10 @@ def test_anonymize_profiler_run_custom_values(
 
 
 def test_anonymize_profiler_run_multiple_rules(
-    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args_multiple_rules: RuleBasedProfilerConfig,
 ) -> None:
-    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+    anonymized_result: dict = profiler_anonymizer.anonymize(
         profiler_config_with_placeholder_args_multiple_rules
     )
     assert anonymized_result == {
@@ -139,10 +141,10 @@ def test_anonymize_profiler_run_multiple_rules(
 
 
 def test_anonymize_profiler_run_multiple_rules_custom_values(
-    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args_multiple_rules_custom_values: RuleBasedProfilerConfig,
 ) -> None:
-    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+    anonymized_result: dict = profiler_anonymizer.anonymize(
         profiler_config_with_placeholder_args_multiple_rules_custom_values
     )
     assert anonymized_result == {
@@ -198,7 +200,7 @@ def test_anonymize_profiler_run_multiple_rules_custom_values(
 
 
 def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
-    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
     # Add batch requests to fixture before running method
@@ -212,7 +214,7 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
     rule["domain_builder"]["batch_request"] = batch_request
     rule["parameter_builders"][0]["batch_request"] = batch_request
 
-    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+    anonymized_result: dict = profiler_anonymizer.anonymize(
         profiler_config_with_placeholder_args
     )
     assert anonymized_result == {
@@ -258,7 +260,7 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
 
 
 def test_anonymize_profiler_run_with_condition_in_expectation_configuration_builder(
-    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:
     rules: Dict[str, dict] = profiler_config_with_placeholder_args.rules
@@ -267,7 +269,7 @@ def test_anonymize_profiler_run_with_condition_in_expectation_configuration_buil
     ][0]
     expectation_configuration_builder["condition"] = "my_condition"
 
-    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+    anonymized_result: dict = profiler_anonymizer.anonymize(
         profiler_config_with_placeholder_args
     )
     assert anonymized_result == {
@@ -295,44 +297,3 @@ def test_anonymize_profiler_run_with_condition_in_expectation_configuration_buil
         "rule_count": 1,
         "variable_count": 1,
     }
-
-
-def test_all_builder_classes_are_recognized_as_profiler_run_anonymizer_attrs(
-    profiler_run_anonymizer: ProfilerRunAnonymizer,
-) -> None:
-    """
-    Ensure that every ParameterBuilder, DomainBuilder, and ExpectationConfigurationBuilder
-    is included within the `self._ge_...` attributes of the ProfilerRunAnonymizer.
-
-    This test is designed to catch instances where a new builder class is introduced but
-    not included in the ProfilerRunAnonymizer.
-    """
-
-    def gather_all_builder_classes(module_path: str, builder_type: str) -> List[Any]:
-        module: ModuleType = importlib.import_module(module_path)
-        builders: List[Any] = [
-            obj for name, obj in module.__dict__.items() if name.endswith(builder_type)
-        ]
-        return builders
-
-    domain_builders: List[str] = gather_all_builder_classes(
-        "great_expectations.rule_based_profiler.domain_builder", "DomainBuilder"
-    )
-    for domain_builder in domain_builders:
-        assert domain_builder in profiler_run_anonymizer._ge_domain_builders
-
-    parameter_builders: List[str] = gather_all_builder_classes(
-        "great_expectations.rule_based_profiler.parameter_builder", "ParameterBuilder"
-    )
-    for parameter_builder in parameter_builders:
-        assert parameter_builder in profiler_run_anonymizer._ge_parameter_builders
-
-    expectation_configuration_builders: List[str] = gather_all_builder_classes(
-        "great_expectations.rule_based_profiler.expectation_configuration_builder",
-        "ExpectationConfigurationBuilder",
-    )
-    for expectation_configuration_builder in expectation_configuration_builders:
-        assert (
-            expectation_configuration_builder
-            in profiler_run_anonymizer._ge_expectation_configuration_builders
-        )

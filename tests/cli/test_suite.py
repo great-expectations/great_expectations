@@ -75,7 +75,7 @@ def test_suite_demo_deprecation_message(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite demo",
+        "--v3-api suite demo",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -141,7 +141,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new",
+        "--v3-api suite new",
         input="\n",
         catch_exceptions=False,
     )
@@ -149,7 +149,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
 
     stdout: str = result.stdout
     assert "Select a datasource" not in stdout
-    assert f"Name the new Expectation Suite [warning]:" in stdout
+    assert "Name the new Expectation Suite [warning]:" in stdout
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
@@ -255,7 +255,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new",
+        "--v3-api suite new",
         input=f"1\n{expectation_suite_name}\n",
         catch_exceptions=False,
     )
@@ -263,7 +263,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
 
     stdout: str = result.stdout
     assert "Select a datasource" not in stdout
-    assert f"Name the new Expectation Suite [warning]:" in stdout
+    assert "Name the new Expectation Suite [warning]:" in stdout
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
@@ -668,7 +668,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
 
     expectation_suite_name: str = "test_suite_name"
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
     with open(batch_request_file_path, "w") as json_file:
         json_file.write("not_proper_json")
 
@@ -759,7 +759,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -1033,7 +1033,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit not_a_real_suite",
+        "--v3-api suite edit not_a_real_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2188,7 +2188,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     }
 
     batch_request_file_path: str = os.path.join(
-        uncommitted_dir, f"batch_request_missing_datasource.json"
+        uncommitted_dir, "batch_request_missing_datasource.json"
     )
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
@@ -2265,7 +2265,7 @@ def test_suite_list_with_zero_suites(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite list",
+        "--v3-api suite list",
         catch_exceptions=False,
     )
 
@@ -2331,7 +2331,7 @@ def test_suite_list_with_one_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite list",
+        "--v3-api suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2402,7 +2402,7 @@ def test_suite_list_with_multiple_suites(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite list",
+        "--v3-api suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2457,7 +2457,7 @@ def test_suite_delete_with_zero_suites(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite delete not_a_suite",
+        "--v3-api suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2522,7 +2522,7 @@ def test_suite_delete_with_non_existent_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite delete not_a_suite",
+        "--v3-api suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2802,7 +2802,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        f"--v3-api suite list",
+        "--v3-api suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2930,7 +2930,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -3033,7 +3033,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -3113,7 +3113,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     )
     assert len(cells_of_interest_dict) == 1
 
-    profiler_code_cell: str = f"""\
+    profiler_code_cell: str = """\
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
     excluded_expectations=None,
@@ -3279,7 +3279,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -3354,7 +3354,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     )
     assert len(cells_of_interest_dict) == 1
 
-    profiler_code_cell: str = f"""\
+    profiler_code_cell: str = """\
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
     excluded_expectations=None,
@@ -3520,7 +3520,7 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -3606,7 +3606,7 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     profiler_code_cell: str = f"""\
 suite = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
-    expectation_suite_name=expectation_suite_name,
+    expectation_suite=validator.expectation_suite
 )
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
@@ -3649,7 +3649,7 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
         "data_asset_name": "Titanic_1911",
     }
 
-    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    batch_request_file_path: str = os.path.join(uncommitted_dir, "batch_request.json")
     with open(batch_request_file_path, "w") as json_file:
         json.dump(batch_request, json_file)
 
@@ -3730,7 +3730,7 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     profiler_code_cell: str = f"""\
 suite = context.run_profiler_with_dynamic_arguments(
     name="{profiler_name}",
-    expectation_suite_name=expectation_suite_name,
+    expectation_suite=validator.expectation_suite
 )
 """
     profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
