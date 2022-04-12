@@ -12,7 +12,7 @@ from great_expectations.rule_based_profiler.types import (
 def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter_name(
     column_Age_domain,
     variables_multi_part_name_parameter_container,
-    rule_with_parameters,
+    rule_state_with_domains_and_parameters,
 ):
     with pytest.raises(
         ge_exceptions.ProfilerExecutionError, match=r".+start with \$.*"
@@ -22,7 +22,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
             fully_qualified_parameter_name="mean",
             domain=column_Age_domain,
             variables=variables_multi_part_name_parameter_container,
-            parameters=rule_with_parameters.parameters,
+            parameters=rule_state_with_domains_and_parameters.parameters,
         )
 
 
@@ -293,7 +293,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
 def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_name(
     column_Age_domain,
     column_Date_domain,
-    rule_with_parameters,
+    rule_state_with_domains_and_parameters,
     variables_multi_part_name_parameter_container,
     domain_name,
     fully_qualified_parameter_name,
@@ -329,7 +329,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
             variables=variables_multi_part_name_parameter_container,
-            parameters=rule_with_parameters.parameters,
+            parameters=rule_state_with_domains_and_parameters.parameters,
         )
         == value
     )
@@ -344,7 +344,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
                 fully_qualified_parameter_name=fully_qualified_parameter_name_for_details,
                 domain=domain,
                 variables=variables_multi_part_name_parameter_container,
-                parameters=rule_with_parameters.parameters,
+                parameters=rule_state_with_domains_and_parameters.parameters,
             )
             == details
         )

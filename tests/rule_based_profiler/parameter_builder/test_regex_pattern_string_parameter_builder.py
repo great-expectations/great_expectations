@@ -1,4 +1,4 @@
-from typing import List, Set
+from typing import Dict, List, Set
 from unittest import mock
 
 import pandas as pd
@@ -144,14 +144,19 @@ def test_regex_pattern_string_parameter_builder_alice(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
     assert parameter_container.parameter_nodes is None
 
     regex_pattern_string_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        domain=domain,
+        parameters=parameters,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
@@ -172,7 +177,7 @@ def test_regex_pattern_string_parameter_builder_alice(
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
-            parameters={domain.id: parameter_container},
+            parameters=parameters,
         )
         == expected_value
     )
@@ -216,15 +221,19 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     assert regex_parameter.candidate_regexes == candidate_regexes
     assert regex_parameter.threshold == 0.9
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     assert parameter_container.parameter_nodes is None
 
     regex_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        domain=domain,
+        parameters=parameters,
     )
 
     fully_qualified_parameter_name_for_value: str = (
@@ -245,7 +254,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     results = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
     assert results is not None
     assert sorted(results["value"]) == sorted(expected_value["value"])
@@ -283,15 +292,19 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
             data_context=data_context,
         )
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
     assert parameter_container.parameter_nodes is None
 
     regex_parameter.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        domain=domain,
+        parameters=parameters,
     )
 
     fully_qualified_parameter_name_for_value: str = (
@@ -321,7 +334,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
-            parameters={domain.id: parameter_container},
+            parameters=parameters,
         )
         == expected_value
     )
@@ -351,13 +364,18 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
         regex_pattern_string_parameter_builder.build_parameters(
-            parameter_container=parameter_container, domain=domain
+            domain=domain,
+            parameters=parameters,
         )
 
     assert (
@@ -391,14 +409,19 @@ def test_regex_single_candidate(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
     assert parameter_container.parameter_nodes is None
 
     regex_pattern_string_parameter_builder.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        domain=domain,
+        parameters=parameters,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"
@@ -409,7 +432,7 @@ def test_regex_single_candidate(
             parameter_reference=fully_qualified_parameter_name_for_value,
             expected_return_type=str,
             domain=domain,
-            parameters={domain.id: parameter_container},
+            parameters=parameters,
         )
         == expected_value
     )
@@ -423,7 +446,7 @@ def test_regex_single_candidate(
         parameter_reference=fully_qualified_parameter_name_for_meta,
         expected_return_type=dict,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
     assert meta == expected_meta
 
@@ -451,14 +474,19 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
     assert parameter_container.parameter_nodes is None
 
     regex_pattern_string_parameter_builder.build_parameters(
-        parameter_container=parameter_container, domain=domain
+        domain=domain,
+        parameters=parameters,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"
@@ -470,7 +498,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
         get_parameter_value_and_validate_return_type(
             parameter_reference=fully_qualified_parameter_name_for_value,
             domain=domain,
-            parameters={domain.id: parameter_container},
+            parameters=parameters,
         )
         == expected_value
     )
@@ -485,7 +513,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
         parameter_reference=fully_qualified_parameter_name_for_meta,
         expected_return_type=dict,
         domain=domain,
-        parameters={domain.id: parameter_container},
+        parameters=parameters,
     )
 
     assert meta == expected_meta

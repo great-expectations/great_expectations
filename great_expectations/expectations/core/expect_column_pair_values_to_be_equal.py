@@ -149,7 +149,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
             params["row_condition"] = None
 
-        if params["mostly"] is None:
+        if params["mostly"] is None or params["mostly"] == 1.0:
             template_str = "Values in $column_A and $column_B must always be equal."
         else:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
@@ -210,7 +210,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
             params["row_condition"] = None
 
-        if params["mostly"] is None:
+        if params["mostly"] is None or params["mostly"] == 1.0:
             template_str = "Values in $column_A and $column_B must always be equal."
         else:
             params["mostly_pct"] = num_to_str(

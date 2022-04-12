@@ -152,12 +152,6 @@ Then load data into the `Validator`.
 
 ## Additional Notes
 
-If you are working with nonstandard CSVs, read one of these guides:
-
-- [How to work with headerless CSVs in pandas](#TODO)
-- [How to work with custom delimited CSVs in pandas](#TODO)
-- [How to work with parquet files in pandas](#TODO)
-
 To view the full scripts used in this page, see them on GitHub:
 
 - [pandas_s3_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py)

@@ -1,5 +1,6 @@
 from typing import List
 
+import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
@@ -48,6 +49,114 @@ def test_table_domain_builder(
     # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.
     assert domain.domain_type.value == "table"
     assert domain.kwargs is None
+
+
+def test_builder_instantiated_with_runtime_batch_request_raises_error(
+    data_context_with_datasource_pandas_engine,
+):
+    data_context: DataContext = data_context_with_datasource_pandas_engine
+
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "a": [
+                "2021-01-01",
+                "2021-01-31",
+                "2021-02-28",
+                "2021-03-20",
+                "2021-02-21",
+                "2021-05-01",
+                "2021-06-18",
+            ]
+        }
+    )
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "default_runtime_data_connector_name",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "batch_data": df,
+        },
+        "batch_identifiers": {
+            "default_identifier_name": "my_identifier",
+        },
+    }
+
+    with pytest.raises(ValueError) as excinfo:
+        # noinspection PyArgumentList
+        domain_builder: DomainBuilder = ColumnDomainBuilder(
+            batch_request=batch_request,
+            data_context=data_context,
+        )
+
+    assert (
+        "Error: batch_data found in batch_request -- only primitive types are allowed as part of ColumnDomainBuilder instance attributes."
+        in str(excinfo.value)
+    )
+
+
+def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
+    data_context_with_datasource_pandas_engine,
+    alice_columnar_table_single_batch,
+):
+    data_context: DataContext = data_context_with_datasource_pandas_engine
+
+    profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
+
+    full_profiler_config_dict: dict = yaml.load(profiler_config)
+
+    variables_configs: dict = full_profiler_config_dict.get("variables")
+    if variables_configs is None:
+        variables_configs = {}
+
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        variables_configs=variables_configs
+    )
+
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "a": [
+                "2021-01-01",
+                "2021-01-31",
+                "2021-02-28",
+                "2021-03-20",
+                "2021-02-21",
+                "2021-05-01",
+                "2021-06-18",
+            ]
+        }
+    )
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "default_runtime_data_connector_name",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "batch_data": df,
+        },
+        "batch_identifiers": {
+            "default_identifier_name": "my_identifier",
+        },
+    }
+
+    domain_builder: DomainBuilder = ColumnDomainBuilder(
+        data_context=data_context,
+    )
+    domains: List[Domain] = domain_builder.get_domains(
+        variables=variables,
+        batch_request=batch_request,
+    )
+
+    assert len(domains) == 1
+    assert domains == [
+        {
+            "domain_type": "column",
+            "domain_kwargs": {
+                "column": "a",
+            },
+            "details": {},
+        },
+    ]
 
 
 def test_column_domain_builder(
