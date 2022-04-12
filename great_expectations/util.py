@@ -179,23 +179,23 @@ def measure_execution_time(
     pretty_print: bool = False,
 ) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
-        func.execution_duration_milliseconds = 0
+        func.execution_duration_milliseconds = 0.0
 
         @wraps(func)
         def compute_delta_t(*args, **kwargs) -> Any:
-            time_begin: int = int(round(time.time() * 1000))
+            time_begin: float = time.perf_counter()
             try:
                 return func(*args, **kwargs)
             finally:
-                time_end: int = int(round(time.time() * 1000))
-                delta_t: int = time_end - time_begin
+                time_end: float = time.perf_counter()
+                delta_t: float = time_end - time_begin
                 func.execution_duration_milliseconds = delta_t
 
                 if pretty_print:
                     bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
                     call_args: OrderedDict = bound_args.arguments
                     print(
-                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
+                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} seconds."
                     )
 
         return compute_delta_t
