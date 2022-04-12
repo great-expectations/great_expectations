@@ -1,6 +1,6 @@
 import datetime
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import pandas as pd
 import sqlalchemy as sa
@@ -23,31 +23,45 @@ from tests.test_utils import (
 
 yaml_handler: YAMLHandler = YAMLHandler()
 
-with open("connection_string.yml") as f:
-    db_config: dict = yaml_handler.load(f)
 
-dialect: str = db_config["dialect"]
-if dialect == "snowflake":
-    CONNECTION_STRING: str = get_snowflake_connection_url()
-elif dialect == "bigquery":
-    CONNECTION_STRING: str = get_bigquery_connection_url()
-else:
-    CONNECTION_STRING: str = db_config["connection_string"]
+def _get_connection_string_and_dialect() -> Tuple[str, str]:
+
+    with open("connection_string.yml") as f:
+        db_config: dict = yaml_handler.load(f)
+
+    dialect: str = db_config["dialect"]
+    if dialect == "snowflake":
+        CONNECTION_STRING: str = get_snowflake_connection_url()
+    elif dialect == "bigquery":
+        CONNECTION_STRING: str = get_bigquery_connection_url()
+    else:
+        CONNECTION_STRING: str = db_config["connection_string"]
+
+    return dialect, CONNECTION_STRING
+
+TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
+
+def _load_data(connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME):
+
+    # Load the first 10 rows of each month of taxi data
+    load_data_into_test_database(
+        table_name=table_name,
+        csv_paths=[
+            f"./data/yellow_tripdata_sample_{year}-{month}.csv"
+            for year in ["2018", "2019", "2020"]
+            for month in [f"{mo:02d}" for mo in range(1, 12 + 1)]
+        ],
+        connection_string=connection_string,
+        convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
+    )
+
+dialect, CONNECTION_STRING = _get_connection_string_and_dialect()
+# TODO: AJB 202204 we need to fix the issue with writing the taxi data to
+#  bigquery and enable bigquery tests.
+if dialect != "bigquery":
+    _load_data(connection_string=CONNECTION_STRING)
 
 print(f"Testing dialect: {dialect}")
-
-# Load the first 10 rows of each month of taxi data
-TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
-load_data_into_test_database(
-    table_name=TAXI_DATA_TABLE_NAME,
-    csv_paths=[
-        f"./data/yellow_tripdata_sample_{year}-{month}.csv"
-        for year in ["2018", "2019", "2020"]
-        for month in [f"{mo:02d}" for mo in range(1, 12 + 1)]
-    ],
-    connection_string=CONNECTION_STRING,
-    convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
-)
 
 YEARS_IN_TAXI_DATA = (
     pd.date_range(start="2018-01-01", end="2020-12-31", freq="AS")
@@ -80,7 +94,7 @@ class TestCase:
 
 test_cases: List[TestCase] = []
 
-general_test_cases: List[TestCase] = [
+non_truncating_test_cases: List[TestCase] = [
     TestCase(
         splitter_method_name="_split_on_year",
         num_expected_batch_definitions=3,
@@ -94,7 +108,7 @@ general_test_cases: List[TestCase] = [
         expected_pickup_datetimes=MONTH_STRINGS_IN_TAXI_DATA
     ),
 ]
-test_cases_to_skip_for_mysql: List[TestCase] = [
+truncating_test_cases: List[TestCase] = [
     TestCase(
         splitter_method_name="_split_on_truncated_year",
         num_expected_batch_definitions=3,
@@ -109,9 +123,10 @@ test_cases_to_skip_for_mysql: List[TestCase] = [
     ),
 ]
 
-test_cases.extend(general_test_cases)
-if dialect != "mysql":
-    test_cases.extend(test_cases_to_skip_for_mysql)
+test_cases.extend(non_truncating_test_cases)
+# TODO: AJB 20220412 Enable these tests after enabling truncating in these dialects.
+if dialect not in ["mysql", "mssql"]:
+    test_cases.extend(truncating_test_cases)
 
 
 for test_case in test_cases:
