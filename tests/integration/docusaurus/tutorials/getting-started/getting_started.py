@@ -82,6 +82,7 @@ validator = context.get_validator(
 assert isinstance(validator, Validator)
 
 # Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
+# <snippet>
 ignored_columns = [
     "vendor_id",
     "pickup_datetime",
@@ -102,6 +103,7 @@ ignored_columns = [
     "total_amount",
     "congestion_surcharge",
 ]
+# </snippet>
 
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
@@ -158,6 +160,7 @@ assert checkpoint_result.run_results
 
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
+# <snippet>
 yaml_config = f"""
 name: getting_started_checkpoint
 config_version: 1.0
@@ -172,6 +175,7 @@ validations:
         index: -1
     expectation_suite_name: getting_started_expectation_suite_taxi.demo
 """
+# </snippet>
 # Note : this override is for internal GE purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 yaml_config = yaml_config.replace(

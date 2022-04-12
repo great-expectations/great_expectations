@@ -6,7 +6,8 @@ import jsonschema
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.profile.base import Profiler, ProfilerTypeMapping
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
+from great_expectations.profile.base import Profiler
 
 logger = logging.getLogger(__name__)
 

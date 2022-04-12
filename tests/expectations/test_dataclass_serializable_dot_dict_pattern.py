@@ -471,6 +471,7 @@ def test_instantiation_with_a_from_legacy_dict_method():
             "in": 10,
         }
     )
+
     assert my_E["foo"] == "a string"
     assert my_E["bar"] == 1
     assert my_E["input"] == 10

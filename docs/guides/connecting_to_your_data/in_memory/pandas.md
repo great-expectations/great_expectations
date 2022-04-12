@@ -8,9 +8,10 @@ import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you connect to your data that is an in-memory Pandas dataframe.
-This will allow you to validate and explore your data.
+This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
 <Prerequisites>
 
@@ -39,7 +40,7 @@ Load your DataContext into memory using the `get_context()` method.
 
 ### 3. Configure your Datasource
 
-Using this example configuration we configure a `RuntimeDataConnector` as part of our Datasource, which will take in our in-memory frame.:
+Using this example configuration we configure a `RuntimeDataConnector` as part of our <TechnicalTag tag="datasource" text="Datasource" />, which will take in our in-memory frame.:
 
 <Tabs
   groupId="yaml-or-python"
@@ -48,7 +49,8 @@ Using this example configuration we configure a `RuntimeDataConnector` as part o
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L9-L21
 ```
@@ -74,8 +76,8 @@ Run this code to test your configuration.
 **Note**: Since the Datasource does not have data passed-in until later, the output will show that no `data_asset_names` are currently available. This is to be expected.
 
 </TabItem>
-</Tabs>
 
+</Tabs>
 
 ### 4. Save the Datasource configuration to your DataContext
 
@@ -88,18 +90,21 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L25
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py#L28
 ```
 
 </TabItem>
+
 </Tabs>
 
 ### 6. Test your new Datasource

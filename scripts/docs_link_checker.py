@@ -66,7 +66,7 @@ class LinkChecker:
         self._site_prefix = site_prefix.strip("/")
         self._skip_external = skip_external
 
-        markdown_link_regex = r"!?\[(.*?)\]\((.*?)\)"  # inline links, like [Description](link), images start with !
+        markdown_link_regex = r"!?\[(.*)\]\((.*?)\)"  # inline links, like [Description](link), images start with !
         self._markdown_link_pattern = re.compile(markdown_link_regex)
 
         external_link_regex = r"^https?:\/\/"  # links that start with http or https
@@ -289,8 +289,17 @@ class LinkChecker:
 
         for match in matches:
             report = self._check_link(match, file)
-            if report is not None:
+
+            if report:
                 result.append(report)
+
+            # sometimes the description may contain a reference to an image
+            nested_match = self._markdown_link_pattern.match(match.group(1))
+            if nested_match:
+                report = self._check_link(nested_match, file)
+
+                if report:
+                    result.append(report)
 
         return result
 
@@ -299,9 +308,9 @@ class LinkChecker:
 @click.option(
     "--path",
     "-p",
-    type=click.Path(exists=True, file_okay=False),
+    type=click.Path(exists=True, file_okay=True),
     default=".",
-    help="Path to markdown files to check",
+    help="Path to markdown file(s) to check",
 )
 @click.option(
     "--docs-root",
@@ -313,18 +322,13 @@ class LinkChecker:
 @click.option(
     "--site-prefix",
     "-s",
-    default="",
+    default=None,
     help="Top-most folder in the docs URL for resolving absolute paths",
 )
 @click.option("--skip-external", is_flag=True)
 def scan_docs(
     path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
 ) -> None:
-    # verify that our path is correct
-    if not os.path.isdir(path):
-        click.echo(f"Docs path: {path} is not a directory")
-        exit(1)
-
     if docs_root is None:
         docs_root = path
     elif not os.path.isdir(docs_root):
@@ -335,13 +339,20 @@ def scan_docs(
     result: List[LinkReport] = list()
     checker = LinkChecker(path, docs_root, site_prefix, skip_external)
 
-    for file in glob.glob(f"{path}/**/*.md", recursive=True):
-        report = checker.check_file(file)
-        if report:
-            result.extend(report)
+    if os.path.isdir(path):
+        # if the path is a directory, get all .md files within it
+        for file in glob.glob(f"{path}/**/*.md", recursive=True):
+            report = checker.check_file(file)
+            if report:
+                result.extend(report)
+    elif os.path.isfile(path):
+        # else we support checking one file at a time
+        result.extend(checker.check_file(path))
+    else:
+        click.echo(f"Docs path: {path} is not a directory or file")
+        exit(1)
 
     if result:
-        logger.info("%i broken links found", len(result))
         click.echo("----------------------------------------------")
         click.echo("------------- Broken Link Report -------------")
         click.echo("----------------------------------------------")
@@ -350,7 +361,6 @@ def scan_docs(
 
         exit(1)
     else:
-        logger.info("No broken links found")
         click.echo("No broken links found")
         exit(0)
 

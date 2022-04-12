@@ -68,10 +68,11 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.match_json_schema"
@@ -95,10 +96,8 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
-
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -123,7 +122,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "json_schema": {
@@ -143,10 +142,10 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         if not params.get("json_schema"):
             template_str = "values must match a JSON Schema but none was specified."
         else:
-            params["formatted_json"] = (
-                "<pre>" + json.dumps(params.get("json_schema"), indent=4) + "</pre>"
-            )
-            if params["mostly"] is not None:
+            params[
+                "formatted_json"
+            ] = f"<pre>{json.dumps(params.get('json_schema'), indent=4)}</pre>"
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -158,7 +157,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
                 )
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -167,7 +166,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -197,10 +196,10 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         if not params.get("json_schema"):
             template_str = "values must match a JSON Schema but none was specified."
         else:
-            params["formatted_json"] = (
-                "<pre>" + json.dumps(params.get("json_schema"), indent=4) + "</pre>"
-            )
-            if params["mostly"] is not None:
+            params[
+                "formatted_json"
+            ] = f"<pre>{json.dumps(params.get('json_schema'), indent=4)}</pre>"
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -212,14 +211,14 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
                 )
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [

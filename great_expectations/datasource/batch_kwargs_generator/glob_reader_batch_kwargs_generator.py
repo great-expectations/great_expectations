@@ -124,9 +124,10 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             not generator_asset and data_asset_name
         ), "Please provide either generator_asset or data_asset_name."
         if generator_asset:
+            # deprecated-v0.11.0
             warnings.warn(
-                "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-                "Please update code accordingly.",
+                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
+                "Please use 'data_asset_name' instead.",
                 DeprecationWarning,
             )
             data_asset_name = generator_asset
@@ -196,7 +197,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 "data_asset_name": data_asset_name,
             }
             raise BatchKwargsError(
-                "Unknown asset_name %s" % data_asset_name, batch_kwargs
+                f"Unknown asset_name {data_asset_name}", batch_kwargs
             )
 
     def _get_iterator(
@@ -252,7 +253,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
             # So, we'll add a *sortable* id
             if matches is None:
-                logger.warning("No match found for path: %s" % path)
+                logger.warning(f"No match found for path: {path}")
                 return (
                     datetime.datetime.now(datetime.timezone.utc).strftime(
                         "%Y%m%dT%H%M%S.%fZ"

@@ -1,14 +1,14 @@
 ---
 title: How to Use Great Expectations with Airflow
 ---
-import Prerequisites from '../guides/connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
 This guide will help you run a Great Expectations checkpoint in Apache Airflow, which allows you to trigger validation of a data asset using an Expectation Suite directly within an Airflow DAG.
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../tutorials/getting_started/intro.md)
-- [Created an Expectation Suite](../tutorials/getting_started/create_your_first_expectations.md)
+- [Set up a working deployment of Great Expectations](../tutorials/getting_started/tutorial_overview.md)
+- [Created an Expectation Suite](../tutorials/getting_started/tutorial_create_expectations.md)
 - [Created a checkpoint for that Expectation Suite and a data asset](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md)
 - Created an Airflow DAG file
 

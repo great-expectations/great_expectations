@@ -12,6 +12,9 @@ import great_expectations as ge
 from great_expectations.self_check.util import expectationSuiteSchema
 
 
+@pytest.mark.filterwarnings(
+    "ignore:partition_data*:DeprecationWarning:great_expectations.dataset.util"
+)
 def test_recursively_convert_to_json_serializable(tmp_path):
     asset = ge.dataset.PandasDataset(
         {

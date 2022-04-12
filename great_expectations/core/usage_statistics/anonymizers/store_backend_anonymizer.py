@@ -1,51 +1,46 @@
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.data_context.store import (
-    DatabaseStoreBackend,
-    InMemoryStoreBackend,
-    StoreBackend,
-    TupleFilesystemStoreBackend,
-    TupleGCSStoreBackend,
-    TupleS3StoreBackend,
-    TupleStoreBackend,
-)
+from typing import Optional
+
+from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+from great_expectations.data_context.store.store_backend import StoreBackend
 
 
-class StoreBackendAnonymizer(Anonymizer):
-    def __init__(self, salt=None):
+class StoreBackendAnonymizer(BaseAnonymizer):
+    def __init__(
+        self,
+        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        salt: Optional[str] = None,
+    ) -> None:
         super().__init__(salt=salt)
 
-        # ordered bottom up in terms of inheritance order
-        self._ge_classes = [
-            TupleFilesystemStoreBackend,
-            TupleS3StoreBackend,
-            TupleGCSStoreBackend,
-            InMemoryStoreBackend,
-            DatabaseStoreBackend,
-            TupleStoreBackend,
-            StoreBackend,
-        ]
+        self._aggregate_anonymizer = aggregate_anonymizer
 
-    def anonymize_store_backend_info(
-        self, store_backend_obj=None, store_backend_object_config=None
-    ):
+    def anonymize(
+        self,
+        obj: Optional[object] = None,
+        store_backend_obj: Optional[StoreBackend] = None,
+        store_backend_object_config: Optional[dict] = None,
+    ) -> dict:
         assert (
             store_backend_obj or store_backend_object_config
         ), "Must pass store_backend_obj or store_backend_object_config."
         anonymized_info_dict = {}
         if store_backend_obj is not None:
-            self.anonymize_object_info(
+            self._anonymize_object_info(
                 object_=store_backend_obj,
                 anonymized_info_dict=anonymized_info_dict,
-                ge_classes=self._ge_classes,
             )
         else:
             class_name = store_backend_object_config.get("class_name")
             module_name = store_backend_object_config.get("module_name")
             if module_name is None:
                 module_name = "great_expectations.data_context.store"
-            self.anonymize_object_info(
+            self._anonymize_object_info(
                 object_config={"class_name": class_name, "module_name": module_name},
                 anonymized_info_dict=anonymized_info_dict,
-                ge_classes=self._ge_classes,
             )
         return anonymized_info_dict
+
+    def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        return (obj is not None and isinstance(obj, StoreBackend)) or (
+            "store_backend_object_config" in kwargs
+        )

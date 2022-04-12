@@ -45,7 +45,6 @@ def test_expect_column_max_to_be_between_warn_parse_strings_as_datetimes(
             max_value=datetime.strptime("2021-07-20", "%Y-%m-%d"),
             parse_strings_as_datetimes=True,
         )
-    assert (
-        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-        in str(record.list[0].message)
+    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+        record.list[0].message
     )

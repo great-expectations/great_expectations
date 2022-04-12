@@ -320,10 +320,7 @@ class HtmlSiteStore:
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
             raise TypeError(
-                "key: {!r} must be a SiteSectionIdentifier, not {!r}".format(
-                    key,
-                    type(key),
-                )
+                f"key: {key!r} must be a SiteSectionIdentifier, not {type(key)!r}"
             )
 
         for key_class in self.store_backends.keys():

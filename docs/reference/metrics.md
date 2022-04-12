@@ -5,12 +5,14 @@ title: Metrics
 
 Metrics are values derived from one or more Batches that can be used to evaluate Expectations or to summarize the result
 of Validation. A Metric could be a statistic, such as the minimum value of the column, or a more complex object, such as
-a histogram.
+a histogram. 
 
 Metrics are the core tool used to validate data. When an Expectation should be evaluated, Great Expectations collects
-all of the Metrics requested by the Expectation and provides them to the Expectation's validation logic. The Expectation
+all the Metrics requested by the Expectation and provides them to the Expectation's validation logic. The Expectation
 can also expose Metrics, such as the observed value of a useful statistic via an Expectation Validation Result, where
 Data Docs -- or other Expectations -- can use them.
+
+Put simply, a Metric answers a question about your data posed by an [**Expectation**](./expectations/expectations.md).
 
 Metrics are produced using ExecutionEngine-specific logic that is defined in a `MetricProvider`. When a MetricProvider
 class is first encountered, Great Expectations will register the metric and any methods that it defines as able to
@@ -51,8 +53,6 @@ Expectation Validation Results and Expectation Suite Validation Results can expo
 Expectations that have been validated, called "Expectation Defined Metrics." To access those values, we address the
 metric as a dot-delimited string that identifies the value, such as `expect_column_values_to_be_unique .success`
 or `expect_column_values_to_be_between.result.unexpected_percent`. These metrics may be stored in a MetricsStore.
-
-It is important to note that these metrics are *NOT* available for compute on raw data directly as other metrics are.
 
 A `metric_kwargs_id` is a string representation of the Metric Kwargs that can be used as a database key. For simple
 cases, it could be easily readable, such as `column=Age`, but when there are multiple keys and values or complex values,

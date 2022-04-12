@@ -1307,9 +1307,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 urn = ge_urn.parseString(string_urn)
             except ParserError:
                 logger.warning(
-                    "Unable to parse great_expectations urn {}".format(
-                        value["$PARAMETER"]
-                    )
+                    f"Unable to parse great_expectations urn {value['$PARAMETER']}"
                 )
                 continue
 
@@ -1322,8 +1320,9 @@ class ExpectationConfiguration(SerializableDictDot):
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
+    @staticmethod
     def _update_dependencies_with_expectation_suite_urn(
-        self, dependencies: dict, urn: ParseResults
+        dependencies: dict, urn: ParseResults
     ) -> None:
         if not urn.get("metric_kwargs"):
             nested_update(
@@ -1379,8 +1378,14 @@ class ExpectationConfigurationSchema(Schema):
             "required": "expectation_type missing in expectation configuration"
         },
     )
-    kwargs = fields.Dict()
-    meta = fields.Dict()
+    kwargs = fields.Dict(
+        required=False,
+        allow_none=True,
+    )
+    meta = fields.Dict(
+        required=False,
+        allow_none=True,
+    )
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema, required=False, allow_none=True

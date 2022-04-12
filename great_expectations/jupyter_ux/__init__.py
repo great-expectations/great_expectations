@@ -7,7 +7,7 @@ from datetime import datetime
 
 import pandas as pd
 import tzlocal
-from IPython.core.display import HTML, display
+from IPython.display import HTML, display
 from packaging import version
 
 pd.set_option("display.max_rows", None)
@@ -173,8 +173,7 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
     logger.addHandler(chandler)
     logger.setLevel(log_level)
     logger.info(
-        "Great Expectations logging enabled at %s level by JupyterUX module."
-        % (log_level,)
+        f"Great Expectations logging enabled at {log_level} level by JupyterUX module."
     )
     #
     # # Filter warnings

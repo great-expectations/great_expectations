@@ -21,6 +21,7 @@
     },
     "tests" : [{
       "title": "basic_positive_test_without_nulls",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -48,6 +49,7 @@
       }
     },{
       "title": "negative_test_with_nulls",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column_A": "x",

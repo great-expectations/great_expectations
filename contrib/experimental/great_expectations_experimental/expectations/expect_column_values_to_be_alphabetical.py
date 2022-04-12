@@ -348,7 +348,6 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
             "@maximetokman",
             "@Harriee02",  # Don't forget to add your github handle here!
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
@@ -451,5 +450,4 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToBeAlphabetical().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToBeAlphabetical().print_diagnostic_checklist()

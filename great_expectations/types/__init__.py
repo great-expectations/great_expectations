@@ -84,7 +84,7 @@ class DictDot:
         return len(self.__dict__)
 
     def keys(self):
-        return self.to_raw_dict().keys()
+        return self.__dict__.keys()
 
     def values(self):
         return self.to_raw_dict().values()
@@ -194,7 +194,9 @@ class DictDot:
                 [key[1:] for key in self.keys() if key[0] == "_"],
             )
         )
+        # Gather public fields.
         public_fields: Set[str] = {key for key in self.keys() if key[0] != "_"}
+        # Combine private and public fields using the "Set Union" operation.
         property_names: Set[str] = public_fields | private_fields
 
         keys_for_exclusion: list = []

@@ -16,6 +16,7 @@
       },
     "tests": [{
       "title": "basic_positive_test_exact_match_true",
+      "include_in_gallery": true,
       "exact_match_out": true,
       "in":{
         "column_set": ["c1", "c2", "c3"],
@@ -44,6 +45,7 @@
       }
     },{
       "title": "negative_test_column_is_missing_exact_match_true",
+      "include_in_gallery": true,
       "exact_match_out": true,
       "in":{
         "column_set": ["c1", "c2"],

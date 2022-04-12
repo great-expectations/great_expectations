@@ -56,6 +56,7 @@
     "tests" : [
       {
         "title": "basic_positive_test_case",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "in": {
           "column": "unique"
@@ -67,6 +68,7 @@
         }
       },{
         "title": "basic_negative_case_all_non_unique_character_values",
+        "include_in_gallery": true,
         "exact_match_out": false,
         "in": {
           "column": "a"
