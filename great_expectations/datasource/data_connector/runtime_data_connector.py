@@ -14,10 +14,9 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.data_context.types.base import assetConfigSchema
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.data_connector import DataConnector
+from great_expectations.datasource.data_connector.util import _build_asset_from_config
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -58,15 +57,12 @@ class RuntimeDataConnector(DataConnector):
 
         if assets is None:
             assets = {}
-        _assets: Dict[str, Union[dict, Asset]] = assets
-        self._assets = _assets
+        self._assets: Dict[str, Union[dict, Asset]] = assets
         self._batch_identifiers: dict = {}
 
         self._build_assets_from_config(config=assets)
-
-        # handle batch_identifiers that are defined at the DataConnector-level
+        # add batch_identifiers defined at the DataConnector level.
         self._add_batch_identifiers(batch_identifiers)
-
         self._refresh_data_references_cache()
 
     @property
@@ -78,60 +74,40 @@ class RuntimeDataConnector(DataConnector):
         batch_identifiers: List[str],
         data_asset_name: Optional[str] = None,
     ):
-        # TODO: clean up this logic before submitting PR
-        if not batch_identifiers and len(self.assets) == 0:
-            raise ge_exceptions.DataConnectorError(
-                "DataConnector has no batch_identifiers, either at the data connector or asset level. This is a problem"
-            )
-
-        if batch_identifiers and not data_asset_name:
-            # check batch_identifiers being specified at DataConnector-level and warn accordingly
-            # deprecated 0.15.01
-            warnings.warn(
-                "We dont want you to do batch_identifiers on your own. Please name them as part of data_assets",
-                DeprecationWarning,
-            )
-            self._batch_identifiers[self.name] = batch_identifiers
-        if data_asset_name and batch_identifiers:
+        if data_asset_name:
+            if not batch_identifiers:
+                raise ge_exceptions.DataConnectorError(
+                    "DataConnector has no batch_identifiers, either at the data connector or asset level. This is a problem"
+                )
             self._batch_identifiers[data_asset_name] = batch_identifiers
-        if data_asset_name and not batch_identifiers:
-            raise ge_exceptions.DataConnectorError(
-                "DataConnector has no batch_identifiers, either at the data connector or asset level. This is a problem"
-            )
+        else:
+            if not batch_identifiers and len(self.assets) == 0:
+                raise ge_exceptions.DataConnectorError(
+                    "DataConnector has no batch_identifiers, either at the data connector or asset level. This is a problem"
+                )
+            if batch_identifiers:
+                # check batch_identifiers being specified at DataConnector-level and warn accordingly
+                # deprecated 0.15.01
+                warnings.warn(
+                    "We dont want you to do batch_identifiers on your own. Please name them as part of data_assets",
+                    DeprecationWarning,
+                )
+                self._batch_identifiers[self.name] = batch_identifiers
 
-    # <WILL> Clean up or add to shared method
     def _build_assets_from_config(self, config: Dict[str, dict]):
         for name, asset_config in config.items():
             if asset_config is None:
                 asset_config = {}
             asset_config.update({"name": name})
-            new_asset: Asset = self._build_asset_from_config(
+            new_asset: Asset = _build_asset_from_config(
+                runtime_environment=self,
                 config=asset_config,
             )
             self.assets[name] = new_asset
-            # adding batch_identifiers
             self._add_batch_identifiers(
                 batch_identifiers=new_asset.batch_identifiers,
                 data_asset_name=new_asset.name,
             )
-
-    # <WILL> Clean up or add to shared method.
-    def _build_asset_from_config(self, config: dict):
-        runtime_environment: dict = {"data_connector": self}
-        config = assetConfigSchema.load(config)
-        config = assetConfigSchema.dump(config)
-        asset: Asset = instantiate_class_from_config(
-            config=config,
-            runtime_environment=runtime_environment,
-            config_defaults={},
-        )
-        if not asset:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name="great_expectations.datasource.data_connector.asset",
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        return asset
 
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
