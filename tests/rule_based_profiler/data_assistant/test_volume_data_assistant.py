@@ -294,3 +294,5 @@ def test_get_metrics(
     ) == deep_filter_properties_iterable(
         properties=expected_rule_based_profiler_config.to_json_dict()
     )
+
+    assert 0.0 < result.execution_time <= 1.0

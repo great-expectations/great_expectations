@@ -175,21 +175,35 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(
-    pretty_print: bool = False,
-) -> Callable:
+def measure_execution_time(pretty_print: bool = False) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
-        func.execution_duration_milliseconds = 0.0
-
         @wraps(func)
         def compute_delta_t(*args, **kwargs) -> Any:
+            """
+            Computes return value of decorated function and calls back "execution_time_keeper" (reserved argument name)
+            and saves execution time in seconds (settable "execution_time_keeper.execution_time" property must exist).
+
+            Args:
+                args: Positional arguments of original function being decorated.
+                kwargs: Keyword arguments of original function being decorated.
+
+            Returns:
+                Any (output value of original function being decorated).
+            """
             time_begin: float = time.perf_counter()
             try:
                 return func(*args, **kwargs)
             finally:
                 time_end: float = time.perf_counter()
                 delta_t: float = time_end - time_begin
-                func.execution_duration_milliseconds = delta_t
+                if kwargs is None:
+                    kwargs = {}
+
+                execution_time_keeper: type = kwargs.get("execution_time_keeper")
+                if execution_time_keeper is not None and hasattr(
+                    execution_time_keeper, "execution_time"
+                ):
+                    execution_time_keeper.execution_time = delta_t
 
                 if pretty_print:
                     bound_args: BoundArguments = signature(func).bind(*args, **kwargs)

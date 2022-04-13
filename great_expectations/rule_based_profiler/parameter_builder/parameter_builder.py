@@ -258,7 +258,8 @@ class ParameterBuilder(Builder, ABC):
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
         details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Tuple containing computed_parameter_value and parameter_computation_details metadata.
         """
         pass
 
