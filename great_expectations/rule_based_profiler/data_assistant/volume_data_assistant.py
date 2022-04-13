@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.data_context import BaseDataContext
@@ -36,12 +36,6 @@ class VolumeDataAssistant(DataAssistant):
             data_context=data_context,
         )
 
-    def build(self) -> None:
-        """
-        Custom "Rule" objects can be added to "self.profiler" property after calling "super().build()".
-        """
-        super().build()
-
     @property
     def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
         return {
@@ -74,3 +68,11 @@ class VolumeDataAssistant(DataAssistant):
                 table_row_count_metric_multi_batch_parameter_builder,
             ],
         }
+
+    @property
+    def variables(self) -> Optional[Dict[str, Any]]:
+        return None
+
+    @property
+    def rules(self) -> Optional[Dict[str, Dict[str, Any]]]:
+        return None
