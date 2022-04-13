@@ -52,26 +52,3 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
         name="test_sql_execution_engine",
         engine=conn,
     )
-
-
-@pytest.fixture
-def taxi_test_file():
-    return file_relative_path(
-        __file__,
-        os.path.join(
-            "..",
-            "test_sets",
-            "taxi_yellow_tripdata_samples",
-            "yellow_tripdata_sample_2019-01.csv",
-        ),
-    )
-
-
-@pytest.fixture
-def taxi_test_file_directory():
-    return file_relative_path(
-        __file__,
-        os.path.join(
-            "..", "test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"
-        ),
-    )

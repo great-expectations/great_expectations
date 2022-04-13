@@ -5955,3 +5955,26 @@ def build_in_memory_runtime_context():
 @pytest.fixture
 def in_memory_runtime_context():
     return build_in_memory_runtime_context()
+
+
+@pytest.fixture
+def taxi_test_file():
+    return file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "yellow_tripdata_sample_2019-01.csv",
+        ),
+    )
+
+
+@pytest.fixture
+def taxi_test_file_directory():
+    return file_relative_path(
+        __file__,
+        os.path.join(
+            "..", "test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"
+        ),
+    )
