@@ -175,13 +175,18 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(pretty_print: bool = False) -> Callable:
+def measure_execution_time(
+    execution_time_keeper_object_reference_name: str = "execution_time_keeper",
+    execution_time_property_name: str = "execution_time",
+    pretty_print: bool = True,
+) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
         @wraps(func)
         def compute_delta_t(*args, **kwargs) -> Any:
             """
-            Computes return value of decorated function and calls back "execution_time_keeper" (reserved argument name)
-            and saves execution time in seconds (settable "execution_time_keeper.execution_time" property must exist).
+            Computes return value of decorated function, calls back "execution_time_keeper_object_reference_name", and
+            saves execution time (in seconds) into specified "execution_time_property_name" of passed object reference.
+            Settable "{execution_time_keeper_object_reference_name}.{execution_time_property_name}" property must exist.
 
             Args:
                 args: Positional arguments of original function being decorated.
@@ -199,11 +204,15 @@ def measure_execution_time(pretty_print: bool = False) -> Callable:
                 if kwargs is None:
                     kwargs = {}
 
-                execution_time_keeper: type = kwargs.get("execution_time_keeper")
+                execution_time_keeper: type = kwargs.get(
+                    execution_time_keeper_object_reference_name
+                )
                 if execution_time_keeper is not None and hasattr(
-                    execution_time_keeper, "execution_time"
+                    execution_time_keeper, execution_time_property_name
                 ):
-                    execution_time_keeper.execution_time = delta_t
+                    setattr(
+                        execution_time_keeper, execution_time_property_name, delta_t
+                    )
 
                 if pretty_print:
                     bound_args: BoundArguments = signature(func).bind(*args, **kwargs)

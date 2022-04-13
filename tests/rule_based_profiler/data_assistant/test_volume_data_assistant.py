@@ -295,4 +295,4 @@ def test_get_metrics(
         properties=expected_rule_based_profiler_config.to_json_dict()
     )
 
-    assert 0.0 < result.execution_time <= 1.0
+    assert 0.0 < result.execution_time <= 1.0  # Execution time (in seconds).

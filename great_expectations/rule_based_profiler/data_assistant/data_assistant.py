@@ -161,7 +161,7 @@ class DataAssistant(ABC):
         result: DataAssistantResult = DataAssistantResult(execution_time=0.0)
         run_profiler_on_data(
             data_assistant=self,
-            execution_time_keeper=result,
+            data_assistant_result=result,
             profiler=self.profiler,
             batch_list=list(self._validator.batches.values()),
             batch_request=None,
@@ -323,10 +323,14 @@ class DataAssistant(ABC):
         return self.profiler.get_expectation_configurations()
 
 
-@measure_execution_time(pretty_print=False)
+@measure_execution_time(
+    execution_time_keeper_object_reference_name="data_assistant_result",
+    execution_time_property_name="execution_time",
+    pretty_print=False,
+)
 def run_profiler_on_data(
     data_assistant: DataAssistant,
-    execution_time_keeper: Optional[DataAssistantResult],
+    data_assistant_result: DataAssistantResult,
     profiler: BaseRuleBasedProfiler,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -342,7 +346,7 @@ def run_profiler_on_data(
         force_batch_data=False,
         reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
     )
-    result: DataAssistantResult = execution_time_keeper
+    result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
     result.metrics = data_assistant.get_metrics()
     result.expectation_configurations = data_assistant.get_expectation_configurations()
