@@ -191,7 +191,6 @@ Notes:
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
-        # How do you get BatchData from our situatin?
         batch_markers: BatchMarkers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(

@@ -147,11 +147,15 @@ class BaseDatasource:
         ] = data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
+
         if isinstance(batch_request, RuntimeBatchRequest):
+            # This is a runtime batch_request
+
             if len(batch_definition_list) != 1:
                 raise ValueError(
                     "RuntimeBatchRequests must specify exactly one corresponding BatchDefinition"
                 )
+
             batch_definition = batch_definition_list[0]
             runtime_parameters = batch_request.runtime_parameters
 
@@ -164,7 +168,7 @@ class BaseDatasource:
                 batch_definition=batch_definition,
                 runtime_parameters=runtime_parameters,
             )
-            # Batch1
+
             new_batch: Batch = Batch(
                 data=batch_data,
                 batch_request=batch_request,

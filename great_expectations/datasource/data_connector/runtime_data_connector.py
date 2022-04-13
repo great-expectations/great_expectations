@@ -373,16 +373,14 @@ class RuntimeDataConnector(DataConnector):
 
     def _validate_data_connector_level_batch_identifiers(self, batch_identifiers: dict):
         batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
-        # TODO: do we do a warning here?
         if not set(batch_identifiers_keys) <= set(self._batch_identifiers[self.name]):
             raise ge_exceptions.DataConnectorError(
                 f"""RuntimeDataConnector "{self.name}" was invoked with one or more batch identifiers that do not
         appear among the configured batch identifiers.
-                            """
+                """
             )
 
-    # TODO: Add self check where we are adding more data_assets. can this update?
-    # what happens to data references? do these get updated too?
+    # TODO: tests that test whether data_references get updated, and both paths.
     def self_check(self, pretty_print=True, max_examples=3):
         """
         Overrides the self_check method for RuntimeDataConnector. Normally the `self_check()` method will check
@@ -417,8 +415,7 @@ class RuntimeDataConnector(DataConnector):
                 "data_asset_count": len_asset_names,
                 "example_data_asset_names": asset_names[:max_examples],
                 "data_assets": {},
-                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
-                # "data_reference_count": self.
+                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
             }
             if pretty_print:
                 print(
@@ -442,5 +439,4 @@ class RuntimeDataConnector(DataConnector):
             report_obj["example_unmatched_data_references"] = unmatched_data_references[
                 :max_examples
             ]
-
             return report_obj

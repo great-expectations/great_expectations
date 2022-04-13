@@ -285,7 +285,6 @@ class ExecutionEngine(ABC):
         """
         Loads the specified batch_data into the execution engine
         """
-        # batch. Does this do any retrieving
         self._batch_data_dict[batch_id] = batch_data
         self._active_batch_data_id = batch_id
 
