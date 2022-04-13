@@ -43,7 +43,6 @@ class DataAssistant(ABC):
         batch_request=batch_request,
         data_context=context,
     )
-    data_assistant.build()
     result: DataAssistantResult = data_assistant.run()
 
     Then:
@@ -61,7 +60,7 @@ class DataAssistant(ABC):
         data_context: BaseDataContext = None,
     ):
         """
-        DataAssistant subclasses build "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
+        DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
         corresponding to indended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
         "RuleBasedProfilerResult" object, containing metrics by "Domain", list of "ExpectationConfiguration" objects,
         and overall "ExpectationSuite" object, immediately available for validating underlying data "Batch" objects.
@@ -91,8 +90,9 @@ class DataAssistant(ABC):
             variables=None,
             data_context=self.data_context,
         )
+        self._build_profiler()
 
-    def build(self) -> None:
+    def _build_profiler(self) -> None:
         """
         Builds "RuleBasedProfiler", corresponding to present DataAssistant use case.
 
@@ -163,6 +163,8 @@ class DataAssistant(ABC):
             data_assistant=self,
             data_assistant_result=result,
             profiler=self.profiler,
+            variables=self.variables,
+            rules=self.rules,
             batch_list=list(self._validator.batches.values()),
             batch_request=None,
             expectation_suite=expectation_suite,
@@ -207,6 +209,24 @@ class DataAssistant(ABC):
 
         Returns:
             Dictionary of "ParameterBuilder" objects, keyed by members of "MetricDomainTypes" Enum.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def variables(self) -> Optional[Dict[str, Any]]:
+        """
+        Returns:
+            Optional "variables" configuration attribute name/value pairs (overrides), commonly-used in Builder objects.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def rules(self) -> Optional[Dict[str, Dict[str, Any]]]:
+        """
+        Returns:
+            Optional custom "rules" configuration attribute name/(configuration-dictionary) (overrides) can be added.
         """
         pass
 
@@ -332,6 +352,8 @@ def run_profiler_on_data(
     data_assistant: DataAssistant,
     data_assistant_result: DataAssistantResult,
     profiler: BaseRuleBasedProfiler,
+    variables: Optional[Dict[str, Any]] = None,
+    rules: Optional[Dict[str, Dict[str, Any]]] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     expectation_suite: Optional[ExpectationSuite] = None,
@@ -339,8 +361,8 @@ def run_profiler_on_data(
     include_citation: bool = True,
 ) -> None:
     profiler.run(
-        variables=None,
-        rules=None,
+        variables=variables,
+        rules=rules,
         batch_list=batch_list,
         batch_request=batch_request,
         force_batch_data=False,
