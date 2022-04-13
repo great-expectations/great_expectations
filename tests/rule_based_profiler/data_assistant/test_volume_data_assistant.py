@@ -313,8 +313,6 @@ def test_execution_time_within_proper_bounds(
         data_context=context,
     )
     data_assistant.build()
-    result: DataAssistantResult = data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
-    )
+    result: DataAssistantResult = data_assistant.run()
 
     assert 0.0 < result.execution_time <= 1.0  # Execution time (in seconds).
