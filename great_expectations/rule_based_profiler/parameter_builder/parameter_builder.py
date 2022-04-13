@@ -389,7 +389,7 @@ class ParameterBuilder(Builder, ABC):
             for value_kwargs_cursor in metric_value_kwargs
         ]
 
-        # Step-3: Generate "MetricConfiguration" directives for all "metric_domain_kwargs" / "metric_value_kwargs" pairs.
+        # Step-3: Generate "MetricConfiguration" directives for all "metric_domain_kwargs"/"metric_value_kwargs" pairs.
 
         domain_kwargs_cursor: dict
         kwargs_combinations: List[List[dict]] = [
@@ -398,8 +398,10 @@ class ParameterBuilder(Builder, ABC):
             for domain_kwargs_cursor in metric_domain_kwargs
         ]
 
+        metrics_to_resolve: List[MetricConfiguration]
+
         kwargs_pair_cursor: List[dict, dict]
-        metrics_to_resolve: List[MetricConfiguration] = [
+        metrics_to_resolve = [
             MetricConfiguration(
                 metric_name=metric_name,
                 metric_domain_kwargs=kwargs_pair_cursor[0],
@@ -409,15 +411,18 @@ class ParameterBuilder(Builder, ABC):
             for kwargs_pair_cursor in kwargs_combinations
         ]
 
+        # Step-4: Sort "MetricConfiguration" directives by "metric_value_kwargs_id" and "batch_id" (in that order).
+        # This precise sort order enables pairing every metric value with its respective "batch_id" (e.g., for display).
+
         metrics_to_resolve = sorted(
             metrics_to_resolve,
-            key=lambda element: (
-                element.metric_value_kwargs_id,
-                element.metric_domain_kwargs["batch_id"],
+            key=lambda metric_configuration_element: (
+                metric_configuration_element.metric_value_kwargs_id,
+                metric_configuration_element.metric_domain_kwargs["batch_id"],
             ),
         )
 
-        # Step-4: Resolve all metrics in one operation simultaneously.
+        # Step-5: Resolve all metrics in one operation simultaneously.
 
         # The Validator object used for metric calculation purposes.
         validator: "Validator" = self.get_validator(  # noqa: F821
@@ -430,11 +435,26 @@ class ParameterBuilder(Builder, ABC):
             metric_configurations=metrics_to_resolve
         )
 
-        # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
+        # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.
+
+        resolved_metrics_sorted: Dict[Tuple[str, str, str], Any] = {}
+
+        metric_configuration: MetricConfiguration
+        resolved_metric_value: Any
+        for metric_configuration in metrics_to_resolve:
+            if metric_configuration.id not in resolved_metrics:
+                raise ge_exceptions.ProfilerExecutionError(
+                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
+                )
+
+            resolved_metrics_sorted[metric_configuration.id] = resolved_metrics[
+                metric_configuration.id
+            ]
+
+        # Step-7: Map resolved metrics to their attributes for identification and recovery by receiver.
 
         attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
 
-        metric_configuration: MetricConfiguration
         for metric_configuration in metrics_to_resolve:
             attributed_resolved_metrics: AttributedResolvedMetrics = (
                 attributed_resolved_metrics_map.get(
@@ -450,20 +470,13 @@ class ParameterBuilder(Builder, ABC):
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
-            resolved_metric_value: Union[
-                Tuple[str, str, str], None
-            ] = resolved_metrics.get(metric_configuration.id)
-            if resolved_metric_value is None:
-                raise ge_exceptions.ProfilerExecutionError(
-                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
-                )
-
+            resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
             attributed_resolved_metrics.add_resolved_metric(value=resolved_metric_value)
 
         metric_attributes_id: str
         metric_values: AttributedResolvedMetrics
 
-        # Step-6: Leverage Numpy Array capabilities for subsequent operations on results of computed/resolved metrics.
+        # Step-8: Leverage Numpy Array capabilities for subsequent operations on results of computed/resolved metrics.
 
         attributed_resolved_metrics_map = {
             metric_attributes_id: AttributedResolvedMetrics(
@@ -473,7 +486,7 @@ class ParameterBuilder(Builder, ABC):
             for metric_attributes_id, metric_values in attributed_resolved_metrics_map.items()
         }
 
-        # Step-7: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
+        # Step-9: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
 
         idx: int
         for (
@@ -487,7 +500,7 @@ class ParameterBuilder(Builder, ABC):
                 metric_values.metric_values = np.array(metric_values.metric_values)
                 attributed_resolved_metrics_map[metric_attributes_id] = metric_values
 
-        # Step-8: Apply numeric/hygiene directives (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+        # Step-10: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
 
         for (
             metric_attributes_id,
@@ -503,7 +516,7 @@ class ParameterBuilder(Builder, ABC):
                 parameters=parameters,
             )
 
-        # Step-9: Compose and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
+        # Step-11: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
 
         return MetricComputationResult(
             metric_values=list(attributed_resolved_metrics_map.values()),
@@ -517,7 +530,6 @@ class ParameterBuilder(Builder, ABC):
                     "metric_dependencies": None,
                 },
                 "num_batches": len(batch_ids),
-                "batch_ids": batch_ids,
             },
         )
 
