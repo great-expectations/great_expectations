@@ -3,13 +3,13 @@ import shutil
 from typing import List, Union
 
 import pandas as pd
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_inferred_assets(
@@ -102,7 +102,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     os.makedirs(titanic_asset_base_directory_path)
 
     titanic_csv_source_file_path: str = file_relative_path(
-        __file__, "../test_sets/Titanic.csv"
+        __file__, "../../test_sets/Titanic.csv"
     )
     titanic_csv_destination_file_path: str = str(
         os.path.join(base_directory, "data/Titanic_19120414_1313.csv")
