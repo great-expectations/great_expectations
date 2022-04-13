@@ -14,7 +14,7 @@ from great_expectations.util import deep_filter_properties_iterable
 
 
 @freeze_time("09/26/2019 13:42:41")
-def test_get_metrics(
+def test_get_metrics_and_expectations(
     quentin_columnar_table_multi_batch_data_context,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
@@ -294,3 +294,25 @@ def test_get_metrics(
     ) == deep_filter_properties_iterable(
         properties=expected_rule_based_profiler_config.to_json_dict()
     )
+
+
+def test_execution_time_within_proper_bounds(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
+        batch_request=batch_request,
+        data_context=context,
+    )
+    data_assistant.build()
+    result: DataAssistantResult = data_assistant.run()
+
+    assert 0.0 < result.execution_time <= 1.0  # Execution time (in seconds).

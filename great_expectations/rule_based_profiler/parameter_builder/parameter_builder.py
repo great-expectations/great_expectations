@@ -7,12 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest,
-    BatchRequestBase,
-    RuntimeBatchRequest,
-)
+from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -108,9 +103,7 @@ class ParameterBuilder(Builder, ABC):
         ] = None,
         json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
+        batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -265,7 +258,8 @@ class ParameterBuilder(Builder, ABC):
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
         details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Tuple containing computed_parameter_value and parameter_computation_details metadata.
         """
         pass
 
