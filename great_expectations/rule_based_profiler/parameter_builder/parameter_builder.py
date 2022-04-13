@@ -424,8 +424,9 @@ class ParameterBuilder(Builder, ABC):
 
         # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
 
-        metric_configuration: MetricConfiguration
         attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
+
+        metric_configuration: MetricConfiguration
         for metric_configuration in metrics_to_resolve:
             attributed_resolved_metrics: AttributedResolvedMetrics = (
                 attributed_resolved_metrics_map.get(
