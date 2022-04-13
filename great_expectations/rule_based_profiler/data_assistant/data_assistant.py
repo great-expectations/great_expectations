@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
-from great_expectations.core.batch import BatchRequestBase
+from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.data_context import BaseDataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -25,8 +25,10 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    DataAssistantResult,
     Domain,
 )
+from great_expectations.util import measure_execution_time
 
 
 class DataAssistant(ABC):
@@ -42,7 +44,6 @@ class DataAssistant(ABC):
         data_context=context,
     )
     data_assistant.build()
-    # TODO: <Alex>ALEX -- "DataAssistantResult" is Work-In-Progress</Alex>
     result: DataAssistantResult = data_assistant.run()
 
     Then:
@@ -50,6 +51,7 @@ class DataAssistant(ABC):
         expectation_configurations: List[ExpectationConfiguration] = result.expectation_configurations
         expectation_suite: ExpectationSuite = result.expectation_suite
         expectation_suite_meta: Dict[str, Any] = expectation_suite.meta
+        profiler_config: RuleBasedProfilerConfig = result.profiler_config
     """
 
     def __init__(
@@ -150,17 +152,24 @@ class DataAssistant(ABC):
             reconciliation_strategy=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES.variables,
         )
 
-    def run(self) -> None:
-        # TODO: <Alex>ALEX -- WILL_RETURN_RESULT_OBJECT</Alex>
-        self.profiler.run(
-            variables=None,
-            rules=None,
+    def run(
+        self,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> DataAssistantResult:
+        result: DataAssistantResult = DataAssistantResult(execution_time=0.0)
+        run_profiler_on_data(
+            data_assistant=self,
+            data_assistant_result=result,
+            profiler=self.profiler,
             batch_list=list(self._validator.batches.values()),
             batch_request=None,
-            force_batch_data=False,
-            reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
         )
-        # TODO: <Alex>ALEX -- WILL_RETURN_RESULT_OBJECT</Alex>
+        return result
 
     @property
     def name(self) -> str:
@@ -312,3 +321,37 @@ class DataAssistant(ABC):
             List of "ExpectationConfiguration" objects, computed by "RuleBasedProfiler" state.
         """
         return self.profiler.get_expectation_configurations()
+
+
+@measure_execution_time(
+    execution_time_holder_object_reference_name="data_assistant_result",
+    execution_time_property_name="execution_time",
+    pretty_print=False,
+)
+def run_profiler_on_data(
+    data_assistant: DataAssistant,
+    data_assistant_result: DataAssistantResult,
+    profiler: BaseRuleBasedProfiler,
+    batch_list: Optional[List[Batch]] = None,
+    batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+    expectation_suite: Optional[ExpectationSuite] = None,
+    expectation_suite_name: Optional[str] = None,
+    include_citation: bool = True,
+) -> None:
+    profiler.run(
+        variables=None,
+        rules=None,
+        batch_list=batch_list,
+        batch_request=batch_request,
+        force_batch_data=False,
+        reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+    )
+    result: DataAssistantResult = data_assistant_result
+    result.profiler_config = profiler.config
+    result.metrics = data_assistant.get_metrics()
+    result.expectation_configurations = data_assistant.get_expectation_configurations()
+    result.expectation_suite = data_assistant.get_expectation_suite(
+        expectation_suite=expectation_suite,
+        expectation_suite_name=expectation_suite_name,
+        include_citation=include_citation,
+    )
