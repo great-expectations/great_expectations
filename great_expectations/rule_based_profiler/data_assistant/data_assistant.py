@@ -324,7 +324,7 @@ class DataAssistant(ABC):
 
 
 @measure_execution_time(
-    execution_time_keeper_object_reference_name="data_assistant_result",
+    execution_time_holder_object_reference_name="data_assistant_result",
     execution_time_property_name="execution_time",
     pretty_print=False,
 )

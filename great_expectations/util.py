@@ -176,7 +176,7 @@ def profile(func: Callable = None) -> Callable:
 
 
 def measure_execution_time(
-    execution_time_keeper_object_reference_name: str = "execution_time_keeper",
+    execution_time_holder_object_reference_name: str = "execution_time_holder",
     execution_time_property_name: str = "execution_time",
     pretty_print: bool = True,
 ) -> Callable:
@@ -184,9 +184,9 @@ def measure_execution_time(
         @wraps(func)
         def compute_delta_t(*args, **kwargs) -> Any:
             """
-            Computes return value of decorated function, calls back "execution_time_keeper_object_reference_name", and
+            Computes return value of decorated function, calls back "execution_time_holder_object_reference_name", and
             saves execution time (in seconds) into specified "execution_time_property_name" of passed object reference.
-            Settable "{execution_time_keeper_object_reference_name}.{execution_time_property_name}" property must exist.
+            Settable "{execution_time_holder_object_reference_name}.{execution_time_property_name}" property must exist.
 
             Args:
                 args: Positional arguments of original function being decorated.
@@ -204,14 +204,14 @@ def measure_execution_time(
                 if kwargs is None:
                     kwargs = {}
 
-                execution_time_keeper: type = kwargs.get(
-                    execution_time_keeper_object_reference_name
+                execution_time_holder: type = kwargs.get(
+                    execution_time_holder_object_reference_name
                 )
-                if execution_time_keeper is not None and hasattr(
-                    execution_time_keeper, execution_time_property_name
+                if execution_time_holder is not None and hasattr(
+                    execution_time_holder, execution_time_property_name
                 ):
                     setattr(
-                        execution_time_keeper, execution_time_property_name, delta_t
+                        execution_time_holder, execution_time_property_name, delta_t
                     )
 
                 if pretty_print:
