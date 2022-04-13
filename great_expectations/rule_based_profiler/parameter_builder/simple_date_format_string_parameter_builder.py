@@ -233,18 +233,18 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         )
 
         # Gather "metric_value_kwargs" for all candidate "strftime_format" strings.
-        fmt_string: str
+        format_string: str
         match_strftime_metric_value_kwargs_list: List[dict] = []
         match_strftime_metric_value_kwargs: dict
-        for fmt_string in candidate_strings:
+        for format_string in candidate_strings:
             if self.metric_value_kwargs:
                 match_strftime_metric_value_kwargs = {
                     **self.metric_value_kwargs,
-                    **{"strftime_format": fmt_string},
+                    **{"strftime_format": format_string},
                 }
             else:
                 match_strftime_metric_value_kwargs = {
-                    "strftime_format": fmt_string,
+                    "strftime_format": format_string,
                 }
 
             match_strftime_metric_value_kwargs_list.append(
@@ -285,24 +285,24 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         )
 
         # get best-matching datetime string that matches greater than threshold
-        best_fmt_string: str
+        best_format_string: str
         best_ratio: float
         (
-            best_fmt_string,
+            best_format_string,
             best_ratio,
         ) = ParameterBuilder._get_best_candidate_above_threshold(
             format_string_success_ratios, threshold
         )
         # dict of sorted datetime and ratios for all evaluated candidates
-        sorted_fmt_strings_and_ratios: dict = (
+        sorted_format_strings_and_ratios: dict = (
             ParameterBuilder._get_sorted_candidates_and_ratios(
                 format_string_success_ratios
             )
         )
         return (
-            best_fmt_string,
+            best_format_string,
             {
                 "success_ratio": best_ratio,
-                "candidate_strings": sorted_fmt_strings_and_ratios,
+                "candidate_strings": sorted_format_strings_and_ratios,
             },
         )
