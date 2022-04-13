@@ -409,6 +409,14 @@ class ParameterBuilder(Builder, ABC):
             for kwargs_pair_cursor in kwargs_combinations
         ]
 
+        metrics_to_resolve = sorted(
+            metrics_to_resolve,
+            key=lambda element: (
+                element.metric_value_kwargs_id,
+                element.metric_domain_kwargs["batch_id"],
+            ),
+        )
+
         # Step-4: Resolve all metrics in one operation simultaneously.
 
         # The Validator object used for metric calculation purposes.
@@ -509,6 +517,7 @@ class ParameterBuilder(Builder, ABC):
                     "metric_dependencies": None,
                 },
                 "num_batches": len(batch_ids),
+                "batch_ids": batch_ids,
             },
         )
 
