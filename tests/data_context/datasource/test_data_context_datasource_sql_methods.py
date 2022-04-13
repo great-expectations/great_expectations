@@ -2,14 +2,14 @@ import json
 from typing import List, Union
 
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest, IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
