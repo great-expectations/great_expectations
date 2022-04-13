@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 import pytest
 
@@ -35,6 +35,16 @@ def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_fi
                 - pipeline_stage_name
                 - airflow_run_id
                 - custom_key_0
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
         ),
         runtime_environment={"name": "my_datasource"},
@@ -46,33 +56,6 @@ def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_fi
 ####################################
 # Tests with data passed in as query
 ####################################
-
-
-@pytest.fixture
-def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_file, sa):
-    basic_datasource: Datasource = instantiate_class_from_config(
-        yaml.load(
-            f"""
-    class_name: Datasource
-
-    execution_engine:
-        class_name: SqlAlchemyExecutionEngine
-        connection_string: sqlite:///{db_file}
-
-    data_connectors:
-        test_runtime_data_connector:
-            module_name: great_expectations.datasource.data_connector
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - pipeline_stage_name
-                - airflow_run_id
-                - custom_key_0
-        """,
-        ),
-        runtime_environment={"name": "my_datasource"},
-        config_defaults={"module_name": "great_expectations.datasource"},
-    )
-    return basic_datasource
 
 
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_self_check(
@@ -92,15 +75,37 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
             "count": 1,
             "test_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
-                "data_asset_count": 0,
-                "example_data_asset_names": [],
-                "data_assets": {},
-                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
+                "data_asset_count": 2,
+                "data_assets": {
+                    "asset_a": {
+                        "batch_definition_count": 0,
+                        "example_data_references": [],
+                    },
+                    "asset_b": {
+                        "batch_definition_count": 0,
+                        "example_data_references": [],
+                    },
+                },
+                "example_data_asset_names": ["asset_a", "asset_b"],
                 "unmatched_data_reference_count": 0,
                 "example_unmatched_data_references": [],
             },
         },
     }
+
+
+def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_available_data_asset(
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
+):
+    expected_available_data_asset_names: Dict[List[str]] = {
+        "test_runtime_data_connector": ["asset_a", "asset_b"]
+    }
+    available_data_asset_names: Dict[
+        List[str]
+    ] = (
+        datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_available_data_asset_names()
+    )
+    assert available_data_asset_names == expected_available_data_asset_names
 
 
 def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_unknown_datasource(
@@ -194,7 +199,7 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_q
 ):
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
-    batch_identifiers = {
+    batch_identifiers: dict = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
@@ -224,7 +229,7 @@ def test_batch_identifiers_and_batch_identifiers_success_no_temp_table(
 ):
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I"
-    batch_identifiers = {
+    batch_identifiers: dict = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
@@ -255,7 +260,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
 ):
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I"
-    batch_identifiers = {
+    batch_identifiers: dict = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
@@ -289,7 +294,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_si
 ):
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
-    batch_identifiers = {"unknown_key": "some_value"}
+    batch_identifiers: dict = {"unknown_key": "some_value"}
     # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration  are not accepted.  In this test, a single illegal key is present.
     batch_request: dict = {
@@ -316,7 +321,7 @@ def test_set_data_asset_name_for_runtime_query_data(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     test_query: str = "SELECT * FROM table_full__I;"
-    batch_identifiers = {
+    batch_identifiers: dict = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
@@ -347,7 +352,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_query(
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
 
-    batch_identifiers = {
+    batch_identifiers: dict = {
         "airflow_run_id": 1234567890,
     }
 
@@ -373,6 +378,98 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_query(
     assert my_batch_1.batch_spec is not None
     assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
     assert isinstance(my_batch_1.data.selectable, sqlalchemy.Table)
+
+
+def test_get_batch_definition_list_from_batch_request_length_one_from_query_named_asset(
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
+):
+    # interacting with the database using query
+    test_query: str = "SELECT * FROM table_full__I;"
+
+    batch_identifiers: dict = {"day": 2, "month": 12}
+
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "asset_a",
+        "runtime_parameters": {
+            "query": test_query,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    # batches are a little bit more difficult to test because of batch_markers
+    # they are ones that uniquely identify the data
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "asset_a"
+    assert isinstance(my_batch_1.data.selectable, sqlalchemy.Table)
+
+
+def test_get_batch_definition_list_from_batch_request_length_one_from_query_named_asset_two_batch_requests(
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
+):
+    # interacting with the database using query
+    test_query: str = "SELECT * FROM table_full__I;"
+
+    batch_identifiers: dict = {"day": 1, "month": 12}
+
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "asset_a",
+        "runtime_parameters": {
+            "query": test_query,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    # batches are a little bit more difficult to test because of batch_markers
+    # they are ones that uniquely identify the data
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "asset_a"
+    assert isinstance(my_batch_1.data.selectable, sqlalchemy.Table)
+
+    # interacting with the database using query
+    test_query: str = "SELECT * FROM table_full__I;"
+
+    batch_identifiers: dict = {"day": 2, "month": 12}
+
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "asset_a",
+        "runtime_parameters": {
+            "query": test_query,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    # batches are a little bit more difficult to test because of batch_markers
+    # they are ones that uniquely identify the data
+    assert len(batch_list) == 1
+    my_batch_2 = batch_list[0]
+    assert my_batch_2.batch_spec is not None
+    assert my_batch_2.batch_definition["data_asset_name"] == "asset_a"
+    assert isinstance(my_batch_2.data.selectable, sqlalchemy.Table)
 
 
 def test_get_batch_with_pipeline_style_batch_request_missing_batch_identifiers_error(
