@@ -3,13 +3,13 @@ import shutil
 from typing import List, Union
 
 import pandas as pd
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_inferred_assets(
