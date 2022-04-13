@@ -43,8 +43,7 @@ class RuntimeDataConnector(DataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         batch_identifiers: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        # usually a dict, but str in sqldataconnector (need to investigate why)
-        assets: Optional[Union[str, dict]] = None,
+        assets: Optional[dict] = None,
     ):
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
@@ -61,6 +60,7 @@ class RuntimeDataConnector(DataConnector):
         self._batch_identifiers: dict = {}
 
         self._build_assets_from_config(config=assets)
+
         # add batch_identifiers defined at the DataConnector level.
         self._add_batch_identifiers(batch_identifiers)
         self._refresh_data_references_cache()
@@ -68,31 +68,6 @@ class RuntimeDataConnector(DataConnector):
     @property
     def assets(self):
         return self._assets
-
-    def _add_batch_identifiers(
-        self,
-        batch_identifiers: List[str],
-        data_asset_name: Optional[str] = None,
-    ):
-        if data_asset_name:
-            if not batch_identifiers:
-                raise ge_exceptions.DataConnectorError(
-                    "DataConnector has no batch_identifiers, either at the data connector or asset level. This is a problem"
-                )
-            self._batch_identifiers[data_asset_name] = batch_identifiers
-        else:
-            if not batch_identifiers and len(self.assets) == 0:
-                raise ge_exceptions.DataConnectorError(
-                    "DataConnector has no batch_identifiers, either at the data connector or asset level. This is a problem"
-                )
-            if batch_identifiers:
-                # check batch_identifiers being specified at DataConnector-level and warn accordingly
-                # deprecated 0.15.01
-                warnings.warn(
-                    "We dont want you to do batch_identifiers on your own. Please name them as part of data_assets",
-                    DeprecationWarning,
-                )
-                self._batch_identifiers[self.name] = batch_identifiers
 
     def _build_assets_from_config(self, config: Dict[str, dict]):
         for name, asset_config in config.items():
@@ -108,6 +83,30 @@ class RuntimeDataConnector(DataConnector):
                 batch_identifiers=new_asset.batch_identifiers,
                 data_asset_name=new_asset.name,
             )
+
+    def _add_batch_identifiers(
+        self,
+        batch_identifiers: List[str],
+        data_asset_name: Optional[str] = None,
+    ):
+        if data_asset_name:
+            if not batch_identifiers:
+                raise ge_exceptions.DataConnectorError(
+                    f"""RuntimeDataConnector "{self.name}" requires batch_identifiers to be configured when speciying Assets."""
+                )
+            self._batch_identifiers[data_asset_name] = batch_identifiers
+        else:
+            if not batch_identifiers and len(self.assets) == 0:
+                raise ge_exceptions.DataConnectorError(
+                    f"""RuntimeDataConnector "{self.name}" requires batch_identifiers to be configured, either at the DataConnector or Asset-level."""
+                )
+            if batch_identifiers:
+                # deprecated 0.15.01
+                warnings.warn(
+                    "Specifying batch_identifiers as part of RuntimeDataConnector config is deprecated as of v 0.15.01. Please configure Assets instead.",
+                    DeprecationWarning,
+                )
+                self._batch_identifiers[self.name] = batch_identifiers
 
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
