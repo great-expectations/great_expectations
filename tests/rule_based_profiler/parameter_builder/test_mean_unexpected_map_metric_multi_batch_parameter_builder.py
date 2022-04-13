@@ -28,7 +28,8 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
-    _: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
+    # noinspection PyUnusedLocal
+    parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
         MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             name="my_name",
             map_metric_name="column_values.nonnull",
@@ -46,8 +47,8 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
     )
 
     with pytest.raises(TypeError) as excinfo:
-        # noinspection PyArgumentList
-        _: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
+        # noinspection PyUnusedLocal,PyArgumentList
+        parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
             MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 name="my_name",
                 map_metric_name="column_values.nonnull",
@@ -61,8 +62,8 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
     )
 
     with pytest.raises(TypeError) as excinfo:
-        # noinspection PyArgumentList
-        _: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
+        # noinspection PyUnusedLocal,PyArgumentList
+        parameter_builder: MeanUnexpectedMapMetricMultiBatchParameterBuilder = (
             MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 name="my_name",
                 total_count_parameter_builder_name="my_total_count",
@@ -751,6 +752,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         "null_count_parameter_builder_name",
         "metric_domain_kwargs",
         "metric_value_kwargs",
+        "evaluation_parameter_builder_configs",
         "json_serialize",
         "batch_request",
     }
@@ -830,6 +832,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         "null_count_parameter_builder_name",
         "metric_domain_kwargs",
         "metric_value_kwargs",
+        "evaluation_parameter_builder_configs",
         "json_serialize",
         "batch_request",
     }

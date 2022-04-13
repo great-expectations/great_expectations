@@ -142,7 +142,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             json_serialize=True,
         )
     )
-    validation_parameter_builder_configs: List[dict] = [
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         value_set_estimator_parameter_builder_config,
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(

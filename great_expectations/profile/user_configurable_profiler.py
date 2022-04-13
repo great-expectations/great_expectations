@@ -1063,7 +1063,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 min_value=None,
                 max_value=None,
                 result_format="SUMMARY",
-                parse_strings_as_datetimes=True,
+                parse_strings_as_datetimes=False,
             ).result["observed_value"]
 
             if min_value is not None:
@@ -1085,7 +1085,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 min_value=None,
                 max_value=None,
                 result_format="SUMMARY",
-                parse_strings_as_datetimes=True,
+                parse_strings_as_datetimes=False,
             ).result["observed_value"]
             if max_value is not None:
                 try:
@@ -1105,7 +1105,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     column,
                     min_value=min_value,
                     max_value=max_value,
-                    parse_strings_as_datetimes=True,
+                    parse_strings_as_datetimes=False,
                 )
 
         return profile_dataset

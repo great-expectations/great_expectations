@@ -20,7 +20,7 @@ your data at various levels of granularity:
 
 <Prerequisites>
 
-- [Configured and loaded a Data Context](../../../tutorials/getting_started/initialize_a_data_context.md)
+- [Configured and loaded a Data Context](../../../tutorials/getting_started/tutorial_setup.md)
 - [Configured a Datasource and Data Connector](../../../reference/datasources.md)
 - Reviewed [How to configure a DataConnector to introspect and partition tables in SQL](../how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md)
 

@@ -1,12 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest,
-    BatchRequestBase,
-    RuntimeBatchRequest,
-)
+from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
@@ -33,9 +28,7 @@ class DomainBuilder(Builder, ABC):
     def __init__(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
+        batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -80,7 +73,7 @@ class DomainBuilder(Builder, ABC):
 
     @property
     @abstractmethod
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         pass
 
     @abstractmethod
