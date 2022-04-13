@@ -495,7 +495,7 @@ class ParameterBuilder(Builder, ABC):
 
         # Step-9: Compose and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
         return MetricComputationResult(
-            list(attributed_resolved_metrics_map.values()),
+            metric_values=list(attributed_resolved_metrics_map.values()),
             details={
                 "metric_configuration": {
                     "metric_name": metric_name,
