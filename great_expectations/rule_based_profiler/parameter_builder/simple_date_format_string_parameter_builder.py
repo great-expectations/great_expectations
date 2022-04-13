@@ -284,10 +284,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        best_fmt_string: Optional[str] = None
-        best_ratio: float = 0.0
-
         # get best-matching datetime string that matches greater than threshold
+        best_fmt_string: str
+        best_ratio: float
         (
             best_fmt_string,
             best_ratio,
