@@ -1,9 +1,12 @@
 import json
+import logging
 import os
 import random
 
 import pytest
 from ruamel.yaml import YAML
+
+logger = logging.getLogger(__name__)
 
 try:
     import pandas as pd

@@ -16,29 +16,6 @@ from great_expectations.validator.validator import Validator
 yaml = YAML()
 
 
-@pytest.fixture
-def taxi_test_file():
-    return file_relative_path(
-        __file__,
-        os.path.join(
-            "..",
-            "test_sets",
-            "taxi_yellow_tripdata_samples",
-            "yellow_tripdata_sample_2019-01.csv",
-        ),
-    )
-
-
-@pytest.fixture
-def taxi_test_file_directory():
-    return file_relative_path(
-        __file__,
-        os.path.join(
-            "..", "test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"
-        ),
-    )
-
-
 @pytest.fixture()
 def test_df_pandas():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
