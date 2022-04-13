@@ -1,5 +1,8 @@
 from typing import Any, Dict, List, Union
 
+import altair as alt
+import pandas as pd
+
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.data_context import BaseDataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -41,6 +44,29 @@ class VolumeDataAssistant(DataAssistant):
         Custom "Rule" objects can be added to "self.profiler" property after calling "super().build()".
         """
         super().build()
+
+    def plot(self):
+        """
+        VolumeDataAssistant-specific plots are defined with Altair and an empty dataset and then passed to
+        "super().plot()" as Vega-Lite json schema.
+        """
+        x_axis: str = "batch"
+        y_axis: str = "table row_count"
+        x_axis_type: str = "nominal"
+        y_axis_type: str = "quantitative"
+
+        data = pd.DataFrame(columns=[x_axis, y_axis])
+        table_row_count_chart: alt.Chart = (
+            alt.Chart(data)
+            .mark_line()
+            .encode(
+                alt.X(x_axis, type=x_axis_type),
+                alt.Y(y_axis, type=y_axis_type),
+            )
+        )
+        print(type(table_row_count_chart))
+
+        return None
 
     @property
     def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
