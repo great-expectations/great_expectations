@@ -36,12 +36,21 @@ def datasource_with_runtime_data_connector_and_pandas_execution_engine():
 
     data_connectors:
         test_runtime_data_connector:
-            module_name: great_expectations.datasource.data_connector
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - pipeline_stage_name
                 - airflow_run_id
                 - custom_key_0
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
         ),
         runtime_environment={"name": "my_datasource"},
@@ -55,8 +64,6 @@ def datasource_with_runtime_data_connector_and_pandas_execution_engine():
 #########################################
 
 # Tests with PandasExecutionEngine : batch_data
-
-
 def test_pandas_execution_engine_self_check(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):
@@ -68,11 +75,19 @@ def test_pandas_execution_engine_self_check(
             "count": 1,
             "test_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
-                "data_asset_count": 0,
-                "data_assets": {},
-                "example_data_asset_names": [],
+                "data_asset_count": 2,
+                "data_assets": {
+                    "asset_a": {
+                        "batch_definition_count": 0,
+                        "example_data_references": [],
+                    },
+                    "asset_b": {
+                        "batch_definition_count": 0,
+                        "example_data_references": [],
+                    },
+                },
+                "example_data_asset_names": ["asset_a", "asset_b"],
                 "example_unmatched_data_references": [],
-                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
                 "unmatched_data_reference_count": 0,
             },
         },
@@ -310,7 +325,7 @@ def test_pandas_execution_engine_get_available_data_asset_names(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):
     expected_available_data_asset_names: Dict[List[str]] = {
-        "test_runtime_data_connector": []
+        "test_runtime_data_connector": ["asset_a", "asset_b"]
     }
     available_data_asset_names: Dict[
         List[str]
@@ -402,6 +417,123 @@ def test_pandas_execution_engine_get_batch_definitions_and_get_batch_basics(
     )
     assert batch.batch_request == {}
 
+
+# the method we want to test is get_batch_list_from_batch_request()
+# get available_batch_definitions
+# 1. do it from named A
+# 2. do it from new one C
+# 3. do it where you do it twice, and see that you get the second one.
+def test_pandas_execution_engine_all_keys_present_for_batch_identifiers_named_asset(
+    datasource_with_runtime_data_connector_and_pandas_execution_engine,
+):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    batch_identifiers = {"day": 1, "month": 12}
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "asset_a",
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) == 1
+    # batches are a little bit more difficult to test because of batch_markers
+    # they are ones that uniquely identify the data
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "asset_a"
+    assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
+    assert my_batch_1.data.dataframe.shape == (2, 2)
+    assert my_batch_1.data.dataframe["col2"].values[1] == 4
+    assert (
+        my_batch_1.batch_markers["pandas_data_fingerprint"]
+        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
+    )
+
+
+def test_pandas_execution_engine_all_keys_present_for_batch_identifiers_named_asset_after_twice(
+    datasource_with_runtime_data_connector_and_pandas_execution_engine,
+):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    batch_identifiers = {"day": 1, "month": 12}
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "asset_a",
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) == 1
+    # batches are a little bit more difficult to test because of batch_markers
+    # they are ones that uniquely identify the data
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "asset_a"
+    assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
+    assert my_batch_1.data.dataframe.shape == (2, 2)
+    assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
+    assert my_batch_1.data.dataframe["col2"].values[1] == 4
+    assert (
+        my_batch_1.batch_markers["pandas_data_fingerprint"]
+        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
+    )
+
+    # second batch request
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
+    batch_identifiers = {"day": 2, "month": 12}
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "asset_a",
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) == 1
+    my_batch_2 = batch_list[0]
+
+    assert my_batch_2.batch_spec is not None
+    assert my_batch_2.batch_definition["data_asset_name"] == "asset_a"
+    assert isinstance(my_batch_2.data.dataframe, pd.DataFrame)
+    assert my_batch_2.data.dataframe.shape == (2, 2)
+    assert my_batch_2.batch_definition.batch_identifiers == batch_identifiers
+    assert my_batch_2.data.dataframe["col2"].values[1] == 8
+    assert (
+        my_batch_2.batch_markers["pandas_data_fingerprint"]
+        == "548e148ff5a8e932a3a2a1d0d8ff7f84"
+    )
+
+
+# TODO: adding tests for BatchDefinition
 
 ###################################
 # Tests with data passed in as path
@@ -552,3 +684,5 @@ def test_pandas_execution_engine_batch_definition_list_from_batch_request_failed
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
+
+        get_batch_from_batch_definition
