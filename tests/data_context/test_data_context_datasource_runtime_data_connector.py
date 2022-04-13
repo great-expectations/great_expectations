@@ -17,6 +17,12 @@ yaml = YAML()
 
 
 @pytest.fixture()
+def test_df_pandas():
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    return test_df
+
+
+@pytest.fixture()
 def test_df_spark(spark_session):
     test_df = spark_session.createDataFrame(
         data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
