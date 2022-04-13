@@ -41,7 +41,7 @@ MetricValue = Union[Any, List[Any], np.ndarray]
 MetricValues = Union[MetricValue, np.ndarray]
 MetricComputationDetails = Dict[str, Any]
 MetricComputationResult = make_dataclass(
-    "MetricComputationResult", ["metric_values", "details"]
+    "MetricComputationResult", ["attributed_resolved_metrics", "details"]
 )
 
 
@@ -522,7 +522,7 @@ class ParameterBuilder(Builder, ABC):
         # Step-10: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
 
         return MetricComputationResult(
-            metric_values=list(attributed_resolved_metrics_map.values()),
+            attributed_resolved_metrics=list(attributed_resolved_metrics_map.values()),
             details={
                 "metric_configuration": {
                     "metric_name": metric_name,
