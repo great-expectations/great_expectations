@@ -223,10 +223,10 @@ class DataAssistant(ABC):
 
     @property
     @abstractmethod
-    def rules(self) -> Optional[Dict[str, Dict[str, Any]]]:
+    def rules(self) -> Optional[List[Rule]]:
         """
         Returns:
-            Optional custom "rules" configuration attribute name/(configuration-dictionary) (overrides) can be added.
+            Optional custom list of "Rule" objects (overrides) can be added by subclasses (return "None" if not needed).
         """
         pass
 
@@ -360,9 +360,16 @@ def run_profiler_on_data(
     expectation_suite_name: Optional[str] = None,
     include_citation: bool = True,
 ) -> None:
+    if rules is None:
+        rules = []
+
+    rule: Rule
+    rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
+        rule.name: rule.to_json_dict() for rule in rules
+    }
     profiler.run(
         variables=variables,
-        rules=rules,
+        rules=rules_configs,
         batch_list=batch_list,
         batch_request=batch_request,
         force_batch_data=False,

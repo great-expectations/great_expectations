@@ -8,6 +8,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
     ParameterBuilder,
 )
+from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
@@ -74,5 +75,5 @@ class VolumeDataAssistant(DataAssistant):
         return None
 
     @property
-    def rules(self) -> Optional[Dict[str, Dict[str, Any]]]:
+    def rules(self) -> Optional[List[Rule]]:
         return None
