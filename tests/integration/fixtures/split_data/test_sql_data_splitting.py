@@ -123,7 +123,7 @@ truncating_test_cases: List[TestCase] = [
 
 test_cases.extend(non_truncating_test_cases)
 # TODO: AJB 20220412 Enable these tests after enabling truncating in these dialects.
-if dialect not in ["mysql", "mssql"]:
+if dialect not in ["mysql", "mssql", "bigquery"]:
     test_cases.extend(truncating_test_cases)
 
 
