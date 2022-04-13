@@ -1,6 +1,5 @@
 import os
 
-import pandas as pd
 import pytest
 
 from great_expectations.data_context.util import file_relative_path
