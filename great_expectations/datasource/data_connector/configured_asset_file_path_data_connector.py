@@ -11,6 +11,7 @@ from great_expectations.datasource.data_connector.asset.asset import Asset
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
+from great_expectations.datasource.data_connector.util import _build_asset_from_config
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -80,27 +81,11 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             if asset_config is None:
                 asset_config = {}
             asset_config.update({"name": name})
-            new_asset: Asset = self._build_asset_from_config(
+            new_asset: Asset = _build_asset_from_config(
+                runtime_environment=self,
                 config=asset_config,
             )
             self.assets[name] = new_asset
-
-    def _build_asset_from_config(self, config: dict):
-        runtime_environment: dict = {"data_connector": self}
-        config = assetConfigSchema.load(config)
-        config = assetConfigSchema.dump(config)
-        asset: Asset = instantiate_class_from_config(
-            config=config,
-            runtime_environment=runtime_environment,
-            config_defaults={},
-        )
-        if not asset:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name="great_expectations.datasource.data_connector.asset",
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        return asset
 
     def get_available_data_asset_names(self) -> List[str]:
         """

@@ -11,13 +11,6 @@ from great_expectations.validator.validator import Validator
 
 yaml = YAMLHandler()
 
-
-@pytest.fixture()
-def test_df_pandas():
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    return test_df
-
-
 #########################################
 # Tests with data passed in as batch_data
 #########################################
