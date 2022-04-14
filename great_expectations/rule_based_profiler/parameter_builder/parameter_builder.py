@@ -54,6 +54,12 @@ class AttributedResolvedMetrics(SerializableDictDot):
     with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
     """
 
+    @staticmethod
+    def get_metric_values_from_attributed_metric_values(
+        attributed_metric_values: Optional[Dict[str, MetricValue]] = None,
+    ) -> MetricValues:
+        return np.array(list(attributed_metric_values.values()))
+
     metric_attributes: Optional[Attributes] = None
     metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
 
@@ -71,8 +77,12 @@ class AttributedResolvedMetrics(SerializableDictDot):
         return self.metric_attributes.to_id()
 
     @property
+    def attributed_metric_values(self) -> Optional[Dict[str, MetricValue]]:
+        return self.metric_values_by_batch_id
+
+    @property
     def metric_values(self) -> MetricValues:
-        return np.array(list(self.metric_values_by_batch_id.values()))
+        return np.array(list(self.attributed_metric_values.values()))
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -195,12 +205,7 @@ class ParameterBuilder(Builder, ABC):
             if parameter_computation_impl is None:
                 parameter_computation_impl = self._build_parameters
 
-            computed_parameter_value: Any
-            parameter_computation_details: dict
-            (
-                computed_parameter_value,
-                parameter_computation_details,
-            ) = parameter_computation_impl(
+            parameter_computation_result: Attributes = parameter_computation_impl(
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
@@ -217,12 +222,11 @@ class ParameterBuilder(Builder, ABC):
                 )
 
             parameter_values: Dict[str, Any] = {
-                self.fully_qualified_parameter_name: {
-                    "value": convert_to_json_serializable(data=computed_parameter_value)
-                    if json_serialize
-                    else computed_parameter_value,
-                    "details": parameter_computation_details,
-                },
+                self.fully_qualified_parameter_name: convert_to_json_serializable(
+                    data=parameter_computation_result
+                )
+                if json_serialize
+                else parameter_computation_result,
             }
 
             build_parameter_container(
@@ -261,13 +265,12 @@ class ParameterBuilder(Builder, ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+    ) -> Attributes:
         """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-        details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
         Returns:
-            Tuple containing computed_parameter_value and parameter_computation_details metadata.
+            Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         pass
 
@@ -497,7 +500,7 @@ class ParameterBuilder(Builder, ABC):
             if attributed_resolved_metrics.metric_values.ndim == 1:
                 attributed_resolved_metrics.metric_values_by_batch_id = {
                     batch_id: [resolved_metric_value]
-                    for batch_id, resolved_metric_value in attributed_resolved_metrics.metric_values_by_batch_id.items()
+                    for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
                 }
                 attributed_resolved_metrics_map[
                     metric_attributes_id
@@ -619,7 +622,7 @@ class ParameterBuilder(Builder, ABC):
                         batch_id: np.nan_to_num(
                             metric_value_vector, copy=False, nan=0.0
                         )
-                        for batch_id, resolved_metric_value in attributed_resolved_metrics.metric_values_by_batch_id.items()
+                        for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
                     }
 
         return attributed_resolved_metrics
