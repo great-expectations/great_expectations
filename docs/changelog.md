@@ -2,6 +2,34 @@
 title: Changelog
 ---
 
+### 0.15.1
+* [FEATURE] Additional Rule-Based Profiler Parameter/Variable Access Methods (#4814)
+* [FEATURE] DataAssistant and VolumeDataAssistant classes (initial implementation -- to be enhanced as part of subsequent work) (#4844)
+* [FEATURE] Add Support for Returning Parameters and Metrics as DataAssistantResult class (#4848)
+* [FEATURE] DataAssistantResult Includes Underlying Profiler Execution Time (#4854)
+* [FEATURE] Add batch_id for every resolved metric_value to ParameterBuilder.get_metrics() result object (#4860)
+* [BUGFIX] Linting error from hackathon automerge (#4829)
+* [BUGFIX] Cleanup contrib (#4838)
+* [BUGFIX] Add `notebook` to `GE_REQUIRED_DEPENDENCIES` (#4842)
+* [BUGFIX] ParameterContainer return value formatting bug fix (#4840)
+* [BUGFIX] Ensure that Parameter Validation/Configuration Dependency Configurations are included in Serialization (#4843)
+* [BUGFIX] Correctly handle SQLA unexpected count metric for empty tables (#4618) (thanks @douglascook)
+* [DOCS] How to validate data with an in memory checkpoint (#4820)
+* [DOCS] Update all tutorial redirect fix (#4841)
+* [DOCS] redirect/remove dead links in docs (#4846)
+* [MAINTENANCE] Refactor Rule-Based Profiler instantiation in Validator to make it available as a public method (#4823)
+* [MAINTENANCE] String Type is not needed as Return Type from DomainBuilder.domain_type() (#4827)
+* [MAINTENANCE] Fix Typo in Checkpoint Readme (#4835) (thanks @andyjessen)
+* [MAINTENANCE] Modify conditional expectations readme (#4616) (thanks @andyjessen)
+* [MAINTENANCE] Fix links within datasource new notebook (#4833) (thanks @andyjessen)
+* [MAINTENANCE] Adds missing dependency, which is breaking CLI workflows (#4839)
+* [MAINTENANCE] Update testing and documentation for `oneshot` estimation method (#4852)
+* [MAINTENANCE] Refactor `Datasource` tests that work with `RuntimeDataConnector` by backend.  (#4853)
+* [MAINTENANCE] Update DataAssistant interfaces (#4857)
+* [MAINTENANCE] Improve types returned by DataAssistant interface methods (#4859)
+* [MAINTENANCE] Refactor `DataContext` tests that work with RuntimeDataConnector by backend (#4858)
+* [HACKATHON] [Hackathon PRs in this release](https://github.com/great-expectations/great_expectations/pulls?q=is%3Apr+label%3Ahackathon-2022+is%3Amerged+-updated%3A%3E%3D2022-04-14+-updated%3A%3C%3D2022-04-06)
+
 ### 0.15.0
 * [BREAKING] EOL Python 3.6 (#4567)
 * [FEATURE] Implement Multi-Column Domain Builder for Rule-Based Profiler (#4604)
