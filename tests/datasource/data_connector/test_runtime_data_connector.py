@@ -130,7 +130,9 @@ def test_new_self_check_after_adding_named_asset_a(
     }
 
 
-def test_new_self_check_after_adding_new_asset_c(basic_datasource_with_assets):
+def test_new_self_check_after_adding_new_asset_c(
+    basic_datasource_with_assets, test_df_pandas
+):
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
@@ -319,7 +321,7 @@ def test_asset_is_name_batch_identifier_correctly_used(
 
 
 def test_asset_is_named_but_batch_identifier_in_other_asset(
-    basic_datasource_with_assets,
+    basic_datasource_with_assets, test_df_pandas
 ):
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
@@ -341,7 +343,7 @@ def test_asset_is_named_but_batch_identifier_in_other_asset(
 
 
 def test_asset_is_named_but_batch_identifier_not_defined_anywhere(
-    basic_datasource_with_assets,
+    basic_datasource_with_assets, test_df_pandas
 ):
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
