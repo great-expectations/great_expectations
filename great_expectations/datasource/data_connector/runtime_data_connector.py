@@ -56,20 +56,23 @@ class RuntimeDataConnector(DataConnector):
 
         if assets is None:
             assets = {}
-        self._assets: Dict[str, Union[dict, Asset]] = assets
+
+        self._assets = assets
         self._batch_identifiers: dict = {}
 
         self._build_assets_from_config(config=assets)
 
         # add batch_identifiers defined at the DataConnector level.
-        self._add_batch_identifiers(batch_identifiers)
+        self._add_batch_identifiers(
+            batch_identifiers=batch_identifiers, data_asset_name=None
+        )
         self._refresh_data_references_cache()
 
     @property
     def assets(self):
         return self._assets
 
-    def _build_assets_from_config(self, config: Dict[str, dict]):
+    def _build_assets_from_config(self, config: Dict[str, dict]) -> None:
         """
         Read in asset configurations from RuntimeDataConnector. Build and load into assets property, and load
         batch_identifiers.
@@ -77,9 +80,14 @@ class RuntimeDataConnector(DataConnector):
         Args:
             config (dict): Asset configurations at the DataConnector-level
         """
+
+        name: str
+        asset_config: dict
+
         for name, asset_config in config.items():
             if asset_config is None:
                 asset_config = {}
+
             asset_config.update({"name": name})
             new_asset: Asset = _build_asset_from_config(
                 runtime_environment=self,
@@ -95,7 +103,7 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_identifiers: List[str],
         data_asset_name: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Handles batch_identifiers that are configured at the DataConnector or Asset-level.
         batch_identifiers are added to the `self._batch_identifiers` cache.
@@ -121,14 +129,14 @@ class RuntimeDataConnector(DataConnector):
                     f"""RuntimeDataConnector "{self.name}" requires batch_identifiers to be configured, either at the DataConnector or Asset-level."""
                 )
             if batch_identifiers:
-                # deprecated 0.15.01
-                warnings.warn(
-                    "Specifying batch_identifiers as part of RuntimeDataConnector config is deprecated as of v0.15.01 and will be removed by v0.17. Please configure Assets instead.",
-                    DeprecationWarning,
-                )
+                # TODO: <WILL> discuss whether DataConnector-level batch_identifiers need to be fully deprecated. Commenting for now.
+                # warnings.warn(
+                #    "Specifying batch_identifiers as part of RuntimeDataConnector config is deprecated as of v0.15.01 and will be removed by v0.17. Please configure Assets instead.",
+                #    DeprecationWarning,
+                # )
                 self._batch_identifiers[self.name] = batch_identifiers
 
-    def _refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self) -> None:
         self._data_references_cache = {}
 
     def _get_data_reference_list(
@@ -152,6 +160,17 @@ class RuntimeDataConnector(DataConnector):
             ]
             return data_reference_list
 
+    def get_data_reference_list_count(self) -> int:
+        """
+        Get number of data_references corresponding to all data_asset_names in cache. In cases where the
+        RuntimeDataConnector has been passed a BatchRequest with the same data_asset_name but different
+        batch_identifiers, it is possible to have more than one data_reference for a data_asset.
+        """
+        return sum(
+            len(data_reference_dict)
+            for key, data_reference_dict in self._data_references_cache.items()
+        )
+
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
     ) -> List[str]:
@@ -164,17 +183,6 @@ class RuntimeDataConnector(DataConnector):
         else:
             return []
 
-    def get_data_reference_list_count(self) -> int:
-        """
-        Get number of data_references corresponding to all data_asset_names in cache. In cases where the
-        RuntimeDataConnector has been passed a BatchRequest with the same data_asset_name but different
-        batch_identifiers, it is possible to have more than one data_reference for a data_asset.
-        """
-        return sum(
-            len(data_reference_dict)
-            for key, data_reference_dict in self._data_references_cache.items()
-        )
-
     def get_unmatched_data_references(self) -> List[str]:
         return []
 
@@ -183,8 +191,9 @@ class RuntimeDataConnector(DataConnector):
         defined_assets: List[str] = list(self.assets.keys())
         data_reference_keys: List[str] = list(self._data_references_cache.keys())
         available_assets: List[str] = list(set(defined_assets + data_reference_keys))
-        available_assets.sort()
-        return available_assets
+
+        sorted_available_assets: List[str] = sorted(available_assets)
+        return sorted_available_assets
 
     # noinspection PyMethodOverriding
     def get_batch_data_and_metadata(
@@ -262,7 +271,7 @@ class RuntimeDataConnector(DataConnector):
         data_asset_name: str,
         batch_definition_list: List,
         batch_identifiers: IDDict,
-    ):
+    ) -> None:
         data_reference = self._get_data_reference_name(batch_identifiers)
         if data_asset_name not in self._data_references_cache:
             # add
@@ -448,13 +457,13 @@ class RuntimeDataConnector(DataConnector):
 
         if pretty_print:
             print(f"\t{self.name}:{self.__class__.__name__}\n")
-        asset_names = self.get_available_data_asset_names()
-        len_asset_names = len(asset_names)
+        asset_names: List[str] = self.get_available_data_asset_names()
+        len_asset_names: int = len(asset_names)
 
         if len_asset_names > 0:
             return super().self_check()
         else:
-            report_obj = {
+            report_obj: dict = {
                 "class_name": self.__class__.__name__,
                 "data_asset_count": len_asset_names,
                 "example_data_asset_names": asset_names[:max_examples],
@@ -470,8 +479,8 @@ class RuntimeDataConnector(DataConnector):
                     + "Note : RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
                 )
 
-            unmatched_data_references = self.get_unmatched_data_references()
-            len_unmatched_data_references = len(unmatched_data_references)
+            unmatched_data_references: List[str] = self.get_unmatched_data_references()
+            len_unmatched_data_references: int = len(unmatched_data_references)
 
             if pretty_print:
                 if pretty_print:
