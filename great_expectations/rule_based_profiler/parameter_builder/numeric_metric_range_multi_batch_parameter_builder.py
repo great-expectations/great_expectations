@@ -253,7 +253,7 @@ detected.
                 )
 
             attributed_resolved_metrics: AttributedResolvedMetrics = (
-                parameter_node.value[0]
+                AttributedResolvedMetrics(**parameter_node.value[0])
             )
             metric_values = attributed_resolved_metrics.metric_values
         else:

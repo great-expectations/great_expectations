@@ -140,7 +140,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = metric_computation_result.metric_values
         details: MetricComputationDetails = metric_computation_result.details
 
         # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -155,14 +154,21 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
         if (
             reduce_scalar_metric
-            and isinstance(metric_values, list)
-            and len(metric_values) == 1
-            and isinstance(metric_values[0], AttributedResolvedMetrics)
-            and metric_values[0].metric_values.shape[1] == 1
+            and len(metric_computation_result.attributed_resolved_metrics) == 1
+            and metric_computation_result.attributed_resolved_metrics[
+                0
+            ].metric_values.shape[1]
+            == 1
         ):
-            metric_values = metric_values[0].metric_values[:, 0]
+            metric_values = metric_computation_result.attributed_resolved_metrics[
+                0
+            ].metric_values[:, 0]
+            return (
+                metric_values,
+                details,
+            )
 
         return (
-            metric_values,
+            metric_computation_result.attributed_resolved_metrics,
             details,
         )

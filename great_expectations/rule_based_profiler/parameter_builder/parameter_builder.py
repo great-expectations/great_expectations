@@ -1,8 +1,9 @@
 import copy
 import itertools
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from dataclasses import asdict, dataclass, make_dataclass
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
 
@@ -40,7 +41,7 @@ MetricValue = Union[Any, List[Any], np.ndarray]
 MetricValues = Union[MetricValue, np.ndarray]
 MetricComputationDetails = Dict[str, Any]
 MetricComputationResult = make_dataclass(
-    "MetricComputationResult", ["metric_values", "details"]
+    "MetricComputationResult", ["attributed_resolved_metrics", "details"]
 )
 
 
@@ -53,18 +54,25 @@ class AttributedResolvedMetrics(SerializableDictDot):
     with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
     """
 
-    metric_values: MetricValues
-    metric_attributes: Attributes
+    metric_attributes: Optional[Attributes] = None
+    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
 
-    def add_resolved_metric(self, value: Any) -> None:
-        if self.metric_values is None:
-            self.metric_values = []
+    def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
+        if self.metric_values_by_batch_id is None:
+            self.metric_values_by_batch_id = {}
 
-        self.metric_values.append(value)
+        if not isinstance(self.metric_values_by_batch_id, OrderedDict):
+            self.metric_values_by_batch_id = OrderedDict(self.metric_values_by_batch_id)
+
+        self.metric_values_by_batch_id[batch_id] = value
 
     @property
     def id(self) -> str:
         return self.metric_attributes.to_id()
+
+    @property
+    def metric_values(self) -> MetricValues:
+        return np.array(list(self.metric_values_by_batch_id.values()))
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -358,6 +366,7 @@ class ParameterBuilder(Builder, ABC):
         )
 
         batch_id: str
+
         metric_domain_kwargs = [
             copy.deepcopy(
                 build_metric_domain_kwargs(
@@ -440,7 +449,9 @@ class ParameterBuilder(Builder, ABC):
         resolved_metrics_sorted: Dict[Tuple[str, str, str], Any] = {}
 
         metric_configuration: MetricConfiguration
+
         resolved_metric_value: Any
+
         for metric_configuration in metrics_to_resolve:
             if metric_configuration.id not in resolved_metrics:
                 raise ge_exceptions.ProfilerExecutionError(
@@ -455,60 +466,52 @@ class ParameterBuilder(Builder, ABC):
 
         attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
 
+        attributed_resolved_metrics: AttributedResolvedMetrics
+
         for metric_configuration in metrics_to_resolve:
-            attributed_resolved_metrics: AttributedResolvedMetrics = (
-                attributed_resolved_metrics_map.get(
-                    metric_configuration.metric_value_kwargs_id
-                )
+            attributed_resolved_metrics = attributed_resolved_metrics_map.get(
+                metric_configuration.metric_value_kwargs_id
             )
             if attributed_resolved_metrics is None:
                 attributed_resolved_metrics = AttributedResolvedMetrics(
                     metric_attributes=metric_configuration.metric_value_kwargs,
-                    metric_values=[],
+                    metric_values_by_batch_id=None,
                 )
                 attributed_resolved_metrics_map[
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
             resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
-            attributed_resolved_metrics.add_resolved_metric(value=resolved_metric_value)
+            attributed_resolved_metrics.add_resolved_metric(
+                batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
+                value=resolved_metric_value,
+            )
+
+        # Step-8: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
 
         metric_attributes_id: str
-        metric_values: AttributedResolvedMetrics
-
-        # Step-8: Leverage Numpy Array capabilities for subsequent operations on results of computed/resolved metrics.
-
-        attributed_resolved_metrics_map = {
-            metric_attributes_id: AttributedResolvedMetrics(
-                metric_attributes=metric_values.metric_attributes,
-                metric_values=np.array(metric_values.metric_values),
-            )
-            for metric_attributes_id, metric_values in attributed_resolved_metrics_map.items()
-        }
-
-        # Step-9: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
-
-        idx: int
         for (
             metric_attributes_id,
-            metric_values,
+            attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
-            if metric_values.metric_values.ndim == 1:
-                metric_values.metric_values = [
-                    [metric_values.metric_values[idx]] for idx in range(len(batch_ids))
-                ]
-                metric_values.metric_values = np.array(metric_values.metric_values)
-                attributed_resolved_metrics_map[metric_attributes_id] = metric_values
+            if attributed_resolved_metrics.metric_values.ndim == 1:
+                attributed_resolved_metrics.metric_values_by_batch_id = {
+                    batch_id: [resolved_metric_value]
+                    for batch_id, resolved_metric_value in attributed_resolved_metrics.metric_values_by_batch_id.items()
+                }
+                attributed_resolved_metrics_map[
+                    metric_attributes_id
+                ] = attributed_resolved_metrics
 
-        # Step-10: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+        # Step-9: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
 
         for (
             metric_attributes_id,
-            metric_values,
+            attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
             self._sanitize_metric_computation(
                 metric_name=metric_name,
-                metric_values=metric_values.metric_values,
+                attributed_resolved_metrics=attributed_resolved_metrics,
                 enforce_numeric_metric=enforce_numeric_metric,
                 replace_nan_with_zero=replace_nan_with_zero,
                 domain=domain,
@@ -516,10 +519,10 @@ class ParameterBuilder(Builder, ABC):
                 parameters=parameters,
             )
 
-        # Step-11: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
+        # Step-10: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
 
         return MetricComputationResult(
-            metric_values=list(attributed_resolved_metrics_map.values()),
+            attributed_resolved_metrics=list(attributed_resolved_metrics_map.values()),
             details={
                 "metric_configuration": {
                     "metric_name": metric_name,
@@ -536,13 +539,13 @@ class ParameterBuilder(Builder, ABC):
     def _sanitize_metric_computation(
         self,
         metric_name: str,
-        metric_values: np.ndarray,
+        attributed_resolved_metrics: AttributedResolvedMetrics,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> np.ndarray:
+    ) -> AttributedResolvedMetrics:
         """
         This method conditions (or "sanitizes") data samples in the format "N x R^m", where "N" (most significant
         dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the multi-dimensional
@@ -569,6 +572,8 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
+        metric_values: MetricValues = attributed_resolved_metrics.metric_values
+
         # Outer-most dimension is data samples (e.g., one per Batch); the rest are dimensions of the actual metric.
         metric_value_shape: tuple = metric_values.shape[1:]
 
@@ -590,9 +595,11 @@ class ParameterBuilder(Builder, ABC):
 
         # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         metric_value_vector: np.ndarray
+        batch_id: str
+        resolved_metric_value: Any
         for metric_value_idx in metric_value_vector_indices:
             # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
-            metric_value_vector = metric_values[metric_value_idx]
+            metric_value_vector = cast(np.ndarray, metric_values)[metric_value_idx]
             if enforce_numeric_metric:
                 if not np.issubdtype(metric_value_vector.dtype, np.number):
                     raise ge_exceptions.ProfilerExecutionError(
@@ -608,9 +615,14 @@ class ParameterBuilder(Builder, ABC):
 """
                         )
 
-                    np.nan_to_num(metric_value_vector, copy=False, nan=0.0)
+                    attributed_resolved_metrics.metric_values_by_batch_id = {
+                        batch_id: np.nan_to_num(
+                            metric_value_vector, copy=False, nan=0.0
+                        )
+                        for batch_id, resolved_metric_value in attributed_resolved_metrics.metric_values_by_batch_id.items()
+                    }
 
-        return metric_values
+        return attributed_resolved_metrics
 
     @staticmethod
     def _get_best_candidate_above_threshold(
