@@ -43,7 +43,9 @@ def _get_connection_string_and_dialect() -> Tuple[str, str]:
 TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
 
 
-def _load_data(connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME) -> pd.DataFrame:
+def _load_data(
+    connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME
+) -> pd.DataFrame:
 
     # Load the first 10 rows of each month of taxi data
     return load_data_into_test_database(
@@ -90,15 +92,27 @@ TEST_COLUMN: str = "pickup_datetime"
 
 
 # Since taxi data does not contain all days, we need to introspect the data to build the fixture:
-YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = list({val[0]: val[1], val[2]: val[3], val[4]: val[5]} for val in {
-    (DatePart.YEAR.value, dt.year, DatePart.MONTH.value, dt.month, DatePart.DAY.value, dt.day) for dt in test_df[TEST_COLUMN]
-})
+YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = list(
+    {val[0]: val[1], val[2]: val[3], val[4]: val[5]}
+    for val in {
+        (
+            DatePart.YEAR.value,
+            dt.year,
+            DatePart.MONTH.value,
+            dt.month,
+            DatePart.DAY.value,
+            dt.day,
+        )
+        for dt in test_df[TEST_COLUMN]
+    }
+)
 YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = sorted(
-    YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA, key=lambda x: (
+    YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA,
+    key=lambda x: (
         x[DatePart.YEAR.value],
         x[DatePart.MONTH.value],
         x[DatePart.DAY.value],
-    )
+    ),
 )
 
 
@@ -117,28 +131,28 @@ test_cases: List[TestCase] = [
         splitter_kwargs={"column_name": TEST_COLUMN},
         num_expected_batch_definitions=3,
         num_expected_rows_in_first_batch_definition=120,
-        expected_pickup_datetimes=YEAR_BATCH_IDENTIFIER_DATA
+        expected_pickup_datetimes=YEAR_BATCH_IDENTIFIER_DATA,
     ),
     TestCase(
         splitter_method_name="split_on_year_and_month",
         splitter_kwargs={"column_name": TEST_COLUMN},
         num_expected_batch_definitions=36,
         num_expected_rows_in_first_batch_definition=10,
-        expected_pickup_datetimes=YEAR_MONTH_BATCH_IDENTIFIER_DATA
+        expected_pickup_datetimes=YEAR_MONTH_BATCH_IDENTIFIER_DATA,
     ),
     TestCase(
         splitter_method_name="split_on_year_and_month_and_day",
         splitter_kwargs={"column_name": TEST_COLUMN},
         num_expected_batch_definitions=299,
         num_expected_rows_in_first_batch_definition=2,
-        expected_pickup_datetimes=YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA
+        expected_pickup_datetimes=YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA,
     ),
     TestCase(
         splitter_method_name="split_on_date_parts",
         splitter_kwargs={"column_name": TEST_COLUMN, "date_parts": [DatePart.MONTH]},
         num_expected_batch_definitions=12,
         num_expected_rows_in_first_batch_definition=30,
-        expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA
+        expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA,
     ),
     # date_parts as a string (with mixed case):
     TestCase(
@@ -146,17 +160,19 @@ test_cases: List[TestCase] = [
         splitter_kwargs={"column_name": TEST_COLUMN, "date_parts": ["mOnTh"]},
         num_expected_batch_definitions=12,
         num_expected_rows_in_first_batch_definition=30,
-        expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA
+        expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA,
     ),
     # Mix of types of date_parts:
     TestCase(
         splitter_method_name="split_on_date_parts",
-        splitter_kwargs={"column_name": TEST_COLUMN, "date_parts": [DatePart.YEAR, "month"]},
+        splitter_kwargs={
+            "column_name": TEST_COLUMN,
+            "date_parts": [DatePart.YEAR, "month"],
+        },
         num_expected_batch_definitions=36,
         num_expected_rows_in_first_batch_definition=10,
-        expected_pickup_datetimes=YEAR_MONTH_BATCH_IDENTIFIER_DATA
-    )
-
+        expected_pickup_datetimes=YEAR_MONTH_BATCH_IDENTIFIER_DATA,
+    ),
 ]
 
 
@@ -217,7 +233,9 @@ for test_case in test_cases:
         for pickup_datetime in test_case.expected_pickup_datetimes
     ]
 
-    assert set(batch_definition_list) == set(expected_batch_definition_list), f"BatchDefinition lists don't match\n\nbatch_definition_list:\n{batch_definition_list}\n\nexpected_batch_definition_list:\n{expected_batch_definition_list}"
+    assert set(batch_definition_list) == set(
+        expected_batch_definition_list
+    ), f"BatchDefinition lists don't match\n\nbatch_definition_list:\n{batch_definition_list}\n\nexpected_batch_definition_list:\n{expected_batch_definition_list}"
 
     # 4. Check that loaded data is as expected
 
