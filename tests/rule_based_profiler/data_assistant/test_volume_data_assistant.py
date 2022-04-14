@@ -282,9 +282,6 @@ def test_get_metrics_and_expectations(
     result: DataAssistantResult = data_assistant.run(
         expectation_suite_name=expectation_suite_name,
     )
-    print(
-        f"\n[ALEX_TEST] [WOUTPUT] METRICS:\n{result.metrics} ; TYPE: {str(type(result.metrics))}"
-    )
 
     assert result.metrics == expected_metrics
     assert result.expectation_configurations == expected_expectation_configurations
