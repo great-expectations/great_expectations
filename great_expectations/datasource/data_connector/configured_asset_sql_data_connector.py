@@ -50,6 +50,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             for asset_name, config in assets.items():
                 self.add_data_asset(asset_name, config)
 
+        if execution_engine:
+            execution_engine: SqlAlchemyExecutionEngine = cast(
+                SqlAlchemyExecutionEngine, execution_engine
+            )
+
         super().__init__(
             name=name,
             datasource_name=datasource_name,
@@ -109,24 +114,47 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             table_name = data_asset_name
 
         if "splitter_method" in data_asset_config:
-            splitter_fn = getattr(self, data_asset_config["splitter_method"])
-            split_query = splitter_fn(
-                table_name=table_name, **data_asset_config["splitter_kwargs"]
-            )
+            SPLITTER_METHOD_MAPPING: dict = {
+                "_split_on_year_month": "get_batch_identifiers_year_month"
+            }
+            if data_asset_config["splitter_method"] in [
+                "_split_on_year_month",
+                "_split_on_date_parts",
+            ]:
 
-            sqlalchemy_execution_engine: SqlAlchemyExecutionEngine = cast(
-                SqlAlchemyExecutionEngine, self._execution_engine
-            )
-            rows = sqlalchemy_execution_engine.engine.execute(split_query).fetchall()
+                splitter_fn_name = SPLITTER_METHOD_MAPPING[
+                    data_asset_config["splitter_method"]
+                ]
+                splitter_fn = getattr(self.execution_engine, splitter_fn_name)
+                # TODO: AJB 20220413 data_asset_name is probably not needed - investigate and remove.
+                batch_identifiers_list = splitter_fn(
+                    data_asset_name=data_asset_name,
+                    table_name=table_name,
+                    **data_asset_config["splitter_kwargs"],
+                )
+            else:
+                splitter_fn = getattr(self, data_asset_config["splitter_method"])
+                split_query = splitter_fn(
+                    table_name=table_name, **data_asset_config["splitter_kwargs"]
+                )
 
-            # Zip up split parameters with column names
-            column_names = self._get_column_names_from_splitter_kwargs(
-                data_asset_config["splitter_kwargs"]
-            )
-            batch_identifiers_list = [dict(zip(column_names, row)) for row in rows]
+                sqlalchemy_execution_engine: SqlAlchemyExecutionEngine = cast(
+                    SqlAlchemyExecutionEngine, self._execution_engine
+                )
+                rows = sqlalchemy_execution_engine.engine.execute(
+                    split_query
+                ).fetchall()
+
+                # Zip up split parameters with column names
+                column_names = self._get_column_names_from_splitter_kwargs(
+                    data_asset_config["splitter_kwargs"]
+                )
+                batch_identifiers_list = [dict(zip(column_names, row)) for row in rows]
 
         else:
             batch_identifiers_list = [{}]
+
+        print(batch_identifiers_list)
 
         return batch_identifiers_list
 
@@ -572,6 +600,100 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 ),
             ]
         ).select_from(sa.text(table_name))
+
+    def _split_on_year_month(
+        self,
+        table_name: str,
+        column_name: str,
+    ) -> "sa.sql.expression.Select":  # noqa: F821
+        """Split on month-truncated values in column_name.
+
+        Truncated values are rounded down to the beginning of the month.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            Select query for distinct split values.
+        """
+        # return self._split_on_date_parts(
+        #     table_name=table_name, column_name=column_name, date_parts=[DatePart.YEAR, DatePart.MONTH],
+        # )
+        return self.execution_engine.XX_NEW_NAME_NEEDED_build_batch_identifiers_for_split_on_date_parts(
+            data_asset_name=table_name,
+            table_name=table_name,
+            column_name=column_name,
+            date_parts=[DatePart.YEAR, DatePart.MONTH],
+        )
+
+    # def _split_on_date_parts(
+    #     self,
+    #     table_name: str,
+    #     column_name: str,
+    #     date_parts: List[DatePart],
+    # ) -> "sa.sql.expression.Select":
+    #     """Split on date_part values in column_name.
+    #
+    #     Values are NOT truncated, for example this will return data for a
+    #     given month (if month is chosen as the date_part) for ALL years.
+    #     This may be useful for viewing seasonality.
+    #
+    #     This method generates a query that will return a series of key-value pairs from
+    #     the date parts specified (not-zero padded) e.g. month_12hour_22 or day_1hour_3
+    #
+    #     Args:
+    #         table_name: table to split.
+    #         column_name: column in table to use in determining split.
+    #         date_part: part of the date to be used for splitting e.g. DatePart.DAY
+    #
+    #     Returns:
+    #         Select query for distinct split values, converted to string.
+    #     """
+    #
+    #     # TODO: 20220413 AJB remove this hack for testing, move to DatePart? Is there a stdlib version?:
+    #     # date_format_string_parts: List[str] = []
+    #     # for date_part in date_parts:
+    #     #     if date_part == DatePart.YEAR:
+    #     #         date_format_string_parts.append("%Y")
+    #     #     if date_part == DatePart.MONTH:
+    #     #         date_format_string_parts.append("%m")
+    #
+    #     # TODO: 20220413 AJB remove this hack for testing:
+    #     # date_format_string: str = "-".join(date_format_string_parts)
+    #     # date_parts.insert(1, "-")
+    #     # ISO 8601 format:
+    #     # strftime("%Y-%m-%dT%H:%M:%S.%f%z")
+    #
+    #     # TODO: AJB 20220413 Move the delimiter to base ExecutionEngine class
+    #     #  (and in a future refactor move all splitter methods to
+    #     #  execution engine, not data connector).
+    #
+    #     # Generate a query that will return a series of key-value pairs from
+    #     # the date parts specified (not-zero padded)
+    #     # e.g. month:12hour:22 or day:1hour:3
+    #     query = sa.select(
+    #         [
+    #             sa.func.distinct(
+    #                 sa.func.concat(
+    #                     *[
+    #                         sa.func.concat(
+    #                             date_part.value,
+    #                             "_",
+    #                             sa.func.extract(date_part.value, sa.column(column_name))
+    #                         )
+    #                             for date_part in date_parts
+    #                     ]
+    #                 )
+    #             )
+    #         ]
+    #     ).select_from(sa.text(table_name))
+    #
+    #     # TODO: 20220413 AJB remove this hack for testing:
+    #     print("type(query):", type(query))
+    #     print("query:", query)
+    #
+    #     return query
 
     def _split_on_divided_integer(
         self, table_name: str, column_name: str, divisor: int

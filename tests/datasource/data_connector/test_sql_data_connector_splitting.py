@@ -11,6 +11,7 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.execution_engine.sqlalchemy_execution_engine import DatePart
 from tests.test_utils import load_data_into_test_database
 
 CONNECTION_STRING: str = "postgresql+psycopg2://postgres:@localhost/test_ci"
@@ -52,32 +53,46 @@ DAYS_IN_TAXI_DATA = (
 # TODO: AJB 20220412 move this test to integration tests
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "splitter_method,num_expected_batch_definitions,num_expected_rows_in_first_batch_definition,expected_pickup_datetimes",
+    "splitter_method,splitter_kwargs,num_expected_batch_definitions,num_expected_rows_in_first_batch_definition,expected_pickup_datetimes",
     [
+        # pytest.param(
+        #     "_split_on_year", 3, 120, YEAR_STRINGS_IN_TAXI_DATA, id="_split_on_year"
+        # ),
+        # pytest.param(
+        #     "_split_on_truncated_year",
+        #     3,
+        #     120,
+        #     YEARS_IN_TAXI_DATA,
+        #     id="_split_on_truncated_year",
+        # ),
+        # pytest.param(
+        #     "_split_on_month", 12, 30, MONTH_STRINGS_IN_TAXI_DATA, id="_split_on_month"
+        # ),
+        # pytest.param(
+        #     "_split_on_truncated_month",
+        #     36,
+        #     10,
+        #     MONTHS_IN_TAXI_DATA,
+        #     id="_split_on_truncated_month",
+        # ),
         pytest.param(
-            "_split_on_year", 3, 120, YEAR_STRINGS_IN_TAXI_DATA, id="_split_on_year"
-        ),
-        pytest.param(
-            "_split_on_truncated_year",
-            3,
-            120,
-            YEARS_IN_TAXI_DATA,
-            id="_split_on_truncated_year",
-        ),
-        pytest.param(
-            "_split_on_month", 12, 30, MONTH_STRINGS_IN_TAXI_DATA, id="_split_on_month"
-        ),
-        pytest.param(
-            "_split_on_truncated_month",
+            "_split_on_year_month",
+            # {"column_name": "pickup_datetime", "date_parts": [DatePart.YEAR, DatePart.MONTH]},
+            {"column_name": "pickup_datetime"},
             36,
             10,
-            MONTHS_IN_TAXI_DATA,
-            id="_split_on_truncated_month",
-        ),
+            # [dt.strftime("year_%Ymonth_%-m") for dt in MONTHS_IN_TAXI_DATA],
+            [
+                {DatePart.YEAR.value: dt.year, DatePart.MONTH.value: dt.month}
+                for dt in MONTHS_IN_TAXI_DATA
+            ],
+            id="_split_on_year_month",
+        )
     ],
 )
 def test__split_on_x_configured_asset_sql_data_connector(
     splitter_method,
+    splitter_kwargs,
     num_expected_batch_definitions,
     num_expected_rows_in_first_batch_definition,
     expected_pickup_datetimes,
@@ -102,7 +117,7 @@ def test__split_on_x_configured_asset_sql_data_connector(
         assets={
             data_asset_name: {
                 "splitter_method": splitter_method,
-                "splitter_kwargs": {"column_name": "pickup_datetime"},
+                "splitter_kwargs": splitter_kwargs,
             }
         },
     )
