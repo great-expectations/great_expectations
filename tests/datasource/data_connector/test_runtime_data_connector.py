@@ -27,12 +27,6 @@ from great_expectations.datasource.data_connector import RuntimeDataConnector
 yaml = YAML()
 
 
-@pytest.fixture()
-def test_df_pandas():
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    return test_df
-
-
 @pytest.fixture
 def basic_datasource_with_assets(tmp_path_factory):
     basic_datasource: Datasource = instantiate_class_from_config(
