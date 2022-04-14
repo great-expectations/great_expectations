@@ -980,325 +980,85 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == batch_identifiers[column_name]
         )
 
-    def _split_on_truncated_year(
+    def split_on_year(
         self,
         table_name: str,
         column_name: str,
         batch_identifiers: dict,
-    ) -> bool:
-        """Split on year-truncated values in column_name.
-
-        Truncated values are rounded down to the beginning of the year.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose year
-                will be used for splitting.
-
-        Returns:
-            Boolean based on whether the datetime in the batch identifier matches
-                the value in the column_name column.
-        """
-        return self._split_on_truncated_date_part(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_part=DatePart.YEAR,
-        )
-
-    def _split_on_truncated_month(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> bool:
-        """Split on month-truncated values in column_name.
-
-        Truncated values are rounded down to the beginning of the month.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose month
-                will be used for splitting.
-
-        Returns:
-            Boolean based on whether the datetime in the batch identifier matches
-                the value in the column_name column.
-        """
-        return self._split_on_truncated_date_part(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_part=DatePart.MONTH,
-        )
-
-    def _split_on_truncated_week(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> bool:
-        """Split on week-truncated values in column_name.
-
-        Truncated values are rounded down to the beginning of the week.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose week
-                will be used for splitting.
-
-        Returns:
-            Boolean based on whether the datetime in the batch identifier matches
-                the value in the column_name column.
-        """
-        return self._split_on_truncated_date_part(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_part=DatePart.WEEK,
-        )
-
-    def _split_on_truncated_day(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> bool:
-        """Split on day-truncated values in column_name.
-
-        Truncated values are rounded down to the beginning of the day.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose day
-                will be used for splitting.
-
-        Returns:
-            Boolean based on whether the datetime in the batch identifier matches
-                the value in the column_name column.
-        """
-        return self._split_on_truncated_date_part(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_part=DatePart.DAY,
-        )
-
-    def _split_on_truncated_date_part(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-        date_part: DatePart,
-    ) -> bool:
-        """Split on date_part values in column_name, truncated to date_part.
-
-        For example if date_part = DatePart.DAY, then days with unique higher significance date parts e.g. months, years
-        will be treated as distinct values, and lower significance parts will be ignored (truncated) e.g. hours, minutes.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime that
-                will be used for splitting. Note: This should be truncated using the same date_part.
-            date_part: part of the date to be used for splitting and truncation e.g. DatePart.DAY
-
-        Returns:
-            Boolean based on whether the date_part value in the batch identifier matches
-                the value in the column_name column.
-        """
-        batch_identifier_datetime: datetime.datetime = self._parse_datetime_if_str(
-            batch_identifiers[column_name]
-        )
-        return sa.func.date_trunc(date_part.value, sa.column(column_name)) == str(
-            batch_identifier_datetime
-        )
-
-    def _split_on_year(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> bool:
+    ) -> "sa.sql.elements.BooleanClauseList":
         """Split on year values in column_name.
 
-        Values are NOT truncated, however this method returns the same results
-        as _split_on_truncated_year but is included for completeness.
-
         Args:
             table_name: table to split.
             column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose year
-                will be used for splitting.
+            batch_identifiers: should contain a dateutil parseable datetime whose
+                relevant date parts will be used for splitting or key values
+                of {date_part: date_part_value}.
 
         Returns:
-            Boolean based on whether the year value in the batch identifier matches
-                the value in the column_name column.
+            List of boolean clauses based on whether the date_part value in the
+                batch identifier matches the date_part value in the column_name column.
         """
-        return self._split_on_date_part(
+        return self.split_on_date_parts(
             table_name=table_name,
             column_name=column_name,
             batch_identifiers=batch_identifiers,
-            date_part=DatePart.YEAR,
+            date_parts=[DatePart.YEAR],
         )
 
-    def _split_on_month(
+    def split_on_year_and_month(
         self,
         table_name: str,
         column_name: str,
         batch_identifiers: dict,
-    ) -> bool:
-        """Split on month values in column_name.
-
-        Values are NOT truncated, for example this will return data for a
-        given month for ALL years. This may be useful for viewing seasonality.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose month
-                will be used for splitting.
-
-        Returns:
-            Select query for distinct split values.
-        """
-        return self._split_on_date_part(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_part=DatePart.MONTH,
-        )
-
-    def _split_on_week(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> bool:
-        """Split on week values in column_name.
-
-        Values are NOT truncated, for example this will return data for a
-        given week for ALL years. This may be useful for viewing seasonality.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose week
-                will be used for splitting.
-
-        Returns:
-            Select query for distinct split values.
-        """
-        return self._split_on_date_part(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_part=DatePart.WEEK,
-        )
-
-    def _split_on_day(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> bool:
-        """Split on day values in column_name.
-
-        Values are NOT truncated, for example this will return data for a
-        given day of the month for ALL months and years. I.e. the first of
-        the month for every month in every year of the data set.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose day
-                will be used for splitting.
-
-        Returns:
-            Select query for distinct split values.
-        """
-        return self._split_on_date_part(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_part=DatePart.DAY,
-        )
-
-    def _split_on_date_part(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-        date_part: DatePart,
-    ) -> bool:
-        """Split on date_part values in column_name.
-
-        Values are NOT truncated, for example this will return data for a
-        given month (if month is chosen as the date_part) for ALL years.
-        This may be useful for viewing seasonality.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose day
-                will be used for splitting.
-            date_part: part of the date to be used for splitting e.g. DatePart.DAY
-
-        Returns:
-            Boolean based on whether the date_part value in the batch identifier matches
-                the value in the column_name column.
-        """
-        batch_identifier_datetime: datetime.datetime = self._parse_datetime_if_str(
-            batch_identifiers[column_name]
-        )
-        return sa.extract(date_part.value, sa.column(column_name)) == getattr(
-            batch_identifier_datetime, date_part.value
-        )
-
-    @staticmethod
-    def _parse_datetime_if_str(dt: Union[datetime.datetime, str]) -> datetime.datetime:
-        """Parse string to datetime or return if already datetime
-
-        Args:
-            dt: string to convert or datetime
-
-        Returns:
-            datetime.datetime of either parsed string or passthrough
-        """
-        if isinstance(dt, str):
-            dt: datetime.datetime = parse(dt)
-        return dt
-
-    def _split_on_year_month(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> bool:
+    ) -> "sa.sql.elements.BooleanClauseList":
         """Split on year and month values in column_name.
 
         Args:
             table_name: table to split.
             column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose month
-                will be used for splitting.
+            batch_identifiers: should contain a dateutil parseable datetime whose
+                relevant date parts will be used for splitting or key values
+                of {date_part: date_part_value}.
 
         Returns:
-            Boolean based on whether the datetime in the batch identifier matches
-                the value in the column_name column.
+            List of boolean clauses based on whether the date_part value in the
+                batch identifier matches the date_part value in the column_name column.
         """
-        return self._split_on_date_parts(
+        return self.split_on_date_parts(
             table_name=table_name,
             column_name=column_name,
             batch_identifiers=batch_identifiers,
             date_parts=[DatePart.YEAR, DatePart.MONTH],
         )
 
-    def _split_on_date_parts(
+    def split_on_year_and_week(
+        self,
+        table_name: str,
+        column_name: str,
+        batch_identifiers: dict,
+    ) -> "sa.sql.elements.BooleanClauseList":
+        """Split on year and week values in column_name.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+            batch_identifiers: should contain a dateutil parseable datetime whose
+                relevant date parts will be used for splitting or key values
+                of {date_part: date_part_value}.
+
+        Returns:
+            List of boolean clauses based on whether the date_part value in the
+                batch identifier matches the date_part value in the column_name column.
+        """
+        return self.split_on_date_parts(
+            table_name=table_name,
+            column_name=column_name,
+            batch_identifiers=batch_identifiers,
+            date_parts=[DatePart.YEAR, DatePart.WEEK],
+        )
+
+    def split_on_date_parts(
         self,
         table_name: str,
         column_name: str,
@@ -1308,8 +1068,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Split on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
-        given month (if month is chosen as the date_part) for ALL years.
-        This may be useful for viewing seasonality.
+        given month (if only month is chosen for date_parts) for ALL years.
+        This may be useful for viewing seasonality, but you can also specify
+        multiple date_parts to achieve date_trunc like behavior e.g.
+        year, month and day.
 
         Args:
             table_name: table to split.
@@ -1322,41 +1084,31 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             List of boolean clauses based on whether the date_part value in the
                 batch identifier matches the date_part value in the column_name column.
         """
+        column_batch_identifiers: dict = batch_identifiers[column_name]
 
-        batch_identifier_datetime: datetime.datetime = self._parse_datetime_if_str(
-            batch_identifiers[column_name]
-        )
-        if isinstance(batch_identifier_datetime, datetime.datetime):
-            return sa.and_(
+        if isinstance(column_batch_identifiers, str):
+            column_batch_identifiers: datetime.datetime = parse(
+                column_batch_identifiers
+            )
+
+        if isinstance(column_batch_identifiers, datetime.datetime):
+            query: "sa.sql.elements.BooleanClauseList" = sa.and_(  # noqa: F821
                 *[
                     sa.extract(date_part.value, sa.column(column_name))
-                    == getattr(batch_identifier_datetime, date_part.value)
+                    == getattr(column_batch_identifiers, date_part.value)
                     for date_part in date_parts
                 ]
             )
-        # except ParserError:
-        #     # Parse batch_identifiers
-        #     date_part_values: dict = {}
-        #     for date_part in date_parts:
-        #         if date_part.value in batch_identifiers[column_name]:
-        #             # TODO: Do this better:
-        #             date_part_parser = (date_part.value + "_" + pp.Word(pp.nums))[...]
-        #             date_part_values[date_part.value] = date_part_parser.parseString(batch_identifiers[column_name])[2]
-        #
-        #         # TODO: AJB 20220413 here generate the query from date_part_values
-        #     print(date_part_values)
-
         else:
-            query = sa.and_(
+            query: "sa.sql.elements.BooleanClauseList" = sa.and_(  # noqa: F821
                 *[
                     sa.extract(date_part.value, sa.column(column_name))
-                    == batch_identifiers[column_name][date_part.value]
+                    == column_batch_identifiers[date_part.value]
                     for date_part in date_parts
                 ]
             )
 
-            print(query)
-            return query
+        return query
 
     def _split_on_divided_integer(
         self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict
@@ -1440,54 +1192,92 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    # TODO: AJB 20220413 flesh out this method or change
-    @staticmethod
-    def _get_dict_from_sqlalchemy_result_row(result_row) -> dict:
-        if version.parse(sa.__version__) < version.parse("1.4"):
-            # row._mapping not available until SQLAlchemy 1.4
-            return dict(result_row)
-        else:
-            return result_row._mapping
+    def get_data_for_batch_identifiers_year(
+        self, table_name: str, column_name: str
+    ) -> List[dict]:
+        """Build batch_identifiers from a column split on year.
 
-    # TODO: AJB 20220413 is this needed? If so clean it up.
-    def get_batch_identifiers_year_month(
-        self, data_asset_name, table_name, column_name
-    ):
-        return self.XX_NEW_NAME_NEEDED_build_batch_identifiers_for_split_on_date_parts(
-            data_asset_name=data_asset_name,
+        This method builds a query to select the unique date_parts from the
+        column_name. This data can be used to build BatchIdentifiers.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            List of dicts of the form [{column_name: {"year": 2022}}]
+        """
+        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
+            table_name=table_name,
+            column_name=column_name,
+            date_parts=[DatePart.YEAR],
+        )
+
+    def get_data_for_batch_identifiers_year_and_month(
+        self, table_name: str, column_name: str
+    ) -> List[dict]:
+        """Build batch_identifiers from a column split on year and week.
+
+        This method builds a query to select the unique date_parts from the
+        column_name. This data can be used to build BatchIdentifiers.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            List of dicts of the form [{column_name: {"year": 2022, "month": 4}}]
+        """
+        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
             table_name=table_name,
             column_name=column_name,
             date_parts=[DatePart.YEAR, DatePart.MONTH],
         )
 
-    def XX_NEW_NAME_NEEDED_build_batch_identifiers_for_split_on_date_parts(
+    def get_data_for_batch_identifiers_year_and_week(
+        self, table_name: str, column_name: str
+    ) -> List[dict]:
+        """Build batch_identifiers from a column split on year and week.
+
+        This method builds a query to select the unique date_parts from the
+        column_name. This data can be used to build BatchIdentifiers.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            List of dicts of the form [{column_name: {"year": 2022, "week": 17}}]
+        """
+        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
+            table_name=table_name,
+            column_name=column_name,
+            date_parts=[DatePart.YEAR, DatePart.WEEK],
+        )
+
+    def get_data_for_batch_identifiers_for_split_on_date_parts(
         self,
-        data_asset_name: str,
         table_name: str,
         column_name: str,
         date_parts: List[DatePart],
-    ) -> List[BatchIdentifier]:
+    ) -> List[dict]:
         """Build batch_identifiers from a column split on a list of date parts.
 
-        # TODO: AJB 20220413 Fill in this docstring
+        This method builds a query to select the unique date_parts from the
+        column_name. This data can be used to build BatchIdentifiers.
+
         Args:
-            data_asset_name:
-            table_name:
-            column_name:
-            date_parts:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+            date_parts: part of the date to be used for splitting e.g. DatePart.DAY
 
         Returns:
-
+            List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
         """
-        # TODO: sql query I want:
 
-        # Here we select the distinct date parts and the date parts for easy retrieval as a
-        # mapping (dictionary) later for use in batch_identifiers
-
-        # TODO: AJB 20220414 the previous query with multiple items in distinct clause
-        #  doesn't work on several dialects
-        #  instead, let's try concatenating in the distinct and later investigate if there is a
-        #  more performant solution.
+        # NOTE: AJB 20220414 concatenating to find distinct values to support all dialects.
+        # There are more performant dialect-specific methods that can be implemented in
+        # future improvements.
         split_query: "sa.sql.expression.Select" = sa.select(
             [
                 sa.func.distinct(
@@ -1509,11 +1299,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ]
         ).select_from(sa.text(table_name))
 
-        print(split_query)
+        result: List["sa.engine.LegacyRow"] = self.engine.execute(
+            split_query
+        ).fetchall()  # noqa: F821
 
-        result = self.engine.execute(split_query).fetchall()
-
-        data_for_batch_identifiers = [
+        data_for_batch_identifiers: List[dict] = [
             {
                 column_name: {
                     date_part.value: getattr(row, date_part.value)
@@ -1523,16 +1313,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             for row in result
         ]
 
-        # batch_identifiers_list = [dict(zip([date_part.value for date_part in date_parts], row)) for row in result]
-
-        # print(batch_identifiers_list)
-
-        # batch_identifiers_list: List[BatchIdentifier] = []
-        # for b_id in data_for_batch_identifiers:
-        #     # row_dict = self._get_dict_from_sqlalchemy_result_row(row)
-        #     batch_identifiers_list.append(BatchIdentifier(batch_identifier=b_id, data_asset_name=data_asset_name))
-
-        # return batch_identifiers_list
         return data_for_batch_identifiers
 
     def _build_selectable_from_batch_spec(

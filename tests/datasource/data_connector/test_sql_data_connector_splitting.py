@@ -35,6 +35,9 @@ YEARS_IN_TAXI_DATA = (
     .tolist()
 )
 YEAR_STRINGS_IN_TAXI_DATA = [str(y.year) for y in YEARS_IN_TAXI_DATA]
+YEAR_BATCH_IDENTIFIER_DATA: List[dict] = [
+    {DatePart.YEAR.value: dt.year} for dt in YEARS_IN_TAXI_DATA
+]
 
 MONTHS_IN_TAXI_DATA = (
     pd.date_range(start="2018-01-01", end="2020-12-31", freq="MS")
@@ -55,16 +58,14 @@ DAYS_IN_TAXI_DATA = (
 @pytest.mark.parametrize(
     "splitter_method,splitter_kwargs,num_expected_batch_definitions,num_expected_rows_in_first_batch_definition,expected_pickup_datetimes",
     [
-        # pytest.param(
-        #     "_split_on_year", 3, 120, YEAR_STRINGS_IN_TAXI_DATA, id="_split_on_year"
-        # ),
-        # pytest.param(
-        #     "_split_on_truncated_year",
-        #     3,
-        #     120,
-        #     YEARS_IN_TAXI_DATA,
-        #     id="_split_on_truncated_year",
-        # ),
+        pytest.param(
+            "split_on_year",
+            {"column_name": "pickup_datetime"},
+            3,
+            120,
+            YEAR_BATCH_IDENTIFIER_DATA,
+            id="split_on_year",
+        ),
         # pytest.param(
         #     "_split_on_month", 12, 30, MONTH_STRINGS_IN_TAXI_DATA, id="_split_on_month"
         # ),
@@ -76,7 +77,7 @@ DAYS_IN_TAXI_DATA = (
         #     id="_split_on_truncated_month",
         # ),
         pytest.param(
-            "_split_on_year_month",
+            "split_on_year_and_month",
             # {"column_name": "pickup_datetime", "date_parts": [DatePart.YEAR, DatePart.MONTH]},
             {"column_name": "pickup_datetime"},
             36,
@@ -86,8 +87,8 @@ DAYS_IN_TAXI_DATA = (
                 {DatePart.YEAR.value: dt.year, DatePart.MONTH.value: dt.month}
                 for dt in MONTHS_IN_TAXI_DATA
             ],
-            id="_split_on_year_month",
-        )
+            id="split_on_year_and_month",
+        ),
     ],
 )
 def test__split_on_x_configured_asset_sql_data_connector(
