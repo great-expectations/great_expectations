@@ -40,12 +40,14 @@ def _get_connection_string_and_dialect() -> Tuple[str, str]:
 
     return dialect, CONNECTION_STRING
 
+
 TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
 
-def _load_data(connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME):
+
+def _load_data(connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME) -> pd.DataFrame:
 
     # Load the first 10 rows of each month of taxi data
-    load_data_into_test_database(
+    return load_data_into_test_database(
         table_name=table_name,
         csv_paths=[
             f"./data/yellow_tripdata_sample_{year}-{month}.csv"
@@ -56,86 +58,100 @@ def _load_data(connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME):
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
     )
 
+
 dialect, CONNECTION_STRING = _get_connection_string_and_dialect()
-
-_load_data(connection_string=CONNECTION_STRING)
-
 print(f"Testing dialect: {dialect}")
+
+test_df = _load_data(connection_string=CONNECTION_STRING)
+
 
 YEARS_IN_TAXI_DATA = (
     pd.date_range(start="2018-01-01", end="2020-12-31", freq="AS")
     .to_pydatetime()
     .tolist()
 )
-YEAR_STRINGS_IN_TAXI_DATA = [str(y.year) for y in YEARS_IN_TAXI_DATA]
+YEAR_BATCH_IDENTIFIER_DATA: List[dict] = [
+    {DatePart.YEAR.value: dt.year} for dt in YEARS_IN_TAXI_DATA
+]
 
 MONTHS_IN_TAXI_DATA = (
     pd.date_range(start="2018-01-01", end="2020-12-31", freq="MS")
     .to_pydatetime()
     .tolist()
 )
-MONTH_STRINGS_IN_TAXI_DATA = [str(mo) for mo in range(1, 12 + 1)]
+YEAR_MONTH_BATCH_IDENTIFIER_DATA: List[dict] = [
+    {DatePart.YEAR.value: dt.year, DatePart.MONTH.value: dt.month}
+    for dt in MONTHS_IN_TAXI_DATA
+]
+MONTH_BATCH_IDENTIFIER_DATA: List[dict] = [
+    {DatePart.MONTH.value: dt.month} for dt in MONTHS_IN_TAXI_DATA
+]
 
-DAYS_IN_TAXI_DATA = (
-    pd.date_range(start="2018-01-01", end="2020-12-31", freq="D")
-    .to_pydatetime()
-    .tolist()
+TEST_COLUMN: str = "pickup_datetime"
+
+# Since taxi data does not contain all weeks, we need to introspect the data to build the fixture:
+YEAR_WEEK_BATCH_IDENTIFIER_DATA: List[dict] = list({val[0]: val[1], val[2]: val[3]} for val in {
+    (DatePart.YEAR.value, dt.year, DatePart.WEEK.value, dt.week) for dt in test_df[TEST_COLUMN]
+})
+YEAR_WEEK_BATCH_IDENTIFIER_DATA: List[dict] = sorted(
+    YEAR_WEEK_BATCH_IDENTIFIER_DATA, key=lambda x: (
+        x[DatePart.YEAR.value],
+        x[DatePart.WEEK.value],
+    )
+)
+
+# Since taxi data does not contain all days, we need to introspect the data to build the fixture:
+YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = list({val[0]: val[1], val[2]: val[3], val[4]: val[5]} for val in {
+    (DatePart.YEAR.value, dt.year, DatePart.MONTH.value, dt.month, DatePart.DAY.value, dt.day) for dt in test_df[TEST_COLUMN]
+})
+YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = sorted(
+    YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA, key=lambda x: (
+        x[DatePart.YEAR.value],
+        x[DatePart.MONTH.value],
+        x[DatePart.DAY.value],
+    )
 )
 
 
 @dataclass
 class TestCase:
     splitter_method_name: str
+    splitter_kwargs: dict
     num_expected_batch_definitions: int
     num_expected_rows_in_first_batch_definition: int
-    expected_pickup_datetimes: Union[List[datetime.datetime], List[str]]
+    expected_pickup_datetimes: List[dict]
 
 
-test_cases: List[TestCase] = []
-
-non_truncating_test_cases: List[TestCase] = [
-    # TestCase(
-    #     splitter_method_name="_split_on_year",
-    #     num_expected_batch_definitions=3,
-    #     num_expected_rows_in_first_batch_definition=120,
-    #     expected_pickup_datetimes=YEAR_STRINGS_IN_TAXI_DATA
-    # ),
-    # TestCase(
-    #     splitter_method_name="_split_on_month",
-    #     num_expected_batch_definitions=12,
-    #     num_expected_rows_in_first_batch_definition=30,
-    #     expected_pickup_datetimes=MONTH_STRINGS_IN_TAXI_DATA
-    # ),
+test_cases: List[TestCase] = [
     TestCase(
-        splitter_method_name="_split_on_year_month",
+        splitter_method_name="split_on_year",
+        splitter_kwargs={"column_name": TEST_COLUMN},
+        num_expected_batch_definitions=3,
+        num_expected_rows_in_first_batch_definition=120,
+        expected_pickup_datetimes=YEAR_BATCH_IDENTIFIER_DATA
+    ),
+    TestCase(
+        splitter_method_name="split_on_year_and_month",
+        splitter_kwargs={"column_name": TEST_COLUMN},
         num_expected_batch_definitions=36,
         num_expected_rows_in_first_batch_definition=10,
-        expected_pickup_datetimes=[
-            {DatePart.YEAR.value: dt.year, DatePart.MONTH.value: dt.month}
-            for dt in MONTHS_IN_TAXI_DATA
-        ]
+        expected_pickup_datetimes=YEAR_MONTH_BATCH_IDENTIFIER_DATA
     ),
-
+    TestCase(
+        splitter_method_name="split_on_year_and_month_and_day",
+        splitter_kwargs={"column_name": TEST_COLUMN},
+        num_expected_batch_definitions=299,
+        num_expected_rows_in_first_batch_definition=2,
+        expected_pickup_datetimes=YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA
+    ),
+    TestCase(
+        splitter_method_name="split_on_date_parts",
+        splitter_kwargs={"column_name": TEST_COLUMN, "date_parts": [DatePart.MONTH]},
+        num_expected_batch_definitions=12,
+        num_expected_rows_in_first_batch_definition=30,
+        expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA
+    )
 ]
-truncating_test_cases: List[TestCase] = [
-    # TestCase(
-    #     splitter_method_name="_split_on_truncated_year",
-    #     num_expected_batch_definitions=3,
-    #     num_expected_rows_in_first_batch_definition=120,
-    #     expected_pickup_datetimes=YEARS_IN_TAXI_DATA,
-    # ),
-    # TestCase(
-    #     splitter_method_name="_split_on_truncated_month",
-    #     num_expected_batch_definitions=36,
-    #     num_expected_rows_in_first_batch_definition=10,
-    #     expected_pickup_datetimes=MONTHS_IN_TAXI_DATA,
-    # ),
-]
-
-test_cases.extend(non_truncating_test_cases)
-# TODO: AJB 20220412 Enable these tests after enabling truncating in these dialects.
-if dialect not in ["mysql", "mssql", "bigquery"]:
-    test_cases.extend(truncating_test_cases)
 
 
 for test_case in test_cases:
@@ -159,7 +175,7 @@ for test_case in test_cases:
     # 2. Set splitter in data connector config
     data_connector_name: str = "test_data_connector"
     data_asset_name: str = TAXI_DATA_TABLE_NAME
-    column_name: str = "pickup_datetime"
+    column_name: str = TEST_COLUMN
     data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
         name=data_connector_name,
         datasource_name=datasource_name,
@@ -199,8 +215,10 @@ for test_case in test_cases:
 
     # 4. Check that loaded data is as expected
 
+    # Use expected_batch_definition_list since it is sorted, and we already
+    # asserted that it contains the same items as batch_definition_list
     batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(
-        batch_definition_list[0]
+        expected_batch_definition_list[0]
     )
 
     batch_data: SqlAlchemyBatchData = context.datasources[

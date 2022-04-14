@@ -18,7 +18,7 @@ CONNECTION_STRING: str = "postgresql+psycopg2://postgres:@localhost/test_ci"
 TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
 
 # Load the first 10 rows of each month of taxi data
-load_data_into_test_database(
+test_df = load_data_into_test_database(
     table_name=TAXI_DATA_TABLE_NAME,
     csv_paths=[
         f"../../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_{year}-{month}.csv"
@@ -28,6 +28,51 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
     convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
 )
+
+TEST_COLUMN: str = "pickup_datetime"
+YEAR_WEEK_BATCH_IDENTIFIER_DATA: List[dict] = list(
+    {val[0]: val[1], val[2]: val[3]}
+    for val in {
+        (DatePart.YEAR.value, dt.year, DatePart.WEEK.value, dt.week)
+        for dt in test_df[TEST_COLUMN]
+    }
+)
+YEAR_WEEK_BATCH_IDENTIFIER_DATA: List[dict] = sorted(
+    YEAR_WEEK_BATCH_IDENTIFIER_DATA,
+    key=lambda x: (
+        x[DatePart.YEAR.value],
+        x[DatePart.WEEK.value],
+    ),
+)
+
+# test_df.loc[:, "year"] = test_df[TEST_COLUMN].dt.year
+# test_df.loc[:, "month"] = test_df[TEST_COLUMN].dt.month
+# test_df.loc[:, "day"] = test_df[TEST_COLUMN].dt.day
+
+
+YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = list(
+    {val[0]: val[1], val[2]: val[3], val[4]: val[5]}
+    for val in {
+        (
+            DatePart.YEAR.value,
+            dt.year,
+            DatePart.MONTH.value,
+            dt.month,
+            DatePart.DAY.value,
+            dt.day,
+        )
+        for dt in test_df[TEST_COLUMN]
+    }
+)
+YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = sorted(
+    YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA,
+    key=lambda x: (
+        x[DatePart.YEAR.value],
+        x[DatePart.MONTH.value],
+        x[DatePart.DAY.value],
+    ),
+)
+
 
 YEARS_IN_TAXI_DATA = (
     pd.date_range(start="2018-01-01", end="2020-12-31", freq="AS")
@@ -45,6 +90,9 @@ MONTHS_IN_TAXI_DATA = (
     .tolist()
 )
 MONTH_STRINGS_IN_TAXI_DATA = [str(mo) for mo in range(1, 12 + 1)]
+MONTH_BATCH_IDENTIFIER_DATA: List[dict] = [
+    {DatePart.MONTH.value: dt.month} for dt in MONTHS_IN_TAXI_DATA
+]
 
 DAYS_IN_TAXI_DATA = (
     pd.date_range(start="2018-01-01", end="2020-12-31", freq="D")
@@ -66,16 +114,6 @@ DAYS_IN_TAXI_DATA = (
             YEAR_BATCH_IDENTIFIER_DATA,
             id="split_on_year",
         ),
-        # pytest.param(
-        #     "_split_on_month", 12, 30, MONTH_STRINGS_IN_TAXI_DATA, id="_split_on_month"
-        # ),
-        # pytest.param(
-        #     "_split_on_truncated_month",
-        #     36,
-        #     10,
-        #     MONTHS_IN_TAXI_DATA,
-        #     id="_split_on_truncated_month",
-        # ),
         pytest.param(
             "split_on_year_and_month",
             # {"column_name": "pickup_datetime", "date_parts": [DatePart.YEAR, DatePart.MONTH]},
@@ -89,6 +127,30 @@ DAYS_IN_TAXI_DATA = (
             ],
             id="split_on_year_and_month",
         ),
+        pytest.param(
+            "split_on_year_and_month_and_day",
+            {"column_name": "pickup_datetime"},
+            299,
+            2,
+            YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA,
+            id="split_on_year_and_month_and_day",
+        ),
+        pytest.param(
+            "split_on_date_parts",
+            {"column_name": "pickup_datetime", "date_parts": [DatePart.MONTH]},
+            12,
+            30,
+            MONTH_BATCH_IDENTIFIER_DATA,
+            id="split_on_date_parts: month",
+        )
+        # pytest.param(
+        #     "split_on_year_and_week",
+        #     {"column_name": "pickup_datetime"},
+        #     143,
+        #     7,  # TODO: AJB 20220414 This includes 2 instances of 12-31-2018 which should not be there
+        #     YEAR_WEEK_BATCH_IDENTIFIER_DATA,
+        #     id="split_on_year_and_week"
+        # ),
     ],
 )
 def test__split_on_x_configured_asset_sql_data_connector(
@@ -151,8 +213,10 @@ def test__split_on_x_configured_asset_sql_data_connector(
 
     # 4. Check that loaded data is as expected
 
+    # Use expected_batch_definition_list since it is sorted, and we already
+    # asserted that it contains the same items as batch_definition_list
     batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(
-        batch_definition_list[0]
+        expected_batch_definition_list[0]
     )
 
     batch_data: SqlAlchemyBatchData = context.datasources[

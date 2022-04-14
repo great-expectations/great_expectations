@@ -118,6 +118,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 "split_on_year": "get_data_for_batch_identifiers_year",
                 "split_on_year_and_month": "get_data_for_batch_identifiers_year_and_month",
                 "split_on_year_and_week": "get_data_for_batch_identifiers_year_and_week",
+                "split_on_year_and_month_and_day": "get_data_for_batch_identifiers_year_and_month_and_day",
                 "split_on_date_parts": "get_data_for_batch_identifiers_for_split_on_date_parts",
             }
             if data_asset_config["splitter_method"] in list(
