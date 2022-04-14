@@ -11,7 +11,6 @@ from great_expectations.validator.validator import Validator
 
 yaml = YAMLHandler()
 
-
 #########################################
 # Tests with data passed in as batch_data
 #########################################
