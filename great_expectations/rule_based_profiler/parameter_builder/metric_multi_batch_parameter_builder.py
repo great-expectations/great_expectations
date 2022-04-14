@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -33,7 +34,9 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
-        evaluation_parameter_builder_configs: Optional[List[dict]] = None,
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
+        ] = None,
         json_serialize: Union[str, bool] = True,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[
@@ -137,7 +140,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = metric_computation_result.metric_values
         details: MetricComputationDetails = metric_computation_result.details
 
         # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -152,14 +154,21 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
         if (
             reduce_scalar_metric
-            and isinstance(metric_values, list)
-            and len(metric_values) == 1
-            and isinstance(metric_values[0], AttributedResolvedMetrics)
-            and metric_values[0].metric_values.shape[1] == 1
+            and len(metric_computation_result.attributed_resolved_metrics) == 1
+            and metric_computation_result.attributed_resolved_metrics[
+                0
+            ].metric_values.shape[1]
+            == 1
         ):
-            metric_values = metric_values[0].metric_values[:, 0]
+            metric_values = metric_computation_result.attributed_resolved_metrics[
+                0
+            ].metric_values[:, 0]
+            return (
+                metric_values,
+                details,
+            )
 
         return (
-            metric_values,
+            metric_computation_result.attributed_resolved_metrics,
             details,
         )

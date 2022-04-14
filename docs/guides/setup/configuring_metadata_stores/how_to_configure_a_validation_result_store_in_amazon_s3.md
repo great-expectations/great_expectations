@@ -9,9 +9,9 @@ By default, <TechnicalTag tag="validation_result" text="Validation Results" /> a
 
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- [Configured an Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
-- [Configured a Checkpoint](../../../tutorials/getting_started/validate_your_data.md).
+- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
+- [Configured an Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md).
+- [Configured a Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md).
 - [Installed boto3](https://github.com/boto/boto3) in your local environment.
 - Identified the S3 bucket and prefix where Validation Results will be stored.
 
@@ -92,4 +92,4 @@ great_expectations store list
 
 ### 6. Confirm that the Validations Results Store has been correctly configured
 
-[Run a Checkpoint](../../../tutorials/getting_started/validate_your_data.md) to store results in the new Validation Results Store on S3 then visualize the results by [re-building Data Docs](../../../tutorials/getting_started/check_out_data_docs.md).
+[Run a Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md) to store results in the new Validation Results Store on S3 then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).

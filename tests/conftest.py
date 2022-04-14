@@ -4,9 +4,8 @@ import logging
 import os
 import random
 import shutil
-import sys
 import warnings
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -53,9 +52,7 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
-    DEFAULT_CANDIDATE_STRINGS,
-)
+from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -2702,23 +2699,392 @@ def alice_columnar_table_single_batch(empty_data_context):
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
+    expected_effective_profiler_config: dict = {
+        "name": "alice user workflow",
+        "config_version": 1.0,
+        "variables": {
+            "alice_single_batch_data_batch_request": {
+                "datasource_name": "alice_columnar_table_single_batch_datasource",
+                "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+                "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+            },
+            "integer_type": "INTEGER",
+            "timestamp_type": "TIMESTAMP",
+            "very_small_user_id": 1000,
+            "very_large_user_id": 999999999999,
+            "min_timestamp": datetime.datetime(2004, 10, 19, 10, 23, 54),
+        },
+        "rules": {
+            "my_rule_for_user_ids": {
+                "domain_builder": {
+                    "batch_request": "$variables.alice_single_batch_data_batch_request",
+                    "column_name_suffixes": ["_id"],
+                    "class_name": "MyCustomSemanticTypeColumnDomainBuilder",
+                    "module_name": "tests.test_fixtures.rule_based_profiler.plugins.my_custom_semantic_type_column_domain_builder",
+                    "semantic_types": ["user_id"],
+                },
+                "parameter_builders": [
+                    {
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
+                        "json_serialize": True,
+                        "name": "my_min_user_id",
+                        "reduce_scalar_metric": True,
+                        "metric_value_kwargs": None,
+                        "metric_name": "column.min",
+                        "replace_nan_with_zero": False,
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "evaluation_parameter_builder_configs": None,
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "enforce_numeric_metric": False,
+                    },
+                    {
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
+                        "json_serialize": True,
+                        "name": "my_max_user_id",
+                        "reduce_scalar_metric": True,
+                        "metric_value_kwargs": None,
+                        "metric_name": "column.max",
+                        "replace_nan_with_zero": False,
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "evaluation_parameter_builder_configs": None,
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "enforce_numeric_metric": False,
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_of_type",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                        "type_": "$variables.integer_type",
+                    },
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_between",
+                        "max_value": "$variables.very_large_user_id",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "min_value": "$variables.very_small_user_id",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_not_be_null",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_less_than",
+                        "condition": "$parameter.my_max_user_id.value[-1] < $variables.very_large_user_id",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "value": "$parameter.my_max_user_id.value[-1]",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_greater_than",
+                        "condition": "$parameter.my_min_user_id.value[-1] > 0 & $parameter.my_min_user_id.value[-1] > $variables.very_small_user_id",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "value": "$parameter.my_min_user_id.value[-1]",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                ],
+            },
+            "my_rule_for_timestamps": {
+                "domain_builder": {
+                    "batch_request": "$variables.alice_single_batch_data_batch_request",
+                    "exclude_column_names": None,
+                    "semantic_type_filter_class_name": None,
+                    "exclude_semantic_types": None,
+                    "class_name": "ColumnDomainBuilder",
+                    "include_column_name_suffixes": ["_ts"],
+                    "include_semantic_types": None,
+                    "exclude_column_name_suffixes": None,
+                    "include_column_names": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                    "semantic_type_filter_module_name": None,
+                },
+                "parameter_builders": [
+                    {
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "enforce_numeric_metric": False,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_name": "column.max",
+                        "metric_value_kwargs": None,
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "name": "my_max_ts",
+                        "reduce_scalar_metric": True,
+                        "replace_nan_with_zero": False,
+                    },
+                    {
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "enforce_numeric_metric": False,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "metric_domain_kwargs": {"column": "event_ts"},
+                        "metric_name": "column.max",
+                        "metric_value_kwargs": None,
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "name": "my_max_event_ts",
+                        "reduce_scalar_metric": True,
+                        "replace_nan_with_zero": False,
+                    },
+                    {
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "enforce_numeric_metric": False,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_name": "column.min",
+                        "metric_value_kwargs": None,
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "name": "my_min_ts",
+                        "reduce_scalar_metric": True,
+                        "replace_nan_with_zero": False,
+                    },
+                    {
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
+                        "candidate_strings": [
+                            "%H:%M:%S",
+                            "%H:%M:%S,%f",
+                            "%H:%M:%S.%f",
+                            "%Y %b %d %H:%M:%S.%f %Z",
+                            "%Y %b %d %H:%M:%S.%f",
+                            "%Y %b %d %H:%M:%S.%f*%Z",
+                            "%Y%m%d %H:%M:%S.%f",
+                            "%Y-%m-%d %H:%M:%S %z",
+                            "%Y-%m-%d %H:%M:%S",
+                            "%Y-%m-%d %H:%M:%S%z",
+                            "%Y-%m-%d %H:%M:%S,%f",
+                            "%Y-%m-%d %H:%M:%S,%f%z",
+                            "%Y-%m-%d %H:%M:%S.%f",
+                            "%Y-%m-%d %H:%M:%S.%f%z",
+                            "%Y-%m-%d",
+                            "%Y-%m-%d'T'%H:%M:%S",
+                            "%Y-%m-%d'T'%H:%M:%S%z",
+                            "%Y-%m-%d'T'%H:%M:%S'%z'",
+                            "%Y-%m-%d'T'%H:%M:%S.%f",
+                            "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
+                            "%Y-%m-%d*%H:%M:%S",
+                            "%Y-%m-%d*%H:%M:%S:%f",
+                            "%Y-%m-%dT%z",
+                            "%Y/%m/%d",
+                            "%Y/%m/%d*%H:%M:%S",
+                            "%b %d %H:%M:%S %Y",
+                            "%b %d %H:%M:%S %z %Y",
+                            "%b %d %H:%M:%S %z",
+                            "%b %d %H:%M:%S",
+                            "%b %d %Y %H:%M:%S",
+                            "%b %d, %Y %H:%M:%S %p",
+                            "%d %b %Y %H:%M:%S",
+                            "%d %b %Y %H:%M:%S*%f",
+                            "%d-%b-%Y %H:%M:%S",
+                            "%d-%b-%Y %H:%M:%S.%f",
+                            "%d-%m-%Y",
+                            "%d/%b %H:%M:%S,%f",
+                            "%d/%b/%Y %H:%M:%S",
+                            "%d/%b/%Y:%H:%M:%S %z",
+                            "%d/%b/%Y:%H:%M:%S",
+                            "%d/%m/%Y",
+                            "%m%d_%H:%M:%S",
+                            "%m%d_%H:%M:%S.%f",
+                            "%m-%d-%Y",
+                            "%m/%d/%Y %H:%M:%S %p",
+                            "%m/%d/%Y %H:%M:%S %p:%f",
+                            "%m/%d/%Y %H:%M:%S %z",
+                            "%m/%d/%Y",
+                            "%m/%d/%Y*%H:%M:%S",
+                            "%m/%d/%Y*%H:%M:%S*%f",
+                            "%m/%d/%y %H:%M:%S %z",
+                            "%m/%d/%y*%H:%M:%S",
+                            "%y%m%d %H:%M:%S",
+                            "%y-%m-%d %H:%M:%S",
+                            "%y-%m-%d %H:%M:%S,%f %z",
+                            "%y-%m-%d %H:%M:%S,%f",
+                            "%y-%m-%d",
+                            "%y/%m/%d %H:%M:%S",
+                            "%y/%m/%d",
+                        ],
+                        "class_name": "SimpleDateFormatStringParameterBuilder",
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "metric_domain_kwargs": {"column": "event_ts"},
+                        "metric_value_kwargs": None,
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder",
+                        "name": "my_date_format",
+                        "threshold": 1.0,
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_of_type",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                        "type_": "$variables.timestamp_type",
+                    },
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_increasing",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
+                                ],
+                            }
+                        },
+                        "expectation_type": "expect_column_min_to_be_between",
+                        "max_value": "$variables.min_timestamp",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "min_value": "$variables.min_timestamp",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+                                ],
+                            }
+                        },
+                        "expectation_type": "expect_column_max_to_be_between",
+                        "max_value": "$parameter.my_max_event_ts.value[-1]",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "min_value": "$variables.min_timestamp",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                                ],
+                            }
+                        },
+                        "expectation_type": "expect_column_values_to_match_strftime_format",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "strftime_format": "$parameter.my_date_format",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                ],
+            },
+            "my_rule_for_one_cardinality": {
+                "domain_builder": {
+                    "batch_request": "$variables.alice_single_batch_data_batch_request",
+                    "exclude_column_names": ["id"],
+                    "semantic_type_filter_class_name": None,
+                    "max_proportion_unique": None,
+                    "exclude_semantic_types": ["binary", "currency", "identifier"],
+                    "max_unique_values": None,
+                    "allowed_semantic_types_passthrough": ["logic"],
+                    "class_name": "CategoricalColumnDomainBuilder",
+                    "include_column_name_suffixes": None,
+                    "include_semantic_types": None,
+                    "exclude_column_name_suffixes": None,
+                    "include_column_names": None,
+                    "limit_mode": "ONE",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
+                    "semantic_type_filter_module_name": None,
+                },
+                "parameter_builders": [
+                    {
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
+                        "json_serialize": True,
+                        "name": "my_user_agent_value_set",
+                        "metric_value_kwargs": None,
+                        "class_name": "ValueSetMultiBatchParameterBuilder",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "evaluation_parameter_builder_configs": None,
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder",
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "batch_request": None,
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "value_set": "$parameter.my_user_agent_value_set.value",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    }
+                ],
+            },
+        },
+    }
+
     # NOTE that this expectation suite should fail when validated on the data in "sample_data_relative_path"
     # because the device_ts is ahead of the event_ts for the latest event
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
 
-    profiler_config: dict = yaml.load(verbose_profiler_config)
-
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
-    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
-
-    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    serialized_config.pop("class_name")
-    serialized_config.pop("module_name")
     expected_expectation_suite.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
-        profiler_config=serialized_config,
+        profiler_config=expected_effective_profiler_config,
     )
 
     return {
@@ -3591,6 +3957,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ),
     ]
+
     my_column_regex_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
@@ -3618,7 +3985,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_regex",
-                "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "RatecodeID",
                     "regex": r"^\d{1}$",
@@ -3640,7 +4006,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_regex",
-                "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "PULocationID",
                     "regex": r"^\d{1}$",
@@ -3662,7 +4027,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_regex",
-                "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "DOLocationID",
                     "regex": r"^\d{1}$",
@@ -3707,6 +4071,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ),
     ]
+
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
@@ -3740,27 +4105,1309 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
-    profiler_config: dict = yaml.load(verbose_profiler_config)
-
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
-    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
-
-    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    serialized_config.pop("class_name")
-    serialized_config.pop("module_name")
+    expected_effective_profiler_config: dict = {
+        "name": "bobby user workflow",
+        "config_version": 1.0,
+        "variables": {
+            "jan_feb_2019_monthly_tripdata_batch_request": {
+                "datasource_name": "taxi_pandas",
+                "data_connector_name": "monthly",
+                "data_asset_name": "my_reports",
+                "data_connector_query": {"index": ":-1"},
+            },
+            "estimator": "oneshot",
+            "false_positive_rate": 0.01,
+            "mostly": 1.0,
+        },
+        "rules": {
+            "row_count_range_rule": {
+                "domain_builder": {
+                    "batch_request": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                    "class_name": "TableDomainBuilder",
+                },
+                "parameter_builders": [
+                    {
+                        "round_decimals": 0,
+                        "json_serialize": True,
+                        "metric_value_kwargs": None,
+                        "reduce_scalar_metric": True,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
+                        "metric_name": "table.row_count",
+                        "bootstrap_random_seed": None,
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "estimator": "$variables.estimator",
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "metric_domain_kwargs": None,
+                        "replace_nan_with_zero": True,
+                        "evaluation_parameter_builder_configs": None,
+                        "truncate_values": {"lower_bound": 0},
+                        "num_bootstrap_samples": None,
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                        "enforce_numeric_metric": True,
+                        "name": "row_count_range",
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "min_value": "$parameter.row_count_range.value[0]",
+                        "meta": {
+                            "profiler_details": "$parameter.row_count_range.details"
+                        },
+                        "condition": None,
+                        "expectation_type": "expect_table_row_count_to_be_between",
+                        "batch_request": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "max_value": "$parameter.row_count_range.value[1]",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    }
+                ],
+            },
+            "column_ranges_rule": {
+                "domain_builder": {
+                    "exclude_column_names": None,
+                    "semantic_type_filter_module_name": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                    "batch_request": {
+                        "datasource_name": "taxi_pandas",
+                        "data_connector_name": "monthly",
+                        "data_asset_name": "my_reports",
+                        "data_connector_query": {"index": -1},
+                    },
+                    "include_column_names": None,
+                    "class_name": "ColumnDomainBuilder",
+                    "include_column_name_suffixes": None,
+                    "exclude_column_name_suffixes": None,
+                    "exclude_semantic_types": None,
+                    "semantic_type_filter_class_name": None,
+                    "include_semantic_types": ["numeric"],
+                },
+                "parameter_builders": [
+                    {
+                        "round_decimals": 2,
+                        "json_serialize": True,
+                        "metric_value_kwargs": None,
+                        "reduce_scalar_metric": True,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
+                        "metric_name": "column.min",
+                        "bootstrap_random_seed": None,
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "estimator": "$variables.estimator",
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "replace_nan_with_zero": True,
+                        "evaluation_parameter_builder_configs": None,
+                        "truncate_values": {"lower_bound": None, "upper_bound": None},
+                        "num_bootstrap_samples": None,
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                        "enforce_numeric_metric": True,
+                        "name": "min_range",
+                    },
+                    {
+                        "round_decimals": 2,
+                        "json_serialize": True,
+                        "metric_value_kwargs": None,
+                        "reduce_scalar_metric": True,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
+                        "metric_name": "column.max",
+                        "bootstrap_random_seed": None,
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "estimator": "$variables.estimator",
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "replace_nan_with_zero": True,
+                        "evaluation_parameter_builder_configs": None,
+                        "truncate_values": {"lower_bound": None, "upper_bound": None},
+                        "num_bootstrap_samples": None,
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                        "enforce_numeric_metric": True,
+                        "name": "max_range",
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "mostly": "$variables.mostly",
+                        "min_value": "$parameter.min_range.value[0]",
+                        "meta": {"profiler_details": "$parameter.min_range.details"},
+                        "condition": None,
+                        "expectation_type": "expect_column_min_to_be_between",
+                        "batch_request": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "max_value": "$parameter.min_range.value[1]",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "mostly": "$variables.mostly",
+                        "min_value": "$parameter.max_range.value[0]",
+                        "meta": {"profiler_details": "$parameter.max_range.details"},
+                        "condition": None,
+                        "expectation_type": "expect_column_max_to_be_between",
+                        "batch_request": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "max_value": "$parameter.max_range.value[1]",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    },
+                ],
+            },
+            "my_rule_for_timestamps": {
+                "domain_builder": {
+                    "exclude_column_names": None,
+                    "semantic_type_filter_module_name": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                    "batch_request": {
+                        "datasource_name": "taxi_pandas",
+                        "data_connector_name": "monthly",
+                        "data_asset_name": "my_reports",
+                        "data_connector_query": {"index": -1},
+                    },
+                    "include_column_names": None,
+                    "class_name": "ColumnDomainBuilder",
+                    "include_column_name_suffixes": ["_datetime"],
+                    "exclude_column_name_suffixes": None,
+                    "exclude_semantic_types": None,
+                    "semantic_type_filter_class_name": None,
+                    "include_semantic_types": None,
+                },
+                "parameter_builders": [
+                    {
+                        "candidate_strings": ["%y-%m-%d", "%Y-%m-%d %H:%M:%S"],
+                        "json_serialize": True,
+                        "metric_value_kwargs": None,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
+                        "class_name": "SimpleDateFormatStringParameterBuilder",
+                        "evaluation_parameter_builder_configs": None,
+                        "metric_domain_kwargs": {"column": "pickup_datetime"},
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder",
+                        "threshold": 0.9,
+                        "name": "my_date_format",
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {
+                            "details": "$parameter.my_date_format.details",
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                                ],
+                            },
+                        },
+                        "condition": None,
+                        "strftime_format": "$parameter.my_date_format.value",
+                        "expectation_type": "expect_column_values_to_match_strftime_format",
+                        "batch_request": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    }
+                ],
+            },
+            "rule_for_regex": {
+                "domain_builder": {
+                    "exclude_column_names": None,
+                    "semantic_type_filter_module_name": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                    "batch_request": {
+                        "datasource_name": "taxi_pandas",
+                        "data_connector_name": "monthly",
+                        "data_asset_name": "my_reports",
+                        "data_connector_query": {"index": -1},
+                    },
+                    "include_column_names": None,
+                    "class_name": "ColumnDomainBuilder",
+                    "include_column_name_suffixes": ["ID"],
+                    "exclude_column_name_suffixes": None,
+                    "exclude_semantic_types": None,
+                    "semantic_type_filter_class_name": None,
+                    "include_semantic_types": None,
+                },
+                "parameter_builders": [
+                    {
+                        "json_serialize": True,
+                        "metric_value_kwargs": None,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
+                        "class_name": "RegexPatternStringParameterBuilder",
+                        "evaluation_parameter_builder_configs": None,
+                        "candidate_regexes": ["^\\d{1}$", "^\\d{2}$"],
+                        "metric_domain_kwargs": {"column": "VendorID"},
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder",
+                        "threshold": 0.9,
+                        "name": "my_regex",
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {
+                            "details": "$parameter.my_regex.details",
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+                                ],
+                            },
+                        },
+                        "condition": None,
+                        "expectation_type": "expect_column_values_to_match_regex",
+                        "batch_request": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "regex": "$parameter.my_regex.value",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    }
+                ],
+            },
+            "my_rule_for_very_few_cardinality": {
+                "domain_builder": {
+                    "exclude_column_names": "DOLocationID, RatecodeID, store_and_fwd_flag, payment_type, extra, mta_tax, improvement_surcharge, congestion_surcharge",
+                    "semantic_type_filter_module_name": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
+                    "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
+                    "include_column_names": None,
+                    "class_name": "CategoricalColumnDomainBuilder",
+                    "include_column_name_suffixes": None,
+                    "exclude_column_name_suffixes": None,
+                    "max_unique_values": None,
+                    "exclude_semantic_types": ["binary", "currency", "identifier"],
+                    "limit_mode": "VERY_FEW",
+                    "semantic_type_filter_class_name": None,
+                    "allowed_semantic_types_passthrough": ["logic"],
+                    "max_proportion_unique": None,
+                    "include_semantic_types": None,
+                },
+                "parameter_builders": [
+                    {
+                        "json_serialize": True,
+                        "metric_value_kwargs": None,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
+                        "class_name": "ValueSetMultiBatchParameterBuilder",
+                        "evaluation_parameter_builder_configs": None,
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder",
+                        "name": "my_pickup_location_id_value_set",
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "condition": None,
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "batch_request": None,
+                        "value_set": "$parameter.my_pickup_location_id_value_set.value",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    }
+                ],
+            },
+        },
+    }
 
     expected_expectation_suite_oneshot_estimator.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
-        profiler_config=serialized_config,
+        profiler_config=expected_effective_profiler_config,
     )
+
+    expected_fixture_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
+        Domain, List[str]
+    ] = {
+        Domain(domain_type="table",): [
+            "$variables",
+            "$parameter.row_count_range.value",
+            "$parameter.row_count_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "VendorID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "passenger_count"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "trip_distance"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "RatecodeID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "PULocationID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "DOLocationID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "payment_type"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "fare_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "extra"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "mta_tax"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "tip_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "tolls_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "improvement_surcharge"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "total_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "congestion_surcharge"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range.value",
+            "$parameter.min_range.details",
+            "$parameter.max_range.value",
+            "$parameter.max_range.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "pickup_datetime"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_date_format.value",
+            "$parameter.my_date_format.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "dropoff_datetime"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_date_format.value",
+            "$parameter.my_date_format.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "VendorID"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_pickup_location_id_value_set.value",
+            "$parameter.my_pickup_location_id_value_set.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "RatecodeID"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_regex.value",
+            "$parameter.my_regex.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "PULocationID"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_regex.value",
+            "$parameter.my_regex.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "DOLocationID"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_regex.value",
+            "$parameter.my_regex.details",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "passenger_count"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_pickup_location_id_value_set.value",
+            "$parameter.my_pickup_location_id_value_set.details",
+        ],
+    }
+
+    expected_parameter_values_for_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
+        Domain, Dict[str, Any]
+    ] = {
+        Domain(domain_type="table",): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.row_count_range.value": [7505.0, 8495.0],
+            "$parameter.row_count_range.details": {
+                "metric_configuration": {
+                    "metric_name": "table.row_count",
+                    "domain_kwargs": {},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "VendorID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [4.0, 4.0],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "VendorID"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [1.0, 1.0],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "VendorID"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "passenger_count"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [6.0, 6.0],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "passenger_count"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [0.0, 1.0],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "passenger_count"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "trip_distance"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [37.62, 57.85],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "trip_distance"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [0.0, 0.0],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "trip_distance"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "RatecodeID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [5.0, 6.0],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "RatecodeID"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [1.0, 1.0],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "RatecodeID"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "PULocationID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [265.0, 265.0],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "PULocationID"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [1.0, 1.0],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "PULocationID"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "DOLocationID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [265.0, 265.0],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "DOLocationID"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [1.0, 1.0],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "DOLocationID"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "payment_type"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [4.0, 4.0],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "payment_type"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [1.0, 1.0],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "payment_type"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "fare_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [228.94, 2990.05],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "fare_amount"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [-51.84, -21.16],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "fare_amount"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "extra"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [4.51, 6.99],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "extra"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [-36.53, -1.18],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "extra"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "mta_tax"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [0.69, 37.32],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "mta_tax"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [-0.5, -0.5],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "mta_tax"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "tip_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [46.84, 74.86],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "tip_amount"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [0.0, 0.0],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "tip_amount"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "tolls_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [26.4, 497.67],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "tolls_amount"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [0.0, 0.0],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "tolls_amount"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "improvement_surcharge"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [0.3, 0.3],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "improvement_surcharge"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [-0.3, -0.3],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "improvement_surcharge"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "total_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [550.18, 2992.47],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "total_amount"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [-52.66, -24.44],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "total_amount"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "congestion_surcharge"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.max_range.value": [0.01, 2.49],
+            "$parameter.max_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.max",
+                    "domain_kwargs": {"column": "congestion_surcharge"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+            "$parameter.min_range.value": [-2.49, -0.01],
+            "$parameter.min_range.details": {
+                "metric_configuration": {
+                    "metric_name": "column.min",
+                    "domain_kwargs": {"column": "congestion_surcharge"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "pickup_datetime"},
+            details=None,
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_date_format.value": "%Y-%m-%d %H:%M:%S",
+            "$parameter.my_date_format.details": {
+                "success_ratio": 1.0,
+                "candidate_strings": {"%Y-%m-%d %H:%M:%S": 1.0, "%y-%m-%d": 0.0},
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "dropoff_datetime"},
+            details=None,
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_date_format.value": "%Y-%m-%d %H:%M:%S",
+            "$parameter.my_date_format.details": {
+                "success_ratio": 1.0,
+                "candidate_strings": {"%Y-%m-%d %H:%M:%S": 1.0, "%y-%m-%d": 0.0},
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "VendorID"},
+            details=None,
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_pickup_location_id_value_set.value": [1, 2, 4],
+            "$parameter.my_pickup_location_id_value_set.details": {
+                "metric_configuration": {
+                    "metric_name": "column.distinct_values",
+                    "domain_kwargs": {"column": "VendorID"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "RatecodeID"},
+            details=None,
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_regex.value": "^\\d{1}$",
+            "$parameter.my_regex.details": {
+                "success_ratio": 1.0,
+                "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "PULocationID"},
+            details=None,
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_regex.value": "^\\d{1}$",
+            "$parameter.my_regex.details": {
+                "success_ratio": 1.0,
+                "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "DOLocationID"},
+            details=None,
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_regex.value": "^\\d{1}$",
+            "$parameter.my_regex.details": {
+                "success_ratio": 1.0,
+                "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+            },
+        },
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "passenger_count"},
+            details=None,
+        ): {
+            "$variables": {
+                "jan_feb_2019_monthly_tripdata_batch_request": {
+                    "datasource_name": "taxi_pandas",
+                    "data_connector_name": "monthly",
+                    "data_asset_name": "my_reports",
+                    "data_connector_query": {"index": ":-1"},
+                },
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_pickup_location_id_value_set.value": [0, 1, 2, 3, 4, 5, 6],
+            "$parameter.my_pickup_location_id_value_set.details": {
+                "metric_configuration": {
+                    "metric_name": "column.distinct_values",
+                    "domain_kwargs": {"column": "passenger_count"},
+                    "metric_value_kwargs": None,
+                    "metric_dependencies": None,
+                },
+                "num_batches": 2,
+            },
+        },
+    }
 
     return {
         "profiler_config": verbose_profiler_config,
         "test_configuration_oneshot_estimator": {
             "expectation_suite_name": expectation_suite_name_oneshot_estimator,
             "expected_expectation_suite": expected_expectation_suite_oneshot_estimator,
+            "expected_fixture_fully_qualified_parameter_names_by_domain": expected_fixture_fully_qualified_parameter_names_by_domain_oneshot_estimator,
+            "expected_parameter_values_for_fully_qualified_parameter_names_by_domain": expected_parameter_values_for_fully_qualified_parameter_names_by_domain_oneshot_estimator,
         },
     }
 
@@ -3884,7 +5531,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         verbose_profiler_config = f.read()
 
     expectation_suite_name_bootstrap_estimator: str = (
-        "bobby_columnar_table_multi_batch_bootstrap_estimator"
+        "bobster_columnar_table_multi_batch_bootstrap_estimator"
     )
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
@@ -3938,7 +5585,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     of a batch sampled from a normal distribution with the mean of 5,000 rows and the standard deviation of 1,000 rows.
     """
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
@@ -4308,3 +5955,23 @@ def build_in_memory_runtime_context():
 @pytest.fixture
 def in_memory_runtime_context():
     return build_in_memory_runtime_context()
+
+
+@pytest.fixture
+def taxi_test_file():
+    return file_relative_path(
+        __file__,
+        os.path.join(
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "yellow_tripdata_sample_2019-01.csv",
+        ),
+    )
+
+
+@pytest.fixture
+def taxi_test_file_directory():
+    return file_relative_path(
+        __file__,
+        os.path.join("test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"),
+    )

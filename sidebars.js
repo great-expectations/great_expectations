@@ -288,7 +288,8 @@ module.exports = {
               items: [
                 'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
                 'guides/validation/advanced/how_to_implement_custom_notifications',
-                'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
+                'guides/validation/advanced/how_to_validate_data_without_a_checkpoint',
+                'guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint'
               ]
             },
             { type: 'doc', id: 'guides/validation/index', label: 'Index' }
@@ -375,6 +376,7 @@ module.exports = {
           items: [
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+            { type: 'doc', id: 'reference/customize_your_deployment' },
             { type: 'doc', id: 'reference/data_discovery' },
             { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]

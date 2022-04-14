@@ -28,8 +28,8 @@ You can read more about the core classes that make Great Expectations run in our
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../tutorials/getting_started/intro.md)
-- [Configured and loaded a Data Context](../../tutorials/getting_started/initialize_a_data_context.md)
+- [Set up a working deployment of Great Expectations](../../tutorials/getting_started/tutorial_overview.md)
+- [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
 - Configured a [Spark Datasource](../../guides/connecting_to_your_data/filesystem/spark.md)
 - Identified an in-memory Spark DataFrame that you would like to use as the data to validate **OR**
 - Identified a filesystem or S3 path to a file that contains the data you would like to use to validate.
@@ -123,8 +123,8 @@ You can read more about the core classes that make Great Expectations run in our
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../tutorials/getting_started/intro.md)
-- [Configured and loaded a Data Context](../../tutorials/getting_started/initialize_a_data_context.md)
+- [Set up a working deployment of Great Expectations](../../tutorials/getting_started/tutorial_overview.md)
+- [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
 - Configured a [Pandas/filesystem Datasource](../../guides/connecting_to_your_data/filesystem/pandas.md)
 - Identified a Pandas DataFrame that you would like to use as the data to validate.
   
