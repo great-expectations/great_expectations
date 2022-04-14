@@ -208,6 +208,7 @@ class DatePart(enum.Enum):
     YEAR = "year"
     # QUARTER = "quarter"
     MONTH = "month"
+    WEEK = "week"
     DAY = "day"
     HOUR = "hour"
     MINUTE = "minute"
@@ -1032,6 +1033,32 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             date_parts=[DatePart.YEAR, DatePart.MONTH],
         )
 
+    def split_on_year_and_month_and_day(
+        self,
+        table_name: str,
+        column_name: str,
+        batch_identifiers: dict,
+    ) -> "sa.sql.elements.BooleanClauseList":
+        """Split on year and month and day values in column_name.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+            batch_identifiers: should contain a dateutil parseable datetime whose
+                relevant date parts will be used for splitting or key values
+                of {date_part: date_part_value}.
+
+        Returns:
+            List of boolean clauses based on whether the date_part value in the
+                batch identifier matches the date_part value in the column_name column.
+        """
+        return self.split_on_date_parts(
+            table_name=table_name,
+            column_name=column_name,
+            batch_identifiers=batch_identifiers,
+            date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
+        )
+
     def split_on_year_and_week(
         self,
         table_name: str,
@@ -1232,6 +1259,27 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             table_name=table_name,
             column_name=column_name,
             date_parts=[DatePart.YEAR, DatePart.MONTH],
+        )
+
+    def get_data_for_batch_identifiers_year_and_month_and_day(
+        self, table_name: str, column_name: str
+    ) -> List[dict]:
+        """Build batch_identifiers from a column split on year and week and day.
+
+        This method builds a query to select the unique date_parts from the
+        column_name. This data can be used to build BatchIdentifiers.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            List of dicts of the form [{column_name: {"year": 2022, "month": 4, "day": 14}}]
+        """
+        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
+            table_name=table_name,
+            column_name=column_name,
+            date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
         )
 
     def get_data_for_batch_identifiers_year_and_week(
