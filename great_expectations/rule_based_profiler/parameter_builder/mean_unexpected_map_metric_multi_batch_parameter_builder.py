@@ -142,7 +142,9 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 parameters=parameters,
             )
         )
-        total_count_values: MetricValues = total_count_parameter_node.value
+        total_count_values: MetricValues = total_count_parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+        ]
 
         # Obtain null_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         null_count_parameter_builder_name: Optional[
@@ -177,7 +179,9 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 variables=variables,
                 parameters=parameters,
             )
-            null_count_values = null_count_parameter_node.value
+            null_count_values = null_count_parameter_node[
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+            ]
 
         nonnull_count_values: np.ndarray = total_count_values - null_count_values
 
@@ -197,7 +201,9 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             variables=variables,
             parameters=parameters,
         )
-        unexpected_count_values: MetricValues = parameter_node.value
+        unexpected_count_values: MetricValues = parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+        ]
 
         unexpected_count_ratio_values: np.ndarray = (
             unexpected_count_values / nonnull_count_values
@@ -207,6 +213,8 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         return Attributes(
             {
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: mean_unexpected_count_ratio,
-                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node.details,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                ],
             }
         )
