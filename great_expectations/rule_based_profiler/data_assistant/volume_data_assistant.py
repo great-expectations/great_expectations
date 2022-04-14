@@ -78,8 +78,9 @@ class VolumeDataAssistant(DataAssistant):
         # all available encodings https://altair-viz.github.io/user_guide/encoding.html
         charts: List[alt.Chart] = []
 
+        line_chart_title: str = f"{metric_label} per {x_axis_label}"
         line_chart: alt.Chart = (
-            alt.Chart(df)
+            alt.Chart(df, title=line_chart_title)
             .mark_line()
             .encode(
                 alt.X(x_axis_label, type=x_axis_type),

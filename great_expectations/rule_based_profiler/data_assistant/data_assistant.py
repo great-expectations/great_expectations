@@ -24,6 +24,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     RuleBasedProfiler,
 )
 from great_expectations.rule_based_profiler.types import (
+    ALTAIR_CONFIGURATION,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
@@ -180,6 +181,7 @@ class DataAssistant(ABC):
 
     def plot(self, charts: List[alt.Chart]):
         for c in charts:
+            c = c.configure(**ALTAIR_CONFIGURATION)
             c.display()
 
     @property
