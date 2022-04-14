@@ -1581,9 +1581,35 @@ def generate_expectation_tests(
         for c in backends:
 
             try:
-                validator_with_data = get_test_validator_with_data(
-                    c, d["data"], d["schemas"]
-                )
+                if isintstance(d["data"], list):
+                    sqlite_db_path = os.path.abspath(
+                        os.path.join(
+                            tmp_dir,
+                            "sqlite_db"
+                            + "".join(
+                                [
+                                    random.choice(string.ascii_letters + string.digits)
+                                    for _ in range(8)
+                                ]
+                            )
+                            + ".db",
+                        )
+                    )
+                    for dataset in d["data"]:
+                        datasets.append(
+                            get_test_validator_with_data(
+                                c,
+                                dataset["data"],
+                                dataset.get("schemas"),
+                                table_name=dataset.get("dataset_name"),
+                                sqlite_db_path=sqlite_db_path,
+                            )
+                        )
+                    validator_with_data = datasets[0]
+                else:
+                    validator_with_data = get_test_validator_with_data(
+                        c, d["data"], d["schemas"]
+                    )
             except Exception as e:
                 # Adding these print staments for build_gallery.py's console output
                 print("\n\n[[ Problem calling get_test_validator_with_data ]]")
