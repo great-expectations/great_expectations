@@ -17,6 +17,7 @@ from great_expectations.rule_based_profiler.types import (
     DataAssistantResult,
     Domain,
 )
+from great_expectations.types import Colors
 
 
 class VolumeDataAssistant(DataAssistant):
@@ -81,7 +82,7 @@ class VolumeDataAssistant(DataAssistant):
         line_chart_title: str = f"{metric_label} per {x_axis_label}"
         line_chart: alt.Chart = (
             alt.Chart(df, title=line_chart_title)
-            .mark_line()
+            .mark_line(color=Colors.BLUE_2.value)
             .encode(
                 alt.X(x_axis_label, type=x_axis_type),
                 alt.Y(metric_label, type=metric_type),
