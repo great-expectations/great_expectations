@@ -1,5 +1,4 @@
 import pandas as pd
-import pyspark.sql.dataframe
 import pytest
 
 import great_expectations
