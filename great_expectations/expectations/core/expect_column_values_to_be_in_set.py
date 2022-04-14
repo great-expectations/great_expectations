@@ -138,6 +138,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             name="value_set_estimator",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
+            include_batch_id_with_metric_value=False,
             evaluation_parameter_builder_configs=None,
             json_serialize=True,
         )

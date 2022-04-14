@@ -43,6 +43,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         null_count_parameter_builder_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
+        include_batch_id_with_metric_value: Union[str, bool] = False,
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
@@ -64,6 +65,8 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             null_count_parameter_builder_name: name of parameter that computes null_count (of domain values in Batch).
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
+            include_batch_id_with_metric_value: if False (default), then omit "batch_id" from output metric result;
+            otherwise, include "batch_id" attribution for each metric result (incompatible with "reduce_scalar_metric").
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
@@ -81,6 +84,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             replace_nan_with_zero=True,
             reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            include_batch_id_with_metric_value=include_batch_id_with_metric_value,
             json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,

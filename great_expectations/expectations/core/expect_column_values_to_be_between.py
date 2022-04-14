@@ -119,6 +119,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             enforce_numeric_metric=True,
             replace_nan_with_zero=True,
             reduce_scalar_metric=True,
+            include_batch_id_with_metric_value=False,
             evaluation_parameter_builder_configs=None,
             json_serialize=True,
         )
@@ -134,6 +135,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             enforce_numeric_metric=True,
             replace_nan_with_zero=True,
             reduce_scalar_metric=True,
+            include_batch_id_with_metric_value=False,
             evaluation_parameter_builder_configs=None,
             json_serialize=True,
         )
