@@ -116,7 +116,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING: dict = {
                 "split_on_year": "get_data_for_batch_identifiers_year",
                 "split_on_year_and_month": "get_data_for_batch_identifiers_year_and_month",
-                "split_on_year_and_week": "get_data_for_batch_identifiers_year_and_week",
                 "split_on_year_and_month_and_day": "get_data_for_batch_identifiers_year_and_month_and_day",
                 "split_on_date_parts": "get_data_for_batch_identifiers_for_split_on_date_parts",
             }
