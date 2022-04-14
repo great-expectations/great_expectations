@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
+import altair as alt
+
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.data_context import BaseDataContext
@@ -175,6 +177,10 @@ class DataAssistant(ABC):
                 include_citation=include_citation,
             ),
         )
+
+    def plot(self, charts: List[alt.Chart]):
+        for c in charts:
+            c.show()
 
     @property
     def name(self) -> str:

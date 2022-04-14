@@ -1,3 +1,4 @@
+from numbers import Number
 from typing import Any, Dict, List, Union
 
 import altair as alt
@@ -13,7 +14,11 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 )
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    DataAssistantResult,
+    Domain,
 )
+
+alt.renderers.enable("altair_viewer")
 
 
 class VolumeDataAssistant(DataAssistant):
@@ -45,28 +50,47 @@ class VolumeDataAssistant(DataAssistant):
         """
         super().build()
 
-    def plot(self):
+    def plot(self, data_assistant_result: DataAssistantResult):
         """
-        VolumeDataAssistant-specific plots are defined with Altair and an empty dataset and then passed to
-        "super().plot()" as Vega-Lite json schema.
+        VolumeDataAssistant-specific plots are defined with Altair and passed to "super().plot()" for display.
         """
-        x_axis: str = "batch"
-        y_axis: str = "table row_count"
-        x_axis_type: str = "nominal"
-        y_axis_type: str = "quantitative"
+        metric_name: str = self.metrics_parameter_builders_by_domain_type[
+            MetricDomainTypes.TABLE
+        ][0]["metric_name"]
+        metric_label = metric_name.replace(".", " ").replace("_", " ").title()
+        x_axis_label: str = "Batch"
 
-        data = pd.DataFrame(columns=[x_axis, y_axis])
-        table_row_count_chart: alt.Chart = (
-            alt.Chart(data)
+        # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
+        x_axis_type: str = "nominal"
+        metric_type: str = "quantitative"
+
+        fully_qualified_parameter_name: str = (
+            self.metrics_parameter_builders_by_domain_type[MetricDomainTypes.TABLE][0][
+                "fully_qualified_parameter_name"
+            ]
+        )
+        data: list[Number] = data_assistant_result.metrics[
+            Domain(
+                domain_type="table",
+            )
+        ][f"{fully_qualified_parameter_name}.value"]
+        df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
+        df[x_axis_label] = df.index + 1
+
+        # all available encodings https://altair-viz.github.io/user_guide/encoding.html
+        charts: List[alt.Chart] = []
+
+        line_chart: alt.Chart = (
+            alt.Chart(df)
             .mark_line()
             .encode(
-                alt.X(x_axis, type=x_axis_type),
-                alt.Y(y_axis, type=y_axis_type),
+                alt.X(x_axis_label, type=x_axis_type),
+                alt.Y(metric_label, type=metric_type),
             )
         )
-        print(type(table_row_count_chart))
+        charts.append(line_chart)
 
-        return None
+        super().plot(charts=charts)
 
     @property
     def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
