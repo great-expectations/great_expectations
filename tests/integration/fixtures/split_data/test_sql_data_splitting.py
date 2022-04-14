@@ -183,7 +183,7 @@ for test_case in test_cases:
         assets={
             data_asset_name: {
                 "splitter_method": test_case.splitter_method_name,
-                "splitter_kwargs": {"column_name": column_name},
+                "splitter_kwargs": test_case.splitter_kwargs,
             }
         },
     )
