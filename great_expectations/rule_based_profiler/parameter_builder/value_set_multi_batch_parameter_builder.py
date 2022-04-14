@@ -129,7 +129,9 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
                 message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({parameter_node.value} found).'
             )
 
-        attributed_resolved_metrics: AttributedResolvedMetrics = parameter_node.value[0]
+        attributed_resolved_metrics: AttributedResolvedMetrics = (
+            AttributedResolvedMetrics(**parameter_node.value[0])
+        )
         metric_values: MetricValues = attributed_resolved_metrics.metric_values
 
         return (
