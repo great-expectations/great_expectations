@@ -141,7 +141,26 @@ DAYS_IN_TAXI_DATA = (
             12,
             30,
             MONTH_BATCH_IDENTIFIER_DATA,
-            id="split_on_date_parts: month",
+            id="split_on_date_parts: DatePart.MONTH",
+        ),
+        pytest.param(
+            "split_on_date_parts",
+            {"column_name": "pickup_datetime", "date_parts": ["month"]},
+            12,
+            30,
+            MONTH_BATCH_IDENTIFIER_DATA,
+            id="split_on_date_parts: month as str",
+        ),
+        pytest.param(
+            "split_on_date_parts",
+            {"column_name": "pickup_datetime", "date_parts": [DatePart.YEAR, "month"]},
+            36,
+            10,
+            [
+                {DatePart.YEAR.value: dt.year, DatePart.MONTH.value: dt.month}
+                for dt in MONTHS_IN_TAXI_DATA
+            ],
+            id="split_on_date_parts: DatePart.YEAR, month as str",
         )
         # pytest.param(
         #     "split_on_year_and_week",

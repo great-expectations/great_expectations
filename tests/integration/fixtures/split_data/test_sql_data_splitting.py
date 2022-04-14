@@ -1,6 +1,5 @@
-import datetime
 from dataclasses import dataclass
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 import pandas as pd
 import sqlalchemy as sa
@@ -89,16 +88,6 @@ MONTH_BATCH_IDENTIFIER_DATA: List[dict] = [
 
 TEST_COLUMN: str = "pickup_datetime"
 
-# Since taxi data does not contain all weeks, we need to introspect the data to build the fixture:
-YEAR_WEEK_BATCH_IDENTIFIER_DATA: List[dict] = list({val[0]: val[1], val[2]: val[3]} for val in {
-    (DatePart.YEAR.value, dt.year, DatePart.WEEK.value, dt.week) for dt in test_df[TEST_COLUMN]
-})
-YEAR_WEEK_BATCH_IDENTIFIER_DATA: List[dict] = sorted(
-    YEAR_WEEK_BATCH_IDENTIFIER_DATA, key=lambda x: (
-        x[DatePart.YEAR.value],
-        x[DatePart.WEEK.value],
-    )
-)
 
 # Since taxi data does not contain all days, we need to introspect the data to build the fixture:
 YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = list({val[0]: val[1], val[2]: val[3], val[4]: val[5]} for val in {
@@ -150,7 +139,24 @@ test_cases: List[TestCase] = [
         num_expected_batch_definitions=12,
         num_expected_rows_in_first_batch_definition=30,
         expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA
+    ),
+    # date_parts as a string (with mixed case):
+    TestCase(
+        splitter_method_name="split_on_date_parts",
+        splitter_kwargs={"column_name": TEST_COLUMN, "date_parts": ["mOnTh"]},
+        num_expected_batch_definitions=12,
+        num_expected_rows_in_first_batch_definition=30,
+        expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA
+    ),
+    # Mix of types of date_parts:
+    TestCase(
+        splitter_method_name="split_on_date_parts",
+        splitter_kwargs={"column_name": TEST_COLUMN, "date_parts": [DatePart.YEAR, "month"]},
+        num_expected_batch_definitions=36,
+        num_expected_rows_in_first_batch_definition=10,
+        expected_pickup_datetimes=YEAR_MONTH_BATCH_IDENTIFIER_DATA
     )
+
 ]
 
 

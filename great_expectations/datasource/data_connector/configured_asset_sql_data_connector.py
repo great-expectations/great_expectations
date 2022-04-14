@@ -17,7 +17,6 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import DatePart
 
 try:
     import sqlalchemy as sa
