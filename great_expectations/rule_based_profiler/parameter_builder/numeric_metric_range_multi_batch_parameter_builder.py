@@ -19,6 +19,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     Attributes,
@@ -249,7 +250,9 @@ detected.
         )
         metric_values: MetricValues = (
             AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
-                attributed_metric_values=parameter_node.attributed_value
+                attributed_metric_values=parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
             )
         )
 
@@ -298,7 +301,9 @@ detected.
         return Attributes(
             {
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_value_range,
-                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node.details,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                ],
             }
         )
 
