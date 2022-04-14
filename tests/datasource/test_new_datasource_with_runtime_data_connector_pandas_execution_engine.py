@@ -321,7 +321,7 @@ def test_batch_data_pandas_execution_engine_set_data_asset_name_for_runtime_data
     assert batch_list[0].batch_definition.data_asset_name == "my_runtime_data_asset"
 
 
-def test_batch_data_pandas_execution_engine_get_available_data_asset_names(
+def test_pandas_execution_engine_get_available_data_asset_names(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):
     expected_available_data_asset_names: Dict[List[str]] = {

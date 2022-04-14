@@ -55,7 +55,7 @@ def test_get_batch_successful_specification_sqlalchemy_engine_named_asset(
     assert batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
-def test_get_batch_successful_specification_pandas_engine_named_asset_two_batch_definition(
+def test_get_batch_successful_specification_pandas_engine_named_asset_two_batch_requests(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: "DataContext" = data_context_with_datasource_sqlalchemy_engine
@@ -430,7 +430,7 @@ def test_get_validator_wrong_runtime_parameters_sqlalchemy_engine(
         )
 
 
-def test_get_validator_successful_specification_sqlalchemy_engine_named_asset_file_path(
+def test_get_validator_successful_specification_sqlalchemy_engine_named_asset(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: "DataContext" = data_context_with_datasource_sqlalchemy_engine

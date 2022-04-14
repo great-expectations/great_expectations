@@ -53,11 +53,8 @@ def data_context_with_datasource_spark_engine_batch_spec_passthrough(
 # Tests with data passed in as batch_data
 #########################################
 
-
 # Tests with SparkDFExecutionEngine : batch_data
-
-
-def test_get_batch_successful_specification_sparkdf_engine(
+def test_batch_data_get_batch_successful_specification_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context = data_context_with_datasource_spark_engine
@@ -76,7 +73,7 @@ def test_get_batch_successful_specification_sparkdf_engine(
     assert isinstance(batch_list[0], Batch)
 
 
-def test_get_batch_successful_specification_sparkdf_engine_named_asset(
+def test_batch_data_get_batch_successful_specification_sparkdf_engine_named_asset(
     data_context_with_datasource_spark_engine, test_df_spark
 ):
     context: "DataContext" = data_context_with_datasource_spark_engine
@@ -98,7 +95,7 @@ def test_get_batch_successful_specification_sparkdf_engine_named_asset(
     assert batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
-def test_get_batch_successful_specification_sparkdf_engine_named_asset_two_batch_definition(
+def test_batch_data_get_batch_successful_specification_sparkdf_engine_named_asset_two_batch_requests(
     data_context_with_datasource_spark_engine, test_df_spark
 ):
     context = data_context_with_datasource_spark_engine
@@ -135,7 +132,7 @@ def test_get_batch_successful_specification_sparkdf_engine_named_asset_two_batch
     assert batch_2.batch_definition.batch_identifiers == batch_identifiers
 
 
-def test_get_batch_ambiguous_parameter_sparkdf_engine(
+def test_batch_data_get_batch_ambiguous_parameter_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     """
@@ -160,7 +157,7 @@ def test_get_batch_ambiguous_parameter_sparkdf_engine(
         )
 
 
-def test_get_batch_failed_specification_type_error_sparkdf_engine(
+def test_batch_data_get_batch_failed_specification_type_error_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context = data_context_with_datasource_spark_engine
@@ -179,7 +176,7 @@ def test_get_batch_failed_specification_type_error_sparkdf_engine(
         )
 
 
-def test_get_batch_failed_specification_no_batch_identifier_sparkdf_engine(
+def test_batch_data_get_batch_failed_specification_no_batch_identifier_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context = data_context_with_datasource_spark_engine
@@ -211,7 +208,7 @@ def test_get_batch_failed_specification_no_batch_identifier_sparkdf_engine(
         )
 
 
-def test_get_batch_failed_specification_no_runtime_parameters_sparkdf_engine(
+def test_batch_data_get_batch_failed_specification_no_runtime_parameters_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context = data_context_with_datasource_spark_engine
@@ -243,7 +240,7 @@ def test_get_batch_failed_specification_no_runtime_parameters_sparkdf_engine(
         )
 
 
-def test_get_batch_failed_specification_incorrect_batch_spec_passthrough_sparkdf_engine(
+def test_batch_data_get_batch_failed_specification_incorrect_batch_spec_passthrough_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context = data_context_with_datasource_spark_engine
@@ -286,7 +283,7 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_sparkdf_engine(
         )
 
 
-def test_get_validator_successful_specification_sparkdf_engine(
+def test_batch_data_get_validator_successful_specification_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context = data_context_with_datasource_spark_engine
@@ -307,7 +304,7 @@ def test_get_validator_successful_specification_sparkdf_engine(
     assert isinstance(my_validator, Validator)
 
 
-def test_get_validator_ambiguous_parameter_sparkdf_engine(
+def test_batch_data_get_validator_ambiguous_parameter_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     """
@@ -359,7 +356,7 @@ def test_get_validator_wrong_type_sparkdf_engine(
         )
 
 
-def test_get_validator_failed_specification_no_batch_identifier_sparkdf_engine(
+def test_batch_data_get_validator_failed_specification_no_batch_identifier_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context = data_context_with_datasource_spark_engine
@@ -394,7 +391,7 @@ def test_get_validator_failed_specification_no_batch_identifier_sparkdf_engine(
         )
 
 
-def test_get_validator_failed_specification_incorrect_batch_spec_passthrough_sparkdf_engine(
+def test_batch_data_get_validator_failed_specification_incorrect_batch_spec_passthrough_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context = data_context_with_datasource_spark_engine
@@ -417,7 +414,7 @@ def test_get_validator_failed_specification_incorrect_batch_spec_passthrough_spa
         )
 
 
-def test_get_validator_failed_specification_no_runtime_parameters_sparkdf_engine(
+def test_batch_data_get_validator_failed_specification_no_runtime_parameters_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context = data_context_with_datasource_spark_engine
@@ -450,7 +447,7 @@ def test_get_validator_failed_specification_no_runtime_parameters_sparkdf_engine
         )
 
 
-def test_get_validator_wrong_runtime_parameters_sparkdf_engine(
+def test_batch_data_get_validator_wrong_runtime_parameters_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session
 ):
     context = data_context_with_datasource_spark_engine
@@ -472,7 +469,7 @@ def test_get_validator_wrong_runtime_parameters_sparkdf_engine(
         )
 
 
-def test_get_validator_successful_specification_sparkdf_engine_named_asset(
+def test_batch_data_get_validator_successful_specification_sparkdf_engine_named_asset(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: "DataContext" = data_context_with_datasource_spark_engine
@@ -505,7 +502,7 @@ def test_get_validator_successful_specification_sparkdf_engine_named_asset(
 # Tests with SparkDF Execution Engine
 
 
-def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_success_file_path(
+def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_request_success(
     data_context_with_datasource_spark_engine,
     taxi_test_file,
     spark_session,
@@ -537,7 +534,7 @@ def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_succe
     assert len(batch.data.dataframe.columns) == 18
 
 
-def test_get_batch_spark_directory_fail_no_reader_method(
+def test_file_path_get_batch_spark_directory_fail_no_reader_method(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
     context = data_context_with_datasource_spark_engine
@@ -555,7 +552,7 @@ def test_get_batch_spark_directory_fail_no_reader_method(
         )
 
 
-def test_get_batch_spark_directory_fail_wrong_reader_method(
+def test_file_path_get_batch_spark_directory_fail_wrong_reader_method(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
     context = data_context_with_datasource_spark_engine
@@ -577,7 +574,7 @@ def test_get_batch_spark_directory_fail_wrong_reader_method(
         )
 
 
-def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_success_file_path_no_header(
+def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_request_success_file_path_no_header(
     data_context_with_datasource_spark_engine,
     taxi_test_file,
     spark_session,
@@ -608,7 +605,7 @@ def test_sparkdf_execution_engine_batch_definition_list_from_batch_request_succe
     assert len(batch.data.dataframe.columns) == 18
 
 
-def test_get_batch_successful_specification_spark_directory(
+def test_file_path_get_batch_successful_specification_spark_directory(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
     context = data_context_with_datasource_spark_engine
@@ -638,7 +635,7 @@ def test_get_batch_successful_specification_spark_directory(
     assert len(batch.data.dataframe.columns) == 18
 
 
-def test_get_batch_successful_specification_spark_directory_batch_spec_passthrough_in_config(
+def test_file_path_get_batch_successful_specification_spark_directory_batch_spec_passthrough_in_config(
     data_context_with_datasource_spark_engine_batch_spec_passthrough,
     taxi_test_file_directory,
     spark_session,
@@ -679,7 +676,7 @@ def test_get_batch_successful_specification_spark_directory_batch_spec_passthrou
     assert len(batch.data.dataframe.columns) == 18
 
 
-def test_get_batch_successful_specification_spark_directory_no_header(
+def test_file_path_get_batch_successful_specification_spark_directory_no_header(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
     context = data_context_with_datasource_spark_engine
@@ -708,7 +705,7 @@ def test_get_batch_successful_specification_spark_directory_no_header(
     assert len(batch.data.dataframe.columns) == 18
 
 
-def test_get_batch_spark_fail_wrong_file_path(
+def test_file_path_get_batch_spark_fail_wrong_file_path(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
     context = data_context_with_datasource_spark_engine
@@ -731,7 +728,7 @@ def test_get_batch_spark_fail_wrong_file_path(
         )
 
 
-def test_get_batch_successful_specification_sparkdf_engine_named_asset_file_path(
+def test_file_path_get_batch_successful_specification_sparkdf_engine_named_asset(
     data_context_with_datasource_spark_engine, taxi_test_file
 ):
     context = data_context_with_datasource_spark_engine
@@ -752,7 +749,43 @@ def test_get_batch_successful_specification_sparkdf_engine_named_asset_file_path
     assert batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
-def test_get_validator_successful_specification_sparkdf_engine_named_asset_file_path(
+def test_file_path_get_batch_successful_specification_sparkdf_engine_named_asset_two_batch_requests(
+    data_context_with_datasource_spark_engine, taxi_test_file
+):
+    context = data_context_with_datasource_spark_engine
+    batch_identifiers: dict = {"day": 1, "month": 12}
+    batch_list: list = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="default_runtime_data_connector_name",
+            data_asset_name="asset_a",
+            runtime_parameters={"path": taxi_test_file},
+            batch_identifiers=batch_identifiers,
+        )
+    )
+    assert len(batch_list) == 1
+    assert isinstance(batch_list[0], Batch)
+
+    batch_1: Batch = batch_list[0]
+    assert batch_1.batch_definition.batch_identifiers == batch_identifiers
+
+    batch_identifiers: dict = {"day": 2, "month": 12}
+    batch_list: list = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="default_runtime_data_connector_name",
+            data_asset_name="asset_a",
+            runtime_parameters={"path": taxi_test_file},
+            batch_identifiers=batch_identifiers,
+        )
+    )
+    assert len(batch_list) == 1
+    assert isinstance(batch_list[0], Batch)
+    batch_2: Batch = batch_list[0]
+    assert batch_2.batch_definition.batch_identifiers == batch_identifiers
+
+
+def test_file_path_get_validator_successful_specification_sparkdf_engine_named_asset(
     data_context_with_datasource_spark_engine, taxi_test_file
 ):
     context = data_context_with_datasource_spark_engine

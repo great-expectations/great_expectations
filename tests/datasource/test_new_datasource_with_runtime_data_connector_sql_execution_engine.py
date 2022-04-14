@@ -380,7 +380,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_query(
     assert isinstance(my_batch_1.data.selectable, sqlalchemy.Table)
 
 
-def test_get_batch_definition_list_from_batch_request_length_one_from_query_named_asset(
+def test_get_batch_list_from_batch_request_length_one_from_query_named_asset(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     # interacting with the database using query
@@ -412,7 +412,7 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_query_name
     assert isinstance(my_batch_1.data.selectable, sqlalchemy.Table)
 
 
-def test_get_batch_definition_list_from_batch_request_length_one_from_query_named_asset_two_batch_requests(
+def test_get_batch_list_from_batch_request_length_one_from_query_named_asset_two_batch_requests(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     # interacting with the database using query

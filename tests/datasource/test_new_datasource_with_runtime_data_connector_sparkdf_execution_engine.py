@@ -470,7 +470,7 @@ def test_batch_data_sparkedf_execution_engine_get_batch_list_with_named_asset(
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
-def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_batch_requests(
+def test_batch_data_sparkdf_execution_engine_get_batch_list_with_named_asset_two_batch_requests(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
     test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
@@ -535,8 +535,6 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_
     assert len(my_batch_2.data.dataframe.columns) == 2
     assert my_batch_2.batch_definition.batch_identifiers == batch_identifiers
 
-
-# TODO: adding whether warning comes out
 
 ###################################
 # Tests with data passed in as path
@@ -835,7 +833,7 @@ def test_file_path_sparkedf_execution_engine_get_batch_list_with_named_asset(
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
-def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_two_batch_requests(
+def test_file_path_sparkdf_execution_engine_get_batch_list_with_named_asset_two_batch_requests(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, taxi_test_file
 ):
     batch_identifiers: dict = {"day": 1, "month": 12}
