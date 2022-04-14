@@ -70,6 +70,13 @@ class RuntimeDataConnector(DataConnector):
         return self._assets
 
     def _build_assets_from_config(self, config: Dict[str, dict]):
+        """
+        Read in asset configurations from RuntimeDataConnector. Build and load into assets property, and load
+        batch_identifiers.
+
+        Args:
+            config (dict): Asset configurations at the DataConnector-level
+        """
         for name, asset_config in config.items():
             if asset_config is None:
                 asset_config = {}
@@ -89,10 +96,23 @@ class RuntimeDataConnector(DataConnector):
         batch_identifiers: List[str],
         data_asset_name: Optional[str] = None,
     ):
+        """
+        Handles batch_identifiers that are configured at the DataConnector or Asset-level.
+        batch_identifiers are added to the `self._batch_identifiers` cache.
+
+            - Asset-level batch_identifiers are keyed by data_asset_name
+            - DataConnector-level batch_identifiers are keyed by DataConnector-name
+
+        Using DataConnector-level batch_identifiers also comes with a Deprecation warning.
+
+        Args:
+            batch_identifiers:  batch_identifiers from either DataConnector or Asset-level
+            data_asset_name: if this value is not None, then we know the batch_identifiers are Asset-level
+        """
         if data_asset_name:
             if not batch_identifiers:
                 raise ge_exceptions.DataConnectorError(
-                    f"""RuntimeDataConnector "{self.name}" requires batch_identifiers to be configured when speciying Assets."""
+                    f"""RuntimeDataConnector "{self.name}" requires batch_identifiers to be configured when specifying Assets."""
                 )
             self._batch_identifiers[data_asset_name] = batch_identifiers
         else:
@@ -103,7 +123,7 @@ class RuntimeDataConnector(DataConnector):
             if batch_identifiers:
                 # deprecated 0.15.01
                 warnings.warn(
-                    "Specifying batch_identifiers as part of RuntimeDataConnector config is deprecated as of v 0.15.01. Please configure Assets instead.",
+                    "Specifying batch_identifiers as part of RuntimeDataConnector config is deprecated as of v0.15.01 and will be removed by v0.17. Please configure Assets instead.",
                     DeprecationWarning,
                 )
                 self._batch_identifiers[self.name] = batch_identifiers
@@ -349,6 +369,24 @@ class RuntimeDataConnector(DataConnector):
     def _validate_batch_identifiers(
         self, data_asset_name: str, batch_identifiers: dict
     ):
+        """
+        Called by _get_batch_definition_list_from_batch_request() ie, when a RuntimeBatchRequest is passed in.
+
+        The batch_identifiers in the RuntimeBatchRequest will need to validated against two types of batch_identifiers.
+            1. Defined at the Asset-level
+            2. Defined at the DataConnector-level
+
+        - Asset-level batch_identifiers should only be accessible from the assets that are configured as part of the DataConnector config.
+        - DataConnector-level batch_identifiers should only be accessible from data assets built at runtime, named by the RuntimeBatchRequest.
+
+        This method will validate the two types of batch_identifiers by calling
+            - _validate_asset_level_batch_identifiers()
+            - _validate_data_connector_level_batch_identifiers()
+
+        Args:
+            data_asset_name: name specified by RuntimeBatchRequest
+            batch_identifiers: identifiers to validate
+        """
         configured_asset_names: List[str] = list(self.assets.keys())
         if data_asset_name in configured_asset_names:
             self._validate_asset_level_batch_identifiers(
@@ -362,6 +400,9 @@ class RuntimeDataConnector(DataConnector):
     def _validate_asset_level_batch_identifiers(
         self, data_asset_name: str, batch_identifiers: dict
     ):
+        """
+        Check that batch_identifiers passed in are an exact match to the ones configured at the Asset-level
+        """
         asset: Asset = self.assets[data_asset_name]
         batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
         if not set(batch_identifiers_keys) == set(asset.batch_identifiers):
@@ -372,6 +413,9 @@ class RuntimeDataConnector(DataConnector):
             )
 
     def _validate_data_connector_level_batch_identifiers(self, batch_identifiers: dict):
+        """
+        Check that batch_identifiers passed in are a subset of the ones configured at the DataConnector-level
+        """
         batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
         if not set(batch_identifiers_keys) <= set(self._batch_identifiers[self.name]):
             raise ge_exceptions.DataConnectorError(
@@ -380,19 +424,19 @@ class RuntimeDataConnector(DataConnector):
                 """
             )
 
-    # TODO: tests that test whether data_references get updated, and both paths.
     def self_check(self, pretty_print=True, max_examples=3):
         """
-        Overrides the self_check method for RuntimeDataConnector. Normally the `self_check()` method will check
-        the configuration of the DataConnector by doing the following :
-        1. refresh or create data_reference_cache
-        2. print batch_definition_count and example_data_references for each data_asset_names
-        3. also print unmatched data_references, and allow the user to modify the regex or glob configuration if necessary
-        However, in the case of the RuntimeDataConnector there is no example data_asset_names until the data is passed
-        in through the RuntimeBatchRequest. Therefore, there will be a note displayed to the user saying that
-        RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest.
-        The exception is if the user configured named Assets as part of the RuntimeDataConnector configuration. In that
-        case we will output them as available data_asset_names
+        Overrides the self_check method for RuntimeDataConnector. This method currently supports 2 modes of usage:
+            1. user has configured Assets at the RuntimeDataConnector-level (preferred).
+            2. user has not configured Assets and will pass in `data_asset_name` with the RuntimeBatchRequest.
+
+        In the case of #1, the get_available_data_asset_names() will return the list of configured Assets and base
+        self_check() will be called.
+
+        In the case of #2  there are no example data_asset_names until the data is passed in through the
+        RuntimeBatchRequest. Therefore, there will be a note displayed to the user saying that RuntimeDataConnector
+        will not have data_asset_names until they are passed in through RuntimeBatchRequest.
+
         Args:
             pretty_print (bool): should the output be printed?
             max_examples (int): how many data_references should be printed?
