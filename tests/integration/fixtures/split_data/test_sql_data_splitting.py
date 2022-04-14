@@ -117,7 +117,7 @@ YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA: List[dict] = sorted(
 
 
 @dataclass
-class TestCase:
+class SqlSplittingTestCase:
     splitter_method_name: str
     splitter_kwargs: dict
     num_expected_batch_definitions: int
@@ -125,29 +125,29 @@ class TestCase:
     expected_pickup_datetimes: List[dict]
 
 
-test_cases: List[TestCase] = [
-    TestCase(
+test_cases: List[SqlSplittingTestCase] = [
+    SqlSplittingTestCase(
         splitter_method_name="split_on_year",
         splitter_kwargs={"column_name": TEST_COLUMN},
         num_expected_batch_definitions=3,
         num_expected_rows_in_first_batch_definition=120,
         expected_pickup_datetimes=YEAR_BATCH_IDENTIFIER_DATA,
     ),
-    TestCase(
+    SqlSplittingTestCase(
         splitter_method_name="split_on_year_and_month",
         splitter_kwargs={"column_name": TEST_COLUMN},
         num_expected_batch_definitions=36,
         num_expected_rows_in_first_batch_definition=10,
         expected_pickup_datetimes=YEAR_MONTH_BATCH_IDENTIFIER_DATA,
     ),
-    TestCase(
+    SqlSplittingTestCase(
         splitter_method_name="split_on_year_and_month_and_day",
         splitter_kwargs={"column_name": TEST_COLUMN},
         num_expected_batch_definitions=299,
         num_expected_rows_in_first_batch_definition=2,
         expected_pickup_datetimes=YEAR_MONTH_DAY_BATCH_IDENTIFIER_DATA,
     ),
-    TestCase(
+    SqlSplittingTestCase(
         splitter_method_name="split_on_date_parts",
         splitter_kwargs={"column_name": TEST_COLUMN, "date_parts": [DatePart.MONTH]},
         num_expected_batch_definitions=12,
@@ -155,7 +155,7 @@ test_cases: List[TestCase] = [
         expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA,
     ),
     # date_parts as a string (with mixed case):
-    TestCase(
+    SqlSplittingTestCase(
         splitter_method_name="split_on_date_parts",
         splitter_kwargs={"column_name": TEST_COLUMN, "date_parts": ["mOnTh"]},
         num_expected_batch_definitions=12,
@@ -163,7 +163,7 @@ test_cases: List[TestCase] = [
         expected_pickup_datetimes=MONTH_BATCH_IDENTIFIER_DATA,
     ),
     # Mix of types of date_parts:
-    TestCase(
+    SqlSplittingTestCase(
         splitter_method_name="split_on_date_parts",
         splitter_kwargs={
             "column_name": TEST_COLUMN,
