@@ -16,7 +16,7 @@ yaml = YAMLHandler()
 def test_get_batch_successful_specification_sqlalchemy_engine(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context = data_context_with_datasource_sqlalchemy_engine
+    context: "DataContext" = data_context_with_datasource_sqlalchemy_engine
     batch_list: list = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
             datasource_name="my_datasource",
@@ -30,6 +30,68 @@ def test_get_batch_successful_specification_sqlalchemy_engine(
     )
     assert len(batch_list) == 1
     assert isinstance(batch_list[0], Batch)
+
+
+def test_get_batch_successful_specification_sqlalchemy_engine_named_asset(
+    data_context_with_datasource_sqlalchemy_engine, sa
+):
+    context: "DataContext" = data_context_with_datasource_sqlalchemy_engine
+    batch_identifiers: dict = {"day": 1, "month": 12}
+    batch_list: list = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="default_runtime_data_connector_name",
+            data_asset_name="asset_a",
+            runtime_parameters={
+                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+            },
+            batch_identifiers=batch_identifiers,
+        )
+    )
+    assert len(batch_list) == 1
+    assert isinstance(batch_list[0], Batch)
+
+    batch_1: Batch = batch_list[0]
+    assert batch_1.batch_definition.batch_identifiers == batch_identifiers
+
+
+def test_get_batch_successful_specification_pandas_engine_named_asset_two_batch_definition(
+    data_context_with_datasource_sqlalchemy_engine, sa
+):
+    context: "DataContext" = data_context_with_datasource_sqlalchemy_engine
+    batch_identifiers: dict = {"day": 1, "month": 12}
+    batch_list: list = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="default_runtime_data_connector_name",
+            data_asset_name="asset_a",
+            runtime_parameters={
+                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+            },
+            batch_identifiers=batch_identifiers,
+        )
+    )
+    assert len(batch_list) == 1
+    assert isinstance(batch_list[0], Batch)
+    batch_1: Batch = batch_list[0]
+    assert batch_1.batch_definition.batch_identifiers == batch_identifiers
+
+    batch_identifiers: dict = {"day": 2, "month": 12}
+    batch_list: list = context.get_batch_list(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="default_runtime_data_connector_name",
+            data_asset_name="asset_a",
+            runtime_parameters={
+                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+            },
+            batch_identifiers=batch_identifiers,
+        )
+    )
+    assert len(batch_list) == 1
+    assert isinstance(batch_list[0], Batch)
+    batch_2: Batch = batch_list[0]
+    assert batch_2.batch_definition.batch_identifiers == batch_identifiers
 
 
 def test_get_batch_ambiguous_parameter_sqlalchemy_engine(
@@ -349,7 +411,7 @@ def test_get_validator_failed_specification_no_runtime_parameters_sqlalchemy_eng
 def test_get_validator_wrong_runtime_parameters_sqlalchemy_engine(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context = data_context_with_datasource_sqlalchemy_engine
+    context: "DataContext" = data_context_with_datasource_sqlalchemy_engine
     context.create_expectation_suite("my_expectations")
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(
@@ -366,3 +428,29 @@ def test_get_validator_wrong_runtime_parameters_sqlalchemy_engine(
             ),
             expectation_suite_name="my_expectations",
         )
+
+
+def test_get_validator_successful_specification_sqlalchemy_engine_named_asset_file_path(
+    data_context_with_datasource_sqlalchemy_engine, sa
+):
+    context: "DataContext" = data_context_with_datasource_sqlalchemy_engine
+    batch_identifiers: dict = {"day": 1, "month": 12}
+    context.create_expectation_suite("my_expectations")
+    # Successful specification using a RuntimeBatchRequest
+    my_validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="default_runtime_data_connector_name",
+            data_asset_name="asset_a",
+            runtime_parameters={
+                "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+            },
+            batch_identifiers=batch_identifiers,
+        ),
+        expectation_suite_name="my_expectations",
+    )
+    assert isinstance(my_validator, Validator)
+    assert (
+        my_validator.active_batch.batch_definition.batch_identifiers
+        == batch_identifiers
+    )
