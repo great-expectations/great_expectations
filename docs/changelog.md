@@ -4,8 +4,6 @@ title: Changelog
 
 ### 0.15.1
 * [FEATURE] Additional Rule-Based Profiler Parameter/Variable Access Methods (#4814)
-* [FEATURE] add icd10 regex expectation (#4691) (thanks @zachlindsey)
-* [FEATURE] Expect column values to be http method (#4690) (thanks @zachlindsey)
 * [FEATURE] DataAssistant and VolumeDataAssistant classes (initial implementation -- to be enhanced as part of subsequent work) (#4844)
 * [FEATURE] Add Support for Returning Parameters and Metrics as DataAssistantResult class (#4848)
 * [FEATURE] DataAssistantResult Includes Underlying Profiler Execution Time (#4854)
