@@ -481,7 +481,7 @@ def load_data_into_test_database(
     csv_paths: Optional[List[str]] = None,
     load_full_dataset: bool = False,
     convert_colnames_to_datetime: Optional[List[str]] = None,
-) -> None:
+) -> pd.DataFrame:
     """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
 
     This includes local Dockerized DBs like postgres, but also cloud-dbs like BigQuery and Redshift.
@@ -495,7 +495,7 @@ def load_data_into_test_database(
         convert_colnames_to_datetime: List of column names to convert to datetime before writing to db.
 
     Returns:
-        None
+        For convenience, the pandas dataframe that was used to load the data.
     """
     if csv_path and csv_paths:
         csv_paths.append(csv_path)
@@ -507,6 +507,20 @@ def load_data_into_test_database(
 
     import pandas as pd
 
+    print("Generating dataframe of all csv data")
+    dfs: List[pd.DataFrame] = []
+    for csv_path in csv_paths:
+        df = pd.read_csv(csv_path)
+        for colname_to_convert in convert_colnames_to_datetime:
+            df[colname_to_convert] = pd.to_datetime(df[colname_to_convert])
+        if not load_full_dataset:
+            # Improving test performance by only loading the first 10 rows of our test data into the db
+            df = df.head(10)
+
+        dfs.append(df)
+
+    all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
+
     connection = None
 
     if sa:
@@ -516,27 +530,16 @@ def load_data_into_test_database(
             "Attempting to load data in to tests SqlAlchemy database, but unable to load SqlAlchemy context; "
             "install optional sqlalchemy dependency for support."
         )
-        return
+        return all_dfs_concatenated
     try:
         connection = engine.connect()
         print(f"Dropping table {table_name}")
         connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-        dfs: List[pd.DataFrame] = []
-        for csv_path in csv_paths:
-            df = pd.read_csv(csv_path)
-            for colname_to_convert in convert_colnames_to_datetime:
-                df[colname_to_convert] = pd.to_datetime(df[colname_to_convert])
-            if not load_full_dataset:
-                # Improving test performance by only loading the first 10 rows of our test data into the db
-                df = df.head(10)
-
-            dfs.append(df)
-
         print(f"Creating table {table_name} and adding data from {csv_paths}")
-        all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
         all_dfs_concatenated.to_sql(
             name=table_name, con=engine, index=False, if_exists="append"
         )
+        return all_dfs_concatenated
     except SQLAlchemyError as e:
         logger.error(
             """Docs integration tests encountered an error while loading test-data into test-database."""
