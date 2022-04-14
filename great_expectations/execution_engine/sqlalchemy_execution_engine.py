@@ -1484,10 +1484,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # Here we select the distinct date parts and the date parts for easy retrieval as a
         # mapping (dictionary) later for use in batch_identifiers
 
+        # TODO: AJB 20220414 the previous query with multiple items in distinct clause
+        #  doesn't work on several dialects
+        #  instead, let's try concatenating in the distinct and later investigate if there is a
+        #  more performant solution.
         split_query: "sa.sql.expression.Select" = sa.select(
             [
                 sa.func.distinct(
-                    sa.tuple_(
+                    sa.func.concat(
                         *[
                             (
                                 sa.func.extract(date_part.value, sa.column(column_name))
@@ -1495,7 +1499,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                             for date_part in date_parts
                         ]
                     )
-                ).label("distinct_clause"),
+                ).label("concat_distinct_values"),
             ]
             + [
                 sa.cast(
@@ -1509,7 +1513,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         result = self.engine.execute(split_query).fetchall()
 
-        r = [row[0] for row in result]
         data_for_batch_identifiers = [
             {
                 column_name: {
