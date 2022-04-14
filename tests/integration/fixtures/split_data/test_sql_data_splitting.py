@@ -15,6 +15,7 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.execution_engine.sqlalchemy_execution_engine import DatePart
 from tests.test_utils import (
     get_bigquery_connection_url,
     get_snowflake_connection_url,
@@ -93,32 +94,42 @@ class TestCase:
 test_cases: List[TestCase] = []
 
 non_truncating_test_cases: List[TestCase] = [
+    # TestCase(
+    #     splitter_method_name="_split_on_year",
+    #     num_expected_batch_definitions=3,
+    #     num_expected_rows_in_first_batch_definition=120,
+    #     expected_pickup_datetimes=YEAR_STRINGS_IN_TAXI_DATA
+    # ),
+    # TestCase(
+    #     splitter_method_name="_split_on_month",
+    #     num_expected_batch_definitions=12,
+    #     num_expected_rows_in_first_batch_definition=30,
+    #     expected_pickup_datetimes=MONTH_STRINGS_IN_TAXI_DATA
+    # ),
     TestCase(
-        splitter_method_name="_split_on_year",
-        num_expected_batch_definitions=3,
-        num_expected_rows_in_first_batch_definition=120,
-        expected_pickup_datetimes=YEAR_STRINGS_IN_TAXI_DATA
-    ),
-    TestCase(
-        splitter_method_name="_split_on_month",
-        num_expected_batch_definitions=12,
-        num_expected_rows_in_first_batch_definition=30,
-        expected_pickup_datetimes=MONTH_STRINGS_IN_TAXI_DATA
-    ),
-]
-truncating_test_cases: List[TestCase] = [
-    TestCase(
-        splitter_method_name="_split_on_truncated_year",
-        num_expected_batch_definitions=3,
-        num_expected_rows_in_first_batch_definition=120,
-        expected_pickup_datetimes=YEARS_IN_TAXI_DATA,
-    ),
-    TestCase(
-        splitter_method_name="_split_on_truncated_month",
+        splitter_method_name="_split_on_year_month",
         num_expected_batch_definitions=36,
         num_expected_rows_in_first_batch_definition=10,
-        expected_pickup_datetimes=MONTHS_IN_TAXI_DATA,
+        expected_pickup_datetimes=[
+            {DatePart.YEAR.value: dt.year, DatePart.MONTH.value: dt.month}
+            for dt in MONTHS_IN_TAXI_DATA
+        ]
     ),
+
+]
+truncating_test_cases: List[TestCase] = [
+    # TestCase(
+    #     splitter_method_name="_split_on_truncated_year",
+    #     num_expected_batch_definitions=3,
+    #     num_expected_rows_in_first_batch_definition=120,
+    #     expected_pickup_datetimes=YEARS_IN_TAXI_DATA,
+    # ),
+    # TestCase(
+    #     splitter_method_name="_split_on_truncated_month",
+    #     num_expected_batch_definitions=36,
+    #     num_expected_rows_in_first_batch_definition=10,
+    #     expected_pickup_datetimes=MONTHS_IN_TAXI_DATA,
+    # ),
 ]
 
 test_cases.extend(non_truncating_test_cases)
