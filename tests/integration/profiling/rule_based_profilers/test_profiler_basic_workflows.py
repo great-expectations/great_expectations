@@ -291,7 +291,6 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,
-                        "include_batch_id_with_metric_value": False,
                         "evaluation_parameter_builder_configs": None,
                         "json_serialize": True,
                         "batch_request": {

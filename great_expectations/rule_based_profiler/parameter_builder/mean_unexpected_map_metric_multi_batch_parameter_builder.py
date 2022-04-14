@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -12,7 +12,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
+    Attributes,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -43,7 +46,6 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         null_count_parameter_builder_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        include_batch_id_with_metric_value: Union[str, bool] = False,
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
@@ -65,8 +67,6 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             null_count_parameter_builder_name: name of parameter that computes null_count (of domain values in Batch).
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
-            include_batch_id_with_metric_value: if False (default), then omit "batch_id" from output metric result;
-            otherwise, include "batch_id" attribution for each metric result (incompatible with "reduce_scalar_metric").
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
@@ -84,7 +84,6 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             replace_nan_with_zero=True,
             reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            include_batch_id_with_metric_value=include_batch_id_with_metric_value,
             json_serialize=json_serialize,
             batch_list=batch_list,
             batch_request=batch_request,
@@ -112,12 +111,12 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+    ) -> Attributes:
         """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-        details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         # Obtain total_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         total_count_parameter_builder_name: str = (
@@ -205,7 +204,9 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         )
         mean_unexpected_count_ratio: np.float64 = np.mean(unexpected_count_ratio_values)
 
-        return (
-            mean_unexpected_count_ratio,
-            parameter_node.details,
+        return Attributes(
+            {
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: mean_unexpected_count_ratio,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node.details,
+            }
         )

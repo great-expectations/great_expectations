@@ -132,7 +132,6 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
             bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
             round_decimals=f"{VARIABLES_KEY}round_decimals",
             truncate_values=f"{VARIABLES_KEY}truncate_values",
-            include_batch_id_with_metric_value=False,
             evaluation_parameter_builder_configs=None,
             json_serialize=True,
         )

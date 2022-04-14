@@ -1,6 +1,5 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -12,7 +11,11 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
+    Attributes,
     Domain,
     ParameterContainer,
 )
@@ -33,7 +36,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
-        include_batch_id_with_metric_value: Union[str, bool] = False,
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
@@ -56,8 +58,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
             otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
-            include_batch_id_with_metric_value: if False (default), then omit "batch_id" from output metric result;
-            otherwise, include "batch_id" attribution for each metric result (incompatible with "reduce_scalar_metric").
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
@@ -83,8 +83,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         self._replace_nan_with_zero = replace_nan_with_zero
 
         self._reduce_scalar_metric = reduce_scalar_metric
-
-        self._include_batch_id_with_metric_value = include_batch_id_with_metric_value
 
     @property
     def fully_qualified_parameter_name(self) -> str:
@@ -122,21 +120,17 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     def reduce_scalar_metric(self) -> Union[str, bool]:
         return self._reduce_scalar_metric
 
-    @property
-    def include_batch_id_with_metric_value(self) -> Union[str, bool]:
-        return self._include_batch_id_with_metric_value
-
     def _build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+    ) -> Attributes:
         """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-        details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         metric_computation_result: MetricComputationResult = self.get_metrics(
             metric_name=self.metric_name,
@@ -159,24 +153,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        # Obtain include_batch_id_with_metric_value from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        include_batch_id_with_metric_value: bool = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.include_batch_id_with_metric_value,
-                expected_return_type=bool,
-                variables=variables,
-                parameters=parameters,
-            )
-        )
-
-        if include_batch_id_with_metric_value and reduce_scalar_metric:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Specifying both, "reduce_scalar_metric" and "include_batch_id_with_metric_value", as \
-"True" in {self.__class__.__name__} is illegal.
-"""
-            )
-
         if len(metric_computation_result.attributed_resolved_metrics) == 1:
             # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
             if (
@@ -186,22 +162,36 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                 ].metric_values.shape[1]
                 == 1
             ):
-                return (
-                    metric_computation_result.attributed_resolved_metrics[
-                        0
-                    ].metric_values[:, 0],
-                    details,
+                return Attributes(
+                    {
+                        FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
+                            0
+                        ].metric_values[
+                            :, 0
+                        ],
+                        FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
+                            0
+                        ].attributed_metric_values,
+                        FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
+                    }
                 )
 
-            if include_batch_id_with_metric_value:
-                return (
-                    metric_computation_result.attributed_resolved_metrics[
+            return Attributes(
+                {
+                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
                         0
-                    ].metric_values_by_batch_id,
-                    details,
-                )
+                    ].metric_values,
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
+                        0
+                    ].attributed_metric_values,
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
+                }
+            )
 
-        return (
-            metric_computation_result.attributed_resolved_metrics,
-            details,
+        return Attributes(
+            {
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics,
+                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
+            }
         )

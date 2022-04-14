@@ -27,7 +27,7 @@ def test_get_metrics_and_expectations(
 
     expected_metrics: Dict[Domain, Dict[str, Any]] = {
         Domain(domain_type="table",): {
-            "$parameter.table_row_count.value": {
+            "$parameter.table_row_count.attributed_value": {
                 "0327cfb13205ec8512e1c28e438ab43b": [10000],
                 "08085632aff9ce4cebbb8023049e1aec": [10000],
                 "0808e185a52825d22356de2fe00a8f5f": [10000],
@@ -151,8 +151,7 @@ def test_get_metrics_and_expectations(
                                     "metric_value_kwargs": None,
                                     "enforce_numeric_metric": True,
                                     "replace_nan_with_zero": True,
-                                    "reduce_scalar_metric": False,
-                                    "include_batch_id_with_metric_value": True,
+                                    "reduce_scalar_metric": True,
                                     "evaluation_parameter_builder_configs": None,
                                     "json_serialize": True,
                                     "batch_request": None,
@@ -180,7 +179,6 @@ def test_get_metrics_and_expectations(
                                             "round_decimals": "$variables.round_decimals",
                                             "reduce_scalar_metric": True,
                                             "truncate_values": "$variables.truncate_values",
-                                            "include_batch_id_with_metric_value": False,
                                             "evaluation_parameter_builder_configs": None,
                                             "json_serialize": True,
                                             "batch_request": None,
@@ -234,8 +232,7 @@ def test_get_metrics_and_expectations(
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "enforce_numeric_metric": True,
                         "replace_nan_with_zero": True,
-                        "reduce_scalar_metric": False,
-                        "include_batch_id_with_metric_value": True,
+                        "reduce_scalar_metric": True,
                         "json_serialize": True,
                     },
                 ],
@@ -258,7 +255,6 @@ def test_get_metrics_and_expectations(
                                 "num_bootstrap_samples": "$variables.num_bootstrap_samples",
                                 "round_decimals": "$variables.round_decimals",
                                 "truncate_values": "$variables.truncate_values",
-                                "include_batch_id_with_metric_value": False,
                                 "json_serialize": True,
                             },
                         ],

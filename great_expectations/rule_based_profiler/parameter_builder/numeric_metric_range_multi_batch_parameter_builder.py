@@ -1,6 +1,6 @@
 import itertools
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Callable, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 
@@ -19,6 +19,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    Attributes,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -72,7 +75,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
-        include_batch_id_with_metric_value: Union[str, bool] = False,
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
@@ -105,8 +107,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
-            include_batch_id_with_metric_value: if False (default), then omit "batch_id" from output metric result;
-            otherwise, include "batch_id" attribution for each metric result (incompatible with "reduce_scalar_metric").
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
@@ -123,7 +123,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             enforce_numeric_metric=enforce_numeric_metric,
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
-            include_batch_id_with_metric_value=include_batch_id_with_metric_value,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
             batch_list=batch_list,
@@ -197,12 +196,12 @@ detected.
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+    ) -> Attributes:
         """
-         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-         details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-         return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
 
          The algorithm operates according to the following steps:
          1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
@@ -248,20 +247,11 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues
-        if isinstance(parameter_node.value, list):
-            num_parameter_node_value_elements: int = len(parameter_node.value)
-            if not (num_parameter_node_value_elements == 1):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f'Length of "AttributedResolvedMetrics" list for {self.__class__.__name__} must be exactly 1 ({num_parameter_node_value_elements} elements found).'
-                )
-
-            attributed_resolved_metrics: AttributedResolvedMetrics = (
-                AttributedResolvedMetrics(**parameter_node.value[0])
+        metric_values: MetricValues = (
+            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
+                attributed_metric_values=parameter_node.attributed_value
             )
-            metric_values = attributed_resolved_metrics.metric_values
-        else:
-            metric_values = parameter_node.value
+        )
 
         # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         estimator: str = get_parameter_value_and_validate_return_type(
@@ -305,9 +295,11 @@ detected.
             **estimator_kwargs,
         )
 
-        return (
-            metric_value_range,
-            parameter_node.details,
+        return Attributes(
+            {
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_value_range,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node.details,
+            }
         )
 
     def _estimate_metric_value_range(
