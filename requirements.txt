@@ -1,5 +1,4 @@
 altair>=4.0.0,<5
-altair_viewer>=0.4.0
 Click>=7.1.2
 colorama>=0.4.3
 cryptography>=3.2

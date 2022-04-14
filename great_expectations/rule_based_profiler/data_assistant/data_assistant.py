@@ -180,7 +180,7 @@ class DataAssistant(ABC):
 
     def plot(self, charts: List[alt.Chart]):
         for c in charts:
-            c.show()
+            c.display()
 
     @property
     def name(self) -> str:

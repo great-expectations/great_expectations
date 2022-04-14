@@ -18,8 +18,6 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
 )
 
-alt.renderers.enable("altair_viewer")
-
 
 class VolumeDataAssistant(DataAssistant):
     """
