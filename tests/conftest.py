@@ -5975,3 +5975,9 @@ def taxi_test_file_directory():
         __file__,
         os.path.join("test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"),
     )
+
+
+@pytest.fixture()
+def test_df_pandas():
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    return test_df
