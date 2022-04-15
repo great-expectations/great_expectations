@@ -43,6 +43,7 @@ ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
 
 # Area
 area_fill_color: str = Colors.BLUE_3.value
+area_fill_opacity: float = 0.20
 
 #
 # Chart Types
@@ -57,6 +58,7 @@ line_chart_tooltip: bool = True
 ALTAIR_CONFIGURATION: Dict[str, Any] = {
     "view": {"width": chart_width, "height": chart_height},
     "title": {"align": title_align, "color": title_color, "fontSize": title_font_size},
+    "selection": {"interval": {"bind": "scales"}},
     "axis": {
         "titleFontSize": axis_title_font_size,
         "titleColor": axis_title_color,
@@ -71,6 +73,6 @@ ALTAIR_CONFIGURATION: Dict[str, Any] = {
         "heatmap": heatmap_color_scheme,
         "ordinal": ordinal_color_scheme,
     },
-    "mark": {"fill": area_fill_color},
+    "mark": {"fill": area_fill_color, "fillOpacity": area_fill_opacity},
     "line": {"strokeWidth": line_stroke_width, "tooltip": line_chart_tooltip},
 }
