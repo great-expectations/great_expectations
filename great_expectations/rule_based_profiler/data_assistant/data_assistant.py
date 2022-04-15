@@ -182,7 +182,9 @@ class DataAssistant(ABC):
     def _plot(self, charts: List[alt.Chart]):
         selection = alt.selection_interval(bind="scales")
         for c in charts:
-            c.configure(**ALTAIR_CONFIGURATION).add_selection(selection).display()
+            c.configure(**ALTAIR_DEFAULT_CONFIGURATION).add_selection(
+                selection
+            ).display()
 
     @property
     def name(self) -> str:
