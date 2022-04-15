@@ -54,7 +54,6 @@ class VolumeDataAssistant(DataAssistant):
         metric_type: str,
         x_axis_label: str,
         x_axis_type: str,
-        x_axis_domain: List[int],
         line: alt.Chart,
         expectation_configurations: List[ExpectationConfiguration],
     ):
@@ -74,7 +73,6 @@ class VolumeDataAssistant(DataAssistant):
                         metric_type=metric_type,
                         x_axis_label=x_axis_label,
                         x_axis_type=x_axis_type,
-                        x_axis_domain=x_axis_domain,
                         line=line,
                         min_value=min_value,
                         max_value=max_value,
