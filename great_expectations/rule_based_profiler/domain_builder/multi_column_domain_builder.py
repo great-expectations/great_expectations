@@ -43,7 +43,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         )
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.MULTICOLUMN
 
     def _get_domains(

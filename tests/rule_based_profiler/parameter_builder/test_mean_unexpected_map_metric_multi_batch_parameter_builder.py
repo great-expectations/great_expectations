@@ -752,6 +752,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         "null_count_parameter_builder_name",
         "metric_domain_kwargs",
         "metric_value_kwargs",
+        "evaluation_parameter_builder_configs",
         "json_serialize",
         "batch_request",
     }
@@ -831,6 +832,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         "null_count_parameter_builder_name",
         "metric_domain_kwargs",
         "metric_value_kwargs",
+        "evaluation_parameter_builder_configs",
         "json_serialize",
         "batch_request",
     }

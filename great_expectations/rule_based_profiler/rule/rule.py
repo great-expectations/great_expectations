@@ -136,10 +136,6 @@ class Rule(SerializableDictDot):
     ) -> Optional[List[ExpectationConfigurationBuilder]]:
         return self._expectation_configuration_builders
 
-    @property
-    def rule_state(self) -> RuleState:
-        return self._rule_state
-
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None
         parameter_builders: Optional[
