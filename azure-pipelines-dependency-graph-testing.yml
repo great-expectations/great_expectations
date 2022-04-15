@@ -105,10 +105,6 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-    - job: docstring_checker
-      steps:
-      - bash: python scripts/check_docstring_coverage.py
-        name: DocstringChecker
     - job: type_hint_checker
       steps:
       - script: |
