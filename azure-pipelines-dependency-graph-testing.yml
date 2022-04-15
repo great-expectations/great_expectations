@@ -71,7 +71,6 @@ stages:
 
                 [GEChanged]
                 great_expectations/**
-                tests/**
                 /*.txt
                 /*.yml
                 requirements*
