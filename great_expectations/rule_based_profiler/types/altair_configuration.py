@@ -27,6 +27,7 @@ axis_label_font_size: int = 12
 
 # X-Axis Only
 x_axis_label_angle: int = 0
+x_axis_label_flush: bool = True
 x_axis_grid: bool = True
 
 # Y-Axis Only
@@ -61,7 +62,11 @@ ALTAIR_DEFAULT_CONFIGURATION: Dict[str, Any] = {
         "labelFontSize": axis_label_font_size,
         "labelColor": axis_label_color,
     },
-    "axisX": {"labelAngle": x_axis_label_angle, "grid": x_axis_grid},
+    "axisX": {
+        "labelAngle": x_axis_label_angle,
+        "labelFlush": x_axis_label_flush,
+        "grid": x_axis_grid,
+    },
     "range": {
         "category": category_color_scheme,
         "diverging": diverging_color_scheme,
