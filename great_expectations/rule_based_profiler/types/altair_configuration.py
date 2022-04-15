@@ -4,7 +4,7 @@ from great_expectations.types import ColorPalettes, Colors
 
 # Size
 chart_width: int = 800
-chart_height: int = 300
+chart_height: int = 275
 
 # Title
 title_align: str = "center"
@@ -15,6 +15,9 @@ title_color: str = Colors.PURPLE.value
 axis_title_color: str = Colors.PURPLE.value
 axis_title_font_size: int = 12
 axis_label_color: str = Colors.BLUE_1.value
+
+# X-Axis
+x_axis_label_angle: int = 90
 
 # Color Palettes
 category_color_scheme: List[str] = ColorPalettes.CATEGORY.value
@@ -31,7 +34,7 @@ ALTAIR_CONFIGURATION: Dict[str, Any] = {
         "titleColor": axis_title_color,
         "labelColor": axis_label_color,
     },
-    "axisX": {"labelAngle": 90},
+    "axisX": {"labelAngle": x_axis_label_angle},
     "range": {
         "category": category_color_scheme,
         "diverging": diverging_color_scheme,
