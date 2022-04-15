@@ -40,7 +40,7 @@ class DataAssistantResult(SerializableDictDot):
                     metric_names.append(
                         details_parameter_node.metric_configuration.metric_name
                     )
-                if parameter_node_name.endswith("attributed_value"):
+                if parameter_node_name.endswith(".attributed_value"):
                     attributed_value_parameter_node: ParameterNode = parameter_node
                     data: list[Number] = sum(
                         attributed_value_parameter_node.values(), []
@@ -63,6 +63,3 @@ class DataAssistantResult(SerializableDictDot):
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
-
-    def _plot(self):
-        pass
