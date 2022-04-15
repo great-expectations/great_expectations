@@ -64,9 +64,15 @@ except ImportError:
     sa = None
 
 try:
+    from sqlalchemy.engine import LegacyRow
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import TextClause, quoted_name
+    from sqlalchemy.sql.elements import (
+        BooleanClauseList,
+        Label,
+        TextClause,
+        quoted_name,
+    )
 except ImportError:
     reflection = None
     DefaultDialect = None
@@ -74,6 +80,7 @@ except ImportError:
     TextClause = None
     quoted_name = None
     OperationalError = None
+    Label = None
 
 
 try:
@@ -974,7 +981,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         table_name: str,
         column_name: str,
         batch_identifiers: dict,
-    ) -> "sa.sql.elements.BooleanClauseList":
+    ) -> BooleanClauseList:
         """Split on year values in column_name.
 
         Args:
@@ -1000,7 +1007,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         table_name: str,
         column_name: str,
         batch_identifiers: dict,
-    ) -> "sa.sql.elements.BooleanClauseList":
+    ) -> BooleanClauseList:
         """Split on year and month values in column_name.
 
         Args:
@@ -1026,7 +1033,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         table_name: str,
         column_name: str,
         batch_identifiers: dict,
-    ) -> "sa.sql.elements.BooleanClauseList":
+    ) -> BooleanClauseList:
         """Split on year and month and day values in column_name.
 
         Args:
@@ -1053,7 +1060,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         column_name: str,
         batch_identifiers: dict,
         date_parts: Union[List[DatePart], List[str]],
-    ) -> "sa.sql.elements.BooleanClauseList":
+    ) -> BooleanClauseList:
         """Split on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
@@ -1091,7 +1098,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         if isinstance(column_batch_identifiers, datetime.datetime):
-            query: "sa.sql.elements.BooleanClauseList" = sa.and_(  # noqa: F821
+            query: BooleanClauseList = sa.and_(  # noqa: F821
                 *[
                     sa.extract(date_part.value, sa.column(column_name))
                     == getattr(column_batch_identifiers, date_part.value)
@@ -1099,7 +1106,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 ]
             )
         else:
-            query: "sa.sql.elements.BooleanClauseList" = sa.and_(  # noqa: F821
+            query: BooleanClauseList = sa.and_(  # noqa: F821
                 *[
                     sa.extract(date_part.value, sa.column(column_name))
                     == column_batch_identifiers[date_part.value]
@@ -1289,7 +1296,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # future improvements.
         if len(date_parts) == 1:
             # MSSql does not accept single item concatenation
-            concat_clause = [
+            concat_clause: List[Label] = [
                 sa.func.distinct(
                     sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
                         date_parts[0].value
@@ -1297,7 +1304,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 ).label("concat_distinct_values")
             ]
         else:
-            concat_clause = [
+            concat_clause: List[Label] = [
                 sa.func.distinct(
                     sa.func.concat(
                         *[
@@ -1310,7 +1317,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 ).label("concat_distinct_values"),
             ]
 
-        split_query: "sa.sql.expression.Select" = sa.select(
+        split_query: Selectable = sa.select(
             concat_clause
             + [
                 sa.cast(
@@ -1320,7 +1327,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ]
         ).select_from(sa.text(table_name))
 
-        result: List["sa.engine.LegacyRow"] = self.engine.execute(
+        result: List[LegacyRow] = self.engine.execute(
             split_query
         ).fetchall()  # noqa: F821
 
