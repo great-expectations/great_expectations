@@ -197,7 +197,6 @@ class DataAssistant(ABC):
         metric_type: str,
         x_axis_label: str,
         x_axis_type: str,
-        x_axis_domain: List[int],
     ):
         line: alt.Chart = (
             alt.Chart(df, title=title)
@@ -207,7 +206,6 @@ class DataAssistant(ABC):
                     x_axis_label,
                     type=x_axis_type,
                     title=x_axis_label,
-                    scale=alt.Scale(domain=x_axis_domain),
                 ),
                 y=alt.Y(metric_label, type=metric_type, title=metric_label),
             )
@@ -222,7 +220,6 @@ class DataAssistant(ABC):
         metric_type: str,
         x_axis_label: str,
         x_axis_type: str,
-        x_axis_domain: List[int],
         line: alt.Chart,
         min_value: float,
         max_value: float,
@@ -241,7 +238,6 @@ class DataAssistant(ABC):
                     x_axis_label,
                     type=x_axis_type,
                     title=x_axis_label,
-                    scale=alt.Scale(domain=x_axis_domain),
                 ),
                 y=alt.Y(min_label, type=metric_type, title=metric_label),
             )
@@ -255,7 +251,6 @@ class DataAssistant(ABC):
                     x_axis_label,
                     type=x_axis_type,
                     title=x_axis_label,
-                    scale=alt.Scale(domain=x_axis_domain),
                 ),
                 y=alt.Y(max_label, type=metric_type, title=metric_label),
             )
@@ -269,7 +264,6 @@ class DataAssistant(ABC):
                     x_axis_label,
                     type=x_axis_type,
                     title=x_axis_label,
-                    scale=alt.Scale(domain=x_axis_domain),
                 ),
                 y=alt.Y(min_label, title=metric_label, type=metric_type),
                 y2=alt.Y2(max_label, title=metric_label),
