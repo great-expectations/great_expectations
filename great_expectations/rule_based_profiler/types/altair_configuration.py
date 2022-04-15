@@ -6,6 +6,10 @@ from great_expectations.types import ColorPalettes, Colors
 chart_width: int = 800
 chart_height: int = 275
 
+#
+# Chart Components
+#
+
 # Title
 title_align: str = "center"
 title_font_size: int = 16
@@ -23,11 +27,21 @@ x_axis_grid: bool = True
 
 # Y-Axis Only
 
+#
 # Color Palettes
+#
+
 category_color_scheme: List[str] = ColorPalettes.CATEGORY.value
 diverging_color_scheme: List[str] = ColorPalettes.DIVERGING.value
 heatmap_color_scheme: List[str] = ColorPalettes.HEATMAP.value
 ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
+
+#
+# Chart Types
+#
+
+# Line Chart
+line_chart_tooltip: bool = True
 
 
 ALTAIR_CONFIGURATION: Dict[str, Any] = {
@@ -46,4 +60,5 @@ ALTAIR_CONFIGURATION: Dict[str, Any] = {
         "heatmap": heatmap_color_scheme,
         "ordinal": ordinal_color_scheme,
     },
+    "line": {"tooltip": line_chart_tooltip},
 }
