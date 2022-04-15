@@ -63,11 +63,14 @@ class VolumeDataAssistant(DataAssistant):
                 "fully_qualified_parameter_name"
             ]
         )
-        data: list[Number] = data_assistant_result.metrics[
-            Domain(
-                domain_type="table",
-            )
-        ][f"{fully_qualified_parameter_name}.attributed_value"]
+        data: list[Number] = sum(
+            data_assistant_result.metrics[
+                Domain(
+                    domain_type="table",
+                )
+            ][f"{fully_qualified_parameter_name}.attributed_value"].values(),
+            [],
+        )
         df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
         df[x_axis_label] = df.index + 1
 

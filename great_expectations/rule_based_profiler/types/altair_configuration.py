@@ -2,14 +2,21 @@ from typing import Any, Dict, List
 
 from great_expectations.types import ColorPalettes, Colors
 
+# Size
 chart_width: int = 800
 chart_height: int = 300
+
+# Title
 title_align: str = "center"
 title_font_size: int = 16
 title_color: str = Colors.PURPLE.value
+
+# Both Axes
 axis_title_color: str = Colors.PURPLE.value
 axis_title_font_size: int = 12
 axis_label_color: str = Colors.BLUE_1.value
+
+# Color Palettes
 category_color_scheme: List[str] = ColorPalettes.CATEGORY.value
 diverging_color_scheme: List[str] = ColorPalettes.DIVERGING.value
 heatmap_color_scheme: List[str] = ColorPalettes.HEATMAP.value
