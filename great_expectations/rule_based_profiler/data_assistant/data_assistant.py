@@ -182,11 +182,12 @@ class DataAssistant(ABC):
         return result
 
     def _plot(self, charts: List[alt.Chart]):
-        selection = alt.selection_interval(bind="scales")
+        """
+        Display each chart passed in Jupyter Notebook
+        """
+        # selection = alt.selection_interval(bind="scales")
         for c in charts:
-            c.configure(**ALTAIR_DEFAULT_CONFIGURATION).add_selection(
-                selection
-            ).display()
+            c.configure(**ALTAIR_DEFAULT_CONFIGURATION).display()
 
     def get_line_chart(
         self,

@@ -85,7 +85,7 @@ class VolumeDataAssistant(DataAssistant):
         metric_names: List[str],
         data: np.ndarray,
         prescriptive: bool,
-        expectation_configurations: list[ExpectationConfiguration],
+        expectation_configurations: List[ExpectationConfiguration],
     ):
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "super()._plot()" for display.

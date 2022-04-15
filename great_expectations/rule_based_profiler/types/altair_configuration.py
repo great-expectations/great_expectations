@@ -29,6 +29,10 @@ axis_label_font_size: int = 12
 x_axis_label_angle: int = 0
 x_axis_label_flush: bool = True
 x_axis_grid: bool = True
+# Known vega-lite bug: https://github.com/vega/vega-lite/issues/5732
+# forces us to choose between features "interactive scaling" and "tooltips"
+x_axis_selection_type: str = "interval"
+x_axis_selection_bind: str = "scales"
 
 # Y-Axis Only
 
@@ -48,6 +52,8 @@ ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
 # Line Chart
 line_color: str = Colors.BLUE_1.value
 line_stroke_width: int = 3
+# Known vega-lite bug: https://github.com/vega/vega-lite/issues/5732
+# forces us to choose between features "interactive scaling" and "tooltips"
 line_chart_tooltip: bool = True
 
 
@@ -74,4 +80,5 @@ ALTAIR_DEFAULT_CONFIGURATION: Dict[str, Any] = {
         "ordinal": ordinal_color_scheme,
     },
     "line": {"strokeWidth": line_stroke_width, "tooltip": line_chart_tooltip},
+    "selection": {x_axis_selection_type: {"bind": x_axis_selection_bind}},
 }
