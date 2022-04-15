@@ -44,12 +44,6 @@ class VolumeDataAssistant(DataAssistant):
             data_context=data_context,
         )
 
-    def build(self) -> None:
-        """
-        Custom "Rule" objects can be added to "self.profiler" property after calling "super().build()".
-        """
-        super().build()
-
     def plot(self, data_assistant_result: DataAssistantResult):
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "super().plot()" for display.
