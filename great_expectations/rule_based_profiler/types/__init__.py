@@ -1,4 +1,4 @@
-from .altair_configuration import ALTAIR_CONFIGURATION
+from .altair_configuration import ALTAIR_DEFAULT_CONFIGURATION
 
 from .attributes import Attributes  # isort:skip
 from .builder import Builder  # isort:skip

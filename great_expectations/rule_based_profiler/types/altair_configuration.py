@@ -58,7 +58,7 @@ line_stroke_width: int = 3
 line_chart_tooltip: bool = True
 
 
-ALTAIR_CONFIGURATION: Dict[str, Any] = {
+ALTAIR_DEFAULT_CONFIGURATION: Dict[str, Any] = {
     "view": {"width": chart_width, "height": chart_height},
     "font": font,
     "title": {"align": title_align, "color": title_color, "fontSize": title_font_size},
