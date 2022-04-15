@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import altair as alt
 import pandas as pd
@@ -12,6 +12,7 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
     ParameterBuilder,
 )
+from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     DataAssistantResult,
@@ -124,3 +125,11 @@ class VolumeDataAssistant(DataAssistant):
                 table_row_count_metric_multi_batch_parameter_builder,
             ],
         }
+
+    @property
+    def variables(self) -> Optional[Dict[str, Any]]:
+        return None
+
+    @property
+    def rules(self) -> Optional[List[Rule]]:
+        return None
