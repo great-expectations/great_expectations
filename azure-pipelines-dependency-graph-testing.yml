@@ -109,6 +109,12 @@ stages:
       steps:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
+    - job: type_hint_checker
+      steps:
+      - script: |
+          pip install mypy
+          ./scripts/check_type_hint_coverage
+        name: TypeHintChecker
 
   - stage: required
     dependsOn: [scope_check, lint]

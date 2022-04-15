@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# Chetan - 20220415 - While this number should be 0, getting the number of warnings down takes time
+# and effort. In the meanwhile, we want to set an upper bound on warnings to ensure we're not introducing
+# further regressions. As functions are annotated, developers should update this number.
+THRESHOLD=2850
+
+if ! command -v mypy &> /dev/null; then
+    echo "mypy could not be found; please install before using this script"
+    exit 1
+fi
+
+# All possible settings:     https://mypy.readthedocs.io/en/stable/command_line.html
+# Function signature checks: https://mypy.readthedocs.io/en/stable/error_code_list2.html#check-that-every-function-has-an-annotation-no-untyped-def
+RESULTS=$(mypy --ignore-missing-imports --disallow-untyped-defs --disallow-incomplete-defs --show-error-codes great_expectations | grep "error:" | grep "no-untyped-def")
+
+# Filter output to only emit results relevant to type hinting function defs
+DEVIATIONS=$(printf '%s\n' "${RESULTS[@]}" | wc -l | xargs)
+
+if [ "$DEVIATIONS" -gt "$THRESHOLD" ]; then
+    printf '%s\n' "${RESULTS[@]}\n"
+    printf "\nAn untyped function definition was introduced; please resolve before merging.\n"
+    printf "We expect there to be %s or fewer untyped-def violations (actual: %s)\n" "$THRESHOLD" "$DEVIATIONS"
+    exit 1
+fi
