@@ -6,6 +6,9 @@ from great_expectations.types import ColorPalettes, Colors
 chart_width: int = 800
 chart_height: int = 275
 
+# Font
+font: str = "Verdana"
+
 #
 # Chart Components
 #
@@ -57,6 +60,7 @@ line_chart_tooltip: bool = True
 
 ALTAIR_CONFIGURATION: Dict[str, Any] = {
     "view": {"width": chart_width, "height": chart_height},
+    "font": font,
     "title": {"align": title_align, "color": title_color, "fontSize": title_font_size},
     "selection": {"interval": {"bind": "scales"}},
     "axis": {
