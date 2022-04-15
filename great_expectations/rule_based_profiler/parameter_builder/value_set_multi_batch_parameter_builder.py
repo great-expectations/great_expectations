@@ -1,7 +1,6 @@
 import itertools
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Collection, Dict, List, Optional, Set, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
@@ -13,6 +12,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    Attributes,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -97,12 +100,12 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+    ) -> Attributes:
         """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-        details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         # Build the list of unique values for each Batch object.
         super().build_parameters(
@@ -120,23 +123,23 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-
-        # This should never happen.
-        if not (
-            isinstance(parameter_node.value, list) and len(parameter_node.value) == 1
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({parameter_node.value} found).'
+        metric_values: MetricValues = (
+            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
+                attributed_metric_values=parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
             )
-
-        attributed_resolved_metrics: AttributedResolvedMetrics = (
-            AttributedResolvedMetrics(**parameter_node.value[0])
         )
-        metric_values: MetricValues = attributed_resolved_metrics.metric_values
 
-        return (
-            _get_unique_values_from_nested_collection_of_sets(collection=metric_values),
-            parameter_node.details,
+        return Attributes(
+            {
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: _get_unique_values_from_nested_collection_of_sets(
+                    collection=metric_values
+                ),
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                ],
+            }
         )
 
 
