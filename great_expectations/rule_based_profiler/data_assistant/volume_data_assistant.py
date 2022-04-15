@@ -54,6 +54,7 @@ class VolumeDataAssistant(DataAssistant):
         metric_type: str,
         x_axis_label: str,
         x_axis_type: str,
+        x_axis_domain: List[int],
         line: alt.Chart,
         expectation_configurations: List[ExpectationConfiguration],
     ):
@@ -73,6 +74,7 @@ class VolumeDataAssistant(DataAssistant):
                         metric_type=metric_type,
                         x_axis_label=x_axis_label,
                         x_axis_type=x_axis_type,
+                        x_axis_domain=x_axis_domain,
                         line=line,
                         min_value=min_value,
                         max_value=max_value,
@@ -97,6 +99,9 @@ class VolumeDataAssistant(DataAssistant):
         x_axis_type: str = "ordinal"
         metric_type: str = "quantitative"
 
+        # don't show gaps between 0 and 1 or above max value
+        x_axis_domain: List[int] = [min(data), max(data)]
+
         df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
         df[x_axis_label] = df.index + 1
 
@@ -111,6 +116,7 @@ class VolumeDataAssistant(DataAssistant):
             metric_type=metric_type,
             x_axis_label=x_axis_label,
             x_axis_type=x_axis_type,
+            x_axis_domain=x_axis_domain,
         )
 
         if prescriptive:
@@ -122,6 +128,7 @@ class VolumeDataAssistant(DataAssistant):
                 metric_type=metric_type,
                 x_axis_label=x_axis_label,
                 x_axis_type=x_axis_type,
+                x_axis_domain=x_axis_domain,
                 line=line,
                 expectation_configurations=expectation_configurations,
             )
