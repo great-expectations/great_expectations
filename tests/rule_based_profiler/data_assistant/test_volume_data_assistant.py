@@ -343,6 +343,8 @@ def test_volume_data_assistant_plot_descriptive(
         expectation_suite_name=expectation_suite_name,
     )
 
+    assert result.data_assistant_cls is VolumeDataAssistant
+
     with mock.patch(
         "great_expectations.rule_based_profiler.types.data_assistant_result.DataAssistantResult.plot",
         return_value=False,
@@ -371,6 +373,8 @@ def test_volume_data_assistant_plot_prescriptive(
     result: DataAssistantResult = data_assistant.run(
         expectation_suite_name=expectation_suite_name,
     )
+
+    assert result.data_assistant_cls is VolumeDataAssistant
 
     with mock.patch(
         "great_expectations.rule_based_profiler.types.data_assistant_result.DataAssistantResult.plot",
