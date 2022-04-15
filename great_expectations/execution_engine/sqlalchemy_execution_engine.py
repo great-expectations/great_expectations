@@ -1074,6 +1074,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             List of boolean clauses based on whether the date_part value in the
                 batch identifier matches the date_part value in the column_name column.
         """
+        if len(date_parts) == 0:
+            raise ge_exceptions.InvalidConfigError(
+                "date_parts are required when using split_on_date_parts."
+            )
+
         column_batch_identifiers: dict = batch_identifiers[column_name]
         date_parts: List[DatePart] = [
             DatePart(date_part.lower()) if isinstance(date_part, str) else date_part
@@ -1269,6 +1274,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
         """
+        if len(date_parts) == 0:
+            raise ge_exceptions.InvalidConfigError(
+                "date_parts are required when using split_on_date_parts."
+            )
+
         date_parts: List[DatePart] = [
             DatePart(date_part.lower()) if isinstance(date_part, str) else date_part
             for date_part in date_parts
@@ -1277,8 +1287,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # NOTE: AJB 20220414 concatenating to find distinct values to support all dialects.
         # There are more performant dialect-specific methods that can be implemented in
         # future improvements.
-        split_query: "sa.sql.expression.Select" = sa.select(
-            [
+        if len(date_parts) == 1:
+            # MSSql does not accept single item concatenation
+            concat_clause = [
+                sa.func.distinct(
+                    sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
+                        date_parts[0].value
+                    )
+                ).label("concat_distinct_values")
+            ]
+        else:
+            concat_clause = [
                 sa.func.distinct(
                     sa.func.concat(
                         *[
@@ -1290,6 +1309,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 ).label("concat_distinct_values"),
             ]
+
+        split_query: "sa.sql.expression.Select" = sa.select(
+            concat_clause
             + [
                 sa.cast(
                     sa.func.extract(date_part.value, sa.column(column_name)), sa.Integer
