@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -6,14 +6,16 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
-    AttributedResolvedMetrics,
     MetricComputationDetails,
     MetricComputationResult,
-    MetricValues,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
+    Attributes,
     Domain,
     ParameterContainer,
 )
@@ -123,12 +125,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+    ) -> Attributes:
         """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-        details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         metric_computation_result: MetricComputationResult = self.get_metrics(
             metric_name=self.metric_name,
@@ -140,7 +142,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues = metric_computation_result.metric_values
         details: MetricComputationDetails = metric_computation_result.details
 
         # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -152,17 +153,45 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
-        if (
-            reduce_scalar_metric
-            and isinstance(metric_values, list)
-            and len(metric_values) == 1
-            and isinstance(metric_values[0], AttributedResolvedMetrics)
-            and metric_values[0].metric_values.shape[1] == 1
-        ):
-            metric_values = metric_values[0].metric_values[:, 0]
+        if len(metric_computation_result.attributed_resolved_metrics) == 1:
+            # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
+            if (
+                reduce_scalar_metric
+                and metric_computation_result.attributed_resolved_metrics[
+                    0
+                ].metric_values.shape[1]
+                == 1
+            ):
+                return Attributes(
+                    {
+                        FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
+                            0
+                        ].metric_values[
+                            :, 0
+                        ],
+                        FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
+                            0
+                        ].attributed_metric_values,
+                        FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
+                    }
+                )
 
-        return (
-            metric_values,
-            details,
+            return Attributes(
+                {
+                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
+                        0
+                    ].metric_values,
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics[
+                        0
+                    ].attributed_metric_values,
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
+                }
+            )
+
+        return Attributes(
+            {
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_computation_result.attributed_resolved_metrics,
+                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: metric_computation_result.attributed_resolved_metrics,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
+            }
         )

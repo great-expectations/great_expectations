@@ -39,10 +39,12 @@ PARAMETER_KEY: str = (
 )
 
 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "value"
+FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: str = "attributed_value"
 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "details"
 
 RESERVED_TERMINAL_LITERALS: Set[str] = {
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
 }
 
@@ -506,25 +508,6 @@ def _get_parameter_value_from_parameter_container(
 "{parameter_name_part}" of fully-qualified parameter name does not exist.
 """
         )
-
-    # TODO: <Alex>ALEX -- leaving the capability below for future considerations.</Alex>
-    # """
-    # Support a shorthand notation (for use in ExpectationConfigurationBuilder): If fully-qualified parameter name does
-    # not end on f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}"
-    # (e.g., ".value") and the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "value") key is available in
-    # "ParameterNode", then return the value, corresponding to the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY"
-    # (e.g., "value") key.  Hence, can use shorthand "$parameter.my_min_user_id" instead of the explicit
-    # "$parameter.my_min_user_id.value".  Retrieving details requires "$parameter.my_min_user_id.details" (explicitly).
-    # """
-    # if (
-    #     not fully_qualified_parameter_name.endswith(
-    #         f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}"
-    #     )
-    #     and isinstance(return_value, ParameterNode)
-    #     and FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY in return_value
-    # ):
-    #     return return_value[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
-    # TODO: <Alex>ALEX -- leaving the capability above for future considerations.</Alex>
 
     return return_value
 

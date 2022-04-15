@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
@@ -14,7 +14,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
+    Attributes,
     Domain,
     ParameterContainer,
 )
@@ -180,12 +183,15 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+    ) -> Attributes:
         """
-        Check the percentage of values matching each string, and return the best fit, or None if no
-        string exceeds the configured threshold.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Check the percentage of values matching each string, and return the best fit, or None if no string exceeds the
+        configured threshold.
+
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         metric_computation_result: MetricComputationResult
 
@@ -199,17 +205,16 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         )
 
         # This should never happen.
-        if not (
-            isinstance(metric_computation_result.metric_values, list)
-            and len(metric_computation_result.metric_values) == 1
-        ):
+        if len(metric_computation_result.attributed_resolved_metrics) != 1:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.metric_values} found).'
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'
             )
 
         attributed_resolved_metrics: AttributedResolvedMetrics
 
-        attributed_resolved_metrics = metric_computation_result.metric_values[0]
+        attributed_resolved_metrics = (
+            metric_computation_result.attributed_resolved_metrics[0]
+        )
 
         metric_values: MetricValues
 
@@ -233,18 +238,18 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         )
 
         # Gather "metric_value_kwargs" for all candidate "strftime_format" strings.
-        fmt_string: str
+        format_string: str
         match_strftime_metric_value_kwargs_list: List[dict] = []
         match_strftime_metric_value_kwargs: dict
-        for fmt_string in candidate_strings:
+        for format_string in candidate_strings:
             if self.metric_value_kwargs:
                 match_strftime_metric_value_kwargs = {
                     **self.metric_value_kwargs,
-                    **{"strftime_format": fmt_string},
+                    **{"strftime_format": format_string},
                 }
             else:
                 match_strftime_metric_value_kwargs = {
-                    "strftime_format": fmt_string,
+                    "strftime_format": format_string,
                 }
 
             match_strftime_metric_value_kwargs_list.append(
@@ -263,7 +268,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         format_string_success_ratios: dict = {}
 
-        for attributed_resolved_metrics in metric_computation_result.metric_values:
+        for (
+            attributed_resolved_metrics
+        ) in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = attributed_resolved_metrics.metric_values[:, 0]
 
@@ -284,26 +291,28 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        best_fmt_string: Optional[str] = None
-        best_ratio: float = 0.0
-
         # get best-matching datetime string that matches greater than threshold
+        best_format_string: str
+        best_ratio: float
         (
-            best_fmt_string,
+            best_format_string,
             best_ratio,
         ) = ParameterBuilder._get_best_candidate_above_threshold(
             format_string_success_ratios, threshold
         )
         # dict of sorted datetime and ratios for all evaluated candidates
-        sorted_fmt_strings_and_ratios: dict = (
+        sorted_format_strings_and_ratios: dict = (
             ParameterBuilder._get_sorted_candidates_and_ratios(
                 format_string_success_ratios
             )
         )
-        return (
-            best_fmt_string,
+
+        return Attributes(
             {
-                "success_ratio": best_ratio,
-                "candidate_strings": sorted_fmt_strings_and_ratios,
-            },
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: best_format_string,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: {
+                    "success_ratio": best_ratio,
+                    "candidate_strings": sorted_format_strings_and_ratios,
+                },
+            }
         )

@@ -1,6 +1,6 @@
 import itertools
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Callable, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 
@@ -19,6 +19,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    Attributes,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -193,12 +197,12 @@ detected.
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+    ) -> Attributes:
         """
-         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-         details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-         return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
 
          The algorithm operates according to the following steps:
          1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
@@ -210,15 +214,9 @@ detected.
          5. Using the configured directives and heuristics, determine whether or not the ranges should be clipped.
          6. Using the configured directives and heuristics, determine if return values should be rounded to an integer.
          7. Convert the multi-dimensional metric computation results to a numpy array (for further computations).
-         Steps 8 -- 10 are for the "oneshot" sampling method only (the "bootstrap" method achieves same automatically):
-         8. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
-         9. Compute number of standard deviations (as floating point) needed (around the mean) to achieve the specified
-            false_positive_rate (note that false_positive_rate of 0.0 would result in infinite number of standard deviations,
-            hence it is "nudged" by small quantity "epsilon" above 0.0 if false_positive_rate of 0.0 appears as argument).
-            (Please refer to "https://en.wikipedia.org/wiki/Normal_distribution" and references therein for background.)
-        10. Compute the "band" around the mean as the min_value and max_value (to be used in ExpectationConfiguration).
-        11. Return [low, high] for the desired metric as estimated by the specified sampling method.
-        12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
+         8. Compute [low, high] for the desired metric using the chosen estimator method.
+         9. Return [low, high] for the desired metric as estimated by the specified sampling method.
+        10. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
         # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
@@ -250,20 +248,13 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues
-        if isinstance(parameter_node.value, list):
-            num_parameter_node_value_elements: int = len(parameter_node.value)
-            if not (num_parameter_node_value_elements == 1):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f'Length of "AttributedResolvedMetrics" list for {self.__class__.__name__} must be exactly 1 ({num_parameter_node_value_elements} elements found).'
-                )
-
-            attributed_resolved_metrics: AttributedResolvedMetrics = (
-                parameter_node.value[0]
+        metric_values: MetricValues = (
+            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
+                attributed_metric_values=parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
             )
-            metric_values = attributed_resolved_metrics.metric_values
-        else:
-            metric_values = parameter_node.value
+        )
 
         # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         estimator: str = get_parameter_value_and_validate_return_type(
@@ -307,9 +298,13 @@ detected.
             **estimator_kwargs,
         )
 
-        return (
-            metric_value_range,
-            parameter_node.details,
+        return Attributes(
+            {
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_value_range,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                ],
+            }
         )
 
     def _estimate_metric_value_range(

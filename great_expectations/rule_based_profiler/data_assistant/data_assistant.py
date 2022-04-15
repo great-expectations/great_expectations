@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 import altair as alt
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
-from great_expectations.core.batch import BatchRequestBase
+from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.data_context import BaseDataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -25,12 +25,13 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 )
 from great_expectations.rule_based_profiler.types import (
     ALTAIR_CONFIGURATION,
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     DataAssistantResult,
     Domain,
 )
+from great_expectations.util import measure_execution_time
 
 
 class DataAssistant(ABC):
@@ -45,7 +46,6 @@ class DataAssistant(ABC):
         batch_request=batch_request,
         data_context=context,
     )
-    data_assistant.build()
     result: DataAssistantResult = data_assistant.run()
 
     Then:
@@ -63,7 +63,7 @@ class DataAssistant(ABC):
         data_context: BaseDataContext = None,
     ):
         """
-        DataAssistant subclasses build "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
+        DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
         corresponding to indended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
         "RuleBasedProfilerResult" object, containing metrics by "Domain", list of "ExpectationConfiguration" objects,
         and overall "ExpectationSuite" object, immediately available for validating underlying data "Batch" objects.
@@ -93,8 +93,9 @@ class DataAssistant(ABC):
             variables=None,
             data_context=self.data_context,
         )
+        self._build_profiler()
 
-    def build(self) -> None:
+    def _build_profiler(self) -> None:
         """
         Builds "RuleBasedProfiler", corresponding to present DataAssistant use case.
 
@@ -160,24 +161,20 @@ class DataAssistant(ABC):
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> DataAssistantResult:
-        self.profiler.run(
-            variables=None,
-            rules=None,
+        result: DataAssistantResult = DataAssistantResult(execution_time=0.0)
+        run_profiler_on_data(
+            data_assistant=self,
+            data_assistant_result=result,
+            profiler=self.profiler,
+            variables=self.variables,
+            rules=self.rules,
             batch_list=list(self._validator.batches.values()),
             batch_request=None,
-            force_batch_data=False,
-            reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
         )
-        return DataAssistantResult(
-            profiler_config=self.profiler.config,
-            metrics=self.get_metrics(),
-            expectation_configurations=self.get_expectation_configurations(),
-            expectation_suite=self.get_expectation_suite(
-                expectation_suite=expectation_suite,
-                expectation_suite_name=expectation_suite_name,
-                include_citation=include_citation,
-            ),
-        )
+        return result
 
     def plot(self, charts: List[alt.Chart]):
         for c in charts:
@@ -223,6 +220,24 @@ class DataAssistant(ABC):
         """
         pass
 
+    @property
+    @abstractmethod
+    def variables(self) -> Optional[Dict[str, Any]]:
+        """
+        Returns:
+            Optional "variables" configuration attribute name/value pairs (overrides), commonly-used in Builder objects.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def rules(self) -> Optional[List[Rule]]:
+        """
+        Returns:
+            Optional custom list of "Rule" objects (overrides) can be added by subclasses (return "None" if not needed).
+        """
+        pass
+
     def get_metrics(self) -> Dict[Domain, Dict[str, Any]]:
         """
         Obtain subset of all parameter values for fully-qualified parameter names by Domain, available from entire
@@ -260,7 +275,7 @@ class DataAssistant(ABC):
                 fully_qualified_metrics_parameter_names_by_domain_type[
                     domain_type
                 ].append(
-                    f"{parameter_builder.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}"
+                    f"{parameter_builder.fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY}"
                 )
                 fully_qualified_metrics_parameter_names_by_domain_type[
                     domain_type
@@ -334,3 +349,46 @@ class DataAssistant(ABC):
             List of "ExpectationConfiguration" objects, computed by "RuleBasedProfiler" state.
         """
         return self.profiler.get_expectation_configurations()
+
+
+@measure_execution_time(
+    execution_time_holder_object_reference_name="data_assistant_result",
+    execution_time_property_name="execution_time",
+    pretty_print=False,
+)
+def run_profiler_on_data(
+    data_assistant: DataAssistant,
+    data_assistant_result: DataAssistantResult,
+    profiler: BaseRuleBasedProfiler,
+    variables: Optional[Dict[str, Any]] = None,
+    rules: Optional[Dict[str, Dict[str, Any]]] = None,
+    batch_list: Optional[List[Batch]] = None,
+    batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+    expectation_suite: Optional[ExpectationSuite] = None,
+    expectation_suite_name: Optional[str] = None,
+    include_citation: bool = True,
+) -> None:
+    if rules is None:
+        rules = []
+
+    rule: Rule
+    rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
+        rule.name: rule.to_json_dict() for rule in rules
+    }
+    profiler.run(
+        variables=variables,
+        rules=rules_configs,
+        batch_list=batch_list,
+        batch_request=batch_request,
+        force_batch_data=False,
+        reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+    )
+    result: DataAssistantResult = data_assistant_result
+    result.profiler_config = profiler.config
+    result.metrics = data_assistant.get_metrics()
+    result.expectation_configurations = data_assistant.get_expectation_configurations()
+    result.expectation_suite = data_assistant.get_expectation_suite(
+        expectation_suite=expectation_suite,
+        expectation_suite_name=expectation_suite_name,
+        include_citation=include_citation,
+    )
