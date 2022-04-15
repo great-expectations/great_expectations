@@ -3,6 +3,7 @@ import importlib.machinery
 import importlib.util
 import logging
 import os
+import pathlib
 import shutil
 import sys
 from dataclasses import dataclass
@@ -764,7 +765,7 @@ aws_integration_tests = [
 ]
 
 # populate integration_test_matrix with sub-lists
-integration_test_matrix = []
+integration_test_matrix: List[IntegrationTestFixture] = []
 integration_test_matrix += aws_integration_tests
 integration_test_matrix += pandas_integration_tests
 
@@ -795,7 +796,9 @@ def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments
     _execute_integration_test(test_configuration, tmp_path)
 
 
-def _execute_integration_test(integration_test_fixture, tmp_path):
+def _execute_integration_test(
+    integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
+):
     """
     Prepare and environment and run integration tests from a list of tests.
 
