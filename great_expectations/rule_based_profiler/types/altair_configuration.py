@@ -15,7 +15,7 @@ font: str = "Verdana"
 
 # Title
 title_align: str = "center"
-title_font_size: int = 16
+title_font_size: int = 15
 title_color: str = Colors.PURPLE.value
 
 # Both Axes

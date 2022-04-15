@@ -73,10 +73,12 @@ class VolumeDataAssistant(DataAssistant):
             ][f"{fully_qualified_parameter_name}.attributed_value"].values(),
             [],
         )
+        lower_limit = 7000000
+        upper_limit = 8000000
         df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
         df[x_axis_label] = df.index + 1
-        df[lower_limit_label] = 7000000
-        df[upper_limit_label] = 8000000
+        df[lower_limit_label] = lower_limit
+        df[upper_limit_label] = upper_limit
 
         # all available encodings https://altair-viz.github.io/user_guide/encoding.html
         charts: List[alt.Chart] = []
