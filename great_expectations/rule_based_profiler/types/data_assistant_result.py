@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.types import Domain
+from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.types import SerializableDictDot
 
 
@@ -27,22 +27,32 @@ class DataAssistantResult(SerializableDictDot):
     execution_time: Optional[float] = None  # Execution time (in seconds).
 
     def plot(self, prescriptive: bool = False):
-        metric_name = "table.row_count"
-        attributed_value: str = self.metrics[Domain(domain_type="table")][
-            "$parameter.table_row_count.attributed_value"
-        ]
-        data: list[Number] = sum(
-            attributed_value.values(),
-            [],
-        )
+        metrics: Dict[Dict, ParameterNode] = self.metrics
+        metric_names: List[str] = []
+        metric_domain: Domain
+        metric_nodes: Dict[str, ParameterNode]
+        parameter_node_name: str
+        parameter_node: ParameterNode
+        for metric_domain, metric_nodes in metrics.items():
+            for parameter_node_name, parameter_node in metric_nodes.items():
+                if parameter_node_name.endswith(".details"):
+                    details_parameter_node: ParameterNode = parameter_node
+                    metric_names.append(
+                        details_parameter_node.metric_configuration.metric_name
+                    )
+                if parameter_node_name.endswith("attributed_value"):
+                    attributed_value_parameter_node: ParameterNode = parameter_node
+                    data: list[Number] = sum(
+                        attributed_value_parameter_node.values(), []
+                    )
 
         expectation_configurations: list[
             ExpectationConfiguration
         ] = self.expectation_configurations
 
         self.data_assistant_cls._plot(
-            self,
-            metric_name=metric_name,
+            self=self.data_assistant_cls,
+            metric_names=metric_names,
             data=data,
             prescriptive=prescriptive,
             expectation_configurations=expectation_configurations,

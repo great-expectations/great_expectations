@@ -51,7 +51,7 @@ class VolumeDataAssistant(DataAssistant):
 
     def _plot(
         self,
-        metric_name: str,
+        metric_names: List[str],
         data: np.ndarray,
         prescriptive: bool,
         expectation_configurations: list[ExpectationConfiguration],
@@ -59,7 +59,7 @@ class VolumeDataAssistant(DataAssistant):
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "super()._plot()" for display.
         """
-        metric_label = metric_name.replace(".", " ").replace("_", " ").title()
+        metric_label = metric_names[0].replace(".", " ").replace("_", " ").title()
         x_axis_label: str = "Batch"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
@@ -130,7 +130,7 @@ class VolumeDataAssistant(DataAssistant):
 
         charts.append(line_chart)
 
-        super()._plot(charts=charts)
+        super()._plot(self, charts=charts)
 
     @property
     def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
