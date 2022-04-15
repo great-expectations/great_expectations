@@ -16,8 +16,8 @@ axis_title_color: str = Colors.PURPLE.value
 axis_title_font_size: int = 12
 axis_label_color: str = Colors.BLUE_1.value
 
-# X-Axis
-x_axis_label_angle: int = 90
+# X-Axis Only
+x_axis_label_angle: int = 0
 
 # Color Palettes
 category_color_scheme: List[str] = ColorPalettes.CATEGORY.value

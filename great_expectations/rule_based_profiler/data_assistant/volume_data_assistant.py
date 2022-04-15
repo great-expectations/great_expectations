@@ -82,7 +82,7 @@ class VolumeDataAssistant(DataAssistant):
             alt.Chart(df, title=line_chart_title)
             .mark_line(color=Colors.BLUE_2.value)
             .encode(
-                x=alt.X(x_axis_label, type=x_axis_type, axis=alt.Axis(labelAngle=90)),
+                x=alt.X(x_axis_label, type=x_axis_type),
                 y=alt.Y(metric_label, type=metric_type),
             )
         )
