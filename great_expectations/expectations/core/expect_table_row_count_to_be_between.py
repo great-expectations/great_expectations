@@ -280,7 +280,6 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             elif params["max_value"] is None:
                 template_str = f"Must have {at_least_str} $min_value rows."
 
-
         return [
             RenderedStringTemplateContent(
                 **{
