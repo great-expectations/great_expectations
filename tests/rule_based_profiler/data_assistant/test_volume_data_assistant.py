@@ -361,7 +361,6 @@ def test_volume_data_assistant_plot(
         batch_request=batch_request,
         data_context=context,
     )
-    data_assistant.run()
 
     expectation_suite_name: str = "test_suite"
     result: DataAssistantResult = data_assistant.run(

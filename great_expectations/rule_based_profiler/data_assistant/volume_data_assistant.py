@@ -53,6 +53,8 @@ class VolumeDataAssistant(DataAssistant):
         ][0]["metric_name"]
         metric_label = metric_name.replace(".", " ").replace("_", " ").title()
         x_axis_label: str = "Batch"
+        lower_limit_label: str = "Lower Limit"
+        upper_limit_label: str = "Upper Limit"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
         x_axis_type: str = "nominal"
@@ -73,12 +75,14 @@ class VolumeDataAssistant(DataAssistant):
         )
         df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
         df[x_axis_label] = df.index + 1
+        df[lower_limit_label] = 7000000
+        df[upper_limit_label] = 8000000
 
         # all available encodings https://altair-viz.github.io/user_guide/encoding.html
         charts: List[alt.Chart] = []
 
         line_chart_title: str = f"{metric_label} per {x_axis_label}"
-        line_chart: alt.Chart = (
+        line: alt.Chart = (
             alt.Chart(df, title=line_chart_title)
             .mark_line(color=Colors.BLUE_2.value)
             .encode(
@@ -86,6 +90,19 @@ class VolumeDataAssistant(DataAssistant):
                 y=alt.Y(metric_label, type=metric_type),
             )
         )
+
+        band = (
+            alt.Chart(df)
+            .mark_area()
+            .encode(
+                x=alt.X(x_axis_label, type=x_axis_type),
+                y=alt.Y(lower_limit_label, type=metric_type),
+                y2=alt.Y2(upper_limit_label),
+            )
+        )
+
+        line_chart = band + line
+
         charts.append(line_chart)
 
         super().plot(charts=charts)

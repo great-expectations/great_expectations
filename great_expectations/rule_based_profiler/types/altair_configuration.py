@@ -20,6 +20,7 @@ axis_title_color: str = Colors.PURPLE.value
 axis_title_font_size: int = 14
 axis_label_color: str = Colors.BLUE_1.value
 axis_label_font_size: int = 12
+axis_label_padding: int = 10
 
 # X-Axis Only
 x_axis_label_angle: int = 0
@@ -35,6 +36,13 @@ category_color_scheme: List[str] = ColorPalettes.CATEGORY.value
 diverging_color_scheme: List[str] = ColorPalettes.DIVERGING.value
 heatmap_color_scheme: List[str] = ColorPalettes.HEATMAP.value
 ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
+
+#
+# Marks
+#
+
+# Area
+area_fill_color: str = Colors.BLUE_3.value
 
 #
 # Chart Types
@@ -54,6 +62,7 @@ ALTAIR_CONFIGURATION: Dict[str, Any] = {
         "titleColor": axis_title_color,
         "labelFontSize": axis_label_font_size,
         "labelColor": axis_label_color,
+        "labelPadding": axis_label_padding,
     },
     "axisX": {"labelAngle": x_axis_label_angle, "grid": x_axis_grid},
     "range": {
@@ -62,5 +71,6 @@ ALTAIR_CONFIGURATION: Dict[str, Any] = {
         "heatmap": heatmap_color_scheme,
         "ordinal": ordinal_color_scheme,
     },
+    "mark": {"fill": area_fill_color},
     "line": {"strokeWidth": line_stroke_width, "tooltip": line_chart_tooltip},
 }
