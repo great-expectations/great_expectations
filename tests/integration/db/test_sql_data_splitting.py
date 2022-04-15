@@ -26,7 +26,7 @@ yaml_handler: YAMLHandler = YAMLHandler()
 
 def _get_connection_string_and_dialect() -> Tuple[str, str]:
 
-    with open("connection_string.yml") as f:
+    with open("./connection_string.yml") as f:
         db_config: dict = yaml_handler.load(f)
 
     dialect: str = db_config["dialect"]

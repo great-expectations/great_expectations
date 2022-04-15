@@ -312,7 +312,7 @@ dockerized_db_tests = [
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_postgres",
-        user_flow_script="tests/integration/fixtures/split_data/test_sql_data_splitting.py",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
@@ -326,7 +326,7 @@ dockerized_db_tests = [
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_mssql",
-        user_flow_script="tests/integration/fixtures/split_data/test_sql_data_splitting.py",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
@@ -340,7 +340,7 @@ dockerized_db_tests = [
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_mysql",
-        user_flow_script="tests/integration/fixtures/split_data/test_sql_data_splitting.py",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
@@ -429,7 +429,7 @@ cloud_snowflake_tests = [
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_snowflake",
-        user_flow_script="tests/integration/fixtures/split_data/test_sql_data_splitting.py",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
@@ -550,7 +550,7 @@ cloud_bigquery_tests = [
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_bigquery",
-        user_flow_script="tests/integration/fixtures/split_data/test_sql_data_splitting.py",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
