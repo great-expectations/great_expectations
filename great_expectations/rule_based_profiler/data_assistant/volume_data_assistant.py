@@ -1,9 +1,10 @@
-from numbers import Number
 from typing import Any, Dict, List, Optional, Union
 
 import altair as alt
+import numpy as np
 import pandas as pd
 
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.data_context import BaseDataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -15,8 +16,6 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    DataAssistantResult,
-    Domain,
 )
 from great_expectations.types import ColorPalettes, Colors
 
@@ -44,28 +43,31 @@ class VolumeDataAssistant(DataAssistant):
             data_context=data_context,
         )
 
-    def _plot(self, data: list[Number]):
+    def _plot_descriptive(self):
+        pass
+
+    def _plot_prescriptive(self):
+        pass
+
+    def _plot(
+        self,
+        metric_name: str,
+        data: np.ndarray,
+        prescriptive: bool,
+        expectation_configurations: list[ExpectationConfiguration],
+    ):
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "super()._plot()" for display.
         """
-        metric_name: str = self.metrics_parameter_builders_by_domain_type[
-            MetricDomainTypes.TABLE
-        ][0]["metric_name"]
         metric_label = metric_name.replace(".", " ").replace("_", " ").title()
         x_axis_label: str = "Batch"
-        lower_limit_label: str = "Lower Limit"
-        upper_limit_label: str = "Upper Limit"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
         x_axis_type: str = "ordinal"
         metric_type: str = "quantitative"
 
-        lower_limit = 7000000
-        upper_limit = 8000000
         df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
         df[x_axis_label] = df.index + 1
-        df[lower_limit_label] = lower_limit
-        df[upper_limit_label] = upper_limit
 
         # all available encodings https://altair-viz.github.io/user_guide/encoding.html
         charts: List[alt.Chart] = []
@@ -80,35 +82,51 @@ class VolumeDataAssistant(DataAssistant):
             )
         )
 
-        lower_limit: alt.Chart = (
-            alt.Chart(df, title=line_chart_title)
-            .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
-            .encode(
-                x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
-                y=alt.Y(lower_limit_label, type=metric_type, title=metric_label),
-            )
-        )
+        if prescriptive:
+            for expectation_configuration in expectation_configurations:
+                if (
+                    expectation_configuration.expectation_type
+                    == "expect_table_row_count_to_be_between"
+                ):
+                    min_label: str = "min_value"
+                    max_label: str = "max_value"
+                    min_value: float = expectation_configuration.kwargs["min_value"]
+                    max_value: float = expectation_configuration.kwargs["max_value"]
 
-        upper_limit: alt.Chart = (
-            alt.Chart(df, title=line_chart_title)
-            .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
-            .encode(
-                x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
-                y=alt.Y(upper_limit_label, type=metric_type, title=metric_label),
-            )
-        )
+                    df[min_label] = min_value
+                    df[max_label] = max_value
 
-        band = (
-            alt.Chart(df)
-            .mark_area()
-            .encode(
-                x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
-                y=alt.Y(lower_limit_label, title=metric_label, type=metric_type),
-                y2=alt.Y2(upper_limit_label, title=metric_label),
-            )
-        )
+                    lower_limit: alt.Chart = (
+                        alt.Chart(df, title=line_chart_title)
+                        .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
+                        .encode(
+                            x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                            y=alt.Y(min_label, type=metric_type, title=metric_label),
+                        )
+                    )
 
-        line_chart = band + lower_limit + upper_limit + line
+                    upper_limit: alt.Chart = (
+                        alt.Chart(df, title=line_chart_title)
+                        .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
+                        .encode(
+                            x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                            y=alt.Y(max_label, type=metric_type, title=metric_label),
+                        )
+                    )
+
+                    band = (
+                        alt.Chart(df)
+                        .mark_area()
+                        .encode(
+                            x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                            y=alt.Y(min_label, title=metric_label, type=metric_type),
+                            y2=alt.Y2(max_label, title=metric_label),
+                        )
+                    )
+
+                    line_chart = band + lower_limit + upper_limit + line
+        else:
+            line_chart = line
 
         charts.append(line_chart)
 

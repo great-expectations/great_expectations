@@ -27,20 +27,26 @@ class DataAssistantResult(SerializableDictDot):
     execution_time: Optional[float] = None  # Execution time (in seconds).
 
     def plot(self, prescriptive: bool = False):
+        metric_name = "table.row_count"
         attributed_value: str = self.metrics[Domain(domain_type="table")][
-            "$parameter_table_row_count.attributed_value"
+            "$parameter.table_row_count.attributed_value"
         ]
-
         data: list[Number] = sum(
-            self.metrics[
-                Domain(
-                    domain_type="table",
-                )
-            ][attributed_value].values(),
+            attributed_value.values(),
             [],
         )
 
-        self.data_assistant_cls._plot(data=data)
+        expectation_configurations: list[
+            ExpectationConfiguration
+        ] = self.expectation_configurations
+
+        self.data_assistant_cls._plot(
+            self,
+            metric_name=metric_name,
+            data=data,
+            prescriptive=prescriptive,
+            expectation_configurations=expectation_configurations,
+        )
 
     def to_dict(self) -> dict:
         return asdict(self)
