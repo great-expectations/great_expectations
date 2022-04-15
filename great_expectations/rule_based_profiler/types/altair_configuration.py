@@ -41,6 +41,8 @@ ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
 #
 
 # Line Chart
+line_color: str = Colors.BLUE_1.value
+line_stroke_width: int = 3
 line_chart_tooltip: bool = True
 
 
@@ -60,5 +62,5 @@ ALTAIR_CONFIGURATION: Dict[str, Any] = {
         "heatmap": heatmap_color_scheme,
         "ordinal": ordinal_color_scheme,
     },
-    "line": {"tooltip": line_chart_tooltip},
+    "line": {"strokeWidth": line_stroke_width, "tooltip": line_chart_tooltip},
 }
