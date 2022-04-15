@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 import altair as alt
@@ -161,7 +161,10 @@ class DataAssistant(ABC):
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> DataAssistantResult:
-        result: DataAssistantResult = DataAssistantResult(execution_time=0.0)
+        data_assistant_cls: ABCMeta = type(self)
+        result: DataAssistantResult = DataAssistantResult(
+            data_assistant_cls=data_assistant_cls, execution_time=0.0
+        )
         run_profiler_on_data(
             data_assistant=self,
             data_assistant_result=result,
@@ -176,7 +179,7 @@ class DataAssistant(ABC):
         )
         return result
 
-    def plot(self, charts: List[alt.Chart]):
+    def _plot(self, charts: List[alt.Chart]):
         selection = alt.selection_interval(bind="scales")
         for c in charts:
             c.configure(**ALTAIR_CONFIGURATION).add_selection(selection).display()

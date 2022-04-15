@@ -367,4 +367,4 @@ def test_volume_data_assistant_plot(
         expectation_suite_name=expectation_suite_name,
     )
 
-    data_assistant.plot(data_assistant_result=result)
+    result.plot()

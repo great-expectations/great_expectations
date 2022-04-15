@@ -18,7 +18,7 @@ from great_expectations.rule_based_profiler.types import (
     DataAssistantResult,
     Domain,
 )
-from great_expectations.types import Colors
+from great_expectations.types import ColorPalettes, Colors
 
 
 class VolumeDataAssistant(DataAssistant):
@@ -44,9 +44,9 @@ class VolumeDataAssistant(DataAssistant):
             data_context=data_context,
         )
 
-    def plot(self, data_assistant_result: DataAssistantResult):
+    def _plot(self, data: list[Number]):
         """
-        VolumeDataAssistant-specific plots are defined with Altair and passed to "super().plot()" for display.
+        VolumeDataAssistant-specific plots are defined with Altair and passed to "super()._plot()" for display.
         """
         metric_name: str = self.metrics_parameter_builders_by_domain_type[
             MetricDomainTypes.TABLE
@@ -60,19 +60,6 @@ class VolumeDataAssistant(DataAssistant):
         x_axis_type: str = "ordinal"
         metric_type: str = "quantitative"
 
-        fully_qualified_parameter_name: str = (
-            self.metrics_parameter_builders_by_domain_type[MetricDomainTypes.TABLE][0][
-                "fully_qualified_parameter_name"
-            ]
-        )
-        data: list[Number] = sum(
-            data_assistant_result.metrics[
-                Domain(
-                    domain_type="table",
-                )
-            ][f"{fully_qualified_parameter_name}.attributed_value"].values(),
-            [],
-        )
         lower_limit = 7000000
         upper_limit = 8000000
         df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
@@ -95,7 +82,7 @@ class VolumeDataAssistant(DataAssistant):
 
         lower_limit: alt.Chart = (
             alt.Chart(df, title=line_chart_title)
-            .mark_line(color=Colors.BLUE_3.value, opacity=0.9)
+            .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
             .encode(
                 x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
                 y=alt.Y(lower_limit_label, type=metric_type, title=metric_label),
@@ -104,7 +91,7 @@ class VolumeDataAssistant(DataAssistant):
 
         upper_limit: alt.Chart = (
             alt.Chart(df, title=line_chart_title)
-            .mark_line(color=Colors.BLUE_3.value, opacity=0.9)
+            .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
             .encode(
                 x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
                 y=alt.Y(upper_limit_label, type=metric_type, title=metric_label),
@@ -125,7 +112,7 @@ class VolumeDataAssistant(DataAssistant):
 
         charts.append(line_chart)
 
-        super().plot(charts=charts)
+        super()._plot(charts=charts)
 
     @property
     def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
