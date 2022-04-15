@@ -1,6 +1,5 @@
 from typing import Any, Dict, List
 
-import pytest
 from freezegun import freeze_time
 
 from great_expectations import DataContext
@@ -364,4 +363,4 @@ def test_volume_data_assistant_plot_prescriptive(
         expectation_suite_name=expectation_suite_name,
     )
 
-    result.plot()
+    result.plot(prescriptive=True)

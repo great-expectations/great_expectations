@@ -41,14 +41,6 @@ heatmap_color_scheme: List[str] = ColorPalettes.HEATMAP.value
 ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
 
 #
-# Marks
-#
-
-# Area
-area_fill_color: str = ColorPalettes.HEATMAP.value[5]
-area_fill_opacity: float = 0.9
-
-#
 # Chart Types
 #
 
@@ -76,6 +68,5 @@ ALTAIR_DEFAULT_CONFIGURATION: Dict[str, Any] = {
         "heatmap": heatmap_color_scheme,
         "ordinal": ordinal_color_scheme,
     },
-    "mark": {"fill": area_fill_color, "fillOpacity": area_fill_opacity},
     "line": {"strokeWidth": line_stroke_width, "tooltip": line_chart_tooltip},
 }

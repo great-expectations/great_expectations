@@ -44,7 +44,8 @@ class VolumeDataAssistant(DataAssistant):
         )
 
     def _plot_descriptive(self, line: alt.Chart):
-        return line
+        descriptive_chart: alt.Chart = line
+        return descriptive_chart
 
     def _plot_prescriptive(
         self,
@@ -62,43 +63,23 @@ class VolumeDataAssistant(DataAssistant):
                 expectation_configuration.expectation_type
                 == "expect_table_row_count_to_be_between"
             ):
-                min_label: str = "min_value"
-                max_label: str = "max_value"
                 min_value: float = expectation_configuration.kwargs["min_value"]
                 max_value: float = expectation_configuration.kwargs["max_value"]
-
-                df[min_label] = min_value
-                df[max_label] = max_value
-
-                lower_limit: alt.Chart = (
-                    alt.Chart(df, title=chart_title)
-                    .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
-                    .encode(
-                        x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
-                        y=alt.Y(min_label, type=metric_type, title=metric_label),
+                prescriptive_chart: alt.Chart = (
+                    self.get_expect_domain_values_to_be_between_chart(
+                        self,
+                        df=df,
+                        chart_title=chart_title,
+                        metric_label=metric_label,
+                        metric_type=metric_type,
+                        x_axis_label=x_axis_label,
+                        x_axis_type=x_axis_type,
+                        line=line,
+                        min_value=min_value,
+                        max_value=max_value,
                     )
                 )
-
-                upper_limit: alt.Chart = (
-                    alt.Chart(df, title=chart_title)
-                    .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
-                    .encode(
-                        x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
-                        y=alt.Y(max_label, type=metric_type, title=metric_label),
-                    )
-                )
-
-                band = (
-                    alt.Chart(df)
-                    .mark_area()
-                    .encode(
-                        x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
-                        y=alt.Y(min_label, title=metric_label, type=metric_type),
-                        y2=alt.Y2(max_label, title=metric_label),
-                    )
-                )
-
-                return band + lower_limit + upper_limit + line
+                return prescriptive_chart
 
     def _plot(
         self,
@@ -124,17 +105,18 @@ class VolumeDataAssistant(DataAssistant):
         charts: List[alt.Chart] = []
 
         line_chart_title: str = f"{metric_label} per {x_axis_label}"
-        line: alt.Chart = (
-            alt.Chart(df, title=line_chart_title)
-            .mark_line(color=Colors.BLUE_2.value)
-            .encode(
-                x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
-                y=alt.Y(metric_label, type=metric_type, title=metric_label),
-            )
+        line: alt.Chart = self.get_line_chart(
+            self,
+            df=df,
+            title=line_chart_title,
+            metric_label=metric_label,
+            metric_type=metric_type,
+            x_axis_label=x_axis_label,
+            x_axis_type=x_axis_type,
         )
 
         if prescriptive:
-            line_chart = self._plot_prescriptive(
+            table_row_count_chart = self._plot_prescriptive(
                 self,
                 df=df,
                 chart_title=line_chart_title,
@@ -146,9 +128,9 @@ class VolumeDataAssistant(DataAssistant):
                 expectation_configurations=expectation_configurations,
             )
         else:
-            line_chart = self._plot_descriptive(self, line=line)
+            table_row_count_chart = self._plot_descriptive(self, line=line)
 
-        charts.append(line_chart)
+        charts.append(table_row_count_chart)
 
         super()._plot(self, charts=charts)
 

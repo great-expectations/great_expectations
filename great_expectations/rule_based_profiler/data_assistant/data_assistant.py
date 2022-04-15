@@ -2,6 +2,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 import altair as alt
+import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequestBase
@@ -31,6 +32,7 @@ from great_expectations.rule_based_profiler.types import (
     DataAssistantResult,
     Domain,
 )
+from great_expectations.types import Colors
 from great_expectations.util import measure_execution_time
 
 
@@ -185,6 +187,71 @@ class DataAssistant(ABC):
             c.configure(**ALTAIR_DEFAULT_CONFIGURATION).add_selection(
                 selection
             ).display()
+
+    def get_line_chart(
+        self,
+        df: pd.DataFrame,
+        title: str,
+        metric_label: str,
+        metric_type: str,
+        x_axis_label: str,
+        x_axis_type: str,
+    ):
+        line: alt.Chart = (
+            alt.Chart(df, title=title)
+            .mark_line(color=Colors.BLUE_2.value)
+            .encode(
+                x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                y=alt.Y(metric_label, type=metric_type, title=metric_label),
+            )
+        )
+        return line
+
+    def get_expect_domain_values_to_be_between_chart(
+        self,
+        df: pd.DataFrame,
+        chart_title: str,
+        metric_label: str,
+        metric_type: str,
+        x_axis_label: str,
+        x_axis_type: str,
+        line: alt.Chart,
+    ):
+        min_label: str = "min_value"
+        max_label: str = "max_value"
+
+        df[min_label] = min_value
+        df[max_label] = max_value
+
+        lower_limit: alt.Chart = (
+            alt.Chart(df, title=chart_title)
+            .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
+            .encode(
+                x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                y=alt.Y(min_label, type=metric_type, title=metric_label),
+            )
+        )
+
+        upper_limit: alt.Chart = (
+            alt.Chart(df, title=chart_title)
+            .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
+            .encode(
+                x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                y=alt.Y(max_label, type=metric_type, title=metric_label),
+            )
+        )
+
+        band = (
+            alt.Chart(df)
+            .mark_area(fill=ColorPalettes.HEATMAP.value[5], fillOpacity=0.9)
+            .encode(
+                x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                y=alt.Y(min_label, title=metric_label, type=metric_type),
+                y2=alt.Y2(max_label, title=metric_label),
+            )
+        )
+
+        return band + lower_limit + upper_limit + line
 
     @property
     def name(self) -> str:
