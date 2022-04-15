@@ -43,11 +43,62 @@ class VolumeDataAssistant(DataAssistant):
             data_context=data_context,
         )
 
-    def _plot_descriptive(self):
-        pass
+    def _plot_descriptive(self, line: alt.Chart):
+        return line
 
-    def _plot_prescriptive(self):
-        pass
+    def _plot_prescriptive(
+        self,
+        line: alt.Chart,
+        expectation_configurations: List[ExpectationConfiguration],
+        df: pd.DataFrame,
+        line_chart_title: str,
+        x_axis_label: str,
+        x_axis_type: str,
+        metric_label: str,
+        metric_type: str,
+    ):
+        for expectation_configuration in expectation_configurations:
+            if (
+                expectation_configuration.expectation_type
+                == "expect_table_row_count_to_be_between"
+            ):
+                min_label: str = "min_value"
+                max_label: str = "max_value"
+                min_value: float = expectation_configuration.kwargs["min_value"]
+                max_value: float = expectation_configuration.kwargs["max_value"]
+
+                df[min_label] = min_value
+                df[max_label] = max_value
+
+                lower_limit: alt.Chart = (
+                    alt.Chart(df, title=line_chart_title)
+                    .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
+                    .encode(
+                        x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                        y=alt.Y(min_label, type=metric_type, title=metric_label),
+                    )
+                )
+
+                upper_limit: alt.Chart = (
+                    alt.Chart(df, title=line_chart_title)
+                    .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
+                    .encode(
+                        x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                        y=alt.Y(max_label, type=metric_type, title=metric_label),
+                    )
+                )
+
+                band = (
+                    alt.Chart(df)
+                    .mark_area()
+                    .encode(
+                        x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                        y=alt.Y(min_label, title=metric_label, type=metric_type),
+                        y2=alt.Y2(max_label, title=metric_label),
+                    )
+                )
+
+                return band + lower_limit + upper_limit + line
 
     def _plot(
         self,
@@ -83,50 +134,18 @@ class VolumeDataAssistant(DataAssistant):
         )
 
         if prescriptive:
-            for expectation_configuration in expectation_configurations:
-                if (
-                    expectation_configuration.expectation_type
-                    == "expect_table_row_count_to_be_between"
-                ):
-                    min_label: str = "min_value"
-                    max_label: str = "max_value"
-                    min_value: float = expectation_configuration.kwargs["min_value"]
-                    max_value: float = expectation_configuration.kwargs["max_value"]
-
-                    df[min_label] = min_value
-                    df[max_label] = max_value
-
-                    lower_limit: alt.Chart = (
-                        alt.Chart(df, title=line_chart_title)
-                        .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
-                        .encode(
-                            x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
-                            y=alt.Y(min_label, type=metric_type, title=metric_label),
-                        )
-                    )
-
-                    upper_limit: alt.Chart = (
-                        alt.Chart(df, title=line_chart_title)
-                        .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
-                        .encode(
-                            x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
-                            y=alt.Y(max_label, type=metric_type, title=metric_label),
-                        )
-                    )
-
-                    band = (
-                        alt.Chart(df)
-                        .mark_area()
-                        .encode(
-                            x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
-                            y=alt.Y(min_label, title=metric_label, type=metric_type),
-                            y2=alt.Y2(max_label, title=metric_label),
-                        )
-                    )
-
-                    line_chart = band + lower_limit + upper_limit + line
+            line_chart = self._plot_prescriptive(
+                line=line,
+                expectation_configurations=expectation_configurations,
+                df=df,
+                line_chart_title=line_chart_title,
+                x_axis_label=x_axis_label,
+                x_axis_type=x_axis_type,
+                metric_label=metric_label,
+                metric_type=metric_type,
+            )
         else:
-            line_chart = line
+            line_chart = self._plot_descriptive(line=line)
 
         charts.append(line_chart)
 
