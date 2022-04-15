@@ -17,7 +17,6 @@ from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
-from great_expectations.types import ColorPalettes, Colors
 
 
 class VolumeDataAssistant(DataAssistant):

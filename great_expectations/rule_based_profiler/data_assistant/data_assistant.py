@@ -32,7 +32,7 @@ from great_expectations.rule_based_profiler.types import (
     DataAssistantResult,
     Domain,
 )
-from great_expectations.types import Colors
+from great_expectations.types import ColorPalettes, Colors
 from great_expectations.util import measure_execution_time
 
 
@@ -216,6 +216,8 @@ class DataAssistant(ABC):
         x_axis_label: str,
         x_axis_type: str,
         line: alt.Chart,
+        min_value: float,
+        max_value: float,
     ):
         min_label: str = "min_value"
         max_label: str = "max_value"
