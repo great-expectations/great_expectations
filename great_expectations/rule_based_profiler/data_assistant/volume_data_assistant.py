@@ -48,14 +48,14 @@ class VolumeDataAssistant(DataAssistant):
 
     def _plot_prescriptive(
         self,
-        line: alt.Chart,
-        expectation_configurations: List[ExpectationConfiguration],
         df: pd.DataFrame,
-        line_chart_title: str,
-        x_axis_label: str,
-        x_axis_type: str,
+        chart_title: str,
         metric_label: str,
         metric_type: str,
+        x_axis_label: str,
+        x_axis_type: str,
+        line: alt.Chart,
+        expectation_configurations: List[ExpectationConfiguration],
     ):
         for expectation_configuration in expectation_configurations:
             if (
@@ -71,7 +71,7 @@ class VolumeDataAssistant(DataAssistant):
                 df[max_label] = max_value
 
                 lower_limit: alt.Chart = (
-                    alt.Chart(df, title=line_chart_title)
+                    alt.Chart(df, title=chart_title)
                     .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
                     .encode(
                         x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
@@ -80,7 +80,7 @@ class VolumeDataAssistant(DataAssistant):
                 )
 
                 upper_limit: alt.Chart = (
-                    alt.Chart(df, title=line_chart_title)
+                    alt.Chart(df, title=chart_title)
                     .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
                     .encode(
                         x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
@@ -135,17 +135,18 @@ class VolumeDataAssistant(DataAssistant):
 
         if prescriptive:
             line_chart = self._plot_prescriptive(
-                line=line,
-                expectation_configurations=expectation_configurations,
+                self,
                 df=df,
-                line_chart_title=line_chart_title,
-                x_axis_label=x_axis_label,
-                x_axis_type=x_axis_type,
+                chart_title=line_chart_title,
                 metric_label=metric_label,
                 metric_type=metric_type,
+                x_axis_label=x_axis_label,
+                x_axis_type=x_axis_type,
+                line=line,
+                expectation_configurations=expectation_configurations,
             )
         else:
-            line_chart = self._plot_descriptive(line=line)
+            line_chart = self._plot_descriptive(self, line=line)
 
         charts.append(line_chart)
 

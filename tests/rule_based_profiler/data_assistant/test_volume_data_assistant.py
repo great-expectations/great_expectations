@@ -317,7 +317,32 @@ def test_execution_time_within_proper_bounds(
     assert 0.0 < result.execution_time <= 1.0  # Execution time (in seconds).
 
 
-def test_volume_data_assistant_plot(
+def test_volume_data_assistant_plot_descriptive(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
+        batch_request=batch_request,
+        data_context=context,
+    )
+
+    expectation_suite_name: str = "test_suite"
+    result: DataAssistantResult = data_assistant.run(
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    result.plot()
+
+
+def test_volume_data_assistant_plot_prescriptive(
     quentin_columnar_table_multi_batch_data_context,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
