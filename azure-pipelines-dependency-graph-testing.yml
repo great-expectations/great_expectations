@@ -100,6 +100,16 @@ stages:
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
+  - stage: custom_checks
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+    - job: docstring_checker
+      steps:
+      - bash: python scripts/check_docstring_coverage.py
+        name: DocstringChecker
+
   - stage: required
     dependsOn: [scope_check, lint]
     pool:
