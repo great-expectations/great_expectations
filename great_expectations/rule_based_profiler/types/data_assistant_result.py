@@ -36,12 +36,12 @@ class DataAssistantResult(SerializableDictDot):
     execution_time: Optional[float] = None  # Execution time (in seconds).
 
     def plot(self, prescriptive: bool = False):
-        metrics: Dict[Dict, ParameterNode] = self.metrics
+        metrics: Optional[Dict[Domain, Dict[str, Any]]] = self.metrics
         metric_names: List[str] = []
-        metric_domain: Domain
-        metric_nodes: Dict[str, ParameterNode]
-        parameter_node_name: str
-        parameter_node: ParameterNode
+        domain: Domain
+        values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        fully_qualified_parameter_name: str
+        parameter_value: Any
 
         parameter_node_name_regex_list: list = [
             re.escape(FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER),
@@ -51,14 +51,20 @@ class DataAssistantResult(SerializableDictDot):
             re.escape(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER),
         ]
 
-        for metric_domain, metric_nodes in metrics.items():
-            for parameter_node_name, parameter_node in metric_nodes.items():
+        for domain, values_for_fully_qualified_parameter_names in metrics.items():
+            for (
+                fully_qualified_parameter_name,
+                parameter_value,
+            ) in values_for_fully_qualified_parameter_names.items():
                 details_key_regex_str: str = "".join(
                     parameter_node_name_regex_list
                     + [FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
                 )
-                if re.match(details_key_regex_str, parameter_node_name) is not None:
-                    details_parameter_node: ParameterNode = parameter_node
+                if (
+                    re.match(details_key_regex_str, fully_qualified_parameter_name)
+                    is not None
+                ):
+                    details_parameter_node: Any = parameter_value
                     metric_names.append(
                         details_parameter_node.metric_configuration.metric_name
                     )
@@ -68,10 +74,12 @@ class DataAssistantResult(SerializableDictDot):
                     + [FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY]
                 )
                 if (
-                    re.match(attributed_value_key_regex_str, parameter_node_name)
+                    re.match(
+                        attributed_value_key_regex_str, fully_qualified_parameter_name
+                    )
                     is not None
                 ):
-                    attributed_value_parameter_node: ParameterNode = parameter_node
+                    attributed_value_parameter_node: Any = parameter_value
                     data: list[Number] = sum(
                         attributed_value_parameter_node.values(), []
                     )
