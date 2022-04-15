@@ -177,9 +177,9 @@ class DataAssistant(ABC):
         return result
 
     def plot(self, charts: List[alt.Chart]):
+        selection = alt.selection_interval(bind="scales")
         for c in charts:
-            c = c.configure(**ALTAIR_CONFIGURATION)
-            c.display()
+            c.configure(**ALTAIR_CONFIGURATION).add_selection(selection).display()
 
     @property
     def name(self) -> str:

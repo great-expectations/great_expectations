@@ -4,7 +4,7 @@ from great_expectations.types import ColorPalettes, Colors
 
 # Size
 chart_width: int = 800
-chart_height: int = 275
+chart_height: int = 250
 
 # Font
 font: str = "Verdana"
@@ -21,9 +21,9 @@ title_color: str = Colors.PURPLE.value
 # Both Axes
 axis_title_color: str = Colors.PURPLE.value
 axis_title_font_size: int = 14
+axis_title_padding: int = 10
 axis_label_color: str = Colors.BLUE_1.value
 axis_label_font_size: int = 12
-axis_label_padding: int = 10
 
 # X-Axis Only
 x_axis_label_angle: int = 0
@@ -45,8 +45,8 @@ ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
 #
 
 # Area
-area_fill_color: str = Colors.BLUE_3.value
-area_fill_opacity: float = 0.20
+area_fill_color: str = ColorPalettes.HEATMAP.value[5]
+area_fill_opacity: float = 0.9
 
 #
 # Chart Types
@@ -62,13 +62,12 @@ ALTAIR_CONFIGURATION: Dict[str, Any] = {
     "view": {"width": chart_width, "height": chart_height},
     "font": font,
     "title": {"align": title_align, "color": title_color, "fontSize": title_font_size},
-    "selection": {"interval": {"bind": "scales"}},
     "axis": {
         "titleFontSize": axis_title_font_size,
         "titleColor": axis_title_color,
+        "titlePadding": axis_title_padding,
         "labelFontSize": axis_label_font_size,
         "labelColor": axis_label_color,
-        "labelPadding": axis_label_padding,
     },
     "axisX": {"labelAngle": x_axis_label_angle, "grid": x_axis_grid},
     "range": {

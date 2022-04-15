@@ -57,7 +57,7 @@ class VolumeDataAssistant(DataAssistant):
         upper_limit_label: str = "Upper Limit"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
-        x_axis_type: str = "nominal"
+        x_axis_type: str = "ordinal"
         metric_type: str = "quantitative"
 
         fully_qualified_parameter_name: str = (
@@ -93,6 +93,24 @@ class VolumeDataAssistant(DataAssistant):
             )
         )
 
+        lower_limit: alt.Chart = (
+            alt.Chart(df, title=line_chart_title)
+            .mark_line(color=Colors.BLUE_3.value, opacity=0.9)
+            .encode(
+                x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                y=alt.Y(lower_limit_label, type=metric_type, title=metric_label),
+            )
+        )
+
+        upper_limit: alt.Chart = (
+            alt.Chart(df, title=line_chart_title)
+            .mark_line(color=Colors.BLUE_3.value, opacity=0.9)
+            .encode(
+                x=alt.X(x_axis_label, type=x_axis_type, title=x_axis_label),
+                y=alt.Y(upper_limit_label, type=metric_type, title=metric_label),
+            )
+        )
+
         band = (
             alt.Chart(df)
             .mark_area()
@@ -103,7 +121,7 @@ class VolumeDataAssistant(DataAssistant):
             )
         )
 
-        line_chart = band + line
+        line_chart = band + lower_limit + upper_limit + line
 
         charts.append(line_chart)
 
