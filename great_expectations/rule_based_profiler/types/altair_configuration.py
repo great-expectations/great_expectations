@@ -13,11 +13,15 @@ title_color: str = Colors.PURPLE.value
 
 # Both Axes
 axis_title_color: str = Colors.PURPLE.value
-axis_title_font_size: int = 12
+axis_title_font_size: int = 14
 axis_label_color: str = Colors.BLUE_1.value
+axis_label_font_size: int = 12
 
 # X-Axis Only
 x_axis_label_angle: int = 0
+x_axis_grid: bool = True
+
+# Y-Axis Only
 
 # Color Palettes
 category_color_scheme: List[str] = ColorPalettes.CATEGORY.value
@@ -32,9 +36,10 @@ ALTAIR_CONFIGURATION: Dict[str, Any] = {
     "axis": {
         "titleFontSize": axis_title_font_size,
         "titleColor": axis_title_color,
+        "labelFontSize": axis_label_font_size,
         "labelColor": axis_label_color,
     },
-    "axisX": {"labelAngle": x_axis_label_angle},
+    "axisX": {"labelAngle": x_axis_label_angle, "grid": x_axis_grid},
     "range": {
         "category": category_color_scheme,
         "diverging": diverging_color_scheme,
