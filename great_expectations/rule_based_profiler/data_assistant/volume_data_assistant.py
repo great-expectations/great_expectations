@@ -1,5 +1,10 @@
 from typing import Any, Dict, List, Optional, Union
 
+import altair as alt
+import numpy as np
+import pandas as pd
+
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.data_context import BaseDataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -36,6 +41,96 @@ class VolumeDataAssistant(DataAssistant):
             batch_request=batch_request,
             data_context=data_context,
         )
+
+    def _plot_descriptive(self, line: alt.Chart):
+        descriptive_chart: alt.Chart = line
+        return descriptive_chart
+
+    def _plot_prescriptive(
+        self,
+        df: pd.DataFrame,
+        chart_title: str,
+        metric_label: str,
+        metric_type: str,
+        x_axis_label: str,
+        x_axis_type: str,
+        line: alt.Chart,
+        expectation_configurations: List[ExpectationConfiguration],
+    ):
+        for expectation_configuration in expectation_configurations:
+            if (
+                expectation_configuration.expectation_type
+                == "expect_table_row_count_to_be_between"
+            ):
+                min_value: float = expectation_configuration.kwargs["min_value"]
+                max_value: float = expectation_configuration.kwargs["max_value"]
+                prescriptive_chart: alt.Chart = (
+                    self.get_expect_domain_values_to_be_between_chart(
+                        self,
+                        df=df,
+                        chart_title=chart_title,
+                        metric_label=metric_label,
+                        metric_type=metric_type,
+                        x_axis_label=x_axis_label,
+                        x_axis_type=x_axis_type,
+                        line=line,
+                        min_value=min_value,
+                        max_value=max_value,
+                    )
+                )
+                return prescriptive_chart
+
+    def _plot(
+        self,
+        metric_names: List[str],
+        data: np.ndarray,
+        prescriptive: bool,
+        expectation_configurations: List[ExpectationConfiguration],
+    ):
+        """
+        VolumeDataAssistant-specific plots are defined with Altair and passed to "super()._plot()" for display.
+        """
+        metric_label = metric_names[0].replace(".", " ").replace("_", " ").title()
+        x_axis_label: str = "Batch"
+
+        # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
+        x_axis_type: str = "ordinal"
+        metric_type: str = "quantitative"
+
+        df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
+        df[x_axis_label] = df.index + 1
+
+        charts: List[alt.Chart] = []
+
+        line_chart_title: str = f"{metric_label} per {x_axis_label}"
+        line: alt.Chart = self.get_line_chart(
+            self,
+            df=df,
+            title=line_chart_title,
+            metric_label=metric_label,
+            metric_type=metric_type,
+            x_axis_label=x_axis_label,
+            x_axis_type=x_axis_type,
+        )
+
+        if prescriptive:
+            table_row_count_chart = self._plot_prescriptive(
+                self,
+                df=df,
+                chart_title=line_chart_title,
+                metric_label=metric_label,
+                metric_type=metric_type,
+                x_axis_label=x_axis_label,
+                x_axis_type=x_axis_type,
+                line=line,
+                expectation_configurations=expectation_configurations,
+            )
+        else:
+            table_row_count_chart = self._plot_descriptive(self, line=line)
+
+        charts.append(table_row_count_chart)
+
+        super()._plot(self, charts=charts)
 
     @property
     def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
