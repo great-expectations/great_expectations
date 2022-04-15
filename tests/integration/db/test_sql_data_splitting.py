@@ -60,9 +60,7 @@ def _load_data(
     )
 
 
-print("DEBUG OUTPUT: test_sql_data_splitting.py __name__:", __name__)
-
-if __name__ == "__main__":
+if __name__ == "test_script_module":
 
     dialect, CONNECTION_STRING = _get_connection_string_and_dialect()
     print(f"Testing dialect: {dialect}")
