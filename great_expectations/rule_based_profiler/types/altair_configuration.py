@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Any, Dict, List
 
 from great_expectations.types import ColorPalettes, Colors
 
@@ -11,9 +11,12 @@ axis_title_color: str = Colors.PURPLE.value
 axis_title_font_size: int = 12
 axis_label_color: str = Colors.BLUE_1.value
 category_color_scheme: List[str] = ColorPalettes.CATEGORY.value
+diverging_color_scheme: List[str] = ColorPalettes.DIVERGING.value
+heatmap_color_scheme: List[str] = ColorPalettes.HEATMAP.value
+ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
 
 
-ALTAIR_CONFIGURATION: Dict[str, Union[str, Dict]] = {
+ALTAIR_CONFIGURATION: Dict[str, Any] = {
     "view": {"width": chart_width, "height": chart_height},
     "title": {"align": title_align, "color": title_color, "fontSize": title_font_size},
     "axis": {
@@ -22,5 +25,10 @@ ALTAIR_CONFIGURATION: Dict[str, Union[str, Dict]] = {
         "labelColor": axis_label_color,
     },
     "axisX": {"labelAngle": 90},
-    "range": {"category": category_color_scheme},
+    "range": {
+        "category": category_color_scheme,
+        "diverging": diverging_color_scheme,
+        "heatmap": heatmap_color_scheme,
+        "ordinal": ordinal_color_scheme,
+    },
 }

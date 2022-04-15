@@ -67,7 +67,7 @@ class VolumeDataAssistant(DataAssistant):
             Domain(
                 domain_type="table",
             )
-        ][f"{fully_qualified_parameter_name}.value"]
+        ][f"{fully_qualified_parameter_name}.attributed_value"]
         df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
         df[x_axis_label] = df.index + 1
 

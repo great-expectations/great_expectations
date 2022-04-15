@@ -334,7 +334,7 @@ def test_volume_data_assistant_plot_missing_result_error(
         data_context=context,
     )
 
-    data_assistant.build()
+    data_assistant.run()
 
     with pytest.raises(TypeError) as e:
         data_assistant.plot()
@@ -361,7 +361,7 @@ def test_volume_data_assistant_plot(
         batch_request=batch_request,
         data_context=context,
     )
-    data_assistant.build()
+    data_assistant.run()
 
     expectation_suite_name: str = "test_suite"
     result: DataAssistantResult = data_assistant.run(
