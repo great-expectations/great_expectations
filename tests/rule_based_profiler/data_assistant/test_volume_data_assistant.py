@@ -333,6 +333,7 @@ def test_volume_data_assistant_plot_missing_result_error(
         batch_request=batch_request,
         data_context=context,
     )
+
     data_assistant.build()
 
     with pytest.raises(TypeError) as e:
