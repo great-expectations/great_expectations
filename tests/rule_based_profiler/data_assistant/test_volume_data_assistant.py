@@ -12,6 +12,11 @@ from great_expectations.rule_based_profiler.data_assistant import (
 from great_expectations.rule_based_profiler.types import DataAssistantResult, Domain
 from great_expectations.util import deep_filter_properties_iterable
 
+try:
+    from unittest import mock
+except ImportError:
+    from unittest import mock
+
 
 @freeze_time("09/26/2019 13:42:41")
 def test_get_metrics_and_expectations(
@@ -338,7 +343,11 @@ def test_volume_data_assistant_plot_descriptive(
         expectation_suite_name=expectation_suite_name,
     )
 
-    result.plot()
+    with mock.patch(
+        "great_expectations.rule_based_profiler.types.data_assistant_result.DataAssistantResult.plot",
+        return_value=False,
+    ) as result:
+        result.plot()
 
 
 def test_volume_data_assistant_plot_prescriptive(
@@ -363,4 +372,8 @@ def test_volume_data_assistant_plot_prescriptive(
         expectation_suite_name=expectation_suite_name,
     )
 
-    result.plot(prescriptive=True)
+    with mock.patch(
+        "great_expectations.rule_based_profiler.types.data_assistant_result.DataAssistantResult.plot",
+        return_value=False,
+    ) as result:
+        result.plot(prescriptive=True)
