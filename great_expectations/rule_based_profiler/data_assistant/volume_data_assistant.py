@@ -100,7 +100,6 @@ class VolumeDataAssistant(DataAssistant):
         df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
         df[x_axis_label] = df.index + 1
 
-        # all available encodings https://altair-viz.github.io/user_guide/encoding.html
         charts: List[alt.Chart] = []
 
         line_chart_title: str = f"{metric_label} per {x_axis_label}"
