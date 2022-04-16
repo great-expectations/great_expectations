@@ -898,7 +898,7 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.project_config_with_variables_substituted.profiler_store_name
         except AttributeError:
-            if DataContext._default_profilers_exist(directory_path=self.root_directory):
+            if BaseDataContext._default_profilers_exist(directory_path=self.root_directory):
                 return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
             if self.root_directory:
                 error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
@@ -912,7 +912,7 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.stores[profiler_store_name]
         except KeyError:
-            if DataContext._default_profilers_exist(directory_path=self.root_directory):
+            if BaseDataContext._default_profilers_exist(directory_path=self.root_directory):
                 logger.warning(
                     f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
@@ -2390,7 +2390,7 @@ class BaseDataContext(ConfigPeer):
                 )
 
             for metric_configuration in metrics_list:
-                metric_configurations = _get_metric_configuration_tuples(
+                metric_configurations = BaseDataContext._get_metric_configuration_tuples(
                     metric_configuration
                 )
                 for metric_name, metric_kwargs in metric_configurations:
@@ -2758,7 +2758,7 @@ class BaseDataContext(ConfigPeer):
                     profiling_results = {
                         "success": False,
                         "error": {
-                            "code": DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+                            "code": BaseDataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
                         },
                     }
                     return profiling_results
@@ -2773,7 +2773,7 @@ class BaseDataContext(ConfigPeer):
                 profiling_results = {
                     "success": False,
                     "error": {
-                        "code": DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+                        "code": BaseDataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
                     },
                 }
                 return profiling_results
@@ -2812,7 +2812,7 @@ class BaseDataContext(ConfigPeer):
                 profiling_results = {
                     "success": False,
                     "error": {
-                        "code": DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
+                        "code": BaseDataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND,
                         "not_found_data_assets": not_found_data_assets,
                         "data_assets": available_data_asset_name_list,
                     },
@@ -2833,7 +2833,7 @@ class BaseDataContext(ConfigPeer):
                     profiling_results = {
                         "success": False,
                         "error": {
-                            "code": DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
+                            "code": BaseDataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS,
                             "num_data_assets": total_data_assets,
                             "data_assets": available_data_asset_name_list,
                         },
@@ -3924,3 +3924,56 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ]
 
         return instantiated_class, usage_stats_event_payload
+
+    @staticmethod
+    def _get_metric_configuration_tuples(metric_configuration, base_kwargs=None):
+        if base_kwargs is None:
+            base_kwargs = {}
+
+        if isinstance(metric_configuration, str):
+            return [(metric_configuration, base_kwargs)]
+
+        metric_configurations_list = []
+        for kwarg_name in metric_configuration.keys():
+            if not isinstance(metric_configuration[kwarg_name], dict):
+                raise ge_exceptions.DataContextError(
+                    "Invalid metric_configuration: each key must contain a " "dictionary."
+                )
+            if (
+                kwarg_name == "metric_kwargs_id"
+            ):  # this special case allows a hash of multiple kwargs
+                for metric_kwargs_id in metric_configuration[kwarg_name].keys():
+                    if base_kwargs != {}:
+                        raise ge_exceptions.DataContextError(
+                            "Invalid metric_configuration: when specifying "
+                            "metric_kwargs_id, no other keys or values may be defined."
+                        )
+                    if not isinstance(
+                        metric_configuration[kwarg_name][metric_kwargs_id], list
+                    ):
+                        raise ge_exceptions.DataContextError(
+                            "Invalid metric_configuration: each value must contain a "
+                            "list."
+                        )
+                    metric_configurations_list += [
+                        (metric_name, {"metric_kwargs_id": metric_kwargs_id})
+                        for metric_name in metric_configuration[kwarg_name][
+                            metric_kwargs_id
+                        ]
+                    ]
+            else:
+                for kwarg_value in metric_configuration[kwarg_name].keys():
+                    base_kwargs.update({kwarg_name: kwarg_value})
+                    if not isinstance(metric_configuration[kwarg_name][kwarg_value], list):
+                        raise ge_exceptions.DataContextError(
+                            "Invalid metric_configuration: each value must contain a "
+                            "list."
+                        )
+                    for nested_configuration in metric_configuration[kwarg_name][
+                        kwarg_value
+                    ]:
+                        metric_configurations_list += BaseDataContext._get_metric_configuration_tuples(
+                            nested_configuration, base_kwargs=base_kwargs
+                        )
+
+        return metric_configurations_list
