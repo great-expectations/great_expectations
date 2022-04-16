@@ -17,7 +17,7 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
