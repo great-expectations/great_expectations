@@ -63,9 +63,7 @@ from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
-from great_expectations.data_context.templates import (
-    CONFIG_VARIABLES_TEMPLATE,
-)
+from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GE_CONFIG_VERSION,
     DEFAULT_USAGE_STATISTICS_URL,
@@ -123,6 +121,7 @@ logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
+
 
 class BaseDataContext(ConfigPeer):
     """
@@ -898,7 +897,9 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.project_config_with_variables_substituted.profiler_store_name
         except AttributeError:
-            if BaseDataContext._default_profilers_exist(directory_path=self.root_directory):
+            if BaseDataContext._default_profilers_exist(
+                directory_path=self.root_directory
+            ):
                 return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
             if self.root_directory:
                 error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
@@ -912,7 +913,9 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.stores[profiler_store_name]
         except KeyError:
-            if BaseDataContext._default_profilers_exist(directory_path=self.root_directory):
+            if BaseDataContext._default_profilers_exist(
+                directory_path=self.root_directory
+            ):
                 logger.warning(
                     f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
@@ -2390,8 +2393,10 @@ class BaseDataContext(ConfigPeer):
                 )
 
             for metric_configuration in metrics_list:
-                metric_configurations = BaseDataContext._get_metric_configuration_tuples(
-                    metric_configuration
+                metric_configurations = (
+                    BaseDataContext._get_metric_configuration_tuples(
+                        metric_configuration
+                    )
                 )
                 for metric_name, metric_kwargs in metric_configurations:
                     try:
@@ -3937,7 +3942,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         for kwarg_name in metric_configuration.keys():
             if not isinstance(metric_configuration[kwarg_name], dict):
                 raise ge_exceptions.DataContextError(
-                    "Invalid metric_configuration: each key must contain a " "dictionary."
+                    "Invalid metric_configuration: each key must contain a "
+                    "dictionary."
                 )
             if (
                 kwarg_name == "metric_kwargs_id"
@@ -3964,7 +3970,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             else:
                 for kwarg_value in metric_configuration[kwarg_name].keys():
                     base_kwargs.update({kwarg_name: kwarg_value})
-                    if not isinstance(metric_configuration[kwarg_name][kwarg_value], list):
+                    if not isinstance(
+                        metric_configuration[kwarg_name][kwarg_value], list
+                    ):
                         raise ge_exceptions.DataContextError(
                             "Invalid metric_configuration: each value must contain a "
                             "list."
@@ -3972,8 +3980,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     for nested_configuration in metric_configuration[kwarg_name][
                         kwarg_value
                     ]:
-                        metric_configurations_list += BaseDataContext._get_metric_configuration_tuples(
-                            nested_configuration, base_kwargs=base_kwargs
+                        metric_configurations_list += (
+                            BaseDataContext._get_metric_configuration_tuples(
+                                nested_configuration, base_kwargs=base_kwargs
+                            )
                         )
 
         return metric_configurations_list

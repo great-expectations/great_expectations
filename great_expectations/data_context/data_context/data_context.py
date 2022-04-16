@@ -9,6 +9,9 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.data_context.data_context.base_data_context import (
+    BaseDataContext,
+)
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -21,13 +24,10 @@ from great_expectations.data_context.types.base import (
     GeCloudConfig,
     dataContextConfigSchema,
 )
-from great_expectations.data_context.util import (
-    file_relative_path,
-)
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.exceptions import DataContextError
-from great_expectations.data_context.data_context.base_data_context import BaseDataContext
 
 logger = logging.getLogger(__name__)
 yaml = YAML()

@@ -1,4 +1,5 @@
 import logging
+
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
@@ -8,6 +9,7 @@ logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
+
 
 class ExplorerDataContext(DataContext):
     def __init__(self, context_root_dir=None, expectation_explorer=True):
