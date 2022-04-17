@@ -108,8 +108,8 @@ stages:
     - job: type_hint_checker
       steps:
       - script: |
-          pip install mypy
-          ./scripts/check_type_hint_coverage
+          pip install mypy # Prereq for type hint script
+          python scripts/check_type_hint_coverage.py
         name: TypeHintChecker
 
   - stage: required
