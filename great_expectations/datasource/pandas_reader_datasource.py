@@ -236,7 +236,7 @@ class PandasReaderDatasource(Datasource):
         return pd.read_clipboard(*args, **kwargs)
 
     @_add_gx_args(primary_arg_variable_name="filepath_or_buffer")
-    def read_dataframe(self, primary_arg, *args, **kwargs):
+    def from_dataframe(self, primary_arg, *args, **kwargs):
         def no_op(df):
             return df
         

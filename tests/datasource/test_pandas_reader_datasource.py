@@ -426,3 +426,30 @@ def test_PandasReaderDatasource_read_sql_with_table(sqlite_engine):
         "timestamp" : 0,
         "id_" : "test_table",
     }
+
+def test_PandasReaderDatasource_read_dataframe():
+    my_datasource = PandasReaderDatasource("my_datasource")
+    my_df = pd.DataFrame({
+        "a": [1,4],
+        "b": [2,5],
+        "c": [3,6],
+    })
+
+    my_validator = my_datasource.from_dataframe(
+        my_df,
+        timestamp=0,
+    )
+    my_batch_request = _get_batch_request_from_validator(my_validator)
+
+    assert isinstance(my_batch_request["runtime_parameters"]["batch_data"], pd.DataFrame)
+    assert my_batch_request["runtime_parameters"]["batch_data"].to_dict() == {
+        "a": {0:1, 1:4},
+        "b": {0:2, 1:5},
+        "c": {0:3, 1:6},
+    }
+    assert my_batch_request["runtime_parameters"]["args"] == []
+    assert my_batch_request["runtime_parameters"]["kwargs"] == {}
+    assert my_batch_request["batch_identifiers"] == {
+        "timestamp" : 0,
+        "id_" : None,
+    }
