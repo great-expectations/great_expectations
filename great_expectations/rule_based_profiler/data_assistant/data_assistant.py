@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 import altair as alt
 import pandas as pd
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.data_context import BaseDataContext
@@ -163,7 +164,7 @@ class DataAssistant(ABC):
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> DataAssistantResult:
-        data_assistant_cls: ABCMeta = type(self)
+        data_assistant_cls: Union[ABCMeta, DataAssistant] = type(self)
         result: DataAssistantResult = DataAssistantResult(
             data_assistant_cls=data_assistant_cls, execution_time=0.0
         )
@@ -197,10 +198,13 @@ class DataAssistant(ABC):
         metric_type: str,
         x_axis_label: str,
         x_axis_type: str,
+        line_color: str = Colors.BLUE_2.value,
+        point_color: Optional[str] = Colors.GREEN.value,
+        point_color_condition: Optional[alt.condition] = None,
     ):
         line: alt.Chart = (
-            alt.Chart(df, title=title)
-            .mark_line(color=Colors.BLUE_2.value)
+            alt.Chart(data=df, title=title)
+            .mark_line(color=line_color)
             .encode(
                 x=alt.X(
                     x_axis_label,
@@ -210,7 +214,36 @@ class DataAssistant(ABC):
                 y=alt.Y(metric_label, type=metric_type, title=metric_label),
             )
         )
-        return line
+
+        if point_color_condition:
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point()
+                .encode(
+                    x=alt.X(
+                        x_axis_label,
+                        type=x_axis_type,
+                        title=x_axis_label,
+                    ),
+                    y=alt.Y(metric_label, type=metric_type, title=metric_label),
+                    color=point_color_condition,
+                )
+            )
+        else:
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point(color=point_color)
+                .encode(
+                    x=alt.X(
+                        x_axis_label,
+                        type=x_axis_type,
+                        title=x_axis_label,
+                    ),
+                    y=alt.Y(metric_label, type=metric_type, title=metric_label),
+                )
+            )
+
+        return line + points
 
     def get_expect_domain_values_to_be_between_chart(
         self,
@@ -221,18 +254,12 @@ class DataAssistant(ABC):
         x_axis_label: str,
         x_axis_type: str,
         line: alt.Chart,
-        min_value: float,
-        max_value: float,
+        min_label: str,
+        max_label: str,
     ):
-        min_label: str = "min_value"
-        max_label: str = "max_value"
-
-        df[min_label] = min_value
-        df[max_label] = max_value
-
         lower_limit: alt.Chart = (
-            alt.Chart(df, title=chart_title)
-            .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
+            alt.Chart(data=df, title=chart_title)
+            .mark_line(color=alt.HexColor(ColorPalettes.HEATMAP.value[4]), opacity=0.9)
             .encode(
                 x=alt.X(
                     x_axis_label,
@@ -244,8 +271,8 @@ class DataAssistant(ABC):
         )
 
         upper_limit: alt.Chart = (
-            alt.Chart(df, title=chart_title)
-            .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
+            alt.Chart(data=df, title=chart_title)
+            .mark_line(color=alt.HexColor(ColorPalettes.HEATMAP.value[4]), opacity=0.9)
             .encode(
                 x=alt.X(
                     x_axis_label,
@@ -257,8 +284,10 @@ class DataAssistant(ABC):
         )
 
         band = (
-            alt.Chart(df)
-            .mark_area(fill=ColorPalettes.HEATMAP.value[5], fillOpacity=0.9)
+            alt.Chart(data=df)
+            .mark_area(
+                fill=alt.HexColor(ColorPalettes.HEATMAP.value[5]), fillOpacity=0.9
+            )
             .encode(
                 x=alt.X(
                     x_axis_label,

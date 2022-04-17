@@ -17,6 +17,7 @@ from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
+from great_expectations.types import Colors
 
 
 class VolumeDataAssistant(DataAssistant):
@@ -55,30 +56,24 @@ class VolumeDataAssistant(DataAssistant):
         x_axis_label: str,
         x_axis_type: str,
         line: alt.Chart,
-        expectation_configurations: List[ExpectationConfiguration],
+        min_label: str,
+        max_label: str,
     ):
-        for expectation_configuration in expectation_configurations:
-            if (
-                expectation_configuration.expectation_type
-                == "expect_table_row_count_to_be_between"
-            ):
-                min_value: float = expectation_configuration.kwargs["min_value"]
-                max_value: float = expectation_configuration.kwargs["max_value"]
-                prescriptive_chart: alt.Chart = (
-                    self.get_expect_domain_values_to_be_between_chart(
-                        self,
-                        df=df,
-                        chart_title=chart_title,
-                        metric_label=metric_label,
-                        metric_type=metric_type,
-                        x_axis_label=x_axis_label,
-                        x_axis_type=x_axis_type,
-                        line=line,
-                        min_value=min_value,
-                        max_value=max_value,
-                    )
-                )
-                return prescriptive_chart
+        prescriptive_chart: alt.Chart = (
+            self.get_expect_domain_values_to_be_between_chart(
+                self,
+                df=df,
+                chart_title=chart_title,
+                metric_label=metric_label,
+                metric_type=metric_type,
+                x_axis_label=x_axis_label,
+                x_axis_type=x_axis_type,
+                line=line,
+                min_label=min_label,
+                max_label=max_label,
+            )
+        )
+        return prescriptive_chart
 
     def _plot(
         self,
@@ -90,7 +85,8 @@ class VolumeDataAssistant(DataAssistant):
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "super()._plot()" for display.
         """
-        metric_label = metric_names[0].replace(".", " ").replace("_", " ").title()
+        # altair doesn't like periods
+        metric_label = metric_names[0].replace(".", "_")
         x_axis_label: str = "Batch"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
@@ -114,6 +110,41 @@ class VolumeDataAssistant(DataAssistant):
         )
 
         if prescriptive:
+            for expectation_configuration in expectation_configurations:
+                if (
+                    expectation_configuration.expectation_type
+                    == "expect_table_row_count_to_be_between"
+                ):
+                    min_label: str = "min_value"
+                    max_label: str = "max_value"
+                    min_value: float = expectation_configuration.kwargs[min_label]
+                    max_value: float = expectation_configuration.kwargs[max_label]
+                    df[min_label] = min_value
+                    df[max_label] = max_value
+
+            predicate = (
+                (alt.datum.min_value > alt.datum.table_row_count)
+                & (alt.datum.max_value > alt.datum.table_row_count)
+            ) | (
+                (alt.datum.min_value < alt.datum.table_row_count)
+                & (alt.datum.max_value < alt.datum.table_row_count)
+            )
+            point_color_condition: alt.condition = alt.condition(
+                predicate=predicate,
+                if_false=alt.value(Colors.GREEN.value),
+                if_true=alt.value(Colors.PINK.value),
+            )
+            anomaly_coded_line: alt.Chart = self.get_line_chart(
+                self,
+                df=df,
+                title=line_chart_title,
+                metric_label=metric_label,
+                metric_type=metric_type,
+                x_axis_label=x_axis_label,
+                x_axis_type=x_axis_type,
+                point_color_condition=point_color_condition,
+            )
+
             table_row_count_chart = self._plot_prescriptive(
                 self,
                 df=df,
@@ -122,8 +153,9 @@ class VolumeDataAssistant(DataAssistant):
                 metric_type=metric_type,
                 x_axis_label=x_axis_label,
                 x_axis_type=x_axis_type,
-                line=line,
-                expectation_configurations=expectation_configurations,
+                line=anomaly_coded_line,
+                min_label=min_label,
+                max_label=max_label,
             )
         else:
             table_row_count_chart = self._plot_descriptive(self, line=line)
