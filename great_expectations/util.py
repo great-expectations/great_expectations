@@ -30,6 +30,7 @@ from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 from dateutil.parser import parse
+from great_expectations.marshmallow__shade.fields import Bool
 from packaging import version
 from pkg_resources import Distribution
 
@@ -1336,9 +1337,12 @@ def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     return True
 
 
-def get_context():
-    from great_expectations.data_context.data_context import DataContext
+def get_context(lite:Bool=False):
+    if lite:
+        from great_expectations.data_context.data_context.lite_data_context import LiteDataContext
+        return LiteDataContext()
 
+    from great_expectations.data_context.data_context import DataContext
     return DataContext()
 
 
