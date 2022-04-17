@@ -79,19 +79,27 @@ def render_deviations(changed_files: List[str], deviations: List[str]) -> None:
     """
     deviations_dict: Dict[str, List[str]] = _build_deviations_dict(deviations)
 
-    for file in changed_files:
-        errors: Optional[List[str]] = deviations_dict.get(file)
-        if errors:
-            print(f"\n{file}:")
-            for error in errors:
-                print(f"  {error}")
+    error_count: int = len(deviations)
+    print(f"[SUMMARY] {error_count} functions have untyped-def violations!")
+
+    threshold_is_surpassed: bool = error_count > TYPE_HINT_ERROR_THRESHOLD
+
+    if threshold_is_surpassed:
+        print(
+            "\nHere are violations of the style guide that are relevant to the files changed in your PR:"
+        )
+        for file in changed_files:
+            errors: Optional[List[str]] = deviations_dict.get(file)
+            if errors:
+                print(f"\n  {file}:")
+                for error in errors:
+                    print(f"    {error}")
 
     # Chetan - 20220417 - While this number should be 0, getting the number of style guide violations down takes time
     # and effort. In the meanwhile, we want to set an upper bound on errors to ensure we're not introducing
     # further regressions. As functions are annotated in adherence with style guide standards, developers should update this number.
-    error_count: int = len(deviations)
     assert (
-        error_count <= TYPE_HINT_ERROR_THRESHOLD
+        threshold_is_surpassed is False
     ), f"""A function without proper type annotations was introduced; please resolve the matter before merging.
                 We expect there to be {TYPE_HINT_ERROR_THRESHOLD} or fewer violations of the style guide (actual: {error_count})"""
 
