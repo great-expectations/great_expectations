@@ -235,6 +235,13 @@ class PandasReaderDatasource(Datasource):
     def read_clipboard(self, *args, **kwargs):
         return pd.read_clipboard(*args, **kwargs)
 
+    @_add_gx_args(primary_arg_variable_name="filepath_or_buffer")
+    def read_dataframe(self, primary_arg, *args, **kwargs):
+        def no_op(df):
+            return df
+        
+        return no_op(primary_arg)
+
     ### These three methods take a connection as their second argument.
 
     @_add_gx_args(primary_arg_variable_name="table_name", default_use_primary_arg_as_id=True, arguments_excluded_from_runtime_parameters={"con":1})
@@ -345,7 +352,8 @@ class PandasReaderDatasource(Datasource):
     #         *args,
     #         **kwargs
     #     )
-        
+    
+    #     #!!! This bottom section could be put into a decorator, too
     #     batch = self.get_single_batch_from_batch_request(
     #         batch_request=RuntimeBatchRequest(
     #             datasource_name=self.name,

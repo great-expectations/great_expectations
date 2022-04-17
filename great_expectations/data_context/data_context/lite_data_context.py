@@ -62,3 +62,14 @@ class LiteDataContext(BaseDataContext):
     def datasources(self) -> Dict[str, BaseDatasource]:
         """A single holder for all Datasources in this context"""
         return DotDict(self._cached_datasources)
+
+    @property
+    def sources(self) -> Dict[str, BaseDatasource]:
+        """An alias for self.datasources
+        
+        This method is purely for convenience.
+        
+        Several other objects and methods also start with "data",
+        so it's often nicer to be able to type "so<TAB>" to autocomplete.
+        """
+        return self.datasources
