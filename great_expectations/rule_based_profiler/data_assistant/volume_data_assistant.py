@@ -50,8 +50,7 @@ class VolumeDataAssistant(DataAssistant):
     def _plot_prescriptive(
         self,
         df: pd.DataFrame,
-        chart_title: str,
-        metric_label: str,
+        metric: str,
         metric_type: str,
         x_axis_label: str,
         x_axis_type: str,
@@ -63,8 +62,7 @@ class VolumeDataAssistant(DataAssistant):
             self.get_expect_domain_values_to_be_between_chart(
                 self,
                 df=df,
-                chart_title=chart_title,
-                metric_label=metric_label,
+                metric=metric,
                 metric_type=metric_type,
                 x_axis_label=x_axis_label,
                 x_axis_type=x_axis_type,
@@ -86,24 +84,23 @@ class VolumeDataAssistant(DataAssistant):
         VolumeDataAssistant-specific plots are defined with Altair and passed to "super()._plot()" for display.
         """
         # altair doesn't like periods
-        metric_label = metric_names[0].replace(".", "_")
+        metric: str = metric_names[0].replace(".", "_")
+        metric_label: str = metric.replace("_", " ").title()
         x_axis_label: str = "Batch"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
         x_axis_type: str = "ordinal"
         metric_type: str = "quantitative"
 
-        df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
+        df: pd.DataFrame = pd.DataFrame(data, columns=[metric])
         df[x_axis_label] = df.index + 1
 
         charts: List[alt.Chart] = []
 
-        line_chart_title: str = f"{metric_label} per {x_axis_label}"
         line: alt.Chart = self.get_line_chart(
             self,
             df=df,
-            title=line_chart_title,
-            metric_label=metric_label,
+            metric=metric,
             metric_type=metric_type,
             x_axis_label=x_axis_label,
             x_axis_type=x_axis_type,
@@ -137,8 +134,7 @@ class VolumeDataAssistant(DataAssistant):
             anomaly_coded_line: alt.Chart = self.get_line_chart(
                 self,
                 df=df,
-                title=line_chart_title,
-                metric_label=metric_label,
+                metric=metric,
                 metric_type=metric_type,
                 x_axis_label=x_axis_label,
                 x_axis_type=x_axis_type,
@@ -148,8 +144,7 @@ class VolumeDataAssistant(DataAssistant):
             table_row_count_chart = self._plot_prescriptive(
                 self,
                 df=df,
-                chart_title=line_chart_title,
-                metric_label=metric_label,
+                metric=metric,
                 metric_type=metric_type,
                 x_axis_label=x_axis_label,
                 x_axis_type=x_axis_type,

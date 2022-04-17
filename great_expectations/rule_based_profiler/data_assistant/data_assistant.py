@@ -186,22 +186,23 @@ class DataAssistant(ABC):
         """
         Display each chart passed in Jupyter Notebook
         """
-        # selection = alt.selection_interval(bind="scales")
         for c in charts:
             c.configure(**ALTAIR_DEFAULT_CONFIGURATION).display()
 
     def get_line_chart(
         self,
         df: pd.DataFrame,
-        title: str,
-        metric_label: str,
+        metric: str,
         metric_type: str,
         x_axis_label: str,
         x_axis_type: str,
-        line_color: str = Colors.BLUE_2.value,
+        line_color: Optional[str] = Colors.BLUE_2.value,
         point_color: Optional[str] = Colors.GREEN.value,
         point_color_condition: Optional[alt.condition] = None,
     ):
+        metric_label: str = metric.replace("_", " ").title()
+        title: str = f"{metric_label} by {x_axis_label}"
+
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
             .mark_line(color=line_color)
@@ -211,35 +212,36 @@ class DataAssistant(ABC):
                     type=x_axis_type,
                     title=x_axis_label,
                 ),
-                y=alt.Y(metric_label, type=metric_type, title=metric_label),
+                y=alt.Y(metric, type=metric_type, title=metric_label),
             )
         )
 
         if point_color_condition:
             points: alt.Chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point()
+                .mark_point(opacity=1.0)
                 .encode(
                     x=alt.X(
                         x_axis_label,
                         type=x_axis_type,
                         title=x_axis_label,
                     ),
-                    y=alt.Y(metric_label, type=metric_type, title=metric_label),
-                    color=point_color_condition,
+                    y=alt.Y(metric, type=metric_type, title=metric_label),
+                    stroke=point_color_condition,
+                    fill=point_color_condition,
                 )
             )
         else:
             points: alt.Chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point(color=point_color)
+                .mark_point(stroke=point_color, fill=point_color, opacity=1.0)
                 .encode(
                     x=alt.X(
                         x_axis_label,
                         type=x_axis_type,
                         title=x_axis_label,
                     ),
-                    y=alt.Y(metric_label, type=metric_type, title=metric_label),
+                    y=alt.Y(metric, type=metric_type, title=metric_label),
                 )
             )
 
@@ -248,8 +250,7 @@ class DataAssistant(ABC):
     def get_expect_domain_values_to_be_between_chart(
         self,
         df: pd.DataFrame,
-        chart_title: str,
-        metric_label: str,
+        metric: str,
         metric_type: str,
         x_axis_label: str,
         x_axis_type: str,
@@ -257,9 +258,15 @@ class DataAssistant(ABC):
         min_label: str,
         max_label: str,
     ):
+        opacity: float = 0.9
+        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
+        fill_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[5])
+
+        metric_label: str = metric.replace("_", " ").title()
+
         lower_limit: alt.Chart = (
-            alt.Chart(data=df, title=chart_title)
-            .mark_line(color=alt.HexColor(ColorPalettes.HEATMAP.value[4]), opacity=0.9)
+            alt.Chart(data=df)
+            .mark_line(color=line_color, opacity=opacity)
             .encode(
                 x=alt.X(
                     x_axis_label,
@@ -271,8 +278,8 @@ class DataAssistant(ABC):
         )
 
         upper_limit: alt.Chart = (
-            alt.Chart(data=df, title=chart_title)
-            .mark_line(color=alt.HexColor(ColorPalettes.HEATMAP.value[4]), opacity=0.9)
+            alt.Chart(data=df)
+            .mark_line(color=line_color, opacity=opacity)
             .encode(
                 x=alt.X(
                     x_axis_label,
@@ -285,9 +292,7 @@ class DataAssistant(ABC):
 
         band = (
             alt.Chart(data=df)
-            .mark_area(
-                fill=alt.HexColor(ColorPalettes.HEATMAP.value[5]), fillOpacity=0.9
-            )
+            .mark_area(fill=fill_color, fillOpacity=opacity)
             .encode(
                 x=alt.X(
                     x_axis_label,

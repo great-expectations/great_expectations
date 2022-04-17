@@ -55,7 +55,10 @@ line_stroke_width: int = 3
 # Known vega-lite bug: https://github.com/vega/vega-lite/issues/5732
 # forces us to choose between features "interactive scaling" and "tooltips" (below)
 line_tooltip_content: str = "data"
-line_tooltip_size: float = 4
+
+# Point
+point_color: str = Colors.GREEN.value
+point_tooltip_content: str = "data"
 
 
 ALTAIR_DEFAULT_CONFIGURATION: Dict[str, Any] = {
@@ -81,7 +84,12 @@ ALTAIR_DEFAULT_CONFIGURATION: Dict[str, Any] = {
         "ordinal": ordinal_color_scheme,
     },
     "line": {
+        "color": line_color,
         "strokeWidth": line_stroke_width,
         "tooltip": {"content": line_tooltip_content},
+    },
+    "point": {
+        "color": point_color,
+        "tooltip": {"content": point_tooltip_content},
     },
 }
