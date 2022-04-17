@@ -622,3 +622,15 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     finally:
         connection.close()
         engine.dispose()
+
+def _get_batch_request_from_validator(validator):
+    """Utility method to unpack batch_requests from Validators
+
+    #!!! I suspect that some cleanup work in the Validator class would make this method unnecessary
+    """
+    key_ = list(validator.batches)[0]
+    my_batch = validator.batches[key_]
+    print(my_batch.batch_request.to_dict())
+
+    my_batch_request = my_batch.batch_request
+    return my_batch_request
