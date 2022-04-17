@@ -82,7 +82,7 @@ def render_deviations(changed_files: List[str], deviations: List[str]) -> None:
     for file in changed_files:
         errors: Optional[List[str]] = deviations_dict.get(file)
         if errors:
-            print(f"{file}:")
+            print(f"\n{file}:")
             for error in errors:
                 print(f"  {error}")
 
@@ -99,7 +99,7 @@ def render_deviations(changed_files: List[str], deviations: List[str]) -> None:
 def _build_deviations_dict(mypy_results: List[str]) -> Dict[str, List[str]]:
     deviations_dict: Dict[str, List[str]] = defaultdict(list)
     for row in mypy_results:
-        file = row.split(":")[0]
+        file: str = row.split(":")[0]
         deviations_dict[file].append(row)
 
     return deviations_dict
