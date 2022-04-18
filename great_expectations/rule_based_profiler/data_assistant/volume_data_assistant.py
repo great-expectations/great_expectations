@@ -52,11 +52,9 @@ class VolumeDataAssistant(DataAssistant):
         df: pd.DataFrame,
         metric: str,
         metric_type: str,
-        x_axis_label: str,
+        x_axis: str,
         x_axis_type: str,
         line: alt.Chart,
-        min_label: str,
-        max_label: str,
     ):
         prescriptive_chart: alt.Chart = (
             self.get_expect_domain_values_to_be_between_chart(
@@ -64,11 +62,9 @@ class VolumeDataAssistant(DataAssistant):
                 df=df,
                 metric=metric,
                 metric_type=metric_type,
-                x_axis_label=x_axis_label,
+                x_axis=x_axis,
                 x_axis_type=x_axis_type,
                 line=line,
-                min_label=min_label,
-                max_label=max_label,
             )
         )
         return prescriptive_chart
@@ -85,15 +81,14 @@ class VolumeDataAssistant(DataAssistant):
         """
         # altair doesn't like periods
         metric: str = metric_names[0].replace(".", "_")
-        metric_label: str = metric.replace("_", " ").title()
-        x_axis_label: str = "Batch"
+        x_axis: str = "batch"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
         x_axis_type: str = "ordinal"
         metric_type: str = "quantitative"
 
         df: pd.DataFrame = pd.DataFrame(data, columns=[metric])
-        df[x_axis_label] = df.index + 1
+        df[x_axis] = df.index + 1
 
         charts: List[alt.Chart] = []
 
@@ -102,7 +97,7 @@ class VolumeDataAssistant(DataAssistant):
             df=df,
             metric=metric,
             metric_type=metric_type,
-            x_axis_label=x_axis_label,
+            x_axis=x_axis,
             x_axis_type=x_axis_type,
         )
 
@@ -112,12 +107,8 @@ class VolumeDataAssistant(DataAssistant):
                     expectation_configuration.expectation_type
                     == "expect_table_row_count_to_be_between"
                 ):
-                    min_label: str = "min_value"
-                    max_label: str = "max_value"
-                    min_value: float = expectation_configuration.kwargs[min_label]
-                    max_value: float = expectation_configuration.kwargs[max_label]
-                    df[min_label] = min_value
-                    df[max_label] = max_value
+                    df["min_value"] = expectation_configuration.kwargs["min_value"]
+                    df["max_value"] = expectation_configuration.kwargs["max_value"]
 
             predicate = (
                 (alt.datum.min_value > alt.datum.table_row_count)
@@ -136,7 +127,7 @@ class VolumeDataAssistant(DataAssistant):
                 df=df,
                 metric=metric,
                 metric_type=metric_type,
-                x_axis_label=x_axis_label,
+                x_axis=x_axis,
                 x_axis_type=x_axis_type,
                 point_color_condition=point_color_condition,
             )
@@ -146,11 +137,9 @@ class VolumeDataAssistant(DataAssistant):
                 df=df,
                 metric=metric,
                 metric_type=metric_type,
-                x_axis_label=x_axis_label,
+                x_axis=x_axis,
                 x_axis_type=x_axis_type,
                 line=anomaly_coded_line,
-                min_label=min_label,
-                max_label=max_label,
             )
         else:
             table_row_count_chart = self._plot_descriptive(self, line=line)

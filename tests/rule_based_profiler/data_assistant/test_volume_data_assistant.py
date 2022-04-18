@@ -376,8 +376,8 @@ def test_volume_data_assistant_plot_prescriptive(
 
     assert result.data_assistant_cls is VolumeDataAssistant
 
-    # with mock.patch(
-    #     "great_expectations.rule_based_profiler.types.data_assistant_result.DataAssistantResult.plot",
-    #     return_value=False,
-    # ) as result:
-    result.plot(prescriptive=True)
+    with mock.patch(
+        "great_expectations.rule_based_profiler.types.data_assistant_result.DataAssistantResult.plot",
+        return_value=False,
+    ) as result:
+        result.plot(prescriptive=True)
