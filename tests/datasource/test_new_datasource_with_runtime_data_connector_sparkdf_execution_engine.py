@@ -109,9 +109,11 @@ def test_sparkdf_execution_engine_self_check(
 def test_batch_data_sparkdf_execution_engine_unknown_datasource(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    )
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
+    )  # noqa: F821
     # raised by _validate_batch_request() in Datasource
     with pytest.raises(ValueError):
         # Test for an unknown datasource
@@ -132,8 +134,10 @@ def test_batch_data_sparkdf_execution_engine_unknown_datasource(
 def test_batch_data_sparkdf_execution_engine_unknown_data_connector(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
     # raised by _validate_batch_request() in Datasource
     with pytest.raises(ValueError):
@@ -155,8 +159,10 @@ def test_batch_data_sparkdf_execution_engine_unknown_data_connector(
 def test_batch_data_sparkdf_execution_engine_no_batch_identifiers(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
@@ -192,8 +198,10 @@ def test_batch_data_sparkdf_execution_engine_no_batch_identifiers(
 def test_batch_data_sparkdf_execution_engine_incorrect_batch_identifiers(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
     # raised by _validate_batch_identifiers_configuration() in RuntimeDataConnector
     with pytest.raises(ge_exceptions.DataConnectorError):
@@ -214,8 +222,10 @@ def test_batch_data_sparkdf_execution_engine_incorrect_batch_identifiers(
 def test_batch_data_sparkdf_execution_engine_all_keys_present_for_batch_identifiers(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
     batch_identifiers: dict = {
         "pipeline_stage_name": "core_processing",
@@ -245,8 +255,10 @@ def test_batch_data_sparkdf_execution_engine_all_keys_present_for_batch_identifi
 def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_mostly_legal_keys(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
     batch_identifiers: dict = {
         "pipeline_stage_name": "core_processing",
@@ -280,8 +292,10 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_mostly_lega
 def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_one_illegal_key(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
 
     batch_identifiers = {"unknown_key": "some_value"}
@@ -310,8 +324,10 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_one_illegal
 def test_batch_data_sparkdf_execution_engine_set_data_asset_name_for_runtime_data(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
     batch_identifiers: dict = {
         "pipeline_stage_name": "core_processing",
@@ -355,8 +371,10 @@ def test_batch_data_sparkdf_execution_engine_get_available_data_asset_names(
 def test_batch_data_sparkdf_execution_engine_get_batch_definition_list_from_batch_request_length_one(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
 
     batch_identifiers: dict = {
@@ -391,8 +409,10 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definition_list_from_batc
 def test_batch_data_sparkdf_execution_engine_get_batch_definitions_and_get_batch_basics(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
 
     data_connector_name: str = "test_runtime_data_connector"
@@ -438,8 +458,10 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definitions_and_get_batch
 def test_batch_data_sparkedf_execution_engine_get_batch_list_with_named_asset(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
 
     batch_identifiers: dict = {"day": 1, "month": 12}
@@ -473,8 +495,10 @@ def test_batch_data_sparkedf_execution_engine_get_batch_list_with_named_asset(
 def test_batch_data_sparkdf_execution_engine_get_batch_list_with_named_asset_two_batch_requests(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+        )
     )
 
     batch_identifiers: dict = {"day": 1, "month": 12}

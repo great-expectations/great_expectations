@@ -60,7 +60,7 @@ def test_batch_data_get_batch_successful_specification_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
@@ -79,7 +79,9 @@ def test_batch_data_get_batch_successful_specification_sparkdf_engine_named_asse
     data_context_with_datasource_spark_engine, test_df_spark
 ):
     context: "DataContext" = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = (
+        test_df_spark  # noqa: F821  # noqa: F821
+    )
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     batch_list: List[Batch] = context.get_batch_list(
         batch_request=RuntimeBatchRequest(
@@ -101,7 +103,7 @@ def test_batch_data_get_batch_successful_specification_sparkdf_engine_named_asse
     data_context_with_datasource_spark_engine, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     batch_list: List[Batch] = context.get_batch_list(
@@ -144,7 +146,7 @@ def test_batch_data_get_batch_ambiguous_parameter_sparkdf_engine(
     as an unnamed parameter, which will raise a GreatExpectationsTypeError
     """
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     # raised by get_batch_list()
     with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
@@ -163,7 +165,7 @@ def test_batch_data_get_batch_failed_specification_type_error_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -182,7 +184,7 @@ def test_batch_data_get_batch_failed_specification_no_batch_identifier_sparkdf_e
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -214,7 +216,7 @@ def test_batch_data_get_batch_failed_specification_no_runtime_parameters_sparkdf
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -246,7 +248,7 @@ def test_batch_data_get_batch_failed_specification_incorrect_batch_spec_passthro
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
@@ -267,7 +269,7 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(
@@ -289,7 +291,7 @@ def test_batch_data_get_validator_successful_specification_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     context.create_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
@@ -316,7 +318,7 @@ def test_batch_data_get_validator_ambiguous_parameter_sparkdf_engine(
     as an unnamed parameter, which will raise a GreatExpectationsTypeError
     """
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     context.create_expectation_suite("my_expectations")
     # raised by get_batch_list() in DataContext
@@ -337,7 +339,7 @@ def test_get_validator_wrong_type_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     context.create_expectation_suite("my_expectations")
 
@@ -362,7 +364,7 @@ def test_batch_data_get_validator_failed_specification_no_batch_identifier_spark
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     context.create_expectation_suite("my_expectations")
 
@@ -397,7 +399,7 @@ def test_batch_data_get_validator_failed_specification_incorrect_batch_spec_pass
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     context.create_expectation_suite("my_expectations")
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
@@ -420,7 +422,7 @@ def test_batch_data_get_validator_failed_specification_no_runtime_parameters_spa
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     context.create_expectation_suite("my_expectations")
     with pytest.raises(TypeError):
@@ -475,7 +477,7 @@ def test_batch_data_get_validator_successful_specification_sparkdf_engine_named_
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: "DataContext" = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark
+    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     context.create_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
