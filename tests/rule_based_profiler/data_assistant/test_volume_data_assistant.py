@@ -12,6 +12,11 @@ from great_expectations.rule_based_profiler.data_assistant import (
 from great_expectations.rule_based_profiler.types import DataAssistantResult, Domain
 from great_expectations.util import deep_filter_properties_iterable
 
+try:
+    from unittest import mock
+except ImportError:
+    from unittest import mock
+
 
 @freeze_time("09/26/2019 13:42:41")
 def test_get_metrics_and_expectations(
@@ -314,3 +319,65 @@ def test_execution_time_within_proper_bounds(
     result: DataAssistantResult = data_assistant.run()
 
     assert 0.0 < result.execution_time <= 1.0  # Execution time (in seconds).
+
+
+def test_volume_data_assistant_plot_descriptive(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
+        batch_request=batch_request,
+        data_context=context,
+    )
+
+    expectation_suite_name: str = "test_suite"
+    result: DataAssistantResult = data_assistant.run(
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    assert result.data_assistant_cls is VolumeDataAssistant
+
+    with mock.patch(
+        "great_expectations.rule_based_profiler.types.data_assistant_result.DataAssistantResult.plot",
+        return_value=False,
+    ) as result:
+        result.plot()
+
+
+def test_volume_data_assistant_plot_prescriptive(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
+        batch_request=batch_request,
+        data_context=context,
+    )
+
+    expectation_suite_name: str = "test_suite"
+    result: DataAssistantResult = data_assistant.run(
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    assert result.data_assistant_cls is VolumeDataAssistant
+
+    with mock.patch(
+        "great_expectations.rule_based_profiler.types.data_assistant_result.DataAssistantResult.plot",
+        return_value=False,
+    ) as result:
+        result.plot(prescriptive=True)
