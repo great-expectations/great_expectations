@@ -1,7 +1,6 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, KeysView, List, Optional, Union
 
 import altair as alt
-import numpy as np
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
@@ -11,6 +10,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
+    MetricValues,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.rule import Rule
@@ -43,91 +43,98 @@ class VolumeDataAssistant(DataAssistant):
             data_context=data_context,
         )
 
-    def _plot_descriptive(self, line: alt.Chart):
-        descriptive_chart: alt.Chart = line
+    def _plot_descriptive(
+        self,
+        df: pd.DataFrame,
+        metric: str,
+        metric_type: str,
+        x_axis: str,
+        x_axis_type: str,
+    ):
+        descriptive_chart: alt.Chart = self.get_line_chart(
+            self,
+            df=df,
+            metric=metric,
+            metric_type=metric_type,
+            x_axis=x_axis,
+            x_axis_type=x_axis_type,
+        )
         return descriptive_chart
 
     def _plot_prescriptive(
         self,
         df: pd.DataFrame,
-        chart_title: str,
-        metric_label: str,
+        metric: str,
         metric_type: str,
-        x_axis_label: str,
+        x_axis: str,
         x_axis_type: str,
-        line: alt.Chart,
-        expectation_configurations: List[ExpectationConfiguration],
     ):
-        for expectation_configuration in expectation_configurations:
-            if (
-                expectation_configuration.expectation_type
-                == "expect_table_row_count_to_be_between"
-            ):
-                min_value: float = expectation_configuration.kwargs["min_value"]
-                max_value: float = expectation_configuration.kwargs["max_value"]
-                prescriptive_chart: alt.Chart = (
-                    self.get_expect_domain_values_to_be_between_chart(
-                        self,
-                        df=df,
-                        chart_title=chart_title,
-                        metric_label=metric_label,
-                        metric_type=metric_type,
-                        x_axis_label=x_axis_label,
-                        x_axis_type=x_axis_type,
-                        line=line,
-                        min_value=min_value,
-                        max_value=max_value,
-                    )
-                )
-                return prescriptive_chart
+        prescriptive_chart: alt.Chart = (
+            self.get_expect_domain_values_to_be_between_chart(
+                self,
+                df=df,
+                metric=metric,
+                metric_type=metric_type,
+                x_axis=x_axis,
+                x_axis_type=x_axis_type,
+            )
+        )
+        return prescriptive_chart
 
     def _plot(
         self,
         metric_names: List[str],
-        data: np.ndarray,
+        attributed_value: Dict[str, List[float]],
         prescriptive: bool,
         expectation_configurations: List[ExpectationConfiguration],
     ):
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "super()._plot()" for display.
         """
-        metric_label = metric_names[0].replace(".", " ").replace("_", " ").title()
-        x_axis_label: str = "Batch"
+        # altair doesn't like periods
+        metric: str = metric_names[0].replace(".", "_")
+        x_axis: str = "batch"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
         x_axis_type: str = "ordinal"
         metric_type: str = "quantitative"
 
-        df: pd.DataFrame = pd.DataFrame(data, columns=[metric_label])
-        df[x_axis_label] = df.index + 1
-
-        charts: List[alt.Chart] = []
-
-        line_chart_title: str = f"{metric_label} per {x_axis_label}"
-        line: alt.Chart = self.get_line_chart(
-            self,
-            df=df,
-            title=line_chart_title,
-            metric_label=metric_label,
-            metric_type=metric_type,
-            x_axis_label=x_axis_label,
-            x_axis_type=x_axis_type,
+        batch_ids: KeysView[str]
+        metric_values: MetricValues
+        batch_ids, metric_values = attributed_value.keys(), sum(
+            attributed_value.values(), []
         )
 
+        batch_numbers: List[int] = [batch + 1 for batch in range(len(batch_ids))]
+
+        df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[x_axis])
+        df["batch_id"] = batch_ids
+        df[metric] = metric_values
+
+        plot_impl: Callable
+        charts: List[alt.Chart] = []
+
         if prescriptive:
-            table_row_count_chart = self._plot_prescriptive(
-                self,
-                df=df,
-                chart_title=line_chart_title,
-                metric_label=metric_label,
-                metric_type=metric_type,
-                x_axis_label=x_axis_label,
-                x_axis_type=x_axis_type,
-                line=line,
-                expectation_configurations=expectation_configurations,
-            )
+            for expectation_configuration in expectation_configurations:
+                if (
+                    expectation_configuration.expectation_type
+                    == "expect_table_row_count_to_be_between"
+                ):
+                    df["min_value"] = expectation_configuration.kwargs["min_value"]
+                    df["max_value"] = expectation_configuration.kwargs["max_value"]
+
+            plot_impl = self._plot_prescriptive
         else:
-            table_row_count_chart = self._plot_descriptive(self, line=line)
+            plot_impl = self._plot_descriptive
+
+        table_row_count_chart: alt.Chart = plot_impl(
+            self,
+            df=df,
+            metric=metric,
+            metric_type=metric_type,
+            x_axis=x_axis,
+            x_axis_type=x_axis_type,
+        )
 
         charts.append(table_row_count_chart)
 
