@@ -1,11 +1,16 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, KeysView, List, Optional, Union
 
+import altair as alt
+import pandas as pd
+
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.data_context import BaseDataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
+    MetricValues,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.rule import Rule
@@ -36,6 +41,103 @@ class VolumeDataAssistant(DataAssistant):
             batch_request=batch_request,
             data_context=data_context,
         )
+
+    def _plot_descriptive(
+        self,
+        df: pd.DataFrame,
+        metric: str,
+        metric_type: str,
+        x_axis: str,
+        x_axis_type: str,
+    ):
+        descriptive_chart: alt.Chart = self.get_line_chart(
+            self,
+            df=df,
+            metric=metric,
+            metric_type=metric_type,
+            x_axis=x_axis,
+            x_axis_type=x_axis_type,
+        )
+        return descriptive_chart
+
+    def _plot_prescriptive(
+        self,
+        df: pd.DataFrame,
+        metric: str,
+        metric_type: str,
+        x_axis: str,
+        x_axis_type: str,
+    ):
+        prescriptive_chart: alt.Chart = (
+            self.get_expect_domain_values_to_be_between_chart(
+                self,
+                df=df,
+                metric=metric,
+                metric_type=metric_type,
+                x_axis=x_axis,
+                x_axis_type=x_axis_type,
+            )
+        )
+        return prescriptive_chart
+
+    def _plot(
+        self,
+        metric_names: List[str],
+        attributed_value: Dict[str, List[float]],
+        prescriptive: bool,
+        expectation_configurations: List[ExpectationConfiguration],
+    ):
+        """
+        VolumeDataAssistant-specific plots are defined with Altair and passed to "super()._plot()" for display.
+        """
+        # altair doesn't like periods
+        metric: str = metric_names[0].replace(".", "_")
+        x_axis: str = "batch"
+
+        # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
+        x_axis_type: str = "ordinal"
+        metric_type: str = "quantitative"
+
+        batch_ids: KeysView[str]
+        metric_values: MetricValues
+        batch_ids, metric_values = attributed_value.keys(), sum(
+            attributed_value.values(), []
+        )
+
+        batch_numbers: List[int] = [batch + 1 for batch in range(len(batch_ids))]
+
+        df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[x_axis])
+        df["batch_id"] = batch_ids
+        df[metric] = metric_values
+
+        plot_impl: Callable
+        charts: List[alt.Chart] = []
+
+        if prescriptive:
+            for expectation_configuration in expectation_configurations:
+                if (
+                    expectation_configuration.expectation_type
+                    == "expect_table_row_count_to_be_between"
+                ):
+                    df["min_value"] = expectation_configuration.kwargs["min_value"]
+                    df["max_value"] = expectation_configuration.kwargs["max_value"]
+
+            plot_impl = self._plot_prescriptive
+        else:
+            plot_impl = self._plot_descriptive
+
+        table_row_count_chart: alt.Chart = plot_impl(
+            self,
+            df=df,
+            metric=metric,
+            metric_type=metric_type,
+            x_axis=x_axis,
+            x_axis_type=x_axis_type,
+        )
+
+        charts.append(table_row_count_chart)
+
+        super()._plot(self, charts=charts)
 
     @property
     def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
