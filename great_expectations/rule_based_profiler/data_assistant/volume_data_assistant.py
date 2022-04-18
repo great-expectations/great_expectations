@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, KeysView, List, Optional, Union
 
 import altair as alt
 import pandas as pd
@@ -83,7 +83,7 @@ class VolumeDataAssistant(DataAssistant):
     def _plot(
         self,
         metric_names: List[str],
-        attributed_value: Dict[str, float],
+        attributed_value: Dict[str, List[float]],
         prescriptive: bool,
         expectation_configurations: List[ExpectationConfiguration],
     ):
@@ -98,13 +98,13 @@ class VolumeDataAssistant(DataAssistant):
         x_axis_type: str = "ordinal"
         metric_type: str = "quantitative"
 
-        batch_ids: list[str]
+        batch_ids: KeysView[str]
         metric_values: MetricValues
         batch_ids, metric_values = attributed_value.keys(), sum(
             attributed_value.values(), []
         )
 
-        batch_numbers: list[int] = [batch + 1 for batch in range(len(batch_ids))]
+        batch_numbers: List[int] = [batch + 1 for batch in range(len(batch_ids))]
 
         df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[x_axis])
         df["batch_id"] = batch_ids
