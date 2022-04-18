@@ -207,7 +207,7 @@ class DataAssistant(ABC):
         batch_id: str = "batch_id"
         batch_id_type: str = "nominal"
 
-        if tooltip is not None:
+        if tooltip is None:
             tooltip: List[alt.Tooltip] = [
                 alt.Tooltip(field=batch_id, type=batch_id_type),
                 alt.Tooltip(field=metric, type=metric_type, format=","),
