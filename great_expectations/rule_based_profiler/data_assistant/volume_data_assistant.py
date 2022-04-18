@@ -54,7 +54,6 @@ class VolumeDataAssistant(DataAssistant):
         metric_type: str,
         x_axis: str,
         x_axis_type: str,
-        line: alt.Chart,
     ):
         prescriptive_chart: alt.Chart = (
             self.get_expect_domain_values_to_be_between_chart(
@@ -64,7 +63,6 @@ class VolumeDataAssistant(DataAssistant):
                 metric_type=metric_type,
                 x_axis=x_axis,
                 x_axis_type=x_axis_type,
-                line=line,
             )
         )
         return prescriptive_chart
@@ -110,28 +108,6 @@ class VolumeDataAssistant(DataAssistant):
                     df["min_value"] = expectation_configuration.kwargs["min_value"]
                     df["max_value"] = expectation_configuration.kwargs["max_value"]
 
-            predicate = (
-                (alt.datum.min_value > alt.datum.table_row_count)
-                & (alt.datum.max_value > alt.datum.table_row_count)
-            ) | (
-                (alt.datum.min_value < alt.datum.table_row_count)
-                & (alt.datum.max_value < alt.datum.table_row_count)
-            )
-            point_color_condition: alt.condition = alt.condition(
-                predicate=predicate,
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
-            )
-            anomaly_coded_line: alt.Chart = self.get_line_chart(
-                self,
-                df=df,
-                metric=metric,
-                metric_type=metric_type,
-                x_axis=x_axis,
-                x_axis_type=x_axis_type,
-                point_color_condition=point_color_condition,
-            )
-
             table_row_count_chart = self._plot_prescriptive(
                 self,
                 df=df,
@@ -139,7 +115,6 @@ class VolumeDataAssistant(DataAssistant):
                 metric_type=metric_type,
                 x_axis=x_axis,
                 x_axis_type=x_axis_type,
-                line=anomaly_coded_line,
             )
         else:
             table_row_count_chart = self._plot_descriptive(self, line=line)

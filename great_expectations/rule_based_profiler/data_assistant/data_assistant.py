@@ -199,10 +199,17 @@ class DataAssistant(ABC):
         line_color: Optional[str] = Colors.BLUE_2.value,
         point_color: Optional[str] = Colors.GREEN.value,
         point_color_condition: Optional[alt.condition] = None,
+        tooltip: alt.Tooltip = None,
     ):
         metric_title: str = metric.replace("_", " ").title()
         x_axis_title: str = x_axis.title()
         title: str = f"{metric_title} by {x_axis_title}"
+
+        if not tooltip:
+            tooltip: list[alt.Tooltip] = [
+                alt.Tooltip(field=metric, type=metric_type, format=","),
+                alt.Tooltip(field=x_axis, type=x_axis_type),
+            ]
 
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
@@ -214,6 +221,7 @@ class DataAssistant(ABC):
                     title=x_axis_title,
                 ),
                 y=alt.Y(metric, type=metric_type, title=metric_title),
+                tooltip=tooltip,
             )
         )
 
@@ -230,6 +238,7 @@ class DataAssistant(ABC):
                     y=alt.Y(metric, type=metric_type, title=metric_title),
                     stroke=point_color_condition,
                     fill=point_color_condition,
+                    tooltip=tooltip,
                 )
             )
         else:
@@ -243,6 +252,7 @@ class DataAssistant(ABC):
                         title=x_axis_title,
                     ),
                     y=alt.Y(metric, type=metric_type, title=metric_title),
+                    tooltip=tooltip,
                 )
             )
 
@@ -255,7 +265,6 @@ class DataAssistant(ABC):
         metric_type: str,
         x_axis: str,
         x_axis_type: str,
-        line: alt.Chart,
     ):
         opacity: float = 0.9
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
@@ -265,7 +274,16 @@ class DataAssistant(ABC):
         x_axis_title: str = x_axis.title()
 
         min_value: str = "min_value"
+        min_value_type: str = "quantitative"
         max_value: str = "max_value"
+        max_value_type: str = "quantitative"
+
+        tooltip: list[alt.Tooltip] = [
+            alt.Tooltip(field=metric, type=metric_type, format=","),
+            alt.Tooltip(field=x_axis, type=x_axis_type),
+            alt.Tooltip(field=min_value, type=min_value_type, format=","),
+            alt.Tooltip(field=max_value, type=max_value_type, format=","),
+        ]
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
@@ -277,6 +295,7 @@ class DataAssistant(ABC):
                     title=x_axis_title,
                 ),
                 y=alt.Y(min_value, type=metric_type, title=metric_title),
+                tooltip=tooltip,
             )
         )
 
@@ -290,10 +309,11 @@ class DataAssistant(ABC):
                     title=x_axis_title,
                 ),
                 y=alt.Y(max_value, type=metric_type, title=metric_title),
+                tooltip=tooltip,
             )
         )
 
-        band = (
+        band: alt.Chart = (
             alt.Chart(data=df)
             .mark_area(fill=fill_color, fillOpacity=opacity)
             .encode(
@@ -307,7 +327,30 @@ class DataAssistant(ABC):
             )
         )
 
-        return band + lower_limit + upper_limit + line
+        predicate = (
+            (alt.datum.min_value > alt.datum.table_row_count)
+            & (alt.datum.max_value > alt.datum.table_row_count)
+        ) | (
+            (alt.datum.min_value < alt.datum.table_row_count)
+            & (alt.datum.max_value < alt.datum.table_row_count)
+        )
+        point_color_condition: alt.condition = alt.condition(
+            predicate=predicate,
+            if_false=alt.value(Colors.GREEN.value),
+            if_true=alt.value(Colors.PINK.value),
+        )
+        anomaly_coded_line: alt.Chart = self.get_line_chart(
+            self,
+            df=df,
+            metric=metric,
+            metric_type=metric_type,
+            x_axis=x_axis,
+            x_axis_type=x_axis_type,
+            point_color_condition=point_color_condition,
+            tooltip=tooltip,
+        )
+
+        return band + lower_limit + upper_limit + anomaly_coded_line
 
     @property
     def name(self) -> str:
