@@ -135,8 +135,6 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_min_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
-        class_name="RuleBasedProfilerConfig",
-        module_name="great_expectations.rule_based_profiler",
         variables={
             "strict_min": False,
             "strict_max": False,

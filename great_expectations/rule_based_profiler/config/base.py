@@ -386,13 +386,11 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
-        class_name: Optional[str] = None,
-        module_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ):
-        self.module_name = module_name
-        self.class_name = class_name
+        self.module_name = "great_expectations.rule_based_profiler"
+        self.class_name = "RuleBasedProfilerConfig"
 
         self.name = name
 
