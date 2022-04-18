@@ -77,7 +77,6 @@ except ImportError:
     reflection = None
     DefaultDialect = None
     Selectable = None
-    BooleanClauseList = None
     TextClause = None
     quoted_name = None
     OperationalError = None
