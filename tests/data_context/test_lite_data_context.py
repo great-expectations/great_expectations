@@ -14,12 +14,15 @@ def test_LiteDataContext_read_csv_with_default_pandas_reader():
     )
     my_batch_request = _get_batch_request_from_validator(my_validator)
 
-    assert isinstance(my_batch_request["runtime_parameters"]["batch_data"], pd.DataFrame)
+    assert isinstance(
+        my_batch_request["runtime_parameters"]["batch_data"], pd.DataFrame
+    )
     assert my_batch_request["runtime_parameters"]["batch_data"].to_dict() == {
-        "a": {0:1, 1:4},
-        "b": {0:2, 1:5},
-        "c": {0:3, 1:6},
+        "a": {0: 1, 1: 4},
+        "b": {0: 2, 1: 5},
+        "c": {0: 3, 1: 6},
     }
+
 
 def test_LiteDataContext_read_csv_with_default_pandas_reader_using_dot_notation():
     ldc = LiteDataContext()
@@ -28,12 +31,15 @@ def test_LiteDataContext_read_csv_with_default_pandas_reader_using_dot_notation(
     )
     my_batch_request = _get_batch_request_from_validator(my_validator)
 
-    assert isinstance(my_batch_request["runtime_parameters"]["batch_data"], pd.DataFrame)
+    assert isinstance(
+        my_batch_request["runtime_parameters"]["batch_data"], pd.DataFrame
+    )
     assert my_batch_request["runtime_parameters"]["batch_data"].to_dict() == {
-        "a": {0:1, 1:4},
-        "b": {0:2, 1:5},
-        "c": {0:3, 1:6},
+        "a": {0: 1, 1: 4},
+        "b": {0: 2, 1: 5},
+        "c": {0: 3, 1: 6},
     }
+
 
 def test_LiteDataContext_sources():
     ldc = LiteDataContext()

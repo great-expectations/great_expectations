@@ -623,6 +623,7 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
         connection.close()
         engine.dispose()
 
+
 def _get_batch_request_from_validator(validator):
     """Utility method to unpack batch_requests from Validators
 
