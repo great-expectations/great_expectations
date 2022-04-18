@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List, Union
 
 import pandas as pd
 import pytest
@@ -206,14 +206,14 @@ def test_batch_data_pandas_execution_engine_all_keys_present_for_batch_identifie
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    batch_identifiers = {
+    batch_identifiers: Dict[str, Union[str, int]] = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
     }
 
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
@@ -235,7 +235,7 @@ def test_batch_data_pandas_execution_engine_batch_identifiers_error_mostly_legal
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    batch_identifiers = {
+    batch_identifiers: Dict[str, int] = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
@@ -244,7 +244,7 @@ def test_batch_data_pandas_execution_engine_batch_identifiers_error_mostly_legal
 
     # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
@@ -269,10 +269,10 @@ def test_batch_data_pandas_execution_engine_batch_identifiers_error_one_illegal_
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_identifiers = {"unknown_key": "some_value"}
+    batch_identifiers: Dict[str, str] = {"unknown_key": "some_value"}
     # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration are not accepted.  In this test, a single illegal key is present.
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
@@ -296,14 +296,14 @@ def test_batch_data_pandas_execution_engine_set_data_asset_name_for_runtime_data
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    batch_identifiers = {
+    batch_identifiers: Dict[str, Union[str, int]] = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
     }
 
     # set : my_runtime_data_asset
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_runtime_data_asset",
@@ -324,11 +324,11 @@ def test_batch_data_pandas_execution_engine_set_data_asset_name_for_runtime_data
 def test_pandas_execution_engine_get_available_data_asset_names(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):
-    expected_available_data_asset_names: Dict[List[str]] = {
+    expected_available_data_asset_names: Dict[str, List[str]] = {
         "test_runtime_data_connector": ["asset_a", "asset_b"]
     }
     available_data_asset_names: Dict[
-        List[str]
+        str, List[str]
     ] = (
         datasource_with_runtime_data_connector_and_pandas_execution_engine.get_available_data_asset_names()
     )
@@ -340,11 +340,11 @@ def test_batch_data_pandas_execution_engine_get_batch_definition_list_from_batch
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_identifiers = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
 
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -383,7 +383,7 @@ def test_batch_data_pandas_execution_engine_get_batch_definitions_and_get_batch_
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "test_asset_1"
 
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
@@ -534,10 +534,10 @@ def test_batch_data_pandas_execution_engine_get_batch_list_with_named_asset_two_
 def test_file_path_pandas_execution_engine_batch_list_from_batch_request_success(
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
-    batch_identifiers = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -564,10 +564,10 @@ def test_file_path_pandas_execution_engine_batch_list_from_batch_request_success
 def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_request_success_no_headers(
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
-    batch_identifiers = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -598,10 +598,10 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
     taxi_test_file_directory,
 ):
-    batch_identifiers = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -652,10 +652,10 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
 def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_request_failed_wrong_reader_method(
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
-    batch_identifiers = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",

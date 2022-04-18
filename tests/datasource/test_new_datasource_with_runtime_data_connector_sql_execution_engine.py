@@ -295,7 +295,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_si
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
     batch_identifiers: Dict[str, Union[str, int]] = {"unknown_key": "some_value"}
-    # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
+    # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration  are not accepted.  In this test, a single illegal key is present.
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
