@@ -301,7 +301,7 @@ def test_PandasReaderDatasource_read_table():
     }
 
 
-@pytest.skip(
+@pytest.mark.skip(
     "This test doesn't work on some headless infrastructure, including our CI setup."
 )
 def test_PandasReaderDatasource_read_clipboard():
