@@ -1,4 +1,4 @@
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 import altair as alt
@@ -163,7 +163,7 @@ class DataAssistant(ABC):
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> DataAssistantResult:
-        data_assistant_cls: ABCMeta = type(self)
+        data_assistant_cls: type = type(self)
         result: DataAssistantResult = DataAssistantResult(
             data_assistant_cls=data_assistant_cls, execution_time=0.0
         )
@@ -477,7 +477,6 @@ def run_profiler_on_data(
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
     result.metrics = data_assistant.get_metrics()
-    result.expectation_configurations = data_assistant.get_expectation_configurations()
     result.expectation_suite = data_assistant.get_expectation_suite(
         expectation_suite=expectation_suite,
         expectation_suite_name=expectation_suite_name,

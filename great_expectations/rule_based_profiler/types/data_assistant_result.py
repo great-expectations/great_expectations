@@ -1,5 +1,4 @@
 import re
-from abc import ABCMeta
 from dataclasses import asdict, dataclass
 from numbers import Number
 from typing import Any, Dict, List, Optional
@@ -26,13 +25,12 @@ class DataAssistantResult(SerializableDictDot):
     object (of type "RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
     """
 
-    data_assistant_cls: ABCMeta
+    data_assistant_cls: type
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
     metrics: Optional[Dict[Domain, Dict[str, Any]]] = None
-    expectation_configurations: Optional[List[ExpectationConfiguration]] = None
-    expectation_suite: Optional[
-        ExpectationSuite
-    ] = None  # Obtain "meta/details" using "meta = expectation_suite.meta".
+    # Obtain "expectation_configurations" using "expectation_configurations = expectation_suite.expectations".
+    # Obtain "meta/details" using "meta = expectation_suite.meta".
+    expectation_suite: Optional[ExpectationSuite] = None
     execution_time: Optional[float] = None  # Execution time (in seconds).
 
     def plot(self, prescriptive: bool = False):
@@ -86,7 +84,7 @@ class DataAssistantResult(SerializableDictDot):
 
         expectation_configurations: list[
             ExpectationConfiguration
-        ] = self.expectation_configurations
+        ] = self.expectation_suite.expectations
 
         self.data_assistant_cls._plot(
             self=self.data_assistant_cls,
