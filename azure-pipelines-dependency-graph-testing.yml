@@ -100,13 +100,12 @@ stages:
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
-  - stage: no_sqlalchemy
-    dependsOn: [scope_check, lint]
+  - stage: import_ge
+    dependsOn: [lint]
     pool:
       vmImage: 'ubuntu-18.04'
     jobs:
-      - job: no_sqlalchemy
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+      - job: import_ge
 
         strategy:
          matrix:
@@ -129,7 +128,7 @@ stages:
 
          - script: |
              pip install  .
-           displayName: 'Install GE and dependencies'
+           displayName: 'Install GE and dependencies (not sqlalchemy)'
 
          - script: |
              python -c "import great_expectations as ge; print('GE Version:', ge.__version__)"
