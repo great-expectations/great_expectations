@@ -112,7 +112,7 @@ stages:
            displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
 
          - script: |
-             python -c "import great_expectations as ge; print('GE Version:', ge.__version__)"
+             python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
            displayName: 'Import Great Expectations'
 
   - stage: required
