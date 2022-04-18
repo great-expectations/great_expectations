@@ -163,7 +163,7 @@ class DataAssistant(ABC):
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> DataAssistantResult:
-        data_assistant_cls: Union[ABCMeta, DataAssistant] = type(self)
+        data_assistant_cls: ABCMeta = type(self)
         result: DataAssistantResult = DataAssistantResult(
             data_assistant_cls=data_assistant_cls, execution_time=0.0
         )
