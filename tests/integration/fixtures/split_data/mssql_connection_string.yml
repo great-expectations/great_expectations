@@ -1,0 +1,2 @@
+connection_string: mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true
+dialect: mssql
