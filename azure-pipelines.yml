@@ -170,6 +170,64 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
+      - job: no_sqlalchemy
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+
+        services:
+          postgres: postgres
+
+        variables:
+          GE_pytest_opts: '--postgresql --spark'
+
+        strategy:
+          matrix:
+            Python38:
+              python.version: '3.8'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+              pip_uninstall_packages: 'sqlalchemy'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              sudo apt-get install -y pandoc
+              pip install pypandoc
+            displayName: 'Install pandoc'
+
+          - script: |
+              pip install --requirement requirements.txt
+              echo "about to run pip install $(GE_pytest_pip_opts)"
+              pip install $(GE_pytest_pip_opts)
+              pip install  .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip uninstall -y $(pip_uninstall_packages)
+            displayName: 'Uninstall packages $(pip_uninstall_packages)'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            displayName: 'pytest'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
       - job: comprehensive
         condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
 
