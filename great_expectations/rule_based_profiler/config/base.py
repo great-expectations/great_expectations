@@ -390,7 +390,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         commented_map: Optional[CommentedMap] = None,
     ):
         self.module_name = "great_expectations.rule_based_profiler"
-        self.class_name = "RuleBasedProfilerConfig"
+        self.class_name = "RuleBasedProfiler"
 
         self.name = name
 
@@ -499,8 +499,6 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         }
 
         return cls(
-            class_name=profiler.__class__.__name__,
-            module_name=profiler.__class__.__module__,
             name=profiler.config.name,
             config_version=profiler.config.config_version,
             variables=runtime_variables,

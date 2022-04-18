@@ -1283,8 +1283,6 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-            class_name=self.__class__.__name__,
-            module_name=self.__class__.__module__,
             name=name,
             config_version=config_version,
             variables=variables,

@@ -2409,6 +2409,9 @@ def populated_profiler_store(
     )
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(serialized_config)
 
+    deserialized_config.pop("module_name")
+    deserialized_config.pop("class_name")
+
     profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         **deserialized_config
     )

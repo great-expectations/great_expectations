@@ -209,9 +209,7 @@ def test_get_metrics_and_expectations(
     expected_expectation_suite.meta = expected_expectation_suite_meta
 
     expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        class_name="RuleBasedProfiler",
         config_version=1.0,
-        module_name="great_expectations.rule_based_profiler.rule_based_profiler",
         name="test_volume_data_assistant",
         variables={
             "false_positive_rate": 0.05,
