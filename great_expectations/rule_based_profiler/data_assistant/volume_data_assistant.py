@@ -1,7 +1,6 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import altair as alt
-import numpy as np
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
@@ -11,13 +10,13 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
+    MetricValues,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
-from great_expectations.types import Colors
 
 
 class VolumeDataAssistant(DataAssistant):
@@ -43,8 +42,22 @@ class VolumeDataAssistant(DataAssistant):
             data_context=data_context,
         )
 
-    def _plot_descriptive(self, line: alt.Chart):
-        descriptive_chart: alt.Chart = line
+    def _plot_descriptive(
+        self,
+        df: pd.DataFrame,
+        metric: str,
+        metric_type: str,
+        x_axis: str,
+        x_axis_type: str,
+    ):
+        descriptive_chart: alt.Chart = self.get_line_chart(
+            self,
+            df=df,
+            metric=metric,
+            metric_type=metric_type,
+            x_axis=x_axis,
+            x_axis_type=x_axis_type,
+        )
         return descriptive_chart
 
     def _plot_prescriptive(
@@ -70,7 +83,7 @@ class VolumeDataAssistant(DataAssistant):
     def _plot(
         self,
         metric_names: List[str],
-        data: np.ndarray,
+        attributed_value: Dict[str, float],
         prescriptive: bool,
         expectation_configurations: List[ExpectationConfiguration],
     ):
@@ -85,19 +98,20 @@ class VolumeDataAssistant(DataAssistant):
         x_axis_type: str = "ordinal"
         metric_type: str = "quantitative"
 
-        df: pd.DataFrame = pd.DataFrame(data, columns=[metric])
-        df[x_axis] = df.index + 1
-
-        charts: List[alt.Chart] = []
-
-        line: alt.Chart = self.get_line_chart(
-            self,
-            df=df,
-            metric=metric,
-            metric_type=metric_type,
-            x_axis=x_axis,
-            x_axis_type=x_axis_type,
+        batch_ids: list[str]
+        metric_values: MetricValues
+        batch_ids, metric_values = attributed_value.keys(), sum(
+            attributed_value.values(), []
         )
+
+        batch_numbers: list[int] = [batch + 1 for batch in range(len(batch_ids))]
+
+        df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[x_axis])
+        df["batch_id"] = batch_ids
+        df[metric] = metric_values
+
+        plot_impl: Callable
+        charts: List[alt.Chart] = []
 
         if prescriptive:
             for expectation_configuration in expectation_configurations:
@@ -108,16 +122,18 @@ class VolumeDataAssistant(DataAssistant):
                     df["min_value"] = expectation_configuration.kwargs["min_value"]
                     df["max_value"] = expectation_configuration.kwargs["max_value"]
 
-            table_row_count_chart = self._plot_prescriptive(
-                self,
-                df=df,
-                metric=metric,
-                metric_type=metric_type,
-                x_axis=x_axis,
-                x_axis_type=x_axis_type,
-            )
+            plot_impl = self._plot_prescriptive
         else:
-            table_row_count_chart = self._plot_descriptive(self, line=line)
+            plot_impl = self._plot_descriptive
+
+        table_row_count_chart: alt.Chart = plot_impl(
+            self,
+            df=df,
+            metric=metric,
+            metric_type=metric_type,
+            x_axis=x_axis,
+            x_axis_type=x_axis_type,
+        )
 
         charts.append(table_row_count_chart)
 

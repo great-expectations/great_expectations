@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional, Union
 import altair as alt
 import pandas as pd
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.data_context import BaseDataContext
@@ -205,10 +204,13 @@ class DataAssistant(ABC):
         x_axis_title: str = x_axis.title()
         title: str = f"{metric_title} by {x_axis_title}"
 
+        batch_id: str = "batch_id"
+        batch_id_type: str = "nominal"
+
         if not tooltip:
             tooltip: list[alt.Tooltip] = [
+                alt.Tooltip(field=batch_id, type=batch_id_type),
                 alt.Tooltip(field=metric, type=metric_type, format=","),
-                alt.Tooltip(field=x_axis, type=x_axis_type),
             ]
 
         line: alt.Chart = (
@@ -273,14 +275,16 @@ class DataAssistant(ABC):
         metric_title: str = metric.replace("_", " ").title()
         x_axis_title: str = x_axis.title()
 
+        batch_id: str = "batch_id"
+        batch_id_type: str = "nominal"
         min_value: str = "min_value"
         min_value_type: str = "quantitative"
         max_value: str = "max_value"
         max_value_type: str = "quantitative"
 
         tooltip: list[alt.Tooltip] = [
+            alt.Tooltip(field=batch_id, type=batch_id_type),
             alt.Tooltip(field=metric, type=metric_type, format=","),
-            alt.Tooltip(field=x_axis, type=x_axis_type),
             alt.Tooltip(field=min_value, type=min_value_type, format=","),
             alt.Tooltip(field=max_value, type=max_value_type, format=","),
         ]
