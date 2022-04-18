@@ -198,8 +198,8 @@ class DataAssistant(ABC):
         line_color: Optional[str] = Colors.BLUE_2.value,
         point_color: Optional[str] = Colors.GREEN.value,
         point_color_condition: Optional[alt.condition] = None,
-        tooltip: alt.Tooltip = None,
-    ):
+        tooltip: Optional[List[alt.Tooltip]] = None,
+    ) -> alt.Chart:
         metric_title: str = metric.replace("_", " ").title()
         x_axis_title: str = x_axis.title()
         title: str = f"{metric_title} by {x_axis_title}"
@@ -207,8 +207,8 @@ class DataAssistant(ABC):
         batch_id: str = "batch_id"
         batch_id_type: str = "nominal"
 
-        if not tooltip:
-            tooltip: list[alt.Tooltip] = [
+        if tooltip is not None:
+            tooltip: List[alt.Tooltip] = [
                 alt.Tooltip(field=batch_id, type=batch_id_type),
                 alt.Tooltip(field=metric, type=metric_type, format=","),
             ]
@@ -227,7 +227,7 @@ class DataAssistant(ABC):
             )
         )
 
-        if point_color_condition:
+        if point_color_condition is not None:
             points: alt.Chart = (
                 alt.Chart(data=df, title=title)
                 .mark_point(opacity=1.0)
@@ -267,7 +267,7 @@ class DataAssistant(ABC):
         metric_type: str,
         x_axis: str,
         x_axis_type: str,
-    ):
+    ) -> alt.Chart:
         opacity: float = 0.9
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
         fill_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[5])
