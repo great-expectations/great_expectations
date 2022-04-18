@@ -135,7 +135,7 @@ stages:
            displayName: 'Import Great Expectations'
 
   - stage: required
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-18.04'
 
@@ -309,7 +309,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -345,7 +345,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
 
     jobs:
       - job: mysql
@@ -438,7 +438,7 @@ stages:
             displayName: 'dgtest'
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
