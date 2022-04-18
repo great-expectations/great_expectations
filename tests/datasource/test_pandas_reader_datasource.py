@@ -300,7 +300,7 @@ def test_PandasReaderDatasource_read_table():
         "c": {0: 3, 1: 6},
     }
 
-
+@pytest.skip("This test doesn't work on some headless infrastructure, including our CI setup.")
 def test_PandasReaderDatasource_read_clipboard():
     import pyperclip
 
