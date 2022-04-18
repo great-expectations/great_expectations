@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import pandas as pd
 import pytest
@@ -98,7 +98,7 @@ def test_sparkdf_execution_engine_self_check(
             "unmatched_data_reference_count": 0,
         },
     }
-    assert report["execution_engine"]["caching"] == True
+    assert report["execution_engine"]["caching"] is True
     assert report["execution_engine"]["class_name"] == "SparkDFExecutionEngine"
     assert (
         report["execution_engine"]["module_name"]
@@ -109,8 +109,8 @@ def test_sparkdf_execution_engine_self_check(
 def test_batch_data_sparkdf_execution_engine_unknown_datasource(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )  # noqa: F821
@@ -134,8 +134,8 @@ def test_batch_data_sparkdf_execution_engine_unknown_datasource(
 def test_batch_data_sparkdf_execution_engine_unknown_data_connector(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
@@ -159,8 +159,8 @@ def test_batch_data_sparkdf_execution_engine_unknown_data_connector(
 def test_batch_data_sparkdf_execution_engine_no_batch_identifiers(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
@@ -198,8 +198,8 @@ def test_batch_data_sparkdf_execution_engine_no_batch_identifiers(
 def test_batch_data_sparkdf_execution_engine_incorrect_batch_identifiers(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
@@ -222,19 +222,19 @@ def test_batch_data_sparkdf_execution_engine_incorrect_batch_identifiers(
 def test_batch_data_sparkdf_execution_engine_all_keys_present_for_batch_identifiers(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
     }
 
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
@@ -255,12 +255,12 @@ def test_batch_data_sparkdf_execution_engine_all_keys_present_for_batch_identifi
 def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_mostly_legal_keys(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
@@ -269,7 +269,7 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_mostly_lega
 
     # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
@@ -292,16 +292,16 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_mostly_lega
 def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_one_illegal_key(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
 
-    batch_identifiers = {"unknown_key": "some_value"}
+    batch_identifiers: Dict[str, str] = {"unknown_key": "some_value"}
     # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration are not accepted.  In this test, a single illegal key is present.
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
@@ -324,19 +324,19 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_one_illegal
 def test_batch_data_sparkdf_execution_engine_set_data_asset_name_for_runtime_data(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
     }
 
     # set : my_runtime_data_asset
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_runtime_data_asset",
@@ -357,11 +357,11 @@ def test_batch_data_sparkdf_execution_engine_set_data_asset_name_for_runtime_dat
 def test_batch_data_sparkdf_execution_engine_get_available_data_asset_names(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    expected_available_data_asset_names: Dict[List[str]] = {
+    expected_available_data_asset_names: Dict[str, List[str]] = {
         "test_runtime_data_connector": ["asset_a", "asset_b"]
     }
     available_data_asset_names: Dict[
-        List[str]
+        str, List[str]
     ] = (
         datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_available_data_asset_names()
     )
@@ -371,17 +371,17 @@ def test_batch_data_sparkdf_execution_engine_get_available_data_asset_names(
 def test_batch_data_sparkdf_execution_engine_get_batch_definition_list_from_batch_request_length_one(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
 
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
 
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -409,8 +409,8 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definition_list_from_batc
 def test_batch_data_sparkdf_execution_engine_get_batch_definitions_and_get_batch_basics(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
@@ -418,7 +418,7 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definitions_and_get_batch
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "test_asset_1"
 
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
@@ -440,8 +440,10 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definitions_and_get_batch
         == 1
     )
 
-    my_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        pd.DataFrame({"x": range(10), "y": range(10)})
+    my_df: "pyspark.sql.dataframe.DataFrame" = (
+        spark_session.createDataFrame(  # noqa: F821
+            pd.DataFrame({"x": range(10), "y": range(10)})
+        )
     )
     batch: Batch = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_from_batch_definition(
         batch_definition=BatchDefinition(
@@ -458,15 +460,15 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definitions_and_get_batch
 def test_batch_data_sparkedf_execution_engine_get_batch_list_with_named_asset(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
 
-    batch_identifiers: dict = {"day": 1, "month": 12}
+    batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
@@ -495,15 +497,15 @@ def test_batch_data_sparkedf_execution_engine_get_batch_list_with_named_asset(
 def test_batch_data_sparkdf_execution_engine_get_batch_list_with_named_asset_two_batch_requests(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
 ):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
+    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
     )
 
-    batch_identifiers: dict = {"day": 1, "month": 12}
+    batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
@@ -532,9 +534,9 @@ def test_batch_data_sparkdf_execution_engine_get_batch_list_with_named_asset_two
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
 
     # second batch request
-    batch_identifiers: dict = {"day": 2, "month": 12}
+    batch_identifiers: Dict[str, int] = {"day": 2, "month": 12}
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
@@ -571,10 +573,10 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     taxi_test_file,
     spark_session,
 ):
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -605,10 +607,10 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_fail_d
     spark_session,
 ):
     # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -635,10 +637,10 @@ def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_req
     spark_session,
 ):
     # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -668,10 +670,10 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_fail_f
     spark_session,
 ):
     # The SparkDFExecutionEngine can only read in multiple files from a directory if the reader_method is specified
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -700,10 +702,10 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     taxi_test_file_directory,
     spark_session,
 ):
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -736,10 +738,10 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     taxi_test_file,
     spark_session,
 ):
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -770,10 +772,10 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     taxi_test_file_directory,
     spark_session,
 ):
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -803,10 +805,10 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
 def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_failed_wrong_file_path(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
 ):
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, int] = {
         "airflow_run_id": 1234567890,
     }
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -829,9 +831,9 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_failed
 def test_file_path_sparkedf_execution_engine_get_batch_list_with_named_asset(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, taxi_test_file
 ):
-    batch_identifiers: dict = {"day": 1, "month": 12}
+    batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
@@ -860,9 +862,9 @@ def test_file_path_sparkedf_execution_engine_get_batch_list_with_named_asset(
 def test_file_path_sparkdf_execution_engine_get_batch_list_with_named_asset_two_batch_requests(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine, taxi_test_file
 ):
-    batch_identifiers: dict = {"day": 1, "month": 12}
+    batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
@@ -891,9 +893,9 @@ def test_file_path_sparkdf_execution_engine_get_batch_list_with_named_asset_two_
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
 
     # second batch request
-    batch_identifiers: dict = {"day": 2, "month": 12}
+    batch_identifiers: Dict[str, int] = {"day": 2, "month": 12}
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
