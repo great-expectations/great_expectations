@@ -100,6 +100,41 @@ stages:
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
+  - stage: no_sqlalchemy
+    dependsOn: [scope_check, lint]
+    pool:
+      vmImage: 'ubuntu-18.04'
+    jobs:
+      - job: no_sqlalchemy
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+
+        strategy:
+         matrix:
+           Python37:
+             python.version: '3.7'
+           Python38:
+             python.version: '3.8'
+           Python39:
+             python.version: '3.9'
+
+
+        steps:
+         - task: UsePythonVersion@0
+           inputs:
+             versionSpec: '$(python.version)'
+           displayName: 'Use Python $(python.version)'
+
+         - bash: python -m pip install --upgrade pip==21.3.1
+           displayName: 'Update pip'
+
+         - script: |
+             pip install  .
+           displayName: 'Install GE and dependencies'
+
+         - script: |
+             python -c "import great_expectations as ge; print('GE Version:', ge.__version__)"
+           displayName: 'Import Great Expectations'
+
   - stage: required
     dependsOn: [scope_check, lint]
     pool:
