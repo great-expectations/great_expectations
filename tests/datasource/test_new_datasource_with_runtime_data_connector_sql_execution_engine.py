@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List, Union
 
 import pytest
 
@@ -199,14 +199,14 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_q
 ):
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, Union[str, int]] = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
     }
 
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "TEMP_QUERY_DATA_ASSET",
@@ -229,14 +229,14 @@ def test_batch_identifiers_and_batch_identifiers_success_no_temp_table(
 ):
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I"
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, Union[str, int]] = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
     }
 
     # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "TEMP_QUERY_DATA_ASSET",
@@ -260,7 +260,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
 ):
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I"
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, Union[str, int]] = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
@@ -269,7 +269,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
 
     # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "TEMP_QUERY_DATA_ASSET",
@@ -294,10 +294,10 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_si
 ):
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
-    batch_identifiers: dict = {"unknown_key": "some_value"}
+    batch_identifiers: Dict[str, Union[str, int]] = {"unknown_key": "some_value"}
     # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration  are not accepted.  In this test, a single illegal key is present.
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "TEMP_QUERY_DATA_ASSET",
@@ -321,14 +321,14 @@ def test_set_data_asset_name_for_runtime_query_data(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     test_query: str = "SELECT * FROM table_full__I;"
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, Union[str, int]] = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
         "custom_key_0": "custom_value_0",
     }
 
     # set : my_runtime_data_asset
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_runtime_data_asset",
@@ -352,11 +352,11 @@ def test_get_batch_definition_list_from_batch_request_length_one_from_query(
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
 
-    batch_identifiers: dict = {
+    batch_identifiers: Dict[str, Union[str, int]] = {
         "airflow_run_id": 1234567890,
     }
 
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "my_data_asset",
@@ -386,9 +386,9 @@ def test_get_batch_list_from_batch_request_length_one_from_query_named_asset(
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
 
-    batch_identifiers: dict = {"day": 2, "month": 12}
+    batch_identifiers: Dict[str, Union[str, int]] = {"day": 2, "month": 12}
 
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
@@ -418,9 +418,9 @@ def test_get_batch_list_from_batch_request_length_one_from_query_named_asset_two
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
 
-    batch_identifiers: dict = {"day": 1, "month": 12}
+    batch_identifiers: Dict[str, Union[str, int]] = {"day": 1, "month": 12}
 
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
@@ -446,9 +446,9 @@ def test_get_batch_list_from_batch_request_length_one_from_query_named_asset_two
     # interacting with the database using query
     test_query: str = "SELECT * FROM table_full__I;"
 
-    batch_identifiers: dict = {"day": 2, "month": 12}
+    batch_identifiers: Dict[str, Union[str, int]] = {"day": 2, "month": 12}
 
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": "test_runtime_data_connector",
         "data_asset_name": "asset_a",
@@ -481,7 +481,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_batch_identifiers_e
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "test_asset_1"
 
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
@@ -509,7 +509,7 @@ def test_get_batch_definitions_and_get_batch_basics_from_query(
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "test_asset_1"
 
-    batch_request: dict = {
+    batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
