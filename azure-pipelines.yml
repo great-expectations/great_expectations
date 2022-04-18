@@ -177,7 +177,7 @@ stages:
           postgres: postgres
 
         variables:
-          GE_pytest_opts: ''
+          GE_pytest_opts: '--no-sqlalchemy'
 
         strategy:
           matrix:
