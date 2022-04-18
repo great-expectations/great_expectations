@@ -1,17 +1,21 @@
 import warnings
 from typing import Dict
 
-from great_expectations.types.base import DotDict
-from great_expectations.data_context.data_context.base_data_context import BaseDataContext
-from great_expectations.datasource import BaseDatasource
+from great_expectations.data_context.data_context.base_data_context import (
+    BaseDataContext,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+from great_expectations.datasource import BaseDatasource
+from great_expectations.types.base import DotDict
+
 
 #!!! Factor this out to somewhere nicer
 class GxExperimentalWarning(Warning):
     pass
+
 
 class LiteDataContext(BaseDataContext):
     #!!! Rather than start from a config, it would be better to programmatically instantiate this datasource in __init__. That will allow other configs to be passed in.
@@ -66,9 +70,9 @@ class LiteDataContext(BaseDataContext):
     @property
     def sources(self) -> Dict[str, BaseDatasource]:
         """An alias for self.datasources
-        
+
         This method is purely for convenience.
-        
+
         Several other objects and methods also start with "data",
         so it's often nicer to be able to type "so<TAB>" to autocomplete.
         """

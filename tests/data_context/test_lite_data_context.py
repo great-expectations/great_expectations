@@ -1,8 +1,11 @@
 import pandas as pd
 
-from great_expectations.data_context.data_context.lite_data_context import LiteDataContext
+from great_expectations.data_context.data_context.lite_data_context import (
+    LiteDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import _get_batch_request_from_validator
+
 
 def test_LiteDataContext_read_csv_with_default_pandas_reader():
     ldc = LiteDataContext()
