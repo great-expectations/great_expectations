@@ -90,6 +90,7 @@ class GEDependencies:
             "pyfakefs",
             "pyodbc",
             "pypd",
+            "pyperclip",
             "pyspark",
             "pytest",
             "pytest-benchmark",
