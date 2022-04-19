@@ -54,6 +54,7 @@ from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
+    ParameterNode,
     RuleState,
     build_parameter_container_for_variables,
 )
@@ -388,13 +389,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def get_parameter_values_for_fully_qualified_parameter_names_by_domain(
         self,
-    ) -> Dict[Domain, Dict[str, Any]]:
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
         Returns:
             Dictionaries of values for fully-qualified parameter names by Domain, accumulated from RuleState of every Rule executed.
         """
         values_for_fully_qualified_parameter_names_by_domain: Dict[
-            Domain, Dict[str, Any]
+            Domain, Dict[str, ParameterNode]
         ] = {}
 
         rule_state: RuleState
@@ -409,7 +410,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
         self, domain_id: str
-    ) -> Dict[str, Any]:
+    ) -> Dict[str, ParameterNode]:
         """
         Args:
             domain_id: ID of desired Domain object.
@@ -430,7 +431,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Add Rule object to existing profiler object by reconciling profiler rules and updating _profiler_config.
         """
-        rules_dict: Dict[str, Dict[str, Any]] = {
+        rules_dict: Dict[str, Dict[str, ParameterNode]] = {
             rule.name: rule.to_json_dict(),
         }
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
@@ -442,7 +443,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ),
         )
         self.rules = effective_rules
-        updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
+        updated_rules: Optional[Dict[str, Dict[str, ParameterNode]]] = {
             rule.name: rule.to_json_dict() for rule in effective_rules
         }
         self._profiler_config.rules = updated_rules
