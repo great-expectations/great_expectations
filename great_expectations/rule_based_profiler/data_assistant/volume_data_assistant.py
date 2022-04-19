@@ -126,7 +126,7 @@ class VolumeDataAssistant(DataAssistant):
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
-        x_axis: str = "batch"
+        x_axis_name: str = "batch"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
         x_axis_type: str = "ordinal"
@@ -141,7 +141,7 @@ class VolumeDataAssistant(DataAssistant):
         idx: int
         batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_ids))]
 
-        df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[x_axis])
+        df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[x_axis_name])
         df["batch_id"] = batch_ids
         df[metric_name] = metric_values
 
@@ -169,7 +169,7 @@ class VolumeDataAssistant(DataAssistant):
             df=df,
             metric=metric_name,
             metric_type=metric_type,
-            x_axis=x_axis,
+            x_axis_name=x_axis_name,
             x_axis_type=x_axis_type,
         )
 
@@ -182,14 +182,14 @@ class VolumeDataAssistant(DataAssistant):
         df: pd.DataFrame,
         metric: str,
         metric_type: str,
-        x_axis: str,
+        x_axis_name: str,
         x_axis_type: str,
     ) -> alt.Chart:
         descriptive_chart: alt.Chart = get_line_chart(
             df=df,
             metric=metric,
             metric_type=metric_type,
-            x_axis=x_axis,
+            x_axis_name=x_axis_name,
             x_axis_type=x_axis_type,
         )
         return descriptive_chart
@@ -199,14 +199,14 @@ class VolumeDataAssistant(DataAssistant):
         df: pd.DataFrame,
         metric: str,
         metric_type: str,
-        x_axis: str,
+        x_axis_name: str,
         x_axis_type: str,
     ) -> alt.Chart:
         prescriptive_chart: alt.Chart = get_expect_domain_values_to_be_between_chart(
             df=df,
             metric=metric,
             metric_type=metric_type,
-            x_axis=x_axis,
+            x_axis_name=x_axis_name,
             x_axis_type=x_axis_type,
         )
         return prescriptive_chart

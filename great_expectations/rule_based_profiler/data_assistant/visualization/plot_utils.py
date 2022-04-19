@@ -38,7 +38,7 @@ def get_expect_domain_values_to_be_between_chart(
     df: pd.DataFrame,
     metric: str,
     metric_type: str,
-    x_axis: str,
+    x_axis_name: str,
     x_axis_type: str,
 ) -> alt.Chart:
     opacity: float = 0.9
@@ -46,7 +46,7 @@ def get_expect_domain_values_to_be_between_chart(
     fill_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[5])
 
     metric_title: str = metric.replace("_", " ").title()
-    x_axis_title: str = x_axis.title()
+    x_axis_title: str = x_axis_name.title()
 
     batch_id: str = "batch_id"
     batch_id_type: str = "nominal"
@@ -67,7 +67,7 @@ def get_expect_domain_values_to_be_between_chart(
         .mark_line(color=line_color, opacity=opacity)
         .encode(
             x=alt.X(
-                x_axis,
+                x_axis_name,
                 type=x_axis_type,
                 title=x_axis_title,
             ),
@@ -81,7 +81,7 @@ def get_expect_domain_values_to_be_between_chart(
         .mark_line(color=line_color, opacity=opacity)
         .encode(
             x=alt.X(
-                x_axis,
+                x_axis_name,
                 type=x_axis_type,
                 title=x_axis_title,
             ),
@@ -95,7 +95,7 @@ def get_expect_domain_values_to_be_between_chart(
         .mark_area(fill=fill_color, fillOpacity=opacity)
         .encode(
             x=alt.X(
-                x_axis,
+                x_axis_name,
                 type=x_axis_type,
                 title=x_axis_title,
             ),
@@ -120,7 +120,7 @@ def get_expect_domain_values_to_be_between_chart(
         df=df,
         metric=metric,
         metric_type=metric_type,
-        x_axis=x_axis,
+        x_axis_name=x_axis_name,
         x_axis_type=x_axis_type,
         point_color_condition=point_color_condition,
         tooltip=tooltip,
@@ -133,7 +133,7 @@ def get_line_chart(
     df: pd.DataFrame,
     metric: str,
     metric_type: str,
-    x_axis: str,
+    x_axis_name: str,
     x_axis_type: str,
     line_color: Optional[str] = Colors.BLUE_2.value,
     point_color: Optional[str] = Colors.GREEN.value,
@@ -141,7 +141,7 @@ def get_line_chart(
     tooltip: Optional[List[alt.Tooltip]] = None,
 ) -> alt.Chart:
     metric_title: str = metric.replace("_", " ").title()
-    x_axis_title: str = x_axis.title()
+    x_axis_title: str = x_axis_name.title()
     title: str = f"{metric_title} by {x_axis_title}"
 
     batch_id: str = "batch_id"
@@ -158,7 +158,7 @@ def get_line_chart(
         .mark_line(color=line_color)
         .encode(
             x=alt.X(
-                x_axis,
+                x_axis_name,
                 type=x_axis_type,
                 title=x_axis_title,
             ),
@@ -173,7 +173,7 @@ def get_line_chart(
             .mark_point(opacity=1.0)
             .encode(
                 x=alt.X(
-                    x_axis,
+                    x_axis_name,
                     type=x_axis_type,
                     title=x_axis_title,
                 ),
@@ -189,7 +189,7 @@ def get_line_chart(
             .mark_point(stroke=point_color, fill=point_color, opacity=1.0)
             .encode(
                 x=alt.X(
-                    x_axis,
+                    x_axis_name,
                     type=x_axis_type,
                     title=x_axis_title,
                 ),
