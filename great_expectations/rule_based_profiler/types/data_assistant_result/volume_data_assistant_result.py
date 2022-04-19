@@ -1,11 +1,10 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, KeysView, List, Optional
 
 import altair as alt
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.parameter_builder import MetricValues
 from great_expectations.rule_based_profiler.types import Domain, ParameterNode
