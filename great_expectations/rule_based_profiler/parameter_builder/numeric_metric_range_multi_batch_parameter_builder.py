@@ -197,6 +197,7 @@ detected.
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        recompute_existing_parameter_values: bool = False,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -238,6 +239,7 @@ detected.
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
             json_serialize=False,
+            recompute_existing_parameter_values=recompute_existing_parameter_values,
         )
 
         # Retrieve metric values for all Batch objects.

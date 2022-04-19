@@ -642,4 +642,4 @@ def _get_parameter_name_parts_up_to_including_reserved_literal(
         except ValueError:
             pass
 
-    return attribute_name_as_list[: idx + 1]
+    return attribute_name_as_list[:idx]
