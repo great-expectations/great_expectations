@@ -35,10 +35,11 @@ class VolumeDataAssistant(DataAssistant):
         batch_request: Union[BatchRequestBase, dict],
         data_context: BaseDataContext = None,
     ):
-        self._result_class = VolumeDataAssistantResult
+        data_assistant_result_cls = VolumeDataAssistantResult
 
         super().__init__(
             name=name,
+            data_assistant_result_cls=data_assistant_result_cls,
             batch_request=batch_request,
             data_context=data_context,
         )

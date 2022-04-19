@@ -53,6 +53,7 @@ class DataAssistant(ABC):
     def __init__(
         self,
         name: str,
+        data_assistant_result_cls: type,
         batch_request: Union[BatchRequestBase, dict],
         data_context: BaseDataContext = None,
     ):
@@ -64,12 +65,15 @@ class DataAssistant(ABC):
 
         Args:
             name: the name of this DataAssistant object.
+            data_assistant_result_cls: the type of DataAssistantResult to associate with this DataAssistant
             batch_request: specified for querying data Batch objects.
             data_context: DataContext
         """
         self._name = name
 
         self._data_context = data_context
+
+        self._data_assistant_result_cls = data_assistant_result_cls
 
         self._validator = get_validator_using_batch_list_or_batch_request(
             purpose=self.name,
@@ -88,8 +92,6 @@ class DataAssistant(ABC):
             data_context=self.data_context,
         )
         self._build_profiler()
-
-        self._data_assistant_result_cls = DataAssistantResult
 
     def _build_profiler(self) -> None:
         """

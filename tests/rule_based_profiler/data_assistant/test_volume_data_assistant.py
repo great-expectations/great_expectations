@@ -410,7 +410,7 @@ def test_volume_data_assistant_plot_prescriptive(
     )
 
     expectation_suite_name: str = "test_suite"
-    result = data_assistant.run(
+    data_assistant.run(
         expectation_suite_name=expectation_suite_name,
     )
 
