@@ -102,7 +102,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         table_row_count_chart: alt.Chart = plot_impl(
             df=df,
-            metric=metric_name,
+            metric_name=metric_name,
             metric_type=metric_type,
             domain_name=domain_name,
             domain_type=domain_type,
@@ -123,14 +123,14 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def _plot_descriptive(
         self,
         df: pd.DataFrame,
-        metric: str,
+        metric_name: str,
         metric_type: str,
         domain_name: str,
         domain_type: str,
     ) -> alt.Chart:
         descriptive_chart: alt.Chart = self.get_line_chart(
             df=df,
-            metric=metric,
+            metric_name=metric_name,
             metric_type=metric_type,
             domain_name=domain_name,
             domain_type=domain_type,
@@ -140,7 +140,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def _plot_prescriptive(
         self,
         df: pd.DataFrame,
-        metric: str,
+        metric_name: str,
         metric_type: str,
         domain_name: str,
         domain_type: str,
@@ -148,7 +148,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         prescriptive_chart: alt.Chart = (
             self.get_expect_domain_values_to_be_between_chart(
                 df=df,
-                metric=metric,
+                metric_name=metric_name,
                 metric_type=metric_type,
                 domain_name=domain_name,
                 domain_type=domain_type,
