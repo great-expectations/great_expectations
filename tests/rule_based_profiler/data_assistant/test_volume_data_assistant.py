@@ -373,7 +373,7 @@ def test_volume_data_assistant_plot_descriptive(
         "data_asset_name": "my_reports",
     }
 
-    data_assistant: VolumeDataAssistant = VolumeDataAssistant(
+    data_assistant: DataAssistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
         batch_request=batch_request,
         data_context=context,
@@ -402,7 +402,7 @@ def test_volume_data_assistant_plot_prescriptive(
         "data_asset_name": "my_reports",
     }
 
-    data_assistant: VolumeDataAssistant = VolumeDataAssistant(
+    data_assistant: DataAssistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
         batch_request=batch_request,
         data_context=context,
