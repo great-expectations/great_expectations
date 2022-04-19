@@ -112,14 +112,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         self.display(charts=charts)
 
-    def to_dict(self) -> dict:
-        """Returns: this DataAssistantResult as a dictionary"""
-        return asdict(self)
-
-    def to_json_dict(self) -> dict:
-        """Returns: this DataAssistantResult as a json dictionary"""
-        return convert_to_json_serializable(data=self.to_dict())
-
     def _plot_descriptive(
         self,
         df: pd.DataFrame,
