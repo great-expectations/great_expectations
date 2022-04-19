@@ -1,6 +1,6 @@
 import datetime
 import enum
-from typing import List, Union
+from typing import Callable, List, Union
 
 from dateutil.parser import parse
 
@@ -49,6 +49,33 @@ class SqlAlchemyDataSplitter:
 
     def __init__(self):
         pass
+
+    def get_splitter_method(self, splitter_method_name: str) -> Callable:
+        """
+
+        Args:
+            splitter_method_name:
+
+        Returns:
+
+        """
+        splitter_method_name: str = self.get_splitter_method_name(splitter_method_name)
+
+        return getattr(self, splitter_method_name)
+
+    def get_splitter_method_name(self, splitter_method_name: str) -> str:
+        """Accept splitter methods with or without starting with `_`.
+
+        Args:
+            splitter_method_name: splitter name starting with or without preceding `_`.
+
+        Returns:
+            splitter method name stripped of preceding underscore.
+        """
+        if splitter_method_name.startswith("_"):
+            return splitter_method_name[1:]
+        else:
+            return splitter_method_name
 
     def split_on_year(
         self,
@@ -178,3 +205,72 @@ class SqlAlchemyDataSplitter:
             )
 
         return query
+
+    def split_on_whole_table(self, batch_identifiers: dict) -> bool:
+        """'Split' by returning the whole table"""
+
+        # return sa.column(column_name) == batch_identifiers[column_name]
+        return 1 == 1
+
+    def split_on_column_value(self, column_name: str, batch_identifiers: dict) -> bool:
+        """Split using the values in the named column"""
+
+        return sa.column(column_name) == batch_identifiers[column_name]
+
+    def split_on_converted_datetime(
+        self,
+        column_name: str,
+        batch_identifiers: dict,
+        date_format_string: str = "%Y-%m-%d",
+    ) -> bool:
+        """Convert the values in the named column to the given date_format, and split on that"""
+
+        return (
+            sa.func.strftime(
+                date_format_string,
+                sa.column(column_name),
+            )
+            == batch_identifiers[column_name]
+        )
+
+    def split_on_divided_integer(
+        self, column_name: str, divisor: int, batch_identifiers: dict
+    ) -> bool:
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        return (
+            sa.cast(sa.column(column_name) / divisor, sa.Integer)
+            == batch_identifiers[column_name]
+        )
+
+    def split_on_mod_integer(
+        self, column_name: str, mod: int, batch_identifiers: dict
+    ) -> bool:
+        """Divide the values in the named column by `divisor`, and split on that"""
+
+        return sa.column(column_name) % mod == batch_identifiers[column_name]
+
+    def split_on_multi_column_values(
+        self, column_names: List[str], batch_identifiers: dict
+    ) -> bool:
+        """Split on the joint values in the named columns"""
+
+        return sa.and_(
+            *(
+                sa.column(column_name) == column_value
+                for column_name, column_value in batch_identifiers.items()
+            )
+        )
+
+    def split_on_hashed_column(
+        self,
+        column_name: str,
+        hash_digits: int,
+        batch_identifiers: dict,
+    ) -> bool:
+        """Split on the hashed value of the named column"""
+
+        return (
+            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
+            == batch_identifiers[column_name]
+        )
