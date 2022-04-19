@@ -212,7 +212,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         domain=domain,
         variables=variables,
         parameters=parameters,
-        ignore_existing_parameters=True,
+        recompute_existing_parameter_values=True,
     )
 
     actual_value_dict = get_parameter_value_by_fully_qualified_parameter_name(

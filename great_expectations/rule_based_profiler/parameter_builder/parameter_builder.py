@@ -168,7 +168,7 @@ class ParameterBuilder(Builder, ABC):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         force_batch_data: bool = False,
-        ignore_existing_parameters: bool = False,
+        recompute_existing_parameter_values: bool = False,
     ) -> None:
         """
         Args:
@@ -180,7 +180,7 @@ class ParameterBuilder(Builder, ABC):
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
-            ignore_existing_parameters: If "True", recompute parameter value if "fully_qualified_parameter_name" exists.
+            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
         """
         fully_qualified_parameter_names: List[
             str
@@ -190,7 +190,7 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
         if (
-            ignore_existing_parameters
+            recompute_existing_parameter_values
             or self.fully_qualified_parameter_name
             not in fully_qualified_parameter_names
         ):
@@ -206,7 +206,7 @@ class ParameterBuilder(Builder, ABC):
                 variables=variables,
                 parameters=parameters,
                 fully_qualified_parameter_names=fully_qualified_parameter_names,
-                ignore_existing_parameters=ignore_existing_parameters,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
 
             if parameter_computation_impl is None:
@@ -216,7 +216,7 @@ class ParameterBuilder(Builder, ABC):
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
-                ignore_existing_parameters=ignore_existing_parameters,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
 
             if json_serialize is None:
@@ -273,7 +273,7 @@ class ParameterBuilder(Builder, ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        ignore_existing_parameters: bool = False,
+        recompute_existing_parameter_values: bool = False,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -715,7 +715,7 @@ def resolve_evaluation_dependencies(
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
     fully_qualified_parameter_names: Optional[List[str]] = None,
-    ignore_existing_parameters: bool = False,
+    recompute_existing_parameter_values: bool = False,
 ) -> None:
     """
     This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
@@ -761,7 +761,7 @@ def resolve_evaluation_dependencies(
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
-                ignore_existing_parameters=ignore_existing_parameters,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
 
             # Step-4: Any "ParameterBuilder" object, including members of "evaluation_parameter_builders" list may be
@@ -771,5 +771,5 @@ def resolve_evaluation_dependencies(
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
-                ignore_existing_parameters=ignore_existing_parameters,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
