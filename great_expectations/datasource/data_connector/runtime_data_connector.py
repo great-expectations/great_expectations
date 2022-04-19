@@ -129,10 +129,11 @@ class RuntimeDataConnector(DataConnector):
                     f"""RuntimeDataConnector "{self.name}" requires batch_identifiers to be configured, either at the DataConnector or Asset-level."""
                 )
             if batch_identifiers:
-                # TODO: <WILL> discuss whether DataConnector-level batch_identifiers need to be fully deprecated. Commenting for now.
-                # warnings.warn(
-                #    "Specifying batch_identifiers as part of RuntimeDataConnector config is deprecated as of v0.15.01 and will be removed by v0.17. Please configure Assets instead.",
-                # )
+                # deprecated-v0.15.1
+                warnings.warn(
+                    "Specifying batch_identifiers as part of the RuntimeDataConnector config is deprecated as of v0.15.1 and will be removed by v0.18. Please configure batch_identifiers as part of Assets instead.",
+                    DeprecationWarning,
+                )
                 self._batch_identifiers[self.name] = batch_identifiers
 
     def _refresh_data_references_cache(self) -> None:

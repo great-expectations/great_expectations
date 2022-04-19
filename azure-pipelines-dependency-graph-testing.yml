@@ -100,10 +100,29 @@ stages:
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
+  - stage: custom_checks
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+    - job: type_hint_checker
+      steps:
+      - script: |
+          pip install mypy # Prereq for type hint script
+          python scripts/check_type_hint_coverage.py
+        name: TypeHintChecker
+
+    - job: docstring_checker
+      steps:
+      - bash: python scripts/check_docstring_coverage.py
+        name: DocstringChecker
+
   - stage: import_ge
     dependsOn: [lint]
     pool:
       vmImage: 'ubuntu-18.04'
+
     jobs:
       - job: import_ge
 
@@ -115,7 +134,6 @@ stages:
              python.version: '3.8'
            Python39:
              python.version: '3.9'
-
 
         steps:
          - task: UsePythonVersion@0
