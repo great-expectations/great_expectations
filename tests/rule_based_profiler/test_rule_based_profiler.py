@@ -1099,8 +1099,6 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
 ):
     profiler_config = RuleBasedProfilerConfig(
         name="my_profiler_config",
-        class_name="RuleBasedProfiler",
-        module_name="great_expectations.rule_based_profiler",
         config_version=1.0,
         rules={
             "rule_1": {
