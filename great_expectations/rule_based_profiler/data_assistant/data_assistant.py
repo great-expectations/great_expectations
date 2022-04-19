@@ -303,12 +303,12 @@ class DataAssistant(ABC):
     ) -> ExpectationSuite:
         """
         Args:
-            expectation_suite: An existing "ExpectationSuite" to update.
-            expectation_suite_name: A name for returned "ExpectationSuite".
+            expectation_suite: An existing "ExpectationSuite" to update
+            expectation_suite_name: A name for returned "ExpectationSuite"
             include_citation: Whether or not to include the Profiler config in the metadata for "ExpectationSuite" produced by "RuleBasedProfiler"
 
         Returns:
-            "ExpectationSuite" using "ExpectationConfiguration" objects, computed by "RuleBasedProfiler" state.
+            "ExpectationSuite" using "ExpectationConfiguration" objects, computed by "RuleBasedProfiler" state
         """
         return self.profiler.get_expectation_suite(
             expectation_suite=expectation_suite,

@@ -258,7 +258,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return band + lower_limit + upper_limit + anomaly_coded_line
 
-    def _display(self, charts: List[alt.Chart]) -> None:
+    def display(self, charts: List[alt.Chart]) -> None:
         """
         Display each chart passed by DataAssistantResult.plot()
 

@@ -12,7 +12,6 @@ from great_expectations.rule_based_profiler.data_assistant import (
 from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
-    VolumeDataAssistantResult,
 )
 from great_expectations.util import deep_filter_properties_iterable
 

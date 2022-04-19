@@ -110,7 +110,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         charts.append(table_row_count_chart)
 
-        self._display(charts=charts)
+        self.display(charts=charts)
 
     def to_dict(self) -> dict:
         """Returns: this DataAssistantResult as a dictionary"""
