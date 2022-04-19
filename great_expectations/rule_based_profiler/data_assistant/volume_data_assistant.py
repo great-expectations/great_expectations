@@ -1,30 +1,21 @@
-from typing import Any, Callable, Dict, KeysView, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
-import altair as alt
-import pandas as pd
-
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.data_context import BaseDataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
-from great_expectations.rule_based_profiler.data_assistant.visualization.plot_utils import (
-    display,
-    get_attributed_metrics_by_domain,
-    get_expect_domain_values_to_be_between_chart,
-    get_line_chart,
-)
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
-    MetricValues,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+)
+from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
-    Domain,
-    ParameterNode,
+    VolumeDataAssistantResult,
 )
 
 
@@ -51,6 +42,40 @@ class VolumeDataAssistant(DataAssistant):
             batch_request=batch_request,
             data_context=data_context,
         )
+
+    def run(
+        self,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> VolumeDataAssistantResult:
+        """
+        Run the DataAssistant as it is currently configured.
+
+        Args:
+            expectation_suite: An existing "ExpectationSuite" to update
+            expectation_suite_name: A name for returned "ExpectationSuite"
+            include_citation: Whether or not to include the Profiler config in the metadata for "ExpectationSuite" produced by "RuleBasedProfiler"
+
+        Returns:
+            DataAssistantResult: The result object for the DataAssistant
+        """
+        data_assistant_result: DataAssistantResult = super().run(
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+
+        volume_data_asssistant_result: VolumeDataAssistantResult = (
+            VolumeDataAssistantResult(
+                profiler_config=data_assistant_result.profiler_config,
+                metrics_by_domain=data_assistant_result.metrics_by_domain,
+                expectation_suite=data_assistant_result.expectation_suite,
+                execution_time=data_assistant_result.execution_time,
+            )
+        )
+
+        return volume_data_asssistant_result
 
     @property
     def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
@@ -92,121 +117,3 @@ class VolumeDataAssistant(DataAssistant):
     @property
     def rules(self) -> Optional[List[Rule]]:
         return None
-
-    def plot(
-        self,
-        result: DataAssistantResult,
-        prescriptive: bool = False,
-    ) -> None:
-        """
-        VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
-        """
-        metrics_by_domain: Dict[
-            Domain, Dict[str, ParameterNode]
-        ] = result.metrics_by_domain
-
-        # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
-        # noinspection PyTypeChecker
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
-            filter(
-                lambda element: element[0].domain_type == MetricDomainTypes.TABLE,
-                get_attributed_metrics_by_domain(
-                    metrics_by_domain=metrics_by_domain
-                ).items(),
-            )
-        )
-
-        # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
-        attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
-            attributed_metrics_by_domain.values()
-        )[0]
-
-        # Altair does not accept periods.
-        # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
-        metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
-            ".", "_"
-        )
-        x_axis_name: str = "batch"
-
-        # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
-        x_axis_type: str = "ordinal"
-        metric_type: str = "quantitative"
-
-        batch_ids: KeysView[str]
-        metric_values: MetricValues
-        batch_ids, metric_values = list(attributed_values_by_metric_name.values())[
-            0
-        ].keys(), sum(list(attributed_values_by_metric_name.values())[0].values(), [])
-
-        idx: int
-        batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_ids))]
-
-        df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[x_axis_name])
-        df["batch_id"] = batch_ids
-        df[metric_name] = metric_values
-
-        plot_impl: Callable
-        charts: List[alt.Chart] = []
-
-        expectation_configurations: List[
-            ExpectationConfiguration
-        ] = result.expectation_suite.expectations
-        expectation_configuration: ExpectationConfiguration
-        if prescriptive:
-            for expectation_configuration in expectation_configurations:
-                if (
-                    expectation_configuration.expectation_type
-                    == "expect_table_row_count_to_be_between"
-                ):
-                    df["min_value"] = expectation_configuration.kwargs["min_value"]
-                    df["max_value"] = expectation_configuration.kwargs["max_value"]
-
-            plot_impl = self._plot_prescriptive
-        else:
-            plot_impl = self._plot_descriptive
-
-        table_row_count_chart: alt.Chart = plot_impl(
-            df=df,
-            metric=metric_name,
-            metric_type=metric_type,
-            x_axis_name=x_axis_name,
-            x_axis_type=x_axis_type,
-        )
-
-        charts.append(table_row_count_chart)
-
-        display(charts=charts)
-
-    @staticmethod
-    def _plot_descriptive(
-        df: pd.DataFrame,
-        metric: str,
-        metric_type: str,
-        x_axis_name: str,
-        x_axis_type: str,
-    ) -> alt.Chart:
-        descriptive_chart: alt.Chart = get_line_chart(
-            df=df,
-            metric=metric,
-            metric_type=metric_type,
-            x_axis_name=x_axis_name,
-            x_axis_type=x_axis_type,
-        )
-        return descriptive_chart
-
-    @staticmethod
-    def _plot_prescriptive(
-        df: pd.DataFrame,
-        metric: str,
-        metric_type: str,
-        x_axis_name: str,
-        x_axis_type: str,
-    ) -> alt.Chart:
-        prescriptive_chart: alt.Chart = get_expect_domain_values_to_be_between_chart(
-            df=df,
-            metric=metric,
-            metric_type=metric_type,
-            x_axis_name=x_axis_name,
-            x_axis_type=x_axis_type,
-        )
-        return prescriptive_chart
