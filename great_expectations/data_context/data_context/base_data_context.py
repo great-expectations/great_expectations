@@ -22,9 +22,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.validation_operators.validation_operators import (
-    ValidationOperator,
-)
 
 try:
     from typing import Literal
@@ -102,7 +99,6 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -636,7 +632,7 @@ class BaseDataContext(ConfigPeer):
 
     def add_validation_operator(
         self, validation_operator_name: str, validation_operator_config: dict
-    ) -> ValidationOperator:
+    ) -> "ValidationOperator":
         """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
 
         Args:
