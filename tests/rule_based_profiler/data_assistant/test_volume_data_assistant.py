@@ -9,7 +9,11 @@ from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
-from great_expectations.rule_based_profiler.types import DataAssistantResult, Domain
+from great_expectations.rule_based_profiler.types import Domain
+from great_expectations.rule_based_profiler.types.data_assistant_result import (
+    DataAssistantResult,
+    VolumeDataAssistantResult,
+)
 from great_expectations.util import deep_filter_properties_iterable
 
 try:
@@ -370,22 +374,22 @@ def test_volume_data_assistant_plot_descriptive(
         "data_asset_name": "my_reports",
     }
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant: VolumeDataAssistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
         batch_request=batch_request,
         data_context=context,
     )
 
     expectation_suite_name: str = "test_suite"
-    result: DataAssistantResult = data_assistant.run(
+    data_assistant.run(
         expectation_suite_name=expectation_suite_name,
     )
 
     with mock.patch(
-        "great_expectations.rule_based_profiler.data_assistant.DataAssistant.plot",
+        "great_expectations.rule_based_profiler.types.data_assistant_result.VolumeDataAssistantResult.plot",
         return_value=False,
-    ) as data_assistant:
-        data_assistant.plot(result=result)
+    ) as result:
+        result.plot()
 
 
 def test_volume_data_assistant_plot_prescriptive(
@@ -399,19 +403,19 @@ def test_volume_data_assistant_plot_prescriptive(
         "data_asset_name": "my_reports",
     }
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
+    data_assistant: VolumeDataAssistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
         batch_request=batch_request,
         data_context=context,
     )
 
     expectation_suite_name: str = "test_suite"
-    result: DataAssistantResult = data_assistant.run(
+    result = data_assistant.run(
         expectation_suite_name=expectation_suite_name,
     )
 
     with mock.patch(
-        "great_expectations.rule_based_profiler.data_assistant.DataAssistant.plot",
+        "great_expectations.rule_based_profiler.types.data_assistant_result.VolumeDataAssistantResult.plot",
         return_value=False,
-    ) as data_assistant:
-        data_assistant.plot(result=result, prescriptive=False)
+    ) as result:
+        result.plot(prescriptive=True)

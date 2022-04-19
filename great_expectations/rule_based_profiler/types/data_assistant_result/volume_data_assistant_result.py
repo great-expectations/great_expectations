@@ -31,7 +31,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
     def plot(
         self,
-        result: DataAssistantResult,
         prescriptive: bool = False,
     ) -> None:
         """
@@ -39,7 +38,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         """
         metrics_by_domain: Dict[
             Domain, Dict[str, ParameterNode]
-        ] = result.metrics_by_domain
+        ] = self.metrics_by_domain
 
         # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
         # noinspection PyTypeChecker
@@ -86,7 +85,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         expectation_configurations: List[
             ExpectationConfiguration
-        ] = result.expectation_suite.expectations
+        ] = self.expectation_suite.expectations
         expectation_configuration: ExpectationConfiguration
         if prescriptive:
             for expectation_configuration in expectation_configurations:

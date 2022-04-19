@@ -12,6 +12,9 @@ from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
+from great_expectations.rule_based_profiler.types.data_assistant_result import (
+    VolumeDataAssistantResult,
+)
 
 
 # TODO: <Alex>ALEX Rename this "VolumeDataAssistant" to be more precise.</Alex>
@@ -32,6 +35,8 @@ class VolumeDataAssistant(DataAssistant):
         batch_request: Union[BatchRequestBase, dict],
         data_context: BaseDataContext = None,
     ):
+        self._result_class = VolumeDataAssistantResult
+
         super().__init__(
             name=name,
             batch_request=batch_request,
