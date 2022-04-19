@@ -47,12 +47,8 @@ class DatePart(enum.Enum):
 class SqlAlchemyDataSplitter:
     """Methods for splitting data accessible via SqlAlchemyExecutionEngine."""
 
-    def __init__(self, execution_engine: "SqlAlchemyExecutionEngine"):
-        self._execution_engine = execution_engine
-
-    @property
-    def execution_engine(self) -> "SqlAlchemyExecutionEngine":
-        return self._execution_engine
+    def __init__(self):
+        pass
 
     def get_splitter_method(self, splitter_method_name: str) -> Callable:
         """Get the appropriate splitter method from the method name.

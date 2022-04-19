@@ -1,6 +1,8 @@
+import datetime
+
+import pytest
 from mock_alchemy.comparison import ExpressionMatcher
 
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
@@ -20,22 +22,78 @@ def test_split_on_year_and_month_and_day():
     pass
 
 
-def test_split_on_date_parts(sa):
+@pytest.mark.parametrize(
+    "batch_identifiers_for_column",
+    [
+        pytest.param({"year": 2018, "month": 10}, id="year_and_month_dict"),
+        pytest.param("10-31-2018", id="dateutil parseable date string"),
+        pytest.param(
+            datetime.datetime(2018, 10, 30, 0, 0, 0),
+            id="datetime",
+        ),
+        pytest.param(
+            {"year": 2019, "month": 10},
+            marks=pytest.mark.xfail(strict=True),
+            id="incorrect year_and_month_dict should fail",
+        ),
+        pytest.param(
+            {"year": 2018, "month": 11},
+            marks=pytest.mark.xfail(strict=True),
+            id="incorrect year_and_month_dict should fail",
+        ),
+        pytest.param(
+            "not a real date",
+            marks=pytest.mark.xfail(strict=True),
+            id="non dateutil parseable date string",
+        ),
+        pytest.param(
+            datetime.datetime(2018, 11, 30, 0, 0, 0),
+            marks=pytest.mark.xfail(strict=True),
+            id="incorrect datetime should fail",
+        ),
+    ],
+)
+@pytest.mark.parametrize(
+    "date_parts",
+    [
+        pytest.param(
+            [DatePart.YEAR, DatePart.MONTH],
+            id="year_month_with_DatePart",
+        ),
+        pytest.param(
+            [DatePart.YEAR, "month"],
+            id="year_month_with_mixed_DatePart",
+        ),
+        pytest.param(
+            ["year", "month"],
+            id="year_month_with_string_DatePart",
+        ),
+        pytest.param(
+            ["YEAR", "Month"],
+            id="year_month_with_string_DatePart",
+        ),
+    ],
+)
+def test_split_on_date_parts_multiple_date_parts(
+    batch_identifiers_for_column, date_parts, sa
+):
 
     sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+    column_name: str = "column_name"
 
-    # result = execution_engine.split_on_date_parts(
-    result = sqlalchemy_data_splitter.split_on_date_parts(
-        column_name="a",
-        batch_identifiers={"a": {"year": 2018, "month": 10}},
-        date_parts=[DatePart.YEAR, DatePart.MONTH],
+    result: sa.sql.elements.BooleanClauseList = (
+        sqlalchemy_data_splitter.split_on_date_parts(
+            column_name=column_name,
+            batch_identifiers={column_name: batch_identifiers_for_column},
+            date_parts=date_parts,
+        )
     )
 
     # using mock-alchemy
     assert ExpressionMatcher(result) == ExpressionMatcher(
         sa.and_(
-            sa.extract("year", sa.column("a")) == 2018,
-            sa.extract("month", sa.column("a")) == 10,
+            sa.extract("year", sa.column(column_name)) == 2018,
+            sa.extract("month", sa.column(column_name)) == 10,
         )
     )
 
@@ -45,13 +103,13 @@ def test_split_on_date_parts(sa):
     assert isinstance(result.clauses[0].comparator.type, sa.Boolean)
     assert isinstance(result.clauses[0].left, sa.sql.elements.Extract)
     assert result.clauses[0].left.field == "year"
-    assert result.clauses[0].left.expr.name == "a"
+    assert result.clauses[0].left.expr.name == column_name
     assert result.clauses[0].right.effective_value == 2018
 
     assert isinstance(result.clauses[1].comparator.type, sa.Boolean)
     assert isinstance(result.clauses[1].left, sa.sql.elements.Extract)
     assert result.clauses[1].left.field == "month"
-    assert result.clauses[1].left.expr.name == "a"
+    assert result.clauses[1].left.expr.name == column_name
     assert result.clauses[1].right.effective_value == 10
 
 
