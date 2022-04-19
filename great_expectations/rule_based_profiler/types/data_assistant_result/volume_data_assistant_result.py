@@ -7,12 +7,6 @@ import pandas as pd
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.data_assistant.visualization.plot import (
-    display,
-    get_attributed_metrics_by_domain,
-    get_expect_domain_values_to_be_between_chart,
-    get_line_chart,
-)
 from great_expectations.rule_based_profiler.parameter_builder import MetricValues
 from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
@@ -52,7 +46,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
             filter(
                 lambda element: element[0].domain_type == MetricDomainTypes.TABLE,
-                get_attributed_metrics_by_domain(
+                self.get_attributed_metrics_by_domain(
                     metrics_by_domain=metrics_by_domain
                 ).items(),
             )
@@ -117,7 +111,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         charts.append(table_row_count_chart)
 
-        display(charts=charts)
+        self.display(charts=charts)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -125,15 +119,15 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
 
-    @staticmethod
     def _plot_descriptive(
+        self,
         df: pd.DataFrame,
         metric: str,
         metric_type: str,
         x_axis_name: str,
         x_axis_type: str,
     ) -> alt.Chart:
-        descriptive_chart: alt.Chart = get_line_chart(
+        descriptive_chart: alt.Chart = self.get_line_chart(
             df=df,
             metric=metric,
             metric_type=metric_type,
@@ -142,19 +136,21 @@ class VolumeDataAssistantResult(DataAssistantResult):
         )
         return descriptive_chart
 
-    @staticmethod
     def _plot_prescriptive(
+        self,
         df: pd.DataFrame,
         metric: str,
         metric_type: str,
         x_axis_name: str,
         x_axis_type: str,
     ) -> alt.Chart:
-        prescriptive_chart: alt.Chart = get_expect_domain_values_to_be_between_chart(
-            df=df,
-            metric=metric,
-            metric_type=metric_type,
-            x_axis_name=x_axis_name,
-            x_axis_type=x_axis_type,
+        prescriptive_chart: alt.Chart = (
+            self.get_expect_domain_values_to_be_between_chart(
+                df=df,
+                metric=metric,
+                metric_type=metric_type,
+                x_axis_name=x_axis_name,
+                x_axis_type=x_axis_type,
+            )
         )
         return prescriptive_chart

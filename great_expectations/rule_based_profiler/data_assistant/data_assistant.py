@@ -21,10 +21,9 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
-    Domain,
-    ParameterNode,
 )
 from great_expectations.util import measure_execution_time
 

@@ -1,7 +1,3 @@
-from great_expectations.rule_based_profiler.types.data_assistant_result.data_assistant_result import (  # isort:skip
-    DataAssistantResult,
-)
-
 from .altair_configuration import ALTAIR_DEFAULT_CONFIGURATION
 
 from .attributes import Attributes  # isort:skip
