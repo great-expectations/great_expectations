@@ -159,6 +159,17 @@ class DataAssistant(ABC):
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> DataAssistantResult:
+        """
+        Run the DataAssistant as it is currently configured.
+
+        Args:
+            expectation_suite: An existing "ExpectationSuite" to update.
+            expectation_suite_name: A name for returned "ExpectationSuite".
+            include_citation: Whether or not to include the Profiler config in the metadata for "ExpectationSuite" produced by "RuleBasedProfiler"
+
+        Returns:
+            DataAssistantResult: The result object for the DataAssistant
+        """
         data_assistant_result_cls = self._data_assistant_result_cls
         result: data_assistant_result_cls = data_assistant_result_cls(
             execution_time=0.0

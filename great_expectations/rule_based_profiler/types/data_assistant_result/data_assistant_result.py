@@ -68,7 +68,7 @@ class DataAssistantResult(SerializableDictDot):
     def get_line_chart(
         self,
         df: pd.DataFrame,
-        metric: str,
+        metric_name: str,
         metric_type: str,
         domain_name: str,
         domain_type: str,
@@ -77,7 +77,22 @@ class DataAssistantResult(SerializableDictDot):
         point_color_condition: Optional[alt.condition] = None,
         tooltip: Optional[List[alt.Tooltip]] = None,
     ) -> alt.Chart:
-        metric_title: str = metric.replace("_", " ").title()
+        """
+        Args:
+            df: A pandas dataframe containing the data to be plotted
+            metric_name: The name of the metric as it exists in the pandas dataframe
+            metric_type: The altair data type for the metric being plotted
+            domain_name: The name of the domain as it exists in the pandas dataframe
+            domain_type: The altair data type for the domain being plotted
+            line_color: Hex code for the line color
+            point_color: Hex code for the point color
+            point_color_condition: Altair condition for changing the point color
+            tooltip: Altair tooltip for displaying relevant information on the chart
+
+        Returns:
+            An altair line chart
+        """
+        metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
         title: str = f"{metric_title} by {domain_title}"
 
@@ -87,7 +102,7 @@ class DataAssistantResult(SerializableDictDot):
         if tooltip is None:
             tooltip: List[alt.Tooltip] = [
                 alt.Tooltip(field=batch_id, type=batch_id_type),
-                alt.Tooltip(field=metric, type=metric_type, format=","),
+                alt.Tooltip(field=metric_name, type=metric_type, format=","),
             ]
 
         line: alt.Chart = (
@@ -99,7 +114,7 @@ class DataAssistantResult(SerializableDictDot):
                     type=domain_type,
                     title=domain_title,
                 ),
-                y=alt.Y(metric, type=metric_type, title=metric_title),
+                y=alt.Y(metric_name, type=metric_type, title=metric_title),
                 tooltip=tooltip,
             )
         )
@@ -114,7 +129,7 @@ class DataAssistantResult(SerializableDictDot):
                         type=domain_type,
                         title=domain_title,
                     ),
-                    y=alt.Y(metric, type=metric_type, title=metric_title),
+                    y=alt.Y(metric_name, type=metric_type, title=metric_title),
                     stroke=point_color_condition,
                     fill=point_color_condition,
                     tooltip=tooltip,
@@ -130,7 +145,7 @@ class DataAssistantResult(SerializableDictDot):
                         type=domain_type,
                         title=domain_title,
                     ),
-                    y=alt.Y(metric, type=metric_type, title=metric_title),
+                    y=alt.Y(metric_name, type=metric_type, title=metric_title),
                     tooltip=tooltip,
                 )
             )
@@ -140,16 +155,27 @@ class DataAssistantResult(SerializableDictDot):
     def get_expect_domain_values_to_be_between_chart(
         self,
         df: pd.DataFrame,
-        metric: str,
+        metric_name: str,
         metric_type: str,
         domain_name: str,
         domain_type: str,
     ) -> alt.Chart:
+        """
+        Args:
+            df: A pandas dataframe containing the data to be plotted
+            metric_name: The name of the metric as it exists in the pandas dataframe
+            metric_type: The altair data type for the metric being plotted
+            domain_name: The name of the domain as it exists in the pandas dataframe
+            domain_type: The altair data type for the domain being plotted
+
+        Returns:
+            An altair line chart with confidence intervals corresponding to "between" expectations
+        """
         opacity: float = 0.9
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
         fill_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[5])
 
-        metric_title: str = metric.replace("_", " ").title()
+        metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
 
         batch_id: str = "batch_id"
@@ -161,7 +187,7 @@ class DataAssistantResult(SerializableDictDot):
 
         tooltip: list[alt.Tooltip] = [
             alt.Tooltip(field=batch_id, type=batch_id_type),
-            alt.Tooltip(field=metric, type=metric_type, format=","),
+            alt.Tooltip(field=metric_name, type=metric_type, format=","),
             alt.Tooltip(field=min_value, type=min_value_type, format=","),
             alt.Tooltip(field=max_value, type=max_value_type, format=","),
         ]
@@ -222,7 +248,7 @@ class DataAssistantResult(SerializableDictDot):
         )
         anomaly_coded_line: alt.Chart = self.get_line_chart(
             df=df,
-            metric=metric,
+            metric=metric_name,
             metric_type=metric_type,
             domain_name=domain_name,
             domain_type=domain_type,
@@ -232,9 +258,12 @@ class DataAssistantResult(SerializableDictDot):
 
         return band + lower_limit + upper_limit + anomaly_coded_line
 
-    def display(self, charts: List[alt.Chart]) -> None:
+    def _display(self, charts: List[alt.Chart]) -> None:
         """
-        Display each chart passed in Jupyter Notebook
+        Display each chart passed by DataAssistantResult.plot()
+
+        Args:
+            charts: A list of altair chart objects to display
         """
         chart: alt.Chart
         altair_configuration: Dict[str, Any] = ALTAIR_DEFAULT_CONFIGURATION
@@ -242,7 +271,9 @@ class DataAssistantResult(SerializableDictDot):
             chart.configure(**altair_configuration).display()
 
     def to_dict(self) -> dict:
+        """Returns: this DataAssistantResult as a dictionary"""
         return asdict(self)
 
     def to_json_dict(self) -> dict:
+        """Returns: this DataAssistantResult as a json dictionary"""
         return convert_to_json_serializable(data=self.to_dict())
