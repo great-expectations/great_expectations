@@ -53,8 +53,8 @@ class VolumeDataAssistant(DataAssistant):
         Run the DataAssistant as it is currently configured.
 
         Args:
-            expectation_suite: An existing "ExpectationSuite" to update.
-            expectation_suite_name: A name for returned "ExpectationSuite".
+            expectation_suite: An existing "ExpectationSuite" to update
+            expectation_suite_name: A name for returned "ExpectationSuite"
             include_citation: Whether or not to include the Profiler config in the metadata for "ExpectationSuite" produced by "RuleBasedProfiler"
 
         Returns:
