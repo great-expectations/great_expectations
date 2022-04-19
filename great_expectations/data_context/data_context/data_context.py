@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 import warnings
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
 import requests
 from ruamel.yaml import YAML, YAMLError
@@ -76,10 +76,10 @@ class DataContext(BaseDataContext):
     @classmethod
     def create(
         cls,
-        project_root_dir=None,
-        usage_statistics_enabled=True,
-        runtime_environment=None,
-    ):
+        project_root_dir: Optional[str] = None,
+        usage_statistics_enabled: bool = True,
+        runtime_environment: Optional[dict] = None,
+    ) -> "DataContext":
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
 
@@ -126,7 +126,7 @@ class DataContext(BaseDataContext):
         return cls(ge_dir, runtime_environment=runtime_environment)
 
     @classmethod
-    def all_uncommitted_directories_exist(cls, ge_dir):
+    def all_uncommitted_directories_exist(cls, ge_dir: str) -> bool:
         """Check if all uncommitted directories exist."""
         uncommitted_dir = os.path.join(ge_dir, cls.GE_UNCOMMITTED_DIR)
         for directory in cls.UNCOMMITTED_DIRECTORIES:
@@ -136,7 +136,7 @@ class DataContext(BaseDataContext):
         return True
 
     @classmethod
-    def config_variables_yml_exist(cls, ge_dir):
+    def config_variables_yml_exist(cls, ge_dir: str) -> bool:
         """Check if all config_variables.yml exists."""
         path_to_yml = os.path.join(ge_dir, cls.GE_YML)
 
@@ -148,14 +148,16 @@ class DataContext(BaseDataContext):
         return os.path.isfile(config_var_path)
 
     @classmethod
-    def write_config_variables_template_to_disk(cls, uncommitted_dir):
+    def write_config_variables_template_to_disk(cls, uncommitted_dir: str) -> None:
         os.makedirs(uncommitted_dir, exist_ok=True)
         config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
         with open(config_var_file, "w") as template:
             template.write(CONFIG_VARIABLES_TEMPLATE)
 
     @classmethod
-    def write_project_template_to_disk(cls, ge_dir, usage_statistics_enabled=True):
+    def write_project_template_to_disk(
+        cls, ge_dir: str, usage_statistics_enabled: bool = True
+    ) -> None:
         file_path = os.path.join(ge_dir, cls.GE_YML)
         with open(file_path, "w") as template:
             if usage_statistics_enabled:
@@ -164,7 +166,7 @@ class DataContext(BaseDataContext):
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
 
     @classmethod
-    def scaffold_directories(cls, base_dir):
+    def scaffold_directories(cls, base_dir: str) -> None:
         """Safely create GE directories for a new project."""
         os.makedirs(base_dir, exist_ok=True)
         with open(os.path.join(base_dir, ".gitignore"), "w") as f:
@@ -200,7 +202,7 @@ class DataContext(BaseDataContext):
             os.makedirs(new_directory_path, exist_ok=True)
 
     @classmethod
-    def scaffold_custom_data_docs(cls, plugins_dir):
+    def scaffold_custom_data_docs(cls, plugins_dir: str) -> None:
         """Copy custom data docs templates"""
         styles_template = file_relative_path(
             __file__,
@@ -219,7 +221,7 @@ class DataContext(BaseDataContext):
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
-    ):
+    ) -> Dict[str, Optional[str]]:
         ge_cloud_base_url = (
             ge_cloud_base_url
             or super()._get_global_config_value(
@@ -278,7 +280,7 @@ class DataContext(BaseDataContext):
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
-    ):
+    ) -> GeCloudConfig:
         """
         Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
         runtime, environment variables, or a global great_expectations.conf file (in order of precedence)
