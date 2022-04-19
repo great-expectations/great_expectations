@@ -2086,6 +2086,16 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -2108,6 +2118,16 @@ def data_context_with_datasource_spark_engine(empty_data_context, spark_session)
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -2131,6 +2151,16 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(

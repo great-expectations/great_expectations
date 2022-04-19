@@ -148,7 +148,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_in_set",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
-        class_name="RuleBasedProfilerConfig",
+        class_name="RuleBasedProfiler",
         module_name="great_expectations.rule_based_profiler",
         variables={
             "mostly": 1.0,
