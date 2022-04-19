@@ -35,18 +35,12 @@ class VolumeDataAssistantResult(DataAssistantResult):
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
         """
-        metrics_by_domain: Dict[
-            Domain, Dict[str, ParameterNode]
-        ] = self.metrics_by_domain
-
         # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
         # noinspection PyTypeChecker
         attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
             filter(
                 lambda element: element[0].domain_type == MetricDomainTypes.TABLE,
-                self.get_attributed_metrics_by_domain(
-                    metrics_by_domain=metrics_by_domain
-                ).items(),
+                self.get_attributed_metrics_by_domain().items(),
             )
         )
 

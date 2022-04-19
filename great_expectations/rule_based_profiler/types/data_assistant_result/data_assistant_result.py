@@ -46,8 +46,11 @@ class DataAssistantResult(SerializableDictDot):
         pass
 
     def get_attributed_metrics_by_domain(
-        self, metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]]
+        self,
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
+        metrics_by_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = self.metrics_by_domain
         domain: Domain
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         fully_qualified_parameter_name: str
