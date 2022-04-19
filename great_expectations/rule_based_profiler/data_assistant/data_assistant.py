@@ -21,10 +21,9 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
-    Domain,
-    ParameterNode,
 )
 from great_expectations.util import measure_execution_time
 
@@ -34,7 +33,7 @@ class DataAssistant(ABC):
     DataAssistant is an application built on top of the Rule-Based Profiler component.
     DataAssistant subclasses provide exploration and validation of particular aspects of specified data Batch objects.
 
-    DataAssustant usage (e.g., in Jupyter notebook) adheres to the following pattern:
+    DataAssistant usage (e.g., in Jupyter notebook) adheres to the following pattern:
 
     data_assistant: DataAssistant = VolumeDataAssistant(
         name="my_volume_data_assistant",
@@ -156,6 +155,17 @@ class DataAssistant(ABC):
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> DataAssistantResult:
+        """
+        Run the DataAssistant as it is currently configured.
+
+        Args:
+            expectation_suite: An existing "ExpectationSuite" to update
+            expectation_suite_name: A name for returned "ExpectationSuite"
+            include_citation: Whether or not to include the Profiler config in the metadata for "ExpectationSuite" produced by "RuleBasedProfiler"
+
+        Returns:
+            DataAssistantResult: The result object for the DataAssistant
+        """
         result: DataAssistantResult = DataAssistantResult(execution_time=0.0)
         run_profiler_on_data(
             data_assistant=self,
@@ -228,21 +238,6 @@ class DataAssistant(ABC):
         """
         pass
 
-    @abstractmethod
-    def plot(
-        self,
-        result: DataAssistantResult,
-        prescriptive: bool = False,
-    ) -> None:
-        """
-        Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
-
-        Args:
-            result: "DataAssistantResult", obtained by executing "DataAssistant.run()" method (contains available data).
-            prescriptive: Type of plot to generate.
-        """
-        pass
-
     def get_metrics_by_domain(self) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
         Obtain subset of all parameter values for fully-qualified parameter names by domain, available from entire
@@ -280,7 +275,7 @@ class DataAssistant(ABC):
                 for parameter_builder in parameter_builders
             ]
 
-        doain: Domain
+        domain: Domain
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         # noinspection PyTypeChecker
         parameter_values_for_fully_qualified_parameter_names_by_domain = {
@@ -306,12 +301,12 @@ class DataAssistant(ABC):
     ) -> ExpectationSuite:
         """
         Args:
-            expectation_suite: An existing "ExpectationSuite" to update.
-            expectation_suite_name: A name for returned "ExpectationSuite".
+            expectation_suite: An existing "ExpectationSuite" to update
+            expectation_suite_name: A name for returned "ExpectationSuite"
             include_citation: Whether or not to include the Profiler config in the metadata for "ExpectationSuite" produced by "RuleBasedProfiler"
 
         Returns:
-            "ExpectationSuite" using "ExpectationConfiguration" objects, computed by "RuleBasedProfiler" state.
+            "ExpectationSuite" using "ExpectationConfiguration" objects, computed by "RuleBasedProfiler" state
         """
         return self.profiler.get_expectation_suite(
             expectation_suite=expectation_suite,
