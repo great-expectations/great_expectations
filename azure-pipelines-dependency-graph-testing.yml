@@ -314,6 +314,14 @@ stages:
 
             displayName: 'dgtest'
 
+          - script: |
+              # These are tests that are missed by the dgtest dependency graph.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              pytest \
+                tests/test_deprecation.py
+
+            displayName: 'dgtest-overrides'
+
           - task: PublishTestResults@2
             condition: succeededOrFailed()
             inputs:
