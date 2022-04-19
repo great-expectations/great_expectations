@@ -70,16 +70,16 @@ class DataAssistantResult(SerializableDictDot):
         df: pd.DataFrame,
         metric: str,
         metric_type: str,
-        x_axis_name: str,
-        x_axis_type: str,
+        domain_name: str,
+        domain_type: str,
         line_color: Optional[str] = Colors.BLUE_2.value,
         point_color: Optional[str] = Colors.GREEN.value,
         point_color_condition: Optional[alt.condition] = None,
         tooltip: Optional[List[alt.Tooltip]] = None,
     ) -> alt.Chart:
         metric_title: str = metric.replace("_", " ").title()
-        x_axis_title: str = x_axis_name.title()
-        title: str = f"{metric_title} by {x_axis_title}"
+        domain_title: str = domain_name.title()
+        title: str = f"{metric_title} by {domain_title}"
 
         batch_id: str = "batch_id"
         batch_id_type: str = "nominal"
@@ -95,9 +95,9 @@ class DataAssistantResult(SerializableDictDot):
             .mark_line(color=line_color)
             .encode(
                 x=alt.X(
-                    x_axis_name,
-                    type=x_axis_type,
-                    title=x_axis_title,
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
                 ),
                 y=alt.Y(metric, type=metric_type, title=metric_title),
                 tooltip=tooltip,
@@ -110,9 +110,9 @@ class DataAssistantResult(SerializableDictDot):
                 .mark_point(opacity=1.0)
                 .encode(
                     x=alt.X(
-                        x_axis_name,
-                        type=x_axis_type,
-                        title=x_axis_title,
+                        domain_name,
+                        type=domain_type,
+                        title=domain_title,
                     ),
                     y=alt.Y(metric, type=metric_type, title=metric_title),
                     stroke=point_color_condition,
@@ -126,9 +126,9 @@ class DataAssistantResult(SerializableDictDot):
                 .mark_point(stroke=point_color, fill=point_color, opacity=1.0)
                 .encode(
                     x=alt.X(
-                        x_axis_name,
-                        type=x_axis_type,
-                        title=x_axis_title,
+                        domain_name,
+                        type=domain_type,
+                        title=domain_title,
                     ),
                     y=alt.Y(metric, type=metric_type, title=metric_title),
                     tooltip=tooltip,
@@ -142,15 +142,15 @@ class DataAssistantResult(SerializableDictDot):
         df: pd.DataFrame,
         metric: str,
         metric_type: str,
-        x_axis_name: str,
-        x_axis_type: str,
+        domain_name: str,
+        domain_type: str,
     ) -> alt.Chart:
         opacity: float = 0.9
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
         fill_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[5])
 
         metric_title: str = metric.replace("_", " ").title()
-        x_axis_title: str = x_axis_name.title()
+        domain_title: str = domain_name.title()
 
         batch_id: str = "batch_id"
         batch_id_type: str = "nominal"
@@ -171,9 +171,9 @@ class DataAssistantResult(SerializableDictDot):
             .mark_line(color=line_color, opacity=opacity)
             .encode(
                 x=alt.X(
-                    x_axis_name,
-                    type=x_axis_type,
-                    title=x_axis_title,
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
                 ),
                 y=alt.Y(min_value, type=metric_type, title=metric_title),
                 tooltip=tooltip,
@@ -185,9 +185,9 @@ class DataAssistantResult(SerializableDictDot):
             .mark_line(color=line_color, opacity=opacity)
             .encode(
                 x=alt.X(
-                    x_axis_name,
-                    type=x_axis_type,
-                    title=x_axis_title,
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
                 ),
                 y=alt.Y(max_value, type=metric_type, title=metric_title),
                 tooltip=tooltip,
@@ -199,9 +199,9 @@ class DataAssistantResult(SerializableDictDot):
             .mark_area(fill=fill_color, fillOpacity=opacity)
             .encode(
                 x=alt.X(
-                    x_axis_name,
-                    type=x_axis_type,
-                    title=x_axis_title,
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
                 ),
                 y=alt.Y(min_value, title=metric_title, type=metric_type),
                 y2=alt.Y2(max_value, title=metric_title),
@@ -224,8 +224,8 @@ class DataAssistantResult(SerializableDictDot):
             df=df,
             metric=metric,
             metric_type=metric_type,
-            x_axis_name=x_axis_name,
-            x_axis_type=x_axis_type,
+            domain_name=domain_name,
+            domain_type=domain_type,
             point_color_condition=point_color_condition,
             tooltip=tooltip,
         )

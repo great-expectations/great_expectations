@@ -62,10 +62,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
-        x_axis_name: str = "batch"
+        domain_name: str = "batch"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
-        x_axis_type: str = "ordinal"
+        domain_type: str = "ordinal"
         metric_type: str = "quantitative"
 
         batch_ids: KeysView[str]
@@ -77,7 +77,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         idx: int
         batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_ids))]
 
-        df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[x_axis_name])
+        df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[domain_name])
         df["batch_id"] = batch_ids
         df[metric_name] = metric_values
 
@@ -105,8 +105,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             df=df,
             metric=metric_name,
             metric_type=metric_type,
-            x_axis_name=x_axis_name,
-            x_axis_type=x_axis_type,
+            domain_name=domain_name,
+            domain_type=domain_type,
         )
 
         charts.append(table_row_count_chart)
@@ -124,15 +124,15 @@ class VolumeDataAssistantResult(DataAssistantResult):
         df: pd.DataFrame,
         metric: str,
         metric_type: str,
-        x_axis_name: str,
-        x_axis_type: str,
+        domain_name: str,
+        domain_type: str,
     ) -> alt.Chart:
         descriptive_chart: alt.Chart = self.get_line_chart(
             df=df,
             metric=metric,
             metric_type=metric_type,
-            x_axis_name=x_axis_name,
-            x_axis_type=x_axis_type,
+            domain_name=domain_name,
+            domain_type=domain_type,
         )
         return descriptive_chart
 
@@ -141,16 +141,16 @@ class VolumeDataAssistantResult(DataAssistantResult):
         df: pd.DataFrame,
         metric: str,
         metric_type: str,
-        x_axis_name: str,
-        x_axis_type: str,
+        domain_name: str,
+        domain_type: str,
     ) -> alt.Chart:
         prescriptive_chart: alt.Chart = (
             self.get_expect_domain_values_to_be_between_chart(
                 df=df,
                 metric=metric,
                 metric_type=metric_type,
-                x_axis_name=x_axis_name,
-                x_axis_type=x_axis_type,
+                domain_name=domain_name,
+                domain_type=domain_type,
             )
         )
         return prescriptive_chart
