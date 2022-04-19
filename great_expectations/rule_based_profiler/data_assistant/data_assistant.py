@@ -53,9 +53,9 @@ class DataAssistant(ABC):
     def __init__(
         self,
         name: str,
-        data_assistant_result_cls: type,
         batch_request: Union[BatchRequestBase, dict],
         data_context: BaseDataContext = None,
+        data_assistant_result_cls: Optional[type] = DataAssistantResult,
     ):
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
