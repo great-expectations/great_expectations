@@ -7,8 +7,6 @@ import warnings
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-from dateutil.parser import parse
-
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
@@ -990,6 +988,31 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
+    def get_splitter_method(self, splitter_method_name: str) -> Callable:
+        """Get the appropriate splitter method from the method name.
+
+        Args:
+            splitter_method_name: name of the splitter to retrieve.
+
+        Returns:
+            splitter method.
+        """
+        return self._sqlalchemy_data_splitter.get_splitter_method(splitter_method_name)
+
+    def execute_split_query(
+        self, split_query: Selectable
+    ) -> List[LegacyRow]:  # noqa: F821
+        """Use the execution engine to run the split query and fetch all of the results.
+
+        Args:
+            split_query: Query to be executed as a sqlalchemy Selectable.
+
+        Returns:
+            List of row results.
+        """
+        return self.execute(split_query).fetchall()  # noqa: F821
+
+    # TODO: AJB 20220419 remove these:
     def get_data_for_batch_identifiers_year(
         self, table_name: str, column_name: str
     ) -> List[dict]:

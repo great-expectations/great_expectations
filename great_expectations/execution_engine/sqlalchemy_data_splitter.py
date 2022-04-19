@@ -47,8 +47,12 @@ class DatePart(enum.Enum):
 class SqlAlchemyDataSplitter:
     """Methods for splitting data accessible via SqlAlchemyExecutionEngine."""
 
-    def __init__(self):
-        pass
+    def __init__(self, execution_engine: "SqlAlchemyExecutionEngine"):
+        self._execution_engine = execution_engine
+
+    @property
+    def execution_engine(self) -> "SqlAlchemyExecutionEngine":
+        return self._execution_engine
 
     def get_splitter_method(self, splitter_method_name: str) -> Callable:
         """Get the appropriate splitter method from the method name.
@@ -274,3 +278,216 @@ class SqlAlchemyDataSplitter:
             sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
             == batch_identifiers[column_name]
         )
+
+    def get_data_for_batch_identifiers_year(
+        self, table_name: str, column_name: str
+    ) -> List[dict]:
+        """Build batch_identifiers from a column split on year.
+
+        This method builds a query to select the unique date_parts from the
+        column_name. This data can be used to build BatchIdentifiers.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            List of dicts of the form [{column_name: {"year": 2022}}]
+        """
+        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
+            table_name=table_name,
+            column_name=column_name,
+            date_parts=[DatePart.YEAR],
+        )
+
+    def get_data_for_batch_identifiers_year_and_month(
+        self, table_name: str, column_name: str
+    ) -> List[dict]:
+        """Build batch_identifiers from a column split on year and month.
+
+        This method builds a query to select the unique date_parts from the
+        column_name. This data can be used to build BatchIdentifiers.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            List of dicts of the form [{column_name: {"year": 2022, "month": 4}}]
+        """
+        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
+            table_name=table_name,
+            column_name=column_name,
+            date_parts=[DatePart.YEAR, DatePart.MONTH],
+        )
+
+    def get_data_for_batch_identifiers_year_and_month_and_day(
+        self, table_name: str, column_name: str
+    ) -> List[dict]:
+        """Build batch_identifiers from a column split on year and month and day.
+
+        This method builds a query to select the unique date_parts from the
+        column_name. This data can be used to build BatchIdentifiers.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+
+        Returns:
+            List of dicts of the form [{column_name: {"year": 2022, "month": 4, "day": 14}}]
+        """
+        return self.get_data_for_batch_identifiers_for_split_on_date_parts(
+            table_name=table_name,
+            column_name=column_name,
+            date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
+        )
+
+    def get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
+        self,
+        table_name: str,
+        column_name: str,
+        date_parts: Union[List[DatePart], List[str]],
+    ) -> List[dict]:
+        """Build a split query to retrieve batch_identifiers info from a column split on a list of date parts.
+
+        This method builds a query to select the unique date_parts from the
+        column_name. This data can be used to build BatchIdentifiers.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+            date_parts: part of the date to be used for splitting e.g.
+                DatePart.DAY or the case-insensitive string representation "day"
+
+        Returns:
+            List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
+        """
+        if len(date_parts) == 0:
+            raise ge_exceptions.InvalidConfigError(
+                "date_parts are required when using split_on_date_parts."
+            )
+
+        date_parts: List[DatePart] = [
+            DatePart(date_part.lower()) if isinstance(date_part, str) else date_part
+            for date_part in date_parts
+        ]
+
+        # NOTE: AJB 20220414 concatenating to find distinct values to support all dialects.
+        # There are more performant dialect-specific methods that can be implemented in
+        # future improvements.
+        if len(date_parts) == 1:
+            # MSSql does not accept single item concatenation
+            concat_clause: List[Label] = [
+                sa.func.distinct(
+                    sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
+                        date_parts[0].value
+                    )
+                ).label("concat_distinct_values")
+            ]
+        else:
+            concat_clause: List[Label] = [
+                sa.func.distinct(
+                    sa.func.concat(
+                        *[
+                            (
+                                sa.func.extract(date_part.value, sa.column(column_name))
+                            ).label(date_part.value)
+                            for date_part in date_parts
+                        ]
+                    )
+                ).label("concat_distinct_values"),
+            ]
+
+        split_query: Selectable = sa.select(
+            concat_clause
+            + [
+                sa.cast(
+                    sa.func.extract(date_part.value, sa.column(column_name)), sa.Integer
+                ).label(date_part.value)
+                for date_part in date_parts
+            ]
+        ).select_from(sa.text(table_name))
+
+        return split_query
+
+    def get_data_for_batch_identifiers_for_split_on_date_parts(
+        self,
+        table_name: str,
+        column_name: str,
+        date_parts: Union[List[DatePart], List[str]],
+    ) -> List[dict]:
+        """Build batch_identifiers from a column split on a list of date parts.
+
+        This method builds a query to select the unique date_parts from the
+        column_name. This data can be used to build BatchIdentifiers.
+
+        Args:
+            table_name: table to split.
+            column_name: column in table to use in determining split.
+            date_parts: part of the date to be used for splitting e.g.
+                DatePart.DAY or the case-insensitive string representation "day"
+
+        Returns:
+            List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
+        """
+
+        split_query: Selectable = (
+            self.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
+                table_name, column_name, date_parts
+            )
+        )
+
+        result: List[LegacyRow] = self.engine.execute(
+            split_query
+        ).fetchall()  # noqa: F821
+
+        data_for_batch_identifiers: List[dict] = [
+            {
+                column_name: {
+                    date_part.value: getattr(row, date_part.value)
+                    for date_part in date_parts
+                }
+            }
+            for row in result
+        ]
+
+        return data_for_batch_identifiers
+
+    def execute_split_query(
+        self, execution_engine: "SqlAlchemyExecutionEngine", split_query: Selectable
+    ) -> List[LegacyRow]:  # noqa: F821
+        """Use the provided execution engine to run the split query and fetch all of the results.
+
+        Args:
+            execution_engine: SqlAlchemyExecutionEngine to be used for executing the query.
+            split_query: Query to be executed as a sqlalchemy Selectable.
+
+        Returns:
+            List of row results.
+        """
+        return execution_engine.execute(split_query).fetchall()  # noqa: F821
+
+    def _get_params_for_batch_identifiers_from_date_part_splitter(
+        self, column_name: str, result: List[LegacyRow], date_parts: List[DatePart]
+    ) -> List[dict]:
+        """Get parameters used to build BatchIdentifiers from the results of a get_data_for_batch_identifiers_for_split_on_date_parts
+
+        Args:
+            column_name: Column name associated with the batch identifier.
+            result: list of LegacyRow objects from sqlalchemy query result.
+            date_parts: part of the date to be used for constructing the batch identifiers e.g.
+                DatePart.DAY or the case-insensitive string representation "day"
+
+        Returns:
+            List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
+        """
+        data_for_batch_identifiers: List[dict] = [
+            {
+                column_name: {
+                    date_part.value: getattr(row, date_part.value)
+                    for date_part in date_parts
+                }
+            }
+            for row in result
+        ]
+        return data_for_batch_identifiers
