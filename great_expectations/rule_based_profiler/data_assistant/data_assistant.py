@@ -64,7 +64,6 @@ class DataAssistant(ABC):
 
         Args:
             name: the name of this DataAssistant object.
-            data_assistant_result_cls: the type of DataAssistantResult to associate with this DataAssistant
             batch_request: specified for querying data Batch objects.
             data_context: DataContext
         """
