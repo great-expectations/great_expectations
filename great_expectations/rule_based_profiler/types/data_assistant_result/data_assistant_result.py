@@ -68,8 +68,8 @@ class DataAssistantResult(SerializableDictDot):
         }
         return metrics_attributed_values_by_domain
 
+    @staticmethod
     def get_line_chart(
-        self,
         df: pd.DataFrame,
         metric_name: str,
         metric_type: str,
@@ -155,8 +155,8 @@ class DataAssistantResult(SerializableDictDot):
 
         return line + points
 
+    @staticmethod
     def get_expect_domain_values_to_be_between_chart(
-        self,
         df: pd.DataFrame,
         metric_name: str,
         metric_type: str,
@@ -249,7 +249,7 @@ class DataAssistantResult(SerializableDictDot):
             if_false=alt.value(Colors.GREEN.value),
             if_true=alt.value(Colors.PINK.value),
         )
-        anomaly_coded_line: alt.Chart = self.get_line_chart(
+        anomaly_coded_line: alt.Chart = DataAssistantResult.get_line_chart(
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
