@@ -116,7 +116,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
 
-        For a rule or an item in a rule configuration, instantiates the following if
+        For a Rule or an item in a Rule configuration, instantiates the following if
         available: a domain builder, a parameter builder, and a configuration builder.
         These will be used to define profiler computation patterns.
 
@@ -137,15 +137,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if variables is None:
             variables = {}
 
-        self._usage_statistics_handler = usage_statistics_handler
-
-        self._citation = None
-
         # Convert variables argument to ParameterContainer
         _variables: ParameterContainer = build_parameter_container_for_variables(
             variables_configs=variables
         )
-        self._variables = _variables
+        self.variables = _variables
+
+        self._usage_statistics_handler = usage_statistics_handler
+
+        self._citation = None
 
         self._data_context = data_context
 
@@ -519,7 +519,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :return: reconciled rules in their canonical List[Rule] object form
         """
         effective_rules: Dict[str, Rule] = self._reconcile_profiler_rules_as_dict(
-            rules, reconciliation_directives
+            rules=rules,
+            reconciliation_directives=reconciliation_directives,
         )
         return list(effective_rules.values())
 
@@ -564,15 +565,17 @@ class BaseRuleBasedProfiler(ConfigPeer):
         override rule with at most one configuration corresponding to the list of rules instantiated from Profiler
         configuration (e.g., stored in a YAML file managed by the Profiler store).
 
-        The reconciliation logic for "rule configuration" employes the "by construction" principle:
-        (1) Find a common configuration between the domain builder configuration, possibly supplied as part of the
-        candiate override rule configuration, and the comain builder configuration of an instantiated rule
-        (2) Find common configurations between parameter builder configurations, possibly supplied as part of the
-        candiate override rule configuration, and the parameter builder configurations of an instantiated rule
-        (3) Find common configurations between expectation configuration builder configurations, possibly supplied as
-        part of the candiate override rule configuration, and the expectation configuration builder configurations of an
-        instantiated rule
-        (4) Construct the reconciled rule configuration dictionary using the formal rule properties ("domain_builder",
+        The reconciliation logic for "Rule configuration" employes the "by construction" principle:
+        (1) Find a common configuration between the variables configuration, possibly supplied as part of the candiate
+        override Rule configuration, and the variables configuration of an instantiated Rule
+        (2) Find a common configuration between the domain builder configuration, possibly supplied as part of the
+        candiate override Rule configuration, and the domain builder configuration of an instantiated Rule
+        (3) Find common configurations between parameter builder configurations, possibly supplied as part of the
+        candiate override Rule configuration, and the parameter builder configurations of an instantiated Rule
+        (4) Find common configurations between expectation configuration builder configurations, possibly supplied as
+        part of the candiate override Rule configuration, and the expectation configuration builder configurations of an
+        instantiated Rule
+        (5) Construct the reconciled Rule configuration dictionary using the formal Rule properties ("domain_builder",
         "parameter_builders", and "expectation_configuration_builders") as keys and their reconciled configuration
         dictionaries as values
 
@@ -588,6 +591,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         effective_rule_config: Dict[str, Any]
         if rule_name in existing_rules:
             rule: Rule = existing_rules[rule_name]
+
+            variables_config: dict = rule_config.get("variables", {})
+            effective_variables: dict = RuleBasedProfiler._reconcile_rule_variables(
+                variables=rule.variables,
+                variables_config=variables_config,
+                reconciliation_strategy=reconciliation_directives.variables,
+            )
 
             domain_builder_config: dict = rule_config.get("domain_builder", {})
             effective_domain_builder_config: dict = (
@@ -621,6 +631,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
 
             effective_rule_config = {
+                "variables": effective_variables,
                 "domain_builder": effective_domain_builder_config,
                 "parameter_builders": effective_parameter_builder_configs,
                 "expectation_configuration_builders": effective_expectation_configuration_builder_configs,
@@ -629,6 +640,42 @@ class BaseRuleBasedProfiler(ConfigPeer):
             effective_rule_config = rule_config
 
         return effective_rule_config
+
+    @staticmethod
+    def _reconcile_rule_variables(
+        variables: ParameterContainer,
+        variables_config: dict,
+        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.variables,
+    ) -> dict:
+        """
+        Rule "variables" reconciliation involves combining the variables, instantiated from Rule configuration
+        (e.g., stored in a YAML file managed by the Profiler store), with the variables override, possibly supplied
+        as part of the candiate override rule configuration.
+
+        The reconciliation logic for "variables" is of the "replace" nature: An override value complements the
+        original on key "miss", and replaces the original on key "hit" (or "collision"), because "variables" is a
+        unique member for a Rule.
+
+        :param variables: existing variables of a Rule
+        :param variables_config: variables configuration override, supplied in dictionary (configuration) form
+        :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
+        :return: reconciled variables configuration, returned in dictionary (configuration) form
+        """
+        variables_as_dict: dict = variables.to_json_dict()
+
+        effective_variables_config: dict = variables_as_dict
+        if variables_config:
+            if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
+                effective_variables_config = nested_update(
+                    effective_variables_config,
+                    variables_config,
+                )
+            elif reconciliation_strategy == ReconciliationStrategy.REPLACE:
+                effective_variables_config = variables_config
+            elif reconciliation_strategy == ReconciliationStrategy.UPDATE:
+                effective_variables_config.update(variables_config)
+
+        return effective_variables_config
 
     @staticmethod
     def _reconcile_rule_domain_builder_config(
@@ -643,9 +690,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         The reconciliation logic for "domain builder" is of the "replace" nature: An override value complements the
         original on key "miss", and replaces the original on key "hit" (or "collision"), because "domain builder" is a
-        unique member for a rule.
+        unique member for a Rule.
 
-        :param domain_builder: existing domain builder of a rule
+        :param domain_builder: existing domain builder of a Rule
         :param domain_builder_config: domain builder configuration override, supplied in dictionary (configuration) form
         :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
         :return: reconciled domain builder configuration, returned in dictionary (configuration) form
@@ -1142,11 +1189,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._rule_states
 
     def to_json_dict(self) -> dict:
-        rule: Rule
         variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
             self.variables
         )
 
+        rule: Rule
         serializeable_dict: dict = {
             "class_name": self.__class__.__name__,
             "module_name": self.__class__.__module__,
@@ -1249,16 +1296,16 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
     ):
         """
         Create a new Profiler using configured rules.
-        For a rule or an item in a rule configuration, instantiates the following if
+        For a Rule or an item in a Rule configuration, instantiates the following if
         available: a domain builder, a parameter builder, and a configuration builder.
         These will be used to define profiler computation patterns.
 
         Args:
             name: The name of the RBP instance
             config_version: The version of the RBP (currently only 1.0 is supported)
+            variables: Any variables to be substituted within the rules
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
             expectation_configuration_builders configuration components
-            variables: Any variables to be substituted within the rules
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(

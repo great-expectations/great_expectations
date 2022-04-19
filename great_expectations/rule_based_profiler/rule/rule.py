@@ -1,5 +1,6 @@
+import copy
 import json
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
@@ -12,11 +13,15 @@ from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
+from great_expectations.rule_based_profiler.helpers.util import (
+    convert_variables_to_dict,
+)
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     RuleState,
+    build_parameter_container_for_variables,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
@@ -27,6 +32,7 @@ class Rule(SerializableDictDot):
         self,
         name: str,
         domain_builder: DomainBuilder,
+        variables: Optional[Dict[str, Any]] = None,
         parameter_builders: Optional[List[ParameterBuilder]] = None,
         expectation_configuration_builders: Optional[
             List[ExpectationConfigurationBuilder]
@@ -35,14 +41,24 @@ class Rule(SerializableDictDot):
         """
         Sets Profiler rule name, domain builders, parameters builders, configuration builders,
         and other necessary instance data (variables)
-        :param name: A string representing the name of the ProfilerRule
-        :param domain_builder: A Domain Builder object used to build rule data domain
-        :param parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters for
-        every configuration
-        :param expectation_configuration_builders: A list of Expectation Configuration Builders
+        name: A string representing the name of the ProfilerRule
+        domain_builder: A Domain Builder object used to build rule data domain
+        variables: Any variables to be substituted within the rules
+        parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters
+        expectation_configuration_builders: A list of Expectation Configuration Builders
         """
         self._name = name
         self._domain_builder = domain_builder
+
+        if variables is None:
+            variables = {}
+
+        # Convert variables argument to ParameterContainer
+        _variables: ParameterContainer = build_parameter_container_for_variables(
+            variables_configs=variables
+        )
+        self._variables = _variables
+
         self._parameter_builders = parameter_builders
         self._expectation_configuration_builders = expectation_configuration_builders
 
@@ -131,6 +147,15 @@ class Rule(SerializableDictDot):
         return self._domain_builder
 
     @property
+    def variables(self) -> Optional[ParameterContainer]:
+        # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
+        return copy.deepcopy(self._variables)
+
+    @variables.setter
+    def variables(self, value: Optional[ParameterContainer]):
+        self._variables = value
+
+    @property
     def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
         return self._parameter_builders
 
@@ -185,6 +210,10 @@ class Rule(SerializableDictDot):
         make this refactoring infeasible at the present time.
         """
         dict_obj: dict = self.to_dict()
+        variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
+            self.variables
+        )
+        dict_obj["variables"] = variables_dict
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 

@@ -249,7 +249,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         "name": "my_rbp",
         "config_version": 1.0,
         "rules": None,
-        "variables": None,
+        "variables": {},
     }
     my_rbp.add_rule(rule=simple_variables_rule)
     context.save_profiler(name="my_rbp", profiler=my_rbp)
@@ -263,7 +263,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
         "class_name": "RuleBasedProfiler",
         "name": "my_rbp",
         "config_version": 1.0,
-        "variables": None,
+        "variables": {},
         "rules": {
             "rule_with_no_variables_no_parameters": {
                 "domain_builder": {
@@ -281,6 +281,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "limit": None,
                     },
                 },
+                "variables": {},
                 "parameter_builders": [
                     {
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",

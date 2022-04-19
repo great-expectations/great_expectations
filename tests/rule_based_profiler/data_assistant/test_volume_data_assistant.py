@@ -181,6 +181,7 @@ def test_get_metrics_and_expectations(
                     },
                     "rules": {
                         "default_expect_table_row_count_to_be_between_rule": {
+                            "variables": {},
                             "domain_builder": {
                                 "class_name": "TableDomainBuilder",
                                 "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
@@ -262,6 +263,7 @@ def test_get_metrics_and_expectations(
         },
         rules={
             "default_expect_table_row_count_to_be_between_rule": {
+                "variables": {},
                 "domain_builder": {
                     "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
                     "class_name": "TableDomainBuilder",
