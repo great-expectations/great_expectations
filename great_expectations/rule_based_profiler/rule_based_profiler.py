@@ -284,28 +284,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
             self.rule_states.append(rule_state)
 
-    def get_expectation_suite_meta(
-        self,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> Dict[str, Any]:
-        """
-        Args:
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
-
-        Returns:
-            Dictionary corresponding to meta property of ExpectationSuite using ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
-        """
-        expectation_suite: ExpectationSuite = self.get_expectation_suite(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-        )
-        return expectation_suite.meta
-
     def get_expectation_suite(
         self,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -342,7 +320,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         expectation_configurations: List[
             ExpectationConfiguration
-        ] = self.get_expectation_configurations()
+        ] = self._get_expectation_configurations()
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expectation_configurations:
@@ -355,7 +333,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return expectation_suite
 
-    def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
+    def _get_expectation_configurations(self) -> List[ExpectationConfiguration]:
         """
         Returns:
             List of ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.

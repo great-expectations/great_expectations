@@ -1,4 +1,4 @@
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 import altair as alt
@@ -163,7 +163,7 @@ class DataAssistant(ABC):
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> DataAssistantResult:
-        data_assistant_cls: ABCMeta = type(self)
+        data_assistant_cls: type = type(self)
         result: DataAssistantResult = DataAssistantResult(
             data_assistant_cls=data_assistant_cls, execution_time=0.0
         )
@@ -185,92 +185,176 @@ class DataAssistant(ABC):
         """
         Display each chart passed in Jupyter Notebook
         """
-        # selection = alt.selection_interval(bind="scales")
         for c in charts:
             c.configure(**ALTAIR_DEFAULT_CONFIGURATION).display()
 
     def get_line_chart(
         self,
         df: pd.DataFrame,
-        title: str,
-        metric_label: str,
+        metric: str,
         metric_type: str,
-        x_axis_label: str,
+        x_axis: str,
         x_axis_type: str,
-    ):
+        line_color: Optional[str] = Colors.BLUE_2.value,
+        point_color: Optional[str] = Colors.GREEN.value,
+        point_color_condition: Optional[alt.condition] = None,
+        tooltip: Optional[List[alt.Tooltip]] = None,
+    ) -> alt.Chart:
+        metric_title: str = metric.replace("_", " ").title()
+        x_axis_title: str = x_axis.title()
+        title: str = f"{metric_title} by {x_axis_title}"
+
+        batch_id: str = "batch_id"
+        batch_id_type: str = "nominal"
+
+        if tooltip is None:
+            tooltip: List[alt.Tooltip] = [
+                alt.Tooltip(field=batch_id, type=batch_id_type),
+                alt.Tooltip(field=metric, type=metric_type, format=","),
+            ]
+
         line: alt.Chart = (
-            alt.Chart(df, title=title)
-            .mark_line(color=Colors.BLUE_2.value)
+            alt.Chart(data=df, title=title)
+            .mark_line(color=line_color)
             .encode(
                 x=alt.X(
-                    x_axis_label,
+                    x_axis,
                     type=x_axis_type,
-                    title=x_axis_label,
+                    title=x_axis_title,
                 ),
-                y=alt.Y(metric_label, type=metric_type, title=metric_label),
+                y=alt.Y(metric, type=metric_type, title=metric_title),
+                tooltip=tooltip,
             )
         )
-        return line
+
+        if point_color_condition is not None:
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point(opacity=1.0)
+                .encode(
+                    x=alt.X(
+                        x_axis,
+                        type=x_axis_type,
+                        title=x_axis_title,
+                    ),
+                    y=alt.Y(metric, type=metric_type, title=metric_title),
+                    stroke=point_color_condition,
+                    fill=point_color_condition,
+                    tooltip=tooltip,
+                )
+            )
+        else:
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point(stroke=point_color, fill=point_color, opacity=1.0)
+                .encode(
+                    x=alt.X(
+                        x_axis,
+                        type=x_axis_type,
+                        title=x_axis_title,
+                    ),
+                    y=alt.Y(metric, type=metric_type, title=metric_title),
+                    tooltip=tooltip,
+                )
+            )
+
+        return line + points
 
     def get_expect_domain_values_to_be_between_chart(
         self,
         df: pd.DataFrame,
-        chart_title: str,
-        metric_label: str,
+        metric: str,
         metric_type: str,
-        x_axis_label: str,
+        x_axis: str,
         x_axis_type: str,
-        line: alt.Chart,
-        min_value: float,
-        max_value: float,
-    ):
-        min_label: str = "min_value"
-        max_label: str = "max_value"
+    ) -> alt.Chart:
+        opacity: float = 0.9
+        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
+        fill_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[5])
 
-        df[min_label] = min_value
-        df[max_label] = max_value
+        metric_title: str = metric.replace("_", " ").title()
+        x_axis_title: str = x_axis.title()
+
+        batch_id: str = "batch_id"
+        batch_id_type: str = "nominal"
+        min_value: str = "min_value"
+        min_value_type: str = "quantitative"
+        max_value: str = "max_value"
+        max_value_type: str = "quantitative"
+
+        tooltip: list[alt.Tooltip] = [
+            alt.Tooltip(field=batch_id, type=batch_id_type),
+            alt.Tooltip(field=metric, type=metric_type, format=","),
+            alt.Tooltip(field=min_value, type=min_value_type, format=","),
+            alt.Tooltip(field=max_value, type=max_value_type, format=","),
+        ]
 
         lower_limit: alt.Chart = (
-            alt.Chart(df, title=chart_title)
-            .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
+            alt.Chart(data=df)
+            .mark_line(color=line_color, opacity=opacity)
             .encode(
                 x=alt.X(
-                    x_axis_label,
+                    x_axis,
                     type=x_axis_type,
-                    title=x_axis_label,
+                    title=x_axis_title,
                 ),
-                y=alt.Y(min_label, type=metric_type, title=metric_label),
+                y=alt.Y(min_value, type=metric_type, title=metric_title),
+                tooltip=tooltip,
             )
         )
 
         upper_limit: alt.Chart = (
-            alt.Chart(df, title=chart_title)
-            .mark_line(color=ColorPalettes.HEATMAP.value[4], opacity=0.9)
+            alt.Chart(data=df)
+            .mark_line(color=line_color, opacity=opacity)
             .encode(
                 x=alt.X(
-                    x_axis_label,
+                    x_axis,
                     type=x_axis_type,
-                    title=x_axis_label,
+                    title=x_axis_title,
                 ),
-                y=alt.Y(max_label, type=metric_type, title=metric_label),
+                y=alt.Y(max_value, type=metric_type, title=metric_title),
+                tooltip=tooltip,
             )
         )
 
-        band = (
-            alt.Chart(df)
-            .mark_area(fill=ColorPalettes.HEATMAP.value[5], fillOpacity=0.9)
+        band: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_area(fill=fill_color, fillOpacity=opacity)
             .encode(
                 x=alt.X(
-                    x_axis_label,
+                    x_axis,
                     type=x_axis_type,
-                    title=x_axis_label,
+                    title=x_axis_title,
                 ),
-                y=alt.Y(min_label, title=metric_label, type=metric_type),
-                y2=alt.Y2(max_label, title=metric_label),
+                y=alt.Y(min_value, title=metric_title, type=metric_type),
+                y2=alt.Y2(max_value, title=metric_title),
             )
         )
 
-        return band + lower_limit + upper_limit + line
+        predicate = (
+            (alt.datum.min_value > alt.datum.table_row_count)
+            & (alt.datum.max_value > alt.datum.table_row_count)
+        ) | (
+            (alt.datum.min_value < alt.datum.table_row_count)
+            & (alt.datum.max_value < alt.datum.table_row_count)
+        )
+        point_color_condition: alt.condition = alt.condition(
+            predicate=predicate,
+            if_false=alt.value(Colors.GREEN.value),
+            if_true=alt.value(Colors.PINK.value),
+        )
+        anomaly_coded_line: alt.Chart = self.get_line_chart(
+            self,
+            df=df,
+            metric=metric,
+            metric_type=metric_type,
+            x_axis=x_axis,
+            x_axis_type=x_axis_type,
+            point_color_condition=point_color_condition,
+            tooltip=tooltip,
+        )
+
+        return band + lower_limit + upper_limit + anomaly_coded_line
 
     @property
     def name(self) -> str:
@@ -477,7 +561,6 @@ def run_profiler_on_data(
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
     result.metrics = data_assistant.get_metrics()
-    result.expectation_configurations = data_assistant.get_expectation_configurations()
     result.expectation_suite = data_assistant.get_expectation_suite(
         expectation_suite=expectation_suite,
         expectation_suite_name=expectation_suite_name,

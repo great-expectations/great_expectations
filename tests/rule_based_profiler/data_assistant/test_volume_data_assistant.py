@@ -133,11 +133,11 @@ def test_get_metrics_and_expectations(
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
                         "bootstrap_random_seed": None,
-                        "round_decimals": 0,
                         "truncate_values": {
                             "lower_bound": 0,
                             "upper_bound": None,
                         },
+                        "round_decimals": 0,
                     },
                     "rules": {
                         "default_expect_table_row_count_to_be_between_rule": {
@@ -181,8 +181,8 @@ def test_get_metrics_and_expectations(
                                             "replace_nan_with_zero": True,
                                             "false_positive_rate": "$variables.false_positive_rate",
                                             "enforce_numeric_metric": True,
-                                            "round_decimals": "$variables.round_decimals",
                                             "reduce_scalar_metric": True,
+                                            "round_decimals": "$variables.round_decimals",
                                             "truncate_values": "$variables.truncate_values",
                                             "evaluation_parameter_builder_configs": None,
                                             "json_serialize": True,
@@ -215,10 +215,10 @@ def test_get_metrics_and_expectations(
             "false_positive_rate": 0.05,
             "estimator": "bootstrap",
             "num_bootstrap_samples": 9999,
-            "round_decimals": 0,
             "truncate_values": {
                 "lower_bound": 0,
             },
+            "round_decimals": 0,
         },
         rules={
             "default_expect_table_row_count_to_be_between_rule": {
@@ -256,8 +256,8 @@ def test_get_metrics_and_expectations(
                                 "estimator": "$variables.estimator",
                                 "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                                 "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                                "round_decimals": "$variables.round_decimals",
                                 "truncate_values": "$variables.truncate_values",
+                                "round_decimals": "$variables.round_decimals",
                                 "json_serialize": True,
                             },
                         ],
@@ -283,7 +283,7 @@ def test_get_metrics_and_expectations(
     )
 
     assert result.metrics == expected_metrics
-    assert result.expectation_configurations == expected_expectation_configurations
+    assert result.expectation_suite.expectations == expected_expectation_configurations
 
     result.expectation_suite.meta.pop("great_expectations_version", None)
 

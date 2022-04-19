@@ -2086,6 +2086,16 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -2108,6 +2118,16 @@ def data_context_with_datasource_spark_engine(empty_data_context, spark_session)
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -2131,6 +2151,16 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -3592,7 +3622,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "kwargs": {
                     "column": "fare_amount",
                     "min_value": 228.94,
-                    "max_value": 2990.05,
+                    "max_value": 2990.06,
                     "mostly": 1.0,
                 },
             },
@@ -4143,8 +4173,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "num_bootstrap_samples": None,
                         "bootstrap_random_seed": None,
                         "false_positive_rate": "$variables.false_positive_rate",
-                        "round_decimals": 0,
                         "truncate_values": {"lower_bound": 0},
+                        "round_decimals": 0,
                         "evaluation_parameter_builder_configs": None,
                         "json_serialize": True,
                         "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
@@ -4200,8 +4230,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "num_bootstrap_samples": None,
                         "bootstrap_random_seed": None,
                         "false_positive_rate": "$variables.false_positive_rate",
-                        "round_decimals": 2,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
+                        "round_decimals": 2,
                         "evaluation_parameter_builder_configs": None,
                         "json_serialize": True,
                         "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
@@ -4220,8 +4250,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "num_bootstrap_samples": None,
                         "bootstrap_random_seed": None,
                         "false_positive_rate": "$variables.false_positive_rate",
-                        "round_decimals": 2,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
+                        "round_decimals": 2,
                         "evaluation_parameter_builder_configs": None,
                         "json_serialize": True,
                         "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
@@ -4957,7 +4987,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [228.94, 2990.05],
+            "$parameter.max_range.value": [228.94, 2990.06],
             "$parameter.max_range.details": {
                 "metric_configuration": {
                     "metric_name": "column.max",

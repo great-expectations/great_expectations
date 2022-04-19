@@ -165,8 +165,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             estimator=f"{VARIABLES_KEY}estimator",
             num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
             bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
-            round_decimals=f"{VARIABLES_KEY}round_decimals",
             truncate_values=f"{VARIABLES_KEY}truncate_values",
+            round_decimals=f"{VARIABLES_KEY}round_decimals",
             evaluation_parameter_builder_configs=None,
             json_serialize=True,
         )
@@ -188,11 +188,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             "estimator": "bootstrap",
             "num_bootstrap_samples": 9999,
             "bootstrap_random_seed": None,
-            "round_decimals": 1,
             "truncate_values": {
                 "lower_bound": None,
                 "upper_bound": None,
             },
+            "round_decimals": 1,
         },
         rules={
             "default_expect_column_quantile_values_to_be_between_rule": {
