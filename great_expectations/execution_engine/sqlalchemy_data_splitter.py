@@ -51,13 +51,13 @@ class SqlAlchemyDataSplitter:
         pass
 
     def get_splitter_method(self, splitter_method_name: str) -> Callable:
-        """
+        """Get the appropriate splitter method from the method name.
 
         Args:
-            splitter_method_name:
+            splitter_method_name: name of the splitter to retrieve.
 
         Returns:
-
+            splitter method.
         """
         splitter_method_name: str = self.get_splitter_method_name(splitter_method_name)
 
