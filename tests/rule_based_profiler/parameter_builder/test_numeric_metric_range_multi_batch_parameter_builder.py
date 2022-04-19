@@ -119,15 +119,24 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     metric_domain_kwargs: dict = {"column": "fare_amount"}
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="column_min_range",
-        metric_name="column.min",
-        metric_domain_kwargs=metric_domain_kwargs,
-        estimator="oneshot",
-        false_positive_rate=1.0e-2,
-        round_decimals=1,
-        data_context=data_context,
-        batch_request=batch_request,
+    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder
+
+    fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
+
+    expected_value_dict: dict
+    actual_value_dict: dict
+
+    numeric_metric_range_parameter_builder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="column_min_range",
+            metric_name="column.min",
+            metric_domain_kwargs=metric_domain_kwargs,
+            estimator="oneshot",
+            false_positive_rate=1.0e-2,
+            round_decimals=1,
+            data_context=data_context,
+            batch_request=batch_request,
+        )
     )
 
     variables: Optional[ParameterContainer] = None
@@ -154,8 +163,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
-    expected_value_dict: dict = {
+    expected_value_dict = {
         "value": None,
         "details": {
             "metric_configuration": {
@@ -168,7 +176,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    actual_value_dict: dict = get_parameter_value_by_fully_qualified_parameter_name(
+    actual_value_dict = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,
@@ -187,24 +195,27 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert actual_value_01_lower == expected_value_01_lower
     assert actual_value_01_upper == expected_value_01_upper
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="column_min_range",
-        metric_name="column.min",
-        metric_domain_kwargs=metric_domain_kwargs,
-        estimator="oneshot",
-        false_positive_rate=5.0e-2,
-        round_decimals=1,
-        data_context=data_context,
-        batch_request=batch_request,
+    numeric_metric_range_parameter_builder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="column_min_range",
+            metric_name="column.min",
+            metric_domain_kwargs=metric_domain_kwargs,
+            estimator="oneshot",
+            false_positive_rate=5.0e-2,
+            round_decimals=1,
+            data_context=data_context,
+            batch_request=batch_request,
+        )
     )
 
     numeric_metric_range_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        ignore_existing_parameters=True,
     )
 
-    actual_value_dict: dict = get_parameter_value_by_fully_qualified_parameter_name(
+    actual_value_dict = get_parameter_value_by_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
         domain=domain,
         parameters=parameters,

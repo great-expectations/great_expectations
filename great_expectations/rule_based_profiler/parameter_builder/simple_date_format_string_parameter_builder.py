@@ -183,6 +183,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        ignore_existing_parameters: bool = False,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
