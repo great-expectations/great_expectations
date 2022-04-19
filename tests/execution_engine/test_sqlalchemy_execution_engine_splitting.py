@@ -1,12 +1,7 @@
-import pytest
+from mock_alchemy.comparison import ExpressionMatcher
 
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import DatePart
-
-try:
-    sqlalchemy = pytest.importorskip("sqlalchemy")
-except ImportError:
-    sqlalchemy = None
 
 
 def test_split_on_year():
@@ -22,7 +17,7 @@ def test_split_on_year_and_month_and_day():
     pass
 
 
-def test_split_on_date_parts(sqlite_view_engine):
+def test_split_on_date_parts(sa, sqlite_view_engine):
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
     )
@@ -32,11 +27,29 @@ def test_split_on_date_parts(sqlite_view_engine):
         batch_identifiers={"a": {"year": 2018, "month": 10}},
         date_parts=[DatePart.YEAR, DatePart.MONTH],
     )
-    # TODO: AJB 20220418 - need to use mocking library ExpressionMatcher to show equality?
-    assert result == sqlalchemy.and_(
-        sqlalchemy.extract("year", "a") == 2018,
-        sqlalchemy.extract("month", "a") == 10,
+
+    # using mock-alchemy
+    assert ExpressionMatcher(result) == ExpressionMatcher(
+        sa.and_(
+            sa.extract("year", sa.column("a")) == 2018,
+            sa.extract("month", sa.column("a")) == 10,
+        )
     )
+
+    # using values
+    assert isinstance(result, sa.sql.elements.BooleanClauseList)
+
+    assert isinstance(result.clauses[0].comparator.type, sa.Boolean)
+    assert isinstance(result.clauses[0].left, sa.sql.elements.Extract)
+    assert result.clauses[0].left.field == "year"
+    assert result.clauses[0].left.expr.name == "a"
+    assert result.clauses[0].right.effective_value == 2018
+
+    assert isinstance(result.clauses[1].comparator.type, sa.Boolean)
+    assert isinstance(result.clauses[1].left, sa.sql.elements.Extract)
+    assert result.clauses[1].left.field == "month"
+    assert result.clauses[1].left.expr.name == "a"
+    assert result.clauses[1].right.effective_value == 10
 
 
 def test_get_data_for_batch_identifiers_year():
