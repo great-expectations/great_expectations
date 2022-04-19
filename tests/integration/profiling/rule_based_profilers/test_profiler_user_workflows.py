@@ -23,7 +23,7 @@ from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.types import Domain
+from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.core.usage_statistics.util import (
@@ -125,6 +125,24 @@ def test_alice_profiler_user_workflow_single_batch(
         ],
         include_citation=True,
     )
+
+    assert (
+        expectation_suite.expectations
+        == alice_columnar_table_single_batch["expected_expectation_suite"].expectations
+    )
+
+    """
+    Deleting some "parameter_builders" from both actual and expected configurations, because nested dictionaries are
+    extremely difficult to match, due to complex structure, containing dictionaries, lists of dictionaries, lists of
+    primitive types, and other iterables, presented in random sort order at various levels of configuration hierarchy.
+    """
+    expectation_suite.meta["citations"][0]["profiler_config"]["rules"][
+        "my_rule_for_timestamps"
+    ].pop("parameter_builders")
+    alice_columnar_table_single_batch["expected_expectation_suite"].meta["citations"][
+        0
+    ]["profiler_config"]["rules"]["my_rule_for_timestamps"].pop("parameter_builders")
+
     assert (
         expectation_suite
         == alice_columnar_table_single_batch["expected_expectation_suite"]
@@ -461,6 +479,23 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         "test_configuration_oneshot_estimator"
     ]["expected_expectation_suite"]
 
+    assert (
+        profiled_expectation_suite.expectations
+        == fixture_expectation_suite.expectations
+    )
+
+    """
+    Deleting some "parameter_builders" from both actual and expected configurations, because nested dictionaries are
+    extremely difficult to match, due to complex structure, containing dictionaries, lists of dictionaries, lists of
+    primitive types, and other iterables, presented in random sort order at various levels of configuration hierarchy.
+    """
+    profiled_expectation_suite.meta["citations"][0]["profiler_config"]["rules"][
+        "my_rule_for_timestamps"
+    ].pop("parameter_builders")
+    fixture_expectation_suite.meta["citations"][0]["profiler_config"]["rules"][
+        "my_rule_for_timestamps"
+    ].pop("parameter_builders")
+
     assert profiled_expectation_suite == fixture_expectation_suite
 
     profiled_fully_qualified_parameter_names_by_domain: Dict[
@@ -500,11 +535,11 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
-        Domain, Dict[str, Any]
+        Domain, Dict[str, ParameterNode]
     ] = profiler.get_parameter_values_for_fully_qualified_parameter_names_by_domain()
 
     fixture_profiled_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
-        Domain, Dict[str, Any]
+        Domain, Dict[str, ParameterNode]
     ] = bobby_columnar_table_multi_batch[
         "test_configuration_oneshot_estimator"
     ][
@@ -523,13 +558,13 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
-        str, Any
+        str, ParameterNode
     ] = profiler.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
         domain_id=domain.id
     )
 
     fixture_profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
-        str, Any
+        str, ParameterNode
     ] = bobby_columnar_table_multi_batch[
         "test_configuration_oneshot_estimator"
     ][

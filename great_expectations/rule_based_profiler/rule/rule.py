@@ -52,6 +52,7 @@ class Rule(SerializableDictDot):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         force_batch_data: bool = False,
+        recompute_existing_parameter_values: bool = False,
     ) -> RuleState:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
@@ -61,6 +62,7 @@ class Rule(SerializableDictDot):
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
+            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
 
         Returns:
             RuleState representing effect of executing Rule
@@ -94,6 +96,7 @@ class Rule(SerializableDictDot):
                     batch_list=batch_list,
                     batch_request=batch_request,
                     force_batch_data=force_batch_data,
+                    recompute_existing_parameter_values=recompute_existing_parameter_values,
                 )
 
             expectation_configuration_builders: List[
@@ -110,6 +113,7 @@ class Rule(SerializableDictDot):
                     batch_list=batch_list,
                     batch_request=batch_request,
                     force_batch_data=force_batch_data,
+                    recompute_existing_parameter_values=recompute_existing_parameter_values,
                 )
 
         return rule_state
@@ -135,10 +139,6 @@ class Rule(SerializableDictDot):
         self,
     ) -> Optional[List[ExpectationConfigurationBuilder]]:
         return self._expectation_configuration_builders
-
-    @property
-    def rule_state(self) -> RuleState:
-        return self._rule_state
 
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None

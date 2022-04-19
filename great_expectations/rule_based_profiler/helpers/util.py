@@ -21,6 +21,7 @@ from great_expectations.rule_based_profiler.types import (
     VARIABLES_PREFIX,
     Domain,
     ParameterContainer,
+    ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
@@ -381,15 +382,22 @@ def build_simple_domains_from_column_names(
 def convert_variables_to_dict(
     variables: Optional[ParameterContainer] = None,
 ) -> Dict[str, Any]:
-    variables: Optional[Dict[str, Any]] = get_parameter_value_and_validate_return_type(
+    variables_as_dict: Optional[
+        Union[ParameterNode, Dict[str, Any]]
+    ] = get_parameter_value_and_validate_return_type(
         domain=None,
         parameter_reference=VARIABLES_PREFIX,
         expected_return_type=None,
         variables=variables,
         parameters=None,
     )
+    if isinstance(variables_as_dict, ParameterNode):
+        return variables_as_dict.to_dict()
 
-    return variables or {}
+    if variables_as_dict is None:
+        return {}
+
+    return variables_as_dict
 
 
 def compute_quantiles(

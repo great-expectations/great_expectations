@@ -81,8 +81,43 @@ stages:
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
-  - stage: required
+  - stage: import_ge
     dependsOn: [lint]
+    pool:
+      vmImage: 'ubuntu-18.04'
+    jobs:
+      - job: import_ge
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+
+        strategy:
+         matrix:
+           Python37:
+             python.version: '3.7'
+           Python38:
+             python.version: '3.8'
+           Python39:
+             python.version: '3.9'
+
+
+        steps:
+         - task: UsePythonVersion@0
+           inputs:
+             versionSpec: '$(python.version)'
+           displayName: 'Use Python $(python.version)'
+
+         - bash: python -m pip install --upgrade pip==21.3.1
+           displayName: 'Update pip'
+
+         - script: |
+             pip install  .
+           displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
+
+         - script: |
+             python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
+           displayName: 'Import Great Expectations'
+
+  - stage: required
+    dependsOn: [lint, import_ge]
     pool:
       vmImage: 'ubuntu-18.04'
 
@@ -241,7 +276,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [lint]
+    dependsOn: [lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -275,7 +310,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [lint]
+    dependsOn: [lint, import_ge]
 
     jobs:
       - job: mysql
@@ -354,7 +389,7 @@ stages:
             displayName: 'pytest'
 
   - stage: cli_integration
-    dependsOn: [lint]
+    dependsOn: [lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 

@@ -8,9 +8,9 @@ This guide will help you add descriptive comments (or notes, here used interchan
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- [Configured a Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- [Configured an Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
+- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
+- [Configured an Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md).
 
 </Prerequisites>
 

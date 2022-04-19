@@ -1270,6 +1270,46 @@ def test_map_unique_column_does_not_exist_sa(sa):
     )
 
 
+def test_map_unique_empty_query_sa(sa):
+    """If the table contains zero rows then there must be zero unexpected values."""
+    engine = build_sa_engine(
+        pd.DataFrame({"a": [], "b": []}),
+        sa,
+    )
+
+    table_columns_metric: MetricConfiguration
+    metrics: dict
+    table_columns_metric, metrics = get_table_columns_metric(engine=engine)
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.unique.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,),
+        metrics=metrics,
+    )
+    assert results[desired_metric.id] == 0
+
+
 def test_map_unique_column_exists_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,

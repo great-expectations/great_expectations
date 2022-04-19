@@ -9,6 +9,7 @@ from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
+    ValidationError,
     fields,
     post_dump,
     post_load,
@@ -386,13 +387,11 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
-        class_name: Optional[str] = None,
-        module_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ):
-        self.module_name = module_name
-        self.class_name = class_name
+        self.module_name = "great_expectations.rule_based_profiler"
+        self.class_name = "RuleBasedProfiler"
 
         self.name = name
 
@@ -410,6 +409,25 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:  # noqa: F821
         return RuleBasedProfilerConfigSchema
+
+    @classmethod
+    def from_commented_map(
+        cls, commented_map: CommentedMap
+    ) -> "RuleBasedProfilerConfig":
+        """Override parent implementation to pop unnecessary attrs from config.
+
+        Please see parent BaseYamlConfig for more details.
+        """
+        try:
+            config: dict = cls._get_schema_instance().load(commented_map)
+            config.pop("class_name", None)
+            config.pop("module_name", None)
+            return cls.get_config_class()(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading config.  See ValidationError for more details."
+            )
+            raise
 
     def to_json_dict(self) -> dict:
         """
@@ -501,8 +519,6 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         }
 
         return cls(
-            class_name=profiler.__class__.__name__,
-            module_name=profiler.__class__.__module__,
             name=profiler.config.name,
             config_version=profiler.config.config_version,
             variables=runtime_variables,
