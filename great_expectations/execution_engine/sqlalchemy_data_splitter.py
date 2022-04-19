@@ -16,6 +16,7 @@ try:
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import (
+        BinaryExpression,
         BooleanClauseList,
         Label,
         TextClause,
@@ -26,6 +27,8 @@ except ImportError:
     DefaultDialect = None
     Selectable = None
     BooleanClauseList = None
+    BinaryExpression = None
+    LegacyRow = None
     TextClause = None
     quoted_name = None
     OperationalError = None
@@ -81,7 +84,7 @@ class SqlAlchemyDataSplitter:
         self,
         column_name: str,
         batch_identifiers: dict,
-    ) -> BooleanClauseList:
+    ) -> Union[BinaryExpression, BooleanClauseList]:
         """Split on year values in column_name.
 
         Args:
@@ -104,7 +107,7 @@ class SqlAlchemyDataSplitter:
         self,
         column_name: str,
         batch_identifiers: dict,
-    ) -> BooleanClauseList:
+    ) -> Union[BinaryExpression, BooleanClauseList]:
         """Split on year and month values in column_name.
 
         Args:
@@ -127,7 +130,7 @@ class SqlAlchemyDataSplitter:
         self,
         column_name: str,
         batch_identifiers: dict,
-    ) -> BooleanClauseList:
+    ) -> Union[BinaryExpression, BooleanClauseList]:
         """Split on year and month and day values in column_name.
 
         Args:
@@ -151,7 +154,7 @@ class SqlAlchemyDataSplitter:
         column_name: str,
         batch_identifiers: dict,
         date_parts: Union[List[DatePart], List[str]],
-    ) -> BooleanClauseList:
+    ) -> Union[BinaryExpression, BooleanClauseList]:
         """Split on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
@@ -188,7 +191,7 @@ class SqlAlchemyDataSplitter:
             )
 
         if isinstance(column_batch_identifiers, datetime.datetime):
-            query: BooleanClauseList = sa.and_(  # noqa: F821
+            query: Union[BinaryExpression, BooleanClauseList] = sa.and_(
                 *[
                     sa.extract(date_part.value, sa.column(column_name))
                     == getattr(column_batch_identifiers, date_part.value)
@@ -196,7 +199,7 @@ class SqlAlchemyDataSplitter:
                 ]
             )
         else:
-            query: BooleanClauseList = sa.and_(  # noqa: F821
+            query: Union[BinaryExpression, BooleanClauseList] = sa.and_(
                 *[
                     sa.extract(date_part.value, sa.column(column_name))
                     == column_batch_identifiers[date_part.value]

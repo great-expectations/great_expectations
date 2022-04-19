@@ -76,6 +76,7 @@ try:
         quoted_name,
     )
 except ImportError:
+    LegacyRow = None
     reflection = None
     DefaultDialect = None
     Selectable = None
