@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
@@ -21,6 +22,20 @@ class DataAssistantResult(SerializableDictDot):
     # Obtain "meta/details" using "meta = expectation_suite.meta".
     expectation_suite: Optional[ExpectationSuite] = None
     execution_time: Optional[float] = None  # Execution time (in seconds).
+
+    @abstractmethod
+    def plot(
+        self,
+        prescriptive: bool = False,
+    ) -> None:
+        """
+        Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
+
+        Args:
+            result: "DataAssistantResult", obtained by executing "DataAssistant.run()" method (contains available data).
+            prescriptive: Type of plot to generate.
+        """
+        pass
 
     def to_dict(self) -> dict:
         return asdict(self)

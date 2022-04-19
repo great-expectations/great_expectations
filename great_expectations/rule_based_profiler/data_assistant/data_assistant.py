@@ -34,7 +34,7 @@ class DataAssistant(ABC):
     DataAssistant is an application built on top of the Rule-Based Profiler component.
     DataAssistant subclasses provide exploration and validation of particular aspects of specified data Batch objects.
 
-    DataAssustant usage (e.g., in Jupyter notebook) adheres to the following pattern:
+    DataAssistant usage (e.g., in Jupyter notebook) adheres to the following pattern:
 
     data_assistant: DataAssistant = VolumeDataAssistant(
         name="my_volume_data_assistant",
@@ -228,21 +228,6 @@ class DataAssistant(ABC):
         """
         pass
 
-    @abstractmethod
-    def plot(
-        self,
-        result: DataAssistantResult,
-        prescriptive: bool = False,
-    ) -> None:
-        """
-        Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
-
-        Args:
-            result: "DataAssistantResult", obtained by executing "DataAssistant.run()" method (contains available data).
-            prescriptive: Type of plot to generate.
-        """
-        pass
-
     def get_metrics_by_domain(self) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
         Obtain subset of all parameter values for fully-qualified parameter names by domain, available from entire
@@ -280,7 +265,7 @@ class DataAssistant(ABC):
                 for parameter_builder in parameter_builders
             ]
 
-        doain: Domain
+        domain: Domain
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         # noinspection PyTypeChecker
         parameter_values_for_fully_qualified_parameter_names_by_domain = {
