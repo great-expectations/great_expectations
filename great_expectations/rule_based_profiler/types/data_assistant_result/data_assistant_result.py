@@ -41,15 +41,14 @@ class DataAssistantResult(SerializableDictDot):
         Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
 
         Args:
-            result: "DataAssistantResult", obtained by executing "DataAssistant.run()" method (contains available data).
             prescriptive: Type of plot to generate.
         """
         pass
 
     def get_attributed_metrics_by_domain(
-        metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]]
+        self, metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]]
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        doain: Domain
+        domain: Domain
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         fully_qualified_parameter_name: str
         parameter_value: ParameterNode
@@ -66,7 +65,80 @@ class DataAssistantResult(SerializableDictDot):
         }
         return metrics_attributed_values_by_domain
 
+    def get_line_chart(
+        self,
+        df: pd.DataFrame,
+        metric: str,
+        metric_type: str,
+        x_axis_name: str,
+        x_axis_type: str,
+        line_color: Optional[str] = Colors.BLUE_2.value,
+        point_color: Optional[str] = Colors.GREEN.value,
+        point_color_condition: Optional[alt.condition] = None,
+        tooltip: Optional[List[alt.Tooltip]] = None,
+    ) -> alt.Chart:
+        metric_title: str = metric.replace("_", " ").title()
+        x_axis_title: str = x_axis_name.title()
+        title: str = f"{metric_title} by {x_axis_title}"
+
+        batch_id: str = "batch_id"
+        batch_id_type: str = "nominal"
+
+        if tooltip is None:
+            tooltip: List[alt.Tooltip] = [
+                alt.Tooltip(field=batch_id, type=batch_id_type),
+                alt.Tooltip(field=metric, type=metric_type, format=","),
+            ]
+
+        line: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_line(color=line_color)
+            .encode(
+                x=alt.X(
+                    x_axis_name,
+                    type=x_axis_type,
+                    title=x_axis_title,
+                ),
+                y=alt.Y(metric, type=metric_type, title=metric_title),
+                tooltip=tooltip,
+            )
+        )
+
+        if point_color_condition is not None:
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point(opacity=1.0)
+                .encode(
+                    x=alt.X(
+                        x_axis_name,
+                        type=x_axis_type,
+                        title=x_axis_title,
+                    ),
+                    y=alt.Y(metric, type=metric_type, title=metric_title),
+                    stroke=point_color_condition,
+                    fill=point_color_condition,
+                    tooltip=tooltip,
+                )
+            )
+        else:
+            points: alt.Chart = (
+                alt.Chart(data=df, title=title)
+                .mark_point(stroke=point_color, fill=point_color, opacity=1.0)
+                .encode(
+                    x=alt.X(
+                        x_axis_name,
+                        type=x_axis_type,
+                        title=x_axis_title,
+                    ),
+                    y=alt.Y(metric, type=metric_type, title=metric_title),
+                    tooltip=tooltip,
+                )
+            )
+
+        return line + points
+
     def get_expect_domain_values_to_be_between_chart(
+        self,
         df: pd.DataFrame,
         metric: str,
         metric_type: str,
@@ -148,7 +220,7 @@ class DataAssistantResult(SerializableDictDot):
             if_false=alt.value(Colors.GREEN.value),
             if_true=alt.value(Colors.PINK.value),
         )
-        anomaly_coded_line: alt.Chart = get_line_chart(
+        anomaly_coded_line: alt.Chart = self.get_line_chart(
             df=df,
             metric=metric,
             metric_type=metric_type,
@@ -160,78 +232,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return band + lower_limit + upper_limit + anomaly_coded_line
 
-    def get_line_chart(
-        df: pd.DataFrame,
-        metric: str,
-        metric_type: str,
-        x_axis_name: str,
-        x_axis_type: str,
-        line_color: Optional[str] = Colors.BLUE_2.value,
-        point_color: Optional[str] = Colors.GREEN.value,
-        point_color_condition: Optional[alt.condition] = None,
-        tooltip: Optional[List[alt.Tooltip]] = None,
-    ) -> alt.Chart:
-        metric_title: str = metric.replace("_", " ").title()
-        x_axis_title: str = x_axis_name.title()
-        title: str = f"{metric_title} by {x_axis_title}"
-
-        batch_id: str = "batch_id"
-        batch_id_type: str = "nominal"
-
-        if tooltip is None:
-            tooltip: List[alt.Tooltip] = [
-                alt.Tooltip(field=batch_id, type=batch_id_type),
-                alt.Tooltip(field=metric, type=metric_type, format=","),
-            ]
-
-        line: alt.Chart = (
-            alt.Chart(data=df, title=title)
-            .mark_line(color=line_color)
-            .encode(
-                x=alt.X(
-                    x_axis_name,
-                    type=x_axis_type,
-                    title=x_axis_title,
-                ),
-                y=alt.Y(metric, type=metric_type, title=metric_title),
-                tooltip=tooltip,
-            )
-        )
-
-        if point_color_condition is not None:
-            points: alt.Chart = (
-                alt.Chart(data=df, title=title)
-                .mark_point(opacity=1.0)
-                .encode(
-                    x=alt.X(
-                        x_axis_name,
-                        type=x_axis_type,
-                        title=x_axis_title,
-                    ),
-                    y=alt.Y(metric, type=metric_type, title=metric_title),
-                    stroke=point_color_condition,
-                    fill=point_color_condition,
-                    tooltip=tooltip,
-                )
-            )
-        else:
-            points: alt.Chart = (
-                alt.Chart(data=df, title=title)
-                .mark_point(stroke=point_color, fill=point_color, opacity=1.0)
-                .encode(
-                    x=alt.X(
-                        x_axis_name,
-                        type=x_axis_type,
-                        title=x_axis_title,
-                    ),
-                    y=alt.Y(metric, type=metric_type, title=metric_title),
-                    tooltip=tooltip,
-                )
-            )
-
-        return line + points
-
-    def display(charts: List[alt.Chart]) -> None:
+    def display(self, charts: List[alt.Chart]) -> None:
         """
         Display each chart passed in Jupyter Notebook
         """
