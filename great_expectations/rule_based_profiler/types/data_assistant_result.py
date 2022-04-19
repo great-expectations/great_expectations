@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.types import Domain
+from great_expectations.rule_based_profiler.types.domain import Domain
 from great_expectations.types import SerializableDictDot
 
 
