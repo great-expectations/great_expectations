@@ -325,8 +325,6 @@ stages:
                 tests/data_context/test_templates.py \
                 tests/data_context/test_data_context_store_configs.py \
                 tests/core/test_urn.py \
-                tests/core/usage_statistics/test_usage_stats_schema.py \
-                tests/core/usage_statistics/test_schema_validation.py \
                 tests/dataset/test_pandas_dataset_conditionals.py \
                 tests/expectations/test_generate_diagnostic_checklist.py
 
