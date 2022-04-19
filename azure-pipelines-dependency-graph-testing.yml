@@ -104,7 +104,15 @@ stages:
     dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-latest'
+
     jobs:
+    - job: type_hint_checker
+      steps:
+      - script: |
+          pip install mypy # Prereq for type hint script
+          python scripts/check_type_hint_coverage.py
+        name: TypeHintChecker
+
     - job: docstring_checker
       steps:
       - bash: python scripts/check_docstring_coverage.py
@@ -114,6 +122,7 @@ stages:
     dependsOn: [lint]
     pool:
       vmImage: 'ubuntu-18.04'
+
     jobs:
       - job: import_ge
 
