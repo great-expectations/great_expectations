@@ -9,6 +9,7 @@ from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
+    ValidationError,
     fields,
     post_dump,
     post_load,
@@ -408,6 +409,21 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:  # noqa: F821
         return RuleBasedProfilerConfigSchema
+
+    @classmethod
+    def from_commented_map(
+        cls, commented_map: CommentedMap
+    ) -> "RuleBasedProfilerConfig":
+        try:
+            config: dict = cls._get_schema_instance().load(commented_map)
+            config.pop("class_name", None)
+            config.pop("module_name", None)
+            return cls.get_config_class()(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading config.  See ValidationError for more details."
+            )
+            raise
 
     def to_json_dict(self) -> dict:
         """

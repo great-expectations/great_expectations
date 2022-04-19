@@ -97,9 +97,6 @@ class BaseYamlConfig(SerializableDictDot):
                 commented_map
             )
             if isinstance(config, dict):
-                if config.get("class_name") == "RuleBasedProfiler":
-                    config.pop("class_name", None)
-                    config.pop("module_name", None)
                 return cls.get_config_class()(commented_map=commented_map, **config)
             return config
         except ValidationError:
