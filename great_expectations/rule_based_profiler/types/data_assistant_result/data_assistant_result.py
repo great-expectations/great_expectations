@@ -236,8 +236,9 @@ class DataAssistantResult(SerializableDictDot):
         Display each chart passed in Jupyter Notebook
         """
         chart: alt.Chart
+        altair_configuration: Dict[str, Any] = ALTAIR_DEFAULT_CONFIGURATION
         for chart in charts:
-            chart.configure(**ALTAIR_DEFAULT_CONFIGURATION).display()
+            chart.configure(**altair_configuration).display()
 
     def to_dict(self) -> dict:
         return asdict(self)
