@@ -174,8 +174,13 @@ class DataAssistant(ABC):
         result: data_assistant_result_cls = data_assistant_result_cls(
             execution_time=0.0
         )
-        self.run_profiler_on_data(
+        run_profiler_on_data(
+            data_assistant=self,
             data_assistant_result=result,
+            profiler=self.profiler,
+            variables=self.variables,
+            rules=self.rules,
+            batch_list=list(self._validator.batches.values()),
             batch_request=None,
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
@@ -316,45 +321,44 @@ class DataAssistant(ABC):
             include_citation=include_citation,
         )
 
-    @measure_execution_time(
-        execution_time_holder_object_reference_name="data_assistant_result",
-        execution_time_property_name="execution_time",
-        pretty_print=False,
+
+@measure_execution_time(
+    execution_time_holder_object_reference_name="data_assistant_result",
+    execution_time_property_name="execution_time",
+    pretty_print=False,
+)
+def run_profiler_on_data(
+    data_assistant: DataAssistant,
+    data_assistant_result: DataAssistantResult,
+    profiler: BaseRuleBasedProfiler,
+    variables: Optional[Dict[str, Any]] = None,
+    rules: Optional[Dict[str, Dict[str, Any]]] = None,
+    batch_list: Optional[List[Batch]] = None,
+    batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+    expectation_suite: Optional[ExpectationSuite] = None,
+    expectation_suite_name: Optional[str] = None,
+    include_citation: bool = True,
+) -> None:
+    if rules is None:
+        rules = []
+
+    rule: Rule
+    rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
+        rule.name: rule.to_json_dict() for rule in rules
+    }
+    profiler.run(
+        variables=variables,
+        rules=rules_configs,
+        batch_list=batch_list,
+        batch_request=batch_request,
+        force_batch_data=False,
+        reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
     )
-    def run_profiler_on_data(
-        self,
-        data_assistant_result: DataAssistantResult,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> None:
-        profiler: BaseRuleBasedProfiler = self.profiler
-        variables: Optional[Dict[str, Any]] = self.variables
-
-        rules: Optional[Dict[str, Dict[str, Any]]] = self.rules
-        if rules is None:
-            rules = []
-
-        batch_list: Optional[List[Batch]] = list(self._validator.batches.values())
-
-        rule: Rule
-        rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
-            rule.name: rule.to_json_dict() for rule in rules
-        }
-        profiler.run(
-            variables=variables,
-            rules=rules_configs,
-            batch_list=batch_list,
-            batch_request=batch_request,
-            force_batch_data=False,
-            reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
-        )
-        result = data_assistant_result
-        result.profiler_config = profiler.config
-        result.metrics_by_domain = self.get_metrics_by_domain()
-        result.expectation_suite = self.get_expectation_suite(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-        )
+    result: DataAssistantResult = data_assistant_result
+    result.profiler_config = profiler.config
+    result.metrics_by_domain = data_assistant.get_metrics_by_domain()
+    result.expectation_suite = data_assistant.get_expectation_suite(
+        expectation_suite=expectation_suite,
+        expectation_suite_name=expectation_suite_name,
+        include_citation=include_citation,
+    )
