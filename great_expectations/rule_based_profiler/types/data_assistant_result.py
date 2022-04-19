@@ -1,7 +1,5 @@
 import re
-from abc import ABCMeta
 from dataclasses import asdict, dataclass
-from numbers import Number
 from typing import Any, Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
@@ -26,13 +24,12 @@ class DataAssistantResult(SerializableDictDot):
     object (of type "RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
     """
 
-    data_assistant_cls: ABCMeta
+    data_assistant_cls: type
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
     metrics: Optional[Dict[Domain, Dict[str, Any]]] = None
-    expectation_configurations: Optional[List[ExpectationConfiguration]] = None
-    expectation_suite: Optional[
-        ExpectationSuite
-    ] = None  # Obtain "meta/details" using "meta = expectation_suite.meta".
+    # Obtain "expectation_configurations" using "expectation_configurations = expectation_suite.expectations".
+    # Obtain "meta/details" using "meta = expectation_suite.meta".
+    expectation_suite: Optional[ExpectationSuite] = None
     execution_time: Optional[float] = None  # Execution time (in seconds).
 
     def plot(self, prescriptive: bool = False):
@@ -79,19 +76,16 @@ class DataAssistantResult(SerializableDictDot):
                     )
                     is not None
                 ):
-                    attributed_value_parameter_node: Any = parameter_value
-                    data: list[Number] = sum(
-                        attributed_value_parameter_node.values(), []
-                    )
+                    attributed_value: Any = parameter_value
 
         expectation_configurations: list[
             ExpectationConfiguration
-        ] = self.expectation_configurations
+        ] = self.expectation_suite.expectations
 
         self.data_assistant_cls._plot(
             self=self.data_assistant_cls,
             metric_names=metric_names,
-            data=data,
+            attributed_value=attributed_value,
             prescriptive=prescriptive,
             expectation_configurations=expectation_configurations,
         )

@@ -110,8 +110,41 @@ stages:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
 
+  - stage: import_ge
+    dependsOn: [lint]
+    pool:
+      vmImage: 'ubuntu-18.04'
+    jobs:
+      - job: import_ge
+
+        strategy:
+         matrix:
+           Python37:
+             python.version: '3.7'
+           Python38:
+             python.version: '3.8'
+           Python39:
+             python.version: '3.9'
+
+        steps:
+         - task: UsePythonVersion@0
+           inputs:
+             versionSpec: '$(python.version)'
+           displayName: 'Use Python $(python.version)'
+
+         - bash: python -m pip install --upgrade pip==21.3.1
+           displayName: 'Update pip'
+
+         - script: |
+             pip install  .
+           displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
+
+         - script: |
+             python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
+           displayName: 'Import Great Expectations'
+
   - stage: required
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-18.04'
 
@@ -285,7 +318,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -321,7 +354,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
 
     jobs:
       - job: mysql
@@ -414,7 +447,7 @@ stages:
             displayName: 'dgtest'
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
