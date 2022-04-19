@@ -5,13 +5,17 @@ import logging
 import traceback
 import warnings
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from dateutil.parser import parse
 
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
+
+from great_expectations.execution_engine.sqlalchemy_data_splitter import (
+    SqlAlchemyDataSplitter,
+)
 
 del get_versions  # isort:skip
 
@@ -379,6 +383,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         }
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
+
+        self._sqlalchemy_data_splitter = SqlAlchemyDataSplitter()
 
     @property
     def credentials(self) -> Optional[dict]:
@@ -977,146 +983,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == batch_identifiers[column_name]
         )
 
-    def split_on_year(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> BooleanClauseList:
-        """Split on year values in column_name.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
-                of {date_part: date_part_value}.
-
-        Returns:
-            List of boolean clauses based on whether the date_part value in the
-                batch identifier matches the date_part value in the column_name column.
-        """
-        return self.split_on_date_parts(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_parts=[DatePart.YEAR],
-        )
-
-    def split_on_year_and_month(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> BooleanClauseList:
-        """Split on year and month values in column_name.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
-                of {date_part: date_part_value}.
-
-        Returns:
-            List of boolean clauses based on whether the date_part value in the
-                batch identifier matches the date_part value in the column_name column.
-        """
-        return self.split_on_date_parts(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_parts=[DatePart.YEAR, DatePart.MONTH],
-        )
-
-    def split_on_year_and_month_and_day(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-    ) -> BooleanClauseList:
-        """Split on year and month and day values in column_name.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose
-                relevant date parts will be used for splitting or key values
-                of {date_part: date_part_value}.
-
-        Returns:
-            List of boolean clauses based on whether the date_part value in the
-                batch identifier matches the date_part value in the column_name column.
-        """
-        return self.split_on_date_parts(
-            table_name=table_name,
-            column_name=column_name,
-            batch_identifiers=batch_identifiers,
-            date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
-        )
-
-    def split_on_date_parts(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-        date_parts: Union[List[DatePart], List[str]],
-    ) -> BooleanClauseList:
-        """Split on date_part values in column_name.
-
-        Values are NOT truncated, for example this will return data for a
-        given month (if only month is chosen for date_parts) for ALL years.
-        This may be useful for viewing seasonality, but you can also specify
-        multiple date_parts to achieve date_trunc like behavior e.g.
-        year, month and day.
-
-        Args:
-            table_name: table to split.
-            column_name: column in table to use in determining split.
-            batch_identifiers: should contain a dateutil parseable datetime whose date parts
-                will be used for splitting or key values of {date_part: date_part_value}
-            date_parts: part of the date to be used for splitting e.g.
-                DatePart.DAY or the case-insensitive string representation "day"
-
-        Returns:
-            List of boolean clauses based on whether the date_part value in the
-                batch identifier matches the date_part value in the column_name column.
-        """
-        if len(date_parts) == 0:
-            raise ge_exceptions.InvalidConfigError(
-                "date_parts are required when using split_on_date_parts."
-            )
-
-        column_batch_identifiers: dict = batch_identifiers[column_name]
-        date_parts: List[DatePart] = [
-            DatePart(date_part.lower()) if isinstance(date_part, str) else date_part
-            for date_part in date_parts
-        ]
-
-        if isinstance(column_batch_identifiers, str):
-            column_batch_identifiers: datetime.datetime = parse(
-                column_batch_identifiers
-            )
-
-        if isinstance(column_batch_identifiers, datetime.datetime):
-            query: BooleanClauseList = sa.and_(  # noqa: F821
-                *[
-                    sa.extract(date_part.value, sa.column(column_name))
-                    == getattr(column_batch_identifiers, date_part.value)
-                    for date_part in date_parts
-                ]
-            )
-        else:
-            query: BooleanClauseList = sa.and_(  # noqa: F821
-                *[
-                    sa.extract(date_part.value, sa.column(column_name))
-                    == column_batch_identifiers[date_part.value]
-                    for date_part in date_parts
-                ]
-            )
-
-        return query
-
     def _split_on_divided_integer(
         self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict
     ) -> bool:
@@ -1347,11 +1213,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
-        table_name: str = batch_spec["table_name"]
         if "splitter_method" in batch_spec:
-            splitter_fn = getattr(self, batch_spec["splitter_method"])
+            if hasattr(self, batch_spec["splitter_method"]):
+                splitter_fn: Callable = getattr(self, batch_spec["splitter_method"])
+            else:
+                splitter_fn: Callable = getattr(
+                    self._sqlalchemy_data_splitter, batch_spec["splitter_method"]
+                )
             split_clause = splitter_fn(
-                table_name=table_name,
+                # table_name=table_name,
                 batch_identifiers=batch_spec["batch_identifiers"],
                 **batch_spec["splitter_kwargs"],
             )
@@ -1359,6 +1229,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             split_clause = True
 
+        table_name: str = batch_spec["table_name"]
         if "sampling_method" in batch_spec:
             if batch_spec["sampling_method"] == "_sample_using_limit":
                 # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,

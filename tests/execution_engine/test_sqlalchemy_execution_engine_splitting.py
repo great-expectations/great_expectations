@@ -1,6 +1,9 @@
 from mock_alchemy.comparison import ExpressionMatcher
 
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_data_splitter import (
+    SqlAlchemyDataSplitter,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import DatePart
 
 
@@ -17,12 +20,12 @@ def test_split_on_year_and_month_and_day():
     pass
 
 
-def test_split_on_date_parts(sa, sqlite_view_engine):
-    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_view_engine
-    )
-    result = execution_engine.split_on_date_parts(
-        table_name="test_table",
+def test_split_on_date_parts(sa):
+
+    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
+
+    # result = execution_engine.split_on_date_parts(
+    result = sqlalchemy_data_splitter.split_on_date_parts(
         column_name="a",
         batch_identifiers={"a": {"year": 2018, "month": 10}},
         date_parts=[DatePart.YEAR, DatePart.MONTH],
