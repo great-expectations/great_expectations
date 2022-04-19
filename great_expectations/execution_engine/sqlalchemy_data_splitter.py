@@ -13,25 +13,13 @@ except ImportError:
 
 try:
     from sqlalchemy.engine import LegacyRow
-    from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import (
-        BinaryExpression,
-        BooleanClauseList,
-        Label,
-        TextClause,
-        quoted_name,
-    )
+    from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList, Label
 except ImportError:
-    reflection = None
-    DefaultDialect = None
-    Selectable = None
-    BooleanClauseList = None
-    BinaryExpression = None
     LegacyRow = None
-    TextClause = None
-    quoted_name = None
-    OperationalError = None
+    Selectable = None
+    BinaryExpression = None
+    BooleanClauseList = None
     Label = None
 
 
@@ -45,6 +33,9 @@ class DatePart(enum.Enum):
     HOUR = "hour"
     MINUTE = "minute"
     SECOND = "second"
+
+    def __eq__(self, other):
+        return self.value == other.value
 
 
 class SqlAlchemyDataSplitter:
@@ -346,7 +337,7 @@ class SqlAlchemyDataSplitter:
         table_name: str,
         column_name: str,
         date_parts: Union[List[DatePart], List[str]],
-    ) -> List[dict]:
+    ) -> Selectable:
         """Build a split query to retrieve batch_identifiers info from a column split on a list of date parts.
 
         This method builds a query to select the unique date_parts from the
