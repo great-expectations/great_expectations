@@ -21,7 +21,12 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    Domain,
+    ParameterNode,
+)
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
@@ -244,6 +249,26 @@ class DataAssistant(ABC):
             Optional custom list of "Rule" objects (overrides) can be added by subclasses (return "None" if not needed).
         """
         pass
+
+    def get_attributed_metrics_by_domain(
+        self, metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]]
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
+        domain: Domain
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+        fully_qualified_parameter_name: str
+        parameter_value: ParameterNode
+        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
+            domain: {
+                parameter_value[
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                ].metric_configuration.metric_name: parameter_value[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
+                for fully_qualified_parameter_name, parameter_value in parameter_values_for_fully_qualified_parameter_names.items()
+            }
+            for domain, parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.items()
+        }
+        return metrics_attributed_values_by_domain
 
     def get_metrics_by_domain(self) -> Dict[Domain, Dict[str, ParameterNode]]:
         """

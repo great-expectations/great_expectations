@@ -9,10 +9,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.types import (
     ALTAIR_DEFAULT_CONFIGURATION,
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     Domain,
-    ParameterNode,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
@@ -44,26 +41,6 @@ class DataAssistantResult(SerializableDictDot):
             prescriptive: Type of plot to generate.
         """
         pass
-
-    def get_attributed_metrics_by_domain(
-        self, metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]]
-    ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        domain: Domain
-        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
-        fully_qualified_parameter_name: str
-        parameter_value: ParameterNode
-        metrics_attributed_values_by_domain: Dict[Domain, Dict[str, ParameterNode]] = {
-            domain: {
-                parameter_value[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ].metric_configuration.metric_name: parameter_value[
-                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
-                ]
-                for fully_qualified_parameter_name, parameter_value in parameter_values_for_fully_qualified_parameter_names.items()
-            }
-            for domain, parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.items()
-        }
-        return metrics_attributed_values_by_domain
 
     def get_line_chart(
         self,
