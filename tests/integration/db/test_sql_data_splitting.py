@@ -14,7 +14,7 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import DatePart
+from great_expectations.execution_engine.sqlalchemy_data_splitter import DatePart
 from tests.test_utils import (
     get_bigquery_connection_url,
     get_snowflake_connection_url,
