@@ -87,6 +87,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Generates the checklist in CLI-appropriate string format."""
         str_ = self._convert_checks_into_output_message(
             self.description["camel_name"],
+            self.library_metadata.maturity,
             self.maturity_checklist,
         )
         return str_
@@ -327,11 +328,13 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _convert_checks_into_output_message(
-        class_name: str, maturity_messages: ExpectationDiagnosticMaturityMessages
+        class_name: str,
+        maturity_level: str,
+        maturity_messages: ExpectationDiagnosticMaturityMessages,
     ) -> str:
         """Converts a list of checks into an output string (potentially nested), with ✔ to indicate checks that passed."""
 
-        output_message = f"Completeness checklist for {class_name}:"
+        output_message = f"Completeness checklist for {class_name} ({maturity_level}):"
 
         checks = (
             maturity_messages.experimental

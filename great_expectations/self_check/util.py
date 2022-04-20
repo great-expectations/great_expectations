@@ -1616,7 +1616,7 @@ def generate_expectation_tests(
                         c, d["data"], d["schemas"]
                     )
             except Exception as e:
-                # Adding these print staments for build_gallery.py's console output
+                # Adding these print statements for build_gallery.py's console output
                 print("\n\n[[ Problem calling get_test_validator_with_data ]]")
                 print(f"expectation_type -> {expectation_type}")
                 print(f"c -> {c}\ne -> {e}")
