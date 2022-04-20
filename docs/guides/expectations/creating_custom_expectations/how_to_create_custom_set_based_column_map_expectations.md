@@ -235,7 +235,7 @@ Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
 ...
 ```
 
-### 8. Linting
+### 7. Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`. 
 
@@ -278,7 +278,7 @@ you may notice that we didn't explicitly implement a `_validate` method or Metri
 the `SetBasedColumnMapExpectation` class handles Metric creation and result validation implicitly; no extra work needed!
 :::
 
-### 9. Contribution (Optional)
+### 8. Contribution (Optional)
 
 This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
