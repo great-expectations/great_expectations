@@ -71,7 +71,7 @@ The template file is set up so that this will run the Expectation's `print_diagn
 
 ```
 Completeness checklist for ExpectColumnValuesToMatchSomeRegex:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
@@ -121,7 +121,7 @@ At this point you can re-run your diagnostic checklist. You should see something
 $ python expect_column_values_to_only_contain_vowels.py
 
 Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
@@ -161,7 +161,7 @@ However, you should see that the tests you've written are now being caught and r
 $ python expect_column_values_to_only_contain_vowels.py
 
 Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
@@ -226,7 +226,7 @@ Running your diagnostic checklist at this point should return something like thi
 $ python expect_column_values_to_only_contain_vowels.py
 
 Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
-  ✔ Has a library_metadata object
+  ✔ Has a valid library_metadata object
   ✔ Has a docstring, including a one-line short description
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
