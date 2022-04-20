@@ -1,5 +1,5 @@
 ---
-title: Contributing a Package
+title: How to contribute a Package to Great Expectations
 ---
 import Prerequisites from './components/prerequisites.jsx'
 
