@@ -8,6 +8,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
     ParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
+    NumericMetricRangeMultiBatchParameterBuilder,
+)
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -49,6 +52,10 @@ class VolumeDataAssistant(DataAssistant):
                 "auto": True,
                 "profiler_config": None,
             },
+            "expect_column_unique_value_count_to_be_between": {
+                "auto": True,
+                "profiler_config": None,
+            },
         }
 
     @property
@@ -69,9 +76,26 @@ class VolumeDataAssistant(DataAssistant):
             batch_request=None,
             data_context=None,
         )
+        column_row_count_metric_multi_batch_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
+            name="column_unique_values_counts",
+            metric_name="column.distinct_values.count",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+            batch_list=None,
+            batch_request=None,
+            data_context=None,
+        )
         return {
             MetricDomainTypes.TABLE: [
                 table_row_count_metric_multi_batch_parameter_builder,
+            ],
+            MetricDomainTypes.COLUMN: [
+                column_row_count_metric_multi_batch_parameter_builder
             ],
         }
 
