@@ -328,7 +328,6 @@ module.exports = {
             { type: 'doc', id: 'contributing/contributing_test' },
             { type: 'doc', id: 'contributing/contributing_maturity' },
             { type: 'doc', id: 'contributing/contributing_misc' },
-            { type: 'doc', id: 'contributing/contributing_package' }
           ]
         },
         {
@@ -351,7 +350,8 @@ module.exports = {
                 { type: 'doc', id: 'integrations/integration_template', label: 'TEMPLATE Integration Document' }
               ]
             },
-            'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
+            { type: 'doc', id: 'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations' },
+            { type: 'doc', id: 'contributing/contributing_package' }
           ]
         },
         {
