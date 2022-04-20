@@ -5,7 +5,7 @@ import os
 import random
 import shutil
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -52,7 +52,7 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.rule_based_profiler.types import Domain
+from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -2086,6 +2086,16 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -2108,6 +2118,16 @@ def data_context_with_datasource_spark_engine(empty_data_context, spark_session)
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -2131,6 +2151,16 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -2340,7 +2370,6 @@ def profiler_config_with_placeholder_args(
     """
     return RuleBasedProfilerConfig(
         name=profiler_name,
-        class_name="RuleBasedProfiler",
         config_version=1.0,
         variables={
             "false_positive_threshold": 1.0e-2,
@@ -2409,6 +2438,9 @@ def populated_profiler_store(
         profiler_config_with_placeholder_args
     )
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(serialized_config)
+
+    deserialized_config.pop("module_name")
+    deserialized_config.pop("class_name")
 
     profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         **deserialized_config
@@ -2725,32 +2757,32 @@ def alice_columnar_table_single_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "batch_request": "$variables.alice_single_batch_data_batch_request",
-                        "json_serialize": True,
-                        "name": "my_min_user_id",
-                        "reduce_scalar_metric": True,
-                        "metric_value_kwargs": None,
-                        "metric_name": "column.min",
-                        "replace_nan_with_zero": False,
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "evaluation_parameter_builder_configs": None,
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_min_user_id",
+                        "metric_name": "column.min",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
                         "enforce_numeric_metric": False,
+                        "replace_nan_with_zero": False,
+                        "reduce_scalar_metric": True,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
                     },
                     {
-                        "batch_request": "$variables.alice_single_batch_data_batch_request",
-                        "json_serialize": True,
-                        "name": "my_max_user_id",
-                        "reduce_scalar_metric": True,
-                        "metric_value_kwargs": None,
-                        "metric_name": "column.max",
-                        "replace_nan_with_zero": False,
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "evaluation_parameter_builder_configs": None,
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_max_user_id",
+                        "metric_name": "column.max",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
                         "enforce_numeric_metric": False,
+                        "replace_nan_with_zero": False,
+                        "reduce_scalar_metric": True,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
                     },
                 ],
                 "expectation_configuration_builders": [
@@ -2827,49 +2859,53 @@ def alice_columnar_table_single_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "batch_request": "$variables.alice_single_batch_data_batch_request",
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "enforce_numeric_metric": False,
-                        "evaluation_parameter_builder_configs": None,
-                        "json_serialize": True,
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "metric_name": "column.max",
-                        "metric_value_kwargs": None,
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
                         "name": "my_max_ts",
-                        "reduce_scalar_metric": True,
-                        "replace_nan_with_zero": False,
-                    },
-                    {
-                        "batch_request": "$variables.alice_single_batch_data_batch_request",
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "enforce_numeric_metric": False,
-                        "evaluation_parameter_builder_configs": None,
-                        "json_serialize": True,
-                        "metric_domain_kwargs": {"column": "event_ts"},
                         "metric_name": "column.max",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
                         "metric_value_kwargs": None,
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                        "name": "my_max_event_ts",
-                        "reduce_scalar_metric": True,
-                        "replace_nan_with_zero": False,
-                    },
-                    {
-                        "batch_request": "$variables.alice_single_batch_data_batch_request",
-                        "class_name": "MetricMultiBatchParameterBuilder",
                         "enforce_numeric_metric": False,
+                        "replace_nan_with_zero": False,
+                        "reduce_scalar_metric": True,
                         "evaluation_parameter_builder_configs": None,
                         "json_serialize": True,
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "metric_name": "column.min",
-                        "metric_value_kwargs": None,
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
-                        "name": "my_min_ts",
-                        "reduce_scalar_metric": True,
-                        "replace_nan_with_zero": False,
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
                     },
                     {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_max_event_ts",
+                        "metric_name": "column.max",
+                        "metric_domain_kwargs": {"column": "event_ts"},
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": False,
+                        "replace_nan_with_zero": False,
+                        "reduce_scalar_metric": True,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
                         "batch_request": "$variables.alice_single_batch_data_batch_request",
+                    },
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_min_ts",
+                        "metric_name": "column.min",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": False,
+                        "reduce_scalar_metric": True,
+                        "replace_nan_with_zero": False,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
+                    },
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder",
+                        "class_name": "SimpleDateFormatStringParameterBuilder",
+                        "name": "my_date_format",
+                        "metric_domain_kwargs": {"column": "event_ts"},
+                        "metric_value_kwargs": None,
                         "candidate_strings": [
                             "%H:%M:%S",
                             "%H:%M:%S,%f",
@@ -2931,14 +2967,10 @@ def alice_columnar_table_single_batch(empty_data_context):
                             "%y/%m/%d %H:%M:%S",
                             "%y/%m/%d",
                         ],
-                        "class_name": "SimpleDateFormatStringParameterBuilder",
+                        "threshold": 1.0,
                         "evaluation_parameter_builder_configs": None,
                         "json_serialize": True,
-                        "metric_domain_kwargs": {"column": "event_ts"},
-                        "metric_value_kwargs": None,
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder",
-                        "name": "my_date_format",
-                        "threshold": 1.0,
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
                     },
                 ],
                 "expectation_configuration_builders": [
@@ -3051,14 +3083,14 @@ def alice_columnar_table_single_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "batch_request": "$variables.alice_single_batch_data_batch_request",
-                        "json_serialize": True,
-                        "name": "my_user_agent_value_set",
-                        "metric_value_kwargs": None,
-                        "class_name": "ValueSetMultiBatchParameterBuilder",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "evaluation_parameter_builder_configs": None,
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder",
+                        "class_name": "ValueSetMultiBatchParameterBuilder",
+                        "name": "my_user_agent_value_set",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "batch_request": "$variables.alice_single_batch_data_batch_request",
                     }
                 ],
                 "expectation_configuration_builders": [
@@ -3590,7 +3622,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "kwargs": {
                     "column": "fare_amount",
                     "min_value": 228.94,
-                    "max_value": 2990.05,
+                    "max_value": 2990.06,
                     "mostly": 1.0,
                 },
             },
@@ -4128,24 +4160,24 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "round_decimals": 0,
-                        "json_serialize": True,
-                        "metric_value_kwargs": None,
-                        "reduce_scalar_metric": True,
-                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
-                        "metric_name": "table.row_count",
-                        "bootstrap_random_seed": None,
-                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                        "estimator": "$variables.estimator",
-                        "false_positive_rate": "$variables.false_positive_rate",
-                        "metric_domain_kwargs": None,
-                        "replace_nan_with_zero": True,
-                        "evaluation_parameter_builder_configs": None,
-                        "truncate_values": {"lower_bound": 0},
-                        "num_bootstrap_samples": None,
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
-                        "enforce_numeric_metric": True,
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "name": "row_count_range",
+                        "metric_name": "table.row_count",
+                        "metric_domain_kwargs": None,
+                        "metric_value_kwargs": None,
+                        "replace_nan_with_zero": True,
+                        "enforce_numeric_metric": True,
+                        "reduce_scalar_metric": True,
+                        "estimator": "$variables.estimator",
+                        "num_bootstrap_samples": None,
+                        "bootstrap_random_seed": None,
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "truncate_values": {"lower_bound": 0},
+                        "round_decimals": 0,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
                     }
                 ],
                 "expectation_configuration_builders": [
@@ -4185,44 +4217,44 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "round_decimals": 2,
-                        "json_serialize": True,
-                        "metric_value_kwargs": None,
-                        "reduce_scalar_metric": True,
-                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
-                        "metric_name": "column.min",
-                        "bootstrap_random_seed": None,
-                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                        "estimator": "$variables.estimator",
-                        "false_positive_rate": "$variables.false_positive_rate",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "replace_nan_with_zero": True,
-                        "evaluation_parameter_builder_configs": None,
-                        "truncate_values": {"lower_bound": None, "upper_bound": None},
-                        "num_bootstrap_samples": None,
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
-                        "enforce_numeric_metric": True,
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "name": "min_range",
+                        "metric_name": "column.min",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": True,
+                        "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "estimator": "$variables.estimator",
+                        "num_bootstrap_samples": None,
+                        "bootstrap_random_seed": None,
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "truncate_values": {"lower_bound": None, "upper_bound": None},
+                        "round_decimals": 2,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
                     },
                     {
-                        "round_decimals": 2,
-                        "json_serialize": True,
-                        "metric_value_kwargs": None,
-                        "reduce_scalar_metric": True,
-                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
-                        "metric_name": "column.max",
-                        "bootstrap_random_seed": None,
-                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                        "estimator": "$variables.estimator",
-                        "false_positive_rate": "$variables.false_positive_rate",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "replace_nan_with_zero": True,
-                        "evaluation_parameter_builder_configs": None,
-                        "truncate_values": {"lower_bound": None, "upper_bound": None},
-                        "num_bootstrap_samples": None,
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
-                        "enforce_numeric_metric": True,
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "name": "max_range",
+                        "metric_name": "column.max",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": True,
+                        "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "estimator": "$variables.estimator",
+                        "num_bootstrap_samples": None,
+                        "bootstrap_random_seed": None,
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "truncate_values": {"lower_bound": None, "upper_bound": None},
+                        "round_decimals": 2,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
                     },
                 ],
                 "expectation_configuration_builders": [
@@ -4275,16 +4307,16 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "candidate_strings": ["%y-%m-%d", "%Y-%m-%d %H:%M:%S"],
-                        "json_serialize": True,
-                        "metric_value_kwargs": None,
-                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
-                        "class_name": "SimpleDateFormatStringParameterBuilder",
-                        "evaluation_parameter_builder_configs": None,
-                        "metric_domain_kwargs": {"column": "pickup_datetime"},
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder",
-                        "threshold": 0.9,
+                        "class_name": "SimpleDateFormatStringParameterBuilder",
                         "name": "my_date_format",
+                        "metric_domain_kwargs": {"column": "pickup_datetime"},
+                        "metric_value_kwargs": None,
+                        "candidate_strings": ["%y-%m-%d", "%Y-%m-%d %H:%M:%S"],
+                        "threshold": 0.9,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
                     }
                 ],
                 "expectation_configuration_builders": [
@@ -4330,16 +4362,16 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "json_serialize": True,
-                        "metric_value_kwargs": None,
-                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
-                        "class_name": "RegexPatternStringParameterBuilder",
-                        "evaluation_parameter_builder_configs": None,
-                        "candidate_regexes": ["^\\d{1}$", "^\\d{2}$"],
-                        "metric_domain_kwargs": {"column": "VendorID"},
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder",
-                        "threshold": 0.9,
+                        "class_name": "RegexPatternStringParameterBuilder",
                         "name": "my_regex",
+                        "metric_domain_kwargs": {"column": "VendorID"},
+                        "metric_value_kwargs": None,
+                        "candidate_regexes": ["^\\d{1}$", "^\\d{2}$"],
+                        "threshold": 0.9,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
                     }
                 ],
                 "expectation_configuration_builders": [
@@ -4384,14 +4416,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "json_serialize": True,
-                        "metric_value_kwargs": None,
-                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
-                        "class_name": "ValueSetMultiBatchParameterBuilder",
-                        "evaluation_parameter_builder_configs": None,
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder",
+                        "class_name": "ValueSetMultiBatchParameterBuilder",
                         "name": "my_pickup_location_id_value_set",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                        "batch_request": "$variables.jan_feb_2019_monthly_tripdata_batch_request",
                     }
                 ],
                 "expectation_configuration_builders": [
@@ -4421,8 +4453,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     ] = {
         Domain(domain_type="table",): [
             "$variables",
-            "$parameter.row_count_range.value",
-            "$parameter.row_count_range.details",
+            "$parameter.row_count_range",
         ],
         Domain(
             domain_type="column",
@@ -4430,10 +4461,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4441,10 +4470,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4452,10 +4479,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4463,10 +4488,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4474,10 +4497,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4485,10 +4506,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4496,10 +4515,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4507,10 +4524,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4518,10 +4533,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4529,10 +4542,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4540,10 +4551,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4551,10 +4560,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4562,10 +4569,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4573,10 +4578,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4584,10 +4587,8 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details={"inferred_semantic_domain_type": "numeric"},
         ): [
             "$variables",
-            "$parameter.min_range.value",
-            "$parameter.min_range.details",
-            "$parameter.max_range.value",
-            "$parameter.max_range.details",
+            "$parameter.min_range",
+            "$parameter.max_range",
         ],
         Domain(
             domain_type="column",
@@ -4595,8 +4596,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details=None,
         ): [
             "$variables",
-            "$parameter.my_date_format.value",
-            "$parameter.my_date_format.details",
+            "$parameter.my_date_format",
         ],
         Domain(
             domain_type="column",
@@ -4604,8 +4604,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details=None,
         ): [
             "$variables",
-            "$parameter.my_date_format.value",
-            "$parameter.my_date_format.details",
+            "$parameter.my_date_format",
         ],
         Domain(
             domain_type="column",
@@ -4613,8 +4612,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details=None,
         ): [
             "$variables",
-            "$parameter.my_pickup_location_id_value_set.value",
-            "$parameter.my_pickup_location_id_value_set.details",
+            "$parameter.my_pickup_location_id_value_set",
         ],
         Domain(
             domain_type="column",
@@ -4622,8 +4620,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details=None,
         ): [
             "$variables",
-            "$parameter.my_regex.value",
-            "$parameter.my_regex.details",
+            "$parameter.my_regex",
         ],
         Domain(
             domain_type="column",
@@ -4631,8 +4628,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details=None,
         ): [
             "$variables",
-            "$parameter.my_regex.value",
-            "$parameter.my_regex.details",
+            "$parameter.my_regex",
         ],
         Domain(
             domain_type="column",
@@ -4640,8 +4636,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details=None,
         ): [
             "$variables",
-            "$parameter.my_regex.value",
-            "$parameter.my_regex.details",
+            "$parameter.my_regex",
         ],
         Domain(
             domain_type="column",
@@ -4649,15 +4644,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             details=None,
         ): [
             "$variables",
-            "$parameter.my_pickup_location_id_value_set.value",
-            "$parameter.my_pickup_location_id_value_set.details",
+            "$parameter.my_pickup_location_id_value_set",
         ],
     }
 
     expected_parameter_values_for_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
-        Domain, Dict[str, Any]
+        Domain, Dict[str, ParameterNode]
     ] = {
-        Domain(domain_type="table",): {
+        Domain(domain_type="table"): {
             "$variables": {
                 "jan_feb_2019_monthly_tripdata_batch_request": {
                     "datasource_name": "taxi_pandas",
@@ -4669,15 +4663,17 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.row_count_range.value": [7505.0, 8495.0],
-            "$parameter.row_count_range.details": {
-                "metric_configuration": {
-                    "metric_name": "table.row_count",
-                    "domain_kwargs": {},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.row_count_range": {
+                "value": [7505, 8495],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "table.row_count",
+                        "domain_kwargs": {},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -4696,25 +4692,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [4.0, 4.0],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "VendorID"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [1, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "VendorID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [1.0, 1.0],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "VendorID"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [4, 4],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "VendorID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -4733,25 +4733,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [6.0, 6.0],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "passenger_count"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [0, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "passenger_count"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [0.0, 1.0],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "passenger_count"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [6, 6],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "passenger_count"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -4770,25 +4774,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [37.62, 57.85],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "trip_distance"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [0.0, 0.0],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "trip_distance"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [0.0, 0.0],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "trip_distance"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [37.62, 57.85],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "trip_distance"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -4807,25 +4815,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [5.0, 6.0],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "RatecodeID"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [1, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "RatecodeID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [1.0, 1.0],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "RatecodeID"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [5, 6],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "RatecodeID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -4844,25 +4856,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [265.0, 265.0],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "PULocationID"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [1, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "PULocationID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [1.0, 1.0],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "PULocationID"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [265, 265],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "PULocationID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -4881,25 +4897,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [265.0, 265.0],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "DOLocationID"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [1, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "DOLocationID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [1.0, 1.0],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "DOLocationID"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [265, 265],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "DOLocationID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -4918,25 +4938,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [4.0, 4.0],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "payment_type"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [1, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "payment_type"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [1.0, 1.0],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "payment_type"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [4, 4],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "payment_type"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -4955,25 +4979,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [228.94, 2990.05],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "fare_amount"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [-51.84, -21.16],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "fare_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [-51.84, -21.16],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "fare_amount"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [228.94, 2990.06],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "fare_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -4992,25 +5020,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [4.51, 6.99],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "extra"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [-36.53, -1.18],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "extra"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [-36.53, -1.18],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "extra"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [4.51, 6.99],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "extra"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -5029,25 +5061,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [0.69, 37.32],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "mta_tax"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [-0.5, -0.5],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "mta_tax"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [-0.5, -0.5],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "mta_tax"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [0.69, 37.32],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "mta_tax"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -5066,25 +5102,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [46.84, 74.86],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "tip_amount"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [0.0, 0.0],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "tip_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [0.0, 0.0],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "tip_amount"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [46.84, 74.86],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "tip_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -5103,25 +5143,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [26.4, 497.67],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "tolls_amount"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [0.0, 0.0],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "tolls_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [0.0, 0.0],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "tolls_amount"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [26.4, 497.67],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "tolls_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -5140,25 +5184,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [0.3, 0.3],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "improvement_surcharge"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [-0.3, -0.3],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "improvement_surcharge"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [-0.3, -0.3],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "improvement_surcharge"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [0.3, 0.3],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "improvement_surcharge"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -5177,25 +5225,29 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [550.18, 2992.47],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "total_amount"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [-52.66, -24.44],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "total_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [-52.66, -24.44],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "total_amount"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [550.18, 2992.47],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "total_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
         Domain(
@@ -5214,32 +5266,32 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.max_range.value": [0.01, 2.49],
-            "$parameter.max_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.max",
-                    "domain_kwargs": {"column": "congestion_surcharge"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.min_range": {
+                "value": [-2.49, -0.01],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "congestion_surcharge"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
-            "$parameter.min_range.value": [-2.49, -0.01],
-            "$parameter.min_range.details": {
-                "metric_configuration": {
-                    "metric_name": "column.min",
-                    "domain_kwargs": {"column": "congestion_surcharge"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.max_range": {
+                "value": [0.01, 2.49],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "congestion_surcharge"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
-        Domain(
-            domain_type="column",
-            domain_kwargs={"column": "pickup_datetime"},
-            details=None,
-        ): {
+        Domain(domain_type="column", domain_kwargs={"column": "pickup_datetime"}): {
             "$variables": {
                 "jan_feb_2019_monthly_tripdata_batch_request": {
                     "datasource_name": "taxi_pandas",
@@ -5251,17 +5303,15 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.my_date_format.value": "%Y-%m-%d %H:%M:%S",
-            "$parameter.my_date_format.details": {
-                "success_ratio": 1.0,
-                "candidate_strings": {"%Y-%m-%d %H:%M:%S": 1.0, "%y-%m-%d": 0.0},
+            "$parameter.my_date_format": {
+                "value": "%Y-%m-%d %H:%M:%S",
+                "details": {
+                    "success_ratio": 1.0,
+                    "candidate_strings": {"%Y-%m-%d %H:%M:%S": 1.0, "%y-%m-%d": 0.0},
+                },
             },
         },
-        Domain(
-            domain_type="column",
-            domain_kwargs={"column": "dropoff_datetime"},
-            details=None,
-        ): {
+        Domain(domain_type="column", domain_kwargs={"column": "dropoff_datetime"}): {
             "$variables": {
                 "jan_feb_2019_monthly_tripdata_batch_request": {
                     "datasource_name": "taxi_pandas",
@@ -5273,17 +5323,15 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.my_date_format.value": "%Y-%m-%d %H:%M:%S",
-            "$parameter.my_date_format.details": {
-                "success_ratio": 1.0,
-                "candidate_strings": {"%Y-%m-%d %H:%M:%S": 1.0, "%y-%m-%d": 0.0},
+            "$parameter.my_date_format": {
+                "value": "%Y-%m-%d %H:%M:%S",
+                "details": {
+                    "success_ratio": 1.0,
+                    "candidate_strings": {"%Y-%m-%d %H:%M:%S": 1.0, "%y-%m-%d": 0.0},
+                },
             },
         },
-        Domain(
-            domain_type="column",
-            domain_kwargs={"column": "VendorID"},
-            details=None,
-        ): {
+        Domain(domain_type="column", domain_kwargs={"column": "VendorID"}): {
             "$variables": {
                 "jan_feb_2019_monthly_tripdata_batch_request": {
                     "datasource_name": "taxi_pandas",
@@ -5295,22 +5343,20 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.my_pickup_location_id_value_set.value": [1, 2, 4],
-            "$parameter.my_pickup_location_id_value_set.details": {
-                "metric_configuration": {
-                    "metric_name": "column.distinct_values",
-                    "domain_kwargs": {"column": "VendorID"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.my_pickup_location_id_value_set": {
+                "value": [1, 2, 4],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.distinct_values",
+                        "domain_kwargs": {"column": "VendorID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
-        Domain(
-            domain_type="column",
-            domain_kwargs={"column": "RatecodeID"},
-            details=None,
-        ): {
+        Domain(domain_type="column", domain_kwargs={"column": "RatecodeID"}): {
             "$variables": {
                 "jan_feb_2019_monthly_tripdata_batch_request": {
                     "datasource_name": "taxi_pandas",
@@ -5322,17 +5368,15 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.my_regex.value": "^\\d{1}$",
-            "$parameter.my_regex.details": {
-                "success_ratio": 1.0,
-                "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+            "$parameter.my_regex": {
+                "value": "^\\d{1}$",
+                "details": {
+                    "success_ratio": 1.0,
+                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                },
             },
         },
-        Domain(
-            domain_type="column",
-            domain_kwargs={"column": "PULocationID"},
-            details=None,
-        ): {
+        Domain(domain_type="column", domain_kwargs={"column": "PULocationID"}): {
             "$variables": {
                 "jan_feb_2019_monthly_tripdata_batch_request": {
                     "datasource_name": "taxi_pandas",
@@ -5344,17 +5388,15 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.my_regex.value": "^\\d{1}$",
-            "$parameter.my_regex.details": {
-                "success_ratio": 1.0,
-                "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+            "$parameter.my_regex": {
+                "value": "^\\d{1}$",
+                "details": {
+                    "success_ratio": 1.0,
+                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                },
             },
         },
-        Domain(
-            domain_type="column",
-            domain_kwargs={"column": "DOLocationID"},
-            details=None,
-        ): {
+        Domain(domain_type="column", domain_kwargs={"column": "DOLocationID"}): {
             "$variables": {
                 "jan_feb_2019_monthly_tripdata_batch_request": {
                     "datasource_name": "taxi_pandas",
@@ -5366,17 +5408,15 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.my_regex.value": "^\\d{1}$",
-            "$parameter.my_regex.details": {
-                "success_ratio": 1.0,
-                "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+            "$parameter.my_regex": {
+                "value": "^\\d{1}$",
+                "details": {
+                    "success_ratio": 1.0,
+                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                },
             },
         },
-        Domain(
-            domain_type="column",
-            domain_kwargs={"column": "passenger_count"},
-            details=None,
-        ): {
+        Domain(domain_type="column", domain_kwargs={"column": "passenger_count"}): {
             "$variables": {
                 "jan_feb_2019_monthly_tripdata_batch_request": {
                     "datasource_name": "taxi_pandas",
@@ -5388,15 +5428,17 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "false_positive_rate": 0.01,
                 "mostly": 1.0,
             },
-            "$parameter.my_pickup_location_id_value_set.value": [0, 1, 2, 3, 4, 5, 6],
-            "$parameter.my_pickup_location_id_value_set.details": {
-                "metric_configuration": {
-                    "metric_name": "column.distinct_values",
-                    "domain_kwargs": {"column": "passenger_count"},
-                    "metric_value_kwargs": None,
-                    "metric_dependencies": None,
+            "$parameter.my_pickup_location_id_value_set": {
+                "value": [0, 1, 2, 3, 4, 5, 6],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.distinct_values",
+                        "domain_kwargs": {"column": "passenger_count"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 2,
                 },
-                "num_batches": 2,
             },
         },
     }
@@ -5975,3 +6017,9 @@ def taxi_test_file_directory():
         __file__,
         os.path.join("test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"),
     )
+
+
+@pytest.fixture()
+def test_df_pandas():
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    return test_df

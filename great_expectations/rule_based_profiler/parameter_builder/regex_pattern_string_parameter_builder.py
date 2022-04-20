@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
@@ -14,7 +14,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
+    Attributes,
     Domain,
     ParameterContainer,
 )
@@ -130,12 +133,15 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+        recompute_existing_parameter_values: bool = False,
+    ) -> Attributes:
         """
-        Check the percentage of values matching the REGEX string, and return the best fit, or None if no
-        string exceeds the configured threshold.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Check the percentage of values matching the REGEX string, and return the best fit, or None if no string exceeds
+        the configured threshold.
+
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
         """
         metric_computation_result: MetricComputationResult
 
@@ -149,17 +155,16 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         )
 
         # This should never happen.
-        if not (
-            isinstance(metric_computation_result.metric_values, list)
-            and len(metric_computation_result.metric_values) == 1
-        ):
+        if len(metric_computation_result.attributed_resolved_metrics) != 1:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.metric_values} found).'
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'
             )
 
         attributed_resolved_metrics: AttributedResolvedMetrics
 
-        attributed_resolved_metrics = metric_computation_result.metric_values[0]
+        attributed_resolved_metrics = (
+            metric_computation_result.attributed_resolved_metrics[0]
+        )
 
         metric_values: MetricValues
 
@@ -215,7 +220,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         regex_string_success_ratios: dict = {}
 
-        for attributed_resolved_metrics in metric_computation_result.metric_values:
+        for (
+            attributed_resolved_metrics
+        ) in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = attributed_resolved_metrics.metric_values[:, 0]
 
@@ -250,10 +257,12 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             )
         )
 
-        return (
-            best_regex_string,
+        return Attributes(
             {
-                "success_ratio": best_ratio,
-                "evaluated_regexes": sorted_regex_candidates_and_ratios,
-            },
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: best_regex_string,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: {
+                    "success_ratio": best_ratio,
+                    "evaluated_regexes": sorted_regex_candidates_and_ratios,
+                },
+            }
         )

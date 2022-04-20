@@ -31,9 +31,9 @@ rules:
         metric_name: table.row_count
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
-        round_decimals: 0
         truncate_values:
           lower_bound: 0
+        round_decimals: 0
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder

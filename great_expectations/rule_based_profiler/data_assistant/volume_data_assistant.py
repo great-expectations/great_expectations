@@ -12,8 +12,13 @@ from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
+from great_expectations.rule_based_profiler.types.data_assistant_result import (
+    DataAssistantResult,
+    VolumeDataAssistantResult,
+)
 
 
+# TODO: <Alex>ALEX Rename this "VolumeDataAssistant" to be more precise.</Alex>
 class VolumeDataAssistant(DataAssistant):
     """
     VolumeDataAssistant provides exploration and validation of "Data Volume" aspects of specified data Batch objects.
@@ -77,3 +82,13 @@ class VolumeDataAssistant(DataAssistant):
     @property
     def rules(self) -> Optional[List[Rule]]:
         return None
+
+    def _build_data_assistant_result(
+        self, data_assistant_result: DataAssistantResult
+    ) -> DataAssistantResult:
+        return VolumeDataAssistantResult(
+            profiler_config=data_assistant_result.profiler_config,
+            metrics_by_domain=data_assistant_result.metrics_by_domain,
+            expectation_suite=data_assistant_result.expectation_suite,
+            execution_time=data_assistant_result.execution_time,
+        )

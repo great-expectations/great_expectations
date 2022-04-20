@@ -1,9 +1,10 @@
 import logging
 import os
 import uuid
+import warnings
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator, List, Union, cast
+from typing import Generator, List, Optional, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -25,7 +26,12 @@ from great_expectations.data_context.store.util import (
     save_config_to_store_backend,
 )
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
-from great_expectations.data_context.util import build_store_from_config
+from great_expectations.data_context.util import (
+    build_store_from_config,
+    instantiate_class_from_config,
+)
+from great_expectations.datasource.data_connector import InferredAssetSqlDataConnector
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -440,17 +446,92 @@ def delete_config_from_filesystem(
     )
 
 
+def get_snowflake_connection_url() -> str:
+    """Get snowflake connection url from environment variables.
+
+    Returns:
+        String of the snowflake connection url.
+    """
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
+    sfUser = os.environ.get("SNOWFLAKE_USER")
+    sfPswd = os.environ.get("SNOWFLAKE_PW")
+    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
+    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+
+    return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+
+
+def get_bigquery_connection_url() -> str:
+    """Get bigquery connection url from environment variables.
+
+    Note: dataset defaults to "demo" if not set.
+
+    Returns:
+        String of the bigquery connection url.
+    """
+    gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+        )
+    bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "demo")
+
+    return f"bigquery://{gcp_project}/{bigquery_dataset}"
+
+
 def load_data_into_test_database(
     table_name: str,
-    csv_path: str,
     connection_string: str,
+    csv_path: Optional[str] = None,
+    csv_paths: Optional[List[str]] = None,
     load_full_dataset: bool = False,
-) -> None:
-    """
-    Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
+    convert_colnames_to_datetime: Optional[List[str]] = None,
+    random_table_suffix: bool = False,
+) -> pd.DataFrame:
+    """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
+
     This includes local Dockerized DBs like postgres, but also cloud-dbs like BigQuery and Redshift.
+
+    Args:
+        table_name: name of the table to write to.
+        connection_string: used to connect to the database.
+        csv_path: path of a single csv to write.
+        csv_paths: list of paths of csvs to write.
+        load_full_dataset: if False, load only the first 10 rows.
+        convert_colnames_to_datetime: List of column names to convert to datetime before writing to db.
+        random_table_suffix: If true, add 8 random characters to the table suffix and remove other tables with the
+            same prefix.
+
+    Returns:
+        For convenience, the pandas dataframe that was used to load the data.
     """
+    if csv_path and csv_paths:
+        csv_paths.append(csv_path)
+    elif csv_path and not csv_paths:
+        csv_paths = [csv_path]
+
+    if convert_colnames_to_datetime is None:
+        convert_colnames_to_datetime = []
+
+    if random_table_suffix:
+        table_name: str = f"{table_name}_{str(uuid.uuid4())[:8]}"
+
     import pandas as pd
+
+    print("Generating dataframe of all csv data")
+    dfs: List[pd.DataFrame] = []
+    for csv_path in csv_paths:
+        df = pd.read_csv(csv_path)
+        for colname_to_convert in convert_colnames_to_datetime:
+            df[colname_to_convert] = pd.to_datetime(df[colname_to_convert])
+        if not load_full_dataset:
+            # Improving test performance by only loading the first 10 rows of our test data into the db
+            df = df.head(10)
+
+        dfs.append(df)
+
+    all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
 
     connection = None
 
@@ -461,17 +542,16 @@ def load_data_into_test_database(
             "Attempting to load data in to tests SqlAlchemy database, but unable to load SqlAlchemy context; "
             "install optional sqlalchemy dependency for support."
         )
-        return
+        return all_dfs_concatenated
     try:
         connection = engine.connect()
         print(f"Dropping table {table_name}")
         connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-        df = pd.read_csv(csv_path)
-        if not load_full_dataset:
-            # Improving test performance by only loading the first 10 rows of our test data into the db
-            df = df.head(10)
-        print(f"Creating table {table_name} from {csv_path}")
-        df.to_sql(name=table_name, con=engine, index=False)
+        print(f"Creating table {table_name} and adding data from {csv_paths}")
+        all_dfs_concatenated.to_sql(
+            name=table_name, con=engine, index=False, if_exists="append"
+        )
+        return all_dfs_concatenated
     except SQLAlchemyError as e:
         logger.error(
             """Docs integration tests encountered an error while loading test-data into test-database."""
@@ -480,6 +560,55 @@ def load_data_into_test_database(
     finally:
         connection.close()
         engine.dispose()
+
+
+def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:
+    """Drop all tables starting with the provided table_prefix.
+    Note: Uses private method InferredAssetSqlDataConnector._introspect_db()
+    to get the table names to not duplicate code, but should be refactored in the
+    future to not use a private method.
+
+    Args:
+        connection_string: To connect to the database.
+        table_prefix: First characters of the tables you want to remove.
+
+    Returns:
+        List of deleted tables.
+    """
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        connection_string=connection_string
+    )
+    data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "temp_data_connector",
+        },
+        runtime_environment={
+            "execution_engine": execution_engine,
+            "datasource_name": "temp_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+    introspection_output = data_connector._introspect_db()
+
+    tables_to_drop: List[str] = []
+    tables_dropped: List[str] = []
+
+    for table in introspection_output:
+        if table["table_name"].startswith(table_prefix):
+            tables_to_drop.append(table["table_name"])
+
+    connection = execution_engine.engine.connect()
+    for table_name in tables_to_drop:
+        print(f"Dropping table {table_name}")
+        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+        tables_dropped.append(table_name)
+
+    tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))
+    if len(tables_skipped) > 0:
+        warnings.warn(f"Warning: Tables skipped: {tables_skipped}")
+
+    return tables_dropped
 
 
 @contextmanager
