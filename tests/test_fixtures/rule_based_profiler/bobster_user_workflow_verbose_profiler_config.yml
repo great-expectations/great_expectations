@@ -26,14 +26,14 @@ rules:
         metric_name: table.row_count
         false_positive_rate: $variables.false_positive_rate
         bootstrap_random_seed: $variables.bootstrap_random_seed
-        round_decimals: 0
         truncate_values:
           lower_bound: 0
+        round_decimals: 0
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        min_value: $parameter.row_count_range.value.value_range[0]
-        max_value: $parameter.row_count_range.value.value_range[1]
+        min_value: $parameter.row_count_range.value[0]
+        max_value: $parameter.row_count_range.value[1]
         meta:
           profiler_details: $parameter.row_count_range.details

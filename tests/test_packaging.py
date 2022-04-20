@@ -16,7 +16,9 @@ def test_requirements_files():
         key = req_file.rsplit(os.path.sep, 1)[-1]
         with open(req_file) as f:
             req_set_dict[key] = {
-                f'{line.name}{"".join(line.specs[0])}' for line in rp.parse(f)
+                f'{line.name}{"".join(line.specs[0])}'
+                for line in rp.parse(f)
+                if line.specs
             }
 
     assert req_set_dict["requirements.txt"] <= req_set_dict["requirements-dev.txt"]

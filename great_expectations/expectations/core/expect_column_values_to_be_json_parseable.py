@@ -63,7 +63,6 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
@@ -83,9 +82,8 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -110,7 +108,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
@@ -125,7 +123,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
         template_str = "values must be parseable as JSON"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -173,7 +171,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
         template_str = "values must be parseable as JSON"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )

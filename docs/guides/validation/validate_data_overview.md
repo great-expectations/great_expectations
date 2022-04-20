@@ -4,6 +4,7 @@ title: "Validate Data: Overview"
 # [![Create Expectations Icon](../../images/universal_map/Checkmark-active.png)](./validate_data_overview.md) Validate Data: Overview
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
 
@@ -13,11 +14,11 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 - Completing [Step 4: Validate data](../../tutorials/getting_started/tutorial_validate_data.md) of the Getting Started tutorial is recommended.
 :::
 
-When you complete this step for the first time, you will have created and run a Checkpoint.  This Checkpoint can then be reused to Validate data in the future, and you can also create and configure additional Checkpoints to cover different use cases, should you have them.
+When you complete this step for the first time, you will have created and run a <TechnicalTag tag="checkpoint" text="Checkpoint" />.  This Checkpoint can then be reused to <TechnicalTag tag="validation" text="Validate" /> data in the future, and you can also create and configure additional Checkpoints to cover different use cases, should you have them.
 
 ## The Validate Data process
 
-The recommended workflow for validating data is through **the use of Checkpoints.**  Checkpoints handle the rest of the validation process for you: They will validate data, save Validation Results, run any Actions you have specified, and finally create Data Docs with their results.  
+The recommended workflow for validating data is through **the use of Checkpoints.**  Checkpoints handle the rest of the Validation process for you: They will Validate data, save <TechnicalTag tag="validation_result" text="Validation Results" />, run any <TechnicalTag tag="action" text="Actions" /> you have specified, and finally create <TechnicalTag tag="data_docs" text="Data Docs" /> with their results.  
 
 ![How a Checkpoint works](../../images/universal_map/overviews/how_a_checkpoint_works.png)
 
@@ -25,17 +26,17 @@ As you can imagine, Checkpoints will make validating data a very simple process,
 
 ### Creating a Checkpoint
 
-Checkpoints are simple to create.  While advanced users could write their configuration from scratch, we recommend using the CLI.  It will launch a Jupyter Notebook set up with boilerplate code to create your checkpoint.  All you will need to do is configure it!  For detailed instructions, please see our guide on [how to create a new Checkpoint](./checkpoints/how_to_create_a_new_checkpoint.md).
+Checkpoints are simple to create.  While advanced users could write their configuration from scratch, we recommend using the <TechnicalTag tag="cli" text="CLI" />.  It will launch a Jupyter Notebook set up with boilerplate code to create your checkpoint.  All you will need to do is configure it!  For detailed instructions, please see our guide on [how to create a new Checkpoint](./checkpoints/how_to_create_a_new_checkpoint.md).
 
 ### Configuring your Checkpoint
 
-There are three very important things you can do when configuring your Checkpoint.  You can add additional validation data, or set the checkpoint so that validation must be specified at run time.  You can add additional Expectation Suites, and you can add Actions which the Checkpoint will execute when it finishes validating data.  For a more detailed overview of Checkpoint configuration, please see our documentation on [Checkpoints and Actions](../../reference/checkpoints_and_actions.md).
+There are three very important things you can do when configuring your Checkpoint.  You can add additional validation data, or set the Checkpoint so that validation data must be specified at run time.  You can add additional <TechnicalTag tag="expectation_suite" text="Expectation Suites" />, and you can add Actions which the Checkpoint will execute when it finishes Validating data.  For a more detailed overview of Checkpoint configuration, please see our documentation on [Checkpoints](../../terms/checkpoint.md) and [Actions](../../terms/action.md).
 
 #### Checkpoints, Batch Requests, and Expectation Suites
 
-Batch Requests are used to specify the data that a Checkpoint will Validate.  You can add additional validation data to your Checkpoint by assigning it Batch Requests, or set up the Checkpoint so that it requires a Batch Request to be specified at run time.
+<p class="markdown"><TechnicalTag tag="batch_request" text="Batch Requests" /> are used to specify the data that a Checkpoint will Validate.  You can add additional validation data to your Checkpoint by assigning it Batch Requests, or set up the Checkpoint so that it requires a Batch Request to be specified at run time.</p>
 
-Expectation Suites contain the Expectations that the Checkpoint will run against the validation data specified in its Batch Requests.  Checkpoints are assigned Expectation Suites and Batch Requests in pairs, and when the Checkpoint is run it will Validate each of its Expectation Suites against the data provided by its paired Batch Request.
+Expectation Suites contain the <TechnicalTag tag="expectation" text="Expectations" /> that the Checkpoint will run against the validation data specified in its Batch Requests.  Checkpoints are assigned Expectation Suites and Batch Requests in pairs, and when the Checkpoint is run it will Validate each of its Expectation Suites against the data provided by its paired Batch Request.
 
 For more detailed instructions on how to add Batch Requests and Expectation Suites to a Checkpoint, please see our guide on [how to add validations data or suites to a Checkpoint](./checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md).
 

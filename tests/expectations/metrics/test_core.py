@@ -703,9 +703,8 @@ def test_map_column_values_increasing_pd():
         )
         metrics.update(results)
     assert len(record) == 1
-    assert (
-        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-        in str(record.list[0].message)
+    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+        record.list[0].message
     )
 
     unexpected_count_metric = MetricConfiguration(
@@ -806,9 +805,8 @@ def test_map_column_values_increasing_spark(spark_session):
         )
         metrics.update(results)
     assert len(record) == 1
-    assert (
-        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-        in str(record.list[0].message)
+    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+        record.list[0].message
     )
 
     unexpected_count_metric = MetricConfiguration(
@@ -894,9 +892,8 @@ def test_map_column_values_decreasing_pd():
         )
         metrics.update(results)
     assert len(record) == 1
-    assert (
-        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-        in str(record.list[0].message)
+    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+        record.list[0].message
     )
 
     unexpected_count_metric = MetricConfiguration(
@@ -997,9 +994,8 @@ def test_map_column_values_decreasing_spark(spark_session):
         )
         metrics.update(results)
     assert len(record) == 1
-    assert (
-        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-        in str(record.list[0].message)
+    assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+        record.list[0].message
     )
 
     unexpected_count_metric = MetricConfiguration(
@@ -1272,6 +1268,46 @@ def test_map_unique_column_does_not_exist_sa(sa):
         'Error: The column "non_existent_column" in BatchData does not exist.'
         in str(eee.value)
     )
+
+
+def test_map_unique_empty_query_sa(sa):
+    """If the table contains zero rows then there must be zero unexpected values."""
+    engine = build_sa_engine(
+        pd.DataFrame({"a": [], "b": []}),
+        sa,
+    )
+
+    table_columns_metric: MetricConfiguration
+    metrics: dict
+    table_columns_metric, metrics = get_table_columns_metric(engine=engine)
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.unique.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(condition_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,),
+        metrics=metrics,
+    )
+    assert results[desired_metric.id] == 0
 
 
 def test_map_unique_column_exists_spark(spark_session):
@@ -3046,9 +3082,8 @@ def test_batch_aggregate_metrics_pd():
         metrics.update(results)
     assert len(records) == 4
     for record in records:
-        assert (
-            'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
-            in str(record.message)
+        assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
+            record.message
         )
     end = datetime.datetime.now()
     print(end - start)

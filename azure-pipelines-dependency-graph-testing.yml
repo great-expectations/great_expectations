@@ -74,6 +74,8 @@ stages:
                 tests/**
                 /*.txt
                 /*.yml
+                requirements*
+                azure-pipelines*
 
   - stage: lint
     dependsOn: scope_check
@@ -90,7 +92,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==22.1.0 pyupgrade==2.7.2
+              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==22.3.0 pyupgrade==2.7.2
               EXIT_STATUS=0
               isort . --check-only --skip docs/ || EXIT_STATUS=$?
               black --check --exclude docs/ . || EXIT_STATUS=$?
@@ -98,40 +100,89 @@ stages:
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
-  - stage: required
-    dependsOn: [scope_check, lint]
+  - stage: custom_checks
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+    - job: type_hint_checker
+      steps:
+      - script: |
+          pip install mypy # Prereq for type hint script
+          python scripts/check_type_hint_coverage.py
+        name: TypeHintChecker
+
+    - job: docstring_checker
+      steps:
+      - bash: python scripts/check_docstring_coverage.py
+        name: DocstringChecker
+
+  - stage: import_ge
+    dependsOn: [lint]
     pool:
       vmImage: 'ubuntu-18.04'
 
     jobs:
-      - job: comprehensive
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-
-        services:
-          postgres: postgres
-
-        variables:
-          GE_pytest_opts: ''
+      - job: import_ge
 
         strategy:
-          matrix:
-            Python36:
-              python.version: '3.6'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python37:
-              python.version: '3.7'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python38:
-              python.version: '3.8'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python39:
-              python.version: '3.9'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+         matrix:
+           Python37:
+             python.version: '3.7'
+           Python38:
+             python.version: '3.8'
+           Python39:
+             python.version: '3.9'
 
+        steps:
+         - task: UsePythonVersion@0
+           inputs:
+             versionSpec: '$(python.version)'
+           displayName: 'Use Python $(python.version)'
+
+         - bash: python -m pip install --upgrade pip==21.3.1
+           displayName: 'Update pip'
+
+         - script: |
+             pip install  .
+           displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
+
+         - script: |
+             python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
+           displayName: 'Import Great Expectations'
+
+  - stage: required
+    dependsOn: [scope_check, lint, import_ge]
+    pool:
+      vmImage: 'ubuntu-18.04'
+
+    jobs:
+      - job: compatibility_matrix
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        variables:
+          GE_pytest_opts: '--no-sqlalchemy'
+        strategy:
+          matrix:
+            Python37-Pandas023:
+              python.version: '3.7'
+              numpy.version: '1.17.0'
+              pandas.version: '0.23.4'
+              scipy.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
+            Python37-Pandas025:
+              python.version: '3.7'
+              numpy.version: '1.17.0'
+              pandas.version: '0.25.3'
+              scipy.version: 'latest'
+              # numpy 1.20 and pandas 0.25.3 do not coexist happily
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
+            Python38-PandasLatest:
+              python.version: '3.8'
+              numpy.version: 'latest'
+              pandas.version: 'latest'
+              scipy.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
@@ -143,17 +194,28 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              sudo apt-get install -y pandoc
-              pip install pypandoc
-            displayName: 'Install pandoc'
+              if [[ $(numpy.version) == 'latest' ]]; then
+                pip install numpy
+              else
+                pip install numpy==$(numpy.version)
+              fi
+            displayName: 'Install numpy'
 
-          - bash: pip install pandas
-            condition: eq(variables['pandas.version'], 'latest')
-            displayName: 'Install pandas latest'
+          - script: |
+              if [[ $(pandas.version) == 'latest' ]]; then
+                pip install pandas
+              else
+                pip install pandas==$(pandas.version)
+              fi
+            displayName: 'Install pandas'
 
-          - bash: pip install pandas==$(pandas.version)
-            condition: ne(variables['pandas.version'], 'latest')
-            displayName: 'Install pandas - $(pandas.version)'
+          - script: |
+              if [[ $(scipy.version) == 'latest' ]]; then
+                pip install scipy
+              else
+                pip install scipy==$(scipy.version)
+              fi
+            displayName: 'Install scipy'
 
           - script: |
               pip install --requirement requirements.txt
@@ -186,8 +248,102 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
+      - job: comprehensive
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+
+        services:
+          postgres: postgres
+
+        variables:
+          GE_pytest_opts: ''
+
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python38:
+              python.version: '3.8'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python39:
+              python.version: '3.9'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              sudo apt-get install -y pandoc
+              pip install pypandoc
+            displayName: 'Install pandoc'
+
+          - script: |
+              if [[ $(pandas.version) == 'latest' ]]; then
+                pip install pandas
+              else
+                pip install pandas==$(pandas.version)
+              fi
+            displayName: 'Install pandas'
+
+          - script: |
+              pip install --requirement requirements.txt
+              echo "about to run pip install $(GE_pytest_pip_opts)"
+              pip install $(GE_pytest_pip_opts)
+              pip install  .
+            displayName: 'Install dependencies'
+
+          - script: |
+              # Install dependencies
+              pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
+
+              # Run dgtest
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+            displayName: 'dgtest'
+
+          - script: |
+              # These are tests that are missed by the dgtest dependency graph.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              pytest \
+                tests/test_deprecation.py \
+                tests/data_asset/test_data_asset_util.py \
+                tests/datasource/test_batch_kwargs.py \
+                tests/datasource/test_sqlalchemy_datasource_workarounds.py \
+                tests/data_context/test_templates.py \
+                tests/data_context/test_data_context_store_configs.py \
+                tests/core/test_urn.py \
+                tests/dataset/test_pandas_dataset_conditionals.py \
+                tests/expectations/test_generate_diagnostic_checklist.py
+
+            displayName: 'dgtest-overrides'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -223,7 +379,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
 
     jobs:
       - job: mysql
@@ -316,7 +472,7 @@ stages:
             displayName: 'dgtest'
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 

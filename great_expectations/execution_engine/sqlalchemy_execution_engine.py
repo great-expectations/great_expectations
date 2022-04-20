@@ -4,11 +4,16 @@ import logging
 import traceback
 import warnings
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
+
+from great_expectations.execution_engine.sqlalchemy_data_splitter import (
+    SqlAlchemyDataSplitter,
+)
+
 del get_versions  # isort:skip
 
 
@@ -36,7 +41,11 @@ from great_expectations.execution_engine.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
+from great_expectations.expectations.row_conditions import (
+    RowCondition,
+    RowConditionParserType,
+    parse_condition_to_sqlalchemy,
+)
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_selectable,
@@ -56,16 +65,25 @@ except ImportError:
     sa = None
 
 try:
+    from sqlalchemy.engine import LegacyRow
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import TextClause, quoted_name
+    from sqlalchemy.sql.elements import (
+        BooleanClauseList,
+        Label,
+        TextClause,
+        quoted_name,
+    )
 except ImportError:
+    LegacyRow = None
     reflection = None
     DefaultDialect = None
     Selectable = None
+    BooleanClauseList = None
     TextClause = None
     quoted_name = None
     OperationalError = None
+    Label = None
 
 
 try:
@@ -107,19 +125,13 @@ except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
+        # deprecated-v0.14.7
         warnings.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
+            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
             DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        ###
-        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-        # to define an attribute "dialect". A PR has been submitted to fix this upstream
-        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-        # fix isn't present, add this "dialect" attribute here:
-        if not hasattr(sqla_bigquery, "dialect"):
-            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
-
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
@@ -358,6 +370,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+        self._sqlalchemy_data_splitter = SqlAlchemyDataSplitter()
+
     @property
     def credentials(self) -> Optional[dict]:
         return self._credentials
@@ -481,6 +495,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     f"Unable to find batch with batch_id {batch_id}"
                 )
 
+        selectable: Selectable
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
@@ -527,9 +542,31 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
                 )
 
+        # Filtering by filter_conditions
+        filter_conditions: List[RowCondition] = domain_kwargs.get(
+            "filter_conditions", []
+        )
+        # For SqlAlchemyExecutionEngine only one filter condition is allowed
+        if len(filter_conditions) == 1:
+            filter_condition = filter_conditions[0]
+            assert (
+                filter_condition.condition_type == RowConditionParserType.GE
+            ), "filter_condition must be of type GE for SqlAlchemyExecutionEngine"
+
+            selectable = (
+                sa.select([sa.text("*")])
+                .select_from(selectable)
+                .where(parse_condition_to_sqlalchemy(filter_condition.condition))
+            )
+        elif len(filter_conditions) > 1:
+            raise GreatExpectationsError(
+                "SqlAlchemyExecutionEngine currently only supports a single filter condition."
+            )
+
         if "column" in domain_kwargs:
             return selectable
 
+        # Filtering by ignore_row_if directive
         if (
             "column_A" in domain_kwargs
             and "column_B" in domain_kwargs
@@ -581,9 +618,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
 
                 if ignore_row_if == "never":
+                    # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" will be deprecated).  Please update code accordingly.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
 """,
                         DeprecationWarning,
                     )
@@ -899,81 +937,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.engine.dispose()
 
-    ### Splitter methods for partitioning tables ###
-
-    def _split_on_whole_table(self, table_name: str, batch_identifiers: dict) -> bool:
-        """'Split' by returning the whole table"""
-
-        # return sa.column(column_name) == batch_identifiers[column_name]
-        return 1 == 1
-
-    def _split_on_column_value(
-        self, table_name: str, column_name: str, batch_identifiers: dict
-    ) -> bool:
-        """Split using the values in the named column"""
-
-        return sa.column(column_name) == batch_identifiers[column_name]
-
-    def _split_on_converted_datetime(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-        date_format_string: str = "%Y-%m-%d",
-    ) -> bool:
-        """Convert the values in the named column to the given date_format, and split on that"""
-
-        return (
-            sa.func.strftime(
-                date_format_string,
-                sa.column(column_name),
-            )
-            == batch_identifiers[column_name]
-        )
-
-    def _split_on_divided_integer(
-        self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict
-    ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
-
-        return (
-            sa.cast(sa.column(column_name) / divisor, sa.Integer)
-            == batch_identifiers[column_name]
-        )
-
-    def _split_on_mod_integer(
-        self, table_name: str, column_name: str, mod: int, batch_identifiers: dict
-    ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
-
-        return sa.column(column_name) % mod == batch_identifiers[column_name]
-
-    def _split_on_multi_column_values(
-        self, table_name: str, column_names: List[str], batch_identifiers: dict
-    ) -> bool:
-        """Split on the joint values in the named columns"""
-
-        return sa.and_(
-            *(
-                sa.column(column_name) == column_value
-                for column_name, column_value in batch_identifiers.items()
-            )
-        )
-
-    def _split_on_hashed_column(
-        self,
-        table_name: str,
-        column_name: str,
-        hash_digits: int,
-        batch_identifiers: dict,
-    ) -> bool:
-        """Split on the hashed value of the named column"""
-
-        return (
-            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
-            == batch_identifiers[column_name]
-        )
-
     ### Sampling methods ###
 
     # _sample_using_limit
@@ -1013,14 +976,36 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
+    def get_splitter_method(self, splitter_method_name: str) -> Callable:
+        """Get the appropriate splitter method from the method name.
+
+        Args:
+            splitter_method_name: name of the splitter to retrieve.
+
+        Returns:
+            splitter method.
+        """
+        return self._sqlalchemy_data_splitter.get_splitter_method(splitter_method_name)
+
+    def execute_split_query(self, split_query: Selectable) -> List[LegacyRow]:
+        """Use the execution engine to run the split query and fetch all of the results.
+
+        Args:
+            split_query: Query to be executed as a sqlalchemy Selectable.
+
+        Returns:
+            List of row results.
+        """
+        return self.engine.execute(split_query).fetchall()
+
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
-        table_name: str = batch_spec["table_name"]
         if "splitter_method" in batch_spec:
-            splitter_fn = getattr(self, batch_spec["splitter_method"])
+            splitter_fn: Callable = self._sqlalchemy_data_splitter.get_splitter_method(
+                splitter_method_name=batch_spec["splitter_method"]
+            )
             split_clause = splitter_fn(
-                table_name=table_name,
                 batch_identifiers=batch_spec["batch_identifiers"],
                 **batch_spec["splitter_kwargs"],
             )
@@ -1028,6 +1013,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             split_clause = True
 
+        table_name: str = batch_spec["table_name"]
         if "sampling_method" in batch_spec:
             if batch_spec["sampling_method"] == "_sample_using_limit":
                 # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,

@@ -64,10 +64,10 @@ rules:
         condition: $parameter.my_min_user_id.value[-1] > 0 & $parameter.my_min_user_id.value[-1] > $variables.very_small_user_id
   my_rule_for_timestamps:
     domain_builder:
-      class_name: SimpleColumnSuffixDomainBuilder
+      class_name: ColumnDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
       batch_request: $variables.alice_single_batch_data_batch_request
-      column_name_suffixes:
+      include_column_name_suffixes:
         - _ts
     parameter_builders:
       # unused parameter my_max_ts

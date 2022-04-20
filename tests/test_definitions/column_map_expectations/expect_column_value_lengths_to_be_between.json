@@ -17,6 +17,7 @@
     },
     "tests": [{
       "title": "positive_test_exact_min_and_max",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in":{
         "column": "s1",
@@ -30,6 +31,7 @@
       }
     },{
       "title": "negative_test_matching_min_max_too_small",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in":{
         "column": "s2",

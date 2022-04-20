@@ -1,3 +1,6 @@
+from typing import Optional
+
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
@@ -13,16 +16,16 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": [
             "core expectation",
             "multi-column expectation",
-            "needs migration to modular expectations api",
         ],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": False,
     }
 
     map_metric = "compound_columns.unique"
@@ -35,6 +38,22 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
         "catch_exceptions": False,
     }
     args_keys = ("column_list",)
+
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+        super().validate_configuration(configuration)
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -80,24 +99,21 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
                 "value": params.get("mostly"),
             },
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
         }
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            template_str = f"Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
+        else:
+            template_str = (
+                f"Values for given compound columns must be unique together: "
+            )
 
-        template_str = (
-            f"Values for given compound columns must be unique together{mostly_str}: "
-        )
         column_list = params.get("column_list") if params.get("column_list") else []
 
         if len(column_list) > 0:
@@ -153,19 +169,16 @@ class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
             ],
         )
 
-        if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
+        if params["mostly"] is not None and params["mostly"] < 1.0:
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            template_str = f"Values for given compound columns must be unique together, at least $mostly_pct % of the time: "
+        else:
+            template_str = (
+                f"Values for given compound columns must be unique together: "
+            )
 
-        template_str = (
-            f"Values for given compound columns must be unique together{mostly_str}: "
-        )
         for idx in range(len(params["column_list"]) - 1):
             template_str += f"$column_list_{str(idx)}, "
             params[f"column_list_{str(idx)}"] = params["column_list"][idx]

@@ -26,7 +26,7 @@ variables:
 rules:
   column_quantiles_rule:
     domain_builder:
-      class_name: SimpleColumnSuffixDomainBuilder
+      class_name: ColumnDomainBuilder
       # BatchRequest yielding exactly one batch (November, 2020 trip data)
       batch_request:
         datasource_name: taxi_pandas
@@ -34,7 +34,7 @@ rules:
         data_asset_name: my_reports
         data_connector_query:
           index: -1
-      column_name_suffixes:
+      include_column_name_suffixes:
         - _amount
     parameter_builders:
       - name: quantile_value_ranges
@@ -55,7 +55,7 @@ rules:
         column: $domain.domain_kwargs.column
         quantile_ranges:
           quantiles: $variables.quantiles
-          value_ranges: $parameter.quantile_value_ranges.value.value_range
+          value_ranges: $parameter.quantile_value_ranges.value
         allow_relative_error: $variables.allow_relative_error
         meta:
           profiler_details: $parameter.quantile_value_ranges.details

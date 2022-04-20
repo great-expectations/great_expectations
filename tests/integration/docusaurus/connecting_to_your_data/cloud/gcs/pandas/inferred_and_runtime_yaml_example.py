@@ -1,12 +1,18 @@
 from typing import List
 
+# <snippet>
 from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 
-context = ge.get_context()
+# </snippet>
 
+# <snippet>
+context = ge.get_context()
+# </snippet>
+
+# <snippet>
 datasource_yaml = rf"""
 name: my_gcs_datasource
 class_name: Datasource
@@ -26,6 +32,7 @@ data_connectors:
             group_names:
                 - data_asset_name
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -36,9 +43,12 @@ datasource_yaml = datasource_yaml.replace(
 
 context.test_yaml_config(datasource_yaml)
 
+# <snippet>
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
+# <snippet>
 batch_request = RuntimeBatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -46,6 +56,7 @@ batch_request = RuntimeBatchRequest(
     runtime_parameters={"path": "<PATH_TO_YOUR_DATA_HERE>"},  # Add your GCS path here.
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
@@ -53,6 +64,7 @@ batch_request.runtime_parameters[
     "path"
 ] = f"gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
+# <snippet>
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
@@ -60,6 +72,7 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
@@ -71,11 +84,13 @@ batch: Batch = batch_list[0]
 assert batch.data.dataframe.shape[0] == 10000
 
 # Here is a BatchRequest naming a data_asset
+# <snippet>
 batch_request = BatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
 )
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.

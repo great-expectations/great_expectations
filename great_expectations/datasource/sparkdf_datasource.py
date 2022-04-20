@@ -196,9 +196,10 @@ class SparkDFDatasource(LegacyDatasource):
 
         if "path" in batch_kwargs or "s3" in batch_kwargs:
             if "s3" in batch_kwargs:
+                # deprecated-v0.13.0
                 warnings.warn(
-                    "Direct GE Support for the s3 BatchKwarg will be removed in a future release. Please use a path "
-                    "including the s3a:// protocol instead.",
+                    "Direct GE Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "
+                    "Please use a path including the s3a:// protocol instead.",
                     DeprecationWarning,
                 )
 

@@ -9,6 +9,7 @@ from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
+    ValidationError,
     fields,
     post_dump,
     post_load,
@@ -17,8 +18,8 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types.parameter_container import (
-    VARIABLES_KEY,
+from great_expectations.rule_based_profiler.types import (
+    VARIABLES_PREFIX,
     ParameterContainer,
 )
 from great_expectations.types import DictDot, SerializableDictDot
@@ -109,9 +110,11 @@ class DomainBuilderConfig(DictDot):
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
-        self.class_name = class_name
         self.module_name = module_name
+        self.class_name = class_name
+
         self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -149,13 +152,22 @@ class ParameterBuilderConfig(DictDot):
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
+        evaluation_parameter_builder_configs: Optional[list] = None,
+        json_serialize: bool = True,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
-        self.name = name
-        self.class_name = class_name
         self.module_name = module_name
+        self.class_name = class_name
+
+        self.name = name
+
+        self.evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
+
+        self.json_serialize = json_serialize
+
         self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -185,6 +197,15 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=True,
         allow_none=False,
     )
+    evaluation_parameter_builder_configs = fields.List(
+        cls_or_instance=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
     json_serialize = fields.Boolean(
         required=False,
         allow_none=True,
@@ -203,12 +224,21 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         meta: Optional[dict] = None,
+        validation_parameter_builder_configs: Optional[list] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
-        self.expectation_type = expectation_type
-        self.class_name = class_name
         self.module_name = module_name
+        self.class_name = class_name
+
+        self.expectation_type = expectation_type
+
         self.meta = meta
+
+        self.validation_parameter_builder_configs = validation_parameter_builder_configs
+
+        self.batch_request = batch_request
+
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
@@ -248,16 +278,29 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
         required=False,
         allow_none=True,
     )
+    validation_parameter_builder_configs = fields.List(
+        cls_or_instance=fields.Nested(
+            lambda: ParameterBuilderConfigSchema(),
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
+    batch_request = fields.Raw(
+        required=False,
+        allow_none=True,
+    )
 
 
 class RuleConfig(SerializableDictDot):
     def __init__(
         self,
-        expectation_configuration_builders: List[
-            dict
-        ],  # see ExpectationConfigurationBuilderConfig
         domain_builder: Optional[dict] = None,  # see DomainBuilderConfig
         parameter_builders: Optional[List[dict]] = None,  # see ParameterBuilderConfig
+        expectation_configuration_builders: Optional[
+            List[dict]
+        ] = None,  # see ExpectationConfigurationBuilderConfig
     ):
         self.domain_builder = domain_builder
         self.parameter_builders = parameter_builders
@@ -333,8 +376,8 @@ class RuleConfigSchema(NotNullSchema):
             required=True,
             allow_none=False,
         ),
-        required=True,
-        allow_none=False,
+        required=False,
+        allow_none=True,
     )
 
 
@@ -344,19 +387,18 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
-        class_name: Optional[str] = None,
-        module_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ):
+        self.module_name = "great_expectations.rule_based_profiler"
+        self.class_name = "RuleBasedProfiler"
+
         self.name = name
+
         self.config_version = config_version
-        self.rules = rules
-        if class_name is not None:
-            self.class_name = class_name
-        if module_name is not None:
-            self.module_name = module_name
+
         self.variables = variables
+        self.rules = rules
 
         super().__init__(commented_map=commented_map)
 
@@ -367,6 +409,25 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:  # noqa: F821
         return RuleBasedProfilerConfigSchema
+
+    @classmethod
+    def from_commented_map(
+        cls, commented_map: CommentedMap
+    ) -> "RuleBasedProfilerConfig":
+        """Override parent implementation to pop unnecessary attrs from config.
+
+        Please see parent BaseYamlConfig for more details.
+        """
+        try:
+            config: dict = cls._get_schema_instance().load(commented_map)
+            config.pop("class_name", None)
+            config.pop("module_name", None)
+            return cls.get_config_class()(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading config.  See ValidationError for more details."
+            )
+            raise
 
     def to_json_dict(self) -> dict:
         """
@@ -458,8 +519,6 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         }
 
         return cls(
-            class_name=profiler.__class__.__name__,
-            module_name=profiler.__class__.__module__,
             name=profiler.config.name,
             config_version=profiler.config.config_version,
             variables=runtime_variables,
@@ -484,7 +543,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         def _traverse_and_substitute(node: Any) -> None:
             if isinstance(node, dict):
                 for key, val in node.copy().items():
-                    if isinstance(val, str) and val.startswith(VARIABLES_KEY):
+                    if isinstance(val, str) and val.startswith(VARIABLES_PREFIX):
                         node[key] = get_parameter_value_and_validate_return_type(
                             domain=None,
                             parameter_reference=val,

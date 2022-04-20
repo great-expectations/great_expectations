@@ -14,11 +14,11 @@ File-based introspection and partitioning are useful for:
 - Exploring the types, subdirectory location, and filepath naming structures of the files in your dataset, and
 - Organizing the discovered files into <TechnicalTag tag="data_asset" text="Data Assets" /> according to the identified structures.
 
-`Partitioning` enables you to select the desired subsets of your dataset for [Validation](/docs/reference/validation).
+`Partitioning` enables you to select the desired subsets of your dataset for [Validation](../../reference/validation.md).
 
 <Prerequisites>
 
-- [Configured and loaded a Data Context](../../tutorials/getting_started/initialize_a_data_context.md)
+- [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
 - [Configured a Datasource and Data Connector](../../reference/datasources.md)
   
 </Prerequisites>

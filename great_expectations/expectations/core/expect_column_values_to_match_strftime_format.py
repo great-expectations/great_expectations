@@ -58,12 +58,13 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.match_strftime_format"
@@ -86,7 +87,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+    ) -> None:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
@@ -109,8 +110,6 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             raise ValueError(f"Unable to use provided strftime_format. {str(e)}")
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-
-        return True
 
     @classmethod
     def _atomic_prescriptive_template(
@@ -145,7 +144,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
@@ -164,7 +163,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             template_str = (
                 "values must match the following strftime format: $strftime_format"
             )
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -222,7 +221,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             template_str = (
                 "values must match the following strftime format: $strftime_format"
             )
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )

@@ -65,14 +65,14 @@ This configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L8-L26
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L9-L27
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L37-L60
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L40-L63
 ```
 
 </TabItem>
@@ -120,14 +120,14 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L90-L114
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L95-L119
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L125-L151
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L132-L158
 ```
 
 </TabItem>

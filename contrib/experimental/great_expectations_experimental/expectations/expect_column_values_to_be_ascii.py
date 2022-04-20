@@ -198,7 +198,6 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
             "@rexboyce",
             "@bragleg",
         ],
-        "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
