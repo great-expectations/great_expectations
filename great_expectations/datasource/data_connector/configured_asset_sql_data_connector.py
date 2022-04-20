@@ -70,6 +70,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def assets(self) -> Dict[str, dict]:
         return self._assets
 
+    @property
+    def execution_engine(self) -> SqlAlchemyExecutionEngine:
+        return cast(SqlAlchemyExecutionEngine, self._execution_engine)
+
     def add_data_asset(
         self,
         name: str,
@@ -114,11 +118,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         "split_on_date_parts": "get_data_for_batch_identifiers_for_split_on_date_parts",
     }
 
-    def _is_splitter_on_execution_engine(self, splitter_method_name: str) -> bool:
+    def _is_splitter_accessible_from_execution_engine(
+        self, splitter_method_name: str
+    ) -> bool:
         """Whether the splitter method resides on the execution engine.
 
-        Note: 20220415 AJB this method should be deprecated in favor of moving these
-            splitter methods to the ExecutionEngine or a sub-dependency thereof.
+        Note: 20220415 AJB this method should be deprecated in favor of moving
+            splitter methods from the data connector to the ExecutionEngine (via SqlAlchemyDataSplitter).
 
         Args:
             splitter_method_name: Name of the splitter method
@@ -151,8 +157,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 splitter_method_name
             ]
         )
-        splitter_fn: Callable = getattr(self.execution_engine, splitter_fn_name)
+        splitter_fn: Callable = self.execution_engine.get_splitter_method(
+            splitter_fn_name
+        )
         batch_identifiers_list: List[dict] = splitter_fn(
+            execution_engine=self.execution_engine,
             table_name=table_name,
             **splitter_kwargs,
         )
@@ -163,8 +172,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     ) -> List[dict]:
         """Get batch identifiers from a splitter method that resides on the current DataConnector.
 
-        Note: 20220415 AJB this method should be deprecated in favor of moving these
-            splitter methods to the ExecutionEngine or a sub-dependency thereof.
+        Note: 20220415 AJB this method should be deprecated in favor of moving
+            splitter methods from the data connector to the ExecutionEngine (via SqlAlchemyDataSplitter).
 
         Args:
             table_name: Name of the table being split.
@@ -210,7 +219,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             splitter_method_name: str = data_asset_config["splitter_method"]
             splitter_kwargs: dict = data_asset_config["splitter_kwargs"]
 
-            if self._is_splitter_on_execution_engine(splitter_method_name):
+            if self._is_splitter_accessible_from_execution_engine(splitter_method_name):
                 batch_identifiers_list: List[
                     dict
                 ] = self._get_batch_identifiers_from_execution_engine_method(
