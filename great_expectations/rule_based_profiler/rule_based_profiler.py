@@ -54,6 +54,7 @@ from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
+    ParameterNode,
     RuleState,
     build_parameter_container_for_variables,
 )
@@ -284,28 +285,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
             self.rule_states.append(rule_state)
 
-    def get_expectation_suite_meta(
-        self,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> Dict[str, Any]:
-        """
-        Args:
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
-
-        Returns:
-            Dictionary corresponding to meta property of ExpectationSuite using ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
-        """
-        expectation_suite: ExpectationSuite = self.get_expectation_suite(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-        )
-        return expectation_suite.meta
-
     def get_expectation_suite(
         self,
         expectation_suite: Optional[ExpectationSuite] = None,
@@ -342,7 +321,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         expectation_configurations: List[
             ExpectationConfiguration
-        ] = self.get_expectation_configurations()
+        ] = self._get_expectation_configurations()
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expectation_configurations:
@@ -355,7 +334,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return expectation_suite
 
-    def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
+    def _get_expectation_configurations(self) -> List[ExpectationConfiguration]:
         """
         Returns:
             List of ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
@@ -410,13 +389,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def get_parameter_values_for_fully_qualified_parameter_names_by_domain(
         self,
-    ) -> Dict[Domain, Dict[str, Any]]:
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
         Returns:
             Dictionaries of values for fully-qualified parameter names by Domain, accumulated from RuleState of every Rule executed.
         """
         values_for_fully_qualified_parameter_names_by_domain: Dict[
-            Domain, Dict[str, Any]
+            Domain, Dict[str, ParameterNode]
         ] = {}
 
         rule_state: RuleState
@@ -431,7 +410,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
         self, domain_id: str
-    ) -> Dict[str, Any]:
+    ) -> Dict[str, ParameterNode]:
         """
         Args:
             domain_id: ID of desired Domain object.
@@ -452,7 +431,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Add Rule object to existing profiler object by reconciling profiler rules and updating _profiler_config.
         """
-        rules_dict: Dict[str, Dict[str, Any]] = {
+        rules_dict: Dict[str, Dict[str, ParameterNode]] = {
             rule.name: rule.to_json_dict(),
         }
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
@@ -464,7 +443,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ),
         )
         self.rules = effective_rules
-        updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
+        updated_rules: Optional[Dict[str, Dict[str, ParameterNode]]] = {
             rule.name: rule.to_json_dict() for rule in effective_rules
         }
         self._profiler_config.rules = updated_rules
@@ -1283,8 +1262,6 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-            class_name=self.__class__.__name__,
-            module_name=self.__class__.__module__,
             name=name,
             config_version=config_version,
             variables=variables,
