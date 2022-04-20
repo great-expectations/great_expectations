@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple, cast
 Diagnostics = Dict[str, List[Tuple[ast.FunctionDef, bool]]]
 
 DOCSTRING_ERROR_THRESHOLD: int = (
-    1112  # This number is to be reduced as we document more public functions!
+    1107  # This number is to be reduced as we document more public functions!
 )
 
 
