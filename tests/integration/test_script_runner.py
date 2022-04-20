@@ -3,6 +3,7 @@ import importlib.machinery
 import importlib.util
 import logging
 import os
+import pathlib
 import shutil
 import sys
 from dataclasses import dataclass
@@ -204,6 +205,18 @@ local_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
     IntegrationTestFixture(
+        name="how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTestFixture(
+        name="how_to_validate_data_with_a_python_configured_in_memory_checkpoint",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTestFixture(
         name="how_to_configure_credentials",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -233,6 +246,18 @@ local_tests = [
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/",
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
         extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTestFixture(
+        name="expect_column_max_to_be_between_custom",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py",
+    ),
+    IntegrationTestFixture(
+        name="expect_column_values_to_equal_three",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py",
+    ),
+    IntegrationTestFixture(
+        name="expect_table_columns_to_be_unique",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py",
     ),
 ]
 
@@ -271,7 +296,7 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
-        name="introspect_and_partition_yaml_example_gradual",
+        name="introspect_and_partition_yaml_example_gradual_sql",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
@@ -279,12 +304,54 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
-        name="introspect_and_partition_yaml_example_complete",
+        name="introspect_and_partition_yaml_example_complete_sql",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_postgres",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_data/postgres_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_mssql",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_data/mssql_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.MSSQL,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_mysql",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_data/mysql_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="mssql_yaml_example",
@@ -360,6 +427,20 @@ cloud_snowflake_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
         util_script="tests/test_utils.py",
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
     ),
 ]
 
@@ -466,6 +547,20 @@ cloud_bigquery_tests = [
         name="gcp_deployment_patterns_file_bigquery_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
 ]
@@ -612,11 +707,11 @@ docs_test_matrix += local_tests
 docs_test_matrix += dockerized_db_tests
 docs_test_matrix += cloud_snowflake_tests
 docs_test_matrix += cloud_gcp_tests
-docs_test_matrix += cloud_bigquery_tests
+# TODO: AJB 20220418 Temporarily disable bigquery tests since we hit our daily quota.
+# docs_test_matrix += cloud_bigquery_tests
 docs_test_matrix += cloud_azure_tests
 docs_test_matrix += cloud_s3_tests
 docs_test_matrix += cloud_redshift_tests
-docs_test_matrix += dockerized_db_tests
 
 pandas_integration_tests = [
     IntegrationTestFixture(
@@ -671,7 +766,7 @@ aws_integration_tests = [
 ]
 
 # populate integration_test_matrix with sub-lists
-integration_test_matrix = []
+integration_test_matrix: List[IntegrationTestFixture] = []
 integration_test_matrix += aws_integration_tests
 integration_test_matrix += pandas_integration_tests
 
@@ -702,7 +797,9 @@ def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments
     _execute_integration_test(test_configuration, tmp_path)
 
 
-def _execute_integration_test(integration_test_fixture, tmp_path):
+def _execute_integration_test(
+    integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
+):
     """
     Prepare and environment and run integration tests from a list of tests.
 
@@ -712,9 +809,10 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
     workdir = os.getcwd()
     try:
         base_dir = file_relative_path(__file__, "../../")
-        os.chdir(tmp_path)
+        os.chdir(base_dir)
         # Ensure GE is installed in our environment
         execute_shell_command("pip install .")
+        os.chdir(tmp_path)
 
         #
         # Build test state
@@ -774,6 +872,7 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         loader.exec_module(test_script_module)
     except Exception as e:
         logger.error(str(e))
+        raise
     finally:
         os.chdir(workdir)
 
@@ -784,7 +883,7 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
     if not dependencies:
         return
     elif dependencies == BackendDependencies.POSTGRESQL and (
-        pytest_args.no_postgresql or pytest_args.no_sqlalchemy
+        not pytest_args.postgresql or pytest_args.no_sqlalchemy
     ):
         pytest.skip("Skipping postgres tests")
     elif dependencies == BackendDependencies.MYSQL and (
@@ -805,7 +904,7 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
         pytest.skip("Skipping AWS tests")
     elif dependencies == BackendDependencies.REDSHIFT and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping redshift tests")
-    elif dependencies == BackendDependencies.SPARK and pytest_args.no_spark:
+    elif dependencies == BackendDependencies.SPARK and not pytest_args.spark:
         pytest.skip("Skipping spark tests")
     elif dependencies == BackendDependencies.SNOWFLAKE and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping snowflake tests")

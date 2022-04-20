@@ -269,10 +269,7 @@ def set_value(dct: typing.Dict[str, typing.Any], key: str, value: typing.Any):
         target = dct.setdefault(head, {})
         if not isinstance(target, dict):
             raise ValueError(
-                "Cannot set {key} in {head} "
-                "due to existing value: {target}".format(
-                    key=key, head=head, target=target
-                )
+                f"Cannot set {key} in {head} due to existing value: {target}"
             )
         set_value(target, rest, value)
     else:

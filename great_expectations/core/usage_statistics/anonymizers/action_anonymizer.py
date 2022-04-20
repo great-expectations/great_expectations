@@ -1,45 +1,37 @@
-from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.validation_operators import (
-    MicrosoftTeamsNotificationAction,
-    NoOpAction,
-    PagerdutyAlertAction,
-    SlackNotificationAction,
-    StoreEvaluationParametersAction,
-    StoreMetricsAction,
-    StoreValidationResultAction,
-    UpdateDataDocsAction,
-    ValidationAction,
-)
+from typing import Any, Optional
+
+from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 
 
-class ActionAnonymizer(Anonymizer):
-    def __init__(self, salt=None):
+class ActionAnonymizer(BaseAnonymizer):
+    def __init__(
+        self,
+        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        salt: Optional[str] = None,
+    ) -> None:
         super().__init__(salt=salt)
 
-        # ordered bottom up in terms of inheritance order
-        self._ge_classes = [
-            StoreMetricsAction,
-            NoOpAction,
-            StoreValidationResultAction,
-            StoreEvaluationParametersAction,
-            SlackNotificationAction,
-            PagerdutyAlertAction,
-            MicrosoftTeamsNotificationAction,
-            UpdateDataDocsAction,
-            ValidationAction,
-        ]
+        self._aggregate_anonymizer = aggregate_anonymizer
 
-    def anonymize_action_info(self, action_name, action_obj=None, action_config=None):
+    def anonymize(
+        self,
+        action_name: str,
+        action_obj: Optional[object] = None,
+        action_config: Optional[dict] = None,
+        obj: Optional[object] = None,
+    ) -> Any:
         anonymized_info_dict: dict = {
-            "anonymized_name": self.anonymize(action_name),
+            "anonymized_name": self._anonymize_string(action_name),
         }
 
-        self.anonymize_object_info(
+        self._anonymize_object_info(
             object_=action_obj,
             object_config=action_config,
             anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
             runtime_environment={"module_name": "great_expectations.checkpoint"},
         )
 
         return anonymized_info_dict
+
+    def can_handle(self, obj: Optional[object] = None, **kwargs) -> bool:
+        return "action_name" in kwargs

@@ -1,7 +1,8 @@
 import warnings
 from collections import Counter, defaultdict
 
-from great_expectations.profile.base import ProfilerTypeMapping
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     CollapseContent,
     RenderedBulletListContent,
@@ -10,8 +11,6 @@ from great_expectations.render.types import (
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
-
-from .renderer import Renderer
 
 
 class ProfilingResultsOverviewSectionRenderer(Renderer):

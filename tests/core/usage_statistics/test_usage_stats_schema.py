@@ -10,7 +10,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_datasource_sqlalchemy_connect_payload_schema,
     anonymized_init_payload_schema,
     anonymized_legacy_profiler_build_suite_payload_schema,
-    anonymized_save_or_edit_expectation_suite_payload_schema,
+    anonymized_rule_based_profiler_run_schema,
     anonymized_test_yaml_config_payload_schema,
     anonymized_usage_statistics_record_schema,
     empty_payload_schema,
@@ -67,6 +67,7 @@ def test_comprehensive_list_of_messages():
         "checkpoint.run",
         "expectation_suite.add_expectation",
         "legacy_profiler.build_suite",
+        "profiler.run",
     }
 
 
@@ -352,4 +353,20 @@ def test_usage_stats_cli_payload_messages():
             jsonschema.validate(
                 message,
                 anonymized_usage_statistics_record_schema,
+            )
+
+
+def test_rule_based_profiler_run_message():
+    usage_stats_records_messages = [
+        "profiler.run",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            jsonschema.validate(
+                message,
+                anonymized_usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                anonymized_rule_based_profiler_run_schema,
             )

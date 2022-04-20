@@ -1,14 +1,13 @@
 import json
+from typing import List
 
 import pandas as pd
 import pytest
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
-    CheckpointRunAnonymizer,
-)
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import deep_filter_properties_iterable
 
 DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
@@ -66,9 +65,6 @@ def test_checkpoint_config_repr(checkpoint):
     assert (
         checkpoint_config_repr
         == """{
-  "name": "my_checkpoint",
-  "config_version": 1.0,
-  "batch_request": {},
   "action_list": [
     {
       "name": "store_validation_result",
@@ -90,9 +86,14 @@ def test_checkpoint_config_repr(checkpoint):
       }
     }
   ],
+  "batch_request": {},
+  "class_name": "Checkpoint",
+  "config_version": 1.0,
   "evaluation_parameters": {},
-  "runtime_configuration": {},
+  "module_name": "great_expectations.checkpoint",
+  "name": "my_checkpoint",
   "profilers": [],
+  "runtime_configuration": {},
   "validations": [
     {
       "batch_request": {
@@ -108,11 +109,6 @@ def test_checkpoint_config_repr(checkpoint):
 
 
 def test_checkpoint_config_repr_after_substitution(checkpoint):
-
-    checkpoint_run_anonymizer: CheckpointRunAnonymizer = CheckpointRunAnonymizer(
-        salt=DATA_CONTEXT_ID
-    )
-
     df: pd.DataFrame = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
     batch_request_param: dict = {
@@ -129,7 +125,7 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
 
     # Matching how this is called in usage_statistics.py (parameter style)
     resolved_runtime_kwargs: dict = (
-        checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(
+        CheckpointConfig.resolve_config_using_acceptable_arguments(
             *(checkpoint,), **kwargs
         )
     )
@@ -139,13 +135,38 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
         properties=json_dict,
         inplace=True,
     )
-    checkpoint_config_repr: str = json.dumps(json_dict, indent=2)
+
+    keys: List[str] = sorted(list(json_dict.keys()))
+
+    key: str
+    sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+    checkpoint_config_repr: str = json.dumps(sorted_json_dict, indent=2)
 
     assert (
         checkpoint_config_repr
         == """{
-  "name": "my_checkpoint",
-  "config_version": 1.0,
+  "action_list": [
+    {
+      "name": "store_validation_result",
+      "action": {
+        "class_name": "StoreValidationResultAction"
+      }
+    },
+    {
+      "name": "store_evaluation_params",
+      "action": {
+        "class_name": "StoreEvaluationParametersAction"
+      }
+    },
+    {
+      "name": "update_data_docs",
+      "action": {
+        "class_name": "UpdateDataDocsAction",
+        "site_names": []
+      }
+    }
+  ],
   "batch_request": {
     "runtime_parameters": {
       "batch_data": [
@@ -163,30 +184,13 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
       "default_identifier_name": "my_simple_df"
     }
   },
-  "action_list": [
-    {
-      "name": "store_validation_result",
-      "action": {
-        "class_name": "StoreValidationResultAction"
-      }
-    },
-    {
-      "name": "store_evaluation_params",
-      "action": {
-        "class_name": "StoreEvaluationParametersAction"
-      }
-    },
-    {
-      "name": "update_data_docs",
-      "action": {
-        "class_name": "UpdateDataDocsAction",
-        "site_names": []
-      }
-    }
-  ],
+  "class_name": "Checkpoint",
+  "config_version": 1.0,
   "evaluation_parameters": {},
-  "runtime_configuration": {},
+  "module_name": "great_expectations.checkpoint",
+  "name": "my_checkpoint",
   "profilers": [],
+  "runtime_configuration": {},
   "validations": [
     {
       "batch_request": {
@@ -194,16 +198,7 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
         "data_connector_name": "default_runtime_data_connector_name",
         "data_asset_name": "my_data_asset",
         "runtime_parameters": {
-          "batch_data": [
-            {
-              "a": 1,
-              "b": 3
-            },
-            {
-              "a": 2,
-              "b": 4
-            }
-          ]
+          "batch_data": "<class \'pandas.core.frame.DataFrame\'>"
         },
         "batch_identifiers": {
           "default_identifier_name": "my_simple_df"

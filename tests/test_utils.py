@@ -3,26 +3,11 @@ import os
 import uuid
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator, List, Union, cast
+from typing import Generator, List, Optional, Union, cast
 
 import numpy as np
 import pandas as pd
 import pytest
-
-logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.exc import SQLAlchemyError
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
 
 from great_expectations.data_context.store import (
     CheckpointStore,
@@ -44,9 +29,26 @@ from great_expectations.data_context.util import build_store_from_config
 
 logger = logging.getLogger(__name__)
 
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.exc import SQLAlchemyError
+
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sa = None
+    reflection = None
+    Table = None
+    Select = None
+    SQLAlchemyError = None
+
+logger = logging.getLogger(__name__)
+
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
+# noinspection PyPep8Naming
 def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
     """
     Assert that two complex structures have almost equal contents.
@@ -438,17 +440,88 @@ def delete_config_from_filesystem(
     )
 
 
+def get_snowflake_connection_url() -> str:
+    """Get snowflake connection url from environment variables.
+
+    Returns:
+        String of the snowflake connection url.
+    """
+    sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
+    sfUser = os.environ.get("SNOWFLAKE_USER")
+    sfPswd = os.environ.get("SNOWFLAKE_PW")
+    sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
+    sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
+    sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
+
+    return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
+
+
+def get_bigquery_connection_url() -> str:
+    """Get bigquery connection url from environment variables.
+
+    Note: dataset defaults to "demo" if not set.
+
+    Returns:
+        String of the bigquery connection url.
+    """
+    gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+        )
+    bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "demo")
+
+    return f"bigquery://{gcp_project}/{bigquery_dataset}"
+
+
 def load_data_into_test_database(
     table_name: str,
-    csv_path: str,
     connection_string: str,
+    csv_path: Optional[str] = None,
+    csv_paths: Optional[List[str]] = None,
     load_full_dataset: bool = False,
-) -> None:
-    """
-    Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
+    convert_colnames_to_datetime: Optional[List[str]] = None,
+) -> pd.DataFrame:
+    """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
+
     This includes local Dockerized DBs like postgres, but also cloud-dbs like BigQuery and Redshift.
+
+    Args:
+        table_name: name of the table to write to.
+        connection_string: used to connect to the database.
+        csv_path: path of a single csv to write.
+        csv_paths: list of paths of csvs to write.
+        load_full_dataset: if False, load only the first 10 rows.
+        convert_colnames_to_datetime: List of column names to convert to datetime before writing to db.
+
+    Returns:
+        For convenience, the pandas dataframe that was used to load the data.
     """
+    if csv_path and csv_paths:
+        csv_paths.append(csv_path)
+    elif csv_path and not csv_paths:
+        csv_paths = [csv_path]
+
+    if convert_colnames_to_datetime is None:
+        convert_colnames_to_datetime = []
+
     import pandas as pd
+
+    print("Generating dataframe of all csv data")
+    dfs: List[pd.DataFrame] = []
+    for csv_path in csv_paths:
+        df = pd.read_csv(csv_path)
+        for colname_to_convert in convert_colnames_to_datetime:
+            df[colname_to_convert] = pd.to_datetime(df[colname_to_convert])
+        if not load_full_dataset:
+            # Improving test performance by only loading the first 10 rows of our test data into the db
+            df = df.head(10)
+
+        dfs.append(df)
+
+    all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
+
+    connection = None
 
     if sa:
         engine = sa.create_engine(connection_string)
@@ -457,20 +530,19 @@ def load_data_into_test_database(
             "Attempting to load data in to tests SqlAlchemy database, but unable to load SqlAlchemy context; "
             "install optional sqlalchemy dependency for support."
         )
-        return
+        return all_dfs_concatenated
     try:
         connection = engine.connect()
         print(f"Dropping table {table_name}")
         connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-        df = pd.read_csv(csv_path)
-        if not load_full_dataset:
-            # Improving test performance by only loading the first 10 rows of our test data into the db
-            df = df.head(10)
-        print(f"Creating table {table_name} from {csv_path}")
-        df.to_sql(name=table_name, con=engine, index=False)
+        print(f"Creating table {table_name} and adding data from {csv_paths}")
+        all_dfs_concatenated.to_sql(
+            name=table_name, con=engine, index=False, if_exists="append"
+        )
+        return all_dfs_concatenated
     except SQLAlchemyError as e:
         logger.error(
-            f"""Docs integration tests encountered an error while loading test-data into test-database."""
+            """Docs integration tests encountered an error while loading test-data into test-database."""
         )
         raise
     finally:
@@ -509,20 +581,20 @@ def check_athena_table_count(
             "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "
             "install optional sqlalchemy dependency for support."
         )
-        return
+        return False
+
+    connection = None
     try:
-        athena_connection = engine.connect()
-        result = athena_connection.execute(
-            sa.text(f"SHOW TABLES in {db_name}")
-        ).fetchall()
+        connection = engine.connect()
+        result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         return len(result) == expected_table_count
     except SQLAlchemyError as e:
         logger.error(
-            f"""Docs integration tests encountered an error while loading test-data into test-database."""
+            """Docs integration tests encountered an error while loading test-data into test-database."""
         )
         raise
     finally:
-        athena_connection.close()
+        connection.close()
         engine.dispose()
 
 
@@ -538,15 +610,15 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
             "install optional sqlalchemy dependency for support."
         )
         return
+
+    connection = None
     try:
-        athena_connection = engine.connect()
-        result = athena_connection.execute(
-            sa.text(f"SHOW TABLES in {db_name}")
-        ).fetchall()
+        connection = engine.connect()
+        result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         for table_tuple in result:
             table = table_tuple[0]
             if table != table_to_keep:
-                athena_connection.execute(sa.text(f"DROP TABLE `{table}`;"))
+                connection.execute(sa.text(f"DROP TABLE `{table}`;"))
     finally:
-        athena_connection.close()
+        connection.close()
         engine.dispose()

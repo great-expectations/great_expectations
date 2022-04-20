@@ -10,9 +10,12 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
+from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.sorter import Sorter
 
 logger = logging.getLogger(__name__)
@@ -265,7 +268,7 @@ def _invert_regex_to_data_reference_template(
             if not (group_name_index < num_groups):
                 break
             # Replace the captured group with "{next_group_name}" in the template
-            data_reference_template += "{" + group_names[group_name_index] + "}"
+            data_reference_template += f"{{{group_names[group_name_index]}}}"
             group_name_index += 1
 
         elif token in [
@@ -515,3 +518,24 @@ def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
         },
     )
     return sorter
+
+
+def _build_asset_from_config(
+    runtime_environment: "DataConnector", config: dict
+) -> Asset:
+    """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""
+    runtime_environment: dict = {"data_connector": runtime_environment}
+    config = assetConfigSchema.load(config)
+    config = assetConfigSchema.dump(config)
+    asset: Asset = instantiate_class_from_config(
+        config=config,
+        runtime_environment=runtime_environment,
+        config_defaults={},
+    )
+    if not asset:
+        raise ge_exceptions.ClassInstantiationError(
+            module_name="great_expectations.datasource.data_connector.asset",
+            package_name=None,
+            class_name=config["class_name"],
+        )
+    return asset

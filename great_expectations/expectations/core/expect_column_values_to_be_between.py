@@ -1,17 +1,28 @@
-from typing import Optional
+from typing import List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations.rule_based_profiler.types import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
+    VARIABLES_KEY,
+)
 
 
 class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
@@ -77,10 +88,11 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     map_metric = "column_values.between"
@@ -92,6 +104,80 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "allow_cross_type_comparisons",
         "mostly",
         "parse_strings_as_datetimes",
+        "auto",
+        "profiler_config",
+    )
+
+    min_estimato_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MetricMultiBatchParameterBuilder",
+            name="min_estimator",
+            metric_name="column.min",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+    )
+    max_estimato_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MetricMultiBatchParameterBuilder",
+            name="max_estimator",
+            metric_name="column.max",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+    )
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        min_estimato_parameter_builder_config,
+        max_estimato_parameter_builder_config,
+    ]
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        variables={
+            "mostly": 1.0,
+            "strict_min": False,
+            "strict_max": False,
+        },
+        rules={
+            "default_expect_column_values_to_be_between_rule": {
+                "domain_builder": {
+                    "class_name": "ColumnDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_values_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+                        "min_value": f"{PARAMETER_KEY}{min_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[-1]",
+                        "max_value": f"{PARAMETER_KEY}{max_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[-1]",
+                        "mostly": f"{VARIABLES_KEY}mostly",
+                        "strict_min": f"{VARIABLES_KEY}strict_min",
+                        "strict_max": f"{VARIABLES_KEY}strict_max",
+                        "meta": {
+                            "profiler_details": {
+                                "min_estimator": f"{PARAMETER_KEY}{min_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                                "max_estimator": f"{PARAMETER_KEY}{max_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            },
+                        },
+                    },
+                ],
+            },
+        },
     )
 
     default_kwarg_values = {
@@ -108,6 +194,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "column",
@@ -117,7 +205,9 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "strict_max",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -126,7 +216,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         # Setting up a configuration
@@ -184,7 +274,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             },
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
             "row_condition": {
@@ -212,7 +302,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             mostly_str = ""
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -229,7 +319,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 template_str += f"values must be {at_least_str} $min_value{mostly_str}."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
@@ -238,7 +328,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             ) = parse_row_condition_string_pandas_engine(
                 params["row_condition"], with_schema=True
             )
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
@@ -282,7 +372,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             mostly_str = ""
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -299,14 +389,14 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 template_str += f"values must be {at_least_str} $min_value{mostly_str}."
 
         if include_column_name:
-            template_str = "$column " + template_str
+            template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
             (
                 conditional_template_str,
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
+            template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
         return [

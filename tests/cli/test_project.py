@@ -1,13 +1,41 @@
 import os
+import shutil
 from unittest import mock
 
+import pytest
 from click.testing import CliRunner
 
+import great_expectations as ge
 from great_expectations.cli import cli
+from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.util import file_relative_path
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
+
+
+@pytest.fixture
+def titanic_data_context_clean(
+    tmp_path_factory,
+) -> DataContext:
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "../test_fixtures/great_expectations_v013clean_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+    )
+    return ge.data_context.DataContext(context_path)
 
 
 def test_project_check_on_missing_ge_dir_guides_user_to_fix(

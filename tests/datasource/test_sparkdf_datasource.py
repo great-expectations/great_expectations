@@ -13,7 +13,7 @@ from great_expectations.datasource import SparkDFDatasource
 from great_expectations.datasource.types import InMemoryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.util import is_library_loadable
-from great_expectations.validator.validator import BridgeValidator, Validator
+from great_expectations.validator.validator import BridgeValidator
 
 yaml = YAML()
 
@@ -251,6 +251,11 @@ def test_create_sparkdf_datasource(
         assert "          header: false\n" in lines
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyarrow")
+    and not is_library_loadable(library_name="fastparquet"),
+    reason="pyarrow and fastparquet are not installed",
+)
 def test_standalone_spark_parquet_datasource(
     test_parquet_folder_connection_path, spark_session
 ):

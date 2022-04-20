@@ -13,9 +13,10 @@ try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.validator.validator import Validator
 
-yaml = YAML()
+yaml = YAML(typ="safe")
 
 
 # TODO: <Alex>ALEX -- Some methods in this module are misplaced and/or provide no action; this must be repaired.</Alex>
@@ -1101,6 +1102,92 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector(
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
     }
+
+
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+        assets={
+            "table_partitioned_by_date_column__A": {
+                "splitter_method": "_split_on_column_value",
+                "splitter_kwargs": {"column_name": "date"},
+                "include_schema_name": True,
+                "schema_name": "main",
+            },
+        },
+    )
+    assert "main.table_partitioned_by_date_column__A" in my_data_connector.assets
+
+    # schema_name given but include_schema_name is set to False
+    with pytest.raises(ge_exceptions.DataConnectorError) as e:
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+            assets={
+                "table_partitioned_by_date_column__A": {
+                    "splitter_method": "_split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": False,
+                    "schema_name": "main",
+                },
+            },
+        )
+
+    assert (
+        e.value.message
+        == "ConfiguredAssetSqlDataConnector ran into an error while initializing Asset names. Schema main was specified, but 'include_schema_name' flag was set to False."
+    )
+
+
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+        assets={
+            "table_partitioned_by_date_column__A": {
+                "splitter_method": "_split_on_column_value",
+                "splitter_kwargs": {"column_name": "date"},
+                "include_schema_name": True,
+                "schema_name": "main",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
+            },
+        },
+    )
+    assert (
+        "taxi__main.table_partitioned_by_date_column__A__asset"
+        in my_data_connector.assets
+    )
+
+    # schema_name provided, but include_schema_name is set to False
+    with pytest.raises(ge_exceptions.DataConnectorError) as e:
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+            assets={
+                "table_partitioned_by_date_column__A": {
+                    "splitter_method": "_split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": False,
+                    "schema_name": "main",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
+                },
+            },
+        )
+    assert (
+        e.value.message
+        == "ConfiguredAssetSqlDataConnector ran into an error while initializing Asset names. Schema main was specified, but 'include_schema_name' flag was set to False."
+    )
 
 
 # TODO

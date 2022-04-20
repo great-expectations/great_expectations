@@ -21,11 +21,11 @@ Previous Design Review notes:
 ### Definition of Done
 Please delete options that are not relevant.
 
-- [ ] My code follows the Great Expectations [style guide](https://docs.greatexpectations.io/en/latest/contributing/style_guide.html?highlight=style%20guide)
-- [ ] I have performed a [self-review](https://docs.greatexpectations.io/en/latest/contributing/contribution_checklist.html?highlight=checklist) of my own code
+- [ ] My code follows the Great Expectations [style guide](https://docs.greatexpectations.io/docs/contributing/style_guides/code_style)
+- [ ] I have performed a [self-review](https://docs.greatexpectations.io/docs/contributing/contributing_checklist) of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
-- [ ] I have added [unit tests](https://docs.greatexpectations.io/en/latest/contributing/testing.html#contributing-testing-writing-unit-tests) where applicable and made sure that new and existing tests are passing.
+- [ ] I have added [unit tests](https://docs.greatexpectations.io/docs/contributing/contributing_test#writing-unit-and-integration-tests) where applicable and made sure that new and existing tests are passing.
 - [ ] I have run any local integration tests and made sure that nothing is broken.
 
 

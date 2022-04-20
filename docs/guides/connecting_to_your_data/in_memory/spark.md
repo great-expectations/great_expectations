@@ -2,6 +2,7 @@
 title: How to connect to in-memory data in a Spark dataframe
 ---
 
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import NextSteps from '../components/next_steps.md'
 import Congratulations from '../components/congratulations.md'
 import Prerequisites from '../components/prerequisites.jsx'
@@ -11,7 +12,7 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 This guide will help you connect to your data in an in-memory dataframe using Spark.
-This will allow you to validate and explore your data.
+This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
 <Prerequisites>
 
@@ -45,7 +46,8 @@ Using this example configuration add in the path to a directory that contains so
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L32-L42
 ```
@@ -56,6 +58,7 @@ Run this code to test your configuration.
 ```
 
 </TabItem>
+
 <TabItem value="python">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py#L32-L42
@@ -67,6 +70,7 @@ Run this code to test your configuration.
 ```
 
 </TabItem>
+
 </Tabs>
 
 **Note**: Since the Datasource does not have data passed-in until later, the output will show that no `data_asset_names` are currently available. This is to be expected.
@@ -82,7 +86,8 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  <TabItem value="yaml">
+
+<TabItem value="yaml">
 
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L46
 ```
@@ -94,11 +99,12 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 ```
 
 </TabItem>
+
 </Tabs>
 
 ### 5. Test your new Datasource
 
-Verify your new Datasource by loading data from it into a `Validator` using a `BatchRequest`.
+Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a `Validator` using a `BatchRequest`.
 
 Add the variable containing your dataframe (`df` in this example) to the `batch_data` key under `runtime_parameters` in your `BatchRequest`.
 

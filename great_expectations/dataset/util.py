@@ -153,8 +153,9 @@ def kde_partition_data(data, estimate_tails=True):
 
 
 def partition_data(data, bins="auto", n_bins=10):
+    # deprecated-v0.10.10
     warnings.warn(
-        "partition_data is deprecated and will be removed. Use either continuous_partition_data or \
+        "partition_data is deprecated as of v0.10.10 and will be removed is a future release. Use either continuous_partition_data or \
                     categorical_partition_data instead.",
         DeprecationWarning,
     )
@@ -196,7 +197,7 @@ def continuous_partition_data(data, bins="auto", n_bins=10, **kwargs):
         )
     except TypeError as e:
         raise TypeError(
-            "Unable to compute histogram. numpy histogram raised error: " + str(e)
+            f"Unable to compute histogram. numpy histogram raised error: {str(e)}"
         )
 
     return {"bins": bin_edges, "weights": hist / len(data)}
@@ -453,7 +454,7 @@ def validate_distribution_parameters(distribution, params):
         "chi2",
         "expon",
     ]:
-        raise AttributeError("Unsupported  distribution provided: %s" % distribution)
+        raise AttributeError(f"Unsupported  distribution provided: {distribution}")
 
     if isinstance(params, dict):
         # `params` is a dictionary
@@ -464,11 +465,11 @@ def validate_distribution_parameters(distribution, params):
         if distribution == "beta" and (
             params.get("alpha", -1) <= 0 or params.get("beta", -1) <= 0
         ):
-            raise ValueError("Invalid parameters: %s" % beta_msg)
+            raise ValueError(f"Invalid parameters: {beta_msg}")
 
         # alpha is required and positive
         elif distribution == "gamma" and params.get("alpha", -1) <= 0:
-            raise ValueError("Invalid parameters: %s" % gamma_msg)
+            raise ValueError(f"Invalid parameters: {gamma_msg}")
 
         # lambda is a required and positive
         # elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
@@ -476,7 +477,7 @@ def validate_distribution_parameters(distribution, params):
 
         # df is necessary and required to be positive
         elif distribution == "chi2" and params.get("df", -1) <= 0:
-            raise ValueError("Invalid parameters: %s:" % chi2_msg)
+            raise ValueError(f"Invalid parameters: {chi2_msg}:")
 
     elif isinstance(params, tuple) or isinstance(params, list):
         scale = None
@@ -484,29 +485,29 @@ def validate_distribution_parameters(distribution, params):
         # `params` is a tuple or a list
         if distribution == "beta":
             if len(params) < 2:
-                raise ValueError("Missing required parameters: %s" % beta_msg)
+                raise ValueError(f"Missing required parameters: {beta_msg}")
             if params[0] <= 0 or params[1] <= 0:
-                raise ValueError("Invalid parameters: %s" % beta_msg)
+                raise ValueError(f"Invalid parameters: {beta_msg}")
             if len(params) == 4:
                 scale = params[3]
             elif len(params) > 4:
-                raise ValueError("Too many parameters provided: %s" % beta_msg)
+                raise ValueError(f"Too many parameters provided: {beta_msg}")
 
         elif distribution == "norm":
             if len(params) > 2:
-                raise ValueError("Too many parameters provided: %s" % norm_msg)
+                raise ValueError(f"Too many parameters provided: {norm_msg}")
             if len(params) == 2:
                 scale = params[1]
 
         elif distribution == "gamma":
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" % gamma_msg)
+                raise ValueError(f"Missing required parameters: {gamma_msg}")
             if len(params) == 3:
                 scale = params[2]
             if len(params) > 3:
-                raise ValueError("Too many parameters provided: %s" % gamma_msg)
+                raise ValueError(f"Too many parameters provided: {gamma_msg}")
             elif params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" % gamma_msg)
+                raise ValueError(f"Invalid parameters: {gamma_msg}")
 
         # elif distribution == 'poisson':
         #    if len(params) < 1:
@@ -520,24 +521,24 @@ def validate_distribution_parameters(distribution, params):
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" % uniform_msg)
+                raise ValueError(f"Too many arguments provided: {uniform_msg}")
 
         elif distribution == "chi2":
             if len(params) < 1:
-                raise ValueError("Missing required parameters: %s" % chi2_msg)
+                raise ValueError(f"Missing required parameters: {chi2_msg}")
             elif len(params) == 3:
                 scale = params[2]
             elif len(params) > 3:
-                raise ValueError("Too many arguments provided: %s" % chi2_msg)
+                raise ValueError(f"Too many arguments provided: {chi2_msg}")
             if params[0] <= 0:
-                raise ValueError("Invalid parameters: %s" % chi2_msg)
+                raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
 
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:
-                raise ValueError("Too many arguments provided: %s" % expon_msg)
+                raise ValueError(f"Too many arguments provided: {expon_msg}")
 
         if scale is not None and scale <= 0:
             raise ValueError("std_dev and scale must be positive.")

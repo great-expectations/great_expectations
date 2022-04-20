@@ -18,7 +18,7 @@ do
   set -x
   time pytest tests/performance/test_bigquery_benchmarks.py \
     --benchmark-json=${benchmark_json} \
-    --no-spark --no-postgresql --bigquery --performance-tests \
+    --bigquery --performance-tests \
     -q -p no:warnings \
     "${@:2}" \
     2> /dev/null

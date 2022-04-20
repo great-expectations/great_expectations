@@ -547,7 +547,7 @@ class Nested(Field):
         return self._schema
 
     def _nested_normalized_option(self, option_name: str) -> typing.List[str]:
-        nested_field = "%s." % self.name
+        nested_field = f"{self.name}."
         return [
             field.split(nested_field, 1)[1]
             for field in getattr(self.root, option_name, set())

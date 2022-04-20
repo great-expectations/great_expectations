@@ -104,9 +104,9 @@ class EvaluationParameterParser:
             fnumber = Regex(r"[+-]?(?:\d+|\.\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?")
             ge_urn = Combine(
                 Literal("urn:great_expectations:")
-                + Word(alphas, alphanums + "_$:?=%.&")
+                + Word(alphas, f"{alphanums}_$:?=%.&")
             )
-            variable = Word(alphas, alphanums + "_$")
+            variable = Word(alphas, f"{alphanums}_$")
             ident = ge_urn | variable
 
             plus, minus, mult, div = map(Literal, "+-*/")
@@ -121,7 +121,7 @@ class EvaluationParameterParser:
             # We will allow functions either to accept *only* keyword
             # expressions or *only* non-keyword expressions
             # define function keyword arguments
-            key = Word(alphas + "_") + Suppress("=")
+            key = Word(f"{alphas}_") + Suppress("=")
             # value = (fnumber | Word(alphanums))
             value = expr
             keyval = dictOf(key.setParseAction(self.push_first), value)
@@ -355,16 +355,16 @@ def parse_evaluation_parameter(
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
                 )
                 raise EvaluationParameterError(
-                    "No value found for $PARAMETER " + str(L[0])
+                    f"No value found for $PARAMETER {str(L[0])}"
                 )
         except ParseException as e:
             logger.debug(
                 f"Parse exception while parsing evaluation parameter: {str(e)}"
             )
-            raise EvaluationParameterError("No value found for $PARAMETER " + str(L[0]))
+            raise EvaluationParameterError(f"No value found for $PARAMETER {str(L[0])}")
         except AttributeError:
             logger.warning("Unable to get store for store-type valuation parameter.")
-            raise EvaluationParameterError("No value found for $PARAMETER " + str(L[0]))
+            raise EvaluationParameterError(f"No value found for $PARAMETER {str(L[0])}")
 
     elif len(L) == 1:
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this
@@ -374,9 +374,30 @@ def parse_evaluation_parameter(
         return evaluation_parameters[L[0]]
 
     elif len(L) == 0 or L[0] != "Parse Failure":
+        # we have a stack to evaluate and there was no parse failure.
+        # iterate through values and look for URNs pointing to a store:
         for i, ob in enumerate(expr.exprStack):
             if isinstance(ob, str) and ob in evaluation_parameters:
                 expr.exprStack[i] = str(evaluation_parameters[ob])
+            elif isinstance(ob, str) and ob not in evaluation_parameters:
+                # try to retrieve this value from a store
+                try:
+                    res = ge_urn.parseString(ob)
+                    if res["urn_type"] == "stores":
+                        store = data_context.stores.get(res["store_name"])
+                        expr.exprStack[i] = str(
+                            store.get_query_result(
+                                res["metric_name"], res.get("metric_kwargs", {})
+                            )
+                        )  # value placed back in stack must be a string
+                    else:
+                        # handle other urn_types here, but note that validations URNs are being resolved elsewhere.
+                        pass
+                # graceful error handling for cases where the value in the stack isn't a URN:
+                except ParseException:
+                    pass
+                except AttributeError:
+                    pass
 
     else:
         err_str, err_line, err_col = L[-1]
@@ -394,7 +415,7 @@ def parse_evaluation_parameter(
         )
         logger.debug(exception_message, e, exc_info=True)
         raise EvaluationParameterError(
-            "Error while evaluating evaluation parameter expression: " + str(e)
+            f"Error while evaluating evaluation parameter expression: {str(e)}"
         )
 
     return result

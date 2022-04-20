@@ -370,7 +370,6 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["edtf", "datetime", "glam"],
         "contributors": ["@mielvds"],
-        "package": "experimental_expectations",
         "requirements": ["edtf_validate"],
     }
 
@@ -386,9 +385,10 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         "catch_exceptions": True,
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
-        return True
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -449,5 +449,4 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToBeEdtfParseable().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToBeEdtfParseable().print_diagnostic_checklist()

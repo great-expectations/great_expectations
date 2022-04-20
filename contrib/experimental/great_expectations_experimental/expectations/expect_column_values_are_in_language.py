@@ -148,7 +148,6 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": ["nlp", "hackathon"],
         "contributors": ["@victorwyee"],
-        "package": "experimental_expectations",
         "requirements": ["langid>=1.1.6"],
     }
 
@@ -172,5 +171,4 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesAreInLanguage().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesAreInLanguage().print_diagnostic_checklist()

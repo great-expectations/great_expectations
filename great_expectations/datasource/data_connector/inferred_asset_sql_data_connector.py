@@ -134,13 +134,12 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         )
         for metadata in introspected_table_metadata:
             if (excluded_tables is not None) and (
-                metadata["schema_name"] + "." + metadata["table_name"]
-                in excluded_tables
+                f"{metadata['schema_name']}.{metadata['table_name']}" in excluded_tables
             ):
                 continue
 
             if (included_tables is not None) and (
-                metadata["schema_name"] + "." + metadata["table_name"]
+                f"{metadata['schema_name']}.{metadata['table_name']}"
                 not in included_tables
             ):
                 continue

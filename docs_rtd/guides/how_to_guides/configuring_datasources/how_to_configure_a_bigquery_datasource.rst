@@ -18,7 +18,7 @@ Steps
 
           - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
           - Followed the `Google Cloud library guide <https://googleapis.dev/python/google-api-core/latest/auth.html>`_ for authentication
-          - Installed the ``pybigquery`` package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
+          - Installed the ``sqlalchemy-bigquery`` package for the BigQuery sqlalchemy dialect (``pip install sqlalchemy-bigquery``)
 
 
         1. Run the following CLI command to begin the interactive Datasource creation process:
@@ -29,7 +29,7 @@ Steps
 
 
         2. Choose "Big Query" from the list of database engines, when prompted.
-        3. Identify the connection string you would like Great Expectations to use to connect to BigQuery, using the examples below and the `PyBigQuery <https://github.com/mxmzdlv/pybigquery>`_ documentation.
+        3. Identify the connection string you would like Great Expectations to use to connect to BigQuery, using the examples below and the `SQLAlchemy BigQuery <https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html>`_ documentation.
 
             If you want Great Expectations to connect to your BigQuery project (without specifying a particular dataset), the URL should be:
 
@@ -67,7 +67,7 @@ Steps
             - :ref:`Understood the basics of Datasources <reference__core_concepts__datasources>`
             - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
             - Followed the `Google Cloud library guide <https://googleapis.dev/python/google-api-core/latest/auth.html>`_ for authentication
-            - Installed the ``pybigquery`` package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
+            - Installed the ``sqlalchemy-bigquery`` package for the BigQuery sqlalchemy dialect (``pip install sqlalchemy-bigquery``)
 
 
         1. Run the following CLI command to begin the interactive Datasource creation process:

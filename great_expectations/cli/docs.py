@@ -144,7 +144,7 @@ def docs_clean(ctx, site_name=None, all_sites=False):
             event=usage_event_end,
             success=True,
         )
-        cli_message("<green>{}</green>".format("Cleaned data docs"))
+        cli_message("<green>Cleaned data docs</green>")
     except DataContextError as de:
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,

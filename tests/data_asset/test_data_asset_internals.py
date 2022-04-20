@@ -440,9 +440,9 @@ def test_format_map_output():
 
     success = True
     element_count = 20
-    nonnull_values = pd.Series([])
+    nonnull_values = pd.Series([], dtype=np.float64)
     nonnull_count = 0
-    boolean_mapped_success_values = pd.Series([])
+    boolean_mapped_success_values = pd.Series([], dtype=np.float64)
     success_count = 0
     unexpected_list = []
     unexpected_index_list = []
@@ -533,9 +533,9 @@ def test_format_map_output():
 
     success = False
     element_count = 0
-    nonnull_values = pd.Series([])
+    nonnull_values = pd.Series([], dtype=np.float64)
     nonnull_count = 0
-    boolean_mapped_success_values = pd.Series([])
+    boolean_mapped_success_values = pd.Series([], dtype=np.float64)
     success_count = 0
     unexpected_list = []
     unexpected_index_list = []

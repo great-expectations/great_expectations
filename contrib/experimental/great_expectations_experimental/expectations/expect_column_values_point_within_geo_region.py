@@ -1,34 +1,16 @@
-import json
-
 import geopandas
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon
 
-#!!! This giant block of imports should be something simpler, such as:
-# from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
-)
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
 
 
 # This class defines a Metric to support your Expectation
@@ -39,23 +21,33 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.point_within_geo_region"
-    condition_value_keys = ("country_iso_a3",)
+    condition_value_keys = ("country_iso_a3", "polygon_points")
     world = geopandas.read_file(geopandas.datasets.get_path("naturalearth_lowres"))
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, country_iso_a3, **kwargs):
-        # Fetches polygon points from Geopandas library for the iso code
-        country_shapes = cls.world[["geometry", "iso_a3"]]
-        country_shapes = country_shapes[country_shapes["iso_a3"] == country_iso_a3]
-        country_shapes.reset_index(drop=True, inplace=True)
-        if country_shapes.empty:
-            raise Exception("This ISO country code is not supported.")
-        country_polygon = country_shapes["geometry"][0]
+    def _pandas(cls, column, country_iso_a3, polygon_points, **kwargs):
+
+        # Check if the parameter are None
+        if polygon_points is not None:
+            polygon = Polygon(polygon_points)
+
+        elif country_iso_a3 is not None:
+            country_shapes = cls.world[["geometry", "iso_a3"]]
+            country_shapes = country_shapes[country_shapes["iso_a3"] == country_iso_a3]
+            country_shapes.reset_index(drop=True, inplace=True)
+
+            if country_shapes.empty:
+                raise Exception("This ISO country code is not supported.")
+
+            polygon = country_shapes["geometry"][0]
+        else:
+            raise Exception("Specify country_iso_a3 or polygon_points")
 
         points = geopandas.GeoSeries(column.apply(Point))
-        return points.within(country_polygon)
+
+        return points.within(polygon)
 
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
@@ -73,7 +65,7 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
 # The main business logic for calculation lives here.
 class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     """This expectation will check a (longitude, latitude) tuple to see if it falls within a country input by the
-    user. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
+    user or a polygon specified by user input points. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
     that are in the Geopandas world database. Importantly, countries are defined by their iso_a3 country code, not their
     full name."""
 
@@ -95,15 +87,23 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                     (-3.435973, 55.378051),
                     None,
                 ],
+                "mostly_points_within_geo_region_US": [
+                    (-116.884380, 33.570321),
+                    (-117.063457, 32.699316),
+                    (-117.063457, 32.699316),
+                    (-117.721397, 33.598757),
+                    None,
+                ],
             },
             "tests": [
                 {
-                    "title": "positive_test_with_mostly",
+                    "title": "positive_test_with_mostly_iso_country_code",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "column": "mostly_points_within_geo_region_PER",
                         "country_iso_a3": "PER",
+                        "polygon_points": None,
                         "mostly": 0.5,
                     },
                     "out": {
@@ -113,12 +113,76 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                     },
                 },
                 {
-                    "title": "negative_test_with_mostly",
+                    "title": "negative_test_with_mostly_iso_country_code",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "column": "mostly_points_within_geo_region_GBR",
                         "country_iso_a3": "PER",
+                        "polygon_points": None,
+                        "mostly": 0.9,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [2, 3],
+                        "unexpected_list": [(2.2426, 53.4808), (-3.435973, 55.378051)],
+                    },
+                },
+                {
+                    "title": "positive_test_with_mostly_input_points",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_points_within_geo_region_PER",
+                        "country_iso_a3": None,
+                        "polygon_points": [
+                            (-80.397, -5.267),
+                            (-73.534, -8.908),
+                            (-70.500, -17.582),
+                            (-81.490, -14.627),
+                        ],
+                        "mostly": 0.5,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": [(-3.435973, 55.378051)],
+                    },
+                },
+                {
+                    "title": "positive_test_with_mostly_input_points_usa",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_points_within_geo_region_US",
+                        "country_iso_a3": None,
+                        "polygon_points": [
+                            (-117.012247, 32.580302),
+                            (-109.352, 41.258),
+                            (-121.426414, 36.346576),
+                            (-122.724666, 29.921319),
+                        ],
+                        "mostly": 1.0,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
+                {
+                    "title": "negative_test_with_mostly_input_points",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_points_within_geo_region_GBR",
+                        "country_iso_a3": None,
+                        "polygon_points": [
+                            (-80.397, -5.267),
+                            (-73.534, -8.908),
+                            (-70.500, -17.582),
+                            (-81.490, -14.627),
+                        ],
                         "mostly": 0.9,
                     },
                     "out": {
@@ -138,9 +202,9 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@DXcarlos",
             "@Rxmeez",
-            "@ryanlindeborg",  # Don't forget to add your github handle here!
+            "@ryanlindeborg",
+            "@mmi333",  # Don't forget to add your github handle here!
         ],
-        "package": "experimental_expectations",
         "requirements": ["geopandas"],
     }
 
@@ -152,6 +216,7 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
     success_keys = (
         "country_iso_a3",
+        "polygon_points",
         "mostly",
     )
 
@@ -160,92 +225,85 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
 
     # This method defines a question Renderer
     # For more info on Renderers, see {some doc}
-    #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
+    #     @classmethod
+    #     @renderer(renderer_type="renderer.question")
+    #     def _question_renderer(
+    #         cls, configuration, result=None, language=None, runtime_configuration=None
+    #     ):
+    #         column = configuration.kwargs.get("column")
+    #         mostly = configuration.kwargs.get("mostly")
 
-#     @classmethod
-#     @renderer(renderer_type="renderer.question")
-#     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
-#     ):
-#         column = configuration.kwargs.get("column")
-#         mostly = configuration.kwargs.get("mostly")
+    #         return f'Do at least {mostly * 100}% of values in column "{column}" equal 3?'
 
-#         return f'Do at least {mostly * 100}% of values in column "{column}" equal 3?'
+    # This method defines an answer Renderer
+    #     @classmethod
+    #     @renderer(renderer_type="renderer.answer")
+    #     def _answer_renderer(
+    #         cls, configuration=None, result=None, language=None, runtime_configuration=None
+    #     ):
+    #         column = result.expectation_config.kwargs.get("column")
+    #         mostly = result.expectation_config.kwargs.get("mostly")
+    #         regex = result.expectation_config.kwargs.get("regex")
+    #         if result.success:
+    #             return f'At least {mostly * 100}% of values in column "{column}" equal 3.'
+    #         else:
+    #             return f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
 
-# This method defines an answer Renderer
-#!!! This example renderer should render RenderedStringTemplateContent, not just a string
-#     @classmethod
-#     @renderer(renderer_type="renderer.answer")
-#     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
-#     ):
-#         column = result.expectation_config.kwargs.get("column")
-#         mostly = result.expectation_config.kwargs.get("mostly")
-#         regex = result.expectation_config.kwargs.get("regex")
-#         if result.success:
-#             return f'At least {mostly * 100}% of values in column "{column}" equal 3.'
-#         else:
-#             return f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
+    # This method defines a prescriptive Renderer
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column", "country_iso_a3", "polygon_points", "mostly"],
+        )
 
-# This method defines a prescriptive Renderer
-#     @classmethod
-#     @renderer(renderer_type="renderer.prescriptive")
-#     @render_evaluation_parameter_string
-#     def _prescriptive_renderer(
-#         cls,
-#         configuration=None,
-#         result=None,
-#         language=None,
-#         runtime_configuration=None,
-#         **kwargs,
-#     ):
-#!!! This example renderer should be shorter
-#         runtime_configuration = runtime_configuration or {}
-#         include_column_name = runtime_configuration.get("include_column_name", True)
-#         include_column_name = (
-#             include_column_name if include_column_name is not None else True
-#         )
-#         styling = runtime_configuration.get("styling")
-#         params = substitute_none_for_missing(
-#             configuration.kwargs,
-#             ["column", "regex", "mostly", "row_condition", "condition_parser"],
-#         )
+        template_str = "values must be inside "
+        if params["country_iso_a3"] is not None:
+            template_str = "$country_iso_a3 country"
+        else:
+            if params["polygon_points"] is not None:
+                template_str = "polygon defined by $polygon_points"
+        if params["mostly"] is not None:
+            params["mostly_pct"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
 
-#         template_str = "values must be equal to 3"
-#         if params["mostly"] is not None:
-#             params["mostly_pct"] = num_to_str(
-#                 params["mostly"] * 100, precision=15, no_scientific=True
-#             )
-#             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-#             template_str += ", at least $mostly_pct % of the time."
-#         else:
-#             template_str += "."
+        if include_column_name:
+            template_str = "$column " + template_str
 
-#         if include_column_name:
-#             template_str = "$column " + template_str
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
-#         if params["row_condition"] is not None:
-#             (
-#                 conditional_template_str,
-#                 conditional_params,
-#             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-#             template_str = conditional_template_str + ", then " + template_str
-#             params.update(conditional_params)
-
-#         return [
-#             RenderedStringTemplateContent(
-#                 **{
-#                     "content_block_type": "string_template",
-#                     "string_template": {
-#                         "template": template_str,
-#                         "params": params,
-#                         "styling": styling,
-#                     },
-#                 }
-#             )
-#         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesPointWithinGeoRegion().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesPointWithinGeoRegion().print_diagnostic_checklist()

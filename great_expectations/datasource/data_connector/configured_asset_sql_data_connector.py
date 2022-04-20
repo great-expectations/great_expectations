@@ -1,6 +1,7 @@
 from copy import deepcopy
-from typing import Dict, List, Optional, cast
+from typing import Callable, Dict, List, Optional, cast
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -21,6 +22,11 @@ try:
     import sqlalchemy as sa
 except ImportError:
     sa = None
+
+try:
+    from sqlalchemy.sql import Selectable
+except ImportError:
+    Selectable = None
 
 
 class ConfiguredAssetSqlDataConnector(DataConnector):
@@ -43,9 +49,15 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         assets: Optional[Dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
-        if assets is None:
-            assets = {}
-        self._assets = assets
+        self._assets: dict = {}
+        if assets:
+            for asset_name, config in assets.items():
+                self.add_data_asset(asset_name, config)
+
+        if execution_engine:
+            execution_engine: SqlAlchemyExecutionEngine = cast(
+                SqlAlchemyExecutionEngine, execution_engine
+            )
 
         super().__init__(
             name=name,
@@ -58,15 +70,139 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def assets(self) -> Dict[str, dict]:
         return self._assets
 
+    @property
+    def execution_engine(self) -> SqlAlchemyExecutionEngine:
+        return cast(SqlAlchemyExecutionEngine, self._execution_engine)
+
     def add_data_asset(
         self,
         name: str,
         config: dict,
     ):
         """
-        Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.
+        Add data_asset to DataConnector using data_asset name as key, and data_asset config as value.
         """
+        name = self._update_data_asset_name_from_config(name, config)
         self._assets[name] = config
+
+    def _update_data_asset_name_from_config(
+        self, data_asset_name: str, data_asset_config: dict
+    ) -> str:
+
+        data_asset_name_prefix: str = data_asset_config.get(
+            "data_asset_name_prefix", ""
+        )
+        data_asset_name_suffix: str = data_asset_config.get(
+            "data_asset_name_suffix", ""
+        )
+        schema_name: str = data_asset_config.get("schema_name", "")
+        include_schema_name: bool = data_asset_config.get("include_schema_name", True)
+        if schema_name and include_schema_name is False:
+            raise ge_exceptions.DataConnectorError(
+                message=f"{self.__class__.__name__} ran into an error while initializing Asset names. Schema {schema_name} was specified, but 'include_schema_name' flag was set to False."
+            )
+
+        if schema_name:
+            data_asset_name: str = f"{schema_name}.{data_asset_name}"
+
+        data_asset_name: str = (
+            f"{data_asset_name_prefix}{data_asset_name}{data_asset_name_suffix}"
+        )
+
+        return data_asset_name
+
+    SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING: dict = {
+        "split_on_year": "get_data_for_batch_identifiers_year",
+        "split_on_year_and_month": "get_data_for_batch_identifiers_year_and_month",
+        "split_on_year_and_month_and_day": "get_data_for_batch_identifiers_year_and_month_and_day",
+        "split_on_date_parts": "get_data_for_batch_identifiers_for_split_on_date_parts",
+    }
+
+    def _is_splitter_accessible_from_execution_engine(
+        self, splitter_method_name: str
+    ) -> bool:
+        """Whether the splitter method resides on the execution engine.
+
+        Note: 20220415 AJB this method should be deprecated in favor of moving
+            splitter methods from the data connector to the ExecutionEngine (via SqlAlchemyDataSplitter).
+
+        Args:
+            splitter_method_name: Name of the splitter method
+
+        Returns:
+            Boolean
+        """
+        return splitter_method_name in list(
+            self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING.keys()
+        )
+
+    def _get_batch_identifiers_from_execution_engine_method(
+        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
+    ) -> List[dict]:
+        """Get batch identifiers from a splitter method that resides on the execution engine.
+
+        Args:
+            table_name: Name of the table being split.
+            splitter_method_name: Name of the method used for splitting.
+            splitter_kwargs: Dict of key-pair arguments to provide to the splitter method e.g.
+                {"column_name": "my_column"}
+
+        Returns:
+            List of dicts containing data for creating batch identifiers.
+                For example, [{column_name: {"year": 2022, "month": 4, "day": 14}}]
+
+        """
+        splitter_fn_name: str = (
+            self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING[
+                splitter_method_name
+            ]
+        )
+        splitter_fn: Callable = self.execution_engine.get_splitter_method(
+            splitter_fn_name
+        )
+        batch_identifiers_list: List[dict] = splitter_fn(
+            execution_engine=self.execution_engine,
+            table_name=table_name,
+            **splitter_kwargs,
+        )
+        return batch_identifiers_list
+
+    def _get_batch_identifiers_from_data_connector_method(
+        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
+    ) -> List[dict]:
+        """Get batch identifiers from a splitter method that resides on the current DataConnector.
+
+        Note: 20220415 AJB this method should be deprecated in favor of moving
+            splitter methods from the data connector to the ExecutionEngine (via SqlAlchemyDataSplitter).
+
+        Args:
+            table_name: Name of the table being split.
+            splitter_method_name: Name of the method used for splitting.
+            splitter_kwargs: Dict of key-pair arguments to provide to the splitter method e.g.
+                {"column_name": "my_column"}
+
+        Returns:
+            List of dicts containing data for creating batch identifiers.
+                For example, [{column_name: {"year": 2022, "month": 4, "day": 14}}]
+        """
+
+        splitter_fn: Callable = getattr(self, splitter_method_name)
+        split_query: Selectable = splitter_fn(table_name=table_name, **splitter_kwargs)
+
+        sqlalchemy_execution_engine: SqlAlchemyExecutionEngine = cast(
+            SqlAlchemyExecutionEngine, self._execution_engine
+        )
+        rows = sqlalchemy_execution_engine.engine.execute(split_query).fetchall()
+
+        # Zip up split parameters with column names
+        column_names: List[str] = self._get_column_names_from_splitter_kwargs(
+            splitter_kwargs
+        )
+        batch_identifiers_list: List[dict] = [
+            dict(zip(column_names, row)) for row in rows
+        ]
+
+        return batch_identifiers_list
 
     def _get_batch_identifiers_list_from_data_asset_config(
         self,
@@ -79,21 +215,22 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             table_name = data_asset_name
 
         if "splitter_method" in data_asset_config:
-            splitter_fn = getattr(self, data_asset_config["splitter_method"])
-            split_query = splitter_fn(
-                table_name=table_name, **data_asset_config["splitter_kwargs"]
-            )
 
-            sqlalchemy_execution_engine: SqlAlchemyExecutionEngine = cast(
-                SqlAlchemyExecutionEngine, self._execution_engine
-            )
-            rows = sqlalchemy_execution_engine.engine.execute(split_query).fetchall()
+            splitter_method_name: str = data_asset_config["splitter_method"]
+            splitter_kwargs: dict = data_asset_config["splitter_kwargs"]
 
-            # Zip up split parameters with column names
-            column_names = self._get_column_names_from_splitter_kwargs(
-                data_asset_config["splitter_kwargs"]
-            )
-            batch_identifiers_list = [dict(zip(column_names, row)) for row in rows]
+            if self._is_splitter_accessible_from_execution_engine(splitter_method_name):
+                batch_identifiers_list: List[
+                    dict
+                ] = self._get_batch_identifiers_from_execution_engine_method(
+                    table_name, splitter_method_name, splitter_kwargs
+                )
+            else:
+                batch_identifiers_list: List[
+                    dict
+                ] = self._get_batch_identifiers_from_data_connector_method(
+                    table_name, splitter_method_name, splitter_kwargs
+                )
 
         else:
             batch_identifiers_list = [{}]
@@ -245,12 +382,33 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             dict built from batch_definition
         """
         data_asset_name: str = batch_definition.data_asset_name
+        table_name: str = self._get_table_name_from_batch_definition(batch_definition)
         return {
             "data_asset_name": data_asset_name,
-            "table_name": data_asset_name,
+            "table_name": table_name,
             "batch_identifiers": batch_definition.batch_identifiers,
             **self.assets[data_asset_name],
         }
+
+    def _get_table_name_from_batch_definition(
+        self, batch_definition: BatchDefinition
+    ) -> str:
+        """
+            Helper method called by _get_batch_identifiers_list_from_data_asset_config() to parse table_name from data_asset_name in cases
+            where schema is included.
+
+            data_asset_name in those cases are [schema].[table_name].
+
+        function will split data_asset_name on [schema]. and return the resulting table_name.
+        """
+        table_name: str = batch_definition.data_asset_name
+        data_asset_dict: dict = self.assets[batch_definition.data_asset_name]
+        if "schema_name" in data_asset_dict:
+            schema_name_str: str = data_asset_dict["schema_name"]
+            if schema_name_str in table_name:
+                table_name = table_name.split(f"{schema_name_str}.")[1]
+
+        return table_name
 
     # Splitter methods for listing partitions
 
@@ -263,7 +421,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
         """
-
         return sa.select([sa.true()])
 
     def _split_on_column_value(

@@ -18,6 +18,7 @@ class Asset:
         pattern: Optional[str] = None,
         group_names: Optional[List[str]] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        batch_identifiers: Optional[List[str]] = None,
         # S3
         bucket: Optional[str] = None,
         max_keys: Optional[int] = None,
@@ -39,6 +40,7 @@ class Asset:
         # Note: this may need to become a nested object to accommodate sorters
         self._group_names = group_names
         self._batch_spec_passthrough = batch_spec_passthrough or {}
+        self._batch_identifiers = batch_identifiers
 
         # S3
         self._bucket = bucket
@@ -113,3 +115,7 @@ class Asset:
     @property
     def delimiter(self) -> Optional[str]:
         return self._delimiter
+
+    @property
+    def batch_identifiers(self) -> Optional[List[str]]:
+        return self._batch_identifiers

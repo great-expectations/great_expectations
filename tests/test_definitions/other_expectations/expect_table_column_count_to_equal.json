@@ -39,8 +39,8 @@
       "tests": [
         {
           "title": "basic_positive_case",
-                    "exact_match_out": false,
-
+          "include_in_gallery": true,
+          "exact_match_out": false,
           "in": {
             "value": 4
           },
@@ -52,6 +52,7 @@
         },
         {
           "title": "basic_negative_case_upper_error",
+          "include_in_gallery": true,
           "exact_match_out": false,
           "in": {
             "value": 5

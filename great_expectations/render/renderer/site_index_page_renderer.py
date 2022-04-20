@@ -6,6 +6,10 @@ import traceback
 import tzlocal
 from dateutil.parser import parse
 
+from great_expectations.render.renderer.call_to_action_renderer import (
+    CallToActionRenderer,
+)
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     RenderedBootstrapTableContent,
     RenderedDocumentContent,
@@ -14,9 +18,6 @@ from great_expectations.render.types import (
     RenderedStringTemplateContent,
     RenderedTabsContent,
 )
-
-from .call_to_action_renderer import CallToActionRenderer
-from .renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,13 @@ class SiteIndexPageRenderer(Renderer):
                 "sortName": "_run_time_sort",
                 "sortable": "true",
                 "filterControl": "datepicker",
+                "filterCustomSearch": "formatRuntimeDateForFilter",
+                "filterDatepickerOptions": {
+                    "clearBtn": "true",
+                    "autoclose": "true",
+                    "format": "yyyy-mm-dd",
+                    "todayHighlight": "true",
+                },
             },
             {
                 "field": "asset_name",
@@ -166,6 +174,7 @@ class SiteIndexPageRenderer(Renderer):
             "filterControl": "true",
             "iconSize": "sm",
             "toolbarAlign": "right",
+            "showSearchClearButton": "true",
         }
 
         table_columns = [
@@ -183,6 +192,13 @@ class SiteIndexPageRenderer(Renderer):
                 "sortName": "_run_time_sort",
                 "sortable": "true",
                 "filterControl": "datepicker",
+                "filterCustomSearch": "formatRuntimeDateForFilter",
+                "filterDatepickerOptions": {
+                    "clearBtn": "true",
+                    "autoclose": "true",
+                    "format": "yyyy-mm-dd",
+                    "todayHighlight": "true",
+                },
             },
             {
                 "field": "run_name",

@@ -48,12 +48,13 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
     library_metadata = {
         "maturity": "production",
-        "package": "great_expectations",
         "tags": ["core expectation", "multi-column expectation"],
         "contributors": [
             "@great_expectations",
         ],
         "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
     }
 
     metric_dependencies = tuple()
@@ -123,29 +124,26 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
                 "value": params.get("mostly"),
             },
             "mostly_pct": {
-                "schema": {"type": "number"},
+                "schema": {"type": "string"},
                 "value": params.get("mostly_pct"),
             },
         }
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            template_str = f"Values must be unique across columns, at least $mostly_pct % of the time: "
+        else:
+            template_str = f"Values must always be unique across columns: "
 
-        template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
-            template_str += "$column_list_" + str(idx) + ", "
-            params["column_list_" + str(idx)] = params["column_list"][idx]
+            template_str += f"$column_list_{str(idx)}, "
+            params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
         last_idx = len(params["column_list"]) - 1
-        template_str += "$column_list_" + str(last_idx)
-        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+        template_str += f"$column_list_{str(last_idx)}"
+        params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
 
         if params["row_condition"] is not None:
             (
@@ -213,12 +211,12 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
 
         template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
-            template_str += "$column_list_" + str(idx) + ", "
-            params["column_list_" + str(idx)] = params["column_list"][idx]
+            template_str += f"$column_list_{str(idx)}, "
+            params[f"column_list_{str(idx)}"] = params["column_list"][idx]
 
         last_idx = len(params["column_list"]) - 1
-        template_str += "$column_list_" + str(last_idx)
-        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+        template_str += f"$column_list_{str(last_idx)}"
+        params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
 
         if params["row_condition"] is not None:
             (

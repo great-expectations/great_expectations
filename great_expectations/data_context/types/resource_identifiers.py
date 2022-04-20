@@ -42,7 +42,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
         return cls(expectation_suite_name=tuple_[0])
 
     def __repr__(self):
-        return self.__class__.__name__ + "::" + self._expectation_suite_name
+        return f"{self.__class__.__name__}::{self._expectation_suite_name}"
 
 
 class ExpectationSuiteIdentifierSchema(Schema):
@@ -111,8 +111,9 @@ class ValidationResultIdentifier(DataContextKey):
         super().__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
         if isinstance(run_id, str):
+            # deprecated-v0.11.0
             warnings.warn(
-                "String run_ids will be deprecated in the future. Please provide a run_id of type "
+                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
                 "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
                 "and run_time (both optional).",
                 DeprecationWarning,
@@ -350,7 +351,7 @@ class ConfigurationIdentifier(DataContextKey):
         return cls(configuration_key=tuple_[0])
 
     def __repr__(self):
-        return self.__class__.__name__ + "::" + self._configuration_key
+        return f"{self.__class__.__name__}::{self._configuration_key}"
 
 
 class ConfigurationIdentifierSchema(Schema):

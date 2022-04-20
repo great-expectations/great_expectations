@@ -26,6 +26,7 @@
     },
     "tests" : [{
       "title": "basic_positive_test_case",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "w",
@@ -39,6 +40,7 @@
       }
     },{
       "title": "negative_test_case_with_max_value_none",
+      "include_in_gallery": true,
       "exact_match_out" : false,
       "in": {
         "column": "w",
