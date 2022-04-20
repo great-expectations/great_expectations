@@ -15,6 +15,7 @@ from great_expectations.rule_based_profiler.types import (
 )
 from great_expectations.rule_based_profiler.types.altair import (
     ALTAIR_DEFAULT_CONFIGURATION,
+    AltairDataTypes,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
@@ -104,10 +105,10 @@ class DataAssistantResult(SerializableDictDot):
         """
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
-        title: str = f"{metric_title} by {domain_title}"
+        title: str = f"{metric_title} per {domain_title}"
 
         batch_id: str = "batch_id"
-        batch_id_type: str = "nominal"
+        batch_id_type: str = AltairDataTypes.NOMINAL.value
 
         if tooltip is None:
             tooltip: List[alt.Tooltip] = [
@@ -189,11 +190,11 @@ class DataAssistantResult(SerializableDictDot):
         domain_title: str = domain_name.title()
 
         batch_id: str = "batch_id"
-        batch_id_type: str = "nominal"
+        batch_id_type: str = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
-        min_value_type: str = "quantitative"
+        min_value_type: str = AltairDataTypes.QUANTITATIVE.value
         max_value: str = "max_value"
-        max_value_type: str = "quantitative"
+        max_value_type: str = AltairDataTypes.QUANTITATIVE.value
 
         tooltip: list[alt.Tooltip] = [
             alt.Tooltip(field=batch_id, type=batch_id_type),

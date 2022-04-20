@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class DataTypes(Enum):
+class AltairDataTypes(Enum):
     QUANTITATIVE = "quantitative"
     ORDINAL = "ordinal"
     NOMINAL = "nominal"
