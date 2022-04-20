@@ -2383,7 +2383,6 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
     )
 
     for column_name, min_value_expected, max_value_expected in test_cases:
-
         # Use all batches, loaded by Validator, for estimating Expectation argument values.
         result = validator.expect_column_unique_value_count_to_be_between(
             column=column_name,

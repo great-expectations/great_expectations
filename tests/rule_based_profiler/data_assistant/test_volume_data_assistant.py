@@ -167,20 +167,20 @@ def test_get_metrics_and_expectations(
                 "profiler_config": {
                     "name": "test_volume_data_assistant",
                     "config_version": 1.0,
-                    "variables": {
-                        "false_positive_rate": 0.05,
-                        "estimator": "bootstrap",
-                        "num_bootstrap_samples": 9999,
-                        "bootstrap_random_seed": None,
-                        "truncate_values": {
-                            "lower_bound": 0,
-                            "upper_bound": None,
-                        },
-                        "round_decimals": 0,
-                    },
+                    "variables": {},
                     "rules": {
                         "default_expect_table_row_count_to_be_between_rule": {
-                            "variables": {},
+                            "variables": {
+                                "false_positive_rate": 0.05,
+                                "estimator": "bootstrap",
+                                "num_bootstrap_samples": 9999,
+                                "bootstrap_random_seed": None,
+                                "truncate_values": {
+                                    "lower_bound": 0,
+                                    "upper_bound": None,
+                                },
+                                "round_decimals": 0,
+                            },
                             "domain_builder": {
                                 "class_name": "TableDomainBuilder",
                                 "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
@@ -251,18 +251,18 @@ def test_get_metrics_and_expectations(
     expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         config_version=1.0,
         name="test_volume_data_assistant",
-        variables={
-            "false_positive_rate": 0.05,
-            "estimator": "bootstrap",
-            "num_bootstrap_samples": 9999,
-            "truncate_values": {
-                "lower_bound": 0,
-            },
-            "round_decimals": 0,
-        },
+        variables={},
         rules={
             "default_expect_table_row_count_to_be_between_rule": {
-                "variables": {},
+                "variables": {
+                    "false_positive_rate": 0.05,
+                    "estimator": "bootstrap",
+                    "num_bootstrap_samples": 9999,
+                    "truncate_values": {
+                        "lower_bound": 0,
+                    },
+                    "round_decimals": 0,
+                },
                 "domain_builder": {
                     "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
                     "class_name": "TableDomainBuilder",
