@@ -53,11 +53,11 @@ class SqlAlchemyDataSplitter:
         Returns:
             splitter method.
         """
-        splitter_method_name: str = self.get_splitter_method_name(splitter_method_name)
+        splitter_method_name: str = self._get_splitter_method_name(splitter_method_name)
 
         return getattr(self, splitter_method_name)
 
-    def get_splitter_method_name(self, splitter_method_name: str) -> str:
+    def _get_splitter_method_name(self, splitter_method_name: str) -> str:
         """Accept splitter methods with or without starting with `_`.
 
         Args:
@@ -271,7 +271,7 @@ class SqlAlchemyDataSplitter:
 
     def get_data_for_batch_identifiers_year(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
         table_name: str,
         column_name: str,
     ) -> List[dict]:
@@ -296,7 +296,7 @@ class SqlAlchemyDataSplitter:
 
     def get_data_for_batch_identifiers_year_and_month(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
         table_name: str,
         column_name: str,
     ) -> List[dict]:
@@ -321,7 +321,7 @@ class SqlAlchemyDataSplitter:
 
     def get_data_for_batch_identifiers_year_and_month_and_day(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
         table_name: str,
         column_name: str,
     ) -> List[dict]:
@@ -427,7 +427,7 @@ class SqlAlchemyDataSplitter:
 
     def get_data_for_batch_identifiers_for_split_on_date_parts(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
         table_name: str,
         column_name: str,
         date_parts: Union[List[DatePart], List[str]],
@@ -463,8 +463,10 @@ class SqlAlchemyDataSplitter:
         )
 
     def _execute_split_query(
-        self, execution_engine: "SqlAlchemyExecutionEngine", split_query: Selectable
-    ) -> List[LegacyRow]:  # noqa: F821
+        self,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        split_query: Selectable,  # noqa: F821
+    ) -> List[LegacyRow]:
         """Use the provided execution engine to run the split query and fetch all of the results.
 
         Args:
