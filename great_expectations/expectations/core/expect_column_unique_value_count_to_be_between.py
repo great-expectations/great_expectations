@@ -125,6 +125,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         name="expect_column_unique_value_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
         variables={
+            "mostly": 1.0,
             "strict_min": False,
             "strict_max": False,
             "false_positive_rate": 0.05,
@@ -132,10 +133,10 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
             "num_bootstrap_samples": 9999,
             "bootstrap_random_seed": None,
             "truncate_values": {
-                "lower_bound": None,
+                "lower_bound": 0,
                 "upper_bound": None,
             },
-            "round_decimals": None,
+            "round_decimals": 0,
         },
         rules={
             "default_expect_column_unique_values_to_be_between_rule": {
