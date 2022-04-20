@@ -16,6 +16,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.execution_engine.sqlalchemy_data_splitter import DatePart
 from tests.test_utils import (
+    LoadedTable,
     clean_up_tables_with_prefix,
     get_bigquery_connection_url,
     get_snowflake_connection_url,
@@ -46,7 +47,7 @@ TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
 
 def _load_data(
     connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME
-) -> pd.DataFrame:
+) -> LoadedTable:
 
     # Load the first 10 rows of each month of taxi data
     return load_data_into_test_database(
@@ -72,7 +73,9 @@ if __name__ == "test_script_module":
         connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
     )
 
-    test_df = _load_data(connection_string=connection_string)
+    loaded_table: LoadedTable = _load_data(connection_string=connection_string)
+    test_df: pd.DataFrame = loaded_table.inserted_dataframe
+    table_name: str = loaded_table.table_name
 
     YEARS_IN_TAXI_DATA = (
         pd.date_range(start="2018-01-01", end="2020-12-31", freq="AS")
@@ -203,7 +206,7 @@ if __name__ == "test_script_module":
 
         # 2. Set splitter in data connector config
         data_connector_name: str = "test_data_connector"
-        data_asset_name: str = TAXI_DATA_TABLE_NAME
+        data_asset_name: str = table_name  # Read from generated table name
         column_name: str = TEST_COLUMN
         data_connector: ConfiguredAssetSqlDataConnector = (
             ConfiguredAssetSqlDataConnector(
