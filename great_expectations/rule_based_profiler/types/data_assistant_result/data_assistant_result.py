@@ -182,8 +182,9 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
-        opacity: float = 0.9
+        line_opacity: float = 0.9
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
+        fill_opacity: float = 0.5
         fill_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[5])
 
         metric_title: str = metric_name.replace("_", " ").title()
@@ -205,7 +206,7 @@ class DataAssistantResult(SerializableDictDot):
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color, opacity=opacity)
+            .mark_line(color=line_color, opacity=line_opacity)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -219,7 +220,7 @@ class DataAssistantResult(SerializableDictDot):
 
         upper_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color, opacity=opacity)
+            .mark_line(color=line_color, opacity=line_opacity)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -233,7 +234,7 @@ class DataAssistantResult(SerializableDictDot):
 
         band: alt.Chart = (
             alt.Chart(data=df)
-            .mark_area(fill=fill_color, fillOpacity=opacity)
+            .mark_area(fill=fill_color, fillOpacity=fill_opacity)
             .encode(
                 x=alt.X(
                     domain_name,
