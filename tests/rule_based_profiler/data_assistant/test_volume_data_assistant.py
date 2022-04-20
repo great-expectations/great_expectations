@@ -9,7 +9,10 @@ from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
-from great_expectations.rule_based_profiler.types import DataAssistantResult, Domain
+from great_expectations.rule_based_profiler.types import Domain
+from great_expectations.rule_based_profiler.types.data_assistant_result import (
+    DataAssistantResult,
+)
 from great_expectations.util import deep_filter_properties_iterable
 
 try:
@@ -249,9 +252,7 @@ def test_get_metrics_and_expectations(
     expected_expectation_suite.meta = expected_expectation_suite_meta
 
     expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-        class_name="RuleBasedProfiler",
         config_version=1.0,
-        module_name="great_expectations.rule_based_profiler.rule_based_profiler",
         name="test_volume_data_assistant",
         variables={
             "false_positive_rate": 0.05,
@@ -379,15 +380,15 @@ def test_volume_data_assistant_plot_descriptive(
     )
 
     expectation_suite_name: str = "test_suite"
-    result: DataAssistantResult = data_assistant.run(
+    data_assistant.run(
         expectation_suite_name=expectation_suite_name,
     )
 
     with mock.patch(
-        "great_expectations.rule_based_profiler.data_assistant.DataAssistant.plot",
+        "great_expectations.rule_based_profiler.types.data_assistant_result.VolumeDataAssistantResult.plot",
         return_value=False,
-    ) as data_assistant:
-        data_assistant.plot(result=result)
+    ) as result:
+        result.plot()
 
 
 def test_volume_data_assistant_plot_prescriptive(
@@ -408,12 +409,12 @@ def test_volume_data_assistant_plot_prescriptive(
     )
 
     expectation_suite_name: str = "test_suite"
-    result: DataAssistantResult = data_assistant.run(
+    data_assistant.run(
         expectation_suite_name=expectation_suite_name,
     )
 
     with mock.patch(
-        "great_expectations.rule_based_profiler.data_assistant.DataAssistant.plot",
+        "great_expectations.rule_based_profiler.types.data_assistant_result.VolumeDataAssistantResult.plot",
         return_value=False,
-    ) as data_assistant:
-        data_assistant.plot(result=result, prescriptive=False)
+    ) as result:
+        result.plot(prescriptive=True)

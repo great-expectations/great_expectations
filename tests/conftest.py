@@ -2370,7 +2370,6 @@ def profiler_config_with_placeholder_args(
     """
     return RuleBasedProfilerConfig(
         name=profiler_name,
-        class_name="RuleBasedProfiler",
         config_version=1.0,
         variables={
             "false_positive_threshold": 1.0e-2,
@@ -2439,6 +2438,9 @@ def populated_profiler_store(
         profiler_config_with_placeholder_args
     )
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(serialized_config)
+
+    deserialized_config.pop("module_name")
+    deserialized_config.pop("class_name")
 
     profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         **deserialized_config

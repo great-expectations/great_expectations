@@ -3304,6 +3304,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
         validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
         profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
+        profiler_config.pop("class_name")
+        profiler_config.pop("module_name")
 
         config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
 
