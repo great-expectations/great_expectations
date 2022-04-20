@@ -934,15 +934,13 @@ def test_run_profiler_without_dynamic_args(
         batch_list=None,
         batch_request=None,
         force_batch_data=False,
+        recompute_existing_parameter_values=False,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
             domain_builder=ReconciliationStrategy.UPDATE,
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
-        expectation_suite=None,
-        expectation_suite_name=None,
-        include_citation=True,
     )
 
 
@@ -977,15 +975,13 @@ def test_run_profiler_with_dynamic_args(
         batch_list=None,
         batch_request=None,
         force_batch_data=False,
+        recompute_existing_parameter_values=False,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
             domain_builder=ReconciliationStrategy.UPDATE,
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        include_citation=include_citation,
     )
 
 
