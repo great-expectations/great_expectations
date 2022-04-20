@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional, Union
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequestBase
 from great_expectations.data_context import BaseDataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -43,40 +42,6 @@ class VolumeDataAssistant(DataAssistant):
             data_context=data_context,
         )
 
-    def run(
-        self,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> VolumeDataAssistantResult:
-        """
-        Run the DataAssistant as it is currently configured.
-
-        Args:
-            expectation_suite: An existing "ExpectationSuite" to update
-            expectation_suite_name: A name for returned "ExpectationSuite"
-            include_citation: Whether or not to include the Profiler config in the metadata for "ExpectationSuite" produced by "RuleBasedProfiler"
-
-        Returns:
-            DataAssistantResult: The result object for the DataAssistant
-        """
-        data_assistant_result: DataAssistantResult = super().run(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-        )
-
-        volume_data_asssistant_result: VolumeDataAssistantResult = (
-            VolumeDataAssistantResult(
-                profiler_config=data_assistant_result.profiler_config,
-                metrics_by_domain=data_assistant_result.metrics_by_domain,
-                expectation_suite=data_assistant_result.expectation_suite,
-                execution_time=data_assistant_result.execution_time,
-            )
-        )
-
-        return volume_data_asssistant_result
-
     @property
     def expectation_kwargs_by_expectation_type(self) -> Dict[str, Dict[str, Any]]:
         return {
@@ -117,3 +82,13 @@ class VolumeDataAssistant(DataAssistant):
     @property
     def rules(self) -> Optional[List[Rule]]:
         return None
+
+    def _build_data_assistant_result(
+        self, data_assistant_result: DataAssistantResult
+    ) -> DataAssistantResult:
+        return VolumeDataAssistantResult(
+            profiler_config=data_assistant_result.profiler_config,
+            metrics_by_domain=data_assistant_result.metrics_by_domain,
+            expectation_suite=data_assistant_result.expectation_suite,
+            execution_time=data_assistant_result.execution_time,
+        )

@@ -20,9 +20,9 @@ from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 @dataclass
 class DataAssistantResult(SerializableDictDot):
     """
-    DataAssistantResult is an immutable "dataclass" object, designed to hold results of executing "data_assistant.run()"
-    method.  Available properties ("metrics", "expectation_configurations", "expectation_suite", and configuration
-    object (of type "RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
+    DataAssistantResult is a "dataclass" object, designed to hold results of executing "DataAssistant.run()" method.
+    Available properties ("metrics_by_domain", "expectation_suite", and configuration object ("RuleBasedProfilerConfig")
+    of effective Rule-Based Profiler, which embodies given "DataAssistant".
     """
 
     profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
@@ -32,25 +32,17 @@ class DataAssistantResult(SerializableDictDot):
     expectation_suite: Optional[ExpectationSuite] = None
     execution_time: Optional[float] = None  # Execution time (in seconds).
 
-    @abstractmethod
-    def plot(
-        self,
-        prescriptive: bool = False,
-    ) -> None:
-        """
-        Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
+    def to_dict(self) -> dict:
+        """Returns: this DataAssistantResult as a dictionary"""
+        return asdict(self)
 
-        Args:
-            prescriptive: Type of plot to generate.
-        """
-        pass
+    def to_json_dict(self) -> dict:
+        """Returns: this DataAssistantResult as a json dictionary"""
+        return convert_to_json_serializable(data=self.to_dict())
 
     def get_attributed_metrics_by_domain(
         self,
     ) -> Dict[Domain, Dict[str, ParameterNode]]:
-        metrics_by_domain: Dict[
-            Domain, Dict[str, ParameterNode]
-        ] = self.metrics_by_domain
         domain: Domain
         parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
         fully_qualified_parameter_name: str
@@ -64,9 +56,22 @@ class DataAssistantResult(SerializableDictDot):
                 ]
                 for fully_qualified_parameter_name, parameter_value in parameter_values_for_fully_qualified_parameter_names.items()
             }
-            for domain, parameter_values_for_fully_qualified_parameter_names in metrics_by_domain.items()
+            for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
         }
         return metrics_attributed_values_by_domain
+
+    @staticmethod
+    def display(charts: List[alt.Chart]) -> None:
+        """
+        Display each chart passed by DataAssistantResult.plot()
+
+        Args:
+            charts: A list of altair chart objects to display
+        """
+        chart: alt.Chart
+        altair_configuration: Dict[str, Any] = ALTAIR_DEFAULT_CONFIGURATION
+        for chart in charts:
+            chart.configure(**altair_configuration).display()
 
     @staticmethod
     def get_line_chart(
@@ -261,22 +266,15 @@ class DataAssistantResult(SerializableDictDot):
 
         return band + lower_limit + upper_limit + anomaly_coded_line
 
-    def display(self, charts: List[alt.Chart]) -> None:
+    @abstractmethod
+    def plot(
+        self,
+        prescriptive: bool = False,
+    ) -> None:
         """
-        Display each chart passed by DataAssistantResult.plot()
+        Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
 
         Args:
-            charts: A list of altair chart objects to display
+            prescriptive: Type of plot to generate.
         """
-        chart: alt.Chart
-        altair_configuration: Dict[str, Any] = ALTAIR_DEFAULT_CONFIGURATION
-        for chart in charts:
-            chart.configure(**altair_configuration).display()
-
-    def to_dict(self) -> dict:
-        """Returns: this DataAssistantResult as a dictionary"""
-        return asdict(self)
-
-    def to_json_dict(self) -> dict:
-        """Returns: this DataAssistantResult as a json dictionary"""
-        return convert_to_json_serializable(data=self.to_dict())
+        pass

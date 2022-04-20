@@ -14,8 +14,9 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import DatePart
+from great_expectations.execution_engine.sqlalchemy_data_splitter import DatePart
 from tests.test_utils import (
+    clean_up_tables_with_prefix,
     get_bigquery_connection_url,
     get_snowflake_connection_url,
     load_data_into_test_database,
@@ -31,13 +32,13 @@ def _get_connection_string_and_dialect() -> Tuple[str, str]:
 
     dialect: str = db_config["dialect"]
     if dialect == "snowflake":
-        CONNECTION_STRING: str = get_snowflake_connection_url()
+        connection_string: str = get_snowflake_connection_url()
     elif dialect == "bigquery":
-        CONNECTION_STRING: str = get_bigquery_connection_url()
+        connection_string: str = get_bigquery_connection_url()
     else:
-        CONNECTION_STRING: str = db_config["connection_string"]
+        connection_string: str = db_config["connection_string"]
 
-    return dialect, CONNECTION_STRING
+    return dialect, connection_string
 
 
 TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
@@ -57,15 +58,21 @@ def _load_data(
         ],
         connection_string=connection_string,
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
+        random_table_suffix=True,
     )
 
 
 if __name__ == "test_script_module":
 
-    dialect, CONNECTION_STRING = _get_connection_string_and_dialect()
+    dialect, connection_string = _get_connection_string_and_dialect()
     print(f"Testing dialect: {dialect}")
 
-    test_df = _load_data(connection_string=CONNECTION_STRING)
+    print("Preemptively cleaning old tables")
+    clean_up_tables_with_prefix(
+        connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
+    )
+
+    test_df = _load_data(connection_string=connection_string)
 
     YEARS_IN_TAXI_DATA = (
         pd.date_range(start="2018-01-01", end="2020-12-31", freq="AS")
@@ -190,7 +197,7 @@ if __name__ == "test_script_module":
             class_name="Datasource",
             execution_engine={
                 "class_name": "SqlAlchemyExecutionEngine",
-                "connection_string": CONNECTION_STRING,
+                "connection_string": connection_string,
             },
         )
 
@@ -255,3 +262,8 @@ if __name__ == "test_script_module":
             sa.select([sa.func.count()]).select_from(batch_data.selectable)
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
+
+    print("Clean up tables used in this test")
+    clean_up_tables_with_prefix(
+        connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
+    )
