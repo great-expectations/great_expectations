@@ -8,11 +8,13 @@ import pandas as pd
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.types import (
-    ALTAIR_DEFAULT_CONFIGURATION,
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     Domain,
     ParameterNode,
+)
+from great_expectations.rule_based_profiler.types.altair import (
+    ALTAIR_DEFAULT_CONFIGURATION,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
