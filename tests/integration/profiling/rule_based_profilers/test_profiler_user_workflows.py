@@ -2372,6 +2372,7 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
     )
     assert len(validator.batches) == 36
 
+    # Utilize a consistent seed to deal with probabilistic nature of this feature
     set_consistent_seed_within_expectation_default_profiler_config(
         "expect_column_unique_value_count_to_be_between"
     )
