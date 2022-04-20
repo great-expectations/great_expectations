@@ -1,5 +1,8 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
+from build.lib.great_expectations.rule_based_profiler.config.base import (
+    ParameterBuilderConfig,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import ColumnExpectation
@@ -13,6 +16,9 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.types.parameter_container import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+)
 
 
 class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
@@ -84,8 +90,44 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
     success_keys = (
         "min_value",
         "max_value",
+        "auto",
+        "profiler_config",
     )
 
+    min_estimator_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MetricMultiBatchParameterBuilder",
+            name="min_estimator",
+            metric_name="column.min",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+    )
+    max_estimator_parameter_builder_config: ParameterBuilderConfig = (
+        ParameterBuilderConfig(
+            module_name="great_expectations.rule_based_profiler.parameter_builder",
+            class_name="MetricMultiBatchParameterBuilder",
+            name="max_estimator",
+            metric_name="column.max",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+        )
+    )
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        min_estimator_parameter_builder_config,
+        max_estimator_parameter_builder_config,
+    ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_unique_value_count_to_be_between",
         config_version=1.0,
@@ -102,6 +144,8 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
+        "auto": False,
+        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "column",
