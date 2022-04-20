@@ -140,10 +140,11 @@ def test__convert_checks_into_output_message():
     assert (
         edr._convert_checks_into_output_message(
             class_name="ExpectColumnValuesToEqualThree",
+            maturity_level="EXPERIMENTAL",
             maturity_messages=edr.maturity_checklist,
         )
         == """\
-Completeness checklist for ExpectColumnValuesToEqualThree:
+Completeness checklist for ExpectColumnValuesToEqualThree (EXPERIMENTAL):
  ✔ AAA
    BBB
    CCC
