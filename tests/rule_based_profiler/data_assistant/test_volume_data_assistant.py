@@ -321,21 +321,26 @@ def test_get_metrics_and_expectations(
         batch_request=batch_request,
         data_context=context,
     )
-    result: DataAssistantResult = data_assistant.run(
+    data_assistant_result: DataAssistantResult = data_assistant.run(
         expectation_suite_name=expectation_suite_name,
     )
 
-    assert result.metrics_by_domain == expected_metrics_by_domain
-    assert result.expectation_suite.expectations == expected_expectation_configurations
+    assert data_assistant_result.metrics_by_domain == expected_metrics_by_domain
+    assert (
+        data_assistant_result.expectation_suite.expectations
+        == expected_expectation_configurations
+    )
 
-    result.expectation_suite.meta.pop("great_expectations_version", None)
+    data_assistant_result.expectation_suite.meta.pop("great_expectations_version", None)
 
-    assert result.expectation_suite == expected_expectation_suite
+    assert data_assistant_result.expectation_suite == expected_expectation_suite
 
-    assert result.expectation_suite.meta == expected_expectation_suite_meta
+    assert (
+        data_assistant_result.expectation_suite.meta == expected_expectation_suite_meta
+    )
 
     assert deep_filter_properties_iterable(
-        properties=result.profiler_config.to_json_dict()
+        properties=data_assistant_result.profiler_config.to_json_dict()
     ) == deep_filter_properties_iterable(
         properties=expected_rule_based_profiler_config.to_json_dict()
     )
@@ -357,9 +362,11 @@ def test_execution_time_within_proper_bounds(
         batch_request=batch_request,
         data_context=context,
     )
-    result: DataAssistantResult = data_assistant.run()
+    data_assistant_result: DataAssistantResult = data_assistant.run()
 
-    assert 0.0 < result.execution_time <= 1.0  # Execution time (in seconds).
+    assert (
+        0.0 < data_assistant_result.execution_time <= 1.0
+    )  # Execution time (in seconds).
 
 
 def test_volume_data_assistant_plot_descriptive(
@@ -387,8 +394,8 @@ def test_volume_data_assistant_plot_descriptive(
     with mock.patch(
         "great_expectations.rule_based_profiler.types.data_assistant_result.VolumeDataAssistantResult.plot",
         return_value=False,
-    ) as result:
-        result.plot()
+    ) as data_assistant_result:
+        data_assistant_result.plot()
 
 
 def test_volume_data_assistant_plot_prescriptive(
@@ -416,5 +423,5 @@ def test_volume_data_assistant_plot_prescriptive(
     with mock.patch(
         "great_expectations.rule_based_profiler.types.data_assistant_result.VolumeDataAssistantResult.plot",
         return_value=False,
-    ) as result:
-        result.plot(prescriptive=True)
+    ) as data_assistant_result:
+        data_assistant_result.plot(prescriptive=True)

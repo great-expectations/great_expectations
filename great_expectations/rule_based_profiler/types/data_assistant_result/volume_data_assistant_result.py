@@ -1,10 +1,9 @@
-from dataclasses import dataclass
-from typing import Any, Callable, Dict, KeysView, List, Optional
+from typing import Callable, Dict, KeysView, List
 
 import altair as alt
 import pandas as pd
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.parameter_builder import MetricValues
 from great_expectations.rule_based_profiler.types import Domain, ParameterNode
@@ -13,21 +12,7 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
 )
 
 
-@dataclass
 class VolumeDataAssistantResult(DataAssistantResult):
-    """
-    DataAssistantResult is an immutable "dataclass" object, designed to hold results of executing "data_assistant.run()"
-    method.  Available properties ("metrics", "expectation_configurations", "expectation_suite", and configuration
-    object (of type "RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
-    """
-
-    profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
-    metrics_by_domain: Optional[Dict[Domain, Dict[str, Any]]] = None
-    # Obtain "expectation_configurations" using "expectation_configurations = expectation_suite.expectations".
-    # Obtain "meta/details" using "meta = expectation_suite.meta".
-    expectation_suite: Optional[ExpectationSuite] = None
-    execution_time: Optional[float] = None  # Execution time (in seconds).
-
     def plot(
         self,
         prescriptive: bool = False,
