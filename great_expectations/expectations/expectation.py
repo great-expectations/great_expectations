@@ -8,15 +8,12 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from dateutil.parser import parse
-from numpy import negative
 
 from great_expectations import __version__ as ge_version
-from great_expectations import execution_engine
-from great_expectations.core import expectation_configuration
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
@@ -58,6 +55,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
+    get_expectation_impl,
     get_metric_kwargs,
     register_expectation,
     register_renderer,
@@ -75,6 +73,7 @@ from great_expectations.render.types import (
     renderedAtomicValueSchema,
 )
 from great_expectations.render.util import num_to_str
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
@@ -2442,3 +2441,13 @@ def _format_map_output(
         return return_obj
 
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")
+
+
+def get_default_profiler_config_for_expectation_type(
+    expectation_type: str,
+) -> Optional[RuleBasedProfilerConfig]:
+    expectation_impl = get_expectation_impl(expectation_name=expectation_type)
+    profiler_config: Optional[
+        RuleBasedProfilerConfig
+    ] = expectation_impl.default_kwarg_values.get("profiler_config")
+    return profiler_config
