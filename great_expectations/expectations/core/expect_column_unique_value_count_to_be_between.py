@@ -1,8 +1,5 @@
 from typing import Dict, List, Optional
 
-from build.lib.great_expectations.rule_based_profiler.config.base import (
-    ParameterBuilderConfig,
-)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import ColumnExpectation
@@ -15,7 +12,10 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config.base import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
 from great_expectations.rule_based_profiler.types.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
