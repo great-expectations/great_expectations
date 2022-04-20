@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -6,6 +6,7 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 )
 from great_expectations.rule_based_profiler.types import (
     Domain,
+    ParameterNode,
     RuleState,
     get_fully_qualified_parameter_names,
     get_parameter_values_for_fully_qualified_parameter_names,
@@ -84,7 +85,7 @@ class RuleOutput:
 
     def get_parameter_values_for_fully_qualified_parameter_names_by_domain(
         self,
-    ) -> Dict[Domain, Dict[str, Any]]:
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
         domain: Domain
         return {
             domain: self.get_parameter_values_for_fully_qualified_parameter_names_for_domain(
@@ -95,11 +96,11 @@ class RuleOutput:
 
     def get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
         self, domain_id: str
-    ) -> Dict[str, Any]:
+    ) -> Dict[str, ParameterNode]:
         domains_dict: Dict[str, Domain] = self.rule_state.get_domains_as_dict()
         domain: Domain = domains_dict[domain_id]
         parameter_values_for_fully_qualified_parameter_names: Dict[
-            str, Any
+            str, ParameterNode
         ] = self.get_parameter_values_for_fully_qualified_parameter_names_for_domain(
             domain=domain
         )
@@ -108,9 +109,9 @@ class RuleOutput:
     def get_parameter_values_for_fully_qualified_parameter_names_for_domain(
         self,
         domain: Optional[Domain] = None,
-    ) -> Dict[str, Any]:
+    ) -> Dict[str, ParameterNode]:
         parameter_values_for_fully_qualified_parameter_names: Dict[
-            str, Any
+            str, ParameterNode
         ] = get_parameter_values_for_fully_qualified_parameter_names(
             domain=domain,
             variables=self.rule_state.variables,

@@ -189,8 +189,6 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
 def test_rule_based_profiler_config_successfully_loads_with_required_args():
     data = {
         "name": "my_RBP",
-        "class_name": "RuleBasedProfiler",
-        "module_name": "great_expectations.rule_based_profiler",
         "config_version": 1.0,
         "rules": {
             "rule_1": {
@@ -218,8 +216,6 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
 def test_rule_based_profiler_config_successfully_loads_with_optional_args():
     data = {
         "name": "my_RBP",
-        "class_name": "RuleBasedProfiler",
-        "module_name": "great_expectations.rule_based_profiler",
         "config_version": 1.0,
         "variables": {"foo": "bar"},
         "rules": {
@@ -263,8 +259,6 @@ def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_f
 def test_rule_based_profiler_from_commented_map():
     data = {
         "name": "my_RBP",
-        "class_name": "RuleBasedProfiler",
-        "module_name": "great_expectations.rule_based_profiler",
         "config_version": 1.0,
         "variables": {"foo": "bar"},
         "rules": {
@@ -291,13 +285,14 @@ def test_resolve_config_using_acceptable_arguments(
     profiler_with_placeholder_args: RuleBasedProfiler,
 ) -> None:
     old_config: RuleBasedProfilerConfig = profiler_with_placeholder_args.config
-    old_config.module_name = profiler_with_placeholder_args.__class__.__module__
-    old_config.class_name = profiler_with_placeholder_args.__class__.__name__
 
     # Roundtrip through schema validation to add/or restore any missing fields.
     old_deserialized_config: dict = ruleBasedProfilerConfigSchema.load(
         old_config.to_json_dict()
     )
+    old_deserialized_config.pop("class_name")
+    old_deserialized_config.pop("module_name")
+
     old_config = RuleBasedProfilerConfig(**old_deserialized_config)
 
     # Brand new config is created but existing attributes are unchanged
@@ -310,12 +305,14 @@ def test_resolve_config_using_acceptable_arguments(
     # Roundtrip through schema validation to add/or restore any missing fields.
     # new_deserialized_config: dict = ruleBasedProfilerConfigSchema.load(new_config.to_json_dict())
     new_deserialized_config: dict = new_config.to_json_dict()
+    new_deserialized_config.pop("class_name")
+    new_deserialized_config.pop("module_name")
+
     new_config = RuleBasedProfilerConfig(**new_deserialized_config)
 
     assert id(old_config) != id(new_config)
     assert all(
-        old_config[attr] == new_config[attr]
-        for attr in ("class_name", "config_version", "module_name", "name")
+        old_config[attr] == new_config[attr] for attr in ("config_version", "name")
     )
 
 
