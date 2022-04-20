@@ -75,6 +75,7 @@ Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
+    Passes all linting checks
 ...
 ```
 
@@ -121,6 +122,7 @@ Completeness checklist for ExpectTableColumnsToBeUnique:
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
+    Passes all linting checks
 ...
 ```
 
@@ -276,6 +278,34 @@ Completeness checklist for ExpectTableColumnsToBeUnique:
   ✔ Has a docstring, including a one-line short description
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
+    Passes all linting checks
+...
+```
+
+### 8. Linting
+
+Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`. 
+
+If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
+
+```console
+black <PATH/TO/YOUR/EXPECTATION.py>
+isort <PATH/TO/YOUR/EXPECTATION.py>
+flake8 <PATH/TO/YOUR/EXPECTATION.py>
+pyupgrade <PATH/TO/YOUR/EXPECTATION.py> --py3-plus
+```
+
+Once this is done, running your diagnostic checklist should now reflect your Custom Expectation as meeting our linting requirements:
+
+```
+$ python expect_table_columns_to_be_unique.py
+
+Completeness checklist for ExpectTableColumnsToBeUnique:
+  ✔ Has a valid library_metadata object
+  ✔ Has a docstring, including a one-line short description
+  ✔ Has at least one positive and negative example case, and all test cases pass
+  ✔ Has core logic and passes tests on at least one Execution Engine
+  ✔ Passes all linting checks
 ...
 ```
 
@@ -285,7 +315,7 @@ Congratulations!<br/>&#127881; You've just built your first Custom Expectation! 
 </b></p>
 </div>
 
-### 8. Contribution (Optional)
+### 9. Contribution (Optional)
 
 This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
