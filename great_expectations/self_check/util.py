@@ -6,6 +6,7 @@ import platform
 import random
 import string
 import threading
+import traceback
 import warnings
 from functools import wraps
 from types import ModuleType
@@ -36,6 +37,10 @@ from great_expectations.core.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.exceptions.exceptions import (
+    MetricProviderError,
+    MetricResolutionError,
+)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -1665,7 +1670,12 @@ def generate_expectation_tests(
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     raise_exceptions_for_backends: bool = False,
 ):
-    """
+    """Determine tests to run
+
+    :param expectation_type: snake_case name of the expectation type
+    :param test_data_cases: list of ExpectationTestDataCases that has data, tests, schemas, and backends to use
+    :param execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics object specifying the engines the expectation is implemented for
+    :return: list of parametrized tests with loaded validators and accessible backends
     """
     parametrized_tests = []
 
@@ -1725,6 +1735,12 @@ def generate_expectation_tests(
                     c, d["data"], d["schemas"]
                 )
             except Exception as e:
+                # Adding these print statements for build_gallery.py's console output
+                print("\n\n[[ Problem calling get_test_validator_with_data ]]")
+                print(f"expectation_type -> {expectation_type}")
+                print(f"c -> {c}\ne -> {e}")
+                print(f"d['data'] -> {d.get('data')}")
+                print(f"d['schemas'] -> {d.get('schemas')}")
                 continue
 
             for test in d["tests"]:
@@ -1884,7 +1900,7 @@ def evaluate_json_test(data_asset, expectation_type, test):
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_cfe(validator, expectation_type, test):
+def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=True):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -1904,7 +1920,8 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
               - unexpected_list
               - details
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
-    :return: None. asserts correctness of results.
+    :param raise_exception: (bool) If False, capture any failed AssertionError from the call to check_json_test_result and return with validation_result
+    :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
     expectation_suite = ExpectationSuite(
         "json_test_suite", data_context=validator._data_context
@@ -1939,20 +1956,37 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
             )
 
     kwargs = copy.deepcopy(test["input"])
+    error_message = None
+    stack_trace = None
 
-    if isinstance(test["input"], list):
-        result = getattr(validator, expectation_type)(*kwargs)
-    # As well as keyword arguments
+    try:
+        if isinstance(test["input"], list):
+            result = getattr(validator, expectation_type)(*kwargs)
+        # As well as keyword arguments
+        else:
+            runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
+            runtime_kwargs.update(kwargs)
+            result = getattr(validator, expectation_type)(**runtime_kwargs)
+    except (MetricProviderError, MetricResolutionError) as e:
+        if raise_exception:
+            raise
+        error_message = str(e)
+        stack_trace = (traceback.format_exc(),)
+        result = None
     else:
-        runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
-        runtime_kwargs.update(kwargs)
-        result = getattr(validator, expectation_type)(**runtime_kwargs)
+        try:
+            check_json_test_result(
+                test=test,
+                result=result,
+                data_asset=validator.execution_engine.active_batch_data,
+            )
+        except Exception as e:
+            if raise_exception:
+                raise
+            error_message = str(e)
+            stack_trace = (traceback.format_exc(),)
 
-    check_json_test_result(
-        test=test,
-        result=result,
-        data_asset=validator.execution_engine.active_batch_data,
-    )
+    return (result, error_message, stack_trace)
 
 
 def check_json_test_result(test, result, data_asset=None):
