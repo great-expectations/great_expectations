@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Callable, Dict, KeysView, List
 
 import altair as alt
@@ -13,7 +12,6 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
 )
 
 
-@dataclass
 class VolumeDataAssistantResult(DataAssistantResult):
     def plot(
         self,
