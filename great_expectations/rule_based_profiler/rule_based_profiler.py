@@ -2,8 +2,6 @@ import copy
 import json
 import logging
 import uuid
-from dataclasses import asdict, dataclass
-from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -20,7 +18,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_profiler_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import convert_to_json_serializable, nested_update
+from great_expectations.core.util import nested_update
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -43,6 +41,12 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
     ExpectationConfigurationBuilder,
     init_rule_expectation_configuration_builders,
 )
+from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
+    DEFAULT_RECONCILATION_DIRECTIVES,
+    ReconciliationDirectives,
+    ReconciliationStrategy,
+    reconcile_rule_variables,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
@@ -58,33 +62,10 @@ from great_expectations.rule_based_profiler.types import (
     RuleState,
     build_parameter_container_for_variables,
 )
-from great_expectations.types import SerializableDictDot
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-
-class ReconciliationStrategy(Enum):
-    NESTED_UPDATE = "nested_update"
-    REPLACE = "replace"
-    UPDATE = "update"
-
-
-@dataclass
-class ReconciliationDirectives(SerializableDictDot):
-    variables: ReconciliationStrategy = ReconciliationStrategy.UPDATE
-    domain_builder: ReconciliationStrategy = ReconciliationStrategy.UPDATE
-    parameter_builder: ReconciliationStrategy = ReconciliationStrategy.UPDATE
-    expectation_configuration_builder: ReconciliationStrategy = (
-        ReconciliationStrategy.UPDATE
-    )
-
-    def to_dict(self) -> dict:
-        return asdict(self)
-
-    def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=self.to_dict())
 
 
 class BaseRuleBasedProfiler(ConfigPeer):
@@ -92,15 +73,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
     BaseRuleBasedProfiler class is initialized from RuleBasedProfilerConfig typed object and contains all functionality
     in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
     """
-
-    DEFAULT_RECONCILATION_DIRECTIVES: ReconciliationDirectives = (
-        ReconciliationDirectives(
-            variables=ReconciliationStrategy.UPDATE,
-            domain_builder=ReconciliationStrategy.UPDATE,
-            parameter_builder=ReconciliationStrategy.UPDATE,
-            expectation_configuration_builder=ReconciliationStrategy.UPDATE,
-        )
-    )
 
     EXPECTATION_SUCCESS_KEYS: Set[str] = {
         "auto",
@@ -187,9 +159,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     message=f'Invalid rule "{rule_name}": missing mandatory {attr}.'
                 )
 
-        # Instantiate builder attributes
+        # Instantiate variables and builder attributes
+        variables: Dict[str, Any] = rule_config.get("variables", {})
         domain_builder: DomainBuilder = RuleBasedProfiler._init_rule_domain_builder(
-            domain_builder_config=rule_config["domain_builder"],
+            domain_builder_config=rule_config.get("domain_builder"),
             data_context=self._data_context,
         )
         parameter_builders: Optional[
@@ -201,15 +174,16 @@ class BaseRuleBasedProfiler(ConfigPeer):
         expectation_configuration_builders: List[
             ExpectationConfigurationBuilder
         ] = init_rule_expectation_configuration_builders(
-            expectation_configuration_builder_configs=rule_config[
+            expectation_configuration_builder_configs=rule_config.get(
                 "expectation_configuration_builders"
-            ],
+            ),
             data_context=self._data_context,
         )
 
         # Compile previous steps and package into a Rule object
         return Rule(
             name=rule_name,
+            variables=variables,
             domain_builder=domain_builder,
             parameter_builders=parameter_builders,
             expectation_configuration_builders=expectation_configuration_builders,
@@ -241,6 +215,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         force_batch_data: bool = False,
+        recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
     ) -> None:
         """
@@ -250,6 +225,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
+            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
         """
         effective_variables: Optional[
@@ -260,7 +236,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
-            rules=rules, reconciliation_directives=reconciliation_directives
+            rules=rules,
+            reconciliation_directives=reconciliation_directives,
         )
 
         rule: Rule
@@ -282,6 +259,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 batch_list=batch_list,
                 batch_request=batch_request,
                 force_batch_data=force_batch_data,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                reconciliation_directives=reconciliation_directives,
             )
             self.rule_states.append(rule_state)
 
@@ -431,7 +410,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Add Rule object to existing profiler object by reconciling profiler rules and updating _profiler_config.
         """
-        rules_dict: Dict[str, Dict[str, ParameterNode]] = {
+        rules_dict: Dict[str, Dict[str, Any]] = {
             rule.name: rule.to_json_dict(),
         }
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
@@ -443,7 +422,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ),
         )
         self.rules = effective_rules
-        updated_rules: Optional[Dict[str, Dict[str, ParameterNode]]] = {
+        updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
             rule.name: rule.to_json_dict() for rule in effective_rules
         }
         self._profiler_config.rules = updated_rules
@@ -593,7 +572,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rule: Rule = existing_rules[rule_name]
 
             variables_config: dict = rule_config.get("variables", {})
-            effective_variables: dict = RuleBasedProfiler._reconcile_rule_variables(
+            effective_variables: dict = reconcile_rule_variables(
                 variables=rule.variables,
                 variables_config=variables_config,
                 reconciliation_strategy=reconciliation_directives.variables,
@@ -640,42 +619,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             effective_rule_config = rule_config
 
         return effective_rule_config
-
-    @staticmethod
-    def _reconcile_rule_variables(
-        variables: ParameterContainer,
-        variables_config: dict,
-        reconciliation_strategy: ReconciliationStrategy = DEFAULT_RECONCILATION_DIRECTIVES.variables,
-    ) -> dict:
-        """
-        Rule "variables" reconciliation involves combining the variables, instantiated from Rule configuration
-        (e.g., stored in a YAML file managed by the Profiler store), with the variables override, possibly supplied
-        as part of the candiate override rule configuration.
-
-        The reconciliation logic for "variables" is of the "replace" nature: An override value complements the
-        original on key "miss", and replaces the original on key "hit" (or "collision"), because "variables" is a
-        unique member for a Rule.
-
-        :param variables: existing variables of a Rule
-        :param variables_config: variables configuration override, supplied in dictionary (configuration) form
-        :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
-        :return: reconciled variables configuration, returned in dictionary (configuration) form
-        """
-        variables_as_dict: dict = variables.to_json_dict()
-
-        effective_variables_config: dict = variables_as_dict
-        if variables_config:
-            if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
-                effective_variables_config = nested_update(
-                    effective_variables_config,
-                    variables_config,
-                )
-            elif reconciliation_strategy == ReconciliationStrategy.REPLACE:
-                effective_variables_config = variables_config
-            elif reconciliation_strategy == ReconciliationStrategy.UPDATE:
-                effective_variables_config.update(variables_config)
-
-        return effective_variables_config
 
     @staticmethod
     def _reconcile_rule_domain_builder_config(
@@ -919,7 +862,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_list=None,
             batch_request=None,
             force_batch_data=False,
-            reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+            reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
@@ -963,7 +906,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_list=batch_list,
             batch_request=batch_request,
             force_batch_data=True,
-            reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+            reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )
 
         result: ExpectationSuite = profiler.get_expectation_suite(
@@ -1190,7 +1133,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def to_json_dict(self) -> dict:
         variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
-            self.variables
+            variables=self.variables
         )
 
         rule: Rule

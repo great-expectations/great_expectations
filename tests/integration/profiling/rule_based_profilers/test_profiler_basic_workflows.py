@@ -125,6 +125,7 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
     )
     simple_rule: Rule = Rule(
         name="rule_with_no_variables_no_parameters",
+        variables=None,
         domain_builder=domain_builder,
         expectation_configuration_builders=[default_expectation_configuration_builder],
     )
@@ -178,6 +179,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     )
     simple_rule: Rule = Rule(
         name="rule_with_variables_and_parameters",
+        variables=None,
         domain_builder=domain_builder,
         parameter_builders=[numeric_range_parameter_builder],
         expectation_configuration_builders=[config_builder],
@@ -233,6 +235,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
     )
     simple_variables_rule: Rule = Rule(
         name="rule_with_no_variables_no_parameters",
+        variables=None,
         domain_builder=domain_builder,
         parameter_builders=[numeric_range_parameter_builder],
         expectation_configuration_builders=[config_builder],
@@ -342,6 +345,7 @@ def test_profiler_run_with_expectation_suite_arg(
     )
     simple_rule: Rule = Rule(
         name="rule_with_no_variables_no_parameters",
+        variables=None,
         domain_builder=domain_builder,
         expectation_configuration_builders=[default_expectation_configuration_builder],
     )

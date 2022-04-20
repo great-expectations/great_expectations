@@ -13,6 +13,11 @@ from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
+from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
+    DEFAULT_RECONCILATION_DIRECTIVES,
+    ReconciliationDirectives,
+    reconcile_rule_variables,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
@@ -31,34 +36,40 @@ class Rule(SerializableDictDot):
     def __init__(
         self,
         name: str,
-        domain_builder: DomainBuilder,
-        variables: Optional[Dict[str, Any]] = None,
+        variables: Optional[Union[ParameterContainer, Dict[str, Any]]] = None,
+        domain_builder: Optional[DomainBuilder] = None,
         parameter_builders: Optional[List[ParameterBuilder]] = None,
         expectation_configuration_builders: Optional[
             List[ExpectationConfigurationBuilder]
         ] = None,
     ):
         """
-        Sets Profiler rule name, domain builders, parameters builders, configuration builders,
-        and other necessary instance data (variables)
-        name: A string representing the name of the ProfilerRule
-        domain_builder: A Domain Builder object used to build rule data domain
-        variables: Any variables to be substituted within the rules
-        parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters
-        expectation_configuration_builders: A list of Expectation Configuration Builders
+        Sets Rule name, variables, domain builder, parameters builders, configuration builders, and other instance data.
+
+        Args:
+            name: A string representing the name of the ProfilerRule
+            variables: Any variables to be substituted within the rules
+            domain_builder: A Domain Builder object used to build rule data domain
+            parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters
+            expectation_configuration_builders: A list of Expectation Configuration Builders
         """
         self._name = name
-        self._domain_builder = domain_builder
 
         if variables is None:
             variables = {}
 
         # Convert variables argument to ParameterContainer
-        _variables: ParameterContainer = build_parameter_container_for_variables(
-            variables_configs=variables
-        )
-        self._variables = _variables
+        _variables: ParameterContainer
+        if isinstance(variables, ParameterContainer):
+            _variables = variables
+        else:
+            _variables: ParameterContainer = build_parameter_container_for_variables(
+                variables_configs=variables
+            )
 
+        self.variables = _variables
+
+        self._domain_builder = domain_builder
         self._parameter_builders = parameter_builders
         self._expectation_configuration_builders = expectation_configuration_builders
 
@@ -69,25 +80,39 @@ class Rule(SerializableDictDot):
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         force_batch_data: bool = False,
         recompute_existing_parameter_values: bool = False,
+        reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
     ) -> RuleState:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
         ConfigurationBuilder available based on the instantiation.
+
         Args:
-            variables: attribute name/value pairs, commonly-used in Builder objects.
-            batch_list: Explicit list of Batch objects to supply data at runtime.
-            batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
-            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
+            variables: Attribute name/value pairs, commonly-used in Builder objects
+            batch_list: Explicit list of Batch objects to supply data at runtime
+            batch_request: Explicit batch_request used to supply data at runtime
+            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components
+            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
+            reconciliation_directives: directives for how each rule component should be overwritten
 
         Returns:
             RuleState representing effect of executing Rule
         """
-        domains: List[Domain] = self.domain_builder.get_domains(
-            variables=variables,
-            batch_list=batch_list,
-            batch_request=batch_request,
-            force_batch_data=force_batch_data,
+        variables = build_parameter_container_for_variables(
+            variables_configs=reconcile_rule_variables(
+                variables=self.variables,
+                variables_config=convert_variables_to_dict(variables=variables),
+                reconciliation_strategy=reconciliation_directives.variables,
+            )
+        )
+        domains: List[Domain] = (
+            []
+            if self.domain_builder is None
+            else self.domain_builder.get_domains(
+                variables=variables,
+                batch_list=batch_list,
+                batch_request=batch_request,
+                force_batch_data=force_batch_data,
+            )
         )
         rule_state: RuleState = RuleState(
             rule=self,
@@ -143,10 +168,6 @@ class Rule(SerializableDictDot):
         self._name = value
 
     @property
-    def domain_builder(self) -> DomainBuilder:
-        return self._domain_builder
-
-    @property
     def variables(self) -> Optional[ParameterContainer]:
         # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
         return copy.deepcopy(self._variables)
@@ -154,6 +175,10 @@ class Rule(SerializableDictDot):
     @variables.setter
     def variables(self, value: Optional[ParameterContainer]):
         self._variables = value
+
+    @property
+    def domain_builder(self) -> Optional[DomainBuilder]:
+        return self._domain_builder
 
     @property
     def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
@@ -211,7 +236,7 @@ class Rule(SerializableDictDot):
         """
         dict_obj: dict = self.to_dict()
         variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
-            self.variables
+            variables=self.variables
         )
         dict_obj["variables"] = variables_dict
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)

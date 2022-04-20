@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+from unittest import mock
 
 from freezegun import freeze_time
 
@@ -14,11 +15,6 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.util import deep_filter_properties_iterable
-
-try:
-    from unittest import mock
-except ImportError:
-    from unittest import mock
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -129,8 +125,8 @@ def test_get_metrics_and_expectations(
         ExpectationConfiguration(
             **{
                 "kwargs": {
-                    "min_value": 10000.0,
-                    "max_value": 10000.0,
+                    "min_value": 10000,
+                    "max_value": 10000,
                 },
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "meta": {

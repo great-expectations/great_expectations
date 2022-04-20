@@ -1270,6 +1270,7 @@ def test_add_single_rule(
     )
     first_rule: Rule = Rule(
         name="first_rule",
+        variables=None,
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
@@ -1279,6 +1280,7 @@ def test_add_single_rule(
 
     duplicate_of_first_rule: Rule = Rule(
         name="first_rule",
+        variables=None,
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
@@ -1306,6 +1308,7 @@ def test_add_rule_overwrite_first_rule(
     )
     first_rule: Rule = Rule(
         name="first_rule",
+        variables=None,
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
@@ -1332,6 +1335,7 @@ def test_add_rule_add_second_rule(
     )
     first_rule: Rule = Rule(
         name="first_rule",
+        variables=None,
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
@@ -1341,6 +1345,7 @@ def test_add_rule_add_second_rule(
 
     second_rule: Rule = Rule(
         name="second_rule",
+        variables=None,
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
