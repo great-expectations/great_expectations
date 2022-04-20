@@ -2364,47 +2364,49 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
     )
     assert result.success
 
-    # key: str
-    # value: Any
-    # expectation_config_kwargs: dict = {
-    #     key: value
-    #     for key, value in result.expectation_config["kwargs"].items()
-    #     if key
-    #     not in [
-    #         "min_value",
-    #         "max_value",
-    #     ]
-    # }
-    # assert expectation_config_kwargs == {
-    #     "column": "fare_amount",
-    #     "strict_min": False,
-    #     "strict_max": False,
-    #     "result_format": "SUMMARY",
-    #     "include_config": True,
-    #     "auto": True,
-    #     "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
-    # }
+    key: str
+    value: Any
+    expectation_config_kwargs: dict = {
+        key: value
+        for key, value in result.expectation_config["kwargs"].items()
+        if key
+        not in [
+            "min_value",
+            "max_value",
+        ]
+    }
+    assert expectation_config_kwargs == {
+        "column": "fare_amount",
+        "strict_min": False,
+        "strict_max": False,
+        "result_format": "SUMMARY",
+        "include_config": True,
+        "auto": True,
+        "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+    }
 
-    # rtol: float = 2.0e1 * RTOL
-    # atol: float = 2.0e1 * ATOL
+    assert result.expectation_config["kwargs"]["min_value"] == 152
 
-    # min_value_actual: float = result.expectation_config["kwargs"]["min_value"]
-    # min_value_expected: float = 1.5438e2
+    rtol: float = 2.0e1 * RTOL
+    atol: float = 2.0e1 * ATOL
 
-    # np.testing.assert_allclose(
-    #     actual=min_value_actual,
-    #     desired=min_value_expected,
-    #     rtol=rtol,
-    #     atol=atol,
-    #     err_msg=f"Actual value of {min_value_actual} differs from expected value of {min_value_expected} by more than {atol + rtol * abs(min_value_expected)} tolerance.",
-    # )
+    min_value_actual: float = result.expectation_config["kwargs"]["min_value"]
+    min_value_expected: float = 1.5438e2
 
-    # max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
-    # max_value_expected: float = 5.6314775e4
-    # np.testing.assert_allclose(
-    #     actual=max_value_actual,
-    #     desired=max_value_expected,
-    #     rtol=rtol,
-    #     atol=atol,
-    #     err_msg=f"Actual value of {max_value_actual} differs from expected value of {max_value_expected} by more than {atol + rtol * abs(max_value_expected)} tolerance.",
-    # )
+    np.testing.assert_allclose(
+        actual=min_value_actual,
+        desired=min_value_expected,
+        rtol=rtol,
+        atol=atol,
+        err_msg=f"Actual value of {min_value_actual} differs from expected value of {min_value_expected} by more than {atol + rtol * abs(min_value_expected)} tolerance.",
+    )
+
+    max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
+    max_value_expected: float = 5.6314775e4
+    np.testing.assert_allclose(
+        actual=max_value_actual,
+        desired=max_value_expected,
+        rtol=rtol,
+        atol=atol,
+        err_msg=f"Actual value of {max_value_actual} differs from expected value of {max_value_expected} by more than {atol + rtol * abs(max_value_expected)} tolerance.",
+    )
