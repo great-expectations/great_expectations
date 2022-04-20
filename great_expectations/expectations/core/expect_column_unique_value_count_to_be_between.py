@@ -12,6 +12,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 
 
 class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
@@ -83,6 +84,13 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
     success_keys = (
         "min_value",
         "max_value",
+    )
+
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_unique_value_count_to_be_between",
+        config_version=1.0,
+        variables={},
+        rules={},
     )
 
     # Default values
