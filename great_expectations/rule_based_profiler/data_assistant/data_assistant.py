@@ -166,10 +166,12 @@ class DataAssistant(ABC):
         Returns:
             DataAssistantResult: The result object for the DataAssistant
         """
-        result: DataAssistantResult = DataAssistantResult(execution_time=0.0)
+        data_assistant_result: DataAssistantResult = DataAssistantResult(
+            execution_time=0.0
+        )
         run_profiler_on_data(
             data_assistant=self,
-            data_assistant_result=result,
+            data_assistant_result=data_assistant_result,
             profiler=self.profiler,
             variables=self.variables,
             rules=self.rules,
@@ -179,7 +181,9 @@ class DataAssistant(ABC):
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
         )
-        return result
+        return self._build_data_assistant_result(
+            data_assistant_result=data_assistant_result
+        )
 
     @property
     def name(self) -> str:
@@ -235,6 +239,22 @@ class DataAssistant(ABC):
         """
         Returns:
             Optional custom list of "Rule" objects (overrides) can be added by subclasses (return "None" if not needed).
+        """
+        pass
+
+    @abstractmethod
+    def _build_data_assistant_result(
+        self, data_assistant_result: DataAssistantResult
+    ) -> DataAssistantResult:
+        """
+        DataAssistant subclasses implement this method to return subclasses of DataAssistantResult object, which imbue
+        base DataAssistantResult class with methods, pertaining to specifics of particular DataAssistantResult subclass.
+
+        Args:
+            data_assistant_result: Base DataAssistantResult result object of DataAssistant (contains only data fields)
+
+        Returns:
+            DataAssistantResult: The appropriate subclass of base DataAssistantResult result object of the DataAssistant
         """
         pass
 
