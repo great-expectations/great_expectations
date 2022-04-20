@@ -41,9 +41,6 @@ class DatePart(enum.Enum):
 class SqlAlchemyDataSplitter:
     """Methods for splitting data accessible via SqlAlchemyExecutionEngine."""
 
-    def __init__(self):
-        pass
-
     def get_splitter_method(self, splitter_method_name: str) -> Callable:
         """Get the appropriate splitter method from the method name.
 
@@ -203,8 +200,7 @@ class SqlAlchemyDataSplitter:
     def split_on_whole_table(self, batch_identifiers: dict) -> bool:
         """'Split' by returning the whole table"""
 
-        # return sa.column(column_name) == batch_identifiers[column_name]
-        return 1 == 1
+        return True
 
     def split_on_column_value(self, column_name: str, batch_identifiers: dict) -> bool:
         """Split using the values in the named column"""
