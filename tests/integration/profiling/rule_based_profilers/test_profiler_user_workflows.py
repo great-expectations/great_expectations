@@ -1,7 +1,7 @@
 import datetime
 import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from unittest import mock
 
 import numpy as np
@@ -17,6 +17,9 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite, ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
+from great_expectations.expectations.expectation import (
+    get_default_profiler_config_for_expectation_type,
+)
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
@@ -31,8 +34,21 @@ from tests.core.usage_statistics.util import (
     usage_stats_invalid_messages_exist,
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
+from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 yaml = YAML()
+
+
+@pytest.fixture
+def set_consistent_seed_within_expectation_default_profiler_config() -> Callable:
+    def _set_seed(expectation_type: str):
+        default_profiler: Optional[
+            RuleBasedProfilerConfig
+        ] = get_default_profiler_config_for_expectation_type(expectation_type)
+        assert default_profiler is not None and default_profiler.variables is not None
+        default_profiler.variables["bootstrap_random_seed"] = RANDOM_SEED
+
+    return _set_seed
 
 
 def test_alice_columnar_table_single_batch_batches_are_accessible(
@@ -2324,7 +2340,8 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
 @freeze_time("09/26/2019 13:42:41")
 def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_columnar_table_multi_batch_data_context,
-):
+    set_consistent_seed_within_expectation_default_profiler_config: Callable,
+) -> None:
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
     result: ExpectationValidationResult
@@ -2354,6 +2371,10 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
         expectation_suite_name=expectation_suite_name,
     )
     assert len(validator.batches) == 36
+
+    set_consistent_seed_within_expectation_default_profiler_config(
+        "expect_column_unique_value_count_to_be_between"
+    )
 
     test_cases: Tuple[Tuple[str, int, int], ...] = (
         ("pickup_location_id", 118, 212),
