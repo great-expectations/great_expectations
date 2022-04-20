@@ -20,7 +20,7 @@ from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 @dataclass
 class DataAssistantResult(SerializableDictDot):
     """
-    DataAssistantResult is a "dataclass" object, designed to hold results of executing "data_assistant.run()" method.
+    DataAssistantResult is a "dataclass" object, designed to hold results of executing "DataAssistant.run()" method.
     Available properties ("metrics_by_domain", "expectation_suite", and configuration object ("RuleBasedProfilerConfig")
     of effective Rule-Based Profiler, which embodies given "DataAssistant".
     """
