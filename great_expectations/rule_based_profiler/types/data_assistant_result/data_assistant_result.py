@@ -108,7 +108,7 @@ class DataAssistantResult(SerializableDictDot):
         title: str = f"{metric_title} per {domain_title}"
 
         batch_id: str = "batch_id"
-        batch_id_type: str = AltairDataTypes.NOMINAL.value
+        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         if tooltip is None:
             tooltip: List[alt.Tooltip] = [
@@ -190,11 +190,11 @@ class DataAssistantResult(SerializableDictDot):
         domain_title: str = domain_name.title()
 
         batch_id: str = "batch_id"
-        batch_id_type: str = AltairDataTypes.NOMINAL.value
+        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
-        min_value_type: str = AltairDataTypes.QUANTITATIVE.value
+        min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         max_value: str = "max_value"
-        max_value_type: str = AltairDataTypes.QUANTITATIVE.value
+        max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
         tooltip: list[alt.Tooltip] = [
             alt.Tooltip(field=batch_id, type=batch_id_type),
