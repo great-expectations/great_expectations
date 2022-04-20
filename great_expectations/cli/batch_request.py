@@ -430,6 +430,7 @@ def _get_batch_spec_passthrough(
         )
         if execution_engine.engine.dialect.name.lower() == "bigquery":
             # bigquery also requires special handling
+            # TODO : Add deprecation warning here:
             bigquery_temp_table: str = click.prompt(
                 "Great Expectations will create a table to use for "
                 "validation." + os.linesep + "Please enter a name for this table: ",

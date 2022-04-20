@@ -1375,6 +1375,7 @@ Would you like to continue?"""
             data_asset_name = f"{project_id}.{data_asset_name}"
 
         # bigquery also requires special handling
+        # TODO: Add deprecation warning here and eliminate it if possible
         bigquery_temp_table = click.prompt(
             "Great Expectations will create a table to use for "
             "validation." + os.linesep + "Please enter a name for this table: ",
