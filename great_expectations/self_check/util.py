@@ -273,6 +273,9 @@ except (ImportError, KeyError):
     mssqlDialect = None
     MSSQL_TYPES = {}
 
+import tempfile
+
+tmp_dir = str(tempfile.mkdtemp())
 
 SQL_DIALECT_NAMES = (
     "sqlite",
@@ -1580,8 +1583,10 @@ def generate_expectation_tests(
 
         for c in backends:
 
+            datasets = []
+
             try:
-                if isintstance(d["data"], list):
+                if isinstance(d["data"], list):
                     sqlite_db_path = os.path.abspath(
                         os.path.join(
                             tmp_dir,
