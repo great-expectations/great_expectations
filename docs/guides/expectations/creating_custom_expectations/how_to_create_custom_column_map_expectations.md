@@ -301,7 +301,7 @@ you may notice that we didn't implement a `_validate` method here. While we have
 Column Map Expectations come with that functionality built in; no extra `_validate` needed!
 :::
 
-### 7. Contribution (Optional)
+### 8. Contribution (Optional)
 
 This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
