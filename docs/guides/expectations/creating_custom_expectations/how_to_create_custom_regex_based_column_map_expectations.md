@@ -78,7 +78,7 @@ Completeness checklist for ExpectColumnValuesToMatchSomeRegex:
     Passes all linting checks
     Has basic input validation and type checking
     Has both Statement Renderers: prescriptive and diagnostic
-    Has core logic that passes tests for all applicable Execution Engines
+    Has core logic that passes tests for all applicable Execution Engines and SQL dialects
     Has a robust suite of tests, as determined by a code owner
     Has passed a manual review by a code owner for code standards and style guides
 ```
