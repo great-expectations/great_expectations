@@ -295,6 +295,10 @@ flake8 <PATH/TO/YOUR/EXPECTATION.py>
 pyupgrade <PATH/TO/YOUR/EXPECTATION.py> --py3-plus
 ```
 
+:::info
+If desired, you can automate this to happen at commit time. See our [guidance on linting](../../../contributing/style_guides/code_style.md#linting) for more on this process.
+:::
+
 Once this is done, running your diagnostic checklist should now reflect your Custom Expectation as meeting our linting requirements:
 
 ```
