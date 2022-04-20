@@ -11,7 +11,7 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML
@@ -73,6 +73,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
+    GeCloudConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
@@ -98,7 +99,6 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -300,7 +300,7 @@ class BaseDataContext(ConfigPeer):
     _data_context = None
 
     @classmethod
-    def validate_config(cls, project_config):
+    def validate_config(cls, project_config: Union[DataContextConfig, Mapping]) -> bool:
         if isinstance(project_config, DataContextConfig):
             return True
         try:
@@ -314,12 +314,12 @@ class BaseDataContext(ConfigPeer):
     )
     def __init__(
         self,
-        project_config,
-        context_root_dir=None,
-        runtime_environment=None,
-        ge_cloud_mode=False,
-        ge_cloud_config=None,
-    ):
+        project_config: Union[DataContextConfig, Mapping],
+        context_root_dir: Optional[str] = None,
+        runtime_environment: Optional[dict] = None,
+        ge_cloud_mode: bool = False,
+        ge_cloud_config: Optional[GeCloudConfig] = None,
+    ) -> None:
         """DataContext constructor
 
         Args:
@@ -399,14 +399,16 @@ class BaseDataContext(ConfigPeer):
         self._evaluation_parameter_dependencies = {}
 
     @property
-    def ge_cloud_config(self):
+    def ge_cloud_config(self) -> Optional[GeCloudConfig]:
         return self._ge_cloud_config
 
     @property
-    def ge_cloud_mode(self):
+    def ge_cloud_mode(self) -> bool:
         return self._ge_cloud_mode
 
-    def _build_store_from_config(self, store_name, store_config):
+    def _build_store_from_config(
+        self, store_name: str, store_config: dict
+    ) -> Optional[Store]:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
         # the expectations_store does not yet exist by:
@@ -439,7 +441,7 @@ class BaseDataContext(ConfigPeer):
         self._stores[store_name] = new_store
         return new_store
 
-    def _init_stores(self, store_configs):
+    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
@@ -466,7 +468,7 @@ class BaseDataContext(ConfigPeer):
                 # caught at the context.get_batch() step. So we just pass here.
                 pass
 
-    def _apply_global_config_overrides(self):
+    def _apply_global_config_overrides(self) -> None:
         # check for global usage statistics opt out
         validation_errors = {}
 
@@ -524,8 +526,11 @@ class BaseDataContext(ConfigPeer):
 
     @classmethod
     def _get_global_config_value(
-        cls, environment_variable=None, conf_file_section=None, conf_file_option=None
-    ):
+        cls,
+        environment_variable: Optional[str] = None,
+        conf_file_section=None,
+        conf_file_option=None,
+    ) -> Optional[str]:
         assert (conf_file_section and conf_file_option) or (
             not conf_file_section and not conf_file_option
         ), "Must pass both 'conf_file_section' and 'conf_file_option' or neither."
@@ -543,7 +548,7 @@ class BaseDataContext(ConfigPeer):
         return None
 
     @staticmethod
-    def _check_global_usage_statistics_opt_out():
+    def _check_global_usage_statistics_opt_out() -> bool:
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
@@ -598,7 +603,7 @@ class BaseDataContext(ConfigPeer):
 
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
-    ):
+    ) -> None:
         """Initialize the usage statistics system."""
         if not usage_statistics_config.enabled:
             logger.info("Usage statistics is disabled; skipping initialization.")
@@ -611,7 +616,7 @@ class BaseDataContext(ConfigPeer):
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
-    def add_store(self, store_name, store_config):
+    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
@@ -626,8 +631,8 @@ class BaseDataContext(ConfigPeer):
         return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
-        self, validation_operator_name, validation_operator_config
-    ):
+        self, validation_operator_name: str, validation_operator_config: dict
+    ) -> "ValidationOperator":
         """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
 
         Args:
@@ -662,7 +667,9 @@ class BaseDataContext(ConfigPeer):
         self.validation_operators[validation_operator_name] = new_validation_operator
         return new_validation_operator
 
-    def _normalize_absolute_or_relative_path(self, path):
+    def _normalize_absolute_or_relative_path(
+        self, path: Optional[str]
+    ) -> Optional[str]:
         if path is None:
             return
         if os.path.isabs(path):
