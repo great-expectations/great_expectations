@@ -110,9 +110,9 @@ great_expectations_contrib check
 ```
 
 This command will run a series of checks on your package, including:
-* Whether or not your code is linted/formatted properly
-* Whether or not you've type annotated function sigantures
-* Whether or not your Expectations are properly documented
+* Whether your code is linted/formatted properly
+* Whether you've type annotated function signatures
+* Whether your Expectations are properly documented
 * And more!
 
 Using `great_expectations_contrib` as part of your development loop will help you
