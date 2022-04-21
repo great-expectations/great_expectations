@@ -55,7 +55,7 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
 
 # </snippet
 # <snippet>
-class ExpectColumnPairValuesToHaveDifferenceOfThree(ColumnPairMapExpectation):
+class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
     """Expect two columns to have a row-wise difference of three."""
 
     map_metric = "column_pair_values.diff_three"
@@ -141,11 +141,11 @@ class ExpectColumnPairValuesToHaveDifferenceOfThree(ColumnPairMapExpectation):
 # </snippet>
 # <snippet>
 if __name__ == "__main__":
-    ExpectColumnPairValuesToHaveDifferenceOfThree().print_diagnostic_checklist()
+    ExpectColumnPairValuesToHaveADifferenceOfThree().print_diagnostic_checklist()
 # </snippet>
 # Note to users: code below this line is only for integration testing -- ignore!
 
-diagnostics = ExpectColumnPairValuesToHaveDifferenceOfThree().run_diagnostics()
+diagnostics = ExpectColumnPairValuesToHaveADifferenceOfThree().run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
