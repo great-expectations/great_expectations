@@ -3,6 +3,7 @@ import importlib.machinery
 import importlib.util
 import logging
 import os
+import pathlib
 import shutil
 import sys
 from dataclasses import dataclass
@@ -311,6 +312,48 @@ dockerized_db_tests = [
         extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
+        name="split_data_on_datetime_postgres",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_data/postgres_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_mssql",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_data/mssql_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.MSSQL,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_mysql",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_data/mysql_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.MYSQL,
+    ),
+    IntegrationTestFixture(
         name="mssql_yaml_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/mssql_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -384,6 +427,20 @@ cloud_snowflake_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
         util_script="tests/test_utils.py",
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_snowflake",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_data/snowflake_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
     ),
 ]
 
@@ -490,6 +547,20 @@ cloud_bigquery_tests = [
         name="gcp_deployment_patterns_file_bigquery_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
 ]
@@ -694,7 +765,7 @@ aws_integration_tests = [
 ]
 
 # populate integration_test_matrix with sub-lists
-integration_test_matrix = []
+integration_test_matrix: List[IntegrationTestFixture] = []
 integration_test_matrix += aws_integration_tests
 integration_test_matrix += pandas_integration_tests
 
@@ -725,7 +796,9 @@ def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments
     _execute_integration_test(test_configuration, tmp_path)
 
 
-def _execute_integration_test(integration_test_fixture, tmp_path):
+def _execute_integration_test(
+    integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
+):
     """
     Prepare and environment and run integration tests from a list of tests.
 
