@@ -2,6 +2,44 @@
 title: Changelog
 ---
 
+### 0.15.2
+* [FEATURE] Split data assets using sql datetime columns (#4871)
+* [FEATURE] Plot metrics with `DataAssistantResult.plot()` (#4873)
+* [FEATURE] RuleBasedProfiler/DataAssistant/MetricMultiBatchParameterBuilder: Enable Returning Metric Computation Results with batch_id Attribution (#4862)
+* [FEATURE] Enable variables to be specified at both Profiler and its constituent individual Rule levels (#4912)
+* [FEATURE] Enable self-initializing `ExpectColumnUniqueValueCountToBeBetween` (#4902)
+* [FEATURE] Improve diagnostic testing process (#4816)
+* [FEATURE] Add Azure CI/CD action to aid with style guide enforcement (type hints) (#4878)
+* [FEATURE] Add Azure CI/CD action to aid with style guide enforcement (docstrings) (#4617)
+* [FEATURE] Use formal interfaces to clean up DataAssistant and DataAssistantResult modules/classes (#4901)
+* [BUGFIX] fix validation issue for column domain type and implement expect_column_unique_value_count_to_be_between for VolumeDataAssistant (#4914)
+* [BUGFIX] Fix issue with not using the generated table name on read (#4905)
+* [BUGFIX] Add deprecation comment to RuntimeDataConnector
+* [BUGFIX] Ensure proper class_name within all RuleBasedProfilerConfig instantiations
+* [BUGFIX] fix rounding directive handling (#4887)
+* [BUGFIX] `great_expectations` import fails when SQL Alchemy is not installed (#4880)
+* [MAINTENANCE] Altair types cleanup (#4916)
+* [MAINTENANCE] test: update test time (#4911)
+* [MAINTENANCE] Add module docstring and simplify access to DatePart (#4910)
+* [MAINTENANCE] Chip away at type hint violations around data context (#4897)
+* [MAINTENANCE] Improve error message outputted to user in DocstringChecker action (#4895)
+* [MAINTENANCE] Re-enable bigquery tests (#4903)
+* [MAINTENANCE] Unit tests for sqlalchemy splitter methods, docs and other improvements (#4900)
+* [MAINTENANCE] Move plot logic from `DataAssistant` into `DataAssistantResult` (#4896)
+* [MAINTENANCE] Add condition to primary pipeline to ensure `import_ge` stage doesn't cause misleading Slack notifications (#4898)
+* [MAINTENANCE] Refactor `RuleBasedProfilerConfig` (#4882)
+* [MAINTENANCE] Refactor DataAssistant Access to Parameter Computation Results and Plotting Utilities (#4893)
+* [MAINTENANCE] Update `dgtest-overrides` list to include all test files not captured by primary strategy (#4891)
+* [MAINTENANCE] Add dgtest-overrides section to dependency_graph Azure pipeline
+* [MAINTENANCE] Datasource and DataContext-level tests for RuntimeDataConnector changes (#4866)
+* [MAINTENANCE] Temporarily disable bigquery tests. (#4888)
+* [MAINTENANCE] Import GE after running `ge init` in packaging CI pipeline (#4885)
+* [MAINTENANCE] Add CI stage importing GE with only required dependencies installed (#4884)
+* [MAINTENANCE] `DataAssistantResult.plot()` conditional formatting and tooltips (#4881)
+* [MAINTENANCE] split data context files (#4879)
+* [MAINTENANCE] Add Tanner to CODEOWNERS for schemas.py (#4875)
+* [MAINTENANCE]  Use defined constants for ParameterNode accessor keys (#4872)
+
 ### 0.15.1
 * [FEATURE] Additional Rule-Based Profiler Parameter/Variable Access Methods (#4814)
 * [FEATURE] DataAssistant and VolumeDataAssistant classes (initial implementation -- to be enhanced as part of subsequent work) (#4844)
