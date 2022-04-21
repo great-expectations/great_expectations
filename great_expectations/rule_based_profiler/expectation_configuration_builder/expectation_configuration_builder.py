@@ -2,12 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Set, Union
 
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest,
-    BatchRequestBase,
-    RuntimeBatchRequest,
-)
+from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -36,10 +31,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
         validation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
         **kwargs
     ):
@@ -51,17 +42,11 @@ class ExpectationConfigurationBuilder(Builder, ABC):
             validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
             fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance.
             These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder".
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
             kwargs: additional arguments
         """
 
-        super().__init__(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            data_context=data_context,
-        )
+        super().__init__(data_context=data_context)
 
         self._expectation_type = expectation_type
 
@@ -91,7 +76,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
     ) -> ExpectationConfiguration:
         """
         Args:
@@ -100,7 +84,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
 
         Returns:
             ExpectationConfiguration object.
@@ -111,7 +94,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
             parameters=parameters,
             batch_list=batch_list,
             batch_request=batch_request,
-            force_batch_data=force_batch_data,
         )
 
         return self._build_expectation_configuration(
@@ -125,7 +107,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
         recompute_existing_parameter_values: bool = False,
     ) -> None:
         validation_parameter_builders: List[ParameterBuilder] = (
@@ -142,7 +123,6 @@ class ExpectationConfigurationBuilder(Builder, ABC):
                 json_serialize=None,
                 batch_list=batch_list,
                 batch_request=batch_request,
-                force_batch_data=force_batch_data,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
 
