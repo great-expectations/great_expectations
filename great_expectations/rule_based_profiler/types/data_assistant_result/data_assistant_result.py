@@ -7,7 +7,7 @@ import altair as alt
 import pandas as pd
 
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
@@ -79,7 +79,7 @@ class DataAssistantResult(SerializableDictDot):
             AltairThemes.DEFAULT_THEME.value
         )
         if custom_altair_theme is not None:
-            altair_configuration.update(custom_altair_theme)
+            nested_update(altair_configuration, custom_altair_theme)
 
         chart: alt.Chart
         for chart in charts:
@@ -146,8 +146,7 @@ class DataAssistantResult(SerializableDictDot):
                         title=domain_title,
                     ),
                     y=alt.Y(metric_name, type=metric_type, title=metric_title),
-                    stroke=point_color_condition,
-                    fill=point_color_condition,
+                    color=point_color_condition,
                     tooltip=tooltip,
                 )
             )

@@ -58,8 +58,9 @@ line_stroke_width: int = 3
 line_tooltip_content: str = "data"
 
 # Point
-point_stroke: str = Colors.GREEN.value
-point_fill: str = Colors.GREEN.value
+point_size: int = 70
+point_color: str = Colors.GREEN.value
+point_filled: bool = True
 point_tooltip_content: str = "data"
 
 
@@ -96,8 +97,9 @@ class AltairThemes(Enum):
             "tooltip": {"content": line_tooltip_content},
         },
         "point": {
-            "stroke": point_stroke,
-            "fill": point_fill,
+            "size": point_size,
+            "color": point_color,
+            "filled": point_filled,
             "tooltip": {"content": point_tooltip_content},
         },
     }
