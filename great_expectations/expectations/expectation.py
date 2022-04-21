@@ -1471,6 +1471,8 @@ class Expectation(metaclass=MetaExpectation):
                 )
             if forbidden_keys:
                 problems.append(f"Extra key(s) found: {sorted(forbidden_keys)}")
+            if type(augmented_library_metadata["requirements"]) != list:
+                problems.append("library_metadata['requirements'] is not a list ")
             if not problems:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
         else:
