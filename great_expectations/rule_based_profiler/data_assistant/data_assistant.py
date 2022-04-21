@@ -110,9 +110,9 @@ class DataAssistant(ABC):
         expectation_configuration_builders: List[ExpectationConfigurationBuilder]
 
         """
-        For each Self-Initializing Expectation as specified by "DataAssistant.expectation_kwargs_by_expectation_type"
-        interface property, retrieve its "RuleBasedProfiler" configuration, construct "Rule" object based on configuration
-        therein and incorporating metrics "ParameterBuilder" objects for "MetricDomainTypes", emitted by "DomainBuilder"
+        For each Self-Initializing "Expectation" as specified by "DataAssistant.expectation_kwargs_by_expectation_type"
+        interface property, retrieve its "RuleBasedProfiler" configuration, construct "Rule" object based on it, while
+        incorporating metrics "ParameterBuilder" objects for "MetricDomainTypes", emitted by "DomainBuilder"
         of comprised "Rule", specified by "DataAssistant.metrics_parameter_builders_by_domain_type" interface property.
         Append this "Rule" object to overall DataAssistant "RuleBasedProfiler" object; incorporate "variables" as well.
         """

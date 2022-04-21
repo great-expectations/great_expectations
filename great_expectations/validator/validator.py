@@ -424,6 +424,7 @@ class Validator:
                 batch_list=list(self.batches.values()),
                 batch_request=None,
                 force_batch_data=False,
+                recompute_existing_parameter_values=False,
                 reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
             )
             expectation_configurations: List[
@@ -626,12 +627,9 @@ class Validator:
         override_profiler_config.pop("name", None)
         override_profiler_config.pop("config_version", None)
 
-        override_variables: Optional[Dict[str, Any]] = override_profiler_config.get(
-            "variables"
+        override_variables: Dict[str, Any] = override_profiler_config.get(
+            "variables", {}
         )
-        if override_variables is None:
-            override_variables = {}
-
         effective_variables: Optional[
             ParameterContainer
         ] = profiler.reconcile_profiler_variables(
@@ -640,11 +638,9 @@ class Validator:
         )
         profiler.variables = effective_variables
 
-        override_rules: Optional[
-            Dict[str, Dict[str, Any]]
-        ] = override_profiler_config.get("rules")
-        if override_rules is None:
-            override_rules = {}
+        override_rules: Dict[str, Dict[str, Any]] = override_profiler_config.get(
+            "rules", {}
+        )
 
         assert (
             len(override_rules) <= 1
@@ -652,7 +648,6 @@ class Validator:
 
         if override_rules:
             profiler.rules[0].name = list(override_rules.keys())[0]
-
             effective_rules: List[Rule] = profiler.reconcile_profiler_rules(
                 rules=override_rules,
                 reconciliation_directives=ReconciliationDirectives(
@@ -703,10 +698,13 @@ class Validator:
 
         # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
         if domain_type == MetricDomainTypes.COLUMN:
-            column_name = expectation_kwargs["column"]
-            rule.domain_builder.include_column_names = [column_name]
+            column_name = expectation_kwargs.get("column")
+            rule.domain_builder.include_column_names = (
+                [column_name] if column_name else None
+            )
 
         parameter_builders: List[ParameterBuilder] = rule.parameter_builders or []
+
         parameter_builder: ParameterBuilder
 
         for parameter_builder in parameter_builders:
