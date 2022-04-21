@@ -23,6 +23,7 @@ title: "Create Expectations: Index"
 - [Overview](../../guides/expectations/creating_custom_expectations/overview.md)
 - [How to create a Custom Column Aggregate Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md)
 - [How to create a Custom Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations.md)
+- [How to create a Custom Column Pair Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations.md)
 - [How to create custom parameterized Expectations](../../guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations.md)
 - [How to create a custom Metric](../../guides/expectations/creating_custom_expectations/how_to_create_custom_metrics.md)
 
