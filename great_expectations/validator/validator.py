@@ -1217,8 +1217,7 @@ class Validator:
 
         exception_info: ExceptionInfo
 
-        # noinspection SpellCheckingInspection
-        progress_bar = None
+        progress_bar: Optional[tqdm] = None
 
         done: bool = False
         while not done:
@@ -1248,6 +1247,7 @@ class Validator:
                     disable=disable,
                 )
                 progress_bar.update(0)
+                progress_bar.refresh()
 
             computable_metrics = set()
 
@@ -1271,6 +1271,7 @@ class Validator:
                     )
                 )
                 progress_bar.update(len(computable_metrics))
+                progress_bar.refresh()
             except MetricResolutionError as err:
                 if catch_exceptions:
                     exception_traceback = traceback.format_exc()
