@@ -15,6 +15,9 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
     empty_payload_schema,
 )
+from tests.integration.usage_statistics.test_all_events_are_in_schema import (
+    get_all_events_from_anonymized_usage_statistics_record_schema,
+)
 from tests.integration.usage_statistics.test_usage_statistics_messages import (
     valid_usage_statistics_messages,
 )
@@ -70,6 +73,10 @@ def test_comprehensive_list_of_messages():
         "profiler.run",
         "data_context.run_profiler_with_dynamic_arguments",
     }
+    assert (
+        set(valid_message_list)
+        == get_all_events_from_anonymized_usage_statistics_record_schema()
+    )
 
 
 def test_init_message():
