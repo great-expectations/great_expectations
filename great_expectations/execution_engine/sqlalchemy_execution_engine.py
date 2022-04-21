@@ -1113,8 +1113,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_table_name: str = batch_spec.get("table_name", None)
 
         temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
-        temp_table_name: Optional[str] = batch_spec.get("bigquery_temp_table")
-
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
@@ -1128,7 +1126,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=self,
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
-                temp_table_name=temp_table_name,
                 create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,

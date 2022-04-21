@@ -34,7 +34,6 @@ class SqlAlchemyBatchData(BatchData):
         selectable=None,
         create_temp_table: bool = True,
         temp_table_schema_name: str = None,
-        temp_table_name: str = None,
         use_quoted_name: bool = False,
         source_schema_name: str = None,
         source_table_name: str = None,
@@ -61,8 +60,6 @@ class SqlAlchemyBatchData(BatchData):
                     When building the batch data object from a query, this flag determines whether a temporary table should
                     be created against which to validate data from the query. If False, a subselect statement will be used
                     in each validation.
-                temp_table_name (str or None): \
-                    The name to use for a temporary table if one should be created. If None, a default name will be generated.
                 temp_table_schema_name (str or None): \
                     The name of the schema in which a temporary table should be created. If None, the default schema will be
                     used if a temporary table is requested.
@@ -133,13 +130,11 @@ class SqlAlchemyBatchData(BatchData):
                 )
 
         elif create_temp_table:
-            if temp_table_name:
-                generated_table_name = temp_table_name
-            else:
-                generated_table_name = generate_temporary_table_name()
-                # mssql expects all temporary table names to have a prefix '#'
-                if engine.dialect.name.lower() == "mssql":
-                    generated_table_name = f"#{generated_table_name}"
+            generated_table_name = generate_temporary_table_name()
+            # mssql expects all temporary table names to have a prefix '#'
+            if engine.dialect.name.lower() == "mssql":
+                generated_table_name = f"#{generated_table_name}"
+
             if selectable is not None:
                 if engine.dialect.name.lower() == "oracle":
                     # oracle query was already passed as a string

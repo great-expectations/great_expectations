@@ -244,16 +244,13 @@ datasource_yaml = datasource_yaml.replace(
 context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.safe_load(datasource_yaml))
 
-# Test for RuntimeBatchRequest using a query. bigquery_temp_table name is passed in as batch_spec_passthrough
+# Test for RuntimeBatchRequest using a query.
 batch_request = RuntimeBatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="taxi_data",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
-    batch_spec_passthrough={
-        "bigquery_temp_table": "ge_temp"
-    },  # this is the name of the table you would like to use as 'temp_table'
 )
 
 context.create_expectation_suite(
@@ -287,8 +284,6 @@ validations:
         default_identifier_name: 1
       runtime_parameters:
         query: SELECT * from demo.taxi_data LIMIT 10
-      batch_spec_passthrough:
-        bigquery_temp_table: ge_temp
     expectation_suite_name: test_bigquery_suite
 """
 

@@ -428,20 +428,6 @@ def _get_batch_spec_passthrough(
         execution_engine: SqlAlchemyExecutionEngine = cast(
             SqlAlchemyExecutionEngine, datasource.execution_engine
         )
-        if execution_engine.engine.dialect.name.lower() == "bigquery":
-            # bigquery also requires special handling
-            # TODO : Add deprecation warning here:
-            bigquery_temp_table: str = click.prompt(
-                "Great Expectations will create a table to use for "
-                "validation." + os.linesep + "Please enter a name for this table: ",
-                default=f"SOME_PROJECT.SOME_DATASET.ge_tmp_{str(uuid.uuid4())[:8]}",
-            )
-            if bigquery_temp_table:
-                batch_spec_passthrough.update(
-                    {
-                        "bigquery_temp_table": bigquery_temp_table,
-                    }
-                )
     else:
         raise ge_exceptions.DataContextError(
             "Datasource {:s} of unsupported type {:s} was encountered.".format(

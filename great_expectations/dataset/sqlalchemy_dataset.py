@@ -557,7 +557,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 raise err
 
         if self.engine.dialect.name.lower() == "bigquery":
-            # TODO : check if this needs to be changed
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
             temp_table_schema_name = None
@@ -635,7 +634,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 and self.engine.dialect.dataset_id is None
             ):
                 raise ValueError(
-                    "No BigQuery dataset specified. Use bigquery_temp_table batch_kwarg or a specify a "
+                    "No BigQuery dataset specified. Please specify a "
                     "default dataset in engine url"
                 )
 
