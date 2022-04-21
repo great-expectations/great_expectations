@@ -3,6 +3,7 @@ import os
 import uuid
 import warnings
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Generator, List, Optional, Union, cast
 
@@ -480,6 +481,14 @@ def get_bigquery_connection_url() -> str:
     return f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 
+@dataclass
+class LoadedTable:
+    """Output of loading a table via load_data_into_test_database."""
+
+    table_name: str
+    inserted_dataframe: pd.DataFrame
+
+
 def load_data_into_test_database(
     table_name: str,
     connection_string: str,
@@ -488,7 +497,7 @@ def load_data_into_test_database(
     load_full_dataset: bool = False,
     convert_colnames_to_datetime: Optional[List[str]] = None,
     random_table_suffix: bool = False,
-) -> pd.DataFrame:
+) -> LoadedTable:
     """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
 
     This includes local Dockerized DBs like postgres, but also cloud-dbs like BigQuery and Redshift.
@@ -533,6 +542,10 @@ def load_data_into_test_database(
 
     all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
 
+    return_value: LoadedTable = LoadedTable(
+        table_name=table_name, inserted_dataframe=all_dfs_concatenated
+    )
+
     connection = None
 
     if sa:
@@ -542,7 +555,7 @@ def load_data_into_test_database(
             "Attempting to load data in to tests SqlAlchemy database, but unable to load SqlAlchemy context; "
             "install optional sqlalchemy dependency for support."
         )
-        return all_dfs_concatenated
+        return return_value
     try:
         connection = engine.connect()
         print(f"Dropping table {table_name}")
@@ -551,7 +564,7 @@ def load_data_into_test_database(
         all_dfs_concatenated.to_sql(
             name=table_name, con=engine, index=False, if_exists="append"
         )
-        return all_dfs_concatenated
+        return return_value
     except SQLAlchemyError as e:
         logger.error(
             """Docs integration tests encountered an error while loading test-data into test-database."""

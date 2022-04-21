@@ -135,21 +135,22 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_min_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
-        variables={
-            "strict_min": False,
-            "strict_max": False,
-            "false_positive_rate": 0.05,
-            "estimator": "bootstrap",
-            "num_bootstrap_samples": 9999,
-            "bootstrap_random_seed": None,
-            "truncate_values": {
-                "lower_bound": None,
-                "upper_bound": None,
-            },
-            "round_decimals": None,
-        },
+        variables={},
         rules={
             "default_expect_column_min_to_be_between_rule": {
+                "variables": {
+                    "strict_min": False,
+                    "strict_max": False,
+                    "false_positive_rate": 0.05,
+                    "estimator": "bootstrap",
+                    "num_bootstrap_samples": 9999,
+                    "bootstrap_random_seed": None,
+                    "truncate_values": {
+                        "lower_bound": None,
+                        "upper_bound": None,
+                    },
+                    "round_decimals": 0,
+                },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
