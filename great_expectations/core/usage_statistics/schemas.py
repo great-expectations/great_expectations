@@ -1013,7 +1013,12 @@ anonymized_usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {"enum": ["datasource.sqlalchemy.connect"]},
+                "event": {
+                    "enum": [
+                        "datasource.sqlalchemy.connect",
+                        "execution_engine.sqlalchemy.connect",
+                    ]
+                },
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_datasource_sqlalchemy_connect_payload"
                 },
@@ -1029,6 +1034,7 @@ anonymized_usage_statistics_record_schema = {
                         "data_context.run_checkpoint",
                         "expectation_suite.add_expectation",
                         "data_context.run_profiler_with_dynamic_arguments",
+                        "data_context.run_profiler_on_data",
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
