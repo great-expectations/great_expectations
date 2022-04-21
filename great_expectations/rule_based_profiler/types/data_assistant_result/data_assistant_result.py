@@ -14,8 +14,8 @@ from great_expectations.rule_based_profiler.types import (
     ParameterNode,
 )
 from great_expectations.rule_based_profiler.types.altair import (
-    ALTAIR_DEFAULT_CONFIGURATION,
     AltairDataTypes,
+    AltairThemes,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
@@ -64,15 +64,21 @@ class DataAssistantResult(SerializableDictDot):
         return metrics_attributed_values_by_domain
 
     @staticmethod
-    def display(charts: List[alt.Chart]) -> None:
+    def display(
+        charts: List[alt.Chart], custom_altair_theme: Optional[Dict[str, Any]]
+    ) -> None:
         """
         Display each chart passed by DataAssistantResult.plot()
 
         Args:
             charts: A list of altair chart objects to display
+            custom_altair_theme: Altair top-level chart configuration dictionary
         """
+        altair_configuration: Dict[str, Any] = AltairThemes.DEFAULT_THEME.value
+        if custom_altair_theme is not None:
+            altair_configuration.update(custom_altair_theme)
+
         chart: alt.Chart
-        altair_configuration: Dict[str, Any] = ALTAIR_DEFAULT_CONFIGURATION
         for chart in charts:
             chart.configure(**altair_configuration).display()
 
@@ -83,8 +89,6 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
-        line_color: Optional[str] = Colors.BLUE_2.value,
-        point_color: Optional[str] = Colors.GREEN.value,
         point_color_condition: Optional[alt.condition] = None,
         tooltip: Optional[List[alt.Tooltip]] = None,
     ) -> alt.Chart:
@@ -95,8 +99,6 @@ class DataAssistantResult(SerializableDictDot):
             metric_type: The altair data type for the metric being plotted
             domain_name: The name of the domain as it exists in the pandas dataframe
             domain_type: The altair data type for the domain being plotted
-            line_color: Hex code for the line color
-            point_color: Hex code for the point color
             point_color_condition: Altair condition for changing the point color
             tooltip: Altair tooltip for displaying relevant information on the chart
 
@@ -118,7 +120,7 @@ class DataAssistantResult(SerializableDictDot):
 
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
-            .mark_line(color=line_color)
+            .mark_line()
             .encode(
                 x=alt.X(
                     domain_name,
@@ -149,7 +151,7 @@ class DataAssistantResult(SerializableDictDot):
         else:
             points: alt.Chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point(stroke=point_color, fill=point_color, opacity=1.0)
+                .mark_point(opacity=1.0)
                 .encode(
                     x=alt.X(
                         domain_name,
@@ -273,12 +275,14 @@ class DataAssistantResult(SerializableDictDot):
     @abstractmethod
     def plot(
         self,
-        prescriptive: bool = False,
+        prescriptive: Optional[bool] = False,
+        custom_altair_theme: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
 
         Args:
-            prescriptive: Type of plot to generate.
+            prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
+            custom_altair_theme: Altair top-level chart configuration dictionary
         """
         pass

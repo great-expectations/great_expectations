@@ -1,4 +1,5 @@
-from typing import Any, Dict, List
+from enum import Enum
+from typing import List
 
 from great_expectations.types import ColorPalettes, Colors
 
@@ -57,39 +58,46 @@ line_stroke_width: int = 3
 line_tooltip_content: str = "data"
 
 # Point
-point_color: str = Colors.GREEN.value
+point_stroke: str = Colors.GREEN.value
+point_fill: str = Colors.GREEN.value
 point_tooltip_content: str = "data"
 
 
-ALTAIR_DEFAULT_CONFIGURATION: Dict[str, Any] = {
-    "view": {"width": chart_width, "height": chart_height},
-    "font": font,
-    "title": {"align": title_align, "color": title_color, "fontSize": title_font_size},
-    "axis": {
-        "titleFontSize": axis_title_font_size,
-        "titleColor": axis_title_color,
-        "titlePadding": axis_title_padding,
-        "labelFontSize": axis_label_font_size,
-        "labelColor": axis_label_color,
-    },
-    "axisX": {
-        "labelAngle": x_axis_label_angle,
-        "labelFlush": x_axis_label_flush,
-        "grid": x_axis_grid,
-    },
-    "range": {
-        "category": category_color_scheme,
-        "diverging": diverging_color_scheme,
-        "heatmap": heatmap_color_scheme,
-        "ordinal": ordinal_color_scheme,
-    },
-    "line": {
-        "color": line_color,
-        "strokeWidth": line_stroke_width,
-        "tooltip": {"content": line_tooltip_content},
-    },
-    "point": {
-        "color": point_color,
-        "tooltip": {"content": point_tooltip_content},
-    },
-}
+class AltairThemes(Enum):
+    DEFAULT_THEME = {
+        "view": {"width": chart_width, "height": chart_height},
+        "font": font,
+        "title": {
+            "align": title_align,
+            "color": title_color,
+            "fontSize": title_font_size,
+        },
+        "axis": {
+            "titleFontSize": axis_title_font_size,
+            "titleColor": axis_title_color,
+            "titlePadding": axis_title_padding,
+            "labelFontSize": axis_label_font_size,
+            "labelColor": axis_label_color,
+        },
+        "axisX": {
+            "labelAngle": x_axis_label_angle,
+            "labelFlush": x_axis_label_flush,
+            "grid": x_axis_grid,
+        },
+        "range": {
+            "category": category_color_scheme,
+            "diverging": diverging_color_scheme,
+            "heatmap": heatmap_color_scheme,
+            "ordinal": ordinal_color_scheme,
+        },
+        "line": {
+            "color": line_color,
+            "strokeWidth": line_stroke_width,
+            "tooltip": {"content": line_tooltip_content},
+        },
+        "point": {
+            "stroke": point_stroke,
+            "fill": point_fill,
+            "tooltip": {"content": point_tooltip_content},
+        },
+    }
