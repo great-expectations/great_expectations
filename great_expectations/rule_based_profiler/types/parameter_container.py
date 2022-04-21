@@ -630,6 +630,12 @@ def _get_parameter_node_attribute_names_as_lists(
 def _get_parameter_name_parts_up_to_including_reserved_literal(
     attribute_name_as_list: List[str],
 ) -> List[str]:
+    if attribute_name_as_list[0] == PARAMETER_NAME_ROOT_FOR_VARIABLES:
+        return [
+            PARAMETER_NAME_ROOT_FOR_VARIABLES,
+            PARAMETER_NAME_ROOT_FOR_VARIABLES,
+        ]
+
     if not (set(attribute_name_as_list) & RESERVED_TERMINAL_LITERALS):
         return attribute_name_as_list
 
