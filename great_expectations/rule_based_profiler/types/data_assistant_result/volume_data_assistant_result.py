@@ -7,6 +7,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.parameter_builder import MetricValues
 from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
@@ -42,8 +43,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
         domain_name: str = "batch"
 
         # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
-        domain_type: str = "ordinal"
-        metric_type: str = "quantitative"
+        domain_type: str = AltairDataTypes.ORDINAL.value
+        metric_type: str = AltairDataTypes.QUANTITATIVE.value
 
         batch_ids: KeysView[str]
         metric_values: MetricValues
@@ -71,8 +72,11 @@ class VolumeDataAssistantResult(DataAssistantResult):
                     expectation_configuration.expectation_type
                     == "expect_table_row_count_to_be_between"
                 ):
-                    df["min_value"] = expectation_configuration.kwargs["min_value"]
-                    df["max_value"] = expectation_configuration.kwargs["max_value"]
+                    for (
+                        kwarg_name,
+                        kwarg_value,
+                    ) in expectation_configuration.kwargs.items():
+                        df[kwarg_name] = kwarg_value
 
             plot_impl = self._plot_prescriptive
         else:
@@ -94,9 +98,9 @@ class VolumeDataAssistantResult(DataAssistantResult):
         self,
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: str,
+        metric_type: alt.StandardType,
         domain_name: str,
-        domain_type: str,
+        domain_type: alt.StandardType,
     ) -> alt.Chart:
         descriptive_chart: alt.Chart = self.get_line_chart(
             df=df,
@@ -111,9 +115,9 @@ class VolumeDataAssistantResult(DataAssistantResult):
         self,
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: str,
+        metric_type: alt.StandardType,
         domain_name: str,
-        domain_type: str,
+        domain_type: alt.StandardType,
     ) -> alt.Chart:
         prescriptive_chart: alt.Chart = (
             self.get_expect_domain_values_to_be_between_chart(
