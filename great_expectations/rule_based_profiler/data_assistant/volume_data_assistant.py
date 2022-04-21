@@ -18,14 +18,12 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
 )
 
 
-# TODO: <Alex>ALEX Rename this "VolumeDataAssistant" to be more precise.</Alex>
 class VolumeDataAssistant(DataAssistant):
     """
     VolumeDataAssistant provides exploration and validation of "Data Volume" aspects of specified data Batch objects.
 
     Self-Initializing Expectations relevant for assessing "Data Volume" include:
         - "expect_table_row_count_to_be_between";
-        # TODO: <Alex>ALEX Implement Self-Initializing Capability for "expect_column_unique_value_count_to_be_between".</Alex>
         - "expect_column_unique_value_count_to_be_between";
         - Others in the future.
     """
