@@ -1,10 +1,11 @@
 import copy
 import json
 import logging
+import sys
 import uuid
-from dataclasses import asdict, dataclass
-from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
+
+from tqdm.auto import tqdm
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -20,7 +21,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_profiler_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import convert_to_json_serializable, nested_update
+from great_expectations.core.util import nested_update
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -43,6 +44,12 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
     ExpectationConfigurationBuilder,
     init_rule_expectation_configuration_builders,
 )
+from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
+    DEFAULT_RECONCILATION_DIRECTIVES,
+    ReconciliationDirectives,
+    ReconciliationStrategy,
+    reconcile_rule_variables,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
@@ -54,36 +61,14 @@ from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
+    ParameterNode,
     RuleState,
     build_parameter_container_for_variables,
 )
-from great_expectations.types import SerializableDictDot
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-
-class ReconciliationStrategy(Enum):
-    NESTED_UPDATE = "nested_update"
-    REPLACE = "replace"
-    UPDATE = "update"
-
-
-@dataclass
-class ReconciliationDirectives(SerializableDictDot):
-    variables: ReconciliationStrategy = ReconciliationStrategy.UPDATE
-    domain_builder: ReconciliationStrategy = ReconciliationStrategy.UPDATE
-    parameter_builder: ReconciliationStrategy = ReconciliationStrategy.UPDATE
-    expectation_configuration_builder: ReconciliationStrategy = (
-        ReconciliationStrategy.UPDATE
-    )
-
-    def to_dict(self) -> dict:
-        return asdict(self)
-
-    def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=self.to_dict())
 
 
 class BaseRuleBasedProfiler(ConfigPeer):
@@ -91,15 +76,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
     BaseRuleBasedProfiler class is initialized from RuleBasedProfilerConfig typed object and contains all functionality
     in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
     """
-
-    DEFAULT_RECONCILATION_DIRECTIVES: ReconciliationDirectives = (
-        ReconciliationDirectives(
-            variables=ReconciliationStrategy.UPDATE,
-            domain_builder=ReconciliationStrategy.UPDATE,
-            parameter_builder=ReconciliationStrategy.UPDATE,
-            expectation_configuration_builder=ReconciliationStrategy.UPDATE,
-        )
-    )
 
     EXPECTATION_SUCCESS_KEYS: Set[str] = {
         "auto",
@@ -115,7 +91,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
 
-        For a rule or an item in a rule configuration, instantiates the following if
+        For a Rule or an item in a Rule configuration, instantiates the following if
         available: a domain builder, a parameter builder, and a configuration builder.
         These will be used to define profiler computation patterns.
 
@@ -136,21 +112,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if variables is None:
             variables = {}
 
-        self._usage_statistics_handler = usage_statistics_handler
-
-        # Necessary to annotate ExpectationSuite during `get_expectation_suite()`
-        self._citation = {
-            "name": name,
-            "config_version": config_version,
-            "variables": variables,
-            "rules": rules,
-        }
-
         # Convert variables argument to ParameterContainer
         _variables: ParameterContainer = build_parameter_container_for_variables(
             variables_configs=variables
         )
-        self._variables = _variables
+        self.variables = _variables
+
+        self._usage_statistics_handler = usage_statistics_handler
+
+        self._citation = None
 
         self._data_context = data_context
 
@@ -192,9 +162,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     message=f'Invalid rule "{rule_name}": missing mandatory {attr}.'
                 )
 
-        # Instantiate builder attributes
+        # Instantiate variables and builder attributes
+        variables: Dict[str, Any] = rule_config.get("variables", {})
         domain_builder: DomainBuilder = RuleBasedProfiler._init_rule_domain_builder(
-            domain_builder_config=rule_config["domain_builder"],
+            domain_builder_config=rule_config.get("domain_builder"),
             data_context=self._data_context,
         )
         parameter_builders: Optional[
@@ -206,15 +177,16 @@ class BaseRuleBasedProfiler(ConfigPeer):
         expectation_configuration_builders: List[
             ExpectationConfigurationBuilder
         ] = init_rule_expectation_configuration_builders(
-            expectation_configuration_builder_configs=rule_config[
+            expectation_configuration_builder_configs=rule_config.get(
                 "expectation_configuration_builders"
-            ],
+            ),
             data_context=self._data_context,
         )
 
         # Compile previous steps and package into a Rule object
         return Rule(
             name=rule_name,
+            variables=variables,
             domain_builder=domain_builder,
             parameter_builders=parameter_builders,
             expectation_configuration_builders=expectation_configuration_builders,
@@ -246,6 +218,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         force_batch_data: bool = False,
+        recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
     ) -> None:
         """
@@ -255,8 +228,31 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
             force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
+            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
         """
+        # Check to see if the user has disabled progress bars
+        disable = False
+        if self._data_context:
+            progress_bars = self._data_context.progress_bars
+            # If progress_bars are not present, assume we want them enabled
+            if progress_bars is not None:
+                if "globally" in progress_bars:
+                    disable = not progress_bars["globally"]
+
+                if "rule_based_profiler" in progress_bars:
+                    disable = not progress_bars["rule_based_profiler"]
+
+        # noinspection PyProtectedMember,SpellCheckingInspection
+        progress_bar: tqdm = tqdm(
+            desc="Profiling Dataset",
+            disable=disable,
+        )
+        progress_bar.update(0)
+        progress_bar.refresh()
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+
         effective_variables: Optional[
             ParameterContainer
         ] = self.reconcile_profiler_variables(
@@ -265,41 +261,40 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
-            rules=rules, reconciliation_directives=reconciliation_directives
+            rules=rules,
+            reconciliation_directives=reconciliation_directives,
         )
+
+        rule: Rule
+        effective_rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
+            rule.name: rule.to_json_dict() for rule in effective_rules
+        }
+        self.citation = {
+            "name": self.name,
+            "config_version": self.config_version,
+            "variables": convert_variables_to_dict(variables=self.variables),
+            "rules": effective_rules_configs,
+        }
 
         rule_state: RuleState
         rule: Rule
+        domains_count: int = 0
         for rule in effective_rules:
             rule_state = rule.run(
                 variables=effective_variables,
                 batch_list=batch_list,
                 batch_request=batch_request,
                 force_batch_data=force_batch_data,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                reconciliation_directives=reconciliation_directives,
             )
             self.rule_states.append(rule_state)
 
-    def get_expectation_suite_meta(
-        self,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> Dict[str, Any]:
-        """
-        Args:
-            expectation_suite: An existing ExpectationSuite to update.
-            expectation_suite_name: A name for returned ExpectationSuite.
-            include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
+            domains_count += len(rule_state.domains)
+            progress_bar.update(domains_count)
+            progress_bar.refresh()
 
-        Returns:
-            Dictionary corresponding to meta property of ExpectationSuite using ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
-        """
-        expectation_suite: ExpectationSuite = self.get_expectation_suite(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-        )
-        return expectation_suite.meta
+        progress_bar.close()
 
     def get_expectation_suite(
         self,
@@ -332,12 +327,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if include_citation:
             expectation_suite.add_citation(
                 comment="Suite created by Rule-Based Profiler with the configuration included.",
-                profiler_config=self._citation,
+                profiler_config=self.citation,
             )
 
         expectation_configurations: List[
             ExpectationConfiguration
-        ] = self.get_expectation_configurations()
+        ] = self._get_expectation_configurations()
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expectation_configurations:
@@ -350,7 +345,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return expectation_suite
 
-    def get_expectation_configurations(self) -> List[ExpectationConfiguration]:
+    def _get_expectation_configurations(self) -> List[ExpectationConfiguration]:
         """
         Returns:
             List of ExpectationConfiguration objects, accumulated from RuleState of every Rule executed.
@@ -405,13 +400,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def get_parameter_values_for_fully_qualified_parameter_names_by_domain(
         self,
-    ) -> Dict[Domain, Dict[str, Any]]:
+    ) -> Dict[Domain, Dict[str, ParameterNode]]:
         """
         Returns:
             Dictionaries of values for fully-qualified parameter names by Domain, accumulated from RuleState of every Rule executed.
         """
         values_for_fully_qualified_parameter_names_by_domain: Dict[
-            Domain, Dict[str, Any]
+            Domain, Dict[str, ParameterNode]
         ] = {}
 
         rule_state: RuleState
@@ -426,7 +421,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
         self, domain_id: str
-    ) -> Dict[str, Any]:
+    ) -> Dict[str, ParameterNode]:
         """
         Args:
             domain_id: ID of desired Domain object.
@@ -458,10 +453,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 expectation_configuration_builder=ReconciliationStrategy.UPDATE,
             ),
         )
+        self.rules = effective_rules
         updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
             rule.name: rule.to_json_dict() for rule in effective_rules
         }
-        self.rules: List[Rule] = effective_rules
         self._profiler_config.rules = updated_rules
 
     def reconcile_profiler_variables(
@@ -535,7 +530,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :return: reconciled rules in their canonical List[Rule] object form
         """
         effective_rules: Dict[str, Rule] = self._reconcile_profiler_rules_as_dict(
-            rules, reconciliation_directives
+            rules=rules,
+            reconciliation_directives=reconciliation_directives,
         )
         return list(effective_rules.values())
 
@@ -580,15 +576,17 @@ class BaseRuleBasedProfiler(ConfigPeer):
         override rule with at most one configuration corresponding to the list of rules instantiated from Profiler
         configuration (e.g., stored in a YAML file managed by the Profiler store).
 
-        The reconciliation logic for "rule configuration" employes the "by construction" principle:
-        (1) Find a common configuration between the domain builder configuration, possibly supplied as part of the
-        candiate override rule configuration, and the comain builder configuration of an instantiated rule
-        (2) Find common configurations between parameter builder configurations, possibly supplied as part of the
-        candiate override rule configuration, and the parameter builder configurations of an instantiated rule
-        (3) Find common configurations between expectation configuration builder configurations, possibly supplied as
-        part of the candiate override rule configuration, and the expectation configuration builder configurations of an
-        instantiated rule
-        (4) Construct the reconciled rule configuration dictionary using the formal rule properties ("domain_builder",
+        The reconciliation logic for "Rule configuration" employes the "by construction" principle:
+        (1) Find a common configuration between the variables configuration, possibly supplied as part of the candiate
+        override Rule configuration, and the variables configuration of an instantiated Rule
+        (2) Find a common configuration between the domain builder configuration, possibly supplied as part of the
+        candiate override Rule configuration, and the domain builder configuration of an instantiated Rule
+        (3) Find common configurations between parameter builder configurations, possibly supplied as part of the
+        candiate override Rule configuration, and the parameter builder configurations of an instantiated Rule
+        (4) Find common configurations between expectation configuration builder configurations, possibly supplied as
+        part of the candiate override Rule configuration, and the expectation configuration builder configurations of an
+        instantiated Rule
+        (5) Construct the reconciled Rule configuration dictionary using the formal Rule properties ("domain_builder",
         "parameter_builders", and "expectation_configuration_builders") as keys and their reconciled configuration
         dictionaries as values
 
@@ -604,6 +602,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         effective_rule_config: Dict[str, Any]
         if rule_name in existing_rules:
             rule: Rule = existing_rules[rule_name]
+
+            variables_config: dict = rule_config.get("variables", {})
+            effective_variables: dict = reconcile_rule_variables(
+                variables=rule.variables,
+                variables_config=variables_config,
+                reconciliation_strategy=reconciliation_directives.variables,
+            )
 
             domain_builder_config: dict = rule_config.get("domain_builder", {})
             effective_domain_builder_config: dict = (
@@ -637,6 +642,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
 
             effective_rule_config = {
+                "variables": effective_variables,
                 "domain_builder": effective_domain_builder_config,
                 "parameter_builders": effective_parameter_builder_configs,
                 "expectation_configuration_builders": effective_expectation_configuration_builder_configs,
@@ -659,9 +665,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         The reconciliation logic for "domain builder" is of the "replace" nature: An override value complements the
         original on key "miss", and replaces the original on key "hit" (or "collision"), because "domain builder" is a
-        unique member for a rule.
+        unique member for a Rule.
 
-        :param domain_builder: existing domain builder of a rule
+        :param domain_builder: existing domain builder of a Rule
         :param domain_builder_config: domain builder configuration override, supplied in dictionary (configuration) form
         :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
         :return: reconciled domain builder configuration, returned in dictionary (configuration) form
@@ -888,10 +894,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_list=None,
             batch_request=None,
             force_batch_data=False,
-            reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
+            recompute_existing_parameter_values=False,
+            reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )
 
         result: ExpectationSuite = profiler.get_expectation_suite(
@@ -932,10 +936,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
             batch_list=batch_list,
             batch_request=batch_request,
             force_batch_data=True,
-            reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
+            recompute_existing_parameter_values=False,
+            reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )
 
         result: ExpectationSuite = profiler.get_expectation_suite(
@@ -1105,12 +1107,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
             Dictionary that contains RuleBasedProfiler state
         """
         # Provide visibility into parameters that RuleBasedProfiler was instantiated with.
-        report_object: dict = {"config": self._citation}
+        report_object: dict = {"config": self.citation}
 
         if pretty_print:
             print(f"\nRuleBasedProfiler class name: {self.name}")
 
-            if not self._variables:
+            if not self.variables:
                 print(
                     'Your current RuleBasedProfiler configuration has an empty "variables" attribute. \
                     Please ensure you populate it if you\'d like to reference values in your "rules" attribute.'
@@ -1138,6 +1140,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @variables.setter
     def variables(self, value: Optional[ParameterContainer]):
         self._variables = value
+        self.config.variables = convert_variables_to_dict(variables=value)
 
     @property
     def rules(self) -> List[Rule]:
@@ -1148,15 +1151,23 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self._rules = value
 
     @property
+    def citation(self) -> Optional[Dict[str, Any]]:
+        return self._citation
+
+    @citation.setter
+    def citation(self, value: Optional[Dict[str, Any]]):
+        self._citation = value
+
+    @property
     def rule_states(self) -> List[RuleState]:
         return self._rule_states
 
     def to_json_dict(self) -> dict:
-        rule: Rule
         variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
-            self.variables
+            variables=self.variables
         )
 
+        rule: Rule
         serializeable_dict: dict = {
             "class_name": self.__class__.__name__,
             "module_name": self.__class__.__module__,
@@ -1259,21 +1270,19 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
     ):
         """
         Create a new Profiler using configured rules.
-        For a rule or an item in a rule configuration, instantiates the following if
+        For a Rule or an item in a Rule configuration, instantiates the following if
         available: a domain builder, a parameter builder, and a configuration builder.
         These will be used to define profiler computation patterns.
 
         Args:
             name: The name of the RBP instance
             config_version: The version of the RBP (currently only 1.0 is supported)
+            variables: Any variables to be substituted within the rules
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
             expectation_configuration_builders configuration components
-            variables: Any variables to be substituted within the rules
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
-            class_name=self.__class__.__name__,
-            module_name=self.__class__.__module__,
             name=name,
             config_version=config_version,
             variables=variables,

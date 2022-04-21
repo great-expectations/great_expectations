@@ -53,6 +53,9 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
+from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
+    DEFAULT_RECONCILATION_DIRECTIVES,
+)
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
@@ -421,11 +424,12 @@ class Validator:
                 batch_list=list(self.batches.values()),
                 batch_request=None,
                 force_batch_data=False,
-                reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+                recompute_existing_parameter_values=False,
+                reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
             )
             expectation_configurations: List[
                 ExpectationConfiguration
-            ] = profiler.get_expectation_configurations()
+            ] = profiler.get_expectation_suite().expectations
 
             configuration = expectation_configurations[0]
 
@@ -623,12 +627,9 @@ class Validator:
         override_profiler_config.pop("name", None)
         override_profiler_config.pop("config_version", None)
 
-        override_variables: Optional[Dict[str, Any]] = override_profiler_config.get(
-            "variables"
+        override_variables: Dict[str, Any] = override_profiler_config.get(
+            "variables", {}
         )
-        if override_variables is None:
-            override_variables = {}
-
         effective_variables: Optional[
             ParameterContainer
         ] = profiler.reconcile_profiler_variables(
@@ -637,11 +638,9 @@ class Validator:
         )
         profiler.variables = effective_variables
 
-        override_rules: Optional[
-            Dict[str, Dict[str, Any]]
-        ] = override_profiler_config.get("rules")
-        if override_rules is None:
-            override_rules = {}
+        override_rules: Dict[str, Dict[str, Any]] = override_profiler_config.get(
+            "rules", {}
+        )
 
         assert (
             len(override_rules) <= 1
@@ -649,7 +648,6 @@ class Validator:
 
         if override_rules:
             profiler.rules[0].name = list(override_rules.keys())[0]
-
             effective_rules: List[Rule] = profiler.reconcile_profiler_rules(
                 rules=override_rules,
                 reconciliation_directives=ReconciliationDirectives(
@@ -700,10 +698,13 @@ class Validator:
 
         # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
         if domain_type == MetricDomainTypes.COLUMN:
-            column_name = expectation_kwargs["column"]
-            rule.domain_builder.include_column_names = [column_name]
+            column_name = expectation_kwargs.get("column")
+            rule.domain_builder.include_column_names = (
+                [column_name] if column_name else None
+            )
 
         parameter_builders: List[ParameterBuilder] = rule.parameter_builders or []
+
         parameter_builder: ParameterBuilder
 
         for parameter_builder in parameter_builders:
@@ -1216,8 +1217,7 @@ class Validator:
 
         exception_info: ExceptionInfo
 
-        # noinspection SpellCheckingInspection
-        progress_bar = None
+        progress_bar: Optional[tqdm] = None
 
         done: bool = False
         while not done:
@@ -1247,6 +1247,7 @@ class Validator:
                     disable=disable,
                 )
                 progress_bar.update(0)
+                progress_bar.refresh()
 
             computable_metrics = set()
 
@@ -1270,6 +1271,7 @@ class Validator:
                     )
                 )
                 progress_bar.update(len(computable_metrics))
+                progress_bar.refresh()
             except MetricResolutionError as err:
                 if catch_exceptions:
                     exception_traceback = traceback.format_exc()
