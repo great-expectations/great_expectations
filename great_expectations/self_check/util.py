@@ -275,8 +275,6 @@ except (ImportError, KeyError):
 
 import tempfile
 
-tmp_dir = str(tempfile.mkdtemp())
-
 SQL_DIALECT_NAMES = (
     "sqlite",
     "postgresql",
@@ -1587,19 +1585,7 @@ def generate_expectation_tests(
 
             try:
                 if isinstance(d["data"], list):
-                    sqlite_db_path = os.path.abspath(
-                        os.path.join(
-                            tmp_dir,
-                            "sqlite_db"
-                            + "".join(
-                                [
-                                    random.choice(string.ascii_letters + string.digits)
-                                    for _ in range(8)
-                                ]
-                            )
-                            + ".db",
-                        )
-                    )
+                    sqlite_db_path = generate_sqlite_db_path()
                     for dataset in d["data"]:
                         datasets.append(
                             get_test_validator_with_data(
@@ -2083,3 +2069,18 @@ def _bigquery_dataset() -> str:
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
         )
     return dataset
+
+
+def generate_sqlite_db_path():
+    tmp_dir = str(tempfile.mkdtemp())
+    abspath = os.path.abspath(
+        os.path.join(
+            tmp_dir,
+            "sqlite_db"
+            + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+            + ".db",
+        )
+    )
+    return abspath
