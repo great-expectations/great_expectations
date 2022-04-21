@@ -363,7 +363,7 @@ def test_execution_time_within_proper_bounds(
     data_assistant_result: DataAssistantResult = data_assistant.run()
 
     assert (
-        0.0 < data_assistant_result.execution_time <= 1.0
+        0.0 < data_assistant_result.execution_time <= 2.0
     )  # Execution time (in seconds).
 
 
