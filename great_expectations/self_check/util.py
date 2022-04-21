@@ -1084,12 +1084,14 @@ def build_sa_validator_with_data(
     batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
+    validator: Validator = Validator(
+        execution_engine=execution_engine, batches=(batch,)
+    )
     # and then return the validator?
     if sa_engine_name == "bigquery":
         sql = text(f"DROP TABLE IF EXISTS {_bigquery_dataset()}.{table_name};")
         engine.execute(sql)
-
-    return Validator(execution_engine=execution_engine, batches=(batch,))
+    return validator
 
 
 def modify_locale(func):
