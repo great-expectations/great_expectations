@@ -1,18 +1,14 @@
-import json
-from typing import Callable, Dict, Optional
-
-from numpy import array
+from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.exceptions.exceptions import (
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.execution_engine import (
+    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    ExecutionEngine,
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
@@ -27,6 +23,8 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 
 class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
+    """MetricProvider Class for Pair Values Diff Three MetricProvider"""
+
     condition_metric_name = "column_pair_values.diff_three"
     condition_domain_keys = (
         "column_A",
@@ -34,12 +32,10 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
     )
     condition_value_keys = ()
 
-    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         return abs(column_A - column_B) == 3
 
-    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_A, column_B, **kwargs):
         row_wise_cond = sa.and_(
@@ -48,7 +44,6 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
         )
         return row_wise_cond
 
-    # noinspection PyPep8Naming
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_A, column_B, **kwargs):
         row_wise_cond = F.abs(column_A - column_B) == 3
@@ -57,6 +52,8 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
 
 class ExpectColumnPairValuesToHaveDifferenceOfThree(ColumnPairMapExpectation):
     """Expect two columns to have a row-wise difference of three."""
+
+    map_metric = "column_pair_values.diff_three"
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -89,17 +86,7 @@ class ExpectColumnPairValuesToHaveDifferenceOfThree(ColumnPairMapExpectation):
         }
     ]
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
-        "tags": [
-            "basic math",
-            "multi-column expectation",
-        ],
-        "contributors": ["@joegargery"],
-    }
-
-    map_metric = "column_pair_values.diff_three"
-
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
     success_keys = (
         "column_A",
         "column_B",
@@ -135,8 +122,16 @@ class ExpectColumnPairValuesToHaveDifferenceOfThree(ColumnPairMapExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "tags": [
+            "basic math",
+            "multi-column expectation",
+        ],
+        "contributors": ["@joegargery"],
+    }
 
-#
+
 if __name__ == "__main__":
     ExpectColumnPairValuesToHaveDifferenceOfThree().print_diagnostic_checklist()
 
