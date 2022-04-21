@@ -103,6 +103,7 @@ def test_reconcile_profiler_rules_new_rule_override(
 ):
     rules: Dict[str, Dict[str, Any]] = {
         "rule_0": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 "class_name": "ColumnDomainBuilder",
@@ -157,6 +158,7 @@ def test_reconcile_profiler_rules_new_rule_override(
 
     expected_rules: Dict[str, dict] = {
         "rule_0": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                 "class_name": "ColumnDomainBuilder",
@@ -217,6 +219,7 @@ def test_reconcile_profiler_rules_new_rule_override(
             ],
         },
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
                 "class_name": "TableDomainBuilder",
@@ -271,6 +274,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
 ):
     rules: Dict[str, Dict[str, Any]] = {
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 "class_name": "ColumnDomainBuilder",
@@ -283,6 +287,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
 
     expected_rules: Dict[str, dict] = {
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                 "class_name": "ColumnDomainBuilder",
@@ -368,6 +373,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
 
     expected_rules: Dict[str, dict] = {
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
                 "class_name": "TableDomainBuilder",
@@ -469,6 +475,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
 
     expected_rules: Dict[str, dict] = {
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
                 "class_name": "TableDomainBuilder",
@@ -535,6 +542,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
 ):
     rules: Dict[str, Dict[str, Any]] = {
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 "class_name": "ColumnDomainBuilder",
@@ -589,6 +597,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
 
     expected_rules: Dict[str, dict] = {
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                 "class_name": "ColumnDomainBuilder",
@@ -677,6 +686,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
 ):
     rules: Dict[str, Dict[str, Any]] = {
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 "class_name": "ColumnDomainBuilder",
@@ -710,6 +720,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
 
     expected_rules: Dict[str, Dict] = {
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                 "class_name": "ColumnDomainBuilder",
@@ -772,6 +783,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
 ):
     rules: Dict[str, Dict[str, Any]] = {
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 "class_name": "ColumnDomainBuilder",
@@ -826,6 +838,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
 
     expected_rules: Dict[str, dict] = {
         "rule_1": {
+            "variables": {},
             "domain_builder": {
                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
                 "class_name": "ColumnDomainBuilder",
@@ -921,15 +934,13 @@ def test_run_profiler_without_dynamic_args(
         batch_list=None,
         batch_request=None,
         force_batch_data=False,
+        recompute_existing_parameter_values=False,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
             domain_builder=ReconciliationStrategy.UPDATE,
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
-        expectation_suite=None,
-        expectation_suite_name=None,
-        include_citation=True,
     )
 
 
@@ -964,15 +975,13 @@ def test_run_profiler_with_dynamic_args(
         batch_list=None,
         batch_request=None,
         force_batch_data=False,
+        recompute_existing_parameter_values=False,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
             domain_builder=ReconciliationStrategy.UPDATE,
             parameter_builder=ReconciliationStrategy.UPDATE,
             expectation_configuration_builder=ReconciliationStrategy.UPDATE,
         ),
-        expectation_suite=None,
-        expectation_suite_name=expectation_suite_name,
-        include_citation=include_citation,
     )
 
 
@@ -1257,6 +1266,7 @@ def test_add_single_rule(
     )
     first_rule: Rule = Rule(
         name="first_rule",
+        variables=None,
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
@@ -1266,6 +1276,7 @@ def test_add_single_rule(
 
     duplicate_of_first_rule: Rule = Rule(
         name="first_rule",
+        variables=None,
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
@@ -1293,6 +1304,7 @@ def test_add_rule_overwrite_first_rule(
     )
     first_rule: Rule = Rule(
         name="first_rule",
+        variables=None,
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
@@ -1319,6 +1331,7 @@ def test_add_rule_add_second_rule(
     )
     first_rule: Rule = Rule(
         name="first_rule",
+        variables=None,
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )
@@ -1328,6 +1341,7 @@ def test_add_rule_add_second_rule(
 
     second_rule: Rule = Rule(
         name="second_rule",
+        variables=None,
         domain_builder=mock_domain_builder,
         expectation_configuration_builders=mock_expectation_configuration_builder,
     )

@@ -9,6 +9,9 @@ from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
+from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
+    DEFAULT_RECONCILATION_DIRECTIVES,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
@@ -107,9 +110,9 @@ class DataAssistant(ABC):
         expectation_configuration_builders: List[ExpectationConfigurationBuilder]
 
         """
-        For each Self-Initializing Expectation as specified by "DataAssistant.expectation_kwargs_by_expectation_type"
-        interface property, retrieve its "RuleBasedProfiler" configuration, construct "Rule" object based on configuration
-        therein and incorporating metrics "ParameterBuilder" objects for "MetricDomainTypes", emitted by "DomainBuilder"
+        For each Self-Initializing "Expectation" as specified by "DataAssistant.expectation_kwargs_by_expectation_type"
+        interface property, retrieve its "RuleBasedProfiler" configuration, construct "Rule" object based on it, while
+        incorporating metrics "ParameterBuilder" objects for "MetricDomainTypes", emitted by "DomainBuilder"
         of comprised "Rule", specified by "DataAssistant.metrics_parameter_builders_by_domain_type" interface property.
         Append this "Rule" object to overall DataAssistant "RuleBasedProfiler" object; incorporate "variables" as well.
         """
@@ -121,7 +124,6 @@ class DataAssistant(ABC):
             profiler = self._validator.build_rule_based_profiler_for_expectation(
                 expectation_type=expectation_type
             )(**expectation_kwargs)
-            # TODO: <Alex>Sharing same "variables" by all RuleBasedProfiler Rule objects is problematic.</Alex>
             variables.update(convert_variables_to_dict(variables=profiler.variables))
             rules = profiler.rules
             for rule in rules:
@@ -138,6 +140,7 @@ class DataAssistant(ABC):
                 self.profiler.add_rule(
                     rule=Rule(
                         name=rule.name,
+                        variables=rule.variables,
                         domain_builder=domain_builder,
                         parameter_builders=parameter_builders,
                         expectation_configuration_builders=expectation_configuration_builders,
@@ -146,7 +149,7 @@ class DataAssistant(ABC):
 
         self.profiler.variables = self.profiler.reconcile_profiler_variables(
             variables=variables,
-            reconciliation_strategy=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES.variables,
+            reconciliation_strategy=DEFAULT_RECONCILATION_DIRECTIVES.variables,
         )
 
     def run(
@@ -365,7 +368,8 @@ def run_profiler_on_data(
         batch_list=batch_list,
         batch_request=batch_request,
         force_batch_data=False,
-        reconciliation_directives=BaseRuleBasedProfiler.DEFAULT_RECONCILATION_DIRECTIVES,
+        recompute_existing_parameter_values=False,
+        reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
     )
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
