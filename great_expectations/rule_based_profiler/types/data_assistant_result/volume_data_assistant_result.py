@@ -42,7 +42,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
         )
         domain_name: str = "batch"
 
-        # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
         domain_type: str = AltairDataTypes.ORDINAL.value
         metric_type: str = AltairDataTypes.QUANTITATIVE.value
 
