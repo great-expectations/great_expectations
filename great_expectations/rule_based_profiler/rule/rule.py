@@ -99,8 +99,8 @@ class Rule(SerializableDictDot):
         """
         variables = build_parameter_container_for_variables(
             variables_configs=reconcile_rule_variables(
-                variables=self.variables,
-                variables_config=convert_variables_to_dict(variables=variables),
+                variables=variables,
+                variables_config=convert_variables_to_dict(variables=self.variables),
                 reconciliation_strategy=reconciliation_directives.variables,
             )
         )
