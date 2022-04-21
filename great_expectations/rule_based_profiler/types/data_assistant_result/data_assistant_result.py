@@ -246,7 +246,7 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        predicate = (
+        predicate: alt.expr.core.BinaryExpression = (
             (alt.datum.min_value > alt.datum.table_row_count)
             & (alt.datum.max_value > alt.datum.table_row_count)
         ) | (
