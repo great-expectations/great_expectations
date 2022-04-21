@@ -80,9 +80,9 @@ class DataAssistantResult(SerializableDictDot):
     def get_line_chart(
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: str,
+        metric_type: alt.StandardType,
         domain_name: str,
-        domain_type: str,
+        domain_type: alt.StandardType,
         line_color: Optional[str] = Colors.BLUE_2.value,
         point_color: Optional[str] = Colors.GREEN.value,
         point_color_condition: Optional[alt.condition] = None,
@@ -167,9 +167,9 @@ class DataAssistantResult(SerializableDictDot):
     def get_expect_domain_values_to_be_between_chart(
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: str,
+        metric_type: alt.StandardType,
         domain_name: str,
-        domain_type: str,
+        domain_type: alt.StandardType,
     ) -> alt.Chart:
         """
         Args:
