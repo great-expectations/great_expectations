@@ -64,7 +64,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sqlalchemy
-    from sqlalchemy import create_engine
+    from sqlalchemy import create_engine, text
 
     # noinspection PyProtectedMember
     from sqlalchemy.engine import Engine
@@ -586,9 +586,13 @@ def get_dataset(
             if_exists="replace",
         )
         custom_sql = f"SELECT * FROM {_bigquery_dataset()}.{table_name}"
-        return SqlAlchemyDataset(
+        # TODO : check if we can still drop this.
+        dataset: SqlAlchemyDataset = SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
+        sql = text(f"DROP TABLE IF EXISTS {_bigquery_dataset()}.{table_name};")
+        engine.execute(sql)
+        return dataset
 
     elif dataset_type == "mssql":
         if not create_engine or not MSSQL_TYPES:
@@ -815,6 +819,7 @@ def get_test_validator_with_data(
     elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
         if not create_engine:
             return None
+        # this is the V3 version
         return build_sa_validator_with_data(
             df=df,
             sa_engine_name=execution_engine,
@@ -1078,6 +1083,11 @@ def build_sa_validator_with_data(
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+
+    # and then return the validator?
+    if sa_engine_name == "bigquery":
+        sql = text(f"DROP TABLE IF EXISTS {_bigquery_dataset()}.{table_name};")
+        engine.execute(sql)
 
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
