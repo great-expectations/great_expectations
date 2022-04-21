@@ -1,6 +1,6 @@
 import itertools
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Callable, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 
@@ -19,6 +19,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     MetricValues,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    Attributes,
     Domain,
     ParameterContainer,
     ParameterNode,
@@ -68,10 +72,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         estimator: str = "bootstrap",
         num_bootstrap_samples: Optional[Union[str, int]] = None,
         bootstrap_random_seed: Optional[Union[str, int]] = None,
-        round_decimals: Optional[Union[str, int]] = None,
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
+        round_decimals: Optional[Union[str, int]] = None,
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
@@ -99,11 +103,11 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             estimator: choice of the estimation algorithm: "oneshot" (one observation) or "bootstrap" (default)
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
             9999 is used (default in "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
+            truncate_values: user-configured directive for whether or not to allow the computed parameter values
+            (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             round_decimals: user-configured non-negative integer indicating the number of decimals of the
             rounding precision of the computed parameter values (i.e., min_value, max_value) prior to packaging them on
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
-            truncate_values: user-configured directive for whether or not to allow the computed parameter values
-            (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
@@ -179,26 +183,27 @@ detected.
         return self._bootstrap_random_seed
 
     @property
-    def round_decimals(self) -> Optional[Union[str, int]]:
-        return self._round_decimals
-
-    @property
     def truncate_values(
         self,
     ) -> Optional[Union[str, Dict[str, Union[Optional[int], Optional[float]]]]]:
         return self._truncate_values
+
+    @property
+    def round_decimals(self) -> Optional[Union[str, int]]:
+        return self._round_decimals
 
     def _build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+        recompute_existing_parameter_values: bool = False,
+    ) -> Attributes:
         """
-         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-         details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-         return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
 
          The algorithm operates according to the following steps:
          1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
@@ -234,6 +239,7 @@ detected.
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
             json_serialize=False,
+            recompute_existing_parameter_values=recompute_existing_parameter_values,
         )
 
         # Retrieve metric values for all Batch objects.
@@ -244,20 +250,13 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricValues
-        if isinstance(parameter_node.value, list):
-            num_parameter_node_value_elements: int = len(parameter_node.value)
-            if not (num_parameter_node_value_elements == 1):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f'Length of "AttributedResolvedMetrics" list for {self.__class__.__name__} must be exactly 1 ({num_parameter_node_value_elements} elements found).'
-                )
-
-            attributed_resolved_metrics: AttributedResolvedMetrics = (
-                AttributedResolvedMetrics(**parameter_node.value[0])
+        metric_values: MetricValues = (
+            AttributedResolvedMetrics.get_metric_values_from_attributed_metric_values(
+                attributed_metric_values=parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+                ]
             )
-            metric_values = attributed_resolved_metrics.metric_values
-        else:
-            metric_values = parameter_node.value
+        )
 
         # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         estimator: str = get_parameter_value_and_validate_return_type(
@@ -301,9 +300,13 @@ detected.
             **estimator_kwargs,
         )
 
-        return (
-            metric_value_range,
-            parameter_node.details,
+        return Attributes(
+            {
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: metric_value_range,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+                ],
+            }
         )
 
     def _estimate_metric_value_range(
@@ -388,16 +391,11 @@ detected.
                     **kwargs,
                 )
 
-            if round_decimals == 0:
-                min_value = round(float(cast(float, lower_quantile)))
-                max_value = round(float(cast(float, upper_quantile)))
-            else:
-                min_value = round(float(cast(float, lower_quantile)), round_decimals)
-                max_value = round(float(cast(float, upper_quantile)), round_decimals)
-
+            min_value = lower_quantile
             if lower_bound is not None:
                 min_value = max(cast(float, min_value), lower_bound)
 
+            max_value = upper_quantile
             if upper_bound is not None:
                 max_value = min(cast(float, max_value), upper_bound)
 
@@ -413,12 +411,19 @@ detected.
             )  # appends "[0]" element
 
             # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
-            metric_value_range[metric_value_range_min_idx] = min_value
-            metric_value_range[metric_value_range_max_idx] = max_value
+            metric_value_range[metric_value_range_min_idx] = round(
+                cast(float, min_value), round_decimals
+            )
+            metric_value_range[metric_value_range_max_idx] = round(
+                cast(float, max_value), round_decimals
+            )
 
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
         if metric_value_range.shape[0] == 1:
             metric_value_range = metric_value_range[0]
+
+        if round_decimals == 0:
+            metric_value_range = metric_value_range.astype(np.int64)
 
         return metric_value_range
 

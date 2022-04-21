@@ -100,8 +100,60 @@ stages:
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
+  - stage: custom_checks
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+    - job: type_hint_checker
+      steps:
+      - script: |
+          pip install mypy # Prereq for type hint script
+          python scripts/check_type_hint_coverage.py
+        name: TypeHintChecker
+
+    - job: docstring_checker
+      steps:
+      - bash: python scripts/check_docstring_coverage.py
+        name: DocstringChecker
+
+  - stage: import_ge
+    dependsOn: [lint]
+    pool:
+      vmImage: 'ubuntu-18.04'
+
+    jobs:
+      - job: import_ge
+
+        strategy:
+         matrix:
+           Python37:
+             python.version: '3.7'
+           Python38:
+             python.version: '3.8'
+           Python39:
+             python.version: '3.9'
+
+        steps:
+         - task: UsePythonVersion@0
+           inputs:
+             versionSpec: '$(python.version)'
+           displayName: 'Use Python $(python.version)'
+
+         - bash: python -m pip install --upgrade pip==21.3.1
+           displayName: 'Update pip'
+
+         - script: |
+             pip install  .
+           displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
+
+         - script: |
+             python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
+           displayName: 'Import Great Expectations'
+
   - stage: required
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-18.04'
 
@@ -262,6 +314,22 @@ stages:
 
             displayName: 'dgtest'
 
+          - script: |
+              # These are tests that are missed by the dgtest dependency graph.
+              # In order to ensure coverage, we run them during each CI/CD cycle.
+              pytest \
+                tests/test_deprecation.py \
+                tests/data_asset/test_data_asset_util.py \
+                tests/datasource/test_batch_kwargs.py \
+                tests/datasource/test_sqlalchemy_datasource_workarounds.py \
+                tests/data_context/test_templates.py \
+                tests/data_context/test_data_context_store_configs.py \
+                tests/core/test_urn.py \
+                tests/dataset/test_pandas_dataset_conditionals.py \
+                tests/expectations/test_generate_diagnostic_checklist.py
+
+            displayName: 'dgtest-overrides'
+
           - task: PublishTestResults@2
             condition: succeededOrFailed()
             inputs:
@@ -275,7 +343,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -311,7 +379,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
 
     jobs:
       - job: mysql
@@ -404,7 +472,7 @@ stages:
             displayName: 'dgtest'
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint]
+    dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
