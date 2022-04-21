@@ -296,12 +296,14 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
 class RuleConfig(SerializableDictDot):
     def __init__(
         self,
+        variables: Optional[Dict[str, Any]] = None,
         domain_builder: Optional[dict] = None,  # see DomainBuilderConfig
         parameter_builders: Optional[List[dict]] = None,  # see ParameterBuilderConfig
         expectation_configuration_builders: Optional[
             List[dict]
         ] = None,  # see ExpectationConfigurationBuilderConfig
     ):
+        self.variables = variables
         self.domain_builder = domain_builder
         self.parameter_builders = parameter_builders
         self.expectation_configuration_builders = expectation_configuration_builders
@@ -356,6 +358,14 @@ class RuleConfigSchema(NotNullSchema):
 
     __config_class__ = RuleConfig
 
+    variables = fields.Dict(
+        keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
     domain_builder = fields.Nested(
         DomainBuilderConfigSchema,
         required=False,

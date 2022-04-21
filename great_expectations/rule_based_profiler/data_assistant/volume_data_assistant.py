@@ -18,14 +18,12 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
 )
 
 
-# TODO: <Alex>ALEX Rename this "VolumeDataAssistant" to be more precise.</Alex>
 class VolumeDataAssistant(DataAssistant):
     """
     VolumeDataAssistant provides exploration and validation of "Data Volume" aspects of specified data Batch objects.
 
     Self-Initializing Expectations relevant for assessing "Data Volume" include:
         - "expect_table_row_count_to_be_between";
-        # TODO: <Alex>ALEX Implement Self-Initializing Capability for "expect_column_unique_value_count_to_be_between".</Alex>
         - "expect_column_unique_value_count_to_be_between";
         - Others in the future.
     """
@@ -49,6 +47,10 @@ class VolumeDataAssistant(DataAssistant):
                 "auto": True,
                 "profiler_config": None,
             },
+            "expect_column_unique_value_count_to_be_between": {
+                "auto": True,
+                "profiler_config": None,
+            },
         }
 
     @property
@@ -69,9 +71,26 @@ class VolumeDataAssistant(DataAssistant):
             batch_request=None,
             data_context=None,
         )
+        column_distinct_values_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
+            name="column_distinct_values.count",
+            metric_name="column.distinct_values.count",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            json_serialize=True,
+            batch_list=None,
+            batch_request=None,
+            data_context=None,
+        )
         return {
             MetricDomainTypes.TABLE: [
                 table_row_count_metric_multi_batch_parameter_builder,
+            ],
+            MetricDomainTypes.COLUMN: [
+                column_distinct_values_metric_multi_batch_parameter_builder,
             ],
         }
 
