@@ -2235,7 +2235,7 @@ def test_get_metrics_and_expectations(
                 "profiler_config": {
                     "name": "test_volume_data_assistant",
                     "config_version": 1.0,
-                    "variables": {"bootstrap_random_seed": 43792},
+                    "variables": {"bootstrap_random_seed": RANDOM_SEED},
                     "rules": {
                         "default_expect_table_row_count_to_be_between_rule": {
                             "domain_builder": {
@@ -2299,7 +2299,7 @@ def test_get_metrics_and_expectations(
                                 "false_positive_rate": 0.05,
                                 "estimator": "bootstrap",
                                 "num_bootstrap_samples": 9999,
-                                "bootstrap_random_seed": 43792,
+                                "bootstrap_random_seed": RANDOM_SEED,
                                 "truncate_values": {
                                     "lower_bound": 0,
                                     "upper_bound": None,
@@ -2383,7 +2383,7 @@ def test_get_metrics_and_expectations(
                                 "false_positive_rate": 0.05,
                                 "estimator": "bootstrap",
                                 "num_bootstrap_samples": 9999,
-                                "bootstrap_random_seed": 43792,
+                                "bootstrap_random_seed": RANDOM_SEED,
                                 "truncate_values": {
                                     "lower_bound": 0,
                                     "upper_bound": None,
@@ -2403,7 +2403,7 @@ def test_get_metrics_and_expectations(
     expected_rule_based_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         config_version=1.0,
         name="test_volume_data_assistant",
-        variables={"bootstrap_random_seed": 43792},
+        variables={"bootstrap_random_seed": RANDOM_SEED},
         rules={
             "default_expect_table_row_count_to_be_between_rule": {
                 "variables": {
@@ -2577,9 +2577,8 @@ def test_execution_time_within_proper_bounds(
     )
     data_assistant_result: DataAssistantResult = data_assistant.run()
 
-    assert (
-        0.0 < data_assistant_result.execution_time <= 7.0
-    )  # Execution time (in seconds).
+    # Execution time (in seconds) must have non-trivial value.
+    assert data_assistant_result.execution_time > 0.0
 
 
 def test_volume_data_assistant_plot_descriptive(
