@@ -1464,6 +1464,19 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
     ],
+    "data_context.run_profiler_with_dynamic_arguments": [
+        {
+            "event_payload": {},
+            "event": "data_context.run_profiler_with_dynamic_arguments",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2022-04-21T16:08:28.070Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.14.6.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
     # CLI INIT COMMANDS
     "cli.init.create": [
         {

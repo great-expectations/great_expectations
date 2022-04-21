@@ -68,6 +68,7 @@ def test_comprehensive_list_of_messages():
         "expectation_suite.add_expectation",
         "legacy_profiler.build_suite",
         "profiler.run",
+        "data_context.run_profiler_with_dynamic_arguments",
     }
 
 
@@ -293,6 +294,7 @@ def test_usage_stats_empty_payload_messages():
         "data_context.build_data_docs",
         "data_context.open_data_docs",
         "data_context.run_checkpoint",
+        "data_context.run_profiler_with_dynamic_arguments",
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:

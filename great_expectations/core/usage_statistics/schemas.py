@@ -1028,6 +1028,7 @@ anonymized_usage_statistics_record_schema = {
                         "data_context.open_data_docs",
                         "data_context.run_checkpoint",
                         "expectation_suite.add_expectation",
+                        "data_context.run_profiler_with_dynamic_arguments",
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
