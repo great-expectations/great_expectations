@@ -1,11 +1,17 @@
-from ruamel import yaml
+import os
 
+# <snippet>
 import great_expectations as ge
 from great_expectations.core.batch import RuntimeBatchRequest
 
-context = ge.get_context()
+# </snippet>
+from great_expectations.core.yaml_handler import YAMLHandler
 
-import os
+yaml = YAMLHandler()
+
+# <snippet>
+context = ge.get_context()
+# </snippet>
 
 # NOTE: The following code is only for testing and depends on an environment
 # variable to set the gcp_project. You can replace the value with your own
@@ -218,6 +224,7 @@ bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
+# <snippet>
 datasource_yaml = rf"""
 name: my_bigquery_datasource
 class_name: Datasource
@@ -233,6 +240,7 @@ data_connectors:
        class_name: InferredAssetSqlDataConnector
        name: whole_table
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -242,9 +250,13 @@ datasource_yaml = datasource_yaml.replace(
 )
 
 context.test_yaml_config(datasource_yaml)
+# <snippet>
 context.add_datasource(**yaml.safe_load(datasource_yaml))
+# </snippet>
 
 # Test for RuntimeBatchRequest using a query.
+
+# <snippet>
 batch_request = RuntimeBatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -252,7 +264,9 @@ batch_request = RuntimeBatchRequest(
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
+# </snippet>
 
+# <snippet>
 context.create_expectation_suite(
     expectation_suite_name="test_bigquery_suite", overwrite_existing=True
 )
@@ -260,15 +274,21 @@ context.create_expectation_suite(
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_bigquery_suite"
 )
+# </snippet>
 
+# <snippet>
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
+# </snippet>
 
+# <snippet>
 validator.save_expectation_suite(discard_failed_expectations=False)
+# </snippet>
 
+# <snippet>
 my_checkpoint_name = "bigquery_checkpoint"
 checkpoint_config = f"""
 name: {my_checkpoint_name}
@@ -286,9 +306,15 @@ validations:
         query: SELECT * from demo.taxi_data LIMIT 10
     expectation_suite_name: test_bigquery_suite
 """
+# </snippet>
 
+# <snippet>
 context.add_checkpoint(**yaml.safe_load(checkpoint_config))
+# </snippet>
+
+# <snippet>
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )
+# </snippet>
 assert checkpoint_result.success is True
