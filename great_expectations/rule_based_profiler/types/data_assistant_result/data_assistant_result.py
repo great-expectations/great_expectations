@@ -1,3 +1,4 @@
+import copy
 from abc import abstractmethod
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
@@ -74,7 +75,9 @@ class DataAssistantResult(SerializableDictDot):
             charts: A list of altair chart objects to display
             custom_altair_theme: Altair top-level chart configuration dictionary
         """
-        altair_configuration: Dict[str, Any] = AltairThemes.DEFAULT_THEME.value
+        altair_configuration: Dict[str, Any] = copy.deepcopy(
+            AltairThemes.DEFAULT_THEME.value
+        )
         if custom_altair_theme is not None:
             altair_configuration.update(custom_altair_theme)
 
