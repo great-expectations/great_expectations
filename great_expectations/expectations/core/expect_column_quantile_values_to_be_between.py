@@ -177,25 +177,26 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
-        variables={
-            "quantiles": [
-                0.25,
-                0.5,
-                0.75,
-            ],
-            "allow_relative_error": "linear",
-            "false_positive_rate": 0.05,
-            "estimator": "bootstrap",
-            "num_bootstrap_samples": 9999,
-            "bootstrap_random_seed": None,
-            "truncate_values": {
-                "lower_bound": None,
-                "upper_bound": None,
-            },
-            "round_decimals": 1,
-        },
+        variables={},
         rules={
             "default_expect_column_quantile_values_to_be_between_rule": {
+                "variables": {
+                    "quantiles": [
+                        0.25,
+                        0.5,
+                        0.75,
+                    ],
+                    "allow_relative_error": "linear",
+                    "false_positive_rate": 0.05,
+                    "estimator": "bootstrap",
+                    "num_bootstrap_samples": 9999,
+                    "bootstrap_random_seed": None,
+                    "truncate_values": {
+                        "lower_bound": None,
+                        "upper_bound": None,
+                    },
+                    "round_decimals": 1,
+                },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
