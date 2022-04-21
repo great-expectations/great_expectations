@@ -8,11 +8,14 @@ import pandas as pd
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.types import (
-    ALTAIR_DEFAULT_CONFIGURATION,
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     Domain,
     ParameterNode,
+)
+from great_expectations.rule_based_profiler.types.altair import (
+    ALTAIR_DEFAULT_CONFIGURATION,
+    AltairDataTypes,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
@@ -77,9 +80,9 @@ class DataAssistantResult(SerializableDictDot):
     def get_line_chart(
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: str,
+        metric_type: alt.StandardType,
         domain_name: str,
-        domain_type: str,
+        domain_type: alt.StandardType,
         line_color: Optional[str] = Colors.BLUE_2.value,
         point_color: Optional[str] = Colors.GREEN.value,
         point_color_condition: Optional[alt.condition] = None,
@@ -102,10 +105,10 @@ class DataAssistantResult(SerializableDictDot):
         """
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
-        title: str = f"{metric_title} by {domain_title}"
+        title: str = f"{metric_title} per {domain_title}"
 
         batch_id: str = "batch_id"
-        batch_id_type: str = "nominal"
+        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         if tooltip is None:
             tooltip: List[alt.Tooltip] = [
@@ -164,9 +167,9 @@ class DataAssistantResult(SerializableDictDot):
     def get_expect_domain_values_to_be_between_chart(
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: str,
+        metric_type: alt.StandardType,
         domain_name: str,
-        domain_type: str,
+        domain_type: alt.StandardType,
     ) -> alt.Chart:
         """
         Args:
@@ -179,19 +182,20 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
-        opacity: float = 0.9
+        line_opacity: float = 0.9
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
+        fill_opacity: float = 0.5
         fill_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[5])
 
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
 
         batch_id: str = "batch_id"
-        batch_id_type: str = "nominal"
+        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
-        min_value_type: str = "quantitative"
+        min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
         max_value: str = "max_value"
-        max_value_type: str = "quantitative"
+        max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
         tooltip: list[alt.Tooltip] = [
             alt.Tooltip(field=batch_id, type=batch_id_type),
@@ -202,7 +206,7 @@ class DataAssistantResult(SerializableDictDot):
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color, opacity=opacity)
+            .mark_line(color=line_color, opacity=line_opacity)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -216,7 +220,7 @@ class DataAssistantResult(SerializableDictDot):
 
         upper_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color, opacity=opacity)
+            .mark_line(color=line_color, opacity=line_opacity)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -230,7 +234,7 @@ class DataAssistantResult(SerializableDictDot):
 
         band: alt.Chart = (
             alt.Chart(data=df)
-            .mark_area(fill=fill_color, fillOpacity=opacity)
+            .mark_area(fill=fill_color, fillOpacity=fill_opacity)
             .encode(
                 x=alt.X(
                     domain_name,

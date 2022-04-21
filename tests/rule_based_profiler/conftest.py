@@ -492,6 +492,7 @@ def rule_without_variables(
 ):
     rule: Rule = Rule(
         name="rule_without_variables",
+        variables=None,
         domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
         expectation_configuration_builders=[
             DefaultExpectationConfigurationBuilder(
