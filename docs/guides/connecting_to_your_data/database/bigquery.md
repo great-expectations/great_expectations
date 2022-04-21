@@ -48,12 +48,12 @@ bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L2-L6
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L2-L5
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L23
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L24
 ```
 
 ### 5. Configure your Datasource
@@ -70,12 +70,12 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L27-L41
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L28-L42
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L52
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L53
 ```
 
 </TabItem>
@@ -114,7 +114,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L56
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L57
 ```
 
 </TabItem>
@@ -143,7 +143,7 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L61-L75
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py#L62-L76
 ```
 
 </TabItem>
