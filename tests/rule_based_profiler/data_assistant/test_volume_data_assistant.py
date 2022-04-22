@@ -1,7 +1,9 @@
 import os
 from typing import Any, Dict, List
 
+import nbconvert
 import nbformat
+import pytest
 from freezegun import freeze_time
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat.notebooknode import NotebookNode
@@ -58,10 +60,14 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     """
     To set this test up we:
     - create a suite
+    - write code (as a string) for creating a VolumeDataAssistantResult
+    - add a new cell to the notebook that was passed to this method
+    - write both cells to ipynb file
 
     We then:
-    - execute that notebook (Note this will raise various errors like
-    CellExecutionError if any cell in the notebook fails
+    - load the notebook back from disk
+    - execute the notebook (Note: this will raise various errors like
+      CellExecutionError if any cell in the notebook fails)
     """
 
     root_dir: str = context.root_directory
@@ -2643,6 +2649,17 @@ def test_execution_time_within_proper_bounds(
 
     # Execution time (in seconds) must have non-trivial value.
     assert data_assistant_result.execution_time > 0.0
+
+
+def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    new_cell: str = "data_assistant_result.plot(this_is_not_a_real_parameter=True)"
+    with pytest.raises(nbconvert.preprocessors.CellExecutionError):
+        run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+            context=context, new_cell=new_cell
+        )
 
 
 def test_volume_data_assistant_plot_descriptive_notebook_execution(
