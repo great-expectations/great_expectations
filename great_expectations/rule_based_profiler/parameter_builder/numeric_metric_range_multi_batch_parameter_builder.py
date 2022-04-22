@@ -79,7 +79,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             List[ParameterBuilderConfig]
         ] = None,
         json_serialize: Union[str, bool] = True,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """
         Args:
@@ -107,7 +107,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            data_context: DataContext
+            data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -197,8 +197,7 @@ detected.
             Attributes object, containing computed parameter values and parameter computation details metadata.
 
          The algorithm operates according to the following steps:
-         1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
-         that this specific BatchRequest was specified as part of configuration for the present ParameterBuilder class.
+         1. Obtain batch IDs of interest using BaseDataContext and BatchRequest (unless passed explicitly as argument).
          2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
          3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
             order to have access to all Batch objects, on each of which the specified metric_name will be computed.

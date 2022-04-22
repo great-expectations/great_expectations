@@ -27,11 +27,11 @@ class DomainBuilder(Builder, ABC):
 
     def __init__(
         self,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """
         Args:
-            data_context: DataContext
+            data_context: BaseDataContext associated with DomainBuilder
         """
         super().__init__(data_context=data_context)
 

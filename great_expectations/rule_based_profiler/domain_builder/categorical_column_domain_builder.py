@@ -52,7 +52,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """Create column domains where cardinality is within the specified limit.
 
@@ -88,7 +88,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
                 cardinality limit to use when filtering columns.
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
-            data_context: DataContext associated with this profiler.
+            data_context: BaseDataContext associated with this DomainBuilder
         """
         if exclude_column_names is None:
             exclude_column_names = [

@@ -31,7 +31,7 @@ class ExpectationConfigurationBuilder(Builder, ABC):
         validation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         **kwargs
     ):
         """
@@ -41,8 +41,8 @@ class ExpectationConfigurationBuilder(Builder, ABC):
             expectation_type: the "expectation_type" argument of "ExpectationConfiguration" object to be emitted.
             validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
             fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance.
-            These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder".
-            data_context: DataContext
+            These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
+            data_context: BaseDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
         """
 
@@ -146,7 +146,7 @@ class ExpectationConfigurationBuilder(Builder, ABC):
 
 def init_rule_expectation_configuration_builders(
     expectation_configuration_builder_configs: List[dict],
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
 ) -> List["ExpectationConfigurationBuilder"]:  # noqa: F821
     expectation_configuration_builder_config: dict
     return [
@@ -162,7 +162,7 @@ def init_expectation_configuration_builder(
     expectation_configuration_builder_config: Union[
         "ExpectationConfigurationBuilder", dict  # noqa: F821
     ],
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
 ) -> "ExpectationConfigurationBuilder":  # noqa: F821
     if not isinstance(expectation_configuration_builder_config, dict):
         expectation_configuration_builder_config = (
