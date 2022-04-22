@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.data_context import BaseDataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -14,9 +13,6 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_validator as get_validator_using_batch_list_or_batch_request,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
@@ -29,6 +25,7 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.util import measure_execution_time
+from great_expectations.validator.validator import Validator
 
 
 class DataAssistant(ABC):
@@ -40,8 +37,7 @@ class DataAssistant(ABC):
 
     data_assistant: DataAssistant = VolumeDataAssistant(
         name="my_volume_data_assistant",
-        batch_request=batch_request,
-        data_context=context,
+        validator=validator,
     )
     result: DataAssistantResult = data_assistant.run()
 
@@ -56,8 +52,7 @@ class DataAssistant(ABC):
     def __init__(
         self,
         name: str,
-        batch_request: Union[BatchRequestBase, dict],
-        data_context: BaseDataContext = None,
+        validator: Validator,
     ):
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
@@ -66,29 +61,17 @@ class DataAssistant(ABC):
         and overall "ExpectationSuite" object, immediately available for validating underlying data "Batch" objects.
 
         Args:
-            name: the name of this DataAssistant object.
-            batch_request: specified for querying data Batch objects.
-            data_context: DataContext
+            name: the name of this DataAssistant object
+            validator: Validator object, containing loaded Batch objects as well as Expectation and Metric operations
         """
         self._name = name
-
-        self._data_context = data_context
-
-        self._validator = get_validator_using_batch_list_or_batch_request(
-            purpose=self.name,
-            data_context=self.data_context,
-            batch_list=None,
-            batch_request=batch_request,
-            domain=None,
-            variables=None,
-            parameters=None,
-        )
+        self._validator = validator
 
         self._profiler = RuleBasedProfiler(
             name=self.name,
             config_version=1.0,
             variables=None,
-            data_context=self.data_context,
+            data_context=self.validator.data_context,
         )
         self._build_profiler()
 
@@ -164,7 +147,8 @@ class DataAssistant(ABC):
         Args:
             expectation_suite: An existing "ExpectationSuite" to update
             expectation_suite_name: A name for returned "ExpectationSuite"
-            include_citation: Whether or not to include the Profiler config in the metadata for "ExpectationSuite" produced by "RuleBasedProfiler"
+            include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
+            as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
@@ -193,8 +177,8 @@ class DataAssistant(ABC):
         return self._name
 
     @property
-    def data_context(self) -> BaseDataContext:
-        return self._data_context
+    def validator(self) -> Validator:
+        return self._validator
 
     @property
     def profiler(self) -> BaseRuleBasedProfiler:
@@ -268,8 +252,8 @@ class DataAssistant(ABC):
         value of "DataAssistant.metrics_parameter_builders_by_domain_type" interface property and actual fully-qualified
         parameter names match interface properties of "ParameterBuilder" objects, corresponding to these "domain" types.
 
-        returns:
-            dictionaries of values for fully-qualified parameter names by domain for metrics, computed by "rulebasedprofiler" state.
+        Returns:
+            Dictionaries of values for fully-qualified parameter names by Domain for metrics, from "RuleBasedpRofiler"
         """
         # noinspection PyTypeChecker
         parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
@@ -326,7 +310,8 @@ class DataAssistant(ABC):
         Args:
             expectation_suite: An existing "ExpectationSuite" to update
             expectation_suite_name: A name for returned "ExpectationSuite"
-            include_citation: Whether or not to include the Profiler config in the metadata for "ExpectationSuite" produced by "RuleBasedProfiler"
+            include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
+            as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
 
         Returns:
             "ExpectationSuite" using "ExpectationConfiguration" objects, computed by "RuleBasedProfiler" state

@@ -1,10 +1,19 @@
-from typing import Any, Dict, List
+import uuid
+from typing import Any, Dict, List, Optional, Union
 from unittest import mock
 
 from freezegun import freeze_time
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.batch import (
+    BatchRequest,
+    BatchRequestBase,
+    RuntimeBatchRequest,
+    materialize_batch_request,
+)
+from great_expectations.data_context import BaseDataContext
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
@@ -25,9 +34,11 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.validator.validator import Validator
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 
+# TODO: <Alex>ALEX -- Make this helper utility of general use.</Alex>
 def set_bootstrap_random_seed_variable(
     profiler: BaseRuleBasedProfiler, random_seed: int = RANDOM_SEED
 ) -> None:
@@ -48,6 +59,33 @@ def set_bootstrap_random_seed_variable(
         )
 
 
+# TODO: <Alex>ALEX -- Make this helper utility of general use.</Alex>
+def get_validator_with_temporary_expectation_suite(
+    data_context: BaseDataContext, batch_request: Union[BatchRequestBase, dict]
+) -> Validator:
+    suite: ExpectationSuite
+
+    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
+    try:
+        # noinspection PyUnusedLocal
+        suite = data_context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+    except ge_exceptions.DataContextError:
+        suite = data_context.create_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+
+    batch_request = materialize_batch_request(batch_request=batch_request)
+    validator: Validator = data_context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    return validator
+
+
 @freeze_time("09/26/2019 13:42:41")
 def test_get_metrics_and_expectations(
     quentin_columnar_table_multi_batch_data_context,
@@ -59,6 +97,12 @@ def test_get_metrics_and_expectations(
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
+
+    validator: Validator = get_validator_with_temporary_expectation_suite(
+        data_context=context,
+        batch_request=batch_request,
+    )
+    assert len(validator.batches) == 36
 
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
         Domain(domain_type="table",): {
@@ -2562,10 +2606,15 @@ def test_execution_time_within_proper_bounds(
         "data_asset_name": "my_reports",
     }
 
+    validator: Validator = get_validator_with_temporary_expectation_suite(
+        data_context=context,
+        batch_request=batch_request,
+    )
+    assert len(validator.batches) == 36
+
     data_assistant: DataAssistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
-        batch_request=batch_request,
-        data_context=context,
+        validator=validator,
     )
     data_assistant_result: DataAssistantResult = data_assistant.run()
 
@@ -2584,10 +2633,15 @@ def test_volume_data_assistant_plot_descriptive(
         "data_asset_name": "my_reports",
     }
 
+    validator: Validator = get_validator_with_temporary_expectation_suite(
+        data_context=context,
+        batch_request=batch_request,
+    )
+    assert len(validator.batches) == 36
+
     data_assistant: DataAssistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
-        batch_request=batch_request,
-        data_context=context,
+        validator=validator,
     )
 
     expectation_suite_name: str = "test_suite"
@@ -2613,10 +2667,15 @@ def test_volume_data_assistant_plot_prescriptive(
         "data_asset_name": "my_reports",
     }
 
+    validator: Validator = get_validator_with_temporary_expectation_suite(
+        data_context=context,
+        batch_request=batch_request,
+    )
+    assert len(validator.batches) == 36
+
     data_assistant: DataAssistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
-        batch_request=batch_request,
-        data_context=context,
+        validator=validator,
     )
 
     expectation_suite_name: str = "test_suite"
