@@ -196,11 +196,16 @@ class SqlAlchemyBatchData(BatchData):
         if self.sql_engine_dialect.name.lower() == "bigquery":
             # created as script
             # https://stackoverflow.com/questions/20673986/how-to-create-temporary-table-in-google-bigquery
-            stmt = f"""
-            BEGIN
-            CREATE OR REPLACE TEMPORARY TABLE _SESSION.`{temp_table_name}` AS {query};
-            END;
-            """
+            # https://stackoverflow.com/questions/57295881/python-bigquery-temporary-table
+            stmt = f"""CREATE OR REPLACE TABLE `{temp_table_name}`
+                    OPTIONS(
+                        expiration_timestamp=TIMESTAMP_ADD(
+                        CURRENT_TIMESTAMP(), INTERVAL 24 HOUR),
+                        friendly_name="temp_table",
+                        description="a view that expires in 1 day",
+                        labels=[("org_unit", "development")]
+                    )
+                    AS {query}"""
         elif self.sql_engine_dialect.name.lower() == "dremio":
             stmt = f"CREATE OR REPLACE VDS {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name.lower() == "snowflake":
