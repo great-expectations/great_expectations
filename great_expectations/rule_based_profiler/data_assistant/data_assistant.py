@@ -71,7 +71,7 @@ class DataAssistant(ABC):
             name=self.name,
             config_version=1.0,
             variables=None,
-            data_context=self.validator.data_context,
+            data_context=self._validator.data_context,
         )
         self._build_profiler()
 
@@ -175,10 +175,6 @@ class DataAssistant(ABC):
     @property
     def name(self) -> str:
         return self._name
-
-    @property
-    def validator(self) -> Validator:
-        return self._validator
 
     @property
     def profiler(self) -> BaseRuleBasedProfiler:
