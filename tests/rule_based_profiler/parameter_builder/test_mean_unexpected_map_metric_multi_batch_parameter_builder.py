@@ -100,8 +100,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
     my_null_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
@@ -114,8 +112,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -128,8 +124,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -149,17 +143,20 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
     my_null_count_metric_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     expected_parameter_value: float = 0.0
@@ -210,8 +207,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
     )
     my_null_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -225,8 +220,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
     )
 
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
@@ -242,8 +235,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -263,6 +254,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     expected_parameter_value: float = 0.0
@@ -313,8 +305,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
     )
     my_null_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
         name="my_null_count",
@@ -326,8 +316,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -343,8 +331,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -364,12 +350,14 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     expected_parameter_value: float = 0.0
@@ -418,8 +406,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
     my_null_count_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
@@ -432,8 +418,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -446,8 +430,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -467,17 +449,20 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
     my_null_count_metric_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     expected_parameter_value: float = 3.89e-3
@@ -528,8 +513,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
     )
     my_null_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -543,8 +526,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
     )
 
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
@@ -560,8 +541,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -581,6 +560,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     expected_parameter_value: float = 3.89e-3
@@ -629,8 +609,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
     my_null_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
@@ -645,8 +623,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
     )
 
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
@@ -661,8 +637,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -682,12 +656,14 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     expected_parameter_value: float = 3.89e-3
@@ -735,8 +711,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -754,7 +728,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         "metric_value_kwargs",
         "evaluation_parameter_builder_configs",
         "json_serialize",
-        "batch_request",
     }
 
 
@@ -783,8 +756,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
     )
     my_null_count_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -798,8 +769,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
     )
 
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
@@ -815,8 +784,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         metric_value_kwargs=None,
         evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         json_serialize=False,
-        batch_list=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
@@ -834,5 +801,4 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         "metric_value_kwargs",
         "evaluation_parameter_builder_configs",
         "json_serialize",
-        "batch_request",
     }

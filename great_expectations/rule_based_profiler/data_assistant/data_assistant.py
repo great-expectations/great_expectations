@@ -367,7 +367,6 @@ def run_profiler_on_data(
         rules=rules_configs,
         batch_list=batch_list,
         batch_request=batch_request,
-        force_batch_data=False,
         recompute_existing_parameter_values=False,
         reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
     )

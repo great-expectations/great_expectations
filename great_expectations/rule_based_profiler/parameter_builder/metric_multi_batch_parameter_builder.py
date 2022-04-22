@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional, Union
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -40,10 +39,6 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             List[ParameterBuilderConfig]
         ] = None,
         json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -62,16 +57,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
         """
         super().__init__(
             name=name,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
         )
 
