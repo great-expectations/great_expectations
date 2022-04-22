@@ -67,10 +67,12 @@ def test_comprehensive_list_of_messages():
         "data_context.save_expectation_suite",
         "data_context.test_yaml_config",
         "datasource.sqlalchemy.connect",
+        "execution_engine.sqlalchemy.connect",
         "checkpoint.run",
         "expectation_suite.add_expectation",
         "legacy_profiler.build_suite",
         "profiler.run",
+        "data_context.run_profiler_on_data",
         "data_context.run_profiler_with_dynamic_arguments",
     }
     assert (
