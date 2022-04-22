@@ -89,15 +89,15 @@ By convention, your <TechnicalTag tag="metric" text="Metric" /> class is defined
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L59
+```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L60
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L61
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L59
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L60
+```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L63
 ```
 
 with something like:
@@ -106,11 +106,12 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L126
+```python
+ExpectColumnPairValuesToMatchSomeCriteria().print_diagnostic_checklist()
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L150
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L147
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -140,7 +141,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L69-L96
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L70-L97
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -222,7 +223,7 @@ with
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L69
+```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L73
 ```
 
 with
@@ -305,12 +306,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L114-L119
+```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L117-L122
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L136-L142
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py#L135-L141
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

@@ -20,9 +20,9 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 
 
-# <snippet>
 # This class defines a Metric to support your Expectation.
 # For most ColumnPairMapExpectations, the main business logic for calculation will live in this class.
+# <snippet>
 class ColumnPairValuesMatchSomeCriteria(ColumnPairMapMetricProvider):
     # </snippet>
     # This is the id string that will be used to reference your metric.
@@ -36,13 +36,14 @@ class ColumnPairValuesMatchSomeCriteria(ColumnPairMapMetricProvider):
     )
     condition_value_keys = ()
 
-    # <snippet>
     # This method implements the core logic for the PandasExecutionEngine
+    # <snippet>
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         raise NotImplementedError
 
     # </snippet>
+
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(cls, column_A, column_B, _dialect, **kwargs):
@@ -82,7 +83,6 @@ class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
-    # <snippet>
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -112,21 +112,16 @@ class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
 
-    # </snippet
-    # <snippet>
     # This object contains metadata for display in the public Gallery
+    # <snippet>
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@your_name_here",  # Don't forget to add your github handle here!
         ],
     }
-
-
-#     </snippet>
+    # </snippet>
 
 
 if __name__ == "__main__":
-    # <snippet>
     ExpectColumnPairValuesToMatchSomeCriteria().print_diagnostic_checklist()
-#     </snippet>

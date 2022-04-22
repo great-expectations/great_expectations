@@ -24,9 +24,9 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 # <snippet>
 class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
+    # </snippet>
     """MetricProvider Class for Pair Values Diff Three MetricProvider"""
 
-    # </snippet>
     # <snippet>
     condition_metric_name = "column_pair_values.diff_three"
     # </snippet>
@@ -49,23 +49,24 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
         )
         return row_wise_cond
 
-    # <snippet>
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_A, column_B, **kwargs):
         row_wise_cond = F.abs(column_A - column_B) == 3
         return row_wise_cond
 
 
-# </snippet>
 # <snippet>
 class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
-    """Expect two columns to have a row-wise difference of three."""
-
     # </snippet>
-    map_metric = "column_pair_values.diff_three"
     # <snippet>
+    """Expect two columns to have a row-wise difference of three."""
+    # </snippet>
+    # <snippet>
+    map_metric = "column_pair_values.diff_three"
+    # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
+    # <snippet>
     examples = [
         {
             "data": {
@@ -115,7 +116,6 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
         "column_B",
     )
 
-    # <snippet>
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -130,9 +130,8 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-    # </snippet>
-    # <snippet>
     # This dictionary contains metadata for display in the public gallery
+    # <snippet>
     library_metadata = {
         "tags": [
             "basic math",
@@ -140,15 +139,13 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
         ],
         "contributors": ["@joegargery"],
     }
-
-
-# </snippet>
+    # </snippet>
 
 
 if __name__ == "__main__":
     # <snippet>
     ExpectColumnPairValuesToHaveADifferenceOfThree().print_diagnostic_checklist()
-# </snippet>
+    # </snippet>
 # Note to users: code below this line is only for integration testing -- ignore!
 
 diagnostics = ExpectColumnPairValuesToHaveADifferenceOfThree().run_diagnostics()
