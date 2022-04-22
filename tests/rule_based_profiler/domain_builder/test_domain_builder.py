@@ -29,10 +29,7 @@ def test_table_domain_builder(
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
-    domain_builder: DomainBuilder = TableDomainBuilder(
-        batch_request=None,
-        data_context=data_context,
-    )
+    domain_builder: DomainBuilder = TableDomainBuilder(data_context=data_context)
     domains: List[Domain] = domain_builder.get_domains()
 
     assert len(domains) == 1
@@ -49,50 +46,6 @@ def test_table_domain_builder(
     # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.
     assert domain.domain_type.value == "table"
     assert domain.kwargs is None
-
-
-def test_builder_instantiated_with_runtime_batch_request_raises_error(
-    data_context_with_datasource_pandas_engine,
-):
-    data_context: DataContext = data_context_with_datasource_pandas_engine
-
-    df: pd.DataFrame = pd.DataFrame(
-        {
-            "a": [
-                "2021-01-01",
-                "2021-01-31",
-                "2021-02-28",
-                "2021-03-20",
-                "2021-02-21",
-                "2021-05-01",
-                "2021-06-18",
-            ]
-        }
-    )
-
-    batch_request: dict = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "default_runtime_data_connector_name",
-        "data_asset_name": "my_data_asset",
-        "runtime_parameters": {
-            "batch_data": df,
-        },
-        "batch_identifiers": {
-            "default_identifier_name": "my_identifier",
-        },
-    }
-
-    with pytest.raises(ValueError) as excinfo:
-        # noinspection PyArgumentList
-        domain_builder: DomainBuilder = ColumnDomainBuilder(
-            batch_request=batch_request,
-            data_context=data_context,
-        )
-
-    assert (
-        "Error: batch_data found in batch_request -- only primitive types are allowed as part of ColumnDomainBuilder instance attributes."
-        in str(excinfo.value)
-    )
 
 
 def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
@@ -183,11 +136,10 @@ def test_column_domain_builder(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    domain_builder: DomainBuilder = ColumnDomainBuilder(
-        batch_request=batch_request,
-        data_context=data_context,
+    domain_builder: DomainBuilder = ColumnDomainBuilder(data_context=data_context)
+    domains: List[Domain] = domain_builder.get_domains(
+        variables=variables, batch_request=batch_request
     )
-    domains: List[Domain] = domain_builder.get_domains(variables=variables)
 
     assert len(domains) == 7
     assert domains == [
@@ -271,10 +223,11 @@ def test_column_domain_builder_with_simple_semantic_type_included(
         include_semantic_types=[
             "numeric",
         ],
-        batch_request=batch_request,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(variables=variables)
+    domains: List[Domain] = domain_builder.get_domains(
+        variables=variables, batch_request=batch_request
+    )
 
     assert len(domains) == 2
     # Assert Domain object equivalence.
@@ -330,13 +283,14 @@ def test_column_pair_domain_builder_wrong_column_names(
             "event_type",
             "user_agent",
         ],
-        batch_request=batch_request,
         data_context=data_context,
     )
 
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyArgumentList
-        domains: List[Domain] = domain_builder.get_domains(variables=variables)
+        domains: List[Domain] = domain_builder.get_domains(
+            variables=variables, batch_request=batch_request
+        )
 
     assert (
         'Error: Columns specified for ColumnPairDomainBuilder in sorted order must correspond to "column_A" and "column_B" (in this exact order).'
@@ -373,10 +327,11 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
             "user_id",
             "event_type",
         ],
-        batch_request=batch_request,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(variables=variables)
+    domains: List[Domain] = domain_builder.get_domains(
+        variables=variables, batch_request=batch_request
+    )
 
     assert len(domains) == 1
     # Assert Domain object equivalence.
@@ -425,13 +380,14 @@ def test_multi_column_domain_builder_wrong_column_list(
 
     domain_builder: DomainBuilder = MultiColumnDomainBuilder(
         include_column_names=None,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyArgumentList
-        domains: List[Domain] = domain_builder.get_domains(variables=variables)
+        domains: List[Domain] = domain_builder.get_domains(
+            variables=variables, batch_request=batch_request
+        )
 
     assert 'Error: "column_list" in MultiColumnDomainBuilder must not be empty.' in str(
         excinfo.value
@@ -439,7 +395,9 @@ def test_multi_column_domain_builder_wrong_column_list(
 
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyArgumentList
-        domains: List[Domain] = domain_builder.get_domains(variables=variables)
+        domains: List[Domain] = domain_builder.get_domains(
+            variables=variables, batch_request=batch_request
+        )
 
     assert 'Error: "column_list" in MultiColumnDomainBuilder must not be empty.' in str(
         excinfo.value
@@ -476,10 +434,11 @@ def test_multi_column_domain_builder_correct_column_list(
             "user_id",
             "user_agent",
         ],
-        batch_request=batch_request,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(variables=variables)
+    domains: List[Domain] = domain_builder.get_domains(
+        variables=variables, batch_request=batch_request
+    )
 
     assert len(domains) == 1
     # Assert Domain object equivalence.
