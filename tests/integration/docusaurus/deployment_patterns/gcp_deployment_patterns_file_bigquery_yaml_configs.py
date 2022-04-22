@@ -94,7 +94,7 @@ great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
-    yaml.dump(great_expectations_yaml, f, default_flow_style=False)
+    yaml.dump(great_expectations_yaml, f)
 
 # adding validation results store
 
@@ -173,7 +173,7 @@ great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
-    yaml.dump(great_expectations_yaml, f, default_flow_style=False)
+    yaml.dump(great_expectations_yaml, f)
 
 # adding data docs store
 data_docs_site_yaml = """
