@@ -195,6 +195,7 @@ class SqlAlchemyBatchData(BatchData):
         """
         if self.sql_engine_dialect.name.lower() == "bigquery":
             # created as script
+            # https://stackoverflow.com/questions/20673986/how-to-create-temporary-table-in-google-bigquery
             stmt = f"""
             BEGIN
             CREATE OR REPLACE TEMPORARY TABLE _SESSION.`{temp_table_name}` AS {query};
