@@ -563,6 +563,12 @@ cloud_bigquery_tests = [
         ),
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
+    IntegrationTestFixture(
+        name="test_runtime_parameters_bigquery",
+        user_flow_script="tests/integration/db/bigquery.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
 ]
 
 cloud_azure_tests = [

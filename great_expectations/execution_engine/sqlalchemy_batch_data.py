@@ -106,7 +106,7 @@ class SqlAlchemyBatchData(BatchData):
             raise ValueError(
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
             )
-
+        # it's always here
         if table_name:
             # Suggestion: pull this block out as its own _function
             if use_quoted_name:
@@ -128,13 +128,13 @@ class SqlAlchemyBatchData(BatchData):
                     sa.MetaData(),
                     schema=schema_name,
                 )
-
+        # then what are we doign here?
+        #
         elif create_temp_table:
             generated_table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
                 generated_table_name = f"#{generated_table_name}"
-
             if selectable is not None:
                 if engine.dialect.name.lower() == "oracle":
                     # oracle query was already passed as a string
@@ -194,7 +194,12 @@ class SqlAlchemyBatchData(BatchData):
         :param query:
         """
         if self.sql_engine_dialect.name.lower() == "bigquery":
-            stmt = f"CREATE OR REPLACE TEMPORARY TABLE `{temp_table_name}` AS {query}"
+            # created as script
+            stmt = f"""
+            BEGIN
+            CREATE OR REPLACE TEMPORARY TABLE _SESSION.`{temp_table_name}` AS {query};
+            END;
+            """
         elif self.sql_engine_dialect.name.lower() == "dremio":
             stmt = f"CREATE OR REPLACE VDS {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name.lower() == "snowflake":
@@ -252,5 +257,9 @@ class SqlAlchemyBatchData(BatchData):
                 self._engine.execute(stmt_1)
             except DatabaseError:
                 self._engine.execute(stmt_2)
+        # if self.sql_engine_dialect.name.lower() == "bigquery":
+        #     # create session or script?
+        #     raise Exception("hello will this is giong to work ")
+        #     self._engine.execute(stmt)
         else:
             self._engine.execute(stmt)
