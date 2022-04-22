@@ -1,6 +1,5 @@
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
@@ -31,6 +30,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     exclude_field_names: Set[str] = ColumnDomainBuilder.exclude_field_names | {
         "cardinality_checker",
     }
+    cardinality_limit_modes: CardinalityLimitMode = CardinalityLimitMode
 
     def __init__(
         self,
@@ -52,10 +52,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """Create column domains where cardinality is within the specified limit.
@@ -67,11 +63,8 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         (proportion of unique values). You can choose one of: limit_mode,
         max_unique_values or max_proportion_unique to specify the cardinality
         limit.
-        Note that the limit must be met for each batch separately that is
-        supplied in the batch_request or the column domain will not be included.
-        Note that the columns used will be from the first batch retrieved
-        via the batch_request. If other batches contain additional columns,
-        these will not be considered.
+        Note that the limit must be met for each Batch separately.
+        If other Batch objects contain additional columns, these will not be considered.
 
         Args:
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
@@ -89,12 +82,12 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
+                Accessible for convenience via CategoricalColumnDomainBuilder.cardinality_limit_modes e.g.:
+                limit_mode=CategoricalColumnDomainBuilder.cardinality_limit_modes.VERY_FEW,
             max_unique_values: number of max unique rows for a custom
                 cardinality limit to use when filtering columns.
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
         """
         if exclude_column_names is None:
@@ -125,8 +118,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             semantic_type_filter_class_name=semantic_type_filter_class_name,
             include_semantic_types=include_semantic_types,
             exclude_semantic_types=exclude_semantic_types,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
         )
 
@@ -137,7 +128,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self._cardinality_checker = None
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN
 
     @property

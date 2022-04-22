@@ -19,9 +19,12 @@ def test_instantiation_value_set_multi_batch_parameter_builder(
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
-    _: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder(
-        name="my_name",
-        data_context=data_context,
+    # noinspection PyUnusedLocal
+    parameter_builder: ValueSetMultiBatchParameterBuilder = (
+        ValueSetMultiBatchParameterBuilder(
+            name="my_name",
+            data_context=data_context,
+        )
     )
 
 
@@ -31,9 +34,11 @@ def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     with pytest.raises(TypeError) as excinfo:
-        # noinspection PyArgumentList
-        _: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder(
-            data_context=data_context,
+        # noinspection PyUnusedLocal,PyArgumentList
+        parameter_builder: ValueSetMultiBatchParameterBuilder = (
+            ValueSetMultiBatchParameterBuilder(
+                data_context=data_context,
+            )
         )
     assert "__init__() missing 1 required positional argument: 'name'" in str(
         excinfo.value
@@ -58,7 +63,6 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
             name="my_event_type_value_set",
             metric_domain_kwargs=metric_domain_kwargs,
             data_context=data_context,
-            batch_request=batch_request,
         )
     )
 
@@ -78,6 +82,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     assert (
@@ -136,7 +141,6 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
             name="my_user_agent_value_set",
             metric_domain_kwargs=metric_domain_kwargs,
             data_context=data_context,
-            batch_request=batch_request,
         )
     )
 
@@ -156,6 +160,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     assert (
@@ -213,7 +218,6 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
             name="my_passenger_count_value_set",
             metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
             data_context=data_context,
-            batch_request=batch_request,
         )
     )
 
@@ -234,6 +238,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     assert (
@@ -291,7 +296,6 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
             name="my_store_and_fwd_flag_value_set",
             metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
             data_context=data_context,
-            batch_request=batch_request,
         )
     )
 
@@ -312,6 +316,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     assert (

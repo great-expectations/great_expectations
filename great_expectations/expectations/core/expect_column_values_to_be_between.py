@@ -108,7 +108,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "profiler_config",
     )
 
-    min_estimato_parameter_builder_config: ParameterBuilderConfig = (
+    min_estimator_parameter_builder_config: ParameterBuilderConfig = (
         ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="MetricMultiBatchParameterBuilder",
@@ -123,7 +123,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             json_serialize=True,
         )
     )
-    max_estimato_parameter_builder_config: ParameterBuilderConfig = (
+    max_estimator_parameter_builder_config: ParameterBuilderConfig = (
         ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="MetricMultiBatchParameterBuilder",
@@ -138,22 +138,21 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             json_serialize=True,
         )
     )
-    validation_parameter_builder_configs: List[dict] = [
-        min_estimato_parameter_builder_config,
-        max_estimato_parameter_builder_config,
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        min_estimator_parameter_builder_config,
+        max_estimator_parameter_builder_config,
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
-        class_name="RuleBasedProfilerConfig",
-        module_name="great_expectations.rule_based_profiler",
-        variables={
-            "mostly": 1.0,
-            "strict_min": False,
-            "strict_max": False,
-        },
+        variables={},
         rules={
             "default_expect_column_values_to_be_between_rule": {
+                "variables": {
+                    "mostly": 1.0,
+                    "strict_min": False,
+                    "strict_max": False,
+                },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
@@ -165,15 +164,15 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": f"{PARAMETER_KEY}{min_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[-1]",
-                        "max_value": f"{PARAMETER_KEY}{max_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[-1]",
+                        "min_value": f"{PARAMETER_KEY}{min_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[-1]",
+                        "max_value": f"{PARAMETER_KEY}{max_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[-1]",
                         "mostly": f"{VARIABLES_KEY}mostly",
                         "strict_min": f"{VARIABLES_KEY}strict_min",
                         "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
                             "profiler_details": {
-                                "min_estimator": f"{PARAMETER_KEY}{min_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
-                                "max_estimator": f"{PARAMETER_KEY}{max_estimato_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                                "min_estimator": f"{PARAMETER_KEY}{min_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                                "max_estimator": f"{PARAMETER_KEY}{max_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                             },
                         },
                     },
@@ -304,7 +303,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             mostly_str = ""
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -374,7 +373,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             mostly_str = ""
-            if params["mostly"] is not None:
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )

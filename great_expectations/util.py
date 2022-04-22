@@ -28,6 +28,7 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
+import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
@@ -175,26 +176,49 @@ def profile(func: Callable = None) -> Callable:
 
 
 def measure_execution_time(
-    pretty_print: bool = False,
+    execution_time_holder_object_reference_name: str = "execution_time_holder",
+    execution_time_property_name: str = "execution_time",
+    pretty_print: bool = True,
 ) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
-        func.execution_duration_milliseconds = 0
-
         @wraps(func)
         def compute_delta_t(*args, **kwargs) -> Any:
-            time_begin: int = int(round(time.time() * 1000))
+            """
+            Computes return value of decorated function, calls back "execution_time_holder_object_reference_name", and
+            saves execution time (in seconds) into specified "execution_time_property_name" of passed object reference.
+            Settable "{execution_time_holder_object_reference_name}.{execution_time_property_name}" property must exist.
+
+            Args:
+                args: Positional arguments of original function being decorated.
+                kwargs: Keyword arguments of original function being decorated.
+
+            Returns:
+                Any (output value of original function being decorated).
+            """
+            time_begin: float = time.perf_counter()
             try:
                 return func(*args, **kwargs)
             finally:
-                time_end: int = int(round(time.time() * 1000))
-                delta_t: int = time_end - time_begin
-                func.execution_duration_milliseconds = delta_t
+                time_end: float = time.perf_counter()
+                delta_t: float = time_end - time_begin
+                if kwargs is None:
+                    kwargs = {}
+
+                execution_time_holder: type = kwargs.get(
+                    execution_time_holder_object_reference_name
+                )
+                if execution_time_holder is not None and hasattr(
+                    execution_time_holder, execution_time_property_name
+                ):
+                    setattr(
+                        execution_time_holder, execution_time_property_name, delta_t
+                    )
 
                 if pretty_print:
                     bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
                     call_args: OrderedDict = bound_args.arguments
                     print(
-                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
+                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} seconds."
                     )
 
         return compute_delta_t
@@ -1423,3 +1447,18 @@ def get_pyathena_potential_type(type_module, type_):
         potential_type = type_module._TYPE_MAPPINGS.get(type_)
 
     return potential_type
+
+
+def pandas_series_between_inclusive(
+    series: pd.Series, min_value: int, max_value: int
+) -> pd.Series:
+    """
+    As of Pandas 1.3.0, the 'inclusive' arg in between() is an enum: {"left", "right", "neither", "both"}
+    """
+    metric_series: pd.Series
+    if version.parse(pd.__version__) >= version.parse("1.3.0"):
+        metric_series = series.between(min_value, max_value, inclusive="both")
+    else:
+        metric_series = series.between(min_value, max_value, inclusive=True)
+
+    return metric_series

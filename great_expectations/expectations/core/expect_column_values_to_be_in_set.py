@@ -142,19 +142,18 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             json_serialize=True,
         )
     )
-    validation_parameter_builder_configs: List[dict] = [
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         value_set_estimator_parameter_builder_config,
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_in_set",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
-        class_name="RuleBasedProfilerConfig",
-        module_name="great_expectations.rule_based_profiler",
-        variables={
-            "mostly": 1.0,
-        },
+        variables={},
         rules={
             "default_expect_column_values_to_be_in_set_rule": {
+                "variables": {
+                    "mostly": 1.0,
+                },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
@@ -247,7 +246,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         template_str = f"values must belong to this set: {values_string}"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -321,7 +320,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         template_str = f"values must belong to this set: {values_string}"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )

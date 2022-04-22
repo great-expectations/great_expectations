@@ -4,7 +4,6 @@ import logging
 import os
 import random
 import shutil
-import sys
 import warnings
 from typing import Dict, List, Optional
 
@@ -25,12 +24,14 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
     GeCloudConfig,
+    InMemoryStoreBackendDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -51,9 +52,7 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
-    DEFAULT_CANDIDATE_STRINGS,
-)
+from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -2087,6 +2086,16 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -2109,6 +2118,16 @@ def data_context_with_datasource_spark_engine(empty_data_context, spark_session)
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -2132,6 +2151,16 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
             class_name: RuntimeDataConnector
             batch_identifiers:
                 - default_identifier_name
+            assets:
+                asset_a:
+                    batch_identifiers:
+                        - day
+                        - month
+                asset_b:
+                    batch_identifiers:
+                        - day
+                        - month
+                        - year
         """,
     )
     context.add_datasource(
@@ -2341,13 +2370,13 @@ def profiler_config_with_placeholder_args(
     """
     return RuleBasedProfilerConfig(
         name=profiler_name,
-        class_name="RuleBasedProfiler",
         config_version=1.0,
         variables={
             "false_positive_threshold": 1.0e-2,
         },
         rules={
             "rule_1": {
+                "variables": {},
                 "domain_builder": {
                     "class_name": "TableDomainBuilder",
                 },
@@ -2410,6 +2439,9 @@ def populated_profiler_store(
         profiler_config_with_placeholder_args
     )
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(serialized_config)
+
+    deserialized_config.pop("module_name")
+    deserialized_config.pop("class_name")
 
     profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         **deserialized_config
@@ -2700,23 +2732,368 @@ def alice_columnar_table_single_batch(empty_data_context):
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
+    expected_effective_profiler_config: dict = {
+        "name": "alice user workflow",
+        "config_version": 1.0,
+        "variables": {
+            "integer_type": "INTEGER",
+            "timestamp_type": "TIMESTAMP",
+            "very_small_user_id": 1000,
+            "very_large_user_id": 999999999999,
+            "min_timestamp": datetime.datetime(2004, 10, 19, 10, 23, 54),
+        },
+        "rules": {
+            "my_rule_for_user_ids": {
+                "variables": {},
+                "domain_builder": {
+                    "column_name_suffixes": ["_id"],
+                    "class_name": "MyCustomSemanticTypeColumnDomainBuilder",
+                    "module_name": "tests.test_fixtures.rule_based_profiler.plugins.my_custom_semantic_type_column_domain_builder",
+                    "semantic_types": ["user_id"],
+                },
+                "parameter_builders": [
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_min_user_id",
+                        "metric_name": "column.min",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": False,
+                        "replace_nan_with_zero": False,
+                        "reduce_scalar_metric": True,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    },
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_max_user_id",
+                        "metric_name": "column.max",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": False,
+                        "replace_nan_with_zero": False,
+                        "reduce_scalar_metric": True,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_of_type",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                        "type_": "$variables.integer_type",
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_between",
+                        "max_value": "$variables.very_large_user_id",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "min_value": "$variables.very_small_user_id",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_not_be_null",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_less_than",
+                        "condition": "$parameter.my_max_user_id.value[-1] < $variables.very_large_user_id",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "value": "$parameter.my_max_user_id.value[-1]",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_greater_than",
+                        "condition": "$parameter.my_min_user_id.value[-1] > 0 & $parameter.my_min_user_id.value[-1] > $variables.very_small_user_id",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "value": "$parameter.my_min_user_id.value[-1]",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                ],
+            },
+            "my_rule_for_timestamps": {
+                "variables": {},
+                "domain_builder": {
+                    "exclude_column_names": None,
+                    "semantic_type_filter_class_name": None,
+                    "exclude_semantic_types": None,
+                    "class_name": "ColumnDomainBuilder",
+                    "include_column_name_suffixes": ["_ts"],
+                    "include_semantic_types": None,
+                    "exclude_column_name_suffixes": None,
+                    "include_column_names": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                    "semantic_type_filter_module_name": None,
+                },
+                "parameter_builders": [
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_max_ts",
+                        "metric_name": "column.max",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": False,
+                        "replace_nan_with_zero": False,
+                        "reduce_scalar_metric": True,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    },
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_max_event_ts",
+                        "metric_name": "column.max",
+                        "metric_domain_kwargs": {"column": "event_ts"},
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": False,
+                        "replace_nan_with_zero": False,
+                        "reduce_scalar_metric": True,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    },
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_min_ts",
+                        "metric_name": "column.min",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": False,
+                        "reduce_scalar_metric": True,
+                        "replace_nan_with_zero": False,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    },
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder",
+                        "class_name": "SimpleDateFormatStringParameterBuilder",
+                        "name": "my_date_format",
+                        "metric_domain_kwargs": {"column": "event_ts"},
+                        "metric_value_kwargs": None,
+                        "candidate_strings": [
+                            "%H:%M:%S",
+                            "%H:%M:%S,%f",
+                            "%H:%M:%S.%f",
+                            "%Y %b %d %H:%M:%S.%f %Z",
+                            "%Y %b %d %H:%M:%S.%f",
+                            "%Y %b %d %H:%M:%S.%f*%Z",
+                            "%Y%m%d %H:%M:%S.%f",
+                            "%Y-%m-%d %H:%M:%S %z",
+                            "%Y-%m-%d %H:%M:%S",
+                            "%Y-%m-%d %H:%M:%S%z",
+                            "%Y-%m-%d %H:%M:%S,%f",
+                            "%Y-%m-%d %H:%M:%S,%f%z",
+                            "%Y-%m-%d %H:%M:%S.%f",
+                            "%Y-%m-%d %H:%M:%S.%f%z",
+                            "%Y-%m-%d",
+                            "%Y-%m-%d'T'%H:%M:%S",
+                            "%Y-%m-%d'T'%H:%M:%S%z",
+                            "%Y-%m-%d'T'%H:%M:%S'%z'",
+                            "%Y-%m-%d'T'%H:%M:%S.%f",
+                            "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
+                            "%Y-%m-%d*%H:%M:%S",
+                            "%Y-%m-%d*%H:%M:%S:%f",
+                            "%Y-%m-%dT%z",
+                            "%Y/%m/%d",
+                            "%Y/%m/%d*%H:%M:%S",
+                            "%b %d %H:%M:%S %Y",
+                            "%b %d %H:%M:%S %z %Y",
+                            "%b %d %H:%M:%S %z",
+                            "%b %d %H:%M:%S",
+                            "%b %d %Y %H:%M:%S",
+                            "%b %d, %Y %H:%M:%S %p",
+                            "%d %b %Y %H:%M:%S",
+                            "%d %b %Y %H:%M:%S*%f",
+                            "%d-%b-%Y %H:%M:%S",
+                            "%d-%b-%Y %H:%M:%S.%f",
+                            "%d-%m-%Y",
+                            "%d/%b %H:%M:%S,%f",
+                            "%d/%b/%Y %H:%M:%S",
+                            "%d/%b/%Y:%H:%M:%S %z",
+                            "%d/%b/%Y:%H:%M:%S",
+                            "%d/%m/%Y",
+                            "%m%d_%H:%M:%S",
+                            "%m%d_%H:%M:%S.%f",
+                            "%m-%d-%Y",
+                            "%m/%d/%Y %H:%M:%S %p",
+                            "%m/%d/%Y %H:%M:%S %p:%f",
+                            "%m/%d/%Y %H:%M:%S %z",
+                            "%m/%d/%Y",
+                            "%m/%d/%Y*%H:%M:%S",
+                            "%m/%d/%Y*%H:%M:%S*%f",
+                            "%m/%d/%y %H:%M:%S %z",
+                            "%m/%d/%y*%H:%M:%S",
+                            "%y%m%d %H:%M:%S",
+                            "%y-%m-%d %H:%M:%S",
+                            "%y-%m-%d %H:%M:%S,%f %z",
+                            "%y-%m-%d %H:%M:%S,%f",
+                            "%y-%m-%d",
+                            "%y/%m/%d %H:%M:%S",
+                            "%y/%m/%d",
+                        ],
+                        "threshold": 1.0,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_of_type",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                        "type_": "$variables.timestamp_type",
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_increasing",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
+                                ],
+                            }
+                        },
+                        "expectation_type": "expect_column_min_to_be_between",
+                        "max_value": "$variables.min_timestamp",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "min_value": "$variables.min_timestamp",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+                                ],
+                            }
+                        },
+                        "expectation_type": "expect_column_max_to_be_between",
+                        "max_value": "$parameter.my_max_event_ts.value[-1]",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "min_value": "$variables.min_timestamp",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                                ],
+                            }
+                        },
+                        "expectation_type": "expect_column_values_to_match_strftime_format",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "strftime_format": "$parameter.my_date_format",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    },
+                ],
+            },
+            "my_rule_for_one_cardinality": {
+                "variables": {},
+                "domain_builder": {
+                    "exclude_column_names": ["id"],
+                    "semantic_type_filter_class_name": None,
+                    "max_proportion_unique": None,
+                    "exclude_semantic_types": ["binary", "currency", "identifier"],
+                    "max_unique_values": None,
+                    "allowed_semantic_types_passthrough": ["logic"],
+                    "class_name": "CategoricalColumnDomainBuilder",
+                    "include_column_name_suffixes": None,
+                    "include_semantic_types": None,
+                    "exclude_column_name_suffixes": None,
+                    "include_column_names": None,
+                    "limit_mode": "ONE",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
+                    "semantic_type_filter_module_name": None,
+                },
+                "parameter_builders": [
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder",
+                        "class_name": "ValueSetMultiBatchParameterBuilder",
+                        "name": "my_user_agent_value_set",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "condition": None,
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "value_set": "$parameter.my_user_agent_value_set.value",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                        "validation_parameter_builder_configs": None,
+                    }
+                ],
+            },
+        },
+    }
+
     # NOTE that this expectation suite should fail when validated on the data in "sample_data_relative_path"
     # because the device_ts is ahead of the event_ts for the latest event
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
 
-    profiler_config: dict = yaml.load(verbose_profiler_config)
-
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
-    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
-
-    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    serialized_config.pop("class_name")
-    serialized_config.pop("module_name")
     expected_expectation_suite.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
-        profiler_config=serialized_config,
+        profiler_config=expected_effective_profiler_config,
     )
 
     return {
@@ -2855,7 +3232,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     ] = [
         ExpectationConfiguration(
             **{
-                "kwargs": {"min_value": 7505, "max_value": 8495},
+                "kwargs": {"min_value": 7510, "max_value": 8995},
                 "expectation_type": "expect_table_row_count_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -2865,7 +3242,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     },
                 },
             },
@@ -2877,6 +3254,12 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     ] = [
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 1,
+                    "min_value": 1,
+                    "column": "VendorID",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -2886,19 +3269,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "VendorID",
-                    "min_value": 1,
-                    "max_value": 1,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 4,
+                    "min_value": 4,
+                    "column": "VendorID",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -2908,41 +3291,41 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "VendorID",
-                    "min_value": 4,
-                    "max_value": 4,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_column_min_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.min",
-                            "domain_kwargs": {"column": "passenger_count"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 2,
-                    }
-                },
                 "kwargs": {
-                    "column": "passenger_count",
+                    "mostly": 1.0,
+                    "max_value": 1,
                     "min_value": 0,
-                    "max_value": 1,
-                    "mostly": 1.0,
+                    "column": "passenger_count",
                 },
-            },
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "passenger_count"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
+                        },
+                        "num_batches": 3,
+                    }
+                },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 6,
+                    "min_value": 6,
+                    "column": "passenger_count",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -2952,41 +3335,41 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "passenger_count",
-                    "min_value": 6,
-                    "max_value": 6,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_column_min_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.min",
-                            "domain_kwargs": {"column": "trip_distance"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 2,
-                    }
-                },
                 "kwargs": {
-                    "column": "trip_distance",
-                    "min_value": 0.0,
+                    "mostly": 1.0,
                     "max_value": 0.0,
-                    "mostly": 1.0,
+                    "min_value": 0.0,
+                    "column": "trip_distance",
                 },
-            },
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "trip_distance"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
+                        },
+                        "num_batches": 3,
+                    }
+                },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 57.8,
+                    "min_value": 37.57,
+                    "column": "trip_distance",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -2996,19 +3379,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "trip_distance",
-                    "min_value": 37.62,
-                    "max_value": 57.85,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 1,
+                    "min_value": 1,
+                    "column": "RatecodeID",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3018,41 +3401,41 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "RatecodeID",
-                    "min_value": 1,
-                    "max_value": 1,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_column_max_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.max",
-                            "domain_kwargs": {"column": "RatecodeID"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 2,
-                    }
-                },
                 "kwargs": {
-                    "column": "RatecodeID",
+                    "mostly": 1.0,
+                    "max_value": 6,
                     "min_value": 5,
-                    "max_value": 6,
-                    "mostly": 1.0,
+                    "column": "RatecodeID",
                 },
-            },
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "RatecodeID"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
+                        },
+                        "num_batches": 3,
+                    }
+                },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 1,
+                    "min_value": 1,
+                    "column": "PULocationID",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3062,19 +3445,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "PULocationID",
-                    "min_value": 1,
-                    "max_value": 1,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 265,
+                    "min_value": 265,
+                    "column": "PULocationID",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3084,19 +3467,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "PULocationID",
-                    "min_value": 265,
-                    "max_value": 265,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 1,
+                    "min_value": 1,
+                    "column": "DOLocationID",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3106,19 +3489,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "DOLocationID",
-                    "min_value": 1,
-                    "max_value": 1,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 265,
+                    "min_value": 265,
+                    "column": "DOLocationID",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3128,19 +3511,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "DOLocationID",
-                    "min_value": 265,
-                    "max_value": 265,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 1,
+                    "min_value": 1,
+                    "column": "payment_type",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3150,41 +3533,41 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "payment_type",
-                    "min_value": 1,
-                    "max_value": 1,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_column_max_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.max",
-                            "domain_kwargs": {"column": "payment_type"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 2,
-                    }
-                },
                 "kwargs": {
-                    "column": "payment_type",
-                    "min_value": 4,
+                    "mostly": 1.0,
                     "max_value": 4,
-                    "mostly": 1.0,
+                    "min_value": 4,
+                    "column": "payment_type",
                 },
-            },
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "payment_type"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
+                        },
+                        "num_batches": 3,
+                    }
+                },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": -21.02,
+                    "min_value": -51.7,
+                    "column": "fare_amount",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3194,19 +3577,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "fare_amount",
-                    "min_value": -51.84,
-                    "max_value": -21.16,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 2976.46,
+                    "min_value": 215.35,
+                    "column": "fare_amount",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3216,19 +3599,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "fare_amount",
-                    "min_value": 228.94,
-                    "max_value": 2990.05,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": -1.0,
+                    "min_value": -36.35,
+                    "column": "extra",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3238,19 +3621,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "extra",
-                    "min_value": -36.53,
-                    "max_value": -1.18,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 7.0,
+                    "min_value": 4.53,
+                    "column": "extra",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3260,41 +3643,41 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "extra",
-                    "min_value": 4.51,
-                    "max_value": 6.99,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_column_min_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.min",
-                            "domain_kwargs": {"column": "mta_tax"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 2,
-                    }
-                },
                 "kwargs": {
-                    "column": "mta_tax",
-                    "min_value": -0.5,
+                    "mostly": 1.0,
                     "max_value": -0.5,
-                    "mostly": 1.0,
+                    "min_value": -0.5,
+                    "column": "mta_tax",
                 },
-            },
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "mta_tax"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
+                        },
+                        "num_batches": 3,
+                    }
+                },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 37.14,
+                    "min_value": 0.5,
+                    "column": "mta_tax",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3304,19 +3687,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "mta_tax",
-                    "min_value": 0.69,
-                    "max_value": 37.32,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 0.0,
+                    "min_value": 0.0,
+                    "column": "tip_amount",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3326,19 +3709,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "tip_amount",
-                    "min_value": 0.0,
-                    "max_value": 0.0,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 74.72,
+                    "min_value": 38.93,
+                    "column": "tip_amount",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3348,19 +3731,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "tip_amount",
-                    "min_value": 46.84,
-                    "max_value": 74.86,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 0.0,
+                    "min_value": 0.0,
+                    "column": "tolls_amount",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3370,19 +3753,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "tolls_amount",
-                    "min_value": 0.0,
-                    "max_value": 0.0,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 495.58,
+                    "min_value": 24.31,
+                    "column": "tolls_amount",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3392,41 +3775,41 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "tolls_amount",
-                    "min_value": 26.4,
-                    "max_value": 497.67,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
-                "expectation_type": "expect_column_min_to_be_between",
-                "meta": {
-                    "profiler_details": {
-                        "metric_configuration": {
-                            "metric_name": "column.min",
-                            "domain_kwargs": {"column": "improvement_surcharge"},
-                            "metric_value_kwargs": None,
-                            "metric_dependencies": None,
-                        },
-                        "num_batches": 2,
-                    }
-                },
                 "kwargs": {
-                    "column": "improvement_surcharge",
-                    "min_value": -0.3,
+                    "mostly": 1.0,
                     "max_value": -0.3,
-                    "mostly": 1.0,
+                    "min_value": -0.3,
+                    "column": "improvement_surcharge",
                 },
-            },
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "improvement_surcharge"},
+                            "metric_value_kwargs": None,
+                            "metric_dependencies": None,
+                        },
+                        "num_batches": 3,
+                    }
+                },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 0.3,
+                    "min_value": 0.3,
+                    "column": "improvement_surcharge",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3436,19 +3819,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "improvement_surcharge",
-                    "min_value": 0.3,
-                    "max_value": 0.3,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": -24.32,
+                    "min_value": -52.54,
+                    "column": "total_amount",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3458,19 +3841,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "total_amount",
-                    "min_value": -52.66,
-                    "max_value": -24.44,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 2980.13,
+                    "min_value": 253.18,
+                    "column": "total_amount",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3480,19 +3863,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "total_amount",
-                    "min_value": 550.18,
-                    "max_value": 2992.47,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": -0.03,
+                    "min_value": -2.5,
+                    "column": "congestion_surcharge",
+                },
                 "expectation_type": "expect_column_min_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3502,19 +3885,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
-                "kwargs": {
-                    "column": "congestion_surcharge",
-                    "min_value": -2.49,
-                    "max_value": -0.01,
-                    "mostly": 1.0,
-                },
-            },
+            }
         ),
         ExpectationConfiguration(
             **{
+                "kwargs": {
+                    "mostly": 1.0,
+                    "max_value": 2.5,
+                    "min_value": 0.02,
+                    "column": "congestion_surcharge",
+                },
                 "expectation_type": "expect_column_max_to_be_between",
                 "meta": {
                     "profiler_details": {
@@ -3524,16 +3907,58 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                             "metric_value_kwargs": None,
                             "metric_dependencies": None,
                         },
-                        "num_batches": 2,
+                        "num_batches": 3,
                     }
                 },
+            }
+        ),
+        ExpectationConfiguration(
+            **{
                 "kwargs": {
-                    "column": "congestion_surcharge",
-                    "min_value": 0.01,
-                    "max_value": 2.49,
-                    "mostly": 1.0,
+                    "strftime_format": "%Y-%m-%d %H:%M:%S",
+                    "column": "pickup_datetime",
                 },
-            },
+                "expectation_type": "expect_column_values_to_match_strftime_format",
+                "meta": {
+                    "details": {
+                        "success_ratio": 1.0,
+                        "candidate_strings": {
+                            "%Y-%m-%d %H:%M:%S": 1.0,
+                            "%y-%m-%d": 0.0,
+                        },
+                    },
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                        ],
+                    },
+                },
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "kwargs": {
+                    "strftime_format": "%Y-%m-%d %H:%M:%S",
+                    "column": "dropoff_datetime",
+                },
+                "expectation_type": "expect_column_values_to_match_strftime_format",
+                "meta": {
+                    "details": {
+                        "success_ratio": 1.0,
+                        "candidate_strings": {
+                            "%Y-%m-%d %H:%M:%S": 1.0,
+                            "%y-%m-%d": 0.0,
+                        },
+                    },
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                        ],
+                    },
+                },
+            }
         ),
     ]
 
@@ -3589,6 +4014,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ),
     ]
+
     my_column_regex_rule_expectation_configurations_oneshot_estimator: List[
         ExpectationConfiguration
     ] = [
@@ -3616,7 +4042,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_regex",
-                "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "RatecodeID",
                     "regex": r"^\d{1}$",
@@ -3638,7 +4063,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_regex",
-                "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "PULocationID",
                     "regex": r"^\d{1}$",
@@ -3660,7 +4084,6 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_match_regex",
-                "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "DOLocationID",
                     "regex": r"^\d{1}$",
@@ -3705,6 +4128,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ),
     ]
+
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
@@ -3738,27 +4162,1190 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
-    profiler_config: dict = yaml.load(verbose_profiler_config)
-
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
-    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
-
-    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    serialized_config.pop("class_name")
-    serialized_config.pop("module_name")
+    expected_effective_profiler_config: dict = {
+        "name": "bobby user workflow",
+        "config_version": 1.0,
+        "variables": {
+            "estimator": "oneshot",
+            "false_positive_rate": 0.01,
+            "mostly": 1.0,
+        },
+        "rules": {
+            "row_count_range_rule": {
+                "variables": {},
+                "domain_builder": {
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+                    "class_name": "TableDomainBuilder",
+                },
+                "parameter_builders": [
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "name": "row_count_range",
+                        "metric_name": "table.row_count",
+                        "metric_domain_kwargs": None,
+                        "metric_value_kwargs": None,
+                        "replace_nan_with_zero": True,
+                        "enforce_numeric_metric": True,
+                        "reduce_scalar_metric": True,
+                        "estimator": "$variables.estimator",
+                        "num_bootstrap_samples": None,
+                        "bootstrap_random_seed": None,
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "truncate_values": {"lower_bound": 0},
+                        "round_decimals": 0,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "min_value": "$parameter.row_count_range.value[0]",
+                        "meta": {
+                            "profiler_details": "$parameter.row_count_range.details"
+                        },
+                        "condition": None,
+                        "expectation_type": "expect_table_row_count_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "max_value": "$parameter.row_count_range.value[1]",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    }
+                ],
+            },
+            "column_ranges_rule": {
+                "variables": {},
+                "domain_builder": {
+                    "exclude_column_names": None,
+                    "semantic_type_filter_module_name": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                    "include_column_names": None,
+                    "class_name": "ColumnDomainBuilder",
+                    "include_column_name_suffixes": None,
+                    "exclude_column_name_suffixes": None,
+                    "exclude_semantic_types": None,
+                    "semantic_type_filter_class_name": None,
+                    "include_semantic_types": ["numeric"],
+                },
+                "parameter_builders": [
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "name": "min_range",
+                        "metric_name": "column.min",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": True,
+                        "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "estimator": "$variables.estimator",
+                        "num_bootstrap_samples": None,
+                        "bootstrap_random_seed": None,
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "truncate_values": {"lower_bound": None, "upper_bound": None},
+                        "round_decimals": 2,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    },
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "name": "max_range",
+                        "metric_name": "column.max",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "enforce_numeric_metric": True,
+                        "replace_nan_with_zero": True,
+                        "reduce_scalar_metric": True,
+                        "estimator": "$variables.estimator",
+                        "num_bootstrap_samples": None,
+                        "bootstrap_random_seed": None,
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "truncate_values": {"lower_bound": None, "upper_bound": None},
+                        "round_decimals": 2,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "mostly": "$variables.mostly",
+                        "min_value": "$parameter.min_range.value[0]",
+                        "meta": {"profiler_details": "$parameter.min_range.details"},
+                        "condition": None,
+                        "expectation_type": "expect_column_min_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "max_value": "$parameter.min_range.value[1]",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    },
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "mostly": "$variables.mostly",
+                        "min_value": "$parameter.max_range.value[0]",
+                        "meta": {"profiler_details": "$parameter.max_range.details"},
+                        "condition": None,
+                        "expectation_type": "expect_column_max_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "max_value": "$parameter.max_range.value[1]",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    },
+                ],
+            },
+            "my_rule_for_timestamps": {
+                "variables": {},
+                "domain_builder": {
+                    "exclude_column_names": None,
+                    "semantic_type_filter_module_name": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                    "include_column_names": None,
+                    "class_name": "ColumnDomainBuilder",
+                    "include_column_name_suffixes": ["_datetime"],
+                    "exclude_column_name_suffixes": None,
+                    "exclude_semantic_types": None,
+                    "semantic_type_filter_class_name": None,
+                    "include_semantic_types": None,
+                },
+                "parameter_builders": [
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder",
+                        "class_name": "SimpleDateFormatStringParameterBuilder",
+                        "name": "my_date_format",
+                        "metric_domain_kwargs": {"column": "pickup_datetime"},
+                        "metric_value_kwargs": None,
+                        "candidate_strings": ["%y-%m-%d", "%Y-%m-%d %H:%M:%S"],
+                        "threshold": 0.9,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {
+                            "details": "$parameter.my_date_format.details",
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                                ],
+                            },
+                        },
+                        "condition": None,
+                        "strftime_format": "$parameter.my_date_format.value",
+                        "expectation_type": "expect_column_values_to_match_strftime_format",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    }
+                ],
+            },
+            "rule_for_regex": {
+                "variables": {},
+                "domain_builder": {
+                    "exclude_column_names": None,
+                    "semantic_type_filter_module_name": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
+                    "include_column_names": None,
+                    "class_name": "ColumnDomainBuilder",
+                    "include_column_name_suffixes": ["ID"],
+                    "exclude_column_name_suffixes": None,
+                    "exclude_semantic_types": None,
+                    "semantic_type_filter_class_name": None,
+                    "include_semantic_types": None,
+                },
+                "parameter_builders": [
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder",
+                        "class_name": "RegexPatternStringParameterBuilder",
+                        "name": "my_regex",
+                        "metric_domain_kwargs": {"column": "VendorID"},
+                        "metric_value_kwargs": None,
+                        "candidate_regexes": ["^\\d{1}$", "^\\d{2}$"],
+                        "threshold": 0.9,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {
+                            "details": "$parameter.my_regex.details",
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+                                ],
+                            },
+                        },
+                        "condition": None,
+                        "expectation_type": "expect_column_values_to_match_regex",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "regex": "$parameter.my_regex.value",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    }
+                ],
+            },
+            "my_rule_for_very_few_cardinality": {
+                "variables": {},
+                "domain_builder": {
+                    "exclude_column_names": "DOLocationID, RatecodeID, store_and_fwd_flag, payment_type, extra, mta_tax, improvement_surcharge, congestion_surcharge",
+                    "semantic_type_filter_module_name": None,
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",
+                    "include_column_names": None,
+                    "class_name": "CategoricalColumnDomainBuilder",
+                    "include_column_name_suffixes": None,
+                    "exclude_column_name_suffixes": None,
+                    "max_unique_values": None,
+                    "exclude_semantic_types": ["binary", "currency", "identifier"],
+                    "limit_mode": "VERY_FEW",
+                    "semantic_type_filter_class_name": None,
+                    "allowed_semantic_types_passthrough": ["logic"],
+                    "max_proportion_unique": None,
+                    "include_semantic_types": None,
+                },
+                "parameter_builders": [
+                    {
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder",
+                        "class_name": "ValueSetMultiBatchParameterBuilder",
+                        "name": "my_pickup_location_id_value_set",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": None,
+                        "evaluation_parameter_builder_configs": None,
+                        "json_serialize": True,
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "column": "$domain.domain_kwargs.column",
+                        "meta": {},
+                        "condition": None,
+                        "expectation_type": "expect_column_values_to_be_in_set",
+                        "value_set": "$parameter.my_pickup_location_id_value_set.value",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "validation_parameter_builder_configs": None,
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
+                    }
+                ],
+            },
+        },
+    }
 
     expected_expectation_suite_oneshot_estimator.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
-        profiler_config=serialized_config,
+        profiler_config=expected_effective_profiler_config,
     )
+
+    expected_fixture_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
+        Domain, List[str]
+    ] = {
+        Domain(domain_type="table",): [
+            "$variables",
+            "$parameter.row_count_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "VendorID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "passenger_count"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "trip_distance"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "RatecodeID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "PULocationID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "DOLocationID"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "payment_type"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "fare_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "extra"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "mta_tax"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "tip_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "tolls_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "improvement_surcharge"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "total_amount"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "congestion_surcharge"},
+            details={"inferred_semantic_domain_type": "numeric"},
+        ): [
+            "$variables",
+            "$parameter.min_range",
+            "$parameter.max_range",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "pickup_datetime"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_date_format",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "dropoff_datetime"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_date_format",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "VendorID"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_pickup_location_id_value_set",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "RatecodeID"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_regex",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "PULocationID"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_regex",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "DOLocationID"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_regex",
+        ],
+        Domain(
+            domain_type="column",
+            domain_kwargs={"column": "passenger_count"},
+            details=None,
+        ): [
+            "$variables",
+            "$parameter.my_pickup_location_id_value_set",
+        ],
+    }
+
+    expected_parameter_values_for_fully_qualified_parameter_names_by_domain_oneshot_estimator: Dict[
+        Domain, Dict[str, ParameterNode]
+    ] = {
+        Domain(**{"domain_type": "table"}): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.row_count_range": {
+                "value": [7510, 8995],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "table.row_count",
+                        "domain_kwargs": {},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "VendorID"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [1, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "VendorID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [4, 4],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "VendorID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "passenger_count"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [0, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "passenger_count"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [6, 6],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "passenger_count"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "trip_distance"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [0.0, 0.0],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "trip_distance"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [37.57, 57.8],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "trip_distance"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "RatecodeID"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [1, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "RatecodeID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [5, 6],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "RatecodeID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "PULocationID"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [1, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "PULocationID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [265, 265],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "PULocationID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "DOLocationID"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [1, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "DOLocationID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [265, 265],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "DOLocationID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "payment_type"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [1, 1],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "payment_type"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [4, 4],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "payment_type"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "fare_amount"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [-51.7, -21.02],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "fare_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [215.35, 2976.46],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "fare_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "extra"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [-36.35, -1.0],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "extra"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [4.53, 7.0],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "extra"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "mta_tax"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [-0.5, -0.5],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "mta_tax"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [0.5, 37.14],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "mta_tax"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "tip_amount"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [0.0, 0.0],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "tip_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [38.93, 74.72],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "tip_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "tolls_amount"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [0.0, 0.0],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "tolls_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [24.31, 495.58],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "tolls_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "improvement_surcharge"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [-0.3, -0.3],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "improvement_surcharge"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [0.3, 0.3],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "improvement_surcharge"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "total_amount"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [-52.54, -24.32],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "total_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [253.18, 2980.13],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "total_amount"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{
+                "domain_type": "column",
+                "domain_kwargs": {"column": "congestion_surcharge"},
+                "details": {"inferred_semantic_domain_type": "numeric"},
+            }
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.min_range": {
+                "value": [-2.5, -0.03],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.min",
+                        "domain_kwargs": {"column": "congestion_surcharge"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+            "$parameter.max_range": {
+                "value": [0.02, 2.5],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.max",
+                        "domain_kwargs": {"column": "congestion_surcharge"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{"domain_type": "column", "domain_kwargs": {"column": "pickup_datetime"}}
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_date_format": {
+                "value": "%Y-%m-%d %H:%M:%S",
+                "details": {
+                    "success_ratio": 1.0,
+                    "candidate_strings": {"%Y-%m-%d %H:%M:%S": 1.0, "%y-%m-%d": 0.0},
+                },
+            },
+        },
+        Domain(
+            **{"domain_type": "column", "domain_kwargs": {"column": "dropoff_datetime"}}
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_date_format": {
+                "value": "%Y-%m-%d %H:%M:%S",
+                "details": {
+                    "success_ratio": 1.0,
+                    "candidate_strings": {"%Y-%m-%d %H:%M:%S": 1.0, "%y-%m-%d": 0.0},
+                },
+            },
+        },
+        Domain(**{"domain_type": "column", "domain_kwargs": {"column": "VendorID"}}): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_pickup_location_id_value_set": {
+                "value": [1, 2, 4],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.distinct_values",
+                        "domain_kwargs": {"column": "VendorID"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+        Domain(
+            **{"domain_type": "column", "domain_kwargs": {"column": "RatecodeID"}}
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_regex": {
+                "value": "^\\d{1}$",
+                "details": {
+                    "success_ratio": 1.0,
+                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                },
+            },
+        },
+        Domain(
+            **{"domain_type": "column", "domain_kwargs": {"column": "PULocationID"}}
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_regex": {
+                "value": "^\\d{1}$",
+                "details": {
+                    "success_ratio": 1.0,
+                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                },
+            },
+        },
+        Domain(
+            **{"domain_type": "column", "domain_kwargs": {"column": "DOLocationID"}}
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_regex": {
+                "value": "^\\d{1}$",
+                "details": {
+                    "success_ratio": 1.0,
+                    "evaluated_regexes": {"^\\d{1}$": 1.0, "^\\d{2}$": 0.0},
+                },
+            },
+        },
+        Domain(
+            **{"domain_type": "column", "domain_kwargs": {"column": "passenger_count"}}
+        ): {
+            "$variables": {
+                "estimator": "oneshot",
+                "false_positive_rate": 0.01,
+                "mostly": 1.0,
+            },
+            "$parameter.my_pickup_location_id_value_set": {
+                "value": [0, 1, 2, 3, 4, 5, 6],
+                "details": {
+                    "metric_configuration": {
+                        "metric_name": "column.distinct_values",
+                        "domain_kwargs": {"column": "passenger_count"},
+                        "metric_value_kwargs": None,
+                        "metric_dependencies": None,
+                    },
+                    "num_batches": 3,
+                },
+            },
+        },
+    }
 
     return {
         "profiler_config": verbose_profiler_config,
         "test_configuration_oneshot_estimator": {
             "expectation_suite_name": expectation_suite_name_oneshot_estimator,
             "expected_expectation_suite": expected_expectation_suite_oneshot_estimator,
+            "expected_fixture_fully_qualified_parameter_names_by_domain": expected_fixture_fully_qualified_parameter_names_by_domain_oneshot_estimator,
+            "expected_parameter_values_for_fully_qualified_parameter_names_by_domain": expected_parameter_values_for_fully_qualified_parameter_names_by_domain_oneshot_estimator,
         },
     }
 
@@ -3882,7 +5469,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         verbose_profiler_config = f.read()
 
     expectation_suite_name_bootstrap_estimator: str = (
-        "bobby_columnar_table_multi_batch_bootstrap_estimator"
+        "bobster_columnar_table_multi_batch_bootstrap_estimator"
     )
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
@@ -3936,7 +5523,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     of a batch sampled from a normal distribution with the mean of 5,000 rows and the standard deviation of 1,000 rows.
     """
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
@@ -4040,21 +5627,61 @@ def quentin_columnar_table_multi_batch():
         "test_configuration": {
             "expectation_suite_name": expectation_suite_name_bootstrap_estimator,
             "expect_column_quantile_values_to_be_between_quantile_ranges_by_column": {
-                "tolls_amount": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
+                "tolls_amount": [
+                    [
+                        0.0,
+                        0.0,
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                    ],
+                    [
+                        0.0,
+                        0.0,
+                    ],
+                ],
                 "fare_amount": [
-                    [5.842754275, 6.5],
-                    [8.675167517, 9.5750000000],
-                    [13.344354435, 15.650000000],
+                    [
+                        5.84438943,
+                        6.5,
+                    ],
+                    [
+                        8.522670697,
+                        9.5625,
+                    ],
+                    [
+                        13.344772404,
+                        15.625,
+                    ],
                 ],
                 "tip_amount": [
-                    [0.0, 0.0],
-                    [0.81269502, 1.97259736],
-                    [2.346049055, 2.993680968],
+                    [
+                        0.0,
+                        0.0,
+                    ],
+                    [
+                        0.814718104,
+                        1.965,
+                    ],
+                    [
+                        2.34,
+                        2.993290568,
+                    ],
                 ],
                 "total_amount": [
-                    [8.2740033, 11.422183043],
-                    [11.2955000, 14.875000000],
-                    [16.746263451, 21.327684643],
+                    [
+                        8.274377804,
+                        11.421313259,
+                    ],
+                    [
+                        11.29625,
+                        14.8625,
+                    ],
+                    [
+                        16.758025632,
+                        21.327228225,
+                    ],
                 ],
             },
         },
@@ -4251,3 +5878,84 @@ data_connectors:
         }
     ]
     return context
+
+
+def build_in_memory_runtime_context():
+    data_context_config: DataContextConfig = DataContextConfig(
+        datasources={
+            "pandas_datasource": {
+                "execution_engine": {
+                    "class_name": "PandasExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "runtime_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
+                },
+            },
+            "spark_datasource": {
+                "execution_engine": {
+                    "class_name": "SparkDFExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "runtime_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
+                },
+            },
+        },
+        expectations_store_name="expectations_store",
+        validations_store_name="validations_store",
+        evaluation_parameter_store_name="evaluation_parameter_store",
+        checkpoint_store_name="checkpoint_store",
+        store_backend_defaults=InMemoryStoreBackendDefaults(),
+    )
+
+    context: BaseDataContext = BaseDataContext(project_config=data_context_config)
+
+    return context
+
+
+@pytest.fixture
+def in_memory_runtime_context():
+    return build_in_memory_runtime_context()
+
+
+@pytest.fixture
+def taxi_test_file():
+    return file_relative_path(
+        __file__,
+        os.path.join(
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "yellow_tripdata_sample_2019-01.csv",
+        ),
+    )
+
+
+@pytest.fixture
+def taxi_test_file_directory():
+    return file_relative_path(
+        __file__,
+        os.path.join("test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"),
+    )
+
+
+@pytest.fixture()
+def test_df_pandas():
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    return test_df

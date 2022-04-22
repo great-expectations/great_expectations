@@ -151,7 +151,16 @@ def test_profile_includes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    # BatchRequest yielding exactly one batch
+    alice_single_batch_data_batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    profiler.run(batch_request=alice_single_batch_data_batch_request)
+
+    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
@@ -199,7 +208,16 @@ def test_profile_excludes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run(
+    # BatchRequest yielding exactly one batch
+    alice_single_batch_data_batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    profiler.run(batch_request=alice_single_batch_data_batch_request)
+
+    expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],

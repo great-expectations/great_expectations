@@ -1,18 +1,14 @@
 import copy
 import itertools
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from dataclasses import asdict, dataclass, make_dataclass
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest,
-    BatchRequestBase,
-    RuntimeBatchRequest,
-)
+from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -45,7 +41,7 @@ MetricValue = Union[Any, List[Any], np.ndarray]
 MetricValues = Union[MetricValue, np.ndarray]
 MetricComputationDetails = Dict[str, Any]
 MetricComputationResult = make_dataclass(
-    "MetricComputationResult", ["metric_values", "details"]
+    "MetricComputationResult", ["attributed_resolved_metrics", "details"]
 )
 
 
@@ -58,18 +54,35 @@ class AttributedResolvedMetrics(SerializableDictDot):
     with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
     """
 
-    metric_values: MetricValues
-    metric_attributes: Attributes
+    @staticmethod
+    def get_metric_values_from_attributed_metric_values(
+        attributed_metric_values: Optional[Dict[str, MetricValue]] = None,
+    ) -> MetricValues:
+        return np.array(list(attributed_metric_values.values()))
 
-    def add_resolved_metric(self, value: Any) -> None:
-        if self.metric_values is None:
-            self.metric_values = []
+    metric_attributes: Optional[Attributes] = None
+    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
 
-        self.metric_values.append(value)
+    def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
+        if self.metric_values_by_batch_id is None:
+            self.metric_values_by_batch_id = {}
+
+        if not isinstance(self.metric_values_by_batch_id, OrderedDict):
+            self.metric_values_by_batch_id = OrderedDict(self.metric_values_by_batch_id)
+
+        self.metric_values_by_batch_id[batch_id] = value
 
     @property
     def id(self) -> str:
         return self.metric_attributes.to_id()
+
+    @property
+    def attributed_metric_values(self) -> Optional[Dict[str, MetricValue]]:
+        return self.metric_values_by_batch_id
+
+    @property
+    def metric_values(self) -> MetricValues:
+        return np.array(list(self.attributed_metric_values.values()))
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -107,10 +120,6 @@ class ParameterBuilder(Builder, ABC):
             List[ParameterBuilderConfig]
         ] = None,
         json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -124,17 +133,15 @@ class ParameterBuilder(Builder, ABC):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
         """
-        super().__init__(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            data_context=data_context,
-        )
+        super().__init__(data_context=data_context)
 
         self._name = name
+
+        self._evaluation_parameter_builder_configs = (
+            evaluation_parameter_builder_configs
+        )
 
         self._evaluation_parameter_builders = init_rule_parameter_builders(
             parameter_builder_configs=evaluation_parameter_builder_configs,
@@ -152,68 +159,77 @@ class ParameterBuilder(Builder, ABC):
         json_serialize: Optional[bool] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
+        recompute_existing_parameter_values: bool = False,
     ) -> None:
         """
         Args:
             domain: Domain object that is context for execution of this ParameterBuilder object.
             variables: attribute name/value pairs
-            parameters: Dictionary of ParameterContainer objects corresponding to all Domain context in memory.
+            parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
             parameter_computation_impl: Object containing desired ParameterBuilder implementation.
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
+            json_serialize: If absent, use property value (in standard way, supporting variables look-up).
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
+            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
         """
-        self.set_batch_list_or_batch_request(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            force_batch_data=force_batch_data,
-        )
-
-        resolve_evaluation_dependencies(
-            parameter_builder=self,
+        fully_qualified_parameter_names: List[
+            str
+        ] = get_fully_qualified_parameter_names(
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-
-        if parameter_computation_impl is None:
-            parameter_computation_impl = self._build_parameters
-
-        computed_parameter_value: Any
-        parameter_computation_details: dict
-        (
-            computed_parameter_value,
-            parameter_computation_details,
-        ) = parameter_computation_impl(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        if json_serialize is None:
-            # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-            json_serialize = get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.json_serialize,
-                expected_return_type=bool,
-                variables=variables,
-                parameters=parameters,
+        if (
+            recompute_existing_parameter_values
+            or self.fully_qualified_parameter_name
+            not in fully_qualified_parameter_names
+        ):
+            self.set_batch_list_or_batch_request(
+                batch_list=batch_list,
+                batch_request=batch_request,
             )
 
-        parameter_values: Dict[str, Any] = {
-            self.fully_qualified_parameter_name: {
-                "value": convert_to_json_serializable(data=computed_parameter_value)
-                if json_serialize
-                else computed_parameter_value,
-                "details": parameter_computation_details,
-            },
-        }
+            resolve_evaluation_dependencies(
+                parameter_builder=self,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+                fully_qualified_parameter_names=fully_qualified_parameter_names,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
+            )
 
-        build_parameter_container(
-            parameter_container=parameters[domain.id], parameter_values=parameter_values
-        )
+            if parameter_computation_impl is None:
+                parameter_computation_impl = self._build_parameters
+
+            parameter_computation_result: Attributes = parameter_computation_impl(
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
+            )
+
+            if json_serialize is None:
+                # Obtain json_serialize directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+                json_serialize = get_parameter_value_and_validate_return_type(
+                    domain=domain,
+                    parameter_reference=self.json_serialize,
+                    expected_return_type=bool,
+                    variables=variables,
+                    parameters=parameters,
+                )
+
+            parameter_values: Dict[str, Any] = {
+                self.fully_qualified_parameter_name: convert_to_json_serializable(
+                    data=parameter_computation_result
+                )
+                if json_serialize
+                else parameter_computation_result,
+            }
+
+            build_parameter_container(
+                parameter_container=parameters[domain.id],
+                parameter_values=parameter_values,
+            )
 
     @property
     @abstractmethod
@@ -231,6 +247,12 @@ class ParameterBuilder(Builder, ABC):
         return self._evaluation_parameter_builders
 
     @property
+    def evaluation_parameter_builder_configs(
+        self,
+    ) -> Optional[List[ParameterBuilderConfig]]:
+        return self._evaluation_parameter_builder_configs
+
+    @property
     def json_serialize(self) -> Union[str, bool]:
         return self._json_serialize
 
@@ -240,12 +262,13 @@ class ParameterBuilder(Builder, ABC):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+        recompute_existing_parameter_values: bool = False,
+    ) -> Attributes:
         """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-        details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         pass
 
@@ -344,6 +367,7 @@ class ParameterBuilder(Builder, ABC):
         )
 
         batch_id: str
+
         metric_domain_kwargs = [
             copy.deepcopy(
                 build_metric_domain_kwargs(
@@ -375,7 +399,7 @@ class ParameterBuilder(Builder, ABC):
             for value_kwargs_cursor in metric_value_kwargs
         ]
 
-        # Step-3: Generate "MetricConfiguration" directives for all "metric_domain_kwargs" / "metric_value_kwargs" pairs.
+        # Step-3: Generate "MetricConfiguration" directives for all "metric_domain_kwargs"/"metric_value_kwargs" pairs.
 
         domain_kwargs_cursor: dict
         kwargs_combinations: List[List[dict]] = [
@@ -384,8 +408,10 @@ class ParameterBuilder(Builder, ABC):
             for domain_kwargs_cursor in metric_domain_kwargs
         ]
 
+        metrics_to_resolve: List[MetricConfiguration]
+
         kwargs_pair_cursor: List[dict, dict]
-        metrics_to_resolve: List[MetricConfiguration] = [
+        metrics_to_resolve = [
             MetricConfiguration(
                 metric_name=metric_name,
                 metric_domain_kwargs=kwargs_pair_cursor[0],
@@ -395,7 +421,18 @@ class ParameterBuilder(Builder, ABC):
             for kwargs_pair_cursor in kwargs_combinations
         ]
 
-        # Step-4: Resolve all metrics in one operation simultaneously.
+        # Step-4: Sort "MetricConfiguration" directives by "metric_value_kwargs_id" and "batch_id" (in that order).
+        # This precise sort order enables pairing every metric value with its respective "batch_id" (e.g., for display).
+
+        metrics_to_resolve = sorted(
+            metrics_to_resolve,
+            key=lambda metric_configuration_element: (
+                metric_configuration_element.metric_value_kwargs_id,
+                metric_configuration_element.metric_domain_kwargs["batch_id"],
+            ),
+        )
+
+        # Step-5: Resolve all metrics in one operation simultaneously.
 
         # The Validator object used for metric calculation purposes.
         validator: "Validator" = self.get_validator(  # noqa: F821
@@ -408,70 +445,74 @@ class ParameterBuilder(Builder, ABC):
             metric_configurations=metrics_to_resolve
         )
 
-        # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
+        # Step-6: Sort resolved metrics according to same sort order as was applied to "MetricConfiguration" directives.
+
+        resolved_metrics_sorted: Dict[Tuple[str, str, str], Any] = {}
 
         metric_configuration: MetricConfiguration
-        attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
+
+        resolved_metric_value: Any
+
         for metric_configuration in metrics_to_resolve:
-            attributed_resolved_metrics: AttributedResolvedMetrics = (
-                attributed_resolved_metrics_map.get(
-                    metric_configuration.metric_value_kwargs_id
+            if metric_configuration.id not in resolved_metrics:
+                raise ge_exceptions.ProfilerExecutionError(
+                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
                 )
+
+            resolved_metrics_sorted[metric_configuration.id] = resolved_metrics[
+                metric_configuration.id
+            ]
+
+        # Step-7: Map resolved metrics to their attributes for identification and recovery by receiver.
+
+        attributed_resolved_metrics_map: Dict[str, AttributedResolvedMetrics] = {}
+
+        attributed_resolved_metrics: AttributedResolvedMetrics
+
+        for metric_configuration in metrics_to_resolve:
+            attributed_resolved_metrics = attributed_resolved_metrics_map.get(
+                metric_configuration.metric_value_kwargs_id
             )
             if attributed_resolved_metrics is None:
                 attributed_resolved_metrics = AttributedResolvedMetrics(
                     metric_attributes=metric_configuration.metric_value_kwargs,
-                    metric_values=[],
+                    metric_values_by_batch_id=None,
                 )
                 attributed_resolved_metrics_map[
                     metric_configuration.metric_value_kwargs_id
                 ] = attributed_resolved_metrics
 
-            resolved_metric_value: Union[
-                Tuple[str, str, str], None
-            ] = resolved_metrics.get(metric_configuration.id)
-            if resolved_metric_value is None:
-                raise ge_exceptions.ProfilerExecutionError(
-                    f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
-                )
+            resolved_metric_value = resolved_metrics_sorted[metric_configuration.id]
+            attributed_resolved_metrics.add_resolved_metric(
+                batch_id=metric_configuration.metric_domain_kwargs["batch_id"],
+                value=resolved_metric_value,
+            )
 
-            attributed_resolved_metrics.add_resolved_metric(value=resolved_metric_value)
+        # Step-8: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
 
         metric_attributes_id: str
-        metric_values: AttributedResolvedMetrics
-
-        # Step-6: Leverage Numpy Array capabilities for subsequent operations on results of computed/resolved metrics.
-
-        attributed_resolved_metrics_map = {
-            metric_attributes_id: AttributedResolvedMetrics(
-                metric_attributes=metric_values.metric_attributes,
-                metric_values=np.array(metric_values.metric_values),
-            )
-            for metric_attributes_id, metric_values in attributed_resolved_metrics_map.items()
-        }
-
-        # Step-7: Convert scalar metric values to vectors to enable uniformity of processing in subsequent operations.
-
-        idx: int
         for (
             metric_attributes_id,
-            metric_values,
+            attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
-            if metric_values.metric_values.ndim == 1:
-                metric_values.metric_values = [
-                    [metric_values.metric_values[idx]] for idx in range(len(batch_ids))
-                ]
-                metric_values.metric_values = np.array(metric_values.metric_values)
-                attributed_resolved_metrics_map[metric_attributes_id] = metric_values
+            if attributed_resolved_metrics.metric_values.ndim == 1:
+                attributed_resolved_metrics.metric_values_by_batch_id = {
+                    batch_id: [resolved_metric_value]
+                    for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
+                }
+                attributed_resolved_metrics_map[
+                    metric_attributes_id
+                ] = attributed_resolved_metrics
 
-        # Step-8: Apply numeric/hygiene directives (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+        # Step-9: Apply numeric/hygiene flags (e.g., "enforce_numeric_metric", "replace_nan_with_zero") to results.
+
         for (
             metric_attributes_id,
-            metric_values,
+            attributed_resolved_metrics,
         ) in attributed_resolved_metrics_map.items():
             self._sanitize_metric_computation(
                 metric_name=metric_name,
-                metric_values=metric_values.metric_values,
+                attributed_resolved_metrics=attributed_resolved_metrics,
                 enforce_numeric_metric=enforce_numeric_metric,
                 replace_nan_with_zero=replace_nan_with_zero,
                 domain=domain,
@@ -479,9 +520,10 @@ class ParameterBuilder(Builder, ABC):
                 parameters=parameters,
             )
 
-        # Step-9: Compose and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
+        # Step-10: Build and return result to receiver (apply simplifications to cases of single "metric_value_kwargs").
+
         return MetricComputationResult(
-            list(attributed_resolved_metrics_map.values()),
+            attributed_resolved_metrics=list(attributed_resolved_metrics_map.values()),
             details={
                 "metric_configuration": {
                     "metric_name": metric_name,
@@ -498,13 +540,13 @@ class ParameterBuilder(Builder, ABC):
     def _sanitize_metric_computation(
         self,
         metric_name: str,
-        metric_values: np.ndarray,
+        attributed_resolved_metrics: AttributedResolvedMetrics,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> np.ndarray:
+    ) -> AttributedResolvedMetrics:
         """
         This method conditions (or "sanitizes") data samples in the format "N x R^m", where "N" (most significant
         dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the multi-dimensional
@@ -531,6 +573,8 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
+        metric_values: MetricValues = attributed_resolved_metrics.metric_values
+
         # Outer-most dimension is data samples (e.g., one per Batch); the rest are dimensions of the actual metric.
         metric_value_shape: tuple = metric_values.shape[1:]
 
@@ -552,9 +596,11 @@ class ParameterBuilder(Builder, ABC):
 
         # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         metric_value_vector: np.ndarray
+        batch_id: str
+        resolved_metric_value: Any
         for metric_value_idx in metric_value_vector_indices:
             # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
-            metric_value_vector = metric_values[metric_value_idx]
+            metric_value_vector = cast(np.ndarray, metric_values)[metric_value_idx]
             if enforce_numeric_metric:
                 if not np.issubdtype(metric_value_vector.dtype, np.number):
                     raise ge_exceptions.ProfilerExecutionError(
@@ -570,9 +616,14 @@ class ParameterBuilder(Builder, ABC):
 """
                         )
 
-                    np.nan_to_num(metric_value_vector, copy=False, nan=0.0)
+                    attributed_resolved_metrics.metric_values_by_batch_id = {
+                        batch_id: np.nan_to_num(
+                            metric_value_vector, copy=False, nan=0.0
+                        )
+                        for batch_id, resolved_metric_value in attributed_resolved_metrics.attributed_metric_values.items()
+                    }
 
-        return metric_values
+        return attributed_resolved_metrics
 
     @staticmethod
     def _get_best_candidate_above_threshold(
@@ -652,6 +703,8 @@ def resolve_evaluation_dependencies(
     domain: Domain,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
+    fully_qualified_parameter_names: Optional[List[str]] = None,
+    recompute_existing_parameter_values: bool = False,
 ) -> None:
     """
     This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
@@ -668,11 +721,12 @@ def resolve_evaluation_dependencies(
     # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"
     # (fully-qualified parameter names are stored in "ParameterNode" objects of "ParameterContainer" of "Domain"
     # whenever "ParameterBuilder.build_parameters()" is executed for "ParameterBuilder.fully_qualified_parameter_name").
-    fully_qualified_parameter_names: List[str] = get_fully_qualified_parameter_names(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
-    )
+    if fully_qualified_parameter_names is None:
+        fully_qualified_parameter_names = get_fully_qualified_parameter_names(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
 
     # Step-3: Check for presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating
     # over evaluation dependencies.  "Execute ParameterBuilder.build_parameters()" if absent from "Domain" scoped list.
@@ -689,13 +743,13 @@ def resolve_evaluation_dependencies(
             evaluation_parameter_builder.set_batch_list_or_batch_request(
                 batch_list=parameter_builder.batch_list,
                 batch_request=parameter_builder.batch_request,
-                force_batch_data=False,
             )
 
             evaluation_parameter_builder.build_parameters(
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
             )
 
             # Step-4: Any "ParameterBuilder" object, including members of "evaluation_parameter_builders" list may be
@@ -705,4 +759,5 @@ def resolve_evaluation_dependencies(
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
+                recompute_existing_parameter_values=recompute_existing_parameter_values,
             )

@@ -3,24 +3,44 @@ import enum
 from dataclasses import dataclass
 from typing import Optional, Tuple, Union
 
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import ProfilerConfigurationError
+from great_expectations.types import SerializableDictDot
 
 
-@dataclass
-class CardinalityLimit(abc.ABC):
+@dataclass(frozen=True)
+class CardinalityLimit(abc.ABC, SerializableDictDot):
     name: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class RelativeCardinalityLimit(CardinalityLimit):
     max_proportion_unique: float
     metric_name_defining_limit: str = "column.unique_proportion"
 
+    def to_json_dict(self) -> dict:
+        return convert_to_json_serializable(
+            {
+                "name": self.name,
+                "max_proportion_unique": self.max_proportion_unique,
+                "metric_name_defining_limit": self.metric_name_defining_limit,
+            }
+        )
 
-@dataclass
+
+@dataclass(frozen=True)
 class AbsoluteCardinalityLimit(CardinalityLimit):
     max_unique_values: int
     metric_name_defining_limit: str = "column.distinct_values.count"
+
+    def to_json_dict(self) -> dict:
+        return convert_to_json_serializable(
+            {
+                "name": self.name,
+                "max_proportion_unique": self.max_unique_values,
+                "metric_name_defining_limit": self.metric_name_defining_limit,
+            }
+        )
 
 
 class CardinalityLimitMode(enum.Enum):

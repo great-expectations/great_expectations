@@ -219,9 +219,9 @@ def profiler_config():
             batch_request: $variables.jan_2018_thru_nov_2020_monthly_tripdata_batch_request
             metric_name: table.row_count
             confidence_level: $variables.confidence_level
-            round_decimals: 0
             truncate_values:
               lower_bound: 0
+            round_decimals: 0
         expectation_configuration_builders:
          - expectation_type: expect_table_row_count_to_be_between
            class_name: DefaultExpectationConfigurationBuilder

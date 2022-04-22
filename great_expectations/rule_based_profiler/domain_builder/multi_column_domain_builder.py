@@ -1,7 +1,6 @@
 from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
@@ -15,17 +14,11 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
     def __init__(
         self,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Args:
             include_column_names: Explicitly specified desired columns.
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
         """
         super().__init__(
@@ -37,13 +30,11 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
             semantic_type_filter_class_name=None,
             include_semantic_types=None,
             exclude_semantic_types=None,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
         )
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.MULTICOLUMN
 
     def _get_domains(

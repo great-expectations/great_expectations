@@ -1,7 +1,6 @@
 from typing import Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -10,6 +9,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     ParameterContainer,
     SemanticDomainTypes,
@@ -39,10 +39,6 @@ class ColumnDomainBuilder(DomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -60,18 +56,12 @@ class ColumnDomainBuilder(DomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
             data_context: DataContext
 
         Inclusion/Exclusion Logic:
         (include_column_names|table_columns - exclude_column_names) + (include_semantic_types - exclude_semantic_types)
         """
-        super().__init__(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            data_context=data_context,
-        )
+        super().__init__(data_context=data_context)
 
         self._include_column_names = include_column_names
         self._exclude_column_names = exclude_column_names
@@ -88,7 +78,7 @@ class ColumnDomainBuilder(DomainBuilder):
         self._semantic_type_filter = None
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN
 
     """
@@ -430,7 +420,7 @@ class ColumnDomainBuilder(DomainBuilder):
                         "column": column_name,
                     },
                     details={
-                        "inferred_semantic_domain_type": self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
+                        INFERRED_SEMANTIC_TYPE_KEY: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
                             column_name
                         ],
                     },

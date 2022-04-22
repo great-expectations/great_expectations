@@ -39,10 +39,12 @@ PARAMETER_KEY: str = (
 )
 
 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "value"
+FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: str = "attributed_value"
 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "details"
 
 RESERVED_TERMINAL_LITERALS: Set[str] = {
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
 }
 
@@ -130,7 +132,7 @@ class ParameterNode(SerializableDotDict):
     """
 
     def to_dict(self) -> dict:
-        return dict(self)
+        return convert_parameter_nodes_to_dictionaries(source=dict(self))
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
@@ -206,45 +208,58 @@ class ParameterContainer(SerializableDictDot):
         if self.parameter_nodes is None:
             return None
 
-        parameter_node: ParameterNode = self._convert_dictionaries_to_parameter_nodes(
+        parameter_node: ParameterNode = convert_dictionaries_to_parameter_nodes(
             source=self.parameter_nodes.get(parameter_name_root)
         )
 
         return parameter_node
-
-    def _convert_dictionaries_to_parameter_nodes(
-        self, source: Optional[Any] = None
-    ) -> Optional[Union[Any, ParameterNode]]:
-        if source is None:
-            return None
-
-        if isinstance(source, dict):
-            if not isinstance(source, ParameterNode):
-                source = ParameterNode(source)
-
-            key: str
-            value: Any
-            for key, value in source.items():
-                source[key] = self._convert_dictionaries_to_parameter_nodes(
-                    source=value
-                )
-        elif isinstance(source, (list, tuple, set)):
-            source_type: type = type(source)
-            value: Any
-            return source_type(
-                [
-                    self._convert_dictionaries_to_parameter_nodes(source=value)
-                    for value in source
-                ]
-            )
-
-        return source
 
     def to_dict(self) -> dict:
         return asdict(self)
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
+
+
+def convert_dictionaries_to_parameter_nodes(
+    source: Optional[Any],
+) -> Optional[ParameterNode]:
+    if source is None:
+        return None
+
+    if isinstance(source, dict):
+        if not isinstance(source, ParameterNode):
+            source = ParameterNode(source)
+
+        key: str
+        value: Any
+        for key, value in source.items():
+            source[key] = convert_dictionaries_to_parameter_nodes(source=value)
+    elif isinstance(source, (list, tuple, set)):
+        source_type: type = type(source)
+        value: Any
+        return source_type(
+            [convert_dictionaries_to_parameter_nodes(source=value) for value in source]
+        )
+
+    return source
+
+
+def convert_parameter_nodes_to_dictionaries(
+    source: Optional[Any],
+) -> Optional[dict]:
+    if source is None:
+        return None
+
+    if isinstance(source, ParameterNode):
+        source = source.to_dict()
+
+        key: str
+        value: Any
+        for key, value in source.items():
+            source[key] = convert_parameter_nodes_to_dictionaries(source=value)
+
+    return source
 
 
 def build_parameter_container_for_variables(
@@ -365,7 +380,9 @@ def _build_parameter_node_tree_for_one_parameter(
     else:
         # If the fully-qualified parameter name (or "name space") is trivial (i.e., at "leaf node" / last part), then
         # store the supplied attribute value into the given ParameterNode using leaf "parameter_name_part" name as key.
-        parameter_node[parameter_name_part] = parameter_value
+        parameter_node[parameter_name_part] = convert_dictionaries_to_parameter_nodes(
+            source=parameter_value
+        )
 
 
 def get_parameter_value_by_fully_qualified_parameter_name(
@@ -492,25 +509,6 @@ def _get_parameter_value_from_parameter_container(
 """
         )
 
-    # TODO: <Alex>ALEX -- leaving the capability below for future considerations.</Alex>
-    # """
-    # Support a shorthand notation (for use in ExpectationConfigurationBuilder): If fully-qualified parameter name does
-    # not end on f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}"
-    # (e.g., ".value") and the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY" (e.g., "value") key is available in
-    # "ParameterNode", then return the value, corresponding to the "FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY"
-    # (e.g., "value") key.  Hence, can use shorthand "$parameter.my_min_user_id" instead of the explicit
-    # "$parameter.my_min_user_id.value".  Retrieving details requires "$parameter.my_min_user_id.details" (explicitly).
-    # """
-    # if (
-    #     not fully_qualified_parameter_name.endswith(
-    #         f"{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}"
-    #     )
-    #     and isinstance(return_value, ParameterNode)
-    #     and FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY in return_value
-    # ):
-    #     return return_value[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
-    # TODO: <Alex>ALEX -- leaving the capability above for future considerations.</Alex>
-
     return return_value
 
 
@@ -570,7 +568,7 @@ def get_fully_qualified_parameter_names(
                     )
                 )
 
-    return fully_qualified_parameter_names
+    return sorted(fully_qualified_parameter_names, reverse=True)
 
 
 def _get_parameter_node_attribute_names(
@@ -632,6 +630,12 @@ def _get_parameter_node_attribute_names_as_lists(
 def _get_parameter_name_parts_up_to_including_reserved_literal(
     attribute_name_as_list: List[str],
 ) -> List[str]:
+    if attribute_name_as_list[0] == PARAMETER_NAME_ROOT_FOR_VARIABLES:
+        return [
+            PARAMETER_NAME_ROOT_FOR_VARIABLES,
+            PARAMETER_NAME_ROOT_FOR_VARIABLES,
+        ]
+
     if not (set(attribute_name_as_list) & RESERVED_TERMINAL_LITERALS):
         return attribute_name_as_list
 
@@ -644,4 +648,4 @@ def _get_parameter_name_parts_up_to_including_reserved_literal(
         except ValueError:
             pass
 
-    return attribute_name_as_list[: idx + 1]
+    return attribute_name_as_list[:idx]

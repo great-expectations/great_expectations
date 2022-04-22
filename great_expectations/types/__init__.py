@@ -6,6 +6,7 @@ from typing import Optional, Set
 import pandas as pd
 
 from .base import SerializableDotDict
+from .color_palettes import ColorPalettes, Colors
 from .configurations import ClassConfig
 
 logger = logging.getLogger(__name__)

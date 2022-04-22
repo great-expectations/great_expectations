@@ -139,7 +139,6 @@ def test_regex_pattern_string_parameter_builder_alice(
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
-            batch_request=batch_request,
             data_context=data_context,
         )
     )
@@ -157,6 +156,7 @@ def test_regex_pattern_string_parameter_builder_alice(
     regex_pattern_string_parameter.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_request=batch_request,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
@@ -212,7 +212,6 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
             threshold=threshold,
-            batch_request=batch_request,
             data_context=data_context,
         )
     )
@@ -234,6 +233,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     regex_parameter.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     fully_qualified_parameter_name_for_value: str = (
@@ -288,7 +288,6 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
             threshold=threshold,
-            batch_request=batch_request,
             data_context=data_context,
         )
     )
@@ -305,6 +304,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
     regex_parameter.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     fully_qualified_parameter_name_for_value: str = (
@@ -359,7 +359,6 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
-            batch_list=[batch],
             data_context=data_context,
         )
     )
@@ -376,6 +375,7 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
         regex_pattern_string_parameter_builder.build_parameters(
             domain=domain,
             parameters=parameters,
+            batch_list=[batch],
         )
 
     assert (
@@ -404,7 +404,6 @@ def test_regex_single_candidate(
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
-            batch_list=[batch],
             data_context=data_context,
         )
     )
@@ -422,6 +421,7 @@ def test_regex_single_candidate(
     regex_pattern_string_parameter_builder.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_list=[batch],
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"
@@ -469,7 +469,6 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
-            batch_list=[batch],
             data_context=data_context,
         )
     )
@@ -487,6 +486,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
     regex_pattern_string_parameter_builder.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_list=[batch],
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"
