@@ -5,8 +5,6 @@ import nbconvert
 import nbformat
 import pytest
 from freezegun import freeze_time
-from nbconvert.preprocessors import ExecutePreprocessor
-from nbformat.notebooknode import NotebookNode
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
@@ -111,10 +109,14 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     with open(notebook_path, "w") as f:
         nbformat.write(nb, f)
 
-    nb: NotebookNode = load_notebook_from_path(notebook_path=notebook_path)
+    nb: nbformat.notebooknode.NotebookNode = load_notebook_from_path(
+        notebook_path=notebook_path
+    )
 
     # Run notebook
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep: nbconvert.preprocessors.ExecutePreprocessor = (
+        nbconvert.preprocessors.ExecutePreprocessor(timeout=60, kernel_name="python3")
+    )
     ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
 
