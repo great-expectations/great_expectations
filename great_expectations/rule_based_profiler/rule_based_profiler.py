@@ -1,8 +1,11 @@
 import copy
 import json
 import logging
+import sys
 import uuid
 from typing import Any, Dict, List, Optional, Set, Union
+
+from tqdm.auto import tqdm
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -214,7 +217,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
     ) -> None:
@@ -224,10 +226,31 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules: name/(configuration-dictionary) (overrides)
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
         """
+        # Check to see if the user has disabled progress bars
+        disable = False
+        if self._data_context:
+            progress_bars = self._data_context.progress_bars
+            # If progress_bars are not present, assume we want them enabled
+            if progress_bars is not None:
+                if "globally" in progress_bars:
+                    disable = not progress_bars["globally"]
+
+                if "rule_based_profiler" in progress_bars:
+                    disable = not progress_bars["rule_based_profiler"]
+
+        # noinspection PyProtectedMember,SpellCheckingInspection
+        progress_bar: tqdm = tqdm(
+            desc="Profiling Dataset",
+            disable=disable,
+        )
+        progress_bar.update(0)
+        progress_bar.refresh()
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+
         effective_variables: Optional[
             ParameterContainer
         ] = self.reconcile_profiler_variables(
@@ -253,16 +276,22 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         rule_state: RuleState
         rule: Rule
+        domains_count: int = 0
         for rule in effective_rules:
             rule_state = rule.run(
                 variables=effective_variables,
                 batch_list=batch_list,
                 batch_request=batch_request,
-                force_batch_data=force_batch_data,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
                 reconciliation_directives=reconciliation_directives,
             )
             self.rule_states.append(rule_state)
+
+            domains_count += len(rule_state.domains)
+            progress_bar.update(domains_count)
+            progress_bar.refresh()
+
+        progress_bar.close()
 
     def get_expectation_suite(
         self,
@@ -861,7 +890,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules,
             batch_list=None,
             batch_request=None,
-            force_batch_data=False,
             recompute_existing_parameter_values=False,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )
@@ -903,7 +931,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules,
             batch_list=batch_list,
             batch_request=batch_request,
-            force_batch_data=True,
             recompute_existing_parameter_values=False,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )
