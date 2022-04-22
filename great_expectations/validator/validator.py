@@ -423,7 +423,6 @@ class Validator:
                 rules=None,
                 batch_list=list(self.batches.values()),
                 batch_request=None,
-                force_batch_data=False,
                 recompute_existing_parameter_values=False,
                 reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
             )
