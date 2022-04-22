@@ -80,7 +80,6 @@ def test_simple_date_format_parameter_builder_alice(
         SimpleDateFormatStringParameterBuilder(
             name="my_date_format",
             metric_domain_kwargs=metric_domain_kwargs,
-            batch_request=batch_request,
             data_context=data_context,
         )
     )
@@ -101,6 +100,7 @@ def test_simple_date_format_parameter_builder_alice(
     date_format_string_parameter.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     # noinspection PyTypeChecker
@@ -210,7 +210,6 @@ def test_simple_date_format_parameter_builder_bobby(
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_strings=candidate_strings,
             threshold=threshold,
-            batch_request=batch_request,
             data_context=data_context,
         )
     )
@@ -231,6 +230,7 @@ def test_simple_date_format_parameter_builder_bobby(
     date_format_string_parameter.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     assert (

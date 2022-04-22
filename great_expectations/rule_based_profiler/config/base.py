@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -107,13 +107,10 @@ class DomainBuilderConfig(DictDot):
         self,
         class_name: str,
         module_name: Optional[str] = None,
-        batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
         self.module_name = module_name
         self.class_name = class_name
-
-        self.batch_request = batch_request
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -140,10 +137,6 @@ class DomainBuilderConfigSchema(NotNullSchema):
         required=True,
         allow_none=False,
     )
-    batch_request = fields.Raw(
-        required=False,
-        allow_none=True,
-    )
 
 
 class ParameterBuilderConfig(DictDot):
@@ -154,7 +147,6 @@ class ParameterBuilderConfig(DictDot):
         module_name: Optional[str] = None,
         evaluation_parameter_builder_configs: Optional[list] = None,
         json_serialize: bool = True,
-        batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
         self.module_name = module_name
@@ -165,8 +157,6 @@ class ParameterBuilderConfig(DictDot):
         self.evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
 
         self.json_serialize = json_serialize
-
-        self.batch_request = batch_request
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -211,10 +201,6 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         allow_none=True,
         missing=True,
     )
-    batch_request = fields.Raw(
-        required=False,
-        allow_none=True,
-    )
 
 
 class ExpectationConfigurationBuilderConfig(DictDot):
@@ -225,7 +211,6 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         module_name: Optional[str] = None,
         meta: Optional[dict] = None,
         validation_parameter_builder_configs: Optional[list] = None,
-        batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
         self.module_name = module_name
@@ -236,8 +221,6 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         self.meta = meta
 
         self.validation_parameter_builder_configs = validation_parameter_builder_configs
-
-        self.batch_request = batch_request
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -284,10 +267,6 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
             required=True,
             allow_none=False,
         ),
-        required=False,
-        allow_none=True,
-    )
-    batch_request = fields.Raw(
         required=False,
         allow_none=True,
     )
