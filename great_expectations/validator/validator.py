@@ -822,10 +822,6 @@ class Validator:
             metric_configurations=list(metrics.values())
         )
 
-        print("hello will this is get_metrics")
-        print(f"metrics:values {metrics.values()}")
-        print(f"resolved:metrics {resolved_metrics}")
-
         return {
             metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
             for metric_configuration in metrics.values()

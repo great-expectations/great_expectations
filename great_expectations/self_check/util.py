@@ -1077,11 +1077,9 @@ def build_sa_validator_with_data(
     )
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    # and we are doing the table_name only
     batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
-    # because we are getting the batch directly?
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
 

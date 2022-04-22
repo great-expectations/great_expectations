@@ -106,7 +106,6 @@ class SqlAlchemyBatchData(BatchData):
             raise ValueError(
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
             )
-        # it's always here
         if table_name:
             # Suggestion: pull this block out as its own _function
             if use_quoted_name:
@@ -128,8 +127,6 @@ class SqlAlchemyBatchData(BatchData):
                     sa.MetaData(),
                     schema=schema_name,
                 )
-        # then what are we doign here?
-        #
         elif create_temp_table:
             generated_table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
@@ -263,9 +260,5 @@ class SqlAlchemyBatchData(BatchData):
                 self._engine.execute(stmt_1)
             except DatabaseError:
                 self._engine.execute(stmt_2)
-        # if self.sql_engine_dialect.name.lower() == "bigquery":
-        #     # create session or script?
-        #     raise Exception("hello will this is giong to work ")
-        #     self._engine.execute(stmt)
         else:
             self._engine.execute(stmt)

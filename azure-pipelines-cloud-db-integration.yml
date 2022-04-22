@@ -76,9 +76,9 @@ stages:
             expectations_cfe:
               test_script: 'tests/test_definitions/test_expectations_cfe.py'
               extra_args: ''
-#            expectations:
-#              test_script: 'tests/test_definitions/test_expectations.py'
-#              extra_args: ''
+            expectations:
+              test_script: 'tests/test_definitions/test_expectations.py'
+              extra_args: ''
           maxParallel: 1
         steps:
           - task: UsePythonVersion@0
