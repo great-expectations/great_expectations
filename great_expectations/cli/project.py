@@ -10,6 +10,7 @@ from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.toolkit import load_data_context_with_error_handling
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
@@ -38,7 +39,7 @@ def project_check_config(ctx):
 
     send_usage_message(
         data_context=context,
-        event="cli.project.check_config",
+        event=UsageStatsEvents.CLI_PROJECT_CHECK_CONFIG.value,
         success=True,
     )
 

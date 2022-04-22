@@ -105,16 +105,16 @@ class UsageStatsEvents(enum.Enum):
     @classmethod
     def get_cli_event_name(
         cls, noun: str, verb: str, other_items: Optional[List[str]] = None
-    ) -> UsageStatsEvents:
-        """Return the appropriate enum based on inputs.
+    ) -> str:
+        """Return the appropriate event name from the appropriate enum based on inputs.
 
         Args:
             noun: CLI noun as a string
             verb: CLI verb as a string
-            other_items: List of optional additional items e.g. [".begin"] or [".end"]
+            other_items: List of optional additional items e.g. ["begin"] or ["end"]
 
         Returns:
-            String
+            String from enum value for event
         """
         if other_items is not None:
 
@@ -125,7 +125,25 @@ class UsageStatsEvents(enum.Enum):
             other_items_str: str = ""
         enum_name: str = f"CLI_{noun.upper()}_{verb.upper()}{other_items_str}"
 
-        return getattr(cls, enum_name)
+        return getattr(cls, enum_name).value
+
+    @classmethod
+    def get_cli_begin_and_end_event_names(cls, noun: str, verb: str) -> List[str]:
+        """Return the appropriate list of event names from the appropriate enums based on inputs.
+
+        Args:
+            noun: CLI noun as a string
+            verb: CLI verb as a string
+
+        Returns:
+            List of strings from enum value for event
+        """
+        other_items_list: List[List[str]] = [["begin"], ["end"]]
+        event_names: List[str] = [
+            cls.get_cli_event_name(noun, verb, other_items=other_items)
+            for other_items in other_items_list
+        ]
+        return event_names
 
     @classmethod
     def get_all_event_names(cls):
