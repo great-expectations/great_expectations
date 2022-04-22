@@ -625,6 +625,65 @@ def get_dataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
 
+    elif dataset_type == "trino":
+        if not create_engine or not TRINO_TYPES:
+            return None
+
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        engine = _create_trino_engine(db_hostname)
+        sql_dtypes = {}
+        if (
+            schemas
+            and "trino" in schemas
+            and isinstance(engine.dialect, trinoDialect)
+        ):
+            schema = schemas["trino"]
+            sql_dtypes = {col: TRINO_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+                elif type_ in ["DATE"]:
+                    df[col] = pd.to_datetime(df[col]).dt.date
+
+        if table_name is None:
+            table_name = generate_test_table_name()
+
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=engine, profiler=profiler, caching=caching
+        )
+
     elif dataset_type == "mssql":
         if not create_engine or not MSSQL_TYPES:
             return None
