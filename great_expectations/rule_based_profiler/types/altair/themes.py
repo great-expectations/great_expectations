@@ -50,9 +50,13 @@ ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
 # Chart Types
 #
 
+# Area
+fill_opacity = 0.5
+
 # Line Chart
 line_color: str = Colors.BLUE_1.value
 line_stroke_width: int = 3
+line_opacity: float = 0.9
 # Known vega-lite bug: https://github.com/vega/vega-lite/issues/5732
 # forces us to choose between features "interactive scaling" and "tooltips" (below)
 line_tooltip_content: str = "data"
@@ -61,6 +65,7 @@ line_tooltip_content: str = "data"
 point_size: int = 70
 point_color: str = Colors.GREEN.value
 point_filled: bool = True
+point_opacity: float = 1.0
 point_tooltip_content: str = "data"
 
 
@@ -91,6 +96,9 @@ class AltairThemes(Enum):
             "heatmap": heatmap_color_scheme,
             "ordinal": ordinal_color_scheme,
         },
+        "area": {
+            "fillOpacity": fill_opacity,
+        },
         "line": {
             "color": line_color,
             "strokeWidth": line_stroke_width,
@@ -100,6 +108,7 @@ class AltairThemes(Enum):
             "size": point_size,
             "color": point_color,
             "filled": point_filled,
+            "opacity": point_opacity,
             "tooltip": {"content": point_tooltip_content},
         },
     }

@@ -17,14 +17,14 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def plot(
         self,
         prescriptive: Optional[bool] = False,
-        custom_altair_theme: Optional[Dict[str, Any]] = None,
+        theme: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
 
         Args:
             prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
-            custom_altair_theme: Altair top-level chart configuration dictionary
+            theme: Altair top-level chart configuration dictionary
         """
         # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
         # noinspection PyTypeChecker
@@ -96,7 +96,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         charts.append(table_row_count_chart)
 
-        self.display(charts=charts, custom_altair_theme=custom_altair_theme)
+        self.display(charts=charts, theme=theme)
 
     def _plot_descriptive(
         self,

@@ -65,21 +65,19 @@ class DataAssistantResult(SerializableDictDot):
         return metrics_attributed_values_by_domain
 
     @staticmethod
-    def display(
-        charts: List[alt.Chart], custom_altair_theme: Optional[Dict[str, Any]]
-    ) -> None:
+    def display(charts: List[alt.Chart], theme: Optional[Dict[str, Any]]) -> None:
         """
         Display each chart passed by DataAssistantResult.plot()
 
         Args:
             charts: A list of altair chart objects to display
-            custom_altair_theme: Altair top-level chart configuration dictionary
+            theme: Altair top-level chart configuration dictionary
         """
         altair_configuration: Dict[str, Any] = copy.deepcopy(
             AltairThemes.DEFAULT_THEME.value
         )
-        if custom_altair_theme is not None:
-            nested_update(altair_configuration, custom_altair_theme)
+        if theme is not None:
+            nested_update(altair_configuration, theme)
 
         chart: alt.Chart
         for chart in charts:
@@ -138,7 +136,7 @@ class DataAssistantResult(SerializableDictDot):
         if point_color_condition is not None:
             points: alt.Chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point(opacity=1.0)
+                .mark_point()
                 .encode(
                     x=alt.X(
                         domain_name,
@@ -153,7 +151,7 @@ class DataAssistantResult(SerializableDictDot):
         else:
             points: alt.Chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point(opacity=1.0)
+                .mark_point()
                 .encode(
                     x=alt.X(
                         domain_name,
@@ -186,9 +184,7 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
-        line_opacity: float = 0.9
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
-        fill_opacity: float = 0.5
         fill_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[5])
 
         metric_title: str = metric_name.replace("_", " ").title()
@@ -210,7 +206,7 @@ class DataAssistantResult(SerializableDictDot):
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color, opacity=line_opacity)
+            .mark_line(color=line_color)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -224,7 +220,7 @@ class DataAssistantResult(SerializableDictDot):
 
         upper_limit: alt.Chart = (
             alt.Chart(data=df)
-            .mark_line(color=line_color, opacity=line_opacity)
+            .mark_line(color=line_color)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -238,7 +234,7 @@ class DataAssistantResult(SerializableDictDot):
 
         band: alt.Chart = (
             alt.Chart(data=df)
-            .mark_area(fill=fill_color, fillOpacity=fill_opacity)
+            .mark_area(fill=fill_color)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -278,13 +274,13 @@ class DataAssistantResult(SerializableDictDot):
     def plot(
         self,
         prescriptive: Optional[bool] = False,
-        custom_altair_theme: Optional[Dict[str, Any]] = None,
+        theme: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
 
         Args:
             prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
-            custom_altair_theme: Altair top-level chart configuration dictionary
+            theme: Altair top-level chart configuration dictionary
         """
         pass

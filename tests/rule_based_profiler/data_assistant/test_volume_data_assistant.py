@@ -2684,27 +2684,25 @@ def test_volume_data_assistant_plot_prescriptive_notebook_execution(
     )
 
 
-def test_volume_data_assistant_plot_descriptive_custom_altair_theme_notebook_execution(
+def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    custom_altair_theme = {"font": "Comic Sans MS"}
-    new_cell: str = (
-        f"data_assistant_result.plot(custom_altair_theme={custom_altair_theme})"
-    )
+    theme = {"font": "Comic Sans MS"}
+    new_cell: str = f"data_assistant_result.plot(theme={theme})"
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         context=context, new_cell=new_cell
     )
 
 
-def test_volume_data_assistant_plot_prescriptive_custom_altair_theme_notebook_execution(
+def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    custom_altair_theme = {"font": "Comic Sans MS"}
-    new_cell: str = f"data_assistant_result.plot(prescriptive=True, custom_altair_theme={custom_altair_theme})"
+    theme = {"font": "Comic Sans MS"}
+    new_cell: str = f"data_assistant_result.plot(prescriptive=True, theme={theme})"
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         context=context, new_cell=new_cell
     )
