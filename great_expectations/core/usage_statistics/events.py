@@ -1,3 +1,35 @@
+"""Event names for use in sending usage stats events.
+
+This module contains an enum with all event names and methods to retrieve
+lists or specific types of events. It also includes a helper utility to
+programmatically create new enum values if run as a module.
+
+    Typical usage example:
+
+        In send_usage_message() as an event name:
+
+        handler.send_usage_message(
+            event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
+            event_payload={
+                "anonymized_name": handler.anonymizer.anonymize(self.name),
+                "sqlalchemy_dialect": self.engine.name,
+            },
+            success=True,
+        )
+
+        In a test to retrieve all event names:
+        all_event_names: List[str] = UsageStatsEvents.get_all_event_names()
+
+        To retrieve CLI event names:
+        (
+            begin_event_name,
+            end_event_name,
+        ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
+            noun=cli_event_noun,
+            verb=ctx.invoked_subcommand,
+        )
+"""
+
 from __future__ import annotations
 
 import enum
@@ -5,6 +37,11 @@ from typing import List, Optional
 
 
 class UsageStatsEvents(enum.Enum):
+    """Event names for all Great Expectations usage stats events.
+
+    Note: These should be used in place of strings, or retrieved
+        using methods like get_cli_event_name().
+    """
 
     CLI_CHECKPOINT_DELETE = "cli.checkpoint.delete"
     CLI_CHECKPOINT_DELETE_BEGIN = "cli.checkpoint.delete.begin"
@@ -89,10 +126,12 @@ class UsageStatsEvents(enum.Enum):
 
     @classmethod
     def get_all_event_names(cls):
+        """Get event names for all usage stats events."""
         return [event_name.value for event_name in cls]
 
     @classmethod
     def get_all_event_names_no_begin_end_events(cls):
+        """Get event names for all usage stats events that don't end with BEGIN or END."""
         return [
             event_name.value
             for event_name in cls
