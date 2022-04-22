@@ -2,6 +2,7 @@ import ast
 import itertools
 from typing import Dict, List, cast
 
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
 )
@@ -99,15 +100,17 @@ def get_all_events_from_decorated_methods() -> List[str]:
 
 def test_all_events_are_in_schema():
 
-    events_from_decorated_methods: List[str] = get_all_events_from_decorated_methods()
-    events_from_send_usage_stats: List[
-        str
-    ] = get_all_events_from_send_usage_stats_invocations()
-
+    # events_from_decorated_methods: List[str] = get_all_events_from_decorated_methods()
+    # events_from_send_usage_stats: List[
+    #     str
+    # ] = get_all_events_from_send_usage_stats_invocations()
+    #
     events_in_schema: List[
         str
     ] = get_all_events_from_anonymized_usage_statistics_record_schema()
 
-    assert set(events_in_schema) == set(
-        events_from_decorated_methods + events_from_send_usage_stats
-    )
+    # assert set(events_in_schema) == set(
+    #     events_from_decorated_methods + events_from_send_usage_stats
+    # )
+
+    assert set(events_in_schema) == set(UsageStatsEvents.get_all_event_names())

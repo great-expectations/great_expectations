@@ -1,5 +1,6 @@
 import jsonschema
 
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_batch_request_schema,
     anonymized_batch_schema,
@@ -75,9 +76,12 @@ def test_comprehensive_list_of_messages():
         "data_context.run_profiler_on_data",
         "data_context.run_profiler_with_dynamic_arguments",
     }
-    assert (
-        set(valid_message_list)
-        == get_all_events_from_anonymized_usage_statistics_record_schema()
+    # assert (
+    #     set(valid_message_list)
+    #     == get_all_events_from_anonymized_usage_statistics_record_schema()
+    # )
+    assert set(valid_message_list) == set(
+        UsageStatsEvents.get_all_event_names_no_begin_end_events()
     )
 
 
