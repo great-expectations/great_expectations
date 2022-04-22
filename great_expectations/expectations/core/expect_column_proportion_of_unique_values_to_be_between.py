@@ -156,7 +156,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                 },
                 "expectation_configuration_builders": [
                     {
-                        "expectation_type": "expect_column_unique_value_count_to_be_between",
+                        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,

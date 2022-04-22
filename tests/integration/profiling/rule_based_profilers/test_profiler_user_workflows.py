@@ -2464,16 +2464,17 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
         "expect_column_proportion_of_unique_values_to_be_between"
     )
 
-    test_cases: Tuple[Tuple[str, int, int], ...] = (("passenger_count", 0, 0),)
+    test_cases: Tuple[Tuple[str, int, int], ...] = (("passenger_count", 0.0, 1.0),)
 
     for column_name, min_value_expected, max_value_expected in test_cases:
         # Use all batches, loaded by Validator, for estimating Expectation argument values.
-        result = validator.expect_column_unique_value_count_to_be_between(
+        result = validator.expect_column_proportion_of_unique_values_to_be_between(
             column=column_name,
             result_format="SUMMARY",
             include_config=True,
             auto=True,
         )
+        __import__("pprint").pprint(result)
         assert result.success
 
         key: str
