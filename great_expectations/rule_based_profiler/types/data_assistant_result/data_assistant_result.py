@@ -256,7 +256,7 @@ class DataAssistantResult(SerializableDictDot):
     @abstractmethod
     def plot(
         self,
-        prescriptive: Optional[bool] = False,
+        prescriptive: bool = False,
         theme: Optional[Dict[str, Any]] = None,
     ) -> None:
         """

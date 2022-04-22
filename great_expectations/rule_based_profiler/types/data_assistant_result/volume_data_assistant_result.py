@@ -16,7 +16,7 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
 class VolumeDataAssistantResult(DataAssistantResult):
     def plot(
         self,
-        prescriptive: Optional[bool] = False,
+        prescriptive: bool = False,
         theme: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
