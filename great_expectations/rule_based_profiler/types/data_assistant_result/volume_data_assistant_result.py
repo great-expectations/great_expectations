@@ -22,6 +22,9 @@ class VolumeDataAssistantResult(DataAssistantResult):
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
 
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
         Args:
             prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
             theme: Altair top-level chart configuration dictionary

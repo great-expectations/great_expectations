@@ -51,7 +51,8 @@ ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
 #
 
 # Area
-fill_opacity = 0.5
+fill_opacity: float = 0.5
+fill_color: str = ColorPalettes.HEATMAP.value[5]
 
 # Line Chart
 line_color: str = Colors.BLUE_1.value
@@ -97,6 +98,7 @@ class AltairThemes(Enum):
             "ordinal": ordinal_color_scheme,
         },
         "area": {
+            "color": fill_color,
             "fillOpacity": fill_opacity,
         },
         "line": {

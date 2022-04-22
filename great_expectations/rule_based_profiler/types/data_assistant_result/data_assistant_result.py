@@ -65,23 +65,27 @@ class DataAssistantResult(SerializableDictDot):
         return metrics_attributed_values_by_domain
 
     @staticmethod
-    def display(charts: List[alt.Chart], theme: Optional[Dict[str, Any]]) -> None:
+    def display(
+        charts: List[alt.Chart],
+        theme: Optional[Dict[str, Any]],
+    ) -> None:
         """
         Display each chart passed by DataAssistantResult.plot()
 
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
         Args:
             charts: A list of altair chart objects to display
-            theme: Altair top-level chart configuration dictionary
+            theme: An Optional Altair top-level chart configuration dictionary to apply over the base_theme
         """
-        altair_configuration: Dict[str, Any] = copy.deepcopy(
-            AltairThemes.DEFAULT_THEME.value
-        )
+        altair_theme: Dict[str, Any] = copy.deepcopy(AltairThemes.DEFAULT_THEME.value)
         if theme is not None:
-            nested_update(altair_configuration, theme)
+            nested_update(altair_theme, theme)
 
         chart: alt.Chart
         for chart in charts:
-            chart.configure(**altair_configuration).display()
+            chart.configure(**altair_theme).display()
 
     @staticmethod
     def get_line_chart(
@@ -90,8 +94,6 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
-        point_color_condition: Optional[alt.condition] = None,
-        tooltip: Optional[List[alt.Tooltip]] = None,
     ) -> alt.Chart:
         """
         Args:
@@ -100,8 +102,6 @@ class DataAssistantResult(SerializableDictDot):
             metric_type: The altair data type for the metric being plotted
             domain_name: The name of the domain as it exists in the pandas dataframe
             domain_type: The altair data type for the domain being plotted
-            point_color_condition: Altair condition for changing the point color
-            tooltip: Altair tooltip for displaying relevant information on the chart
 
         Returns:
             An altair line chart
@@ -113,11 +113,10 @@ class DataAssistantResult(SerializableDictDot):
         batch_id: str = "batch_id"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
-        if tooltip is None:
-            tooltip: List[alt.Tooltip] = [
-                alt.Tooltip(field=batch_id, type=batch_id_type),
-                alt.Tooltip(field=metric_name, type=metric_type, format=","),
-            ]
+        tooltip: List[alt.Tooltip] = [
+            alt.Tooltip(field=batch_id, type=batch_id_type),
+            alt.Tooltip(field=metric_name, type=metric_type, format=","),
+        ]
 
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
@@ -133,35 +132,19 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        if point_color_condition is not None:
-            points: alt.Chart = (
-                alt.Chart(data=df, title=title)
-                .mark_point()
-                .encode(
-                    x=alt.X(
-                        domain_name,
-                        type=domain_type,
-                        title=domain_title,
-                    ),
-                    y=alt.Y(metric_name, type=metric_type, title=metric_title),
-                    color=point_color_condition,
-                    tooltip=tooltip,
-                )
+        points: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_point()
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=metric_title),
+                tooltip=tooltip,
             )
-        else:
-            points: alt.Chart = (
-                alt.Chart(data=df, title=title)
-                .mark_point()
-                .encode(
-                    x=alt.X(
-                        domain_name,
-                        type=domain_type,
-                        title=domain_title,
-                    ),
-                    y=alt.Y(metric_name, type=metric_type, title=metric_title),
-                    tooltip=tooltip,
-                )
-            )
+        )
 
         return line + points
 
@@ -185,7 +168,6 @@ class DataAssistantResult(SerializableDictDot):
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
         line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
-        fill_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[5])
 
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
@@ -234,7 +216,7 @@ class DataAssistantResult(SerializableDictDot):
 
         band: alt.Chart = (
             alt.Chart(data=df)
-            .mark_area(fill=fill_color)
+            .mark_area()
             .encode(
                 x=alt.X(
                     domain_name,
@@ -244,6 +226,14 @@ class DataAssistantResult(SerializableDictDot):
                 y=alt.Y(min_value, title=metric_title, type=metric_type),
                 y2=alt.Y2(max_value, title=metric_title),
             )
+        )
+
+        line: alt.Chart = DataAssistantResult.get_line_chart(
+            df=df,
+            metric_name=metric_name,
+            metric_type=metric_type,
+            domain_name=domain_name,
+            domain_type=domain_type,
         )
 
         predicate: alt.expr.core.BinaryExpression = (
@@ -258,15 +248,8 @@ class DataAssistantResult(SerializableDictDot):
             if_false=alt.value(Colors.GREEN.value),
             if_true=alt.value(Colors.PINK.value),
         )
-        anomaly_coded_line: alt.Chart = DataAssistantResult.get_line_chart(
-            df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
-            point_color_condition=point_color_condition,
-            tooltip=tooltip,
-        )
+
+        anomaly_coded_line = line.encode(color=point_color_condition, tooltip=tooltip)
 
         return band + lower_limit + upper_limit + anomaly_coded_line
 
@@ -278,6 +261,9 @@ class DataAssistantResult(SerializableDictDot):
     ) -> None:
         """
         Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
             prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
