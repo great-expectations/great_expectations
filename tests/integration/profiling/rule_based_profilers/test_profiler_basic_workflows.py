@@ -82,10 +82,9 @@ def test_domain_builder(data_context_with_taxi_data):
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
         include_column_name_suffixes=["_amount"],
-        batch_request=batch_request,
         data_context=context,
     )
-    domains: list = domain_builder.get_domains()
+    domains: list = domain_builder.get_domains(batch_request=batch_request)
     assert len(domains) == 4
     assert domains == [
         {"domain_type": "column", "domain_kwargs": {"column": "fare_amount"}},
@@ -116,7 +115,6 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
         include_column_name_suffixes=["_amount"],
-        batch_request=batch_request.to_json_dict(),
         data_context=context,
     )
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -135,7 +133,7 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
         data_context=context,
     )
     my_rbp.add_rule(rule=simple_rule)
-    my_rbp.run()
+    my_rbp.run(batch_request=batch_request)
     res: ExpectationSuite = my_rbp.get_expectation_suite()
     assert len(res.expectations) == 4
 
@@ -157,14 +155,12 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
         include_column_name_suffixes=["_amount"],
-        batch_request=batch_request.to_json_dict(),
         data_context=context,
     )
     # parameter_builder
     numeric_range_parameter_builder: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
             data_context=context,
-            batch_request=batch_request.to_json_dict(),
             metric_name="column.min",
             metric_domain_kwargs="$domain.domain_kwargs",
             name="my_column_min",
@@ -190,7 +186,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
         data_context=context,
     )
     my_rbp.add_rule(rule=simple_rule)
-    my_rbp.run()
+    my_rbp.run(batch_request=batch_request)
     res: ExpectationSuite = my_rbp.get_expectation_suite()
     assert len(res.expectations) == 4
 
@@ -205,22 +201,14 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
     The test tests that context.save_profiler() and context.get_profiler() return the expected RBP.
     """
     context: DataContext = data_context_with_taxi_data
-    batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_multibatch_datasource_other_possibility",
-        data_connector_name="default_inferred_data_connector_name",
-        data_asset_name="yellow_tripdata_sample_2018",
-        data_connector_query={"index": -1},
-    )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
         include_column_name_suffixes=["_amount"],
-        batch_request=batch_request.to_json_dict(),
         data_context=context,
     )
     # parameter_builder
     numeric_range_parameter_builder: MetricMultiBatchParameterBuilder = (
         MetricMultiBatchParameterBuilder(
             data_context=context,
-            batch_request=batch_request.to_json_dict(),
             metric_name="column.min",
             metric_domain_kwargs="$domain.domain_kwargs",
             name="my_column_min",
@@ -275,14 +263,6 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                     "include_column_name_suffixes": [
                         "_amount",
                     ],
-                    "batch_request": {
-                        "datasource_name": "taxi_multibatch_datasource_other_possibility",
-                        "data_connector_name": "default_inferred_data_connector_name",
-                        "data_asset_name": "yellow_tripdata_sample_2018",
-                        "batch_spec_passthrough": None,
-                        "data_connector_query": {"index": -1},
-                        "limit": None,
-                    },
                 },
                 "variables": {},
                 "parameter_builders": [
@@ -297,14 +277,6 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "reduce_scalar_metric": True,
                         "evaluation_parameter_builder_configs": None,
                         "json_serialize": True,
-                        "batch_request": {
-                            "datasource_name": "taxi_multibatch_datasource_other_possibility",
-                            "data_connector_name": "default_inferred_data_connector_name",
-                            "data_asset_name": "yellow_tripdata_sample_2018",
-                            "batch_spec_passthrough": None,
-                            "data_connector_query": {"index": -1},
-                            "limit": None,
-                        },
                     },
                 ],
                 "expectation_configuration_builders": [
@@ -316,7 +288,6 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                         "column": "$domain.domain_kwargs.column",
                         "validation_parameter_builder_configs": None,
                         "value": "$parameter.my_column_min.value[-1]",
-                        "batch_request": None,
                     },
                 ],
             },
@@ -336,7 +307,6 @@ def test_profiler_run_with_expectation_suite_arg(
     )
     domain_builder: DomainBuilder = ColumnDomainBuilder(
         include_column_name_suffixes=["_amount"],
-        batch_request=batch_request.to_json_dict(),
         data_context=context,
     )
     default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
@@ -374,7 +344,7 @@ def test_profiler_run_with_expectation_suite_arg(
     assert len(basic_expectation_suite.expectations) == 4
     assert basic_expectation_suite.expectations == existing_expectations
 
-    my_rbp.run()
+    my_rbp.run(batch_request=batch_request)
     res: ExpectationSuite = my_rbp.get_expectation_suite(
         expectation_suite=basic_expectation_suite
     )
