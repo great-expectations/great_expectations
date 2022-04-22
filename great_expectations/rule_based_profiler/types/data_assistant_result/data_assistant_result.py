@@ -105,17 +105,19 @@ class DataAssistantResult(SerializableDictDot):
         """
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
-        title: str = f"{metric_title} per {domain_title}"
 
         batch_id: str = "batch_id"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         if tooltip is None:
-            tooltip: List[alt.Tooltip] = [
+            tooltip = [
                 alt.Tooltip(field=batch_id, type=batch_id_type),
                 alt.Tooltip(field=metric_name, type=metric_type, format=","),
             ]
 
+        title: alt.TitleParams = alt.TitleParams(
+            f"{metric_title} per {domain_title}", subtitle=["This is my subtitle"]
+        )
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
             .mark_line(color=line_color)

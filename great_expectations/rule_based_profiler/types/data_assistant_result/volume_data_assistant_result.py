@@ -21,18 +21,26 @@ class VolumeDataAssistantResult(DataAssistantResult):
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
         """
-        # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
-        # noinspection PyTypeChecker
-        attributed_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]] = dict(
+        attributed_metrics_by_table_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = dict(
             filter(
                 lambda element: element[0].domain_type == MetricDomainTypes.TABLE,
+                self.get_attributed_metrics_by_domain().items(),
+            )
+        )
+        attributed_metrics_by_column_domain: Dict[
+            Domain, Dict[str, ParameterNode]
+        ] = dict(
+            filter(
+                lambda element: element[0].domain_type == MetricDomainTypes.COLUMN,
                 self.get_attributed_metrics_by_domain().items(),
             )
         )
 
         # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
         attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
-            attributed_metrics_by_domain.values()
+            attributed_metrics_by_table_domain.values()
         )[0]
 
         # Altair does not accept periods.
@@ -65,32 +73,33 @@ class VolumeDataAssistantResult(DataAssistantResult):
         expectation_configurations: List[
             ExpectationConfiguration
         ] = self.expectation_suite.expectations
+
         expectation_configuration: ExpectationConfiguration
-        if prescriptive:
-            for expectation_configuration in expectation_configurations:
-                if (
-                    expectation_configuration.expectation_type
-                    == "expect_table_row_count_to_be_between"
-                ):
+        for expectation_configuration in expectation_configurations:
+            expectation_type: str = expectation_configuration.expectation_type
+            if prescriptive:
+                if expectation_type == "expect_table_row_count_to_be_between":
                     for (
                         kwarg_name,
                         kwarg_value,
                     ) in expectation_configuration.kwargs.items():
                         df[kwarg_name] = kwarg_value
+                elif (
+                    expectation_type == "expect_column_unique_value_count_to_be_between"
+                ):
+                    pass
+                plot_impl = self._plot_prescriptive
+            else:
+                plot_impl = self._plot_descriptive
 
-            plot_impl = self._plot_prescriptive
-        else:
-            plot_impl = self._plot_descriptive
-
-        table_row_count_chart: alt.Chart = plot_impl(
-            df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
-        )
-
-        charts.append(table_row_count_chart)
+            table_row_count_chart: alt.Chart = plot_impl(
+                df=df,
+                metric_name=metric_name,
+                metric_type=metric_type,
+                domain_name=domain_name,
+                domain_type=domain_type,
+            )
+            charts.append(table_row_count_chart)
 
         self.display(charts=charts)
 
