@@ -11,6 +11,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import BatchRequestBase, materialize_batch_request
+from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store import (
     CheckpointStore,
     ProfilerStore,
@@ -31,8 +35,8 @@ from great_expectations.data_context.util import (
     build_store_from_config,
     instantiate_class_from_config,
 )
-from great_expectations.datasource.data_connector import InferredAssetSqlDataConnector
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -696,3 +700,31 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     finally:
         connection.close()
         engine.dispose()
+
+
+def get_validator_with_temporary_expectation_suite(
+    component_name: str,
+    batch_request: Union[BatchRequestBase, dict],
+    data_context: BaseDataContext,
+) -> Validator:
+    suite: ExpectationSuite
+
+    expectation_suite_name: str = f"tmp.{component_name}.suite_{str(uuid.uuid4())[:8]}"
+    try:
+        # noinspection PyUnusedLocal
+        suite = data_context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+    except ge_exceptions.DataContextError:
+        suite = data_context.create_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+
+    batch_request = materialize_batch_request(batch_request=batch_request)
+    validator: Validator = data_context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    return validator
