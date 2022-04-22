@@ -5,13 +5,6 @@ class_name: RuleBaseProfiler
 config_version: 1.0
 
 variables:
-  # BatchRequest yielding two batches (January, 2019 and February, 2019 trip data)
-  jan_feb_2019_monthly_tripdata_batch_request:
-    datasource_name: taxi_pandas
-    data_connector_name: monthly
-    data_asset_name: my_reports
-    data_connector_query:
-      index: ":-1"
   estimator: oneshot  # Choices: bootstrap (default) or oneshot (inaccurate -- should be used only for testing).
   false_positive_rate: 1.0e-2
   mostly: 1.0
@@ -23,7 +16,6 @@ rules:
     parameter_builders:
       - name: row_count_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
-        batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         metric_name: table.row_count
         estimator: $variables.estimator
         false_positive_rate: $variables.false_positive_rate
@@ -41,19 +33,11 @@ rules:
   column_ranges_rule:
     domain_builder:
       class_name: ColumnDomainBuilder
-      # BatchRequest yielding exactly one batch (March, 2019 trip data)
-      batch_request:
-        datasource_name: taxi_pandas
-        data_connector_name: monthly
-        data_asset_name: my_reports
-        data_connector_query:
-          index: -1
       include_semantic_types:
         - numeric
     parameter_builders:
       - name: min_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
-        batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
         estimator: $variables.estimator
@@ -61,7 +45,6 @@ rules:
         round_decimals: 2
       - name: max_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
-        batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
         estimator: $variables.estimator
@@ -89,20 +72,12 @@ rules:
   my_rule_for_timestamps:
     domain_builder:
       class_name: ColumnDomainBuilder
-      # BatchRequest yielding exactly one batch (March, 2019 trip data)
-      batch_request:
-        datasource_name: taxi_pandas
-        data_connector_name: monthly
-        data_asset_name: my_reports
-        data_connector_query:
-          index: -1
       include_column_name_suffixes:
         - _datetime
     parameter_builders:
       - name: my_date_format
         class_name: SimpleDateFormatStringParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
-        batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
           column: pickup_datetime
@@ -125,20 +100,12 @@ rules:
   rule_for_regex:
     domain_builder:
       class_name: ColumnDomainBuilder
-      # BatchRequest yielding exactly one batch (March, 2019 trip data)
-      batch_request:
-        datasource_name: taxi_pandas
-        data_connector_name: monthly
-        data_asset_name: my_reports
-        data_connector_query:
-          index: -1
       include_column_name_suffixes:
         - ID
     parameter_builders:
       - name: my_regex
         class_name: RegexPatternStringParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
-        batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
           column: VendorID
@@ -163,13 +130,11 @@ rules:
     domain_builder:
       class_name: CategoricalColumnDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
-      batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
       limit_mode: VERY_FEW
       exclude_column_names: DOLocationID, RatecodeID, store_and_fwd_flag, payment_type, extra, mta_tax, improvement_surcharge, congestion_surcharge
     parameter_builders:
       - name: my_pickup_location_id_value_set
         class_name: ValueSetMultiBatchParameterBuilder
-        batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
