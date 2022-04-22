@@ -12,6 +12,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_init_payload_schema,
     anonymized_legacy_profiler_build_suite_payload_schema,
     anonymized_rule_based_profiler_run_schema,
+    anonymized_run_validation_operator_payload_schema,
     anonymized_test_yaml_config_payload_schema,
     anonymized_usage_statistics_record_schema,
     empty_payload_schema,
@@ -64,6 +65,7 @@ def test_comprehensive_list_of_messages():
         "data_context.run_checkpoint",
         "data_context.save_expectation_suite",
         "data_context.test_yaml_config",
+        "data_context.run_validation_operator",
         "datasource.sqlalchemy.connect",
         "execution_engine.sqlalchemy.connect",
         "checkpoint.run",
@@ -73,8 +75,10 @@ def test_comprehensive_list_of_messages():
         "data_context.run_profiler_on_data",
         "data_context.run_profiler_with_dynamic_arguments",
     }
+    # Note: "cli.project.upgrade" has no base event, only .begin and .end events
     assert set(valid_message_list) == set(
         UsageStatsEvents.get_all_event_names_no_begin_end_events()
+        + ["cli.project.upgrade"]
     )
 
 
@@ -163,6 +167,21 @@ def test_checkpoint_run_message():
             jsonschema.validate(
                 message["event_payload"],
                 anonymized_checkpoint_run_schema,
+            )
+
+
+def test_run_validation_operator_message():
+    usage_stats_records_messages = ["data_context.run_validation_operator"]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                anonymized_usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                anonymized_run_validation_operator_payload_schema,
             )
 
 
