@@ -518,7 +518,7 @@ def upgrade_project(
         confirm_prompt=upgrade_prompt,
         continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
         data_context=data_context,
-        usage_stats_event="cli.project.upgrade.end",
+        usage_stats_event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END.value,
     )
     cli_message(string=SECTION_SEPARATOR)
 

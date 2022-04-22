@@ -31,8 +31,6 @@ class UsageStatsEvents(enum.Enum):
     CLI_DATASOURCE_NEW_BEGIN = "cli.datasource.new.begin"
     CLI_DATASOURCE_NEW_END = "cli.datasource.new.end"
     CLI_DATASOURCE_PROFILE = "cli.datasource.profile"
-    CLI_DATASOURCE_PROFILE_BEGIN = "cli.datasource.profile.begin"
-    CLI_DATASOURCE_PROFILE_END = "cli.datasource.profile.end"
     CLI_DOCS_BUILD = "cli.docs.build"
     CLI_DOCS_BUILD_BEGIN = "cli.docs.build.begin"
     CLI_DOCS_BUILD_END = "cli.docs.build.end"
@@ -43,15 +41,8 @@ class UsageStatsEvents(enum.Enum):
     CLI_DOCS_LIST_BEGIN = "cli.docs.list.begin"
     CLI_DOCS_LIST_END = "cli.docs.list.end"
     CLI_INIT_CREATE = "cli.init.create"
-    CLI_INIT_CREATE_BEGIN = "cli.init.create.begin"
-    CLI_INIT_CREATE_END = "cli.init.create.end"
     CLI_NEW_DS_CHOICE = "cli.new_ds_choice"
-    CLI_NEW_DS_CHOICE_BEGIN = "cli.new_ds_choice.begin"
-    CLI_NEW_DS_CHOICE_END = "cli.new_ds_choice.end"
     CLI_PROJECT_CHECK_CONFIG = "cli.project.check_config"
-    CLI_PROJECT_CHECK_CONFIG_BEGIN = "cli.project.check_config.begin"
-    CLI_PROJECT_CHECK_CONFIG_END = "cli.project.check_config.end"
-    CLI_PROJECT_UPGRADE = "cli.project.upgrade"
     CLI_PROJECT_UPGRADE_BEGIN = "cli.project.upgrade.begin"
     CLI_PROJECT_UPGRADE_END = "cli.project.upgrade.end"
     CLI_STORE_LIST = "cli.store.list"
@@ -73,14 +64,8 @@ class UsageStatsEvents(enum.Enum):
     CLI_SUITE_NEW_BEGIN = "cli.suite.new.begin"
     CLI_SUITE_NEW_END = "cli.suite.new.end"
     CLI_SUITE_SCAFFOLD = "cli.suite.scaffold"
-    CLI_SUITE_SCAFFOLD_BEGIN = "cli.suite.scaffold.begin"
-    CLI_SUITE_SCAFFOLD_END = "cli.suite.scaffold.end"
     CLI_VALIDATION_OPERATOR_LIST = "cli.validation_operator.list"
-    CLI_VALIDATION_OPERATOR_LIST_BEGIN = "cli.validation_operator.list.begin"
-    CLI_VALIDATION_OPERATOR_LIST_END = "cli.validation_operator.list.end"
     CLI_VALIDATION_OPERATOR_RUN = "cli.validation_operator.run"
-    CLI_VALIDATION_OPERATOR_RUN_BEGIN = "cli.validation_operator.run.begin"
-    CLI_VALIDATION_OPERATOR_RUN_END = "cli.validation_operator.run.end"
     DATA_ASSET_VALIDATE = "data_asset.validate"
     DATA_CONTEXT___INIT__ = "data_context.__init__"
     DATA_CONTEXT_ADD_DATASOURCE = "data_context.add_datasource"
@@ -101,6 +86,19 @@ class UsageStatsEvents(enum.Enum):
     DATA_CONTEXT_RUN_PROFILER_WITH_DYNAMIC_ARGUMENTS = (
         "data_context.run_profiler_with_dynamic_arguments"
     )
+
+    @classmethod
+    def get_all_event_names(cls):
+        return [event_name.value for event_name in cls]
+
+    @classmethod
+    def get_all_event_names_no_begin_end_events(cls):
+        return [
+            event_name.value
+            for event_name in cls
+            if not (event_name.name.endswith("BEGIN"))
+            | (event_name.name.endswith("END"))
+        ]
 
     @classmethod
     def get_cli_event_name(
@@ -145,23 +143,6 @@ class UsageStatsEvents(enum.Enum):
         ]
         return event_names
 
-    @classmethod
-    def get_all_event_names(cls):
-        return [event_name.value for event_name in cls]
-
-    @classmethod
-    def get_all_event_names_no_begin_end_events(cls):
-        return [
-            event_name.value
-            for event_name in cls
-            if not (event_name.name.endswith("BEGIN"))
-            | (event_name.name.endswith("END"))
-        ]
-
-    @classmethod
-    def get_all_events(cls):
-        return [event_name for event_name in cls]
-
 
 if __name__ == "__main__":
     """You can use this optional utility to help generate enum attributes."""
@@ -181,7 +162,6 @@ if __name__ == "__main__":
         "cli.init.create",
         "cli.new_ds_choice",
         "cli.project.check_config",
-        "cli.project.upgrade",
         "cli.store.list",
         "cli.suite.delete",
         "cli.suite.demo",
