@@ -2312,7 +2312,6 @@ def test_get_metrics_and_expectations(
                         "default_expect_table_row_count_to_be_between_rule": {
                             "domain_builder": {
                                 "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
-                                "batch_request": None,
                                 "class_name": "TableDomainBuilder",
                             },
                             "parameter_builders": [
@@ -2320,7 +2319,6 @@ def test_get_metrics_and_expectations(
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                     "metric_name": "table.row_count",
                                     "json_serialize": True,
-                                    "batch_request": None,
                                     "class_name": "MetricMultiBatchParameterBuilder",
                                     "name": "table_row_count",
                                     "enforce_numeric_metric": True,
@@ -2334,7 +2332,6 @@ def test_get_metrics_and_expectations(
                             "expectation_configuration_builders": [
                                 {
                                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                                    "batch_request": None,
                                     "max_value": "$parameter.row_count_range_estimator.value[1]",
                                     "class_name": "DefaultExpectationConfigurationBuilder",
                                     "meta": {
@@ -2346,7 +2343,6 @@ def test_get_metrics_and_expectations(
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                                             "json_serialize": True,
                                             "metric_name": "table.row_count",
-                                            "batch_request": None,
                                             "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                                             "false_positive_rate": "$variables.false_positive_rate",
                                             "name": "row_count_range_estimator",
@@ -2383,7 +2379,6 @@ def test_get_metrics_and_expectations(
                             "domain_builder": {
                                 "exclude_column_name_suffixes": None,
                                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
-                                "batch_request": None,
                                 "semantic_type_filter_class_name": None,
                                 "class_name": "ColumnDomainBuilder",
                                 "include_semantic_types": None,
@@ -2398,7 +2393,6 @@ def test_get_metrics_and_expectations(
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                     "metric_name": "column.distinct_values.count",
                                     "json_serialize": True,
-                                    "batch_request": None,
                                     "class_name": "MetricMultiBatchParameterBuilder",
                                     "name": "column_distinct_values.count",
                                     "enforce_numeric_metric": True,
@@ -2413,7 +2407,6 @@ def test_get_metrics_and_expectations(
                                 {
                                     "column": "$domain.domain_kwargs.column",
                                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                                    "batch_request": None,
                                     "max_value": "$parameter.column_unique_values_range_estimator.value[1]",
                                     "class_name": "DefaultExpectationConfigurationBuilder",
                                     "strict_max": "$variables.strict_max",
@@ -2426,7 +2419,6 @@ def test_get_metrics_and_expectations(
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                                             "json_serialize": True,
                                             "metric_name": "column.distinct_values.count",
-                                            "batch_request": None,
                                             "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                                             "false_positive_rate": "$variables.false_positive_rate",
                                             "name": "column_unique_values_range_estimator",
