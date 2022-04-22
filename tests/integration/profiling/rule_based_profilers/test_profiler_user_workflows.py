@@ -1,7 +1,7 @@
 import datetime
 import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from unittest import mock
 
 import numpy as np
@@ -17,6 +17,9 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite, ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
+from great_expectations.expectations.expectation import (
+    get_default_profiler_config_for_expectation_type,
+)
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
@@ -31,8 +34,21 @@ from tests.core.usage_statistics.util import (
     usage_stats_invalid_messages_exist,
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
+from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 yaml = YAML()
+
+
+@pytest.fixture
+def set_consistent_seed_within_expectation_default_profiler_config() -> Callable:
+    def _set_seed(expectation_type: str):
+        default_profiler: Optional[
+            RuleBasedProfilerConfig
+        ] = get_default_profiler_config_for_expectation_type(expectation_type)
+        assert default_profiler is not None and default_profiler.variables is not None
+        default_profiler.variables["bootstrap_random_seed"] = RANDOM_SEED
+
+    return _set_seed
 
 
 def test_alice_columnar_table_single_batch_batches_are_accessible(
@@ -2236,8 +2252,6 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
 
     result: ExpectationValidationResult
 
-    custom_profiler_config: RuleBasedProfilerConfig
-
     suite: ExpectationSuite
 
     expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
@@ -2317,3 +2331,90 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
         atol=atol,
         err_msg=f"Actual value of {max_value_actual} differs from expected value of {max_value_expected} by more than {atol + rtol * abs(max_value_expected)} tolerance.",
     )
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time("09/26/2019 13:42:41")
+def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_columnar_table_multi_batch_data_context,
+    set_consistent_seed_within_expectation_default_profiler_config: Callable,
+) -> None:
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    result: ExpectationValidationResult
+
+    suite: ExpectationSuite
+
+    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
+    try:
+        # noinspection PyUnusedLocal
+        suite = context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+    except ge_exceptions.DataContextError:
+        suite = context.create_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite_name=expectation_suite_name,
+    )
+    assert len(validator.batches) == 36
+
+    # Utilize a consistent seed to deal with probabilistic nature of this feature.
+    set_consistent_seed_within_expectation_default_profiler_config(
+        "expect_column_unique_value_count_to_be_between"
+    )
+
+    test_cases: Tuple[Tuple[str, int, int], ...] = (
+        ("pickup_location_id", 118, 212),
+        ("dropoff_location_id", 190, 236),
+    )
+
+    for column_name, min_value_expected, max_value_expected in test_cases:
+        # Use all batches, loaded by Validator, for estimating Expectation argument values.
+        result = validator.expect_column_unique_value_count_to_be_between(
+            column=column_name,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
+        assert result.success
+
+        key: str
+        value: Any
+        expectation_config_kwargs: dict = {
+            key: value
+            for key, value in result.expectation_config["kwargs"].items()
+            if key
+            not in [
+                "min_value",
+                "max_value",
+            ]
+        }
+        assert expectation_config_kwargs == {
+            "column": column_name,
+            "strict_min": False,
+            "strict_max": False,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+        }
+
+        min_value_actual: int = result.expectation_config["kwargs"]["min_value"]
+        assert min_value_expected - 1 <= min_value_actual <= min_value_expected + 1
+
+        max_value_actual: int = result.expectation_config["kwargs"]["max_value"]
+        assert max_value_expected - 1 <= max_value_actual <= max_value_expected + 1

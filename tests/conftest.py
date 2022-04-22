@@ -2391,6 +2391,7 @@ def profiler_config_with_placeholder_args(
         },
         rules={
             "rule_1": {
+                "variables": {},
                 "domain_builder": {
                     "class_name": "TableDomainBuilder",
                 },
@@ -2763,6 +2764,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         },
         "rules": {
             "my_rule_for_user_ids": {
+                "variables": {},
                 "domain_builder": {
                     "batch_request": "$variables.alice_single_batch_data_batch_request",
                     "column_name_suffixes": ["_id"],
@@ -2859,6 +2861,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                 ],
             },
             "my_rule_for_timestamps": {
+                "variables": {},
                 "domain_builder": {
                     "batch_request": "$variables.alice_single_batch_data_batch_request",
                     "exclude_column_names": None,
@@ -3079,6 +3082,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                 ],
             },
             "my_rule_for_one_cardinality": {
+                "variables": {},
                 "domain_builder": {
                     "batch_request": "$variables.alice_single_batch_data_batch_request",
                     "exclude_column_names": ["id"],
@@ -4168,6 +4172,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         },
         "rules": {
             "row_count_range_rule": {
+                "variables": {},
                 "domain_builder": {
                     "batch_request": None,
                     "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
@@ -4212,6 +4217,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 ],
             },
             "column_ranges_rule": {
+                "variables": {},
                 "domain_builder": {
                     "exclude_column_names": None,
                     "semantic_type_filter_module_name": None,
@@ -4302,6 +4308,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 ],
             },
             "my_rule_for_timestamps": {
+                "variables": {},
                 "domain_builder": {
                     "exclude_column_names": None,
                     "semantic_type_filter_module_name": None,
@@ -4357,6 +4364,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 ],
             },
             "rule_for_regex": {
+                "variables": {},
                 "domain_builder": {
                     "exclude_column_names": None,
                     "semantic_type_filter_module_name": None,
@@ -4412,6 +4420,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 ],
             },
             "my_rule_for_very_few_cardinality": {
+                "variables": {},
                 "domain_builder": {
                     "exclude_column_names": "DOLocationID, RatecodeID, store_and_fwd_flag, payment_type, extra, mta_tax, improvement_surcharge, congestion_surcharge",
                     "semantic_type_filter_module_name": None,

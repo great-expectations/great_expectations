@@ -110,6 +110,10 @@ SINGLE_DATE_PART_DATE_PARTS: List[pytest.param] = [
         id="month_with_DatePart",
     ),
     pytest.param(
+        [SqlAlchemyDataSplitter.date_part.MONTH],
+        id="month getting date parts from SqlAlchemyDataSplitter.date_part",
+    ),
+    pytest.param(
         ["month"],
         id="month_with_string_DatePart",
     ),
@@ -220,6 +224,10 @@ MULTIPLE_DATE_PART_DATE_PARTS: List[pytest.param] = [
     pytest.param(
         [DatePart.YEAR, DatePart.MONTH],
         id="year_month_with_DatePart",
+    ),
+    pytest.param(
+        [SqlAlchemyDataSplitter.date_part.YEAR, SqlAlchemyDataSplitter.date_part.MONTH],
+        id="year_month getting date parts from SqlAlchemyDataSplitter.date_part",
     ),
     pytest.param(
         [DatePart.YEAR, "month"],

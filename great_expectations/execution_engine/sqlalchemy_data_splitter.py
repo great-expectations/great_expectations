@@ -1,3 +1,19 @@
+"""Create queries for use in sql data splitting.
+
+This module contains utilities for generating queries used by execution engines
+and data connectors to split data into batches based on the data itself. It
+is typically used from within either an execution engine or a data connector,
+not by itself.
+
+    Typical usage example:
+        __init__():
+            self._sqlalchemy_data_splitter = SqlAlchemyDataSplitter()
+
+        elsewhere():
+            splitter = self._sqlalchemy_data_splitter.get_splitter_method()
+            split_query_or_clause = splitter()
+"""
+
 import datetime
 import enum
 from typing import Callable, List, Union
@@ -39,7 +55,13 @@ class DatePart(enum.Enum):
 
 
 class SqlAlchemyDataSplitter:
-    """Methods for splitting data accessible via SqlAlchemyExecutionEngine."""
+    """Methods for splitting data accessible via SqlAlchemyExecutionEngine.
+
+    Note, for convenience, you can also access DatePart via the instance variable
+    date_part e.g. SqlAlchemyDataSplitter.date_part.MONTH
+    """
+
+    date_part: DatePart = DatePart
 
     def get_splitter_method(self, splitter_method_name: str) -> Callable:
         """Get the appropriate splitter method from the method name.
