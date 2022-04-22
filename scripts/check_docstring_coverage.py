@@ -40,14 +40,14 @@ def collect_functions(directory_path: str) -> Dict[str, List[ast.FunctionDef]]:
     """
     all_funcs: Dict[str, List[ast.FunctionDef]] = {}
 
-    file_paths: List[str] = gather_source_files(directory_path)
+    file_paths: List[str] = _gather_source_files(directory_path)
     for file_path in file_paths:
         all_funcs[file_path] = _collect_functions(file_path)
 
     return all_funcs
 
 
-def gather_source_files(directory_path: str) -> List[str]:
+def _gather_source_files(directory_path: str) -> List[str]:
     return glob.glob(f"{directory_path}/**/*.py", recursive=True)
 
 
