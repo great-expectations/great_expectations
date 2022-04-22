@@ -1,6 +1,8 @@
 import copy
 import datetime
 import logging
+import random
+import string
 import traceback
 import warnings
 from pathlib import Path
@@ -868,9 +870,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
-            queries[domain_id]["select"].append(
-                engine_fn.label(metric_to_resolve.metric_name)
-            )
+            if self.engine.dialect.name == "clickhouse":
+                queries[domain_id]["select"].append(
+                    engine_fn.label(
+                        metric_to_resolve.metric_name.join(
+                            random.choices(string.ascii_lowercase, k=2)
+                        )
+                    )
+                )
+            else:
+                queries[domain_id]["select"].append(
+                    engine_fn.label(metric_to_resolve.metric_name)
+                )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             domain_kwargs = query["domain_kwargs"]
