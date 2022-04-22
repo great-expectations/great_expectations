@@ -13,17 +13,7 @@ from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
-from great_expectations.rule_based_profiler.helpers.util import (
-    convert_variables_to_dict,
-)
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.rule_based_profiler import (
-    BaseRuleBasedProfiler,
-)
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    build_parameter_container_for_variables,
-)
+from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
@@ -31,28 +21,10 @@ from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
 from tests.render.test_util import load_notebook_from_path
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
-from tests.test_utils import get_validator_with_temporary_expectation_suite
-
-
-# TODO: <Alex>ALEX -- Make this helper utility of general use.</Alex>
-def set_bootstrap_random_seed_variable(
-    profiler: BaseRuleBasedProfiler, random_seed: int = RANDOM_SEED
-) -> None:
-    variables_dict: dict
-
-    variables_dict = convert_variables_to_dict(variables=profiler.variables)
-    variables_dict["bootstrap_random_seed"] = random_seed
-    profiler.variables = build_parameter_container_for_variables(
-        variables_configs=variables_dict
-    )
-
-    rule: Rule
-    for rule in profiler.rules:
-        variables_dict = convert_variables_to_dict(variables=rule.variables)
-        variables_dict["bootstrap_random_seed"] = random_seed
-        rule.variables = build_parameter_container_for_variables(
-            variables_configs=variables_dict
-        )
+from tests.test_utils import (
+    get_validator_with_expectation_suite,
+    set_bootstrap_random_seed_variable,
+)
 
 
 def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
@@ -76,7 +48,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     context.create_expectation_suite(expectation_suite_name)
     notebook_path: str = os.path.join(root_dir, f"run_volume_data_assistant.ipynb")
     notebook_code: str = """
-    from typing import Union
+    from typing import Optional, Union
 
     import uuid
 
@@ -93,24 +65,52 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     import great_expectations.exceptions as ge_exceptions
     """
     notebook_code += """
-    def get_validator_with_temporary_expectation_suite(
-        component_name: str,
+    def get_validator_with_expectation_suite(
         batch_request: Union[BatchRequestBase, dict],
         data_context: BaseDataContext,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+        component_name: Optional[str] = None,
     ) -> Validator:
         suite: ExpectationSuite
 
-        expectation_suite_name: str = f"tmp.{component_name}.suite_{str(uuid.uuid4())[:8]}"
-        try:
-            # noinspection PyUnusedLocal
-            suite = data_context.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-        except ge_exceptions.DataContextError:
-            suite = data_context.create_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-            print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+        generate_temp_expectation_suite_name: bool
+        create_expectation_suite: bool
+
+        if expectation_suite is not None and expectation_suite_name is not None:
+            if expectation_suite.expectation_suite_name != expectation_suite_name:
+                raise ValueError(
+                    'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
+                )
+            generate_temp_expectation_suite_name = False
+            create_expectation_suite = False
+        elif expectation_suite is None and expectation_suite_name is not None:
+            generate_temp_expectation_suite_name = False
+            create_expectation_suite = True
+        elif expectation_suite is not None and expectation_suite_name is None:
+            generate_temp_expectation_suite_name = False
+            create_expectation_suite = False
+        else:
+            generate_temp_expectation_suite_name = True
+            create_expectation_suite = True
+
+        if generate_temp_expectation_suite_name:
+            if not component_name:
+                component_name = "test"
+
+            expectation_suite_name = f"tmp.{component_name}.suite_{str(uuid.uuid4())[:8]}"
+
+        if create_expectation_suite:
+            try:
+                # noinspection PyUnusedLocal
+                expectation_suite = data_context.get_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                )
+            except ge_exceptions.DataContextError:
+                expectation_suite = data_context.create_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                )
+                print(f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".')
 
         batch_request = materialize_batch_request(batch_request=batch_request)
         validator: Validator = data_context.get_validator(
@@ -129,10 +129,12 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_temporary_expectation_suite(
-        component_name="volume_data_assistant",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="volume_data_assistant",
     )
 
     data_assistant: DataAssistant = VolumeDataAssistant(
@@ -178,10 +180,12 @@ def test_get_metrics_and_expectations(
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_temporary_expectation_suite(
-        component_name="volume_data_assistant",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="volume_data_assistant",
     )
     assert len(validator.batches) == 36
 
@@ -2686,10 +2690,12 @@ def test_execution_time_within_proper_bounds(
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_temporary_expectation_suite(
-        component_name="volume_data_assistant",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="volume_data_assistant",
     )
     assert len(validator.batches) == 36
 
