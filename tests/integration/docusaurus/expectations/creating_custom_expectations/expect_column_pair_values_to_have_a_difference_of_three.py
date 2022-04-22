@@ -26,13 +26,16 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
     """MetricProvider Class for Pair Values Diff Three MetricProvider"""
 
+    # </snippet>
+    # <snippet>
     condition_metric_name = "column_pair_values.diff_three"
+    # </snippet>
     condition_domain_keys = (
         "column_A",
         "column_B",
     )
     condition_value_keys = ()
-
+    # <snippet>
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         return abs(column_A - column_B) == 3
@@ -53,13 +56,14 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
         return row_wise_cond
 
 
-# </snippet
+# </snippet>
 # <snippet>
 class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
     """Expect two columns to have a row-wise difference of three."""
 
+    # </snippet>
     map_metric = "column_pair_values.diff_three"
-
+    # <snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
@@ -90,7 +94,7 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
             ],
         }
     ]
-
+    # </snippet>
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
     success_keys = (
         "column_A",
@@ -110,7 +114,7 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
         "column_A",
         "column_B",
     )
-    # </snippet>
+
     # <snippet>
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
@@ -139,8 +143,10 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
 
 
 # </snippet>
-# <snippet>
+
+
 if __name__ == "__main__":
+    # <snippet>
     ExpectColumnPairValuesToHaveADifferenceOfThree().print_diagnostic_checklist()
 # </snippet>
 # Note to users: code below this line is only for integration testing -- ignore!

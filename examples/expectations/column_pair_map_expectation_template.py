@@ -24,17 +24,18 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnPairMapExpectations, the main business logic for calculation will live in this class.
 class ColumnPairValuesMatchSomeCriteria(ColumnPairMapMetricProvider):
-
+    # </snippet>
     # This is the id string that will be used to reference your metric.
+    # <snippet>
     condition_metric_name = "METRIC NAME GOES HERE"
-
+    # </snippet>
     # These point your metric at the provided keys to facilitate calculation
     condition_domain_keys = (
         "column_A",
         "column_B",
     )
     condition_value_keys = ()
-    # </snippet>
+
     # <snippet>
     # This method implements the core logic for the PandasExecutionEngine
     @column_pair_condition_partial(engine=PandasExecutionEngine)
@@ -58,6 +59,7 @@ class ColumnPairValuesMatchSomeCriteria(ColumnPairMapMetricProvider):
 class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
     """TODO: Add a docstring here"""
 
+    # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = []
@@ -75,7 +77,7 @@ class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
-    # </snippet>
+
     # <snippet>
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
@@ -120,4 +122,6 @@ class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
 # </snippet>
 
 if __name__ == "__main__":
+    # <snippet>
     ExpectColumnPairValuesToMatchSomeCriteria().print_diagnostic_checklist()
+#     </snippet>
