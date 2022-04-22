@@ -249,7 +249,10 @@ class DataAssistantResult(SerializableDictDot):
             if_true=alt.value(Colors.PINK.value),
         )
 
-        anomaly_coded_line = line.encode(color=point_color_condition, tooltip=tooltip)
+        anomaly_coded_points = line.layer[1].encode(
+            color=point_color_condition, tooltip=tooltip
+        )
+        anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
 
         return band + lower_limit + upper_limit + anomaly_coded_line
 
