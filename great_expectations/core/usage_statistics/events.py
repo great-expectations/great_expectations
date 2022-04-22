@@ -90,6 +90,7 @@ class UsageStatsEvents(enum.Enum):
     DATA_CONTEXT_RUN_CHECKPOINT = "data_context.run_checkpoint"
     DATA_CONTEXT_SAVE_EXPECTATION_SUITE = "data_context.save_expectation_suite"
     DATA_CONTEXT_TEST_YAML_CONFIG = "data_context.test_yaml_config"
+    DATA_CONTEXT_RUN_VALIDATION_OPERATOR = "data_context.run_validation_operator"
     DATASOURCE_SQLALCHEMY_CONNECT = "datasource.sqlalchemy.connect"
     EXECUTION_ENGINE_SQLALCHEMY_CONNECT = "execution_engine.sqlalchemy.connect"
     CHECKPOINT_RUN = "checkpoint.run"
@@ -145,7 +146,7 @@ class UsageStatsEvents(enum.Enum):
 
 
 if __name__ == "__main__":
-    """Use this utility to generate enum."""
+    """You can use this optional utility to help generate enum attributes."""
     EVENT_LIST = [
         "cli.checkpoint.delete",
         "cli.checkpoint.list",
@@ -181,6 +182,7 @@ if __name__ == "__main__":
         "data_context.run_checkpoint",
         "data_context.save_expectation_suite",
         "data_context.test_yaml_config",
+        "data_context.run_validation_operator",
         "datasource.sqlalchemy.connect",
         "execution_engine.sqlalchemy.connect",
         "checkpoint.run",

@@ -18,6 +18,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
@@ -310,7 +311,7 @@ class BaseDataContext(ConfigPeer):
         return True
 
     @usage_statistics_enabled_method(
-        event_name="data_context.__init__",
+        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__.value,
     )
     def __init__(
         self,
@@ -775,7 +776,7 @@ class BaseDataContext(ConfigPeer):
         return site_builder
 
     @usage_statistics_enabled_method(
-        event_name="data_context.open_data_docs",
+        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS.value,
     )
     def open_data_docs(
         self,
@@ -1444,7 +1445,7 @@ class BaseDataContext(ConfigPeer):
         return batch_list[0]
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_validation_operator",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR.value,
         args_payload_fn=run_validation_operator_usage_statistics,
     )
     def run_validation_operator(
@@ -1647,7 +1648,7 @@ class BaseDataContext(ConfigPeer):
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.get_batch_list",
+        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST.value,
         args_payload_fn=get_batch_list_usage_statistics,
     )
     def get_batch_list(
@@ -1896,7 +1897,7 @@ class BaseDataContext(ConfigPeer):
         return list(self.validation_operators.keys())
 
     @usage_statistics_enabled_method(
-        event_name="data_context.add_datasource",
+        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE.value,
         args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
@@ -2303,7 +2304,7 @@ class BaseDataContext(ConfigPeer):
         return sorted_expectation_suite_names
 
     @usage_statistics_enabled_method(
-        event_name="data_context.save_expectation_suite",
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
         args_payload_fn=save_expectation_suite_usage_statistics,
     )
     def save_expectation_suite(
@@ -2566,7 +2567,7 @@ class BaseDataContext(ConfigPeer):
         return return_obj
 
     @usage_statistics_enabled_method(
-        event_name="data_context.build_data_docs",
+        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,
     )
     def build_data_docs(
         self,
@@ -3217,7 +3218,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_checkpoint",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT.value,
     )
     def run_checkpoint(
         self,
@@ -3361,7 +3362,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_profiler_with_dynamic_arguments",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
     )
     def run_profiler_with_dynamic_arguments(
         self,
@@ -3404,7 +3405,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_profiler_on_data",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_PROFILER_ON_DATA.value,
     )
     def run_profiler_on_data(
         self,
