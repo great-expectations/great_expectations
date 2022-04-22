@@ -1,6 +1,5 @@
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     build_simple_domains_from_column_names,
@@ -38,10 +37,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         max_unexpected_values: Union[str, int] = 0,
         max_unexpected_ratio: Optional[Union[str, float]] = None,
         min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -66,8 +61,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             (intra-Batch); if both "max_unexpected_values" and "max_unexpected_ratio" are specified, then
             "max_unexpected_ratio" is used (and "max_unexpected_values" is ignored).
             min_max_unexpected_values_proportion: minimum fraction of Batch objects adhering to "max_unexpected_values"
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
             data_context: DataContext associated with this profiler.
 
         For example (using default values of "max_unexpected_values" and "min_max_unexpected_values_proportion"):
@@ -103,8 +96,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             semantic_type_filter_class_name=semantic_type_filter_class_name,
             include_semantic_types=include_semantic_types,
             exclude_semantic_types=exclude_semantic_types,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
         )
 

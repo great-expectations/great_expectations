@@ -67,8 +67,6 @@ class VolumeDataAssistant(DataAssistant):
             reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=None,
             json_serialize=True,
-            batch_list=None,
-            batch_request=None,
             data_context=None,
         )
         column_distinct_values_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
@@ -81,8 +79,6 @@ class VolumeDataAssistant(DataAssistant):
             reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=None,
             json_serialize=True,
-            batch_list=None,
-            batch_request=None,
             data_context=None,
         )
         return {
