@@ -32,14 +32,6 @@ def sample_rule_dict():
             "include_column_names": None,
             "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
             "class_name": "ColumnDomainBuilder",
-            "batch_request": {
-                "datasource_name": "my_sample_datasource",
-                "data_connector_name": "default_inferred_data_connector_name",
-                "data_asset_name": "yellow_tripdata_sample_2018",
-                "batch_spec_passthrough": None,
-                "data_connector_query": {"index": -1},
-                "limit": None,
-            },
             "include_column_name_suffixes": ["_amount"],
         },
         "parameter_builders": [],
@@ -933,7 +925,6 @@ def test_run_profiler_without_dynamic_args(
         rules=None,
         batch_list=None,
         batch_request=None,
-        force_batch_data=False,
         recompute_existing_parameter_values=False,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
@@ -974,7 +965,6 @@ def test_run_profiler_with_dynamic_args(
         rules=rules,
         batch_list=None,
         batch_request=None,
-        force_batch_data=False,
         recompute_existing_parameter_values=False,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,

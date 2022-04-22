@@ -36,7 +36,6 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         false_positive_rate=1.0e-2,
         round_decimals=0,
         data_context=data_context,
-        batch_request=batch_request,
     )
 
     variables: Optional[ParameterContainer] = None
@@ -55,6 +54,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -135,7 +135,6 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             false_positive_rate=1.0e-2,
             round_decimals=1,
             data_context=data_context,
-            batch_request=batch_request,
         )
     )
 
@@ -156,6 +155,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         domain=domain,
         variables=variables,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -204,7 +204,6 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             false_positive_rate=5.0e-2,
             round_decimals=1,
             data_context=data_context,
-            batch_request=batch_request,
         )
     )
 
@@ -213,6 +212,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         variables=variables,
         parameters=parameters,
         recompute_existing_parameter_values=True,
+        batch_request=batch_request,
     )
 
     actual_value_dict = get_parameter_value_by_fully_qualified_parameter_name(

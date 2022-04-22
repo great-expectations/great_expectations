@@ -1,4 +1,4 @@
-from typing import Callable, Dict, KeysView, List
+from typing import Any, Callable, Dict, KeysView, List, Optional
 
 import altair as alt
 import pandas as pd
@@ -17,9 +17,17 @@ class VolumeDataAssistantResult(DataAssistantResult):
     def plot(
         self,
         prescriptive: bool = False,
+        theme: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
+            theme: Altair top-level chart configuration dictionary
         """
         attributed_metrics_by_table_domain: Dict[
             Domain, Dict[str, ParameterNode]
@@ -50,7 +58,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
         )
         domain_name: str = "batch"
 
-        # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
         domain_type: str = AltairDataTypes.ORDINAL.value
         metric_type: str = AltairDataTypes.QUANTITATIVE.value
 
@@ -101,7 +108,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             )
             charts.append(table_row_count_chart)
 
-        self.display(charts=charts)
+        self.display(charts=charts, theme=theme)
 
     def _plot_descriptive(
         self,
