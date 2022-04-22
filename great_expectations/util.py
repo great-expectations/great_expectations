@@ -1401,7 +1401,7 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this
     conversion takes place.
 
-    For versions of SQLAlchemy < 1.5 the implicit conversion to a subquery may not always work, so that
+    For versions of SQLAlchemy < 1.4 the implicit conversion to a subquery may not always work, so that
     also needs to be handled here, using the old equivalent method.
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
