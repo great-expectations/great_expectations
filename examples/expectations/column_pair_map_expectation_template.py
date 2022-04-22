@@ -54,19 +54,23 @@ class ColumnPairValuesMatchSomeCriteria(ColumnPairMapMetricProvider):
     #     raise NotImplementedError
 
 
-# <snippet>
 # This class defines the Expectation itself
+# <snippet>
 class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
-    """TODO: Add a docstring here"""
-
     # </snippet>
+    # <snippet>
+    """TODO: Add a docstring here"""
+    # </snippet>
+
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = []
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
+    # <snippet>
     map_metric = "METRIC NAME GOES HERE"
+    # </snippet>
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = (
@@ -119,7 +123,8 @@ class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
     }
 
 
-# </snippet>
+#     </snippet>
+
 
 if __name__ == "__main__":
     # <snippet>
