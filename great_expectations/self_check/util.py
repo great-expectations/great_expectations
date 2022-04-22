@@ -1049,7 +1049,7 @@ def build_sa_validator_with_data(
     elif sa_engine_name == "bigquery":
         engine = _create_bigquery_engine()
     elif sa_engine_name == "trino":
-        engine = _create_trino_engine()
+        engine = _create_trino_engine(db_hostname)
     else:
         engine = None
 
@@ -1646,7 +1646,7 @@ def build_test_backends_list(
         if include_trino:
             # noinspection PyUnresolvedReferences
             try:
-                engine = _create_trino_engine()
+                engine = _create_trino_engine(db_hostname)
                 conn = engine.connect()
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
@@ -2203,31 +2203,40 @@ def _bigquery_dataset() -> str:
     return dataset
 
 
-def _create_trino_engine() -> Engine:
-    trino_user = os.getenv("GE_TEST_TRINO_USER")
-    if not trino_user:
-        raise ValueError(
-            "Environment Variable GE_TEST_TRINO_USER is required to run trino expectation tests."
-        )
+def _create_trino_engine(hostname: str = "localhost", schema_name: str = "schema") -> Engine:
+    engine = create_engine(f"trino://test@{hostname}:8088/memory/{schema_name}")
+    from sqlalchemy import text
+    from trino.exceptions import TrinoUserError
+    with engine.begin() as conn:
+        try:
+            res = conn.execute(text(f"create schema {schema_name}"))
+        except TrinoUserError:
+            pass
+    return engine
+    # trino_user = os.getenv("GE_TEST_TRINO_USER")
+    # if not trino_user:
+    #     raise ValueError(
+    #         "Environment Variable GE_TEST_TRINO_USER is required to run trino expectation tests."
+    #     )
 
-    trino_password = os.getenv("GE_TEST_TRINO_PASSWORD")
-    if not trino_password:
-        raise ValueError(
-            "Environment Variable GE_TEST_TRINO_PASSWORD is required to run trino expectation tests."
-        )
+    # trino_password = os.getenv("GE_TEST_TRINO_PASSWORD")
+    # if not trino_password:
+    #     raise ValueError(
+    #         "Environment Variable GE_TEST_TRINO_PASSWORD is required to run trino expectation tests."
+    #     )
 
-    trino_account = os.getenv("GE_TEST_TRINO_ACCOUNT")
-    if not trino_account:
-        raise ValueError(
-            "Environment Variable GE_TEST_TRINO_ACCOUNT is required to run trino expectation tests."
-        )
+    # trino_account = os.getenv("GE_TEST_TRINO_ACCOUNT")
+    # if not trino_account:
+    #     raise ValueError(
+    #         "Environment Variable GE_TEST_TRINO_ACCOUNT is required to run trino expectation tests."
+    #     )
 
-    trino_cluster = os.getenv("GE_TEST_TRINO_CLUSTER")
-    if not trino_cluster:
-        raise ValueError(
-            "Environment Variable GE_TEST_TRINO_CLUSTER is required to run trino expectation tests."
-        )
+    # trino_cluster = os.getenv("GE_TEST_TRINO_CLUSTER")
+    # if not trino_cluster:
+    #     raise ValueError(
+    #         "Environment Variable GE_TEST_TRINO_CLUSTER is required to run trino expectation tests."
+    #     )
 
-    return create_engine(
-        f"trino://{trino_user}:{trino_password}@{trino_account}-{trino_cluster}.trino.galaxy.starburst.io:443/test_suite/test_ci"
-    )
+    # return create_engine(
+    #     f"trino://{trino_user}:{trino_password}@{trino_account}-{trino_cluster}.trino.galaxy.starburst.io:443/test_suite/test_ci"
+    # )
