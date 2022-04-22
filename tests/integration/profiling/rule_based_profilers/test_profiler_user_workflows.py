@@ -33,7 +33,7 @@ from tests.core.usage_statistics.util import (
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
-from tests.test_utils import get_validator_with_temporary_expectation_suite
+from tests.test_utils import get_validator_with_expectation_suite
 
 yaml = YAML()
 
@@ -678,10 +678,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 3
 
@@ -815,10 +817,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_asset_name": "my_reports",
     }
 
-    validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 3
 
@@ -945,10 +949,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         },
     }
 
-    validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 1
 
@@ -1111,10 +1117,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_asset_name": "my_reports",
     }
 
-    validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 3
 
@@ -1204,10 +1212,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         },
     }
 
-    validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 1
 
@@ -1451,10 +1461,12 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
@@ -1640,10 +1652,12 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
@@ -1813,10 +1827,12 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
@@ -1869,10 +1885,12 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
@@ -1922,10 +1940,12 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
@@ -2003,10 +2023,12 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = get_validator_with_temporary_expectation_suite(
-        component_name="profiler",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
