@@ -29,6 +29,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
             theme: Altair top-level chart configuration dictionary
         """
+        charts: List[alt.Chart] = []
+
         attributed_metrics_by_table_domain: Dict[
             Domain, Dict[str, ParameterNode]
         ] = dict(
@@ -37,6 +39,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 self.get_attributed_metrics_by_domain().items(),
             )
         )
+
         attributed_metrics_by_column_domain: Dict[
             Domain, Dict[str, ParameterNode]
         ] = dict(
@@ -46,13 +49,45 @@ class VolumeDataAssistantResult(DataAssistantResult):
             )
         )
 
-        # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
+        expectation_configurations: List[
+            ExpectationConfiguration
+        ] = self.expectation_suite.expectations
+
+        expectation_configuration: ExpectationConfiguration
+        for expectation_configuration in expectation_configurations:
+            expectation_type: str = expectation_configuration.expectation_type
+
+            chart: alt.Chart
+            if expectation_type == "expect_table_row_count_to_be_between":
+                chart = self._create_chart_for_expect_table_row_count_to_be_between(
+                    expectation_configuration=expectation_configuration,
+                    attributed_metrics=attributed_metrics_by_table_domain,
+                    prescriptive=prescriptive,
+                )
+            elif expectation_type == "expect_column_unique_value_count_to_be_between":
+                chart = self._create_chart_for_expect_column_unique_value_count_to_be_between(
+                    expectation_configuration=expectation_configuration,
+                    attributed_metrics=attributed_metrics_by_column_domain,
+                    prescriptive=prescriptive,
+                )
+            else:
+                raise Exception()
+
+            charts.append(chart)
+
+        self.display(charts=charts, theme=theme)
+
+    def _create_chart_for_expect_table_row_count_to_be_between(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        prescriptive: bool,
+    ) -> alt.Chart:
         attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
-            attributed_metrics_by_table_domain.values()
+            attributed_metrics.values()
         )[0]
 
         # Altair does not accept periods.
-        # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
         metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
             ".", "_"
         )
@@ -75,40 +110,32 @@ class VolumeDataAssistantResult(DataAssistantResult):
         df[metric_name] = metric_values
 
         plot_impl: Callable
-        charts: List[alt.Chart] = []
+        if prescriptive:
+            for (
+                kwarg_name,
+                kwarg_value,
+            ) in expectation_configuration.kwargs.items():
+                df[kwarg_name] = kwarg_value
+            plot_impl = self._plot_prescriptive
+        else:
+            plot_impl = self._plot_descriptive
 
-        expectation_configurations: List[
-            ExpectationConfiguration
-        ] = self.expectation_suite.expectations
+        chart: alt.Chart = plot_impl(
+            df=df,
+            metric_name=metric_name,
+            metric_type=metric_type,
+            domain_name=domain_name,
+            domain_type=domain_type,
+        )
+        return chart
 
-        expectation_configuration: ExpectationConfiguration
-        for expectation_configuration in expectation_configurations:
-            expectation_type: str = expectation_configuration.expectation_type
-            if prescriptive:
-                if expectation_type == "expect_table_row_count_to_be_between":
-                    for (
-                        kwarg_name,
-                        kwarg_value,
-                    ) in expectation_configuration.kwargs.items():
-                        df[kwarg_name] = kwarg_value
-                elif (
-                    expectation_type == "expect_column_unique_value_count_to_be_between"
-                ):
-                    pass
-                plot_impl = self._plot_prescriptive
-            else:
-                plot_impl = self._plot_descriptive
-
-            table_row_count_chart: alt.Chart = plot_impl(
-                df=df,
-                metric_name=metric_name,
-                metric_type=metric_type,
-                domain_name=domain_name,
-                domain_type=domain_type,
-            )
-            charts.append(table_row_count_chart)
-
-        self.display(charts=charts, theme=theme)
+    def _create_chart_for_expect_column_unique_value_count_to_be_between(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        prescriptive: bool,
+    ) -> alt.Chart:
+        pass
 
     def _plot_descriptive(
         self,
