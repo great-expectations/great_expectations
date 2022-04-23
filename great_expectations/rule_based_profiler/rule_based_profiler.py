@@ -1,8 +1,11 @@
 import copy
 import json
 import logging
+import sys
 import uuid
 from typing import Any, Dict, List, Optional, Set, Union
+
+from tqdm.auto import tqdm
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -82,7 +85,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def __init__(
         self,
         profiler_config: RuleBasedProfilerConfig,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
     ):
         """
@@ -94,7 +97,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         Args:
             profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration
-            data_context: DataContext object that defines a full runtime environment (data access, etc.)
+            data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
         """
         name: str = profiler_config.name
         config_version: float = profiler_config.config_version
@@ -192,7 +195,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def _init_rule_domain_builder(
         domain_builder_config: dict,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> DomainBuilder:
         domain_builder: DomainBuilder = instantiate_class_from_config(
             config=domain_builder_config,
@@ -214,7 +217,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
     ) -> None:
@@ -224,10 +226,31 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules: name/(configuration-dictionary) (overrides)
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
         """
+        # Check to see if the user has disabled progress bars
+        disable = False
+        if self._data_context:
+            progress_bars = self._data_context.progress_bars
+            # If progress_bars are not present, assume we want them enabled
+            if progress_bars is not None:
+                if "globally" in progress_bars:
+                    disable = not progress_bars["globally"]
+
+                if "rule_based_profiler" in progress_bars:
+                    disable = not progress_bars["rule_based_profiler"]
+
+        # noinspection PyProtectedMember,SpellCheckingInspection
+        progress_bar: tqdm = tqdm(
+            desc="Profiling Dataset",
+            disable=disable,
+        )
+        progress_bar.update(0)
+        progress_bar.refresh()
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+
         effective_variables: Optional[
             ParameterContainer
         ] = self.reconcile_profiler_variables(
@@ -253,16 +276,22 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         rule_state: RuleState
         rule: Rule
+        domains_count: int = 0
         for rule in effective_rules:
             rule_state = rule.run(
                 variables=effective_variables,
                 batch_list=batch_list,
                 batch_request=batch_request,
-                force_batch_data=force_batch_data,
                 recompute_existing_parameter_values=recompute_existing_parameter_values,
                 reconciliation_directives=reconciliation_directives,
             )
             self.rule_states.append(rule_state)
+
+            domains_count += len(rule_state.domains)
+            progress_bar.update(domains_count)
+            progress_bar.refresh()
+
+        progress_bar.close()
 
     def get_expectation_suite(
         self,
@@ -839,7 +868,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def run_profiler(
-        data_context: "DataContext",  # noqa: F821
+        data_context: "BaseDataContext",  # noqa: F821
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
@@ -861,7 +890,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules,
             batch_list=None,
             batch_request=None,
-            force_batch_data=False,
             recompute_existing_parameter_values=False,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )
@@ -876,7 +904,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def run_profiler_on_data(
-        data_context: "DataContext",  # noqa: F821
+        data_context: "BaseDataContext",  # noqa: F821
         profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -903,7 +931,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules,
             batch_list=batch_list,
             batch_request=batch_request,
-            force_batch_data=True,
             recompute_existing_parameter_values=False,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         )
@@ -919,7 +946,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def add_profiler(
         config: RuleBasedProfilerConfig,
-        data_context: "DataContext",  # noqa: F821
+        data_context: "BaseDataContext",  # noqa: F821
         profiler_store: ProfilerStore,
         ge_cloud_id: Optional[str] = None,
     ) -> "RuleBasedProfiler":  # noqa: F821
@@ -930,7 +957,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store.store_name}"'
             )
 
-        # Chetan - 20220204 - DataContext to be removed once it can be decoupled from RBP
+        # Chetan - 20220204 - BaseDataContext to be removed once it can be decoupled from RBP
         new_profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
             config=config.to_json_dict(),
             runtime_environment={
@@ -982,7 +1009,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def get_profiler(
-        data_context: "DataContext",  # noqa: F821
+        data_context: "BaseDataContext",  # noqa: F821
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
@@ -1068,7 +1095,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def self_check(self, pretty_print: bool = True) -> dict:
         """
-        Necessary to enable integration with `DataContext.test_yaml_config`
+        Necessary to enable integration with `BaseDataContext.test_yaml_config`
         Args:
             pretty_print: flag to turn on verbose output
         Returns:
@@ -1234,7 +1261,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         config_version: float,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """
         Create a new Profiler using configured rules.
@@ -1248,7 +1275,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             variables: Any variables to be substituted within the rules
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
             expectation_configuration_builders configuration components
-            data_context: DataContext object that defines a full runtime environment (data access, etc.)
+            data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
             name=name,

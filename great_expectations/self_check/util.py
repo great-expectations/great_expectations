@@ -273,6 +273,7 @@ except (ImportError, KeyError):
     mssqlDialect = None
     MSSQL_TYPES = {}
 
+import tempfile
 
 SQL_DIALECT_NAMES = (
     "sqlite",
@@ -1580,10 +1581,26 @@ def generate_expectation_tests(
 
         for c in backends:
 
+            datasets = []
+
             try:
-                validator_with_data = get_test_validator_with_data(
-                    c, d["data"], d["schemas"]
-                )
+                if isinstance(d["data"], list):
+                    sqlite_db_path = generate_sqlite_db_path()
+                    for dataset in d["data"]:
+                        datasets.append(
+                            get_test_validator_with_data(
+                                c,
+                                dataset["data"],
+                                dataset.get("schemas"),
+                                table_name=dataset.get("dataset_name"),
+                                sqlite_db_path=sqlite_db_path,
+                            )
+                        )
+                    validator_with_data = datasets[0]
+                else:
+                    validator_with_data = get_test_validator_with_data(
+                        c, d["data"], d["schemas"]
+                    )
             except Exception as e:
                 # Adding these print statements for build_gallery.py's console output
                 print("\n\n[[ Problem calling get_test_validator_with_data ]]")
@@ -2052,3 +2069,25 @@ def _bigquery_dataset() -> str:
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
         )
     return dataset
+
+
+def generate_sqlite_db_path():
+    """Creates a temporary directory and absolute path to an ephemeral sqlite_db within that temp directory.
+
+    Used to support testing of multi-table expectations without creating temp directories at import.
+
+    Returns:
+        str: An absolute path to the ephemeral db within the created temporary directory.
+    """
+    tmp_dir = str(tempfile.mkdtemp())
+    abspath = os.path.abspath(
+        os.path.join(
+            tmp_dir,
+            "sqlite_db"
+            + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+            + ".db",
+        )
+    )
+    return abspath

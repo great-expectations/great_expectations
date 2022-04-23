@@ -1,7 +1,5 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from great_expectations.core.batch import BatchRequestBase
-from great_expectations.data_context import BaseDataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -16,6 +14,7 @@ from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
     VolumeDataAssistantResult,
 )
+from great_expectations.validator.validator import Validator
 
 
 class VolumeDataAssistant(DataAssistant):
@@ -31,13 +30,11 @@ class VolumeDataAssistant(DataAssistant):
     def __init__(
         self,
         name: str,
-        batch_request: Union[BatchRequestBase, dict],
-        data_context: BaseDataContext = None,
+        validator: Validator,
     ):
         super().__init__(
             name=name,
-            batch_request=batch_request,
-            data_context=data_context,
+            validator=validator,
         )
 
     @property
@@ -67,8 +64,6 @@ class VolumeDataAssistant(DataAssistant):
             reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=None,
             json_serialize=True,
-            batch_list=None,
-            batch_request=None,
             data_context=None,
         )
         column_distinct_values_metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = MetricMultiBatchParameterBuilder(
@@ -81,8 +76,6 @@ class VolumeDataAssistant(DataAssistant):
             reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=None,
             json_serialize=True,
-            batch_list=None,
-            batch_request=None,
             data_context=None,
         )
         return {

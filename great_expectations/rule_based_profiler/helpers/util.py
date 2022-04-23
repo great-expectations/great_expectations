@@ -37,7 +37,7 @@ NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
@@ -92,7 +92,7 @@ def get_validator(
 
 
 def get_batch_ids(
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
@@ -126,7 +126,7 @@ def get_batch_ids(
 
 
 def build_batch_request(
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -136,11 +136,11 @@ def build_batch_request(
 
     # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
     effective_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest, dict]
+        Union[BatchRequestBase, dict]
     ] = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=batch_request,
-        expected_return_type=(BatchRequest, RuntimeBatchRequest, dict),
+        expected_return_type=(BatchRequestBase, dict),
         variables=variables,
         parameters=parameters,
     )
