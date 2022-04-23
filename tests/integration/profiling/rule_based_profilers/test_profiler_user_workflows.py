@@ -1,5 +1,4 @@
 import datetime
-import uuid
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from unittest import mock
@@ -12,7 +11,6 @@ from packaging import version
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite, ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest
@@ -35,6 +33,7 @@ from tests.core.usage_statistics.util import (
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
+from tests.test_utils import get_validator_with_expectation_suite
 
 yaml = YAML()
 
@@ -673,30 +672,18 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
-    # Use all batches, loaded by Validator, for estimating Expectation argument values.
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 3
 
@@ -815,20 +802,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     batch_request: dict
 
     validator: Validator
@@ -844,9 +817,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_asset_name": "my_reports",
     }
 
-    validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 3
 
@@ -973,6 +949,15 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         },
     }
 
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
+    )
+    assert len(validator.batches) == 1
+
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -1008,12 +993,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             },
         },
     )
-
-    validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
-    )
-    assert len(validator.batches) == 1
 
     result = validator.expect_column_values_to_be_between(
         column=column_name,
@@ -1078,20 +1057,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     batch_request: dict
 
     validator: Validator
@@ -1152,9 +1117,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_asset_name": "my_reports",
     }
 
-    validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 3
 
@@ -1244,9 +1212,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         },
     }
 
-    validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 1
 
@@ -1483,22 +1454,6 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
     )
 
-    result: ExpectationValidationResult
-
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1506,16 +1461,21 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
-    result = validator.expect_table_row_count_to_be_between(
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
+    result: ExpectationValidationResult = (
+        validator.expect_table_row_count_to_be_between(
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
     )
     assert result.expectation_config.kwargs["auto"]
 
@@ -1686,29 +1646,18 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
 
     custom_profiler_config: RuleBasedProfilerConfig
 
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
@@ -1870,23 +1819,7 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
-    result: ExpectationValidationResult
-
     custom_profiler_config: RuleBasedProfilerConfig
-
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1894,14 +1827,17 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
-    result = validator.expect_column_values_to_be_in_set(
+    result: ExpectationValidationResult = validator.expect_column_values_to_be_in_set(
         column="passenger_count",
         result_format="SUMMARY",
         include_config=True,
@@ -1941,23 +1877,7 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
-    result: ExpectationValidationResult
-
     custom_profiler_config: RuleBasedProfilerConfig
-
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1965,14 +1885,17 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
-    result = validator.expect_column_min_to_be_between(
+    result: ExpectationValidationResult = validator.expect_column_min_to_be_between(
         column="fare_amount",
         result_format="SUMMARY",
         include_config=True,
@@ -2011,36 +1934,23 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
-    result: ExpectationValidationResult
-
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
-    result = validator.expect_column_max_to_be_between(
+    result: ExpectationValidationResult = validator.expect_column_max_to_be_between(
         column="fare_amount",
         result_format="SUMMARY",
         include_config=True,
@@ -2107,29 +2017,18 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
 
     result: ExpectationValidationResult
 
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 

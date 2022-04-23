@@ -70,19 +70,19 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         validation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         **kwargs,
     ):
         """
         Args:
             expectation_type: the "expectation_type" argument of "ExpectationConfiguration" object to be emitted.
-            meta: the "meta" argument of "ExpectationConfiguration" object to be emitted.
+            meta: the "meta" argument of "ExpectationConfiguration" object to be emitted
             condition: Boolean statement (expressed as string and following specified grammar), which controls whether
-            or not underlying logic should be executed and thus resulting "ExpectationConfiguration" emitted.
+            or not underlying logic should be executed and thus resulting "ExpectationConfiguration" emitted
             validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
-            fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance.
-            These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder".
-            data_context: DataContext
+            fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance
+            These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
+            data_context: BaseDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
         """
 

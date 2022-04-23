@@ -120,7 +120,7 @@ class ParameterBuilder(Builder, ABC):
             List[ParameterBuilderConfig]
         ] = None,
         json_serialize: Union[str, bool] = True,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
@@ -133,7 +133,7 @@ class ParameterBuilder(Builder, ABC):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            data_context: DataContext
+            data_context: BaseDataContext associated with ParameterBuilder
         """
         super().__init__(data_context=data_context)
 
@@ -667,7 +667,7 @@ class ParameterBuilder(Builder, ABC):
 
 def init_rule_parameter_builders(
     parameter_builder_configs: Optional[List[dict]] = None,
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
 ) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
     if parameter_builder_configs is None:
         return None
@@ -683,7 +683,7 @@ def init_rule_parameter_builders(
 
 def init_parameter_builder(
     parameter_builder_config: Union["ParameterBuilderConfig", dict],  # noqa: F821
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
 ) -> "ParameterBuilder":  # noqa: F821
     if not isinstance(parameter_builder_config, dict):
         parameter_builder_config = parameter_builder_config.to_dict()

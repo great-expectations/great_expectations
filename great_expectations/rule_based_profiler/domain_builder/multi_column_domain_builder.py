@@ -14,12 +14,12 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
     def __init__(
         self,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """
         Args:
-            include_column_names: Explicitly specified desired columns.
-            data_context: DataContext associated with this profiler.
+            include_column_names: Explicitly specified desired columns
+            data_context: BaseDataContext associated with this DomainBuilder
         """
         super().__init__(
             include_column_names=include_column_names,

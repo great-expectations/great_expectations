@@ -86,7 +86,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def __init__(
         self,
         profiler_config: RuleBasedProfilerConfig,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
     ):
         """
@@ -98,7 +98,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         Args:
             profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration
-            data_context: DataContext object that defines a full runtime environment (data access, etc.)
+            data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
         """
         name: str = profiler_config.name
         config_version: float = profiler_config.config_version
@@ -196,7 +196,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def _init_rule_domain_builder(
         domain_builder_config: dict,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ) -> DomainBuilder:
         domain_builder: DomainBuilder = instantiate_class_from_config(
             config=domain_builder_config,
@@ -869,7 +869,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def run_profiler(
-        data_context: "DataContext",  # noqa: F821
+        data_context: "BaseDataContext",  # noqa: F821
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
@@ -905,7 +905,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def run_profiler_on_data(
-        data_context: "DataContext",  # noqa: F821
+        data_context: "BaseDataContext",  # noqa: F821
         profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -947,7 +947,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def add_profiler(
         config: RuleBasedProfilerConfig,
-        data_context: "DataContext",  # noqa: F821
+        data_context: "BaseDataContext",  # noqa: F821
         profiler_store: ProfilerStore,
         ge_cloud_id: Optional[str] = None,
     ) -> "RuleBasedProfiler":  # noqa: F821
@@ -958,7 +958,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store.store_name}"'
             )
 
-        # Chetan - 20220204 - DataContext to be removed once it can be decoupled from RBP
+        # Chetan - 20220204 - BaseDataContext to be removed once it can be decoupled from RBP
         new_profiler: "RuleBasedProfiler" = instantiate_class_from_config(  # noqa: F821
             config=config.to_json_dict(),
             runtime_environment={
@@ -1010,7 +1010,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     @staticmethod
     def get_profiler(
-        data_context: "DataContext",  # noqa: F821
+        data_context: "BaseDataContext",  # noqa: F821
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
@@ -1096,7 +1096,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
     def self_check(self, pretty_print: bool = True) -> dict:
         """
-        Necessary to enable integration with `DataContext.test_yaml_config`
+        Necessary to enable integration with `BaseDataContext.test_yaml_config`
         Args:
             pretty_print: flag to turn on verbose output
         Returns:
@@ -1262,7 +1262,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         config_version: float,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """
         Create a new Profiler using configured rules.
@@ -1276,7 +1276,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             variables: Any variables to be substituted within the rules
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
             expectation_configuration_builders configuration components
-            data_context: DataContext object that defines a full runtime environment (data access, etc.)
+            data_context: BaseDataContext object that defines full runtime environment (data access, etc.)
         """
         profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
             name=name,
