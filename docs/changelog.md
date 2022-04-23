@@ -2,6 +2,20 @@
 title: Changelog
 ---
 
+### 0.16.0
+* [FEATURE] new checksum expectation (#4657)
+* [BUGFIX] Fix clickhouse same-alias issue (#4389)
+* [BUGFIX] Update helper to add explicit alias to subqueries for SQLA version < 1.4 (#4660)
+* [BUGFIX] Add missing events to schema (#4917)
+* [BUGFIX] Enables successful parsing of test cases for multi-table expectations (#4906)
+* [BUGFIX] check contrib requirements (#4922)
+* [MAINTENANCE] Remove DataContext from DataAssistant  (#4931)
+* [MAINTENANCE] Improve Altair plotting extensibility (#4923)
+* [MAINTENANCE] Remove BatchRequest from Rule-Based Profiler Configuration and from Builder Constructor Arguments (#4927)
+* [MAINTENANCE] Ensure that code style scripts in CI/CD exit early on failure (#4921)
+* [MAINTENANCE] Fix broken link for checklist (#4932)
+* [MAINTENANCE] ProgressBar for DataAssistant RuleBasedProfiler computations. (#4918)
+
 ### 0.15.2
 * [FEATURE] Split data assets using sql datetime columns (#4871)
 * [FEATURE] Plot metrics with `DataAssistantResult.plot()` (#4873)
