@@ -522,7 +522,7 @@ class ExpectationSuite(SerializableDictDot):
     def _add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
-        send_usage_event: bool,
+        send_usage_event: bool = True,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
@@ -539,6 +539,7 @@ class ExpectationSuite(SerializableDictDot):
                 and so whether we should add or replace.
             overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
                 False.
+
         Returns:
             The ExpectationConfiguration to add or replace.
         Raises:
@@ -598,19 +599,61 @@ class ExpectationSuite(SerializableDictDot):
                 success=success,
             )
 
+    def add_expectation_configurations(
+        self,
+        expectation_configurations: List[ExpectationConfiguration],
+        send_usage_event: bool = True,
+        match_type: str = "domain",
+        overwrite_existing: bool = True,
+    ) -> List[ExpectationConfiguration]:
+        """
+        Args:
+            expectation_configurations: The List of candidate new/modifed "ExpectationConfiguration" objects for Suite.
+            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
+                public add_expectation() method, this is set to `True`.
+            match_type: The criteria used to determine whether the Suite already has an "ExpectationConfiguration"
+                object, matching the specified criteria, and thus whether we should add or replace (i.e., "upsert").
+            overwrite_existing: If "ExpectationConfiguration" already exists, this will cause it to be overwritten if
+                True and raise an error if False.
+
+        Returns:
+            The List of "ExpectationConfiguration" objects attempted to be added or replaced (can differ from the list
+            of "ExpectationConfiguration" objects in "self.expectations" at the completion of this method's execution).
+        Raises:
+            More than one match
+            One match if overwrite_existing = False
+        """
+        expectation_configuration: ExpectationConfiguration
+        expectation_configurations_attempted_to_be_added: List[
+            ExpectationConfiguration
+        ] = [
+            self.add_expectation(
+                expectation_configuration=expectation_configuration,
+                send_usage_event=send_usage_event,
+                match_type=match_type,
+                overwrite_existing=overwrite_existing,
+            )
+            for expectation_configuration in expectation_configurations
+        ]
+        return expectation_configurations_attempted_to_be_added
+
     def add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
+        send_usage_event: bool = True,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
         """
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
+            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
+                public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
                 and so whether we should add or replace.
             overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
                 False.
+
         Returns:
             The ExpectationConfiguration to add or replace.
         Raises:
@@ -619,7 +662,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
-            send_usage_event=True,
+            send_usage_event=send_usage_event,
             match_type=match_type,
             overwrite_existing=overwrite_existing,
         )
