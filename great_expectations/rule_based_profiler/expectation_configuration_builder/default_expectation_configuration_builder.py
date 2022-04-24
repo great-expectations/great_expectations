@@ -16,7 +16,6 @@ from pyparsing import (
 )
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -71,33 +70,25 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         validation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         **kwargs,
     ):
         """
         Args:
             expectation_type: the "expectation_type" argument of "ExpectationConfiguration" object to be emitted.
-            meta: the "meta" argument of "ExpectationConfiguration" object to be emitted.
+            meta: the "meta" argument of "ExpectationConfiguration" object to be emitted
             condition: Boolean statement (expressed as string and following specified grammar), which controls whether
-            or not underlying logic should be executed and thus resulting "ExpectationConfiguration" emitted.
+            or not underlying logic should be executed and thus resulting "ExpectationConfiguration" emitted
             validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
-            fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance.
-            These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder".
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance
+            These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
+            data_context: BaseDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
         """
 
         super().__init__(
             expectation_type=expectation_type,
             validation_parameter_builder_configs=validation_parameter_builder_configs,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
             **kwargs,
         )

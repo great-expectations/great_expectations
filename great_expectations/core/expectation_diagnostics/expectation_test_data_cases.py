@@ -88,6 +88,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
             exact_match_out=exact_match_out,
             suppress_test_for=suppress_test_for,
             only_for=kwargs.get("only_for"),
+            include_in_gallery=kwargs.get("include_in_gallery", False),
         )
 
 

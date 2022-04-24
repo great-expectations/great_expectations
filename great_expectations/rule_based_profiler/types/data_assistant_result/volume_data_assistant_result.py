@@ -1,39 +1,33 @@
-from dataclasses import dataclass
 from typing import Any, Callable, Dict, KeysView, List, Optional
 
 import altair as alt
 import pandas as pd
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.parameter_builder import MetricValues
 from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
 
 
-@dataclass
 class VolumeDataAssistantResult(DataAssistantResult):
-    """
-    DataAssistantResult is an immutable "dataclass" object, designed to hold results of executing "data_assistant.run()"
-    method.  Available properties ("metrics", "expectation_configurations", "expectation_suite", and configuration
-    object (of type "RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
-    """
-
-    profiler_config: Optional["RuleBasedProfilerConfig"] = None  # noqa: F821
-    metrics_by_domain: Optional[Dict[Domain, Dict[str, Any]]] = None
-    # Obtain "expectation_configurations" using "expectation_configurations = expectation_suite.expectations".
-    # Obtain "meta/details" using "meta = expectation_suite.meta".
-    expectation_suite: Optional[ExpectationSuite] = None
-    execution_time: Optional[float] = None  # Execution time (in seconds).
-
     def plot(
         self,
         prescriptive: bool = False,
+        theme: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
+
+        Altair theme configuration reference:
+            https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+
+        Args:
+            prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
+            theme: Altair top-level chart configuration dictionary
         """
         # TODO: <Alex>ALEX Currently, only one Domain key (with domain_type of MetricDomainTypes.TABLE) is utilized; enhancements may require additional Domain key(s) with different domain_type value(s) to be incorporated.</Alex>
         # noinspection PyTypeChecker
@@ -56,9 +50,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
         )
         domain_name: str = "batch"
 
-        # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
-        domain_type: str = "ordinal"
-        metric_type: str = "quantitative"
+        domain_type: str = AltairDataTypes.ORDINAL.value
+        metric_type: str = AltairDataTypes.QUANTITATIVE.value
 
         batch_ids: KeysView[str]
         metric_values: MetricValues
@@ -86,8 +79,11 @@ class VolumeDataAssistantResult(DataAssistantResult):
                     expectation_configuration.expectation_type
                     == "expect_table_row_count_to_be_between"
                 ):
-                    df["min_value"] = expectation_configuration.kwargs["min_value"]
-                    df["max_value"] = expectation_configuration.kwargs["max_value"]
+                    for (
+                        kwarg_name,
+                        kwarg_value,
+                    ) in expectation_configuration.kwargs.items():
+                        df[kwarg_name] = kwarg_value
 
             plot_impl = self._plot_prescriptive
         else:
@@ -103,15 +99,15 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         charts.append(table_row_count_chart)
 
-        self.display(charts=charts)
+        self.display(charts=charts, theme=theme)
 
     def _plot_descriptive(
         self,
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: str,
+        metric_type: alt.StandardType,
         domain_name: str,
-        domain_type: str,
+        domain_type: alt.StandardType,
     ) -> alt.Chart:
         descriptive_chart: alt.Chart = self.get_line_chart(
             df=df,
@@ -126,9 +122,9 @@ class VolumeDataAssistantResult(DataAssistantResult):
         self,
         df: pd.DataFrame,
         metric_name: str,
-        metric_type: str,
+        metric_type: alt.StandardType,
         domain_name: str,
-        domain_type: str,
+        domain_type: alt.StandardType,
     ) -> alt.Chart:
         prescriptive_chart: alt.Chart = (
             self.get_expect_domain_values_to_be_between_chart(

@@ -8,15 +8,12 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from dateutil.parser import parse
-from numpy import negative
 
 from great_expectations import __version__ as ge_version
-from great_expectations import execution_engine
-from great_expectations.core import expectation_configuration
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
@@ -34,7 +31,7 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
-    ExecutedExpectationTestCase,
+    ExpectationBackendTestResultCounts,
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticMaturityMessages,
     ExpectationErrorDiagnostics,
@@ -58,6 +55,7 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
+    get_expectation_impl,
     get_metric_kwargs,
     register_expectation,
     register_renderer,
@@ -75,6 +73,7 @@ from great_expectations.render.types import (
     renderedAtomicValueSchema,
 )
 from great_expectations.render.util import num_to_str
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
@@ -905,7 +904,6 @@ class Expectation(metaclass=MetaExpectation):
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
-        return_only_gallery_examples: bool = False,
     ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
@@ -928,37 +926,35 @@ class Expectation(metaclass=MetaExpectation):
         that do not exist). These errors are added under "errors" key in the report.
         """
 
-        # errors :List[ExpectationErrorDiagnostics] = []
+        errors: List[ExpectationErrorDiagnostics] = []
 
         library_metadata: ExpectationDescriptionDiagnostics = (
             self._get_augmented_library_metadata()
         )
-        gallery_examples: List[ExpectationTestDataCases] = self._get_examples(
-            return_only_gallery_examples=True
-        )
         examples: List[ExpectationTestDataCases] = self._get_examples(
-            return_only_gallery_examples=return_only_gallery_examples
+            return_only_gallery_examples=False
         )
+        gallery_examples: List[ExpectationTestDataCases] = []
+        for example in examples:
+            _tests_to_include = [
+                test for test in example.tests if test.include_in_gallery
+            ]
+            example = deepcopy(example)
+            if _tests_to_include:
+                example.tests = _tests_to_include
+                gallery_examples.append(example)
+
         description_diagnostics: ExpectationDescriptionDiagnostics = (
             self._get_description_diagnostics()
         )
 
-        executed_test_cases: ExecutedExpectationTestCase = self._execute_test_examples(
-            expectation_type=description_diagnostics.snake_name, examples=examples
+        _expectation_config: ExpectationConfiguration = (
+            self._get_expectation_configuration_from_examples(examples)
         )
-
-        renderers: List[
-            ExpectationRendererDiagnostics
-        ] = self._get_renderer_diagnostics(
-            expectation_type=description_diagnostics.snake_name,
-            executed_test_cases=executed_test_cases,
-            registered_renderers=_registered_renderers,
-        )
-
         metric_diagnostics_list: List[
             ExpectationMetricDiagnostics
         ] = self._get_metric_diagnostics_list(
-            executed_test_cases=executed_test_cases,
+            expectation_config=_expectation_config,
         )
 
         introspected_execution_engines: ExpectationExecutionEngineDiagnostics = (
@@ -975,15 +971,48 @@ class Expectation(metaclass=MetaExpectation):
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
+        backend_test_result_counts: List[
+            ExpectationBackendTestResultCounts
+        ] = ExpectationDiagnostics._get_backends_from_test_results(test_results)
+
+        renderers: List[
+            ExpectationRendererDiagnostics
+        ] = self._get_renderer_diagnostics(
+            expectation_type=description_diagnostics.snake_name,
+            test_diagnostics=test_results,
+            registered_renderers=_registered_renderers,
+        )
+
         maturity_checklist: ExpectationDiagnosticMaturityMessages = (
             self._get_maturity_checklist(
                 library_metadata=library_metadata,
                 description=description_diagnostics,
                 examples=examples,
                 tests=test_results,
+                backend_test_result_counts=backend_test_result_counts,
                 execution_engines=introspected_execution_engines,
             )
         )
+
+        # Set final maturity level based on status of all checks
+        all_experimental = all(
+            [check.passed for check in maturity_checklist.experimental]
+        )
+        all_beta = all([check.passed for check in maturity_checklist.beta])
+        all_production = all([check.passed for check in maturity_checklist.production])
+        if all_production and all_beta and all_experimental:
+            library_metadata.maturity = "PRODUCTION"
+        elif all_beta and all_experimental:
+            library_metadata.maturity = "BETA"
+        else:
+            library_metadata.maturity = "EXPERIMENTAL"
+
+        # Set the errors found when running tests
+        errors = [
+            test_result.error_diagnostics
+            for test_result in test_results
+            if test_result.error_diagnostics
+        ]
 
         return ExpectationDiagnostics(
             library_metadata=library_metadata,
@@ -994,8 +1023,9 @@ class Expectation(metaclass=MetaExpectation):
             metrics=metric_diagnostics_list,
             execution_engines=introspected_execution_engines,
             tests=test_results,
+            backend_test_result_counts=backend_test_result_counts,
             maturity_checklist=maturity_checklist,
-            errors=[],  #!!!FIXME!!!
+            errors=errors,
         )
 
     def print_diagnostic_checklist(
@@ -1120,65 +1150,21 @@ class Expectation(metaclass=MetaExpectation):
             }
         )
 
-    def _execute_test_examples(
+    def _get_expectation_configuration_from_examples(
         self,
-        expectation_type: str,
         examples: List[ExpectationTestDataCases],
-    ) -> List[ExecutedExpectationTestCase]:
-        """Executes a set of test examples.
-
-        This method is an internal, intermediate step within run_diagnostics.
-        """
-
-        if examples == []:
-            return []
-
-        example_data, example_test = self._choose_example(examples)
-
-        executed_expectation_test_cases: List[ExecutedExpectationTestCase] = []
-        for test_data, test_case in [(example_data, example_test)]:
-
-            # TODO: this should be creating a Batch using an engine
-            test_batch = Batch(data=pd.DataFrame(test_data))
-
-            expectation_config = ExpectationConfiguration(
-                **{"expectation_type": expectation_type, "kwargs": test_case.input}
-            )
-
-            try:
-                validation_results = self._instantiate_example_validation_results(
-                    test_batch=test_batch,
-                    expectation_config=expectation_config,
-                )
-            except (
-                GreatExpectationsError,
-                AttributeError,
-                ImportError,
-                LookupError,
-                ValueError,
-                SyntaxError,
-            ) as e:
-                error_diagnostics = ExpectationErrorDiagnostics(
-                    error_msg=str(e),
-                    stack_trace=traceback.format_exc(),
-                )
-                validation_result = None
-
-            else:
-                error_diagnostics = None
-                validation_result = validation_results[0]
-
-            executed_expectation_test_cases.append(
-                ExecutedExpectationTestCase(
-                    data=test_data,
-                    test_case=test_case,
-                    expectation_configuration=expectation_config,
-                    validation_result=validation_result,
-                    error_diagnostics=error_diagnostics,
-                )
-            )
-
-        return executed_expectation_test_cases
+    ) -> ExpectationConfiguration:
+        """Return an ExpectationConfiguration instance using test input expected to succeed"""
+        if examples:
+            for example in examples:
+                tests = example.tests
+                if tests:
+                    for test in tests:
+                        if test.output.get("success"):
+                            return ExpectationConfiguration(
+                                expectation_type=self.expectation_type,
+                                kwargs=test.input,
+                            )
 
     @staticmethod
     def _choose_example(
@@ -1194,19 +1180,6 @@ class Expectation(metaclass=MetaExpectation):
         example_test_case = example["tests"][0]
 
         return example_test_data, example_test_case
-
-    @staticmethod
-    def _instantiate_example_validation_results(
-        test_batch: Batch,
-        expectation_config: ExpectationConfiguration,
-    ) -> List[ExpectationValidationResult]:
-        """Convenience method to validate data and instantiate ExpectationValidationResults"""
-
-        validation_results = Validator(
-            execution_engine=PandasExecutionEngine(), batches=[test_batch]
-        ).graph_validate(configurations=[expectation_config])
-
-        return validation_results
 
     @staticmethod
     def _get_registered_renderers(
@@ -1229,59 +1202,51 @@ class Expectation(metaclass=MetaExpectation):
         """Generate test results. This is an internal method for run_diagnostics."""
         test_results = []
 
-        exp_tests = cls._generate_expectation_tests(
-            snake_name=expectation_type,
+        exp_tests = generate_expectation_tests(
+            expectation_type=expectation_type,
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
         for exp_test in exp_tests:
-            try:
-                result = evaluate_json_test_cfe(
-                    validator=exp_test["validator_with_data"],
-                    expectation_type=exp_test["expectation_type"],
-                    test=exp_test["test"],
+            validation_result, error_message, stack_trace = evaluate_json_test_cfe(
+                validator=exp_test["validator_with_data"],
+                expectation_type=exp_test["expectation_type"],
+                test=exp_test["test"],
+                raise_exception=False,
+            )
+            if error_message is None:
+                test_passed = True
+                error_diagnostics = None
+            else:
+                error_diagnostics = ExpectationErrorDiagnostics(
+                    error_msg=error_message,
+                    stack_trace=stack_trace,
+                    test_title=exp_test["test"]["title"],
+                    test_backend=exp_test["backend"],
                 )
-                test_results.append(
-                    ExpectationTestDiagnostics(
-                        **{
-                            "test_title": exp_test["test"]["title"],
-                            "backend": exp_test["backend"],
-                            "test_passed": True,
-                        }
-                    )
+                test_passed = False
+
+            if validation_result:
+                # The ExpectationTestDiagnostics instance will error when calling it's to_dict()
+                # method (AttributeError: 'ExpectationConfiguration' object has no attribute 'raw_kwargs')
+                validation_result.expectation_config.raw_kwargs = (
+                    validation_result.expectation_config._raw_kwargs
                 )
-            except Exception as e:
-                test_results.append(
-                    ExpectationTestDiagnostics(
-                        **{
-                            "test_title": exp_test["test"]["title"],
-                            "backend": exp_test["backend"],
-                            "test_passed": False,
-                            "error_message": str(e),
-                            "stack_trace": traceback.format_exc(),
-                        }
-                    )
+
+            test_results.append(
+                ExpectationTestDiagnostics(
+                    test_title=exp_test["test"]["title"],
+                    backend=exp_test["backend"],
+                    test_passed=test_passed,
+                    include_in_gallery=exp_test["test"]["include_in_gallery"],
+                    validation_result=validation_result,
+                    error_diagnostics=error_diagnostics,
                 )
+            )
 
         return test_results
-
-    @staticmethod
-    def _generate_expectation_tests(
-        snake_name: str,
-        test_data_cases: List[ExpectationTestDataCases],
-        execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
-        raise_exceptions_for_backends: bool = False,
-    ):
-        """This is a placeholder method to adapt the typed objects used to build ExpectationDiagnostics with the untyped dictionaries used in generate_expectation_tests"""
-        parameterized_tests = generate_expectation_tests(
-            expectation_type=snake_name,
-            test_data_cases=test_data_cases,
-            execution_engine_diagnostics=execution_engine_diagnostics,
-            raise_exceptions_for_backends=raise_exceptions_for_backends,
-        )
-        return parameterized_tests
 
     def _get_rendered_result_as_string(self, rendered_result) -> str:
         """Convenience method to get rendered results as strings."""
@@ -1338,7 +1303,7 @@ class Expectation(metaclass=MetaExpectation):
     def _get_renderer_diagnostics(
         self,
         expectation_type: str,
-        executed_test_cases: List[ExecutedExpectationTestCase],
+        test_diagnostics: List[ExpectationTestDiagnostics],
         registered_renderers: List[str],
         standard_renderers: List[str] = [
             "renderer.answer",
@@ -1350,7 +1315,7 @@ class Expectation(metaclass=MetaExpectation):
             "renderer.question",
         ],
     ) -> List[ExpectationRendererDiagnostics]:
-        """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExecutedExpectationTestCases."""
+        """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExpectationTestDiagnostics."""
 
         supported_renderers = self._get_registered_renderers(
             expectation_type=expectation_type,
@@ -1363,15 +1328,15 @@ class Expectation(metaclass=MetaExpectation):
             if renderer_name in supported_renderers:
                 _, renderer = registered_renderers[expectation_type][renderer_name]
 
-                for executed_test_case in executed_test_cases:
-                    test_title = executed_test_case["test_case"]["title"]
+                for test_diagnostic in test_diagnostics:
+                    test_title = test_diagnostic["test_title"]
 
                     try:
                         rendered_result = renderer(
-                            configuration=executed_test_case[
-                                "expectation_configuration"
+                            configuration=test_diagnostic["validation_result"][
+                                "expectation_config"
                             ],
-                            result=executed_test_case["validation_result"],
+                            result=test_diagnostic["validation_result"],
                         )
                         rendered_result_str = self._get_rendered_result_as_string(
                             rendered_result
@@ -1448,18 +1413,15 @@ class Expectation(metaclass=MetaExpectation):
 
     def _get_metric_diagnostics_list(
         self,
-        executed_test_cases: List[ExecutedExpectationTestCase],
+        expectation_config: ExpectationConfiguration,
     ) -> List[ExpectationMetricDiagnostics]:
         """Check to see which Metrics are upstream dependencies for this Expectation."""
 
         # NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
         # There's probably some part of get_validation_dependencies that can be factored out to remove the dependency.
 
-        if len(executed_test_cases) < 1:
+        if not expectation_config:
             return []
-
-        expectation_config = executed_test_cases[0]["expectation_configuration"]
-
         validation_dependencies = self.get_validation_dependencies(
             configuration=expectation_config
         )
@@ -1509,6 +1471,8 @@ class Expectation(metaclass=MetaExpectation):
                 )
             if forbidden_keys:
                 problems.append(f"Extra key(s) found: {sorted(forbidden_keys)}")
+            if type(augmented_library_metadata["requirements"]) != list:
+                problems.append("library_metadata['requirements'] is not a list ")
             if not problems:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
         else:
@@ -1523,6 +1487,7 @@ class Expectation(metaclass=MetaExpectation):
         description: ExpectationDescriptionDiagnostics,
         examples: List[ExpectationTestDataCases],
         tests: List[ExpectationTestDiagnostics],
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
         execution_engines: ExpectationExecutionEngineDiagnostics,
     ) -> ExpectationDiagnosticMaturityMessages:
         """Generate maturity checklist messages"""
@@ -1539,7 +1504,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         experimental_checks.append(
             ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
-                tests
+                backend_test_result_counts
             )
         )
         experimental_checks.append(ExpectationDiagnostics._check_linting(self))
@@ -1550,7 +1515,7 @@ class Expectation(metaclass=MetaExpectation):
         beta_checks.append(ExpectationDiagnostics._check_renderer_methods(self))
         beta_checks.append(
             ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(
-                tests
+                backend_test_result_counts
             )
         )
 
@@ -2442,3 +2407,22 @@ def _format_map_output(
         return return_obj
 
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")
+
+
+def get_default_profiler_config_for_expectation_type(
+    expectation_type: str,
+) -> Optional[RuleBasedProfilerConfig]:
+    """Retrieves the default profiler config as defined within a given Expectation.
+
+    Args:
+        expectation_type (str): The name of the Expectation to parse
+
+    Returns:
+        The default profiler config within the target Expectation.
+        If not available, returns None.
+    """
+    expectation_impl = get_expectation_impl(expectation_name=expectation_type)
+    profiler_config: Optional[
+        RuleBasedProfilerConfig
+    ] = expectation_impl.default_kwarg_values.get("profiler_config")
+    return profiler_config

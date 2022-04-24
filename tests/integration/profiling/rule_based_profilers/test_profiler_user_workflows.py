@@ -1,7 +1,6 @@
 import datetime
-import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from unittest import mock
 
 import numpy as np
@@ -12,11 +11,13 @@ from packaging import version
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite, ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
+from great_expectations.expectations.expectation import (
+    get_default_profiler_config_for_expectation_type,
+)
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
@@ -31,8 +32,22 @@ from tests.core.usage_statistics.util import (
     usage_stats_invalid_messages_exist,
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
+from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
+from tests.test_utils import get_validator_with_expectation_suite
 
 yaml = YAML()
+
+
+@pytest.fixture
+def set_consistent_seed_within_expectation_default_profiler_config() -> Callable:
+    def _set_seed(expectation_type: str):
+        default_profiler: Optional[
+            RuleBasedProfilerConfig
+        ] = get_default_profiler_config_for_expectation_type(expectation_type)
+        assert default_profiler is not None and default_profiler.variables is not None
+        default_profiler.variables["bootstrap_random_seed"] = RANDOM_SEED
+
+    return _set_seed
 
 
 def test_alice_columnar_table_single_batch_batches_are_accessible(
@@ -118,7 +133,13 @@ def test_alice_profiler_user_workflow_single_batch(
         data_context=data_context,
     )
 
-    profiler.run()
+    # BatchRequest yielding exactly one batch
+    alice_single_batch_data_batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+    profiler.run(batch_request=alice_single_batch_data_batch_request)
     expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
@@ -167,36 +188,15 @@ def test_alice_profiler_user_workflow_single_batch(
                         "anonymized_domain_builder": {
                             "parent_class": "DomainBuilder",
                             "anonymized_class": "9c8f42e45ec72197d6fb4d0d5194c89d",
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
-                                    "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
-                                    "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
-                                }
-                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
                                 "anonymized_name": "2b4df3c7cf39207db3e08477e1ea8f79",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
-                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
-                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
-                                    }
-                                },
                             },
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
                                 "anonymized_name": "bea5e4c3943006d008899cdb1ebc3fb4",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
-                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
-                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
-                                    }
-                                },
                             },
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -228,58 +228,23 @@ def test_alice_profiler_user_workflow_single_batch(
                         "anonymized_name": "116c25bb5cf9b84958846024fe1c2b7b",
                         "anonymized_domain_builder": {
                             "parent_class": "ColumnDomainBuilder",
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
-                                    "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
-                                    "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
-                                }
-                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
                                 "anonymized_name": "fa3ce9b81f1acc2f2730005e05737ea7",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
-                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
-                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
-                                    }
-                                },
                             },
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
                                 "anonymized_name": "0bb947e516b26696a66787dc936570b7",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
-                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
-                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
-                                    }
-                                },
                             },
                             {
                                 "parent_class": "MetricMultiBatchParameterBuilder",
                                 "anonymized_name": "66093b34c0c2e4ff275edf1752bcd27e",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
-                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
-                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
-                                    }
-                                },
                             },
                             {
                                 "parent_class": "SimpleDateFormatStringParameterBuilder",
                                 "anonymized_name": "c5caa53c1ee64365b96ec96a285a6b3a",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
-                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
-                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
-                                    }
-                                },
                             },
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -313,25 +278,11 @@ def test_alice_profiler_user_workflow_single_batch(
                         "anonymized_name": "83a71ec7b61bbdb8eb728ebc428f8aea",
                         "anonymized_domain_builder": {
                             "parent_class": "CategoricalColumnDomainBuilder",
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
-                                    "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
-                                    "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
-                                }
-                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "ValueSetMultiBatchParameterBuilder",
                                 "anonymized_name": "46d405b0294a06e1335c04bf1441dabf",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "aaea35c1421a0d3b7afe28cdfbd4b8d1",
-                                        "anonymized_data_connector_name": "5bed7acb38185c12e3050a0c34f27ff4",
-                                        "anonymized_data_asset_name": "d1c08815a25bc17c0493a50cd51ba31f",
-                                    }
-                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -343,7 +294,7 @@ def test_alice_profiler_user_workflow_single_batch(
                     },
                 ],
                 "rule_count": 3,
-                "variable_count": 6,
+                "variable_count": 5,
             },
             "event": "profiler.run",
             "success": True,
@@ -464,7 +415,13 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         data_context=data_context,
     )
 
-    profiler.run()
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    profiler.run(batch_request=batch_request)
 
     domain: Domain
 
@@ -601,17 +558,6 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                             {
                                 "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
                                 "anonymized_name": "dc1bc513697628c3a7f5b73494234a01",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                    },
-                                    "batch_request_optional_top_level_keys": [
-                                        "data_connector_query"
-                                    ],
-                                    "data_connector_query_keys": ["index"],
-                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -625,48 +571,15 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                         "anonymized_name": "9b95e917ab153669bcd32ec522604556",
                         "anonymized_domain_builder": {
                             "parent_class": "ColumnDomainBuilder",
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                    "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                    "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                },
-                                "batch_request_optional_top_level_keys": [
-                                    "data_connector_query"
-                                ],
-                                "data_connector_query_keys": ["index"],
-                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
                                 "anonymized_name": "ace31374d026e07ec630c7459915e628",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                    },
-                                    "batch_request_optional_top_level_keys": [
-                                        "data_connector_query"
-                                    ],
-                                    "data_connector_query_keys": ["index"],
-                                },
                             },
                             {
                                 "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
                                 "anonymized_name": "f2dcb0a322c3ab161d0fd33e6bac3d7f",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                    },
-                                    "batch_request_optional_top_level_keys": [
-                                        "data_connector_query"
-                                    ],
-                                    "data_connector_query_keys": ["index"],
-                                },
                             },
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -684,33 +597,11 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                         "anonymized_name": "716348d3985f11679de53ec2b6ce5987",
                         "anonymized_domain_builder": {
                             "parent_class": "ColumnDomainBuilder",
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                    "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                    "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                },
-                                "batch_request_optional_top_level_keys": [
-                                    "data_connector_query"
-                                ],
-                                "data_connector_query_keys": ["index"],
-                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "SimpleDateFormatStringParameterBuilder",
                                 "anonymized_name": "49526fea6686e5f87be493967a5ba6b7",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                    },
-                                    "batch_request_optional_top_level_keys": [
-                                        "data_connector_query"
-                                    ],
-                                    "data_connector_query_keys": ["index"],
-                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -724,33 +615,11 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                         "anonymized_name": "38f59421a7c7b59a45b547a73c7714f9",
                         "anonymized_domain_builder": {
                             "parent_class": "ColumnDomainBuilder",
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                    "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                    "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                },
-                                "batch_request_optional_top_level_keys": [
-                                    "data_connector_query"
-                                ],
-                                "data_connector_query_keys": ["index"],
-                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "RegexPatternStringParameterBuilder",
                                 "anonymized_name": "2a791a71865e26a98b3f9f89ef83556b",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                    },
-                                    "batch_request_optional_top_level_keys": [
-                                        "data_connector_query"
-                                    ],
-                                    "data_connector_query_keys": ["index"],
-                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -764,33 +633,11 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                         "anonymized_name": "57a6fe0ec12e12107fc275b42855ab1c",
                         "anonymized_domain_builder": {
                             "parent_class": "CategoricalColumnDomainBuilder",
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                    "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                    "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                },
-                                "batch_request_optional_top_level_keys": [
-                                    "data_connector_query"
-                                ],
-                                "data_connector_query_keys": ["index"],
-                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "ValueSetMultiBatchParameterBuilder",
                                 "anonymized_name": "73b050124a17a420f2fb3e605f7111b2",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                    },
-                                    "batch_request_optional_top_level_keys": [
-                                        "data_connector_query"
-                                    ],
-                                    "data_connector_query_keys": ["index"],
-                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -802,7 +649,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
                     },
                 ],
                 "rule_count": 5,
-                "variable_count": 4,
+                "variable_count": 3,
             },
             "event": "profiler.run",
             "success": True,
@@ -825,30 +672,18 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
-    # Use all batches, loaded by Validator, for estimating Expectation argument values.
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 3
 
@@ -967,20 +802,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     batch_request: dict
 
     validator: Validator
@@ -996,9 +817,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_asset_name": "my_reports",
     }
 
-    validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 3
 
@@ -1120,8 +944,19 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
-        "data_connector_query": {"index": 1},
+        "data_connector_query": {
+            "index": 1,
+        },
     }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
+    )
+    assert len(validator.batches) == 1
 
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
@@ -1133,7 +968,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                         "name": "my_min_estimator",
                         "class_name": "MetricMultiBatchParameterBuilder",
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "batch_request": batch_request,
                         "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "enforce_numeric_metric": True,
@@ -1159,12 +993,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             },
         },
     )
-
-    validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
-    )
-    assert len(validator.batches) == 1
 
     result = validator.expect_column_values_to_be_between(
         column=column_name,
@@ -1229,20 +1057,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     batch_request: dict
 
     validator: Validator
@@ -1303,9 +1117,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_asset_name": "my_reports",
     }
 
-    validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 3
 
@@ -1395,31 +1212,14 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         },
     }
 
-    validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 1
-
-    # Use one batch (at index "1"), loaded by Validator as active_batch, for DomainBuilder purposes.
-    domain_batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-        "data_connector_query": {
-            "index": 1,
-        },
-    }
-
-    # Use all batches, except ("latest") active_batch, loaded by Validator, for estimating Expectation argument values.
-    parameter_builder_batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-        "data_connector_query": {
-            "index": "1",
-        },
-    }
 
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
@@ -1434,14 +1234,12 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                    "batch_request": domain_batch_request,
                 },
                 "parameter_builders": [
                     {
                         "name": "my_min_estimator",
                         "class_name": "MetricMultiBatchParameterBuilder",
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "batch_request": parameter_builder_batch_request,
                         "metric_name": "column.min",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "enforce_numeric_metric": True,
@@ -1549,7 +1347,14 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         data_context=data_context,
     )
 
-    profiler.run()
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    profiler.run(batch_request=batch_request)
+
     expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
             "test_configuration_bootstrap_estimator"
@@ -1613,17 +1418,6 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
                             {
                                 "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
                                 "anonymized_name": "dc1bc513697628c3a7f5b73494234a01",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                    },
-                                    "batch_request_optional_top_level_keys": [
-                                        "data_connector_query"
-                                    ],
-                                    "data_connector_query_keys": ["index"],
-                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -1635,7 +1429,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 3,
+                "variable_count": 2,
             },
             "event": "profiler.run",
             "success": True,
@@ -1660,22 +1454,6 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
     )
 
-    result: ExpectationValidationResult
-
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1683,16 +1461,21 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
-    result = validator.expect_table_row_count_to_be_between(
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
+    result: ExpectationValidationResult = (
+        validator.expect_table_row_count_to_be_between(
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
     )
     assert result.expectation_config.kwargs["auto"]
 
@@ -1733,7 +1516,14 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         data_context=data_context,
     )
 
-    profiler.run()
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    profiler.run(batch_request=batch_request)
+
     expectation_suite: ExpectationSuite = profiler.get_expectation_suite(
         expectation_suite_name=quentin_columnar_table_multi_batch["test_configuration"][
             "expectation_suite_name"
@@ -1813,33 +1603,11 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                         "anonymized_name": "f54fc6b216560f2a56a3cced587fb6e3",
                         "anonymized_domain_builder": {
                             "parent_class": "ColumnDomainBuilder",
-                            "anonymized_batch_request": {
-                                "anonymized_batch_request_required_top_level_properties": {
-                                    "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                    "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                    "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                },
-                                "batch_request_optional_top_level_keys": [
-                                    "data_connector_query"
-                                ],
-                                "data_connector_query_keys": ["index"],
-                            },
                         },
                         "anonymized_parameter_builders": [
                             {
                                 "parent_class": "NumericMetricRangeMultiBatchParameterBuilder",
                                 "anonymized_name": "71243c854c0c04e9e014d02a793abe55",
-                                "anonymized_batch_request": {
-                                    "anonymized_batch_request_required_top_level_properties": {
-                                        "anonymized_datasource_name": "12ed1b4af37ec138531bd721a8813a33",
-                                        "anonymized_data_connector_name": "869034ebc8733404d9d6ac564012f441",
-                                        "anonymized_data_asset_name": "57cd583969f4508907a12c880d78efd6",
-                                    },
-                                    "batch_request_optional_top_level_keys": [
-                                        "data_connector_query"
-                                    ],
-                                    "data_connector_query_keys": ["index"],
-                                },
                             }
                         ],
                         "anonymized_expectation_configuration_builders": [
@@ -1851,7 +1619,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 6,
+                "variable_count": 5,
             },
             "event": "profiler.run",
             "success": True,
@@ -1878,53 +1646,22 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
 
     custom_profiler_config: RuleBasedProfilerConfig
 
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
     parameter_builder_batch_request: dict
-
-    # Use one batch (at index "1"), loaded by Validator as active_batch, for DomainBuilder purposes.
-    domain_batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-        "data_connector_query": {
-            "index": -1,
-        },
-    }
-
-    # Use all batches, except ("latest") active_batch, loaded by Validator, for estimating Expectation argument values.
-    parameter_builder_batch_request = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-        "data_connector_query": {
-            "index": ":-1",
-        },
-    }
 
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
@@ -1934,14 +1671,12 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                    "batch_request": domain_batch_request,
                 },
                 "parameter_builders": [
                     {
                         "name": "quantile_value_ranges",
                         "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "batch_request": parameter_builder_batch_request,
                         "metric_name": "column.quantile_values",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "metric_value_kwargs": {
@@ -1985,16 +1720,16 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
 
     value_ranges_expected = [
         [
-            5.842754275,
+            5.85,
             6.5,
         ],
         [
-            8.675167517,
-            9.570000000,
+            8.52,
+            9.56,
         ],
         [
-            13.344354435,
-            15.650000000,
+            13.35,
+            15.62,
         ],
     ]
 
@@ -2018,13 +1753,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                 err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {ATOL + RTOL * abs(value_ranges[1][idx])} tolerance.",
             )
 
-    # Use all batches, loaded by Validator, for estimating Expectation argument values.
-    parameter_builder_batch_request = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -2033,14 +1761,12 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                    "batch_request": domain_batch_request,
                 },
                 "parameter_builders": [
                     {
                         "name": "quantile_value_ranges",
                         "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "batch_request": parameter_builder_batch_request,
                         "metric_name": "column.quantile_values",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "metric_value_kwargs": {
@@ -2093,23 +1819,7 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
-    result: ExpectationValidationResult
-
     custom_profiler_config: RuleBasedProfilerConfig
-
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -2117,14 +1827,17 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
-    result = validator.expect_column_values_to_be_in_set(
+    result: ExpectationValidationResult = validator.expect_column_values_to_be_in_set(
         column="passenger_count",
         result_format="SUMMARY",
         include_config=True,
@@ -2164,23 +1877,7 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
-    result: ExpectationValidationResult
-
     custom_profiler_config: RuleBasedProfilerConfig
-
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -2188,14 +1885,17 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
-    result = validator.expect_column_min_to_be_between(
+    result: ExpectationValidationResult = validator.expect_column_min_to_be_between(
         column="fare_amount",
         result_format="SUMMARY",
         include_config=True,
@@ -2234,38 +1934,23 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
-    result: ExpectationValidationResult
-
-    custom_profiler_config: RuleBasedProfilerConfig
-
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
-    result = validator.expect_column_max_to_be_between(
+    result: ExpectationValidationResult = validator.expect_column_max_to_be_between(
         column="fare_amount",
         result_format="SUMMARY",
         include_config=True,
@@ -2317,3 +2002,79 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
         atol=atol,
         err_msg=f"Actual value of {max_value_actual} differs from expected value of {max_value_expected} by more than {atol + rtol * abs(max_value_expected)} tolerance.",
     )
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time("09/26/2019 13:42:41")
+def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_columnar_table_multi_batch_data_context,
+    set_consistent_seed_within_expectation_default_profiler_config: Callable,
+) -> None:
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    result: ExpectationValidationResult
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
+    )
+    assert len(validator.batches) == 36
+
+    # Utilize a consistent seed to deal with probabilistic nature of this feature.
+    set_consistent_seed_within_expectation_default_profiler_config(
+        "expect_column_unique_value_count_to_be_between"
+    )
+
+    test_cases: Tuple[Tuple[str, int, int], ...] = (
+        ("pickup_location_id", 118, 212),
+        ("dropoff_location_id", 190, 236),
+    )
+
+    for column_name, min_value_expected, max_value_expected in test_cases:
+        # Use all batches, loaded by Validator, for estimating Expectation argument values.
+        result = validator.expect_column_unique_value_count_to_be_between(
+            column=column_name,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
+        assert result.success
+
+        key: str
+        value: Any
+        expectation_config_kwargs: dict = {
+            key: value
+            for key, value in result.expectation_config["kwargs"].items()
+            if key
+            not in [
+                "min_value",
+                "max_value",
+            ]
+        }
+        assert expectation_config_kwargs == {
+            "column": column_name,
+            "strict_min": False,
+            "strict_max": False,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+        }
+
+        min_value_actual: int = result.expectation_config["kwargs"]["min_value"]
+        assert min_value_expected - 1 <= min_value_actual <= min_value_expected + 1
+
+        max_value_actual: int = result.expectation_config["kwargs"]["max_value"]
+        assert max_value_expected - 1 <= max_value_actual <= max_value_expected + 1

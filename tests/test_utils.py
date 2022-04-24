@@ -1,7 +1,9 @@
 import logging
 import os
 import uuid
+import warnings
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Generator, List, Optional, Union, cast
 
@@ -9,6 +11,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import BatchRequestBase, materialize_batch_request
+from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store import (
     CheckpointStore,
     ProfilerStore,
@@ -25,7 +31,23 @@ from great_expectations.data_context.store.util import (
     save_config_to_store_backend,
 )
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
-from great_expectations.data_context.util import build_store_from_config
+from great_expectations.data_context.util import (
+    build_store_from_config,
+    instantiate_class_from_config,
+)
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.rule_based_profiler.helpers.util import (
+    convert_variables_to_dict,
+)
+from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.rule_based_profiler import (
+    BaseRuleBasedProfiler,
+)
+from great_expectations.rule_based_profiler.types import (
+    build_parameter_container_for_variables,
+)
+from great_expectations.validator.validator import Validator
+from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 logger = logging.getLogger(__name__)
 
@@ -474,6 +496,14 @@ def get_bigquery_connection_url() -> str:
     return f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 
+@dataclass
+class LoadedTable:
+    """Output of loading a table via load_data_into_test_database."""
+
+    table_name: str
+    inserted_dataframe: pd.DataFrame
+
+
 def load_data_into_test_database(
     table_name: str,
     connection_string: str,
@@ -481,7 +511,8 @@ def load_data_into_test_database(
     csv_paths: Optional[List[str]] = None,
     load_full_dataset: bool = False,
     convert_colnames_to_datetime: Optional[List[str]] = None,
-) -> pd.DataFrame:
+    random_table_suffix: bool = False,
+) -> LoadedTable:
     """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
 
     This includes local Dockerized DBs like postgres, but also cloud-dbs like BigQuery and Redshift.
@@ -493,6 +524,8 @@ def load_data_into_test_database(
         csv_paths: list of paths of csvs to write.
         load_full_dataset: if False, load only the first 10 rows.
         convert_colnames_to_datetime: List of column names to convert to datetime before writing to db.
+        random_table_suffix: If true, add 8 random characters to the table suffix and remove other tables with the
+            same prefix.
 
     Returns:
         For convenience, the pandas dataframe that was used to load the data.
@@ -504,6 +537,9 @@ def load_data_into_test_database(
 
     if convert_colnames_to_datetime is None:
         convert_colnames_to_datetime = []
+
+    if random_table_suffix:
+        table_name: str = f"{table_name}_{str(uuid.uuid4())[:8]}"
 
     import pandas as pd
 
@@ -521,6 +557,10 @@ def load_data_into_test_database(
 
     all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
 
+    return_value: LoadedTable = LoadedTable(
+        table_name=table_name, inserted_dataframe=all_dfs_concatenated
+    )
+
     connection = None
 
     if sa:
@@ -530,7 +570,7 @@ def load_data_into_test_database(
             "Attempting to load data in to tests SqlAlchemy database, but unable to load SqlAlchemy context; "
             "install optional sqlalchemy dependency for support."
         )
-        return all_dfs_concatenated
+        return return_value
     try:
         connection = engine.connect()
         print(f"Dropping table {table_name}")
@@ -539,7 +579,7 @@ def load_data_into_test_database(
         all_dfs_concatenated.to_sql(
             name=table_name, con=engine, index=False, if_exists="append"
         )
-        return all_dfs_concatenated
+        return return_value
     except SQLAlchemyError as e:
         logger.error(
             """Docs integration tests encountered an error while loading test-data into test-database."""
@@ -548,6 +588,55 @@ def load_data_into_test_database(
     finally:
         connection.close()
         engine.dispose()
+
+
+def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:
+    """Drop all tables starting with the provided table_prefix.
+    Note: Uses private method InferredAssetSqlDataConnector._introspect_db()
+    to get the table names to not duplicate code, but should be refactored in the
+    future to not use a private method.
+
+    Args:
+        connection_string: To connect to the database.
+        table_prefix: First characters of the tables you want to remove.
+
+    Returns:
+        List of deleted tables.
+    """
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        connection_string=connection_string
+    )
+    data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "temp_data_connector",
+        },
+        runtime_environment={
+            "execution_engine": execution_engine,
+            "datasource_name": "temp_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+    introspection_output = data_connector._introspect_db()
+
+    tables_to_drop: List[str] = []
+    tables_dropped: List[str] = []
+
+    for table in introspection_output:
+        if table["table_name"].startswith(table_prefix):
+            tables_to_drop.append(table["table_name"])
+
+    connection = execution_engine.engine.connect()
+    for table_name in tables_to_drop:
+        print(f"Dropping table {table_name}")
+        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+        tables_dropped.append(table_name)
+
+    tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))
+    if len(tables_skipped) > 0:
+        warnings.warn(f"Warning: Tables skipped: {tables_skipped}")
+
+    return tables_dropped
 
 
 @contextmanager
@@ -635,3 +724,83 @@ def _get_batch_request_from_validator(validator):
 
     my_batch_request = my_batch.batch_request
     return my_batch_request
+
+def get_validator_with_expectation_suite(
+    batch_request: Union[BatchRequestBase, dict],
+    data_context: BaseDataContext,
+    expectation_suite: Optional[ExpectationSuite] = None,
+    expectation_suite_name: Optional[str] = None,
+    component_name: str = "test",
+) -> Validator:
+    """
+    Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
+    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
+    """
+    suite: ExpectationSuite
+
+    generate_temp_expectation_suite_name: bool
+    create_expectation_suite: bool
+
+    if expectation_suite is not None and expectation_suite_name is not None:
+        if expectation_suite.expectation_suite_name != expectation_suite_name:
+            raise ValueError(
+                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
+            )
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = False
+    elif expectation_suite is None and expectation_suite_name is not None:
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = True
+    elif expectation_suite is not None and expectation_suite_name is None:
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = False
+    else:
+        generate_temp_expectation_suite_name = True
+        create_expectation_suite = True
+
+    if generate_temp_expectation_suite_name:
+        expectation_suite_name = f"tmp.{component_name}.suite_{str(uuid.uuid4())[:8]}"
+
+    if create_expectation_suite:
+        try:
+            # noinspection PyUnusedLocal
+            expectation_suite = data_context.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+        except ge_exceptions.DataContextError:
+            expectation_suite = data_context.create_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+            print(
+                f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
+            )
+
+    batch_request = materialize_batch_request(batch_request=batch_request)
+    validator: Validator = data_context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    return validator
+
+
+def set_bootstrap_random_seed_variable(
+    profiler: BaseRuleBasedProfiler,
+    random_seed: int = RANDOM_SEED,
+) -> None:
+    variables_dict: dict
+
+    variables_dict = convert_variables_to_dict(variables=profiler.variables)
+    variables_dict["bootstrap_random_seed"] = random_seed
+    profiler.variables = build_parameter_container_for_variables(
+        variables_configs=variables_dict
+    )
+
+    rule: Rule
+    for rule in profiler.rules:
+        variables_dict = convert_variables_to_dict(variables=rule.variables)
+        variables_dict["bootstrap_random_seed"] = random_seed
+        rule.variables = build_parameter_container_for_variables(
+            variables_configs=variables_dict
+        )
