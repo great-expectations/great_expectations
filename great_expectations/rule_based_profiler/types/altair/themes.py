@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import List
 
+import altair as alt
+
 from great_expectations.types import ColorPalettes, Colors
 
 # Size
@@ -20,6 +22,7 @@ title_font_size: int = 15
 title_color: str = Colors.GREEN.value
 subtitle_font_size: int = 12
 subtitle_color: str = Colors.PURPLE.value
+subtitle_font_weight: alt.FontWeight = alt.FontWeight("bold")
 
 # Both Axes
 axis_title_color: str = Colors.PURPLE.value
@@ -83,6 +86,7 @@ class AltairThemes(Enum):
             "fontSize": title_font_size,
             "subtitleFontSize": subtitle_font_size,
             "subtitleColor": subtitle_color,
+            "subtitleFontWeight": subtitle_font_weight,
         },
         "axis": {
             "titleFontSize": axis_title_font_size,
