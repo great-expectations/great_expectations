@@ -26,6 +26,7 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
@@ -77,7 +78,7 @@ class BaseCheckpoint(ConfigPeer):
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
     #  while run_name_template also undergoes strftime datetime substitution
     @usage_statistics_enabled_method(
-        event_name="checkpoint.run",
+        event_name=UsageStatsEvents.CHECKPOINT_RUN.value,
         args_payload_fn=get_checkpoint_run_usage_statistics,
     )
     def run(

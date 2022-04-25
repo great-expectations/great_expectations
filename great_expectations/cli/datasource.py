@@ -10,6 +10,7 @@ from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.templates import YAMLToString
 from great_expectations.datasource.types import DatasourceTypes
@@ -47,13 +48,21 @@ class SupportedDatabaseBackends(enum.Enum):
 def datasource(ctx):
     """Datasource operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
-    usage_stats_prefix = f"cli.datasource.{ctx.invoked_subcommand}"
+
+    cli_event_noun: str = "datasource"
+    (
+        begin_event_name,
+        end_event_name,
+    ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
+        noun=cli_event_noun,
+        verb=ctx.invoked_subcommand,
+    )
     send_usage_message(
         data_context=ctx.obj.data_context,
-        event=f"{usage_stats_prefix}.begin",
+        event=begin_event_name,
         success=True,
     )
-    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
+    ctx.obj.usage_event_end = end_event_name
 
 
 @datasource.command(name="new")
@@ -262,7 +271,7 @@ class BaseDatasourceNewYamlHelper:
     def send_backend_choice_usage_message(self, context: DataContext) -> None:
         send_usage_message(
             data_context=context,
-            event="cli.new_ds_choice",
+            event=UsageStatsEvents.CLI_NEW_DS_CHOICE.value,
             event_payload={
                 "type": self.datasource_type.value,
                 **self.usage_stats_payload,
