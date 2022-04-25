@@ -575,6 +575,21 @@ class BaseDataContext(ConfigPeer):
                     return True
             except (ValueError, configparser.Error):
                 pass
+
+        if BaseDataContext._check_if_in_local_installation():
+            return True
+
+        return False
+
+    @staticmethod
+    def _check_if_in_local_installation() -> bool:
+        """Utility to check whether or not Great Expectations was
+        installed with `pip install -e .`
+        """
+        for item in sys.path:
+            egg_link: str = os.path.join(item, "great_expectations.egg-info")
+            if os.path.isdir(egg_link):
+                return True
         return False
 
     def _construct_data_context_id(self) -> str:
