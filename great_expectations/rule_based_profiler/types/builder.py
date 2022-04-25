@@ -26,11 +26,11 @@ class Builder(SerializableDictDot):
 
     def __init__(
         self,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """
         Args:
-            data_context: DataContext
+            data_context: BaseDataContext associated with this Builder
         """
         self._batch_list = None
         self._batch_request = None
@@ -60,7 +60,7 @@ class Builder(SerializableDictDot):
         self._batch_request = value
 
     @property
-    def data_context(self) -> Optional["DataContext"]:  # noqa: F821
+    def data_context(self) -> Optional["BaseDataContext"]:  # noqa: F821
         return self._data_context
 
     def set_batch_list_or_batch_request(
