@@ -153,7 +153,18 @@ class VolumeDataAssistantResult(DataAssistantResult):
         df["batch_id"] = batch_ids
         df[metric_name] = metric_values
 
-        plot_impl: Callable
+        plot_impl: Callable[
+            [
+                pd.DataFrame,
+                str,
+                alt.StandardType,
+                str,
+                alt.StandardType,
+                Optional[List[str]],
+            ],
+            alt.Chart,
+        ]
+
         if prescriptive:
             for kwarg_name in ("min_value", "max_value"):
                 df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
