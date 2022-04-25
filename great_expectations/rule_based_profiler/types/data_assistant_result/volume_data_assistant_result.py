@@ -2,6 +2,7 @@ from typing import Any, Callable, Dict, KeysView, List, Optional, cast
 
 import altair as alt
 import pandas as pd
+from altair.vegalite.v4.api import VConcatChart
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -69,11 +70,25 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 raise Exception()
 
         concatenated_column_domain_chart: alt.Chart = cast(
-            alt.Chart, alt.vconcat(*column_domain_charts)
+            alt.Chart,
+            VolumeDataAssistantResult._vertically_concatenate_charts(
+                column_domain_charts
+            ),
         )
         charts.append(concatenated_column_domain_chart)
 
         self.display(charts=charts, theme=theme)
+
+    @staticmethod
+    def _vertically_concatenate_charts(charts: List[alt.Chart]) -> VConcatChart:
+        brush = alt.selection(type="interval", encodings=["x"])
+        for chart in charts:
+            chart.properties(
+                height=10,
+            ).add_selection(brush)
+
+        concatenated_chart: alt.VConcatChart = alt.vconcat(*charts)
+        return concatenated_chart
 
     def _determine_attributed_metrics_by_domain_type(
         self, metric_domain_type: MetricDomainTypes
