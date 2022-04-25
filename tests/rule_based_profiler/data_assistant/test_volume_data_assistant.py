@@ -73,7 +73,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         expectation_suite_name: Optional[str] = None,
         component_name: Optional[str] = None,
     ) -> Validator:
-        suite: ExpectationSuite
+        expectation_suite: ExpectationSuite
 
         generate_temp_expectation_suite_name: bool
         create_expectation_suite: bool
@@ -2715,13 +2715,13 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_n
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
-    suite: ExpectationSuite = get_or_create_expectation_suite(
+    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
         data_context=context,
         expectation_suite=None,
         expectation_suite_name="my_suite",
         component_name=None,
     )
-    assert len(suite.expectations) == 0
+    assert len(expectation_suite.expectations) == 0
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -2733,7 +2733,7 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_n
         batch_request=batch_request,
         data_context=context,
         expectation_suite_name=None,
-        expectation_suite=suite,
+        expectation_suite=expectation_suite,
         component_name="volume_data_assistant",
     )
     assert len(validator.batches) == 36
@@ -2744,13 +2744,13 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_n
     )
     data_assistant_result: DataAssistantResult = data_assistant.run()
 
-    suite.add_expectation_configurations(
+    expectation_suite.add_expectation_configurations(
         expectation_configurations=data_assistant_result.expectation_suite.expectations,
         send_usage_event=False,
         match_type="domain",
         overwrite_existing=True,
     )
-    assert len(suite.expectations) == 19
+    assert len(expectation_suite.expectations) == 19
 
 
 def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_yes_use_suite_name(
@@ -2760,17 +2760,17 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_y
 
     expectation_suite_name: str = "my_suite"
 
-    suite: ExpectationSuite
+    expectation_suite: ExpectationSuite
 
-    suite = get_or_create_expectation_suite(
+    expectation_suite = get_or_create_expectation_suite(
         data_context=context,
         expectation_suite=None,
         expectation_suite_name=expectation_suite_name,
         component_name=None,
     )
-    assert len(suite.expectations) == 0
+    assert len(expectation_suite.expectations) == 0
 
-    context.save_expectation_suite(expectation_suite=suite)
+    context.save_expectation_suite(expectation_suite=expectation_suite)
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -2782,7 +2782,7 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_y
         batch_request=batch_request,
         data_context=context,
         expectation_suite_name=expectation_suite_name,
-        expectation_suite=suite,
+        expectation_suite=expectation_suite,
         component_name="volume_data_assistant",
     )
     assert len(validator.batches) == 36
@@ -2798,27 +2798,27 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_y
         expectation_suite_name=expectation_suite_name,
         save_updated_expectation_suite=False,
     )
-    suite: ExpectationSuite = get_or_create_expectation_suite(
+    expectation_suite = get_or_create_expectation_suite(
         data_context=context,
         expectation_suite=None,
         expectation_suite_name=expectation_suite_name,
         component_name=None,
     )
     assert len(data_assistant_result.expectation_suite.expectations) == 19
-    assert len(suite.expectations) == 0
+    assert len(expectation_suite.expectations) == 0
 
     data_assistant_result = data_assistant.run(
         expectation_suite_name=expectation_suite_name,
         save_updated_expectation_suite=True,
     )
-    suite: ExpectationSuite = get_or_create_expectation_suite(
+    expectation_suite = get_or_create_expectation_suite(
         data_context=context,
         expectation_suite=None,
         expectation_suite_name=expectation_suite_name,
         component_name=None,
     )
     assert len(data_assistant_result.expectation_suite.expectations) == 19
-    assert len(suite.expectations) == 19
+    assert len(expectation_suite.expectations) == 19
 
 
 def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_yes_use_suite(
@@ -2826,13 +2826,13 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_y
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
-    suite: ExpectationSuite = get_or_create_expectation_suite(
+    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
         data_context=context,
         expectation_suite=None,
         expectation_suite_name="my_suite",
         component_name=None,
     )
-    assert len(suite.expectations) == 0
+    assert len(expectation_suite.expectations) == 0
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -2844,7 +2844,7 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_y
         batch_request=batch_request,
         data_context=context,
         expectation_suite_name=None,
-        expectation_suite=suite,
+        expectation_suite=expectation_suite,
         component_name="volume_data_assistant",
     )
     assert len(validator.batches) == 36
@@ -2855,9 +2855,9 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_y
     )
     # noinspection PyUnusedLocal
     data_assistant_result: DataAssistantResult = data_assistant.run(
-        expectation_suite=suite
+        expectation_suite=expectation_suite
     )
-    assert len(suite.expectations) == 19
+    assert len(expectation_suite.expectations) == 19
 
 
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
