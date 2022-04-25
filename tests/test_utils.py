@@ -504,6 +504,45 @@ class LoadedTable:
     inserted_dataframe: pd.DataFrame
 
 
+def load_and_concatenate_csvs(
+    csv_paths: List[str],
+    load_full_dataset: bool = False,
+    convert_column_names_to_datetime: Optional[List[str]] = None,
+) -> pd.DataFrame:
+    """Utility method that is used in loading test data into a pandas dataframe.
+
+    It includes several parameters used to describe the output data.
+
+    Args:
+        csv_paths: list of paths of csvs to write, can be a single path. These should all be the same shape.
+        load_full_dataset: if False, load only the first 10 rows.
+        convert_column_names_to_datetime: List of column names to convert to datetime before writing to db.
+
+    Returns:
+        A pandas dataframe concatenating data loaded from all csvs.
+    """
+
+    if convert_column_names_to_datetime is None:
+        convert_column_names_to_datetime = []
+
+    import pandas as pd
+
+    dfs: List[pd.DataFrame] = []
+    for csv_path in csv_paths:
+        df = pd.read_csv(csv_path)
+        for column_name_to_convert in convert_column_names_to_datetime:
+            df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+        if not load_full_dataset:
+            # Improving test performance by only loading the first 10 rows of our test data into the db
+            df = df.head(10)
+
+        dfs.append(df)
+
+    all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
+
+    return all_dfs_concatenated
+
+
 def load_data_into_test_database(
     table_name: str,
     connection_string: str,
@@ -528,34 +567,19 @@ def load_data_into_test_database(
             same prefix.
 
     Returns:
-        For convenience, the pandas dataframe that was used to load the data.
+        LoadedTable which for convenience, contains the pandas dataframe that was used to load the data.
     """
     if csv_path and csv_paths:
         csv_paths.append(csv_path)
     elif csv_path and not csv_paths:
         csv_paths = [csv_path]
 
-    if convert_colnames_to_datetime is None:
-        convert_colnames_to_datetime = []
+    all_dfs_concatenated: pd.DataFrame = load_and_concatenate_csvs(
+        csv_paths, load_full_dataset, convert_colnames_to_datetime
+    )
 
     if random_table_suffix:
         table_name: str = f"{table_name}_{str(uuid.uuid4())[:8]}"
-
-    import pandas as pd
-
-    print("Generating dataframe of all csv data")
-    dfs: List[pd.DataFrame] = []
-    for csv_path in csv_paths:
-        df = pd.read_csv(csv_path)
-        for colname_to_convert in convert_colnames_to_datetime:
-            df[colname_to_convert] = pd.to_datetime(df[colname_to_convert])
-        if not load_full_dataset:
-            # Improving test performance by only loading the first 10 rows of our test data into the db
-            df = df.head(10)
-
-        dfs.append(df)
-
-    all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
 
     return_value: LoadedTable = LoadedTable(
         table_name=table_name, inserted_dataframe=all_dfs_concatenated
