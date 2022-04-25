@@ -155,11 +155,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         plot_impl: Callable
         if prescriptive:
-            for (
-                kwarg_name,
-                kwarg_value,
-            ) in expectation_configuration.kwargs.items():
-                df[kwarg_name] = kwarg_value
+            for kwarg_name in ("min_value", "max_value"):
+                df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
             plot_impl = self._plot_prescriptive
         else:
             plot_impl = self._plot_descriptive
