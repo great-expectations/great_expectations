@@ -87,6 +87,7 @@ stages:
 
     jobs:
     - job: type_hint_checker
+      condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
       steps:
       - script: |
           pip install mypy # Prereq for type hint script
@@ -94,6 +95,7 @@ stages:
         name: TypeHintChecker
 
     - job: docstring_checker
+      condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
       steps:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
