@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import List
 
-import altair as alt
-
 from great_expectations.types import ColorPalettes, Colors
 
 # Size
