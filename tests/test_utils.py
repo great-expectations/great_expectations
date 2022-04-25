@@ -725,8 +725,7 @@ def get_validator_with_expectation_suite(
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
     """
-    # noinspection PyUnusedLocal
-    suite: ExpectationSuite = get_or_create_expectation_suite(
+    expectation_suite = get_or_create_expectation_suite(
         data_context=data_context,
         expectation_suite=expectation_suite,
         expectation_suite_name=expectation_suite_name,
@@ -736,7 +735,7 @@ def get_validator_with_expectation_suite(
     batch_request = materialize_batch_request(batch_request=batch_request)
     validator: Validator = data_context.get_validator(
         batch_request=batch_request,
-        expectation_suite_name=expectation_suite_name,
+        expectation_suite=expectation_suite,
     )
 
     return validator
