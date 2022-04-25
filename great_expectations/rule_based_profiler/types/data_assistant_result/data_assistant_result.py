@@ -236,24 +236,16 @@ class DataAssistantResult(SerializableDictDot):
             domain_type=domain_type,
         )
 
-        predicate: alt.expr.core.BinaryExpression = (
-            DataAssistantResult._determine_alt_predicate(metric_name)
+        anomaly_coded_line: alt.Chart = (
+            DataAssistantResult._determine_anomaly_coded_line(
+                line, tooltip, metric_name
+            )
         )
-        point_color_condition: alt.condition = alt.condition(
-            predicate=predicate,
-            if_false=alt.value(Colors.GREEN.value),
-            if_true=alt.value(Colors.PINK.value),
-        )
-
-        anomaly_coded_points = line.layer[1].encode(
-            color=point_color_condition, tooltip=tooltip
-        )
-        anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
 
         return band + lower_limit + upper_limit + anomaly_coded_line
 
+    @staticmethod
     def get_vertically_concatenated_chart(
-        self,
         dfs_by_column: List[Tuple[str, pd.DataFrame]],
         metric_name: str,
         metric_type: alt.StandardType,
@@ -334,8 +326,7 @@ class DataAssistantResult(SerializableDictDot):
             .properties(height=chart_height)
         )
 
-        chart: alt.Chart = line + points
-        return chart
+        return line + points
 
     @staticmethod
     def get_expect_column_values_to_be_between_chart(
@@ -450,8 +441,24 @@ class DataAssistantResult(SerializableDictDot):
             include_title=include_title,
         )
 
+        anomaly_coded_line: alt.Chart = (
+            DataAssistantResult._determine_anomaly_coded_line(
+                line, tooltip, metric_name
+            )
+        )
+
+        return band + lower_limit + upper_limit + anomaly_coded_line
+
+    @staticmethod
+    def _determine_anomaly_coded_line(
+        line: alt.Chart, tooltip: List[alt.Tooltip], metric_name: str
+    ) -> alt.Chart:
         predicate: alt.expr.core.BinaryExpression = (
-            DataAssistantResult._determine_alt_predicate(metric_name)
+            (alt.datum.min_value > alt.datum[metric_name])
+            & (alt.datum.max_value > alt.datum[metric_name])
+        ) | (
+            (alt.datum.min_value < alt.datum[metric_name])
+            & (alt.datum.max_value < alt.datum[metric_name])
         )
         point_color_condition: alt.condition = alt.condition(
             predicate=predicate,
@@ -463,19 +470,7 @@ class DataAssistantResult(SerializableDictDot):
             color=point_color_condition, tooltip=tooltip
         )
         anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
-
-        return band + lower_limit + upper_limit + anomaly_coded_line
-
-    @staticmethod
-    def _determine_alt_predicate(metric_name: str) -> alt.expr.core.BinaryExpression:
-        predicate: alt.expr.core.BinaryExpression = (
-            (alt.datum.min_value > alt.datum[metric_name])
-            & (alt.datum.max_value > alt.datum[metric_name])
-        ) | (
-            (alt.datum.min_value < alt.datum[metric_name])
-            & (alt.datum.max_value < alt.datum[metric_name])
-        )
-        return predicate
+        return anomaly_coded_line
 
     @abstractmethod
     def plot(
