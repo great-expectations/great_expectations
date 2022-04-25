@@ -17,7 +17,9 @@ font: str = "Verdana"
 # Title
 title_align: str = "center"
 title_font_size: int = 15
-title_color: str = Colors.PURPLE.value
+title_color: str = Colors.GREEN.value
+subtitle_font_size: int = 12
+subtitle_color: str = Colors.PURPLE.value
 
 # Both Axes
 axis_title_color: str = Colors.PURPLE.value
@@ -71,6 +73,7 @@ point_tooltip_content: str = "data"
 
 
 class AltairThemes(Enum):
+    # https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
     DEFAULT_THEME = {
         "view": {"width": chart_width, "height": chart_height},
         "font": font,
@@ -78,6 +81,8 @@ class AltairThemes(Enum):
             "align": title_align,
             "color": title_color,
             "fontSize": title_font_size,
+            "subtitleFontSize": subtitle_font_size,
+            "subtitleColor": subtitle_color,
         },
         "axis": {
             "titleFontSize": axis_title_font_size,

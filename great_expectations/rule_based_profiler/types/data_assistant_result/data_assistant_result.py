@@ -94,6 +94,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
+        subtitle: Optional[List[str]] = None,
     ) -> alt.Chart:
         """
         Args:
@@ -117,8 +118,10 @@ class DataAssistantResult(SerializableDictDot):
             alt.Tooltip(field=metric_name, type=metric_type, format=","),
         ]
 
+        if subtitle is None:
+            subtitle = []
         title: alt.TitleParams = alt.TitleParams(
-            f"{metric_title} per {domain_title}", subtitle=["This is my subtitle"]
+            f"{metric_title} per {domain_title}", subtitle=subtitle
         )
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
@@ -157,6 +160,7 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
+        subtitle: Optional[List[str]] = None,
     ) -> alt.Chart:
         """
         Args:
@@ -236,6 +240,7 @@ class DataAssistantResult(SerializableDictDot):
             metric_type=metric_type,
             domain_name=domain_name,
             domain_type=domain_type,
+            subtitle=subtitle,
         )
 
         predicate: alt.expr.core.BinaryExpression = (

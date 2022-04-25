@@ -161,12 +161,17 @@ class VolumeDataAssistantResult(DataAssistantResult):
         else:
             plot_impl = self._plot_descriptive
 
+        subtitle: Optional[List[str]] = None
+        if "column" in expectation_configuration.kwargs:
+            subtitle = [f"Column: {expectation_configuration.kwargs['column']}"]
+
         chart: alt.Chart = plot_impl(
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
             domain_name=domain_name,
             domain_type=domain_type,
+            subtitle=subtitle,
         )
         return chart
 
@@ -177,6 +182,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
+        subtitle: Optional[List[str]] = None,
     ) -> alt.Chart:
         descriptive_chart: alt.Chart = self.get_line_chart(
             df=df,
@@ -184,6 +190,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             metric_type=metric_type,
             domain_name=domain_name,
             domain_type=domain_type,
+            subtitle=subtitle,
         )
         return descriptive_chart
 
@@ -194,6 +201,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
+        subtitle: Optional[List[str]] = None,
     ) -> alt.Chart:
         prescriptive_chart: alt.Chart = (
             self.get_expect_domain_values_to_be_between_chart(
@@ -202,6 +210,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
                 metric_type=metric_type,
                 domain_name=domain_name,
                 domain_type=domain_type,
+                subtitle=subtitle,
             )
         )
         return prescriptive_chart
