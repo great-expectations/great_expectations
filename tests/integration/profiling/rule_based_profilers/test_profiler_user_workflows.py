@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from unittest import mock
@@ -11,6 +12,7 @@ from packaging import version
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite, ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest
@@ -2124,7 +2126,10 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
         "expect_column_proportion_of_unique_values_to_be_between"
     )
 
-    test_cases: Tuple[Tuple[str, int, int], ...] = (("passenger_count", 0.0, 1.0),)
+    test_cases: Tuple[Tuple[str, float, float], ...] = (
+        ("passenger_count", 0.0, 1.0),
+        ("trip_distance", 0.0, 1.0),
+    )
 
     for column_name, min_value_expected, max_value_expected in test_cases:
         # Use all batches, loaded by Validator, for estimating Expectation argument values.
@@ -2134,7 +2139,6 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
             include_config=True,
             auto=True,
         )
-        __import__("pprint").pprint(result)
         assert result.success
 
         key: str
@@ -2159,7 +2163,7 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
         }
 
         min_value_actual: int = result.expectation_config["kwargs"]["min_value"]
-        assert min_value_expected - 1 <= min_value_actual <= min_value_expected + 1
+        assert min_value_expected <= min_value_actual
 
         max_value_actual: int = result.expectation_config["kwargs"]["max_value"]
-        assert max_value_expected - 1 <= max_value_actual <= max_value_expected + 1
+        assert max_value_expected >= max_value_actual

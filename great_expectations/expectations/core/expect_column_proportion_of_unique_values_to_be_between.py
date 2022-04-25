@@ -145,8 +145,8 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,
                     "truncate_values": {
-                        "lower_bound": 0,
-                        "upper_bound": 1,
+                        "lower_bound": 0.0,
+                        "upper_bound": 1.0,
                     },
                     "round_decimals": 2,
                 },
@@ -161,8 +161,8 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": f"{PARAMETER_KEY}{column_proportion_unique_values_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
-                        "max_value": f"{PARAMETER_KEY}{column_proportion_unique_values_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+                        "min_value": 0.0,
+                        "max_value": 1.0,
                         "strict_min": f"{VARIABLES_KEY}strict_min",
                         "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
