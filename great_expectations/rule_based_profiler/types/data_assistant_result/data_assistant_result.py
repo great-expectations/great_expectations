@@ -244,11 +244,7 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         predicate: alt.expr.core.BinaryExpression = (
-            (alt.datum.min_value > alt.datum.table_row_count)
-            & (alt.datum.max_value > alt.datum.table_row_count)
-        ) | (
-            (alt.datum.min_value < alt.datum.table_row_count)
-            & (alt.datum.max_value < alt.datum.table_row_count)
+            DataAssistantResult._determine_alt_predicate(metric_name)
         )
         point_color_condition: alt.condition = alt.condition(
             predicate=predicate,
@@ -262,6 +258,17 @@ class DataAssistantResult(SerializableDictDot):
         anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
 
         return band + lower_limit + upper_limit + anomaly_coded_line
+
+    @staticmethod
+    def _determine_alt_predicate(metric_name: str) -> alt.expr.core.BinaryExpression:
+        predicate: alt.expr.core.BinaryExpression = (
+            (alt.datum.min_value > alt.datum[metric_name])
+            & (alt.datum.max_value > alt.datum[metric_name])
+        ) | (
+            (alt.datum.min_value < alt.datum[metric_name])
+            & (alt.datum.max_value < alt.datum[metric_name])
+        )
+        return predicate
 
     @abstractmethod
     def plot(
