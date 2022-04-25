@@ -39,7 +39,7 @@ class ColumnDomainBuilder(DomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """
         A semantic type is distinguished from the structured column type;
@@ -56,7 +56,7 @@ class ColumnDomainBuilder(DomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
-            data_context: DataContext
+            data_context: BaseDataContext associated with this DomainBuilder
 
         Inclusion/Exclusion Logic:
         (include_column_names|table_columns - exclude_column_names) + (include_semantic_types - exclude_semantic_types)

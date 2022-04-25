@@ -628,9 +628,10 @@ class Batch(SerializableDictDot):
         return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
 
 
+# TODO: <Alex>ALEX -- Make this helper utility of general use.</Alex>
 def materialize_batch_request(
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
+) -> Optional[BatchRequestBase]:
     effective_batch_request: dict = get_batch_request_as_dict(
         batch_request=batch_request
     )
