@@ -259,6 +259,14 @@ local_tests = [
         name="expect_table_columns_to_be_unique",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py",
     ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_spark",
+        user_flow_script="tests/integration/spark/test_spark_data_splitting.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
 ]
 
 
