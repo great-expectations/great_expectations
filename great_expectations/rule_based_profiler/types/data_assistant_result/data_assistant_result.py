@@ -294,7 +294,7 @@ class DataAssistantResult(SerializableDictDot):
         ]
 
         column_label: str = column_name
-        chart_height: int = 200
+        chart_height: int = 150
 
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
@@ -384,7 +384,7 @@ class DataAssistantResult(SerializableDictDot):
         ]
 
         column_label: str = column_name
-        chart_height: int = 200
+        chart_height: int = 150
 
         lower_limit: alt.Chart = (
             alt.Chart(data=df)
