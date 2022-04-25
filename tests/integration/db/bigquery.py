@@ -104,7 +104,7 @@ batch_request = RuntimeBatchRequest(
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
-with pytest.raises(DeprecationWarning):
+with pytest.warns(DeprecationWarning):
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )
