@@ -5,6 +5,7 @@ from pathlib import Path
 from string import Template
 
 from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
@@ -287,7 +288,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
             ):
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
-                    event="datasource.sqlalchemy.connect",
+                    event=UsageStatsEvents.DATASOURCE_SQLALCHEMY_CONNECT.value,
                     event_payload={
                         "anonymized_name": handler.anonymizer.anonymize(obj=self.name),
                         "sqlalchemy_dialect": self.engine.name,

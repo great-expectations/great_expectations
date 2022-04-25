@@ -11,10 +11,10 @@ from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.execution_engine.sqlalchemy_data_splitter import DatePart
 from tests.test_utils import (
     LoadedTable,
     clean_up_tables_with_prefix,

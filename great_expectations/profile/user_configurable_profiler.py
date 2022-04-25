@@ -10,6 +10,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import ProfilerError
@@ -275,7 +276,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         }
         send_usage_message(
             data_context=self.profile_dataset._data_context,
-            event="legacy_profiler.build_suite",
+            event=UsageStatsEvents.LEGACY_PROFILER_BUILD_SUITE.value,
             event_payload=event_payload,
             api_version="v2",
             success=True,
