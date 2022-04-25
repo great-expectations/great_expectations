@@ -108,7 +108,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
-    column_proportion_unique_values_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    column_proportion_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="NumericMetricRangeMultiBatchParameterBuilder",
         name="column_unique_values_range_estimator",
@@ -128,7 +128,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        column_proportion_unique_values_range_estimator_parameter_builder_config,
+        column_proportion_range_estimator_parameter_builder_config
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_proportion_of_unique_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
@@ -148,7 +148,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                         "lower_bound": 0.0,
                         "upper_bound": 1.0,
                     },
-                    "round_decimals": 2,
+                    "round_decimals": 3,
                 },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
@@ -161,12 +161,12 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-                        "min_value": 0.0,
-                        "max_value": 1.0,
+                        "min_value": f"{PARAMETER_KEY}{column_proportion_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+                        "max_value": f"{PARAMETER_KEY}{column_proportion_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
                         "strict_min": f"{VARIABLES_KEY}strict_min",
                         "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{column_proportion_unique_values_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{column_proportion_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     },
                 ],
