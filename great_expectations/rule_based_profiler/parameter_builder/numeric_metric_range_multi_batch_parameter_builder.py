@@ -1,4 +1,5 @@
 import itertools
+import warnings
 from numbers import Number
 from typing import Callable, Dict, List, Optional, Tuple, Union, cast
 
@@ -122,7 +123,23 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             data_context=data_context,
         )
 
-        self._false_positive_rate = false_positive_rate
+        if isinstance(false_positive_rate, str):
+            false_positive_rate = float(false_positive_rate)
+
+        if false_positive_rate <= 0:
+            raise warnings.warn(
+                f"""false_positive_rate should be a positive decimal number between 0 and 1 exclusive
+(0, 1), but {false_positive_rate} was provided. A false_positive_rate of {NP_EPSILON} has been selected instead.""",
+                RuntimeWarning,
+            )
+            self._false_positive_rate = NP_EPSILON
+        elif false_positive_rate >= 1:
+            raise ValueError(
+                f"""false_positive_rate must be a positive decimal number between 0 and 1 exclusive (0, 1),
+ but {false_positive_rate} was provided."""
+            )
+        else:
+            self._false_positive_rate = false_positive_rate
 
         self._estimator = estimator
 
