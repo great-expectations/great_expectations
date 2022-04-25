@@ -255,7 +255,7 @@ class DataAssistantResult(SerializableDictDot):
         charts: List[alt.Chart] = []
         for i, (column_name, df) in enumerate(dfs_by_column):
             include_title: bool = i == 0
-            chart: alt.Chart = DataAssistantResult._chart_column_specific_df(
+            chart: alt.Chart = DataAssistantResult._get_vertically_concatenated_chart(
                 df=df,
                 column_name=column_name,
                 metric_name=metric_name,
@@ -269,7 +269,7 @@ class DataAssistantResult(SerializableDictDot):
         return alt.vconcat(*charts)
 
     @staticmethod
-    def _chart_column_specific_df(
+    def _get_vertically_concatenated_chart(
         df: pd.DataFrame,
         column_name: str,
         metric_name: str,
@@ -431,7 +431,7 @@ class DataAssistantResult(SerializableDictDot):
             .properties(height=chart_height)
         )
 
-        line: alt.Chart = DataAssistantResult._chart_column_specific_df(
+        line: alt.Chart = DataAssistantResult._get_vertically_concatenated_chart(
             df=df,
             column_name=column_name,
             metric_name=metric_name,
