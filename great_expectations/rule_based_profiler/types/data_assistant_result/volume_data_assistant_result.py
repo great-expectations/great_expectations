@@ -192,7 +192,24 @@ class VolumeDataAssistantResult(DataAssistantResult):
             dfs.append((column_name, df))
 
         assert metric_name is not None
-        chart: alt.VConcatChart = self.get_vertically_concatenated_chart(
+
+        plot_impl: Callable[
+            [
+                List[Tuple[str, pd.DataFrame]],
+                str,
+                alt.StandardType,
+                str,
+                alt.StandardType,
+            ],
+            alt.VConcatChart,
+        ]
+
+        if prescriptive:
+            plot_impl = self.get_expect_column_values_to_be_between_chart
+        else:
+            plot_impl = self.get_vertically_concatenated_chart
+
+        chart: alt.VConcatChart = plot_impl(
             dfs_by_column=dfs,
             metric_name=metric_name,
             metric_type=metric_type,

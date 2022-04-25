@@ -263,7 +263,7 @@ class DataAssistantResult(SerializableDictDot):
         charts: List[alt.Chart] = []
         for i, (column_name, df) in enumerate(dfs_by_column):
             include_title: bool = i == 0
-            chart: alt.Chart = self._get_vertically_concatenated_chart(
+            chart: alt.Chart = DataAssistantResult._chart_column_specific_df(
                 df=df,
                 column_name=column_name,
                 metric_name=metric_name,
@@ -276,8 +276,8 @@ class DataAssistantResult(SerializableDictDot):
 
         return alt.vconcat(*charts)
 
-    def _get_vertically_concatenated_chart(
-        self,
+    @staticmethod
+    def _chart_column_specific_df(
         df: pd.DataFrame,
         column_name: str,
         metric_name: str,
@@ -336,6 +336,135 @@ class DataAssistantResult(SerializableDictDot):
 
         chart: alt.Chart = line + points
         return chart
+
+    @staticmethod
+    def get_expect_column_values_to_be_between_chart(
+        dfs_by_column: List[Tuple[str, pd.DataFrame]],
+        metric_name: str,
+        metric_type: alt.StandardType,
+        domain_name: str,
+        domain_type: alt.StandardType,
+    ) -> alt.VConcatChart:
+        charts: List[alt.Chart] = []
+        for i, (column_name, df) in enumerate(dfs_by_column):
+            include_title: bool = i == 0
+            chart: alt.Chart = (
+                DataAssistantResult._get_expect_column_values_to_be_between_chart(
+                    df=df,
+                    column_name=column_name,
+                    metric_name=metric_name,
+                    metric_type=metric_type,
+                    domain_name=domain_name,
+                    domain_type=domain_type,
+                    include_title=include_title,
+                )
+            )
+            charts.append(chart)
+
+        return alt.vconcat(*charts)
+
+    @staticmethod
+    def _get_expect_column_values_to_be_between_chart(
+        df: pd.DataFrame,
+        column_name: str,
+        metric_name: str,
+        metric_type: alt.StandardType,
+        domain_name: str,
+        domain_type: alt.StandardType,
+        include_title: bool,
+    ) -> alt.Chart:
+        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
+
+        metric_title: str = metric_name.replace("_", " ").title()
+        domain_title: str = domain_name.title()
+
+        batch_id: str = "batch_id"
+        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+        min_value: str = "min_value"
+        min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+        max_value: str = "max_value"
+        max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
+
+        tooltip: list[alt.Tooltip] = [
+            alt.Tooltip(field=batch_id, type=batch_id_type),
+            alt.Tooltip(field=metric_name, type=metric_type, format=","),
+            alt.Tooltip(field=min_value, type=min_value_type, format=","),
+            alt.Tooltip(field=max_value, type=max_value_type, format=","),
+        ]
+
+        column_label: str = column_name
+        chart_height: int = 200
+
+        lower_limit: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_line(color=line_color)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(min_value, type=metric_type, title=column_label),
+                tooltip=tooltip,
+            )
+            .properties(height=chart_height)
+        )
+
+        upper_limit: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_line(color=line_color)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(max_value, type=metric_type, title=column_label),
+                tooltip=tooltip,
+            )
+            .properties(height=chart_height)
+        )
+
+        band: alt.Chart = (
+            alt.Chart(data=df)
+            .mark_area()
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(min_value, type=metric_type, title=column_label),
+                y2=alt.Y2(max_value, title=column_label),
+            )
+            .properties(height=chart_height)
+        )
+
+        line: alt.Chart = DataAssistantResult._chart_column_specific_df(
+            df=df,
+            column_name=column_name,
+            metric_name=metric_name,
+            metric_type=metric_type,
+            domain_name=domain_name,
+            domain_type=domain_type,
+            include_title=include_title,
+        )
+
+        predicate: alt.expr.core.BinaryExpression = (
+            DataAssistantResult._determine_alt_predicate(metric_name)
+        )
+        point_color_condition: alt.condition = alt.condition(
+            predicate=predicate,
+            if_false=alt.value(Colors.GREEN.value),
+            if_true=alt.value(Colors.PINK.value),
+        )
+
+        anomaly_coded_points = line.layer[1].encode(
+            color=point_color_condition, tooltip=tooltip
+        )
+        anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
+
+        return band + lower_limit + upper_limit + anomaly_coded_line
 
     @staticmethod
     def _determine_alt_predicate(metric_name: str) -> alt.expr.core.BinaryExpression:
