@@ -15,6 +15,7 @@ from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
     expectationConfigurationSchema,
 )
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
@@ -589,11 +590,10 @@ class ExpectationSuite(SerializableDictDot):
         return expectation_configuration
 
     def send_usage_event(self, success: bool):
-        usage_stats_event_name: str = "expectation_suite.add_expectation"
         usage_stats_event_payload: dict = {}
         if self._data_context is not None:
             self._data_context.send_usage_message(
-                event=usage_stats_event_name,
+                event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION.value,
                 event_payload=usage_stats_event_payload,
                 success=success,
             )
