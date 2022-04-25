@@ -199,7 +199,7 @@ class SqlAlchemyBatchData(BatchData):
                         expiration_timestamp=TIMESTAMP_ADD(
                         CURRENT_TIMESTAMP(), INTERVAL 24 HOUR),
                         friendly_name="temp_table",
-                        description="a view that expires in 1 day",
+                        description="a table that expires in 1 day",
                         labels=[("org_unit", "development")]
                     )
                     AS {query}"""

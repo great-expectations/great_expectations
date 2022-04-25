@@ -549,20 +549,20 @@ cloud_bigquery_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
-    IntegrationTestFixture(
-        name="split_data_on_datetime_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_splitting.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    ),
+    # IntegrationTestFixture(
+    #     name="split_data_on_datetime_bigquery",
+    #     user_flow_script="tests/integration/db/test_sql_data_splitting.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    #     util_script="tests/test_utils.py",
+    #     other_files=(
+    #         (
+    #             "tests/integration/fixtures/split_data/bigquery_connection_string.yml",
+    #             "connection_string.yml",
+    #         ),
+    #     ),
+    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    # ),
     IntegrationTestFixture(
         name="test_runtime_parameters_bigquery",
         user_flow_script="tests/integration/db/bigquery.py",
@@ -902,8 +902,10 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
     elif dependencies == BackendDependencies.BIGQUERY and (
         pytest_args.no_sqlalchemy or not pytest_args.bigquery
     ):
+        # TODO : Investigate whether this test should be handled by azure-pipelines-cloud-db-integration.yml
         pytest.skip("Skipping bigquery tests")
     elif dependencies == BackendDependencies.GCS and not pytest_args.bigquery:
+        # TODO : Investigate whether this test should be handled by azure-pipelines-cloud-db-integration.yml
         pytest.skip("Skipping GCS tests")
     elif dependencies == BackendDependencies.AWS and not pytest_args.aws:
         pytest.skip("Skipping AWS tests")

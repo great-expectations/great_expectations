@@ -1,35 +1,38 @@
-# add end-to-end test here that handles 2 things.
-
-# still accept the old methods
-# <snippet>
+import datetime
+import logging
 import os
 
+import pytest
+
 import great_expectations as ge
+from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 
-# </snippet>
-from great_expectations.validator.validator import Validator
+logger = logging.getLogger(__name__)
 
-yaml = YAMLHandler()
-# NOTE: The following code is only for testing and depends on an environment
-# variable to set the gcp_project. You can replace the value with your own
-# GCP project information
-gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+
+try:
+    from google.cloud import bigquery
+except ImportError:
+    bigquery = None
+    logger.debug(
+        "Unable to load GCS connection object; install optional google dependency for support"
+    )
+
+gcp_project: str = os.environ.get("GE_TEST_GCP_PROJECT")
 if not gcp_project:
     raise ValueError(
         "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
     )
-bigquery_dataset = "demo"
+bigquery_dataset: str = "demo"
+CONNECTION_STRING: str = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
-CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
+yaml = YAMLHandler()
 
-# <snippet>
-context = ge.get_context()
-# </snippet>
+context: DataContext = ge.get_context()
 
-# <snippet>
-datasource_yaml = f"""
+datasource_yaml: str = f"""
 name: my_bigquery_datasource
 class_name: Datasource
 execution_engine:
@@ -38,46 +41,70 @@ execution_engine:
 data_connectors:
    default_runtime_data_connector_name:
        class_name: RuntimeDataConnector
-       batch_identifiers:
-           - default_identifier_name
+       assets:
+            asset_a:
+                batch_identifiers:
+                    - default_identifier_name
    default_inferred_data_connector_name:
        class_name: InferredAssetSqlDataConnector
        include_schema_name: true
 """
-# </snippet>
 
-# Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
+datasource_yaml: str = datasource_yaml.replace(
     "bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
     CONNECTION_STRING,
 )
 
-# <snippet>
-context.test_yaml_config(datasource_yaml)
-# </snippet>
-
-# <snippet>
 context.add_datasource(**yaml.load(datasource_yaml))
-# </snippet>
 
-# Test for RuntimeBatchRequest using a query.
-# <snippet>
 batch_request = RuntimeBatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="default_name",  # this can be anything that identifies this data
+    data_asset_name="asset_a",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
     # batch_spec_passthrough={"create_temp_table": False},
 )
-
-
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
+# add assertions
 print(validator.head())
-# ensure that temp table is actually created
+
+
+# temp_table_name
+temp_table_name: str = validator.active_batch.data.selectable.description
+
+client = bigquery.Client()
+project = client.project
+dataset_ref = bigquery.DatasetReference(project, bigquery_dataset)
+table_ref = dataset_ref.table(temp_table_name)
+table = client.get_table(table_ref)
+
+expected_expiration = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
+    days=1
+)
+assert table.expires <= expected_expiration
+
+# this will fire off a deprecation warning.
+batch_request = RuntimeBatchRequest(
+    datasource_name="my_bigquery_datasource",
+    data_connector_name="default_runtime_data_connector_name",
+    data_asset_name="asset_a",  # this can be anything that identifies this data
+    runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
+    batch_identifiers={"default_identifier_name": "default_identifier"},
+    batch_spec_passthrough={
+        "bigquery_temp_table": "ge_temp"
+    },  # this is the name of the table you would like to use a 'temp_table'
+)
+
+context.create_expectation_suite(
+    expectation_suite_name="test_suite", overwrite_existing=True
+)
+with pytest.raises(DeprecationWarning):
+    validator = context.get_validator(
+        batch_request=batch_request, expectation_suite_name="test_suite"
+    )

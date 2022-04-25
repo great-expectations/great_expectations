@@ -382,6 +382,9 @@ class SqlAlchemyDatasource(LegacyDatasource):
             }
         )
 
+        if "bigquery_temp_table" in batch_kwargs:
+            raise DeprecationWarning("you dont have to do this anymore")
+
         if "snowflake_transient_table" in batch_kwargs:
             # Snowflake can use either a transient or temp table, so we allow a table_name to be provided
             query_support_table_name = batch_kwargs.get("snowflake_transient_table")
