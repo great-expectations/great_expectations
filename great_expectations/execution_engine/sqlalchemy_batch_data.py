@@ -191,16 +191,12 @@ class SqlAlchemyBatchData(BatchData):
         :param query:
         """
         if self.sql_engine_dialect.name.lower() == "bigquery":
-            # created as script
+            # BigQuery Table is created using with an expiration of 24 hours using Google's Data Definition Language
             # https://stackoverflow.com/questions/20673986/how-to-create-temporary-table-in-google-bigquery
-            # https://stackoverflow.com/questions/57295881/python-bigquery-temporary-table
             stmt = f"""CREATE OR REPLACE TABLE `{temp_table_name}`
                     OPTIONS(
                         expiration_timestamp=TIMESTAMP_ADD(
-                        CURRENT_TIMESTAMP(), INTERVAL 24 HOUR),
-                        friendly_name="temp_table",
-                        description="a table that expires in 1 day",
-                        labels=[("org_unit", "development")]
+                        CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
                     )
                     AS {query}"""
         elif self.sql_engine_dialect.name.lower() == "dremio":
