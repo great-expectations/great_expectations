@@ -11,9 +11,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequestBase, materialize_batch_request
+from great_expectations.core.util import get_or_create_expectation_suite
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store import (
     CheckpointStore,
@@ -725,49 +725,17 @@ def get_validator_with_expectation_suite(
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
     """
-    suite: ExpectationSuite
-
-    generate_temp_expectation_suite_name: bool
-    create_expectation_suite: bool
-
-    if expectation_suite is not None and expectation_suite_name is not None:
-        if expectation_suite.expectation_suite_name != expectation_suite_name:
-            raise ValueError(
-                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
-            )
-        generate_temp_expectation_suite_name = False
-        create_expectation_suite = False
-    elif expectation_suite is None and expectation_suite_name is not None:
-        generate_temp_expectation_suite_name = False
-        create_expectation_suite = True
-    elif expectation_suite is not None and expectation_suite_name is None:
-        generate_temp_expectation_suite_name = False
-        create_expectation_suite = False
-    else:
-        generate_temp_expectation_suite_name = True
-        create_expectation_suite = True
-
-    if generate_temp_expectation_suite_name:
-        expectation_suite_name = f"tmp.{component_name}.suite_{str(uuid.uuid4())[:8]}"
-
-    if create_expectation_suite:
-        try:
-            # noinspection PyUnusedLocal
-            expectation_suite = data_context.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-        except ge_exceptions.DataContextError:
-            expectation_suite = data_context.create_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-            print(
-                f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
-            )
+    expectation_suite = get_or_create_expectation_suite(
+        data_context=data_context,
+        expectation_suite=expectation_suite,
+        expectation_suite_name=expectation_suite_name,
+        component_name=component_name,
+    )
 
     batch_request = materialize_batch_request(batch_request=batch_request)
     validator: Validator = data_context.get_validator(
         batch_request=batch_request,
-        expectation_suite_name=expectation_suite_name,
+        expectation_suite=expectation_suite,
     )
 
     return validator
