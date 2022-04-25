@@ -72,8 +72,10 @@ class BaseAnonymizer(ABC):
                 object_module_name = object_config.get("module_name")
                 object_class = load_class(object_class_name, object_module_name)
 
-            object_class_name = object_class.__name__
-            object_module_name = object_class.__module__
+            # TODO: <Alex>ALEX</Alex>
+            # object_class_name = object_class.__name__
+            # object_module_name = object_class.__module__
+            # TODO: <Alex>ALEX</Alex>
 
             # Utilize candidate list if provided.
             if classes_to_check:
@@ -120,6 +122,9 @@ class BaseAnonymizer(ABC):
             )
 
         salted = self._salt + string_
+        print(
+            f"\n[ALEX_TEST] [BASE_ANONYMIZER._ANONYMIZE_STRING()] SALTED_STRING:\n{salted} ; TYPE: {str(type(salted))}"
+        )
         return md5(salted.encode("utf-8")).hexdigest()
 
     def _anonymize_object_info(
