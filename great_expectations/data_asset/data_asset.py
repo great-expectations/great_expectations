@@ -27,6 +27,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
@@ -868,7 +869,7 @@ class DataAsset:
                 if getattr(data_context, "_usage_statistics_handler", None):
                     handler = data_context._usage_statistics_handler
                     handler.send_usage_message(
-                        event="data_asset.validate",
+                        event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
                         event_payload=handler.anonymizer.anonymize(obj=self),
                         success=False,
                     )
@@ -1028,7 +1029,7 @@ class DataAsset:
             if getattr(data_context, "_usage_statistics_handler", None):
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
-                    event="data_asset.validate",
+                    event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
                     event_payload=handler.anonymizer.anonymize(obj=self),
                     success=False,
                 )
@@ -1039,7 +1040,7 @@ class DataAsset:
         if getattr(data_context, "_usage_statistics_handler", None):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event="data_asset.validate",
+                event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
                 event_payload=handler.anonymizer.anonymize(obj=self),
                 success=True,
             )

@@ -12,6 +12,7 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
@@ -348,7 +349,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event="execution_engine.sqlalchemy.connect",
+                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
                 event_payload={
                     "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,

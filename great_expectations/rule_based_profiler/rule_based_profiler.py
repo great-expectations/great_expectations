@@ -15,6 +15,7 @@ from great_expectations.core.batch import (
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     get_profiler_run_usage_statistics,
@@ -211,7 +212,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return domain_builder
 
     @usage_statistics_enabled_method(
-        event_name="profiler.run",
+        event_name=UsageStatsEvents.PROFILER_RUN.value,
         args_payload_fn=get_profiler_run_usage_statistics,
     )
     def run(
