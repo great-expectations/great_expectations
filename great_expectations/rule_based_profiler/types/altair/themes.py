@@ -19,10 +19,7 @@ font: str = "Verdana"
 # Title
 title_align: str = "center"
 title_font_size: int = 15
-title_color: str = Colors.GREEN.value
-subtitle_font_size: int = 12
-subtitle_color: str = Colors.PURPLE.value
-subtitle_font_weight: alt.FontWeight = alt.FontWeight("bold")
+title_color: str = Colors.PURPLE.value
 
 # Both Axes
 axis_title_color: str = Colors.PURPLE.value
@@ -84,9 +81,6 @@ class AltairThemes(Enum):
             "align": title_align,
             "color": title_color,
             "fontSize": title_font_size,
-            "subtitleFontSize": subtitle_font_size,
-            "subtitleColor": subtitle_color,
-            "subtitleFontWeight": subtitle_font_weight,
         },
         "axis": {
             "titleFontSize": axis_title_font_size,

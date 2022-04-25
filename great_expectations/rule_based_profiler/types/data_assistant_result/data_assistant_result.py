@@ -1,7 +1,7 @@
 import copy
 from abc import abstractmethod
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import altair as alt
 import pandas as pd
@@ -94,7 +94,6 @@ class DataAssistantResult(SerializableDictDot):
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
-        subtitle: Optional[List[str]] = None,
     ) -> alt.Chart:
         """
         Args:
@@ -109,6 +108,7 @@ class DataAssistantResult(SerializableDictDot):
         """
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
+        title: str = f"{metric_title} per {domain_title}"
 
         batch_id: str = "batch_id"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
@@ -118,11 +118,6 @@ class DataAssistantResult(SerializableDictDot):
             alt.Tooltip(field=metric_name, type=metric_type, format=","),
         ]
 
-        if subtitle is None:
-            subtitle = []
-        title: alt.TitleParams = alt.TitleParams(
-            f"{metric_title} per {domain_title}", subtitle=subtitle
-        )
         line: alt.Chart = (
             alt.Chart(data=df, title=title)
             .mark_line()
@@ -154,13 +149,12 @@ class DataAssistantResult(SerializableDictDot):
         return line + points
 
     @staticmethod
-    def get_expect_domain_values_to_be_between_chart(
+    def get_expect_table_values_to_be_between_chart(
         df: pd.DataFrame,
         metric_name: str,
         metric_type: alt.StandardType,
         domain_name: str,
         domain_type: alt.StandardType,
-        subtitle: Optional[List[str]] = None,
     ) -> alt.Chart:
         """
         Args:
@@ -240,7 +234,6 @@ class DataAssistantResult(SerializableDictDot):
             metric_type=metric_type,
             domain_name=domain_name,
             domain_type=domain_type,
-            subtitle=subtitle,
         )
 
         predicate: alt.expr.core.BinaryExpression = (
@@ -258,6 +251,91 @@ class DataAssistantResult(SerializableDictDot):
         anomaly_coded_line = alt.layer(line.layer[0], anomaly_coded_points)
 
         return band + lower_limit + upper_limit + anomaly_coded_line
+
+    def get_vertically_concatenated_chart(
+        self,
+        dfs_by_column: List[Tuple[str, pd.DataFrame]],
+        metric_name: str,
+        metric_type: alt.StandardType,
+        domain_name: str,
+        domain_type: alt.StandardType,
+    ) -> alt.VConcatChart:
+        charts: List[alt.Chart] = []
+        for i, (column_name, df) in enumerate(dfs_by_column):
+            include_title: bool = i == 0
+            chart: alt.Chart = self._get_vertically_concatenated_chart(
+                df=df,
+                column_name=column_name,
+                metric_name=metric_name,
+                metric_type=metric_type,
+                domain_name=domain_name,
+                domain_type=domain_type,
+                include_title=include_title,
+            )
+            charts.append(chart)
+
+        return alt.vconcat(*charts)
+
+    def _get_vertically_concatenated_chart(
+        self,
+        df: pd.DataFrame,
+        column_name: str,
+        metric_name: str,
+        metric_type: alt.StandardType,
+        domain_name: str,
+        domain_type: alt.StandardType,
+        include_title: bool,
+    ) -> alt.Chart:
+        metric_title: str = metric_name.replace("_", " ").title()
+        domain_title: str = domain_name.title()
+
+        title: str = ""
+        if include_title:
+            title = f"{metric_title} per {domain_title}"
+
+        batch_id: str = "batch_id"
+        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+
+        tooltip: List[alt.Tooltip] = [
+            alt.Tooltip(field=batch_id, type=batch_id_type),
+            alt.Tooltip(field=metric_name, type=metric_type, format=","),
+        ]
+
+        column_label: str = column_name
+        chart_height: int = 200
+
+        line: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_line()
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=column_label),
+                tooltip=tooltip,
+            )
+            .properties(height=chart_height)
+        )
+
+        points: alt.Chart = (
+            alt.Chart(data=df, title=title)
+            .mark_point()
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=column_label),
+                tooltip=tooltip,
+            )
+            .properties(height=chart_height)
+        )
+
+        chart: alt.Chart = line + points
+        return chart
 
     @staticmethod
     def _determine_alt_predicate(metric_name: str) -> alt.expr.core.BinaryExpression:
