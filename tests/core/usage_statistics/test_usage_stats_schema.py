@@ -64,10 +64,13 @@ def test_comprehensive_list_of_messages():
         "data_context.save_expectation_suite",
         "data_context.test_yaml_config",
         "datasource.sqlalchemy.connect",
+        "execution_engine.sqlalchemy.connect",
         "checkpoint.run",
         "expectation_suite.add_expectation",
         "legacy_profiler.build_suite",
         "profiler.run",
+        "data_context.run_profiler_on_data",
+        "data_context.run_profiler_with_dynamic_arguments",
     }
 
 
@@ -196,6 +199,7 @@ def test_data_context_save_expectation_suite_message():
 def test_datasource_sqlalchemy_connect_message():
     usage_stats_records_messages = [
         "datasource.sqlalchemy.connect",
+        "execution_engine.sqlalchemy.connect",
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
@@ -293,6 +297,8 @@ def test_usage_stats_empty_payload_messages():
         "data_context.build_data_docs",
         "data_context.open_data_docs",
         "data_context.run_checkpoint",
+        "data_context.run_profiler_on_data",
+        "data_context.run_profiler_with_dynamic_arguments",
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:

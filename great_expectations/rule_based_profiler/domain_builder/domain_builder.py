@@ -27,35 +27,25 @@ class DomainBuilder(Builder, ABC):
 
     def __init__(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """
         Args:
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
-            data_context: DataContext
+            data_context: BaseDataContext associated with DomainBuilder
         """
-        super().__init__(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            data_context=data_context,
-        )
+        super().__init__(data_context=data_context)
 
     def get_domains(
         self,
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
     ) -> List[Domain]:
         """
         Args:
             variables: attribute name/value pairs
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite existing batch_request value in DomainBuilder components.
 
         Returns:
             List of Domain objects.
@@ -66,7 +56,6 @@ class DomainBuilder(Builder, ABC):
         self.set_batch_list_or_batch_request(
             batch_list=batch_list,
             batch_request=batch_request,
-            force_batch_data=force_batch_data,
         )
 
         return self._get_domains(variables=variables)

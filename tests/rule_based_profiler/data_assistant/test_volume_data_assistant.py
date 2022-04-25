@@ -1,6 +1,9 @@
+import os
 from typing import Any, Dict, List
-from unittest import mock
 
+import nbconvert
+import nbformat
+import pytest
 from freezegun import freeze_time
 
 from great_expectations import DataContext
@@ -10,42 +13,159 @@ from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
-from great_expectations.rule_based_profiler.helpers.util import (
-    convert_variables_to_dict,
-)
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.rule_based_profiler import (
-    BaseRuleBasedProfiler,
-)
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    build_parameter_container_for_variables,
-)
+from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.validator.validator import Validator
+from tests.render.test_util import load_notebook_from_path
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
+from tests.test_utils import (
+    get_validator_with_expectation_suite,
+    set_bootstrap_random_seed_variable,
+)
 
 
-def set_bootstrap_random_seed_variable(
-    profiler: BaseRuleBasedProfiler, random_seed: int = RANDOM_SEED
-) -> None:
-    variables_dict: dict
+def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+    context: DataContext, new_cell: str
+):
+    """
+    To set this test up we:
+    - create a suite
+    - write code (as a string) for creating a VolumeDataAssistantResult
+    - add a new cell to the notebook that was passed to this method
+    - write both cells to ipynb file
 
-    variables_dict = convert_variables_to_dict(variables=profiler.variables)
-    variables_dict["bootstrap_random_seed"] = random_seed
-    profiler.variables = build_parameter_container_for_variables(
-        variables_configs=variables_dict
+    We then:
+    - load the notebook back from disk
+    - execute the notebook (Note: this will raise various errors like
+      CellExecutionError if any cell in the notebook fails)
+    """
+
+    root_dir: str = context.root_directory
+    expectation_suite_name: str = "test_suite"
+    context.create_expectation_suite(expectation_suite_name)
+    notebook_path: str = os.path.join(root_dir, f"run_volume_data_assistant.ipynb")
+    notebook_code: str = """
+    from typing import Optional, Union
+
+    import uuid
+
+    import great_expectations as ge
+    from great_expectations.data_context import BaseDataContext
+    from great_expectations.core.batch import BatchRequestBase, materialize_batch_request
+    from great_expectations.core import ExpectationSuite
+    from great_expectations.validator.validator import Validator
+    from great_expectations.rule_based_profiler.data_assistant import (
+        DataAssistant,
+        VolumeDataAssistant,
+    )
+    from great_expectations.rule_based_profiler.types.data_assistant_result import DataAssistantResult
+    import great_expectations.exceptions as ge_exceptions
+    """
+    notebook_code += """
+    def get_validator_with_expectation_suite(
+        batch_request: Union[BatchRequestBase, dict],
+        data_context: BaseDataContext,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+        component_name: Optional[str] = None,
+    ) -> Validator:
+        suite: ExpectationSuite
+
+        generate_temp_expectation_suite_name: bool
+        create_expectation_suite: bool
+
+        if expectation_suite is not None and expectation_suite_name is not None:
+            if expectation_suite.expectation_suite_name != expectation_suite_name:
+                raise ValueError(
+                    'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
+                )
+            generate_temp_expectation_suite_name = False
+            create_expectation_suite = False
+        elif expectation_suite is None and expectation_suite_name is not None:
+            generate_temp_expectation_suite_name = False
+            create_expectation_suite = True
+        elif expectation_suite is not None and expectation_suite_name is None:
+            generate_temp_expectation_suite_name = False
+            create_expectation_suite = False
+        else:
+            generate_temp_expectation_suite_name = True
+            create_expectation_suite = True
+
+        if generate_temp_expectation_suite_name:
+            if not component_name:
+                component_name = "test"
+
+            expectation_suite_name = f"tmp.{component_name}.suite_{str(uuid.uuid4())[:8]}"
+
+        if create_expectation_suite:
+            try:
+                # noinspection PyUnusedLocal
+                expectation_suite = data_context.get_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                )
+            except ge_exceptions.DataContextError:
+                expectation_suite = data_context.create_expectation_suite(
+                    expectation_suite_name=expectation_suite_name
+                )
+                print(f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".')
+
+        batch_request = materialize_batch_request(batch_request=batch_request)
+        validator: Validator = data_context.get_validator(
+            batch_request=batch_request,
+            expectation_suite_name=expectation_suite_name,
+        )
+
+        return validator
+    """
+    notebook_code += """
+    context = ge.get_context()
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="volume_data_assistant",
     )
 
-    rule: Rule
-    for rule in profiler.rules:
-        variables_dict = convert_variables_to_dict(variables=rule.variables)
-        variables_dict["bootstrap_random_seed"] = random_seed
-        rule.variables = build_parameter_container_for_variables(
-            variables_configs=variables_dict
-        )
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
+        validator=validator,
+    )
+
+    expectation_suite_name: str = "test_suite"
+    data_assistant_result: DataAssistantResult = data_assistant.run(
+        expectation_suite_name=expectation_suite_name,
+    )
+    """
+
+    nb = nbformat.v4.new_notebook()
+    nb["cells"] = []
+    nb["cells"].append(nbformat.v4.new_code_cell(notebook_code))
+    nb["cells"].append(nbformat.v4.new_code_cell(new_cell))
+
+    # Write notebook to path and load it as NotebookNode
+    with open(notebook_path, "w") as f:
+        nbformat.write(nb, f)
+
+    nb: nbformat.notebooknode.NotebookNode = load_notebook_from_path(
+        notebook_path=notebook_path
+    )
+
+    # Run notebook
+    ep: nbconvert.preprocessors.ExecutePreprocessor = (
+        nbconvert.preprocessors.ExecutePreprocessor(timeout=60, kernel_name="python3")
+    )
+    ep.preprocess(nb, {"metadata": {"path": root_dir}})
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -59,6 +179,15 @@ def test_get_metrics_and_expectations(
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="volume_data_assistant",
+    )
+    assert len(validator.batches) == 36
 
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
         Domain(domain_type="table",): {
@@ -2240,7 +2369,6 @@ def test_get_metrics_and_expectations(
                         "default_expect_table_row_count_to_be_between_rule": {
                             "domain_builder": {
                                 "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
-                                "batch_request": None,
                                 "class_name": "TableDomainBuilder",
                             },
                             "parameter_builders": [
@@ -2248,7 +2376,6 @@ def test_get_metrics_and_expectations(
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                     "metric_name": "table.row_count",
                                     "json_serialize": True,
-                                    "batch_request": None,
                                     "class_name": "MetricMultiBatchParameterBuilder",
                                     "name": "table_row_count",
                                     "enforce_numeric_metric": True,
@@ -2262,7 +2389,6 @@ def test_get_metrics_and_expectations(
                             "expectation_configuration_builders": [
                                 {
                                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                                    "batch_request": None,
                                     "max_value": "$parameter.row_count_range_estimator.value[1]",
                                     "class_name": "DefaultExpectationConfigurationBuilder",
                                     "meta": {
@@ -2274,7 +2400,6 @@ def test_get_metrics_and_expectations(
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                                             "json_serialize": True,
                                             "metric_name": "table.row_count",
-                                            "batch_request": None,
                                             "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                                             "false_positive_rate": "$variables.false_positive_rate",
                                             "name": "row_count_range_estimator",
@@ -2311,7 +2436,6 @@ def test_get_metrics_and_expectations(
                             "domain_builder": {
                                 "exclude_column_name_suffixes": None,
                                 "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",
-                                "batch_request": None,
                                 "semantic_type_filter_class_name": None,
                                 "class_name": "ColumnDomainBuilder",
                                 "include_semantic_types": None,
@@ -2326,7 +2450,6 @@ def test_get_metrics_and_expectations(
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",
                                     "metric_name": "column.distinct_values.count",
                                     "json_serialize": True,
-                                    "batch_request": None,
                                     "class_name": "MetricMultiBatchParameterBuilder",
                                     "name": "column_distinct_values.count",
                                     "enforce_numeric_metric": True,
@@ -2341,7 +2464,6 @@ def test_get_metrics_and_expectations(
                                 {
                                     "column": "$domain.domain_kwargs.column",
                                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                                    "batch_request": None,
                                     "max_value": "$parameter.column_unique_values_range_estimator.value[1]",
                                     "class_name": "DefaultExpectationConfigurationBuilder",
                                     "strict_max": "$variables.strict_max",
@@ -2354,7 +2476,6 @@ def test_get_metrics_and_expectations(
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                                             "json_serialize": True,
                                             "metric_name": "column.distinct_values.count",
-                                            "batch_request": None,
                                             "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                                             "false_positive_rate": "$variables.false_positive_rate",
                                             "name": "column_unique_values_range_estimator",
@@ -2530,8 +2651,7 @@ def test_get_metrics_and_expectations(
     # Utilize a consistent seed to deal with probabilistic nature of this feature.
     data_assistant: DataAssistant = VolumeDataAssistant(
         name="test_volume_data_assistant",
-        batch_request=batch_request,
-        data_context=context,
+        validator=validator,
     )
     set_bootstrap_random_seed_variable(profiler=data_assistant.profiler)
     data_assistant_result: DataAssistantResult = data_assistant.run(
@@ -2570,10 +2690,18 @@ def test_execution_time_within_proper_bounds(
         "data_asset_name": "my_reports",
     }
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
+    validator: Validator = get_validator_with_expectation_suite(
         batch_request=batch_request,
         data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="volume_data_assistant",
+    )
+    assert len(validator.batches) == 36
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
+        validator=validator,
     )
     data_assistant_result: DataAssistantResult = data_assistant.run()
 
@@ -2581,59 +2709,56 @@ def test_execution_time_within_proper_bounds(
     assert data_assistant_result.execution_time > 0.0
 
 
-def test_volume_data_assistant_plot_descriptive(
-    quentin_columnar_table_multi_batch_data_context,
+def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        batch_request=batch_request,
-        data_context=context,
-    )
-
-    expectation_suite_name: str = "test_suite"
-    data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
-    )
-
-    with mock.patch(
-        "great_expectations.rule_based_profiler.types.data_assistant_result.VolumeDataAssistantResult.plot",
-        return_value=False,
-    ) as data_assistant_result:
-        data_assistant_result.plot()
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    new_cell: str = "data_assistant_result.plot(this_is_not_a_real_parameter=True)"
+    with pytest.raises(nbconvert.preprocessors.CellExecutionError):
+        run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+            context=context, new_cell=new_cell
+        )
 
 
-def test_volume_data_assistant_plot_prescriptive(
-    quentin_columnar_table_multi_batch_data_context,
+def test_volume_data_assistant_plot_descriptive_notebook_execution(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        batch_request=batch_request,
-        data_context=context,
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    new_cell: str = "data_assistant_result.plot()"
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context, new_cell=new_cell
     )
 
-    expectation_suite_name: str = "test_suite"
-    data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
+
+def test_volume_data_assistant_plot_prescriptive_notebook_execution(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    new_cell: str = "data_assistant_result.plot(prescriptive=True)"
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context, new_cell=new_cell
     )
 
-    with mock.patch(
-        "great_expectations.rule_based_profiler.types.data_assistant_result.VolumeDataAssistantResult.plot",
-        return_value=False,
-    ) as data_assistant_result:
-        data_assistant_result.plot(prescriptive=True)
+
+def test_volume_data_assistant_plot_descriptive_theme_notebook_execution(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    theme = {"font": "Comic Sans MS"}
+    new_cell: str = f"data_assistant_result.plot(theme={theme})"
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context, new_cell=new_cell
+    )
+
+
+def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    theme = {"font": "Comic Sans MS"}
+    new_cell: str = f"data_assistant_result.plot(prescriptive=True, theme={theme})"
+    run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
+        context=context, new_cell=new_cell
+    )
