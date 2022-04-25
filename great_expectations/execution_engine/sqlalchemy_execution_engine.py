@@ -1126,7 +1126,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
 
         if batch_spec.get("bigquery_temp_table"):
-            raise DeprecationWarning("you dont have to do this anymore")
+            # deprecated-v0.15.3
+            warnings.warn(
+                "BigQuery tables that are created as the result of a query are no longer created as "
+                "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
+                "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
+                "v0.15.3 and will be removed in v0.16.",
+                DeprecationWarning,
+            )
 
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table

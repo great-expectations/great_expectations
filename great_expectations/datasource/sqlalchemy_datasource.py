@@ -1,5 +1,6 @@
 import datetime
 import logging
+import warnings
 from pathlib import Path
 from string import Template
 
@@ -383,7 +384,14 @@ class SqlAlchemyDatasource(LegacyDatasource):
         )
 
         if "bigquery_temp_table" in batch_kwargs:
-            raise DeprecationWarning("you dont have to do this anymore")
+            # deprecated-v0.15.3
+            warnings.warn(
+                "BigQuery tables that are created as the result of a query are no longer created as "
+                "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
+                "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
+                "v0.15.3 and will be removed in v0.16.",
+                DeprecationWarning,
+            )
 
         if "snowflake_transient_table" in batch_kwargs:
             # Snowflake can use either a transient or temp table, so we allow a table_name to be provided
