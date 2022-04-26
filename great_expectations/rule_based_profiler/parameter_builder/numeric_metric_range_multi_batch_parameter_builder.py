@@ -219,9 +219,6 @@ detected.
             parameters=parameters,
         )
 
-        if isinstance(false_positive_rate, str):
-            false_positive_rate = float(false_positive_rate)
-
         if false_positive_rate < 0 or false_positive_rate >= 1:
             raise ValueError(
                 f"""false_positive_rate must be a positive decimal number between 0 and 1 exclusive (0, 1),
