@@ -284,7 +284,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
 but 1.0 was provided."""
     )
 
-    with pytest.raises(ValueError, match=error_message) as e:
+    with pytest.raises(ValueError, match=error_message):
         numeric_metric_range_parameter_builder.build_parameters(
             domain=domain,
             variables=variables,
@@ -333,10 +333,10 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
 
     warning_message: str = re.escape(
         """false_positive_rate should be a positive decimal number between 0 and 1 exclusive (0, 1),
-but 0 was provided. A false_positive_rate of 2.220446049250313e-16 has been selected instead."""
+but 0.0 was provided. A false_positive_rate of 2.220446049250313e-16 has been selected instead."""
     )
 
-    with pytest.warns(match=warning_message):
+    with pytest.warns(UserWarning, match=warning_message):
         numeric_metric_range_parameter_builder.build_parameters(
             domain=domain,
             variables=variables,

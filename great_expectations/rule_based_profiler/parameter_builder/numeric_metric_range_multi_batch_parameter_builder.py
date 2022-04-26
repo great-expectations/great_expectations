@@ -223,7 +223,7 @@ detected.
             false_positive_rate = float(false_positive_rate)
 
         if false_positive_rate <= 0:
-            raise warnings.warn(
+            warnings.warn(
                 f"""false_positive_rate should be a positive decimal number between 0 and 1 exclusive (0, 1),
 but {false_positive_rate} was provided. A false_positive_rate of {NP_EPSILON} has been selected instead."""
             )
@@ -235,11 +235,6 @@ but {false_positive_rate} was provided."""
             )
         else:
             self._false_positive_rate = false_positive_rate
-
-        if not (0.0 <= false_positive_rate <= 1.0):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
-            )
 
         # Compute metric value for each Batch object.
         super().build_parameters(
