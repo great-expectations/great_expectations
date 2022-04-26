@@ -13,6 +13,10 @@ from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
     VolumeDataAssistant,
 )
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_or_create_expectation_suite,
+    get_validator_with_expectation_suite,
+)
 from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
@@ -21,11 +25,7 @@ from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
 from tests.render.test_util import load_notebook_from_path
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
-from tests.test_utils import (
-    get_or_create_expectation_suite,
-    get_validator_with_expectation_suite,
-    set_bootstrap_random_seed_variable,
-)
+from tests.test_utils import set_bootstrap_random_seed_variable
 
 
 def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
@@ -55,71 +55,14 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 
     import great_expectations as ge
     from great_expectations.data_context import BaseDataContext
-    from great_expectations.core.batch import BatchRequestBase, materialize_batch_request
-    from great_expectations.core import ExpectationSuite
     from great_expectations.validator.validator import Validator
     from great_expectations.rule_based_profiler.data_assistant import (
         DataAssistant,
         VolumeDataAssistant,
     )
     from great_expectations.rule_based_profiler.types.data_assistant_result import DataAssistantResult
+    from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
     import great_expectations.exceptions as ge_exceptions
-    """
-    notebook_code += """
-    def get_validator_with_expectation_suite(
-        batch_request: Union[BatchRequestBase, dict],
-        data_context: BaseDataContext,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        component_name: Optional[str] = None,
-    ) -> Validator:
-        expectation_suite: ExpectationSuite
-
-        generate_temp_expectation_suite_name: bool
-        create_expectation_suite: bool
-
-        if expectation_suite is not None and expectation_suite_name is not None:
-            if expectation_suite.expectation_suite_name != expectation_suite_name:
-                raise ValueError(
-                    'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
-                )
-            generate_temp_expectation_suite_name = False
-            create_expectation_suite = False
-        elif expectation_suite is None and expectation_suite_name is not None:
-            generate_temp_expectation_suite_name = False
-            create_expectation_suite = True
-        elif expectation_suite is not None and expectation_suite_name is None:
-            generate_temp_expectation_suite_name = False
-            create_expectation_suite = False
-        else:
-            generate_temp_expectation_suite_name = True
-            create_expectation_suite = True
-
-        if generate_temp_expectation_suite_name:
-            if not component_name:
-                component_name = "test"
-
-            expectation_suite_name = f"tmp.{component_name}.suite_{str(uuid.uuid4())[:8]}"
-
-        if create_expectation_suite:
-            try:
-                # noinspection PyUnusedLocal
-                expectation_suite = data_context.get_expectation_suite(
-                    expectation_suite_name=expectation_suite_name
-                )
-            except ge_exceptions.DataContextError:
-                expectation_suite = data_context.create_expectation_suite(
-                    expectation_suite_name=expectation_suite_name
-                )
-                print(f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".')
-
-        batch_request = materialize_batch_request(batch_request=batch_request)
-        validator: Validator = data_context.get_validator(
-            batch_request=batch_request,
-            expectation_suite_name=expectation_suite_name,
-        )
-
-        return validator
     """
     notebook_code += """
     context = ge.get_context()
