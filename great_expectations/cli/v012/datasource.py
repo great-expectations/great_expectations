@@ -1374,16 +1374,6 @@ Would you like to continue?"""
             project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
             data_asset_name = f"{project_id}.{data_asset_name}"
 
-        # bigquery also requires special handling
-        bigquery_temp_table = click.prompt(
-            "Great Expectations will create a table to use for "
-            "validation." + os.linesep + "Please enter a name for this table: ",
-            default=f"SOME_PROJECT.SOME_DATASET.ge_tmp_{str(uuid.uuid4())[:8]}",
-        )
-        temp_table_kwargs = {
-            "bigquery_temp_table": bigquery_temp_table,
-        }
-
     # now building the actual batch_kwargs
     if sql_query is None:
         batch_kwargs = temp_generator.build_batch_kwargs(
