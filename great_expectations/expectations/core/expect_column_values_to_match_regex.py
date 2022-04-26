@@ -17,11 +17,9 @@ from great_expectations.rule_based_profiler.config.base import (
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
 )
-from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
-    RegexPatternStringParameterBuilder,
-)
 from great_expectations.rule_based_profiler.types.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     PARAMETER_KEY,
     VARIABLES_KEY,
@@ -100,7 +98,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         "profiler_config",
     )
 
-    regex_pattern_string_parameter_builder: ParameterBuilderConfig = (
+    regex_pattern_string_parameter_builder_config: ParameterBuilderConfig = (
         ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="RegexPatternStringParameterBuilder",
@@ -112,7 +110,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         )
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
-        regex_pattern_string_parameter_builder
+        regex_pattern_string_parameter_builder_config
     ]
     default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
         name="expect_column_values_to_match_regex",  # Convention: use "expectation_type" as profiler name.
@@ -136,7 +134,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                         "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
                         "mostly": f"{VARIABLES_KEY}mostly",
                         "meta": {
-                            "profiler_details": f"{PARAMETER_KEY}{value_set_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                            "profiler_details": f"{PARAMETER_KEY}{regex_pattern_string_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     },
                 ],

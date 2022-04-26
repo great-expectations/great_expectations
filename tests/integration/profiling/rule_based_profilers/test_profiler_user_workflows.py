@@ -39,6 +39,8 @@ from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 yaml = YAML()
 
+TIMESTAMP: str = "09/26/2019 13:42:41"
+
 
 @pytest.fixture
 def set_consistent_seed_within_expectation_default_profiler_config() -> Callable:
@@ -102,7 +104,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     assert metric_max == 73
 
 
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -309,6 +311,41 @@ def test_alice_profiler_user_workflow_single_batch(
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time(TIMESTAMP)
+def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    alice_columnar_table_single_batch_context: DataContext,
+) -> None:
+    context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
+    )
+    assert len(validator.batches) == 1
+
+    result = validator.expect_column_values_to_match_regex(
+        column="id",
+        result_format="SUMMARY",
+        include_config=True,
+        auto=True,
+    )
+    __import__("pprint").pprint(result)
+    assert result.success
+
+
 # noinspection PyUnusedLocal
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     monkeypatch,
@@ -382,7 +419,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -668,7 +705,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -798,7 +835,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -1041,7 +1078,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_no_custom_profiler_config_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -1448,7 +1485,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
 ):
@@ -1638,7 +1675,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -1815,7 +1852,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -1873,7 +1910,7 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -1930,7 +1967,7 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_columnar_table_multi_batch_data_context,
 ):
@@ -2010,7 +2047,7 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_columnar_table_multi_batch_data_context,
     set_consistent_seed_within_expectation_default_profiler_config: Callable,
