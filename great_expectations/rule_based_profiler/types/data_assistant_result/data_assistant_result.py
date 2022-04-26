@@ -252,7 +252,22 @@ class DataAssistantResult(SerializableDictDot):
         domain_name: str,
         domain_type: alt.StandardType,
     ) -> alt.VConcatChart:
+        """
+        Args:
+            dfs_by_column: A list of tuples pairing pandas dataframes with the columns they correspond to
+            metric_name: The name of the metric as it exists in the pandas dataframe
+            metric_type: The altair data type for the metric being plotted
+            domain_name: The name of the domain as it exists in the pandas dataframe
+            domain_type: The altair data type for the domain being plotted
+
+        Returns:
+            A vertically concatenated (vconcat) altair line chart
+        """
         charts: List[alt.Chart] = []
+
+        i: int
+        column_name: str
+        df: pd.DataFrame
         for i, (column_name, df) in enumerate(dfs_by_column):
             include_title: bool = i == 0
             chart: alt.Chart = DataAssistantResult._get_vertically_concatenated_chart(
@@ -336,7 +351,22 @@ class DataAssistantResult(SerializableDictDot):
         domain_name: str,
         domain_type: alt.StandardType,
     ) -> alt.VConcatChart:
+        """
+        Args:
+            dfs_by_column: A list of tuples pairing pandas dataframes with the columns they correspond to
+            metric_name: The name of the metric as it exists in the pandas dataframe
+            metric_type: The altair data type for the metric being plotted
+            domain_name: The name of the domain as it exists in the pandas dataframe
+            domain_type: The altair data type for the domain being plotted
+
+        Returns:
+            A vertically concatenated (vconcat) altair line chart with confidence intervals corresponding to "between" expectations
+        """
         charts: List[alt.Chart] = []
+
+        i: int
+        column_name: str
+        df: pd.DataFrame
         for i, (column_name, df) in enumerate(dfs_by_column):
             include_title: bool = i == 0
             chart: alt.Chart = (
