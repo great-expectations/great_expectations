@@ -132,17 +132,6 @@ class TaxiSplittingTestCases:
                 num_expected_rows_in_first_batch_definition=30,
                 expected_pickup_datetimes=self.taxi_test_data.month_batch_identifier_data(),
             ),
-            # date_parts as a string (with mixed case):
-            TaxiSplittingTestCase(
-                splitter_method_name="split_on_date_parts",
-                splitter_kwargs={
-                    "column_name": self.taxi_test_data.test_column_name,
-                    "date_parts": ["mOnTh"],
-                },
-                num_expected_batch_definitions=12,
-                num_expected_rows_in_first_batch_definition=30,
-                expected_pickup_datetimes=self.taxi_test_data.month_batch_identifier_data(),
-            ),
             # Mix of types of date_parts:
             TaxiSplittingTestCase(
                 splitter_method_name="split_on_date_parts",
