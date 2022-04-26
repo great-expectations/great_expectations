@@ -21,11 +21,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_profiler_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import (
-    TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN,
-    get_or_create_expectation_suite,
-    nested_update,
-)
+from great_expectations.core.util import nested_update
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -55,7 +51,9 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     reconcile_rule_variables,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
+    TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN,
     convert_variables_to_dict,
+    get_or_create_expectation_suite,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,

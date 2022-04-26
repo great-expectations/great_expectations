@@ -1,6 +1,7 @@
 import copy
 import itertools
 import logging
+import re
 import uuid
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -32,6 +33,12 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
+
+TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX: str = "tmp"
+TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
+TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN: re.Pattern = re.compile(
+    rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\w{8}"
+)
 
 
 def get_validator(
@@ -553,3 +560,86 @@ def compute_bootstrap_quantiles_point_estimate(
         lower_quantile_bias_corrected_point_estimate,
         upper_quantile_bias_corrected_point_estimate,
     )
+
+
+def get_validator_with_expectation_suite(
+    batch_request: Union[BatchRequestBase, dict],
+    data_context: "BaseDataContext",  # noqa: F821
+    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    expectation_suite_name: Optional[str] = None,
+    component_name: str = "test",
+) -> "Validator":  # noqa: F821
+    """
+    Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
+    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
+    """
+    expectation_suite = get_or_create_expectation_suite(
+        data_context=data_context,
+        expectation_suite=expectation_suite,
+        expectation_suite_name=expectation_suite_name,
+        component_name=component_name,
+    )
+
+    batch_request = materialize_batch_request(batch_request=batch_request)
+    validator: "Validator" = data_context.get_validator(  # noqa: F821
+        batch_request=batch_request,
+        expectation_suite=expectation_suite,
+    )
+
+    return validator
+
+
+def get_or_create_expectation_suite(
+    data_context: "BaseDataContext",  # noqa: F821
+    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    expectation_suite_name: Optional[str] = None,
+    component_name: Optional[str] = None,
+) -> "ExpectationSuite":  # noqa: F821
+    """
+    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
+    """
+    suite: "ExpectationSuite"  # noqa: F821
+
+    generate_temp_expectation_suite_name: bool
+    create_expectation_suite: bool
+
+    if expectation_suite is not None and expectation_suite_name is not None:
+        if expectation_suite.expectation_suite_name != expectation_suite_name:
+            raise ValueError(
+                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
+            )
+
+        return expectation_suite
+    elif expectation_suite is None and expectation_suite_name is not None:
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = True
+    elif expectation_suite is not None and expectation_suite_name is None:
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = False
+    else:
+        generate_temp_expectation_suite_name = True
+        create_expectation_suite = True
+
+    if generate_temp_expectation_suite_name:
+        if not component_name:
+            component_name = "test"
+
+        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}{str(uuid.uuid4())[:8]}"
+
+    if create_expectation_suite:
+        try:
+            # noinspection PyUnusedLocal
+            expectation_suite = data_context.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+        except ge_exceptions.DataContextError:
+            expectation_suite = data_context.create_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+            print(
+                f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
+            )
+
+    return expectation_suite

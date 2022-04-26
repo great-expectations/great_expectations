@@ -135,6 +135,14 @@ class ProfilerNotFoundError(ProfilerError):
     pass
 
 
+class DataAssistantError(GreatExpectationsError):
+    pass
+
+
+class DataAssistantNotFoundError(DataAssistantError):
+    pass
+
+
 class InvalidConfigError(DataContextError):
     def __init__(self, message):
         self.message = message
