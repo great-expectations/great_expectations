@@ -143,5 +143,35 @@ class SparkDataSplitter(DataSplitter):
         )
 
         for date_part, date_part_value in date_parts_dict.items():
-            df = df.filter(getattr(F, date_part)(F.col(column_name)) == date_part_value)
+            df = df.filter(
+                getattr(F, self._convert_date_part_to_spark_equivalent(date_part))(
+                    F.col(column_name)
+                )
+                == date_part_value
+            )
         return df
+
+    @staticmethod
+    def _convert_date_part_to_spark_equivalent(date_part: [DatePart, str]) -> str:
+        """Convert the DatePart to a string representing the corresponding pyspark.sql.functions version.
+
+        For example DatePart.DAY -> pyspark.sql.functions.dayofmonth() -> "dayofmonth"
+
+        Args:
+            date_part: DatePart representing the part of the datetime to extract or string equivalent.
+
+        Returns:
+            String representing the spark function to use for the given DatePart.
+        """
+        date_part: DatePart = DatePart(date_part)
+
+        spark_date_part_decoder: dict = {
+            DatePart.YEAR: "year",
+            DatePart.MONTH: "month",
+            DatePart.WEEK: "weekofyear",
+            DatePart.DAY: "dayofmonth",
+            DatePart.HOUR: "hour",
+            DatePart.MINUTE: "minute",
+            DatePart.SECOND: "second",
+        }
+        return spark_date_part_decoder[date_part]

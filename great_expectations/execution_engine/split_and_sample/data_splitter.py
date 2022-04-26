@@ -22,6 +22,9 @@ class DatePart(enum.Enum):
     def __eq__(self, other):
         return self.value == other.value
 
+    def __hash__(self):
+        return hash(self.value)
+
 
 class DataSplitter(abc.ABC):
     """Abstract base class containing methods for splitting data accessible via Execution Engines.
@@ -101,14 +104,14 @@ class DataSplitter(abc.ABC):
         column_batch_identifiers: Union[datetime.datetime, str, dict],
         date_parts: List[DatePart],
     ) -> dict:
-        """Convert batch identifiers to a dict of {date_part: date_part value}.
+        """Convert batch identifiers to a dict of {date_part as str: date_part value}.
 
         Args:
             column_batch_identifiers: Batch identifiers related to the column of interest.
             date_parts: List of DatePart to include in the return value.
 
         Returns:
-            A dict of {date_part: date_part value}.
+            A dict of {date_part as str: date_part value} eg. {"day": 3}.
         """
 
         if isinstance(column_batch_identifiers, str):
