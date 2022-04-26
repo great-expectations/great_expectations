@@ -527,28 +527,28 @@ cloud_gcp_tests = [
 ]
 
 cloud_bigquery_tests = [
-    # IntegrationTestFixture(
-    #     name="bigquery_yaml_example",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     util_script="tests/test_utils.py",
-    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    # ),
-    # IntegrationTestFixture(
-    #     name="bigquery_python_example",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     util_script="tests/test_utils.py",
-    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    # ),
-    # IntegrationTestFixture(
-    #     name="gcp_deployment_patterns_file_bigquery_yaml_configs",
-    #     user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    # ),
+    IntegrationTestFixture(
+        name="bigquery_yaml_example",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        util_script="tests/test_utils.py",
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="bigquery_python_example",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        util_script="tests/test_utils.py",
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
+    IntegrationTestFixture(
+        name="gcp_deployment_patterns_file_bigquery_yaml_configs",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
     IntegrationTestFixture(
         name="split_data_on_datetime_bigquery",
         user_flow_script="tests/integration/db/test_sql_data_splitting.py",
@@ -563,12 +563,12 @@ cloud_bigquery_tests = [
         ),
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
-    # IntegrationTestFixture(
-    #     name="test_runtime_parameters_bigquery",
-    #     user_flow_script="tests/integration/db/bigquery.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
-    # ),
+    IntegrationTestFixture(
+        name="test_runtime_parameters_bigquery",
+        user_flow_script="tests/integration/db/bigquery.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    ),
 ]
 
 cloud_azure_tests = [
@@ -709,14 +709,14 @@ cloud_redshift_tests = [
 ]
 
 # populate docs_test_matrix with sub-lists
-# docs_test_matrix += local_tests
-# docs_test_matrix += dockerized_db_tests
-# docs_test_matrix += cloud_snowflake_tests
-# docs_test_matrix += cloud_gcp_tests
+docs_test_matrix += local_tests
+docs_test_matrix += dockerized_db_tests
+docs_test_matrix += cloud_snowflake_tests
+docs_test_matrix += cloud_gcp_tests
 docs_test_matrix += cloud_bigquery_tests
-# docs_test_matrix += cloud_azure_tests
-# docs_test_matrix += cloud_s3_tests
-# docs_test_matrix += cloud_redshift_tests
+docs_test_matrix += cloud_azure_tests
+docs_test_matrix += cloud_s3_tests
+docs_test_matrix += cloud_redshift_tests
 
 pandas_integration_tests = [
     IntegrationTestFixture(
@@ -772,8 +772,8 @@ aws_integration_tests = [
 
 # populate integration_test_matrix with sub-lists
 integration_test_matrix: List[IntegrationTestFixture] = []
-# integration_test_matrix += aws_integration_tests
-# integration_test_matrix += pandas_integration_tests
+integration_test_matrix += aws_integration_tests
+integration_test_matrix += pandas_integration_tests
 
 
 def idfn(test_configuration):

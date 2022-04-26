@@ -70,13 +70,11 @@ if __name__ == "test_script_module":
 
     dialect, connection_string = _get_connection_string_and_dialect()
     print(f"Testing dialect: {dialect}")
+
     print("Preemptively cleaning old tables")
-    # see if expiration can be set with BigQuery backend?
-    # or if this is being cleaned up too often
-    # if
-    # clean_up_tables_with_prefix(
-    #     connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
-    # )
+    clean_up_tables_with_prefix(
+        connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
+    )
 
     loaded_table: LoadedTable = _load_data(connection_string=connection_string)
     test_df: pd.DataFrame = loaded_table.inserted_dataframe
