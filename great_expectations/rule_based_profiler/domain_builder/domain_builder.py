@@ -20,7 +20,7 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class DomainBuilder(Builder, ABC):
+class DomainBuilder(ABC, Builder):
     """
     A DomainBuilder provides methods to get domains based on one or more batches of data.
     """
