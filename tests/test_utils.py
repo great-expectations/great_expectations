@@ -732,6 +732,8 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
         engine.dispose()
 
 
+# Chetan - 20220426 - This is to be deleted in favor of
+# `set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder`
 def set_bootstrap_random_seed_variable(
     profiler: BaseRuleBasedProfiler,
     random_seed: int = RANDOM_SEED,

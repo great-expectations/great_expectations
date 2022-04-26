@@ -2409,22 +2409,3 @@ def _format_map_output(
         return return_obj
 
     raise ValueError(f"Unknown result_format {result_format['result_format']}.")
-
-
-def get_default_profiler_config_for_expectation_type(
-    expectation_type: str,
-) -> Optional[RuleBasedProfilerConfig]:
-    """Retrieves the default profiler config as defined within a given Expectation.
-
-    Args:
-        expectation_type (str): The name of the Expectation to parse
-
-    Returns:
-        The default profiler config within the target Expectation.
-        If not available, returns None.
-    """
-    expectation_impl = get_expectation_impl(expectation_name=expectation_type)
-    profiler_config: Optional[
-        RuleBasedProfilerConfig
-    ] = expectation_impl.default_kwarg_values.get("profiler_config")
-    return profiler_config
