@@ -27,6 +27,7 @@ class DataAssistantDispatcher:
         self._data_assistant_runner_cache = {}
 
     def __getattr__(self, name):
+        # Both, full registered "volume_data_assistant" data_assistant_type and alias name are supported for invocation.
         data_assistant_cls: Type["DataAssistant"] = get_data_assistant_impl(
             data_assistant_type=name.lower()
         ) or get_data_assistant_impl(

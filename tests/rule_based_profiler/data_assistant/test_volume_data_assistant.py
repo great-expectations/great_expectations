@@ -2431,7 +2431,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 
     implicit_invocation_code: str = """
     expectation_suite_name: str = "test_suite"
-    data_assistant_result: DataAssistantResult = context.assistants.volume_data_assistant.run(
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
         batch_request=batch_request,
         expectation_suite_name=expectation_suite_name,
     )
@@ -2555,11 +2555,9 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
         name=registered_data_assistant_name
     )
 
-    data_assistant_result: DataAssistantResult = (
-        context.assistants.volume_data_assistant.run(
-            batch_request=batch_request,
-            expectation_suite_name=expected_expectation_suite.expectation_suite_name,
-        )
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
+        expectation_suite_name=expected_expectation_suite.expectation_suite_name,
     )
 
     assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
@@ -2633,10 +2631,8 @@ def test_execution_time_within_proper_bounds_using_implicit_invocation(
         "data_asset_name": "my_reports",
     }
 
-    data_assistant_result: DataAssistantResult = (
-        context.assistants.volume_data_assistant.run(
-            batch_request=batch_request,
-        )
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
     )
 
     # Execution time (in seconds) must have non-trivial value.
@@ -2705,10 +2701,8 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_n
         "data_asset_name": "my_reports",
     }
 
-    data_assistant_result: DataAssistantResult = (
-        context.assistants.volume_data_assistant.run(
-            batch_request=batch_request,
-        )
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request,
     )
 
     expectation_suite.add_expectation_configurations(
@@ -2815,6 +2809,9 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_y
 
     data_assistant_result: DataAssistantResult
 
+    # Both, full registered "volume_data_assistant" data_assistant_type and alias name are supported for invocation.
+
+    # Using full registered "volume_data_assistant" data_assistant_type for invocation.
     data_assistant_result = context.assistants.volume_data_assistant.run(
         batch_request=batch_request,
         expectation_suite_name=expectation_suite_name,
@@ -2830,7 +2827,8 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_y
     assert len(data_assistant_result.expectation_suite.expectations) == 19
     assert len(expectation_suite.expectations) == 0
 
-    data_assistant_result = context.assistants.volume_data_assistant.run(
+    # Using alias name "volume" for invocation.
+    data_assistant_result = context.assistants.volume.run(
         batch_request=batch_request,
         expectation_suite_name=expectation_suite_name,
         save_updated_expectation_suite=True,
@@ -2905,10 +2903,8 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_y
     }
 
     # noinspection PyUnusedLocal
-    data_assistant_result: DataAssistantResult = (
-        context.assistants.volume_data_assistant.run(
-            batch_request=batch_request, expectation_suite=expectation_suite
-        )
+    data_assistant_result: DataAssistantResult = context.assistants.volume.run(
+        batch_request=batch_request, expectation_suite=expectation_suite
     )
     assert len(expectation_suite.expectations) == 19
 
