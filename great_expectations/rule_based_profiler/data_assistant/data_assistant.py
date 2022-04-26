@@ -39,7 +39,12 @@ class DataAssistant(ABC):
         name="my_volume_data_assistant",
         validator=validator,
     )
-    result: DataAssistantResult = data_assistant.run()
+    result: DataAssistantResult = data_assistant.run(
+        expectation_suite=None,
+        expectation_suite_name="my_suite",
+        include_citation=True,
+        save_updated_expectation_suite=False,
+    )
 
     Then:
         metrics: Dict[Domain, Dict[str, ParameterNode]] = result.metrics
@@ -140,6 +145,7 @@ class DataAssistant(ABC):
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
+        save_updated_expectation_suite: bool = False,
     ) -> DataAssistantResult:
         """
         Run the DataAssistant as it is currently configured.
@@ -149,6 +155,7 @@ class DataAssistant(ABC):
             expectation_suite_name: A name for returned "ExpectationSuite"
             include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
             as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
+            save_updated_expectation_suite: Flag, constrolling whether or not updated "ExpectationSuite" must be saved
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
@@ -167,6 +174,7 @@ class DataAssistant(ABC):
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
+            save_updated_expectation_suite=save_updated_expectation_suite,
         )
         return self._build_data_assistant_result(
             data_assistant_result=data_assistant_result
@@ -301,13 +309,15 @@ class DataAssistant(ABC):
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
+        save_updated_expectation_suite: bool = False,
     ) -> ExpectationSuite:
         """
         Args:
             expectation_suite: An existing "ExpectationSuite" to update
             expectation_suite_name: A name for returned "ExpectationSuite"
-            include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
-            as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
+            include_citation: Flag, which controls whether or not effective "RuleBasedProfiler" configuration should be
+            included as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
+            save_updated_expectation_suite: Flag, constrolling whether or not updated "ExpectationSuite" must be saved
 
         Returns:
             "ExpectationSuite" using "ExpectationConfiguration" objects, computed by "RuleBasedProfiler" state
@@ -316,6 +326,7 @@ class DataAssistant(ABC):
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
+            save_updated_expectation_suite=save_updated_expectation_suite,
         )
 
 
@@ -335,6 +346,7 @@ def run_profiler_on_data(
     expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
     include_citation: bool = True,
+    save_updated_expectation_suite: bool = False,
 ) -> None:
     if rules is None:
         rules = []
@@ -358,4 +370,5 @@ def run_profiler_on_data(
         expectation_suite=expectation_suite,
         expectation_suite_name=expectation_suite_name,
         include_citation=include_citation,
+        save_updated_expectation_suite=save_updated_expectation_suite,
     )
