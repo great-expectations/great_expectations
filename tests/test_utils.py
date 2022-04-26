@@ -478,6 +478,24 @@ def get_snowflake_connection_url() -> str:
     return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 
 
+def get_bigquery_table_prefix() -> str:
+    """Get table_prefix that will be used by the BigQuery client in loading a BigQuery table from DataFrame.
+
+    Reference link
+        https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
+
+    Returns:
+        String of table prefix, which is the gcp_project and dataset concatenated by a "."
+    """
+    gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+        )
+    bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "test_ci")
+    return f"""{gcp_project}.{bigquery_dataset}"""
+
+
 def get_bigquery_connection_url() -> str:
     """Get bigquery connection url from environment variables.
 
@@ -584,9 +602,7 @@ def load_data_into_test_database(
     return_value: LoadedTable = LoadedTable(
         table_name=table_name, inserted_dataframe=all_dfs_concatenated
     )
-
     connection = None
-
     if sa:
         engine = sa.create_engine(connection_string)
     else:
@@ -595,23 +611,57 @@ def load_data_into_test_database(
             "install optional sqlalchemy dependency for support."
         )
         return return_value
-    try:
-        connection = engine.connect()
-        print(f"Dropping table {table_name}")
-        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-        print(f"Creating table {table_name} and adding data from {csv_paths}")
-        all_dfs_concatenated.to_sql(
-            name=table_name, con=engine, index=False, if_exists="append"
+    if engine.dialect.name.lower() == "bigquery":
+        # bigquery is handled in a special way
+        load_data_into_test_bigquery_database_with_bigquery_client(
+            dataframe=all_dfs_concatenated, table_name=table_name
         )
         return return_value
-    except SQLAlchemyError as e:
-        logger.error(
-            """Docs integration tests encountered an error while loading test-data into test-database."""
+    else:
+        try:
+            connection = engine.connect()
+            print(f"Dropping table {table_name}")
+            connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+            print(f"Creating table {table_name} and adding data from {csv_paths}")
+            all_dfs_concatenated.to_sql(
+                name=table_name, con=engine, index=False, if_exists="append"
+            )
+            return return_value
+        except SQLAlchemyError as e:
+            logger.error(
+                """Docs integration tests encountered an error while loading test-data into test-database."""
+            )
+            raise
+        finally:
+            connection.close()
+            engine.dispose()
+
+
+def load_data_into_test_bigquery_database_with_bigquery_client(
+    dataframe: pd.DataFrame, table_name: str
+) -> None:
+    """
+    Loads dataframe into bigquery table using BigQuery client. Follows pattern specified in the GCP documentation here:
+        - https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
+    Args:
+        dataframe (pd.DataFrame): DataFrame to load
+        table_name (str): table to load DataFrame to. Prefix containing project and dataset are loaded
+                        by helper function.
+    """
+    prefix: str = get_bigquery_table_prefix()
+    table_id: str = f"""{prefix}.{table_name}"""
+    from google.cloud import bigquery
+
+    gcp_project: Optional[str] = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
         )
-        raise
-    finally:
-        connection.close()
-        engine.dispose()
+    client: bigquery.Client = bigquery.Client(project=gcp_project)
+    job: bigquery.LoadJob = client.load_table_from_dataframe(
+        dataframe, table_id
+    )  # Make an API request.
+    job.result()  # Wait for the job to complete
 
 
 def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:
