@@ -2809,9 +2809,9 @@ def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_y
 
     data_assistant_result: DataAssistantResult
 
-    # Both, full registered "volume_data_assistant" data_assistant_type and alias name are supported for invocation.
+    # Both, registered "volume_data_assistant" data_assistant_type and alias name are supported for invocation.
 
-    # Using full registered "volume_data_assistant" data_assistant_type for invocation.
+    # Using registered "volume_data_assistant" data_assistant_type for invocation.
     data_assistant_result = context.assistants.volume_data_assistant.run(
         batch_request=batch_request,
         expectation_suite_name=expectation_suite_name,

@@ -98,6 +98,12 @@ def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F82
 def register_data_assistant(
     data_assistant: Type["DataAssistant"],  # noqa: F821
 ) -> None:
+    """
+    This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
+
+    Args:
+        data_assistant: "DataAssistant" class to be registered
+    """
     data_assistant_type = data_assistant.data_assistant_type
     if data_assistant_type in _registered_data_assistants:
         if _registered_data_assistants[data_assistant_type] == data_assistant:
@@ -119,6 +125,15 @@ def register_data_assistant(
 def get_data_assistant_impl(
     data_assistant_type: str,
 ) -> Optional[Type["DataAssistant"]]:  # noqa: F821
+    """
+    This method obtains (previously registered) "DataAssistant" class from DataAssistant Registry
+
+    Args:
+        data_assistant_type: String representing "snake case" version of "DataAssistant" class type
+
+    Returns:
+        Class inheriting "DataAssistant" if found; otherwise, None
+    """
     return _registered_data_assistants.get(data_assistant_type)
 
 
