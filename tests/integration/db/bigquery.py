@@ -32,7 +32,7 @@ if not gcp_project:
     raise ValueError(
         "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
     )
-bigquery_dataset: str = "demo"
+bigquery_dataset: str = "test_ci"
 CONNECTION_STRING: str = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 yaml = YAMLHandler()
