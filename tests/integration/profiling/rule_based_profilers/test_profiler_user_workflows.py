@@ -1,5 +1,4 @@
 import datetime
-import logging
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, cast
 from unittest import mock
@@ -33,8 +32,6 @@ from tests.core.usage_statistics.util import (
     usage_stats_invalid_messages_exist,
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
-
-logger: logging.Logger = logging.getLogger(__name__)
 
 yaml = YAML()
 

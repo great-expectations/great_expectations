@@ -5969,6 +5969,12 @@ def test_df_pandas():
 def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder(
     monkeypatch,
 ) -> None:
+    """Utility to ensure that the probabilistic nature of the
+    NumericMetricRangeMultiBatchParameterBuilder is made deterministic for the
+    purposes of testing.
+
+    Usage: Simply put this fixture as an arg of a given test (function-scoped)
+    """
     monkeypatch.setattr(
         NumericMetricRangeMultiBatchParameterBuilder,
         "bootstrap_random_seed",
