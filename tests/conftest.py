@@ -52,6 +52,9 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
+    NumericMetricRangeMultiBatchParameterBuilder,
+)
 from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
@@ -61,6 +64,7 @@ from great_expectations.self_check.util import (
     get_dataset,
 )
 from great_expectations.util import is_library_loadable
+from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 yaml = YAML()
 ###
@@ -5959,3 +5963,23 @@ def taxi_test_file_directory():
 def test_df_pandas():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     return test_df
+
+
+@pytest.fixture
+def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder(
+    monkeypatch,
+) -> None:
+    """Utility to ensure that the probabilistic nature of the
+    NumericMetricRangeMultiBatchParameterBuilder is made deterministic for the
+    purposes of testing.
+
+    Usage: Simply put this fixture as an arg of a given test (function-scoped)
+    """
+    monkeypatch.setattr(
+        NumericMetricRangeMultiBatchParameterBuilder,
+        "bootstrap_random_seed",
+        RANDOM_SEED,
+    )
+    logger.info(
+        "Set the bootstrap_random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
+    )
