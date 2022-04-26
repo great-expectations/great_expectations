@@ -200,7 +200,7 @@ class SqlAlchemyBatchData(BatchData):
         """
         dialect = self.sql_engine_dialect.name.lower()
         try:
-            # Sometimes `dialect`` is a byte string, e.g. `b"hive"`, it should be converted
+            # Sometimes `dialect` is a byte string, e.g. `b"hive"`, it should be converted
             # to string for proper comparison.
             dialect = dialect.decode()
         except (UnicodeDecodeError, AttributeError):

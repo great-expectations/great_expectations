@@ -877,6 +877,7 @@ class DatasourceConfig(SerializableDictDot):
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
+
 class DatasourceConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
