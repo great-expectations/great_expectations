@@ -25,12 +25,9 @@ from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
 from tests.render.test_util import load_notebook_from_path
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
-from tests.test_utils import set_bootstrap_random_seed_variable
 
 
-def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
-    context: DataContext, new_cell: str
-):
+def run_volume_data_assistant_result_jupyter_notebook_with_new_cell():
     """
     To set this test up we:
     - create a suite
@@ -44,77 +41,83 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
       CellExecutionError if any cell in the notebook fails)
     """
 
-    root_dir: str = context.root_directory
-    expectation_suite_name: str = "test_suite"
-    context.create_expectation_suite(expectation_suite_name)
-    notebook_path: str = os.path.join(root_dir, f"run_volume_data_assistant.ipynb")
-    notebook_code: str = """
-    from typing import Optional, Union
+    def _closure(context: DataContext, new_cell: str):
+        root_dir: str = context.root_directory
+        expectation_suite_name: str = "test_suite"
+        context.create_expectation_suite(expectation_suite_name)
+        notebook_path: str = os.path.join(root_dir, f"run_volume_data_assistant.ipynb")
+        notebook_code: str = """
+        from typing import Optional, Union
 
-    import uuid
+        import uuid
 
-    import great_expectations as ge
-    from great_expectations.data_context import BaseDataContext
-    from great_expectations.validator.validator import Validator
-    from great_expectations.rule_based_profiler.data_assistant import (
-        DataAssistant,
-        VolumeDataAssistant,
-    )
-    from great_expectations.rule_based_profiler.types.data_assistant_result import DataAssistantResult
-    from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
-    import great_expectations.exceptions as ge_exceptions
-    """
-    notebook_code += """
-    context = ge.get_context()
+        import great_expectations as ge
+        from great_expectations.data_context import BaseDataContext
+        from great_expectations.validator.validator import Validator
+        from great_expectations.rule_based_profiler.data_assistant import (
+            DataAssistant,
+            VolumeDataAssistant,
+        )
+        from great_expectations.rule_based_profiler.types.data_assistant_result import DataAssistantResult
+        from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
+        import great_expectations.exceptions as ge_exceptions
+        """
+        notebook_code += """
+        context = ge.get_context()
 
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
+        batch_request: dict = {
+            "datasource_name": "taxi_pandas",
+            "data_connector_name": "monthly",
+            "data_asset_name": "my_reports",
+        }
 
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="volume_data_assistant",
-    )
+        validator: Validator = get_validator_with_expectation_suite(
+            batch_request=batch_request,
+            data_context=context,
+            expectation_suite_name=None,
+            expectation_suite=None,
+            component_name="volume_data_assistant",
+        )
 
-    data_assistant: DataAssistant = VolumeDataAssistant(
-        name="test_volume_data_assistant",
-        validator=validator,
-    )
+        data_assistant: DataAssistant = VolumeDataAssistant(
+            name="test_volume_data_assistant",
+            validator=validator,
+        )
 
-    expectation_suite_name: str = "test_suite"
-    data_assistant_result: DataAssistantResult = data_assistant.run(
-        expectation_suite_name=expectation_suite_name,
-    )
-    """
+        expectation_suite_name: str = "test_suite"
+        data_assistant_result: DataAssistantResult = data_assistant.run(
+            expectation_suite_name=expectation_suite_name,
+        )
+        """
 
-    nb = nbformat.v4.new_notebook()
-    nb["cells"] = []
-    nb["cells"].append(nbformat.v4.new_code_cell(notebook_code))
-    nb["cells"].append(nbformat.v4.new_code_cell(new_cell))
+        nb = nbformat.v4.new_notebook()
+        nb["cells"] = []
+        nb["cells"].append(nbformat.v4.new_code_cell(notebook_code))
+        nb["cells"].append(nbformat.v4.new_code_cell(new_cell))
 
-    # Write notebook to path and load it as NotebookNode
-    with open(notebook_path, "w") as f:
-        nbformat.write(nb, f)
+        # Write notebook to path and load it as NotebookNode
+        with open(notebook_path, "w") as f:
+            nbformat.write(nb, f)
 
-    nb: nbformat.notebooknode.NotebookNode = load_notebook_from_path(
-        notebook_path=notebook_path
-    )
+        nb: nbformat.notebooknode.NotebookNode = load_notebook_from_path(
+            notebook_path=notebook_path
+        )
 
-    # Run notebook
-    ep: nbconvert.preprocessors.ExecutePreprocessor = (
-        nbconvert.preprocessors.ExecutePreprocessor(timeout=60, kernel_name="python3")
-    )
-    ep.preprocess(nb, {"metadata": {"path": root_dir}})
+        # Run notebook
+        ep: nbconvert.preprocessors.ExecutePreprocessor = (
+            nbconvert.preprocessors.ExecutePreprocessor(
+                timeout=60, kernel_name="python3"
+            )
+        )
+        ep.preprocess(nb, {"metadata": {"path": root_dir}})
+
+    return _closure
 
 
 @freeze_time("09/26/2019 13:42:41")
 def test_get_metrics_and_expectations(
     quentin_columnar_table_multi_batch_data_context,
+    set_consistent_seed_within_numeric_range_multi_batch_parameter_builder,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
@@ -2597,7 +2600,7 @@ def test_get_metrics_and_expectations(
         name="test_volume_data_assistant",
         validator=validator,
     )
-    set_bootstrap_random_seed_variable(profiler=data_assistant.profiler)
+
     data_assistant_result: DataAssistantResult = data_assistant.run(
         expectation_suite_name=expectation_suite_name,
     )

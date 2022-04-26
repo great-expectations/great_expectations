@@ -32,17 +32,6 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.rule_based_profiler.helpers.util import (
-    convert_variables_to_dict,
-)
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.rule_based_profiler import (
-    BaseRuleBasedProfiler,
-)
-from great_expectations.rule_based_profiler.types import (
-    build_parameter_container_for_variables,
-)
-from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 logger = logging.getLogger(__name__)
 
@@ -730,24 +719,3 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     finally:
         connection.close()
         engine.dispose()
-
-
-def set_bootstrap_random_seed_variable(
-    profiler: BaseRuleBasedProfiler,
-    random_seed: int = RANDOM_SEED,
-) -> None:
-    variables_dict: dict
-
-    variables_dict = convert_variables_to_dict(variables=profiler.variables)
-    variables_dict["bootstrap_random_seed"] = random_seed
-    profiler.variables = build_parameter_container_for_variables(
-        variables_configs=variables_dict
-    )
-
-    rule: Rule
-    for rule in profiler.rules:
-        variables_dict = convert_variables_to_dict(variables=rule.variables)
-        variables_dict["bootstrap_random_seed"] = random_seed
-        rule.variables = build_parameter_container_for_variables(
-            variables_configs=variables_dict
-        )
