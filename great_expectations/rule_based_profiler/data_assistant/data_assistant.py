@@ -39,9 +39,14 @@ class MetaDataAssistant(ABCMeta):
     """
 
     def __new__(cls, clsname, bases, attrs):
+        """
+        Instantiate class as part of descentants calling "__init__()" and register its type in "DataAssistant" registry.
+        """
         newclass = super().__new__(cls, clsname, bases, attrs)
+
         # noinspection PyUnresolvedReferences
         if not newclass.is_abstract():
+            # Only particular "DataAssistant" implementations must be registered.
             newclass.data_assistant_type = camel_to_snake(name=clsname)
             register_data_assistant(data_assistant=newclass)
 
@@ -209,7 +214,13 @@ class DataAssistant(metaclass=MetaDataAssistant):
         return self._profiler
 
     @classmethod
-    def is_abstract(cls):
+    def is_abstract(cls) -> bool:
+        """
+        This method inspects the present class and determines whether or not it contains abstract methods.
+
+        Returns:
+            Boolean value (True if all interface methods are implemented; otherwise, False)
+        """
         return isabstract(cls)
 
     @property

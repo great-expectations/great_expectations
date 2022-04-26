@@ -17,7 +17,7 @@ class DataAssistantDispatcher:
         "volume": "volume_data_assistant",
     }
 
-    def __init__(self, data_context: "BaseDataContext"):  # noqa: F821
+    def __init__(self, data_context: "BaseDataContext") -> None:  # noqa: F821
         """
         Args:
             data_context: BaseDataContext associated with DataAssistantDispatcher
@@ -26,15 +26,22 @@ class DataAssistantDispatcher:
 
         self._data_assistant_runner_cache = {}
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> DataAssistantRunner:
         # Both, full registered "volume_data_assistant" data_assistant_type and alias name are supported for invocation.
-        data_assistant_cls: Type["DataAssistant"] = get_data_assistant_impl(
+
+        # Attempt to utilize alias name for invocation first.
+        data_assistant_cls: Optional[Type["DataAssistant"]] = get_data_assistant_impl(
             data_assistant_type=name.lower()
-        ) or get_data_assistant_impl(
-            data_assistant_type=DataAssistantDispatcher.DATA_ASSISTANT_TYPE_ALIASES.get(
-                name.lower(), ""
-            )
         )
+        # If no friendly alias exists, use full registered "volume_data_assistant" data_assistant_type for invocation.
+        if data_assistant_cls is None:
+            data_assistant_cls = get_data_assistant_impl(
+                data_assistant_type=DataAssistantDispatcher.DATA_ASSISTANT_TYPE_ALIASES.get(
+                    name.lower()
+                )
+            )
+
+        # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".
         if data_assistant_cls is None:
             raise AttributeError(
                 f'"{type(self).__name__}" object has no attribute "{name}".'

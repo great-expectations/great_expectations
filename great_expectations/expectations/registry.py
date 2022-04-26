@@ -118,7 +118,7 @@ def register_data_assistant(
 
 def get_data_assistant_impl(
     data_assistant_type: str,
-) -> Type["DataAssistant"]:  # noqa: F821
+) -> Optional[Type["DataAssistant"]]:  # noqa: F821
     return _registered_data_assistants.get(data_assistant_type)
 
 
