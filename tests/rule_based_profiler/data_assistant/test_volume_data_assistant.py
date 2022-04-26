@@ -113,7 +113,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 @freeze_time("09/26/2019 13:42:41")
 def test_get_metrics_and_expectations(
     quentin_columnar_table_multi_batch_data_context,
-    set_consistent_seed_within_numeric_range_multi_batch_parameter_builder,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
