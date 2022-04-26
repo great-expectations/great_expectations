@@ -11,16 +11,16 @@ If you post in off hours be patient, Someone will get back to you once the sun c
 ## Asking for help
 
 - Do your best to try and solve the problem first as your efforts will help us more easily answer the question.
+- [Read "How to write a good question in Slack"](https://github.com/great-expectations/great_expectations/discussions/4951)
 - Head over to our [Documentation](https://docs.greatexpectations.io/en/latest/)
-- Checkout [Discuss](https://discuss.greatexpectations.io/) this is where we want most of our problem solving, discussion, updates, etc to go because it helps keep a more visible record for GE users.
+- Checkout [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions) this is where we want most of our problem solving, discussion, updates, etc to go because it helps keep a more visible record for GE users.
 
 #### Asking your question in Slack
 
 **Know your support channel:**
 <ul>
-	<li>#beginners: If you are just getting started this is your place to be!</li>
-	<li>#support: Having trouble with customizing your expectations, an integration or anything else .beyond just getting started? Post here.</li>
-	<li>#expectation-requests: Have a good idea for an expectation? Post it here. </li>
+	<li>#support: Having trouble with customizing your Expectations, an integration or anything else .beyond just getting started? Post here.</li>
+	<li>#feature-requests: Have a good idea for an Expectation or a feature? Post it here. </li>
 	<li>#contributors-contributing: For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.</li>
 </ul>
 ## Use Public Channels, Not Private Groups
@@ -44,13 +44,10 @@ Great Expectations is a piece of the puzzle when it comes to being a data practi
 **\#contributors-contributing**<br/>
 For previous, current and prospective contributors to talk about potential contributions and to help each other with contributions.
 
-**\#beginners**<br/>
-Judgement free question zone! If you’re having trouble getting started with GE this is a perfect place to ask. Community help is encouraged here :)
-
 **\#job-openings**<br/>
 Looking to hire someone in the community? Post your job here:
 
-**\#expectation-requests**<br/>
+**\#feature-requests**<br/>
 Have a good idea for an expectation? Post it here.
 
 **\#support**<br/>
