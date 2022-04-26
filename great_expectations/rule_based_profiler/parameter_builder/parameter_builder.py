@@ -26,7 +26,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
-    Attributes,
     Builder,
     Domain,
     ParameterContainer,
@@ -34,6 +33,7 @@ from great_expectations.rule_based_profiler.types import (
     get_fully_qualified_parameter_names,
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.types.attributes import Attributes
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 # TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
@@ -54,14 +54,14 @@ class AttributedResolvedMetrics(SerializableDictDot):
     with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
     """
 
+    metric_attributes: Optional[Attributes] = None
+    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
+
     @staticmethod
     def get_metric_values_from_attributed_metric_values(
         attributed_metric_values: Optional[Dict[str, MetricValue]] = None,
     ) -> MetricValues:
         return np.array(list(attributed_metric_values.values()))
-
-    metric_attributes: Optional[Attributes] = None
-    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
 
     def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
         if self.metric_values_by_batch_id is None:

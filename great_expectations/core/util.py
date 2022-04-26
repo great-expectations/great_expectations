@@ -25,7 +25,6 @@ from great_expectations.types.base import SerializableDotDict
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 
-
 logger = logging.getLogger(__name__)
 
 

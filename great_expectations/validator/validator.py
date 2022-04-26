@@ -395,7 +395,7 @@ class Validator:
         meta: dict,
         expectation_impl: "Expectation",  # noqa: F821
     ) -> ExpectationConfiguration:
-        auto: Optional[bool] = expectation_kwargs.get("auto")
+        auto: bool = expectation_kwargs.get("auto", False)
         profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
             "profiler_config"
         )
@@ -428,7 +428,12 @@ class Validator:
             )
             expectation_configurations: List[
                 ExpectationConfiguration
-            ] = profiler.get_expectation_suite().expectations
+            ] = profiler.get_expectation_suite(
+                expectation_suite=None,
+                expectation_suite_name=None,
+                include_citation=True,
+                save_updated_expectation_suite=False,
+            ).expectations
 
             configuration = expectation_configurations[0]
 

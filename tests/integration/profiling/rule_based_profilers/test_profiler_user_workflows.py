@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from unittest import mock
@@ -11,6 +12,7 @@ from packaging import version
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite, ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest
@@ -23,6 +25,9 @@ from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_validator_with_expectation_suite,
+)
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -33,7 +38,6 @@ from tests.core.usage_statistics.util import (
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
-from tests.test_utils import get_validator_with_expectation_suite
 
 yaml = YAML()
 
@@ -2078,3 +2082,80 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
 
         max_value_actual: int = result.expectation_config["kwargs"]["max_value"]
         assert max_value_expected - 1 <= max_value_actual <= max_value_expected + 1
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time("09/26/2019 13:42:41")
+def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_columnar_table_multi_batch_data_context,
+    set_consistent_seed_within_expectation_default_profiler_config: Callable,
+) -> None:
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
+    )
+    assert len(validator.batches) == 36
+
+    # Utilize a consistent seed to deal with probabilistic nature of this feature.
+    set_consistent_seed_within_expectation_default_profiler_config(
+        "expect_column_proportion_of_unique_values_to_be_between"
+    )
+
+    test_cases: Tuple[Tuple[str, float, float], ...] = (
+        ("pickup_datetime", 0.0, 1.0),
+        ("dropoff_datetime", 0.0, 1.0),
+    )
+
+    column_name: str
+    min_value_expected: float
+    max_value_expected: float
+    for column_name, min_value_expected, max_value_expected in test_cases:
+        # Use all batches, loaded by Validator, for estimating Expectation argument values.
+        result = validator.expect_column_proportion_of_unique_values_to_be_between(
+            column=column_name,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
+        assert result.success
+
+        key: str
+        value: Any
+        expectation_config_kwargs: dict = {
+            key: value
+            for key, value in result.expectation_config["kwargs"].items()
+            if key
+            not in [
+                "min_value",
+                "max_value",
+            ]
+        }
+        assert expectation_config_kwargs == {
+            "column": column_name,
+            "strict_min": False,
+            "strict_max": False,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+        }
+
+        min_value_actual: int = result.expectation_config["kwargs"]["min_value"]
+        assert min_value_expected <= min_value_actual
+
+        max_value_actual: int = result.expectation_config["kwargs"]["max_value"]
+        assert max_value_expected >= max_value_actual
