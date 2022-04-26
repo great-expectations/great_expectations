@@ -25,7 +25,6 @@ from great_expectations.types.base import SerializableDotDict
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -68,12 +67,6 @@ except ImportError:
 
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
-
-TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX: str = "tmp"
-TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
-TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN: re.Pattern = re.compile(
-    rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\w{8}"
-)
 
 
 def nested_update(
@@ -774,58 +767,3 @@ def get_sql_dialect_floating_point_infinity_value(
             return res["NegativeInfinity"]
         else:
             return res["PositiveInfinity"]
-
-
-def get_or_create_expectation_suite(
-    data_context: "BaseDataContext",  # noqa: F821
-    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
-    expectation_suite_name: Optional[str] = None,
-    component_name: Optional[str] = None,
-) -> "ExpectationSuite":  # noqa: F821
-    """
-    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
-    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
-    """
-    suite: "ExpectationSuite"  # noqa: F821
-
-    generate_temp_expectation_suite_name: bool
-    create_expectation_suite: bool
-
-    if expectation_suite is not None and expectation_suite_name is not None:
-        if expectation_suite.expectation_suite_name != expectation_suite_name:
-            raise ValueError(
-                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
-            )
-
-        return expectation_suite
-    elif expectation_suite is None and expectation_suite_name is not None:
-        generate_temp_expectation_suite_name = False
-        create_expectation_suite = True
-    elif expectation_suite is not None and expectation_suite_name is None:
-        generate_temp_expectation_suite_name = False
-        create_expectation_suite = False
-    else:
-        generate_temp_expectation_suite_name = True
-        create_expectation_suite = True
-
-    if generate_temp_expectation_suite_name:
-        if not component_name:
-            component_name = "test"
-
-        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}{str(uuid.uuid4())[:8]}"
-
-    if create_expectation_suite:
-        try:
-            # noinspection PyUnusedLocal
-            expectation_suite = data_context.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-        except ge_exceptions.DataContextError:
-            expectation_suite = data_context.create_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-            print(
-                f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
-            )
-
-    return expectation_suite
