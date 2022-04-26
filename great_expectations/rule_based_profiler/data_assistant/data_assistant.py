@@ -1,9 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
+from inspect import isabstract
 from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.expectations.registry import register_data_assistant
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -24,11 +26,29 @@ from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.util import measure_execution_time
+from great_expectations.util import camel_to_snake, measure_execution_time
 from great_expectations.validator.validator import Validator
 
 
-class DataAssistant(ABC):
+# noinspection PyMethodParameters
+class MetaDataAssistant(ABCMeta):
+    """
+    MetaDataAssistant registers every DataAssistant class as it is defined, it them to the DataAssistant registry.
+
+    Any class inheriting from DataAssistant will be registered by snake-casing the name of the class.
+    """
+
+    def __new__(cls, clsname, bases, attrs):
+        newclass = super().__new__(cls, clsname, bases, attrs)
+        # noinspection PyUnresolvedReferences
+        if not newclass.is_abstract():
+            newclass.data_assistant_type = camel_to_snake(name=clsname)
+            register_data_assistant(data_assistant=newclass)
+
+        return newclass
+
+
+class DataAssistant(metaclass=MetaDataAssistant):
     """
     DataAssistant is an application built on top of the Rule-Based Profiler component.
     DataAssistant subclasses provide exploration and validation of particular aspects of specified data Batch objects.
@@ -187,6 +207,10 @@ class DataAssistant(ABC):
     @property
     def profiler(self) -> BaseRuleBasedProfiler:
         return self._profiler
+
+    @classmethod
+    def is_abstract(cls):
+        return isabstract(cls)
 
     @property
     @abstractmethod
