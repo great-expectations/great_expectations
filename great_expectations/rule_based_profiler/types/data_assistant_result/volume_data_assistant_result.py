@@ -31,11 +31,12 @@ class VolumeDataAssistantResult(DataAssistantResult):
             prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
             theme: Altair top-level chart configuration dictionary
             include_column_names: A list of columns to chart
-            exclude_column_names: A list of columns to avoid charting
+            exclude_column_names: A list of columns not to chart
         """
-        assert not (
-            include_column_names is not None and exclude_column_names is not None
-        ), "You may either use `include_column_names` or `exclude_column_names` (but not both)."
+        if include_column_names is not None and exclude_column_names is not None:
+            raise ValueError(
+                "You may either use `include_column_names` or `exclude_column_names` (but not both)."
+            )
 
         charts: List[Union[alt.Chart, alt.VConcatChart]] = []
 
@@ -123,7 +124,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         ]
 
         if prescriptive:
-            for kwarg_name in ("min_value", "max_value"):
+            for kwarg_name in expectation_configuration.kwargs:
                 df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
             plot_impl = self.get_expect_table_values_to_be_between_chart
         else:
@@ -186,7 +187,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_type: str = AltairDataTypes.QUANTITATIVE.value
         domain_type: str = AltairDataTypes.ORDINAL.value
 
-        dfs: List[Tuple[str, pd.DataFrame]] = []
+        column_dfs: List[Tuple[str, pd.DataFrame]] = []
         for expectation_configuration in expectation_configurations:
             metric_configuration: dict = expectation_configuration.meta[
                 "profiler_details"
@@ -211,11 +212,11 @@ class VolumeDataAssistantResult(DataAssistantResult):
             )
 
             if prescriptive:
-                for kwarg_name in ("min_value", "max_value"):
+                for kwarg_name in expectation_configuration.kwargs:
                     df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
 
             column_name: str = expectation_configuration.kwargs["column"]
-            dfs.append((column_name, df))
+            column_dfs.append((column_name, df))
 
         assert metric_name is not None
 
@@ -233,10 +234,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
         if prescriptive:
             plot_impl = self.get_expect_column_values_to_be_between_chart
         else:
-            plot_impl = self.get_vertically_concatenated_chart
+            plot_impl = self.get_vertically_concatenated_line_chart
 
         chart: alt.VConcatChart = plot_impl(
-            dfs_by_column=dfs,
+            column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
             domain_name=domain_name,

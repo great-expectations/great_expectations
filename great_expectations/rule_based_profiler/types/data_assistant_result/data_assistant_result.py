@@ -245,8 +245,8 @@ class DataAssistantResult(SerializableDictDot):
         return band + lower_limit + upper_limit + anomaly_coded_line
 
     @staticmethod
-    def get_vertically_concatenated_chart(
-        dfs_by_column: List[Tuple[str, pd.DataFrame]],
+    def get_vertically_concatenated_line_chart(
+        column_dfs: List[Tuple[str, pd.DataFrame]],
         metric_name: str,
         metric_type: alt.StandardType,
         domain_name: str,
@@ -254,7 +254,7 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.VConcatChart:
         """
         Args:
-            dfs_by_column: A list of tuples pairing pandas dataframes with the columns they correspond to
+            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
             metric_name: The name of the metric as it exists in the pandas dataframe
             metric_type: The altair data type for the metric being plotted
             domain_name: The name of the domain as it exists in the pandas dataframe
@@ -268,23 +268,25 @@ class DataAssistantResult(SerializableDictDot):
         i: int
         column_name: str
         df: pd.DataFrame
-        for i, (column_name, df) in enumerate(dfs_by_column):
+        for i, (column_name, df) in enumerate(column_dfs):
             include_title: bool = i == 0
-            chart: alt.Chart = DataAssistantResult._get_vertically_concatenated_chart(
-                df=df,
-                column_name=column_name,
-                metric_name=metric_name,
-                metric_type=metric_type,
-                domain_name=domain_name,
-                domain_type=domain_type,
-                include_title=include_title,
+            chart: alt.Chart = (
+                DataAssistantResult._get_vertically_concatenated_line_chart(
+                    df=df,
+                    column_name=column_name,
+                    metric_name=metric_name,
+                    metric_type=metric_type,
+                    domain_name=domain_name,
+                    domain_type=domain_type,
+                    include_title=include_title,
+                )
             )
             charts.append(chart)
 
         return alt.vconcat(*charts)
 
     @staticmethod
-    def _get_vertically_concatenated_chart(
+    def _get_vertically_concatenated_line_chart(
         df: pd.DataFrame,
         column_name: str,
         metric_name: str,
@@ -345,7 +347,7 @@ class DataAssistantResult(SerializableDictDot):
 
     @staticmethod
     def get_expect_column_values_to_be_between_chart(
-        dfs_by_column: List[Tuple[str, pd.DataFrame]],
+        column_dfs: List[Tuple[str, pd.DataFrame]],
         metric_name: str,
         metric_type: alt.StandardType,
         domain_name: str,
@@ -353,7 +355,7 @@ class DataAssistantResult(SerializableDictDot):
     ) -> alt.VConcatChart:
         """
         Args:
-            dfs_by_column: A list of tuples pairing pandas dataframes with the columns they correspond to
+            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
             metric_name: The name of the metric as it exists in the pandas dataframe
             metric_type: The altair data type for the metric being plotted
             domain_name: The name of the domain as it exists in the pandas dataframe
@@ -367,7 +369,7 @@ class DataAssistantResult(SerializableDictDot):
         i: int
         column_name: str
         df: pd.DataFrame
-        for i, (column_name, df) in enumerate(dfs_by_column):
+        for i, (column_name, df) in enumerate(column_dfs):
             include_title: bool = i == 0
             chart: alt.Chart = (
                 DataAssistantResult._get_expect_column_values_to_be_between_chart(
@@ -461,7 +463,7 @@ class DataAssistantResult(SerializableDictDot):
             .properties(height=chart_height)
         )
 
-        line: alt.Chart = DataAssistantResult._get_vertically_concatenated_chart(
+        line: alt.Chart = DataAssistantResult._get_vertically_concatenated_line_chart(
             df=df,
             column_name=column_name,
             metric_name=metric_name,
