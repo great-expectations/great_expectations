@@ -229,13 +229,13 @@ but {false_positive_rate} was provided."""
                 f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 0.
 A false_positive_rate of {NP_EPSILON} has been selected instead."""
             )
-            self._false_positive_rate = NP_EPSILON
+            false_positive_rate = NP_EPSILON
         elif false_positive_rate >= (1 - NP_EPSILON):
             warnings.warn(
                 f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 1.
 A false_positive_rate of {1-NP_EPSILON} has been selected instead."""
             )
-            self._false_positive_rate = 1 - NP_EPSILON
+            false_positive_rate = 1 - NP_EPSILON
 
         # Compute metric value for each Batch object.
         super().build_parameters(
@@ -282,7 +282,7 @@ A false_positive_rate of {1-NP_EPSILON} has been selected instead."""
             )
 
         estimator_func: Callable
-        etimator_kwargs: dict
+        estimator_kwargs: dict
         if estimator == "bootstrap":
             estimator_func = self._get_bootstrap_estimate
             estimator_kwargs = {
