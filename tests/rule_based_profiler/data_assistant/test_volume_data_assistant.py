@@ -25,6 +25,7 @@ from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
 from tests.render.test_util import load_notebook_from_path
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
+from tests.test_utils import set_bootstrap_random_seed_variable
 
 
 def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
@@ -114,7 +115,6 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 @freeze_time("09/26/2019 13:42:41")
 def test_get_metrics_and_expectations(
     quentin_columnar_table_multi_batch_data_context,
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ):
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
@@ -2597,6 +2597,7 @@ def test_get_metrics_and_expectations(
         name="test_volume_data_assistant",
         validator=validator,
     )
+    set_bootstrap_random_seed_variable(profiler=data_assistant.profiler)
     data_assistant_result: DataAssistantResult = data_assistant.run(
         expectation_suite_name=expectation_suite_name,
     )
