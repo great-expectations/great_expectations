@@ -34,7 +34,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             exclude_column_names: A list of columns to avoid charting
         """
         assert not (
-            include_column_names is not None and exclude_column_names is not None,
+            include_column_names and exclude_column_names,
             "You may either use `include_column_names` or `exclude_column_names` (but not both).",
         )
 
@@ -44,12 +44,12 @@ class VolumeDataAssistantResult(DataAssistantResult):
             ExpectationConfiguration
         ] = self.expectation_suite.expectations
 
-        table_domain_charts: List[alt.Chart] = self._plot_table_domain(
+        table_domain_charts: List[alt.Chart] = self._plot_table_domain_charts(
             expectation_configurations, prescriptive
         )
         charts.extend(table_domain_charts)
 
-        column_domain_chart: alt.VConcatChart = self._plot_column_domain(
+        column_domain_chart: alt.VConcatChart = self._plot_column_domain_chart(
             expectation_configurations,
             include_column_names,
             exclude_column_names,
