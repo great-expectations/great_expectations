@@ -10,11 +10,9 @@ from copy import deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple, Union
 
-import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
@@ -94,6 +92,7 @@ _TEST_DEFS_DIR = os.path.join(
 )
 
 
+# noinspection PyMethodParameters
 class MetaExpectation(ABCMeta):
     """MetaExpectation registers Expectations as they are defined, adding them to the Expectation registry.
 
@@ -103,9 +102,12 @@ class MetaExpectation(ABCMeta):
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
+        # noinspection PyUnresolvedReferences
         if not newclass.is_abstract():
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
+
+        # noinspection PyUnresolvedReferences
         newclass._register_renderer_functions()
         default_kwarg_values = {}
         for base in reversed(bases):
