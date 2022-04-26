@@ -143,38 +143,25 @@ class SqlAlchemyDataSplitter(DataSplitter):
             List of boolean clauses based on whether the date_part value in the
                 batch identifier matches the date_part value in the column_name column.
         """
-        if len(date_parts) == 0:
-            raise ge_exceptions.InvalidConfigError(
-                "date_parts are required when using split_on_date_parts."
-            )
+        self._validate_date_parts(date_parts)
+
+        date_parts: List[DatePart] = self._convert_date_parts(date_parts)
 
         column_batch_identifiers: dict = batch_identifiers[column_name]
-        date_parts: List[DatePart] = [
-            DatePart(date_part.lower()) if isinstance(date_part, str) else date_part
-            for date_part in date_parts
-        ]
 
-        if isinstance(column_batch_identifiers, str):
-            column_batch_identifiers: datetime.datetime = parse(
-                column_batch_identifiers
+        date_parts_dict: dict = (
+            self._convert_datetime_batch_identifiers_to_date_parts_dict(
+                column_batch_identifiers, date_parts
             )
+        )
 
-        if isinstance(column_batch_identifiers, datetime.datetime):
-            query: Union[BinaryExpression, BooleanClauseList] = sa.and_(
-                *[
-                    sa.extract(date_part.value, sa.column(column_name))
-                    == getattr(column_batch_identifiers, date_part.value)
-                    for date_part in date_parts
-                ]
-            )
-        else:
-            query: Union[BinaryExpression, BooleanClauseList] = sa.and_(
-                *[
-                    sa.extract(date_part.value, sa.column(column_name))
-                    == column_batch_identifiers[date_part.value]
-                    for date_part in date_parts
-                ]
-            )
+        query: Union[BinaryExpression, BooleanClauseList] = sa.and_(
+            *[
+                sa.extract(date_part.value, sa.column(column_name))
+                == date_parts_dict[date_part.value]
+                for date_part in date_parts
+            ]
+        )
 
         return query
 
@@ -341,10 +328,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         Returns:
             List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
         """
-        if len(date_parts) == 0:
-            raise ge_exceptions.InvalidConfigError(
-                "date_parts are required when using split_on_date_parts."
-            )
+        self._validate_date_parts(date_parts)
 
         date_parts: List[DatePart] = self._convert_date_parts(date_parts)
 

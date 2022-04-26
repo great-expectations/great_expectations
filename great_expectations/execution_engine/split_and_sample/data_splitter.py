@@ -1,6 +1,11 @@
 import abc
+import datetime
 import enum
 from typing import Callable, List, Union
+
+from dateutil.parser import parse
+
+import great_expectations.exceptions as ge_exceptions
 
 
 class DatePart(enum.Enum):
@@ -69,3 +74,52 @@ class DataSplitter(abc.ABC):
             DatePart(date_part.lower()) if isinstance(date_part, str) else date_part
             for date_part in date_parts
         ]
+
+    @staticmethod
+    def _validate_date_parts(date_parts: Union[List[DatePart], List[str]]) -> None:
+        """Validate that date parts exist and are of the correct type.
+
+        Args:
+            date_parts: DatePart instances or str.
+
+        Returns:
+            None, this method raises exceptions if the config is invalid.
+        """
+        if len(date_parts) == 0:
+            raise ge_exceptions.InvalidConfigError(
+                "date_parts are required when using split_on_date_parts."
+            )
+        if not all(
+            [(isinstance(dp, DatePart)) or (isinstance(dp, str)) for dp in date_parts]
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                "date_parts should be of type DatePart or str."
+            )
+
+    @staticmethod
+    def _convert_datetime_batch_identifiers_to_date_parts_dict(
+        column_batch_identifiers: Union[datetime.datetime, str, dict],
+        date_parts: List[DatePart],
+    ) -> dict:
+        """Convert batch identifiers to a dict of {date_part: date_part value}.
+
+        Args:
+            column_batch_identifiers: Batch identifiers related to the column of interest.
+            date_parts: List of DatePart to include in the return value.
+
+        Returns:
+            A dict of {date_part: date_part value}.
+        """
+
+        if isinstance(column_batch_identifiers, str):
+            column_batch_identifiers: datetime.datetime = parse(
+                column_batch_identifiers
+            )
+
+        if isinstance(column_batch_identifiers, datetime.datetime):
+            return {
+                date_part.value: getattr(column_batch_identifiers, date_part.value)
+                for date_part in date_parts
+            }
+        else:
+            return column_batch_identifiers
