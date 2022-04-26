@@ -1,308 +1,340 @@
+import pydoc
+import re
 import ast
 import glob
-import subprocess
-from collections import defaultdict
-from typing import Dict, List, Tuple, cast, Union
-from os.path import basename
 from pathlib import Path
-import re
+from typing import Dict, List, Union
+import importlib
+import inspect
 
 
-def _gather_source_files(directory_path: str) -> List[str]:
-    return glob.glob(f"{directory_path}/**/*.py", recursive=True)
+PUBLIC_API_WHITELISTED = "--Public API Whitelisted--"
 
 
-def _filter_source_files(file_paths: List[str]) -> List[str]:
-    return [_ for _ in file_paths if not basename(_).startswith("_")]
+def _gather_source_files(directory_path: str) -> List[Path]:
+    """Returns a list of all python files in the tree starting from the provided directory_path
+
+    Args:
+        directory_path: the root directory of a python project.
+
+    Returns:
+        A list of python file paths.
+    """
+    return [Path(_) for _ in glob.glob(f"{directory_path}/**/*.py", recursive=True)]
 
 
-def get_relevant_source_files(directory_path: str) -> List[str]:
+def _filter_source_files(file_paths: List[Path]) -> List[Path]:
+    """Filters out paths to files starting with an underscore from a list of paths.
+
+    Args:
+        file_paths: A list of file paths.
+
+    Returns:
+        A filtered list of file paths.
+
+    """
+    return [_ for _ in file_paths if not _.name.startswith("_")]
+
+
+def get_relevant_source_files(directory_path: str) -> List[Path]:
+    """Retrieves filepaths to all public python files in a directory tree.
+
+    Args:
+        directory_path: root folder of the directory tree to gather paths from.
+
+    Returns:
+        A list of paths to public python files.
+
+    """
     return _filter_source_files(_gather_source_files(directory_path))
 
 
-def _get_ast_module(source_file_path: str) -> ast.Module:
-    with open(source_file_path) as f:
-        root: ast.Module = ast.parse(f.read())
-    return root
-
-
-def _filter_ast_module(ast_module: ast.Module) -> List[Union[ast.ClassDef, ast.FunctionDef]]:
-    return [_ for _ in ast_module.body if isinstance(_, ast.ClassDef) or isinstance(_, ast.FunctionDef)]
-
-
-def get_top_level_classes_and_methods(source_file_path: str) -> List[Union[ast.ClassDef, ast.FunctionDef]]:
-    return _filter_ast_module(_get_ast_module(source_file_path))
-
-
-def get_or_create_doc_folder(source_file_path):
-    new_folder = Path(source_file_path.replace("../", "../docs/api_docs/"))
-    new_folder = new_folder.with_suffix('')
-    new_folder.mkdir(parents=True, exist_ok=True)
-    return new_folder
-
-
-def get_doc_file_path(doc_folder: Path, ast_obj: Union[ast.FunctionDef, ast.ClassDef]):
-    file_path = doc_folder.joinpath(f"{ast_obj.name}__auto_api").with_suffix('.md')
-    print(file_path)
-    return file_path
-
-
-def parse_tuple(ast_obj: ast.Tuple):
-    tuple_items = []
-    for item in ast_obj.elts:
-        if isinstance(item, ast.Subscript):
-            tuple_items.append(parse_subscript(item))
-        elif isinstance(item, ast.Name):
-            tuple_items.append(item.id)
-        elif isinstance(item, ast.Attribute):
-            tuple_items.append(item.attr)
-        elif isinstance(item, ast.Constant):
-            tuple_items.append(str(item.value))
-        elif isinstance(item, ast.Tuple):
-            tuple_items.append(parse_tuple(item))
-        elif isinstance(item, ast.List):
-            tuple_items.append(parse_tuple(item))
-        else:
-            print(f"{ast_obj.slice.value}")
-            raise Exception
-    out_str = ', '.join(tuple_items)
-    return out_str
-
-
-def parse_subscript(ast_obj: ast.Subscript, input_str: str = "") -> str:
-    if isinstance(ast_obj.value, ast.Attribute):
-        out_str = f"{input_str}{ast_obj.value.attr}["
-    else:
-        out_str = f"{input_str}{ast_obj.value.id}["
-    if isinstance(ast_obj.slice.value, ast.Subscript):
-        out_str = f"{parse_subscript(ast_obj.slice.value, out_str)}"
-    elif isinstance(ast_obj.slice.value, ast.Tuple):
-        out_str = f"{out_str}{parse_tuple(ast_obj.slice.value)}"
-    elif isinstance(ast_obj.slice.value, ast.Name):
-        out_str = f"{out_str}{ast_obj.slice.value.id}"
-    elif isinstance(ast_obj.slice.value, ast.Attribute):
-        out_str = f"{out_str}{ast_obj.slice.value.attr}"
-    elif isinstance(ast_obj.slice.value, ast.Constant):
-        out_str = f"{out_str}{ast_obj.slice.value.value}"
-    else:
-        out_str = f"{out_str}{ast_obj.slice.value}"
-        print(f"{ast_obj.slice.value}")
-        raise Exception
-    out_str = f"{out_str}]"
-    return out_str
-
-
-def generate_function_documentation(ast_obj):
-    api_doc = []
-    api_doc.append(f"## Method: {ast_obj.name}")
-    api_doc.append("")
-    api_doc.append("### Callable")
-    api_doc.append(f"**{ast_obj.name}**({', '.join([arg.arg for arg in ast_obj.args.args])})")
-    api_doc[-1] = api_doc[-1].replace("(self,", "(*self*,")
-    if ast_obj.args.args:
-        api_doc.append('')
-        api_doc.append('### Arguments')
-        api_doc.append('')
-        api_doc.append("Argument | Annotation | Type")
-        api_doc.append("---|---|---")
-        for arg in ast_obj.args.args:
-            arg_name = arg.arg
-            if arg_name == 'self':
-                arg_name = '*self*'
-            arg_annotation = arg.annotation
-            arg_type = arg.type_comment
-            if arg_annotation:
-                if isinstance(arg_annotation, ast.Attribute):
-                    arg_annotation = f"{arg_annotation.value.id}.{arg_annotation.attr}"
-                elif isinstance(arg_annotation, ast.Name):
-                    arg_annotation = arg_annotation.id
-                elif isinstance(arg_annotation, ast.Subscript):
-                    arg_test = parse_subscript(arg_annotation)
-                    arg_annotation = parse_subscript(arg_annotation)
-                elif isinstance(arg_annotation, str):
-                    arg_annotation = arg_annotation
-            else:
-                arg_annotation = ""
-            if arg_type:
-                pass
-            else:
-                arg_type = ""
-            api_doc.append(f'{arg_name}|{arg_annotation}|{arg_type}')
-    api_doc.append('')
-    api_doc.append('### Docstring')
-    docstring = ast.get_docstring(ast_obj)
-    if docstring:
-        api_doc.append('')
-        api_doc.append(format_docstring_to_markdown(docstring))
-    else:
-        api_doc.append(f"*This method does not currently have a docstring.*")
-    return("\n".join(api_doc))
-
-
-def _function_filter(func: ast.FunctionDef) -> bool:
-    # Private and dunder funcs/methods
-    if func.name.startswith("_"):
-        return False
-    # Getters and setters
-    for decorator in func.decorator_list:
-        if (isinstance(decorator, ast.Name) and decorator.id == "property") or (
-            isinstance(decorator, ast.Attribute) and decorator.attr == "setter"
-        ):
-            return False
-    return True
-
-
-def write_doc_file(file_path: Path, ast_obj: Union[ast.FunctionDef, ast.ClassDef]):
-    api_doc = ["---"]
-    if isinstance(ast_obj, ast.FunctionDef):
-        if not _function_filter(ast_obj):
-            return
-        else:
-            if ast_obj.args.defaults:
-                pass
-            api_doc.append(f"title: 'Method: {ast_obj.name}'")
-            doc_type = 'method'
-            api_doc.append("---")
-            api_doc.append("")
-            api_doc.append(generate_function_documentation(ast_obj))
-    else:
-        api_doc.append(f"title: 'Class: {ast_obj.name}'")
-        doc_type = 'class'
-        api_doc.append("---")
-        api_doc.append("")
-        api_doc.append("## Overview")
-        public_methods = [element for element in ast_obj.body if
-                          isinstance(element, ast.FunctionDef) and _function_filter(element)]
-        if public_methods:
-            api_doc.append("")
-            api_doc.append("### Methods")
-            api_doc.append("")
-        for public_method in public_methods:
-            if len(public_method.args.args) > 1:
-                api_doc.append(f"- [{public_method.name}(...)](#method-{public_method.name.lower()})")
-            else:
-                api_doc.append(f"- [{public_method.name}()](#method-{public_method.name.lower()})")
-
-        api_doc.append("")
-        api_doc.append("### Docstring")
-        docstring = ast.get_docstring(ast_obj)
-        if docstring:
-            api_doc.append("")
-            api_doc.append(format_docstring_to_markdown(docstring))
-        else:
-            api_doc.append(f"*This class does not currently have a docstring.*")
-
-        for public_method in public_methods:
-            api_doc.append("")
-            api_doc.append(generate_function_documentation(public_method))
-        # for body_element in ast_obj.body:
-        #     if isinstance(body_element, ast.FunctionDef):
-        #         if _function_filter(body_element):
-        #             if len(body_element.args.args) > 1:
-        #                 api_doc.append(f"[{body_element.name}(...)](#{body_element.name})")
-        #             else:
-        #                 api_doc.append(f"[{body_element.name}()](#{body_element.name})")
-        # for body_element in ast_obj.body:
-        #     if isinstance(body_element, ast.FunctionDef):
-        #         if _function_filter(body_element):
-        #             api_doc.append("")
-        #             api_doc.append(generate_function_documentation(body_element))
-    with open(file_path, 'w') as f:
-        f.write("\n".join(api_doc))
-
-
-def format_docstring_to_markdown(docstr: str) -> str:
-    """
-    Add markdown formatting to a provided docstring
+def check_file_for_whitelisted_elements(file_path: Path) -> bool:
+    """Indicates if a file contains whitelisted classes or methods.
 
     Args:
-        docstr: the original docstring that needs to be converted to markdown.
+        file_path: path to the file that should be checked.
 
     Returns:
-        str of Docstring formatted as markdown
+        True if the file contains the tag "--Public API Whitelisted--" OR False if the file does not.
 
     """
-    r = re.compile(r"\s\s+", re.MULTILINE)
-    clean_docstr_list = []
-    prev_line = None
-    in_code_block = False
-    in_param = False
-    first_code_indentation = None
-
-    # Parse each line to determine if it needs formatting
-    for original_line in docstr.split("\n"):
-        # Remove excess spaces from lines formed by concatenated docstring lines.
-        line = r.sub(" ", original_line)
-        line = line.replace("import", "`import`")
-        # In some old docstrings, this indicates the start of an example block.
-        if line.strip() == "::":
-            in_code_block = True
-            clean_docstr_list.append("```")
-
-        # All of our parameter/arg/etc lists start after a line ending in ':'.
-        elif line.strip().endswith(":"):
-            in_param = True
-            # This adds a blank line before the header if one doesn't already exist.
-            if prev_line != "":
-                clean_docstr_list.append("")
-            # Turn the line into an H4 header
-            clean_docstr_list.append(f"#### {line.strip()}")
-        elif line.strip() == "" and prev_line != "::":
-            # All of our parameter groups end with a line break, but we don't want to exit a parameter block due to a
-            # line break in a code block.  However, some code blocks start with a blank first line, so we want to make
-            # sure we aren't immediately exiting the code block (hence the test for '::' on the previous line.
-            in_param = False
-            # Add the markdown indicator to close a code block, since we aren't in one now.
-            if in_code_block:
-                clean_docstr_list.append("```")
-            in_code_block = False
-            first_code_indentation = None
-            clean_docstr_list.append(line)
+    with open(file_path, 'r') as open_file:
+        if PUBLIC_API_WHITELISTED in open_file.read():
+            return True
         else:
-            if in_code_block:
-                # Determine the number of spaces indenting the first line of code so they can be removed from all lines
-                # in the code block without wrecking the hierarchical indentation levels of future lines.
-                if first_code_indentation == None and line.strip() != "":
-                    first_code_indentation = len(
-                        re.match(r"\s*", original_line, re.UNICODE).group(0)
-                    )
-                if line.strip() == "" and prev_line == "::":
-                    # If the first line of the code block is a blank one, just skip it.
-                    pass
+            return False
+
+
+def convert_to_import_path(file_path: Path) -> str:
+    import_path = str(file_path).replace("../", "")
+    import_path = import_path.replace("/", ".")
+    import_path = import_path.replace(".py", "")
+    return import_path
+
+
+def gather_classes_to_document(import_path):
+    module = importlib.import_module(import_path)
+    imported_classes = dict(inspect.getmembers(module, inspect.isclass))
+    for class_name, imported_class in imported_classes.items():
+        synop, desc = pydoc.splitdoc(pydoc.getdoc(imported_class))
+        if PUBLIC_API_WHITELISTED in desc:
+            yield class_name, imported_class
+
+
+def gather_whitelisted_methods(imported_class):
+    methods = dict(inspect.getmembers(imported_class, inspect.isroutine))
+    for method_name, class_method in methods.items():
+        synop, desc = pydoc.splitdoc(pydoc.getdoc(class_method))
+        if PUBLIC_API_WHITELISTED in desc:
+            print(method_name, class_method)
+            yield method_name, class_method
+
+
+def parse_signature(signature, param_dict):
+    sig_type = ""
+    sig_default = ""
+    sig_results = []
+    for key, value in signature.parameters.items():
+        value = str(value)
+        if ":" in value:
+            sig_parameter, remainder = value.split(":", 1)
+            if "=" in remainder:
+                sig_type, sig_default = remainder.rsplit("=", 1)
+            else:
+                sig_type = remainder
+        elif "=" in value:
+            sig_parameter, sig_default = value.split("=", 1)
+        else:
+            sig_parameter = value
+        sig_results.append([sig_parameter, sig_type, sig_default, param_dict.get(sig_parameter, '')])
+    return sig_results
+
+
+def parse_args(docstring):
+    arg_dict = {}
+    for line in docstring.split("\n"):
+        if ":" in line:
+            key, value = line.strip().split(":", 1)
+            key = key.strip("- *")
+            value = value.strip("- *")
+            arg_dict[key] = value
+    return arg_dict
+
+
+def build_method_document(method_name, whitelisted_method, class_path, github_path):
+    description = pydoc.describe(whitelisted_method)
+    title = f"{class_path.rsplit('.', 1)[-1]}.{method_name}"
+    method_docstring = inspect.getdoc(whitelisted_method)
+    if method_docstring:
+        synopsis, docstring = pydoc.splitdoc(method_docstring)
+    else:
+        synopsis = docstring = ""
+
+
+    description = description.capitalize()
+    inprogress_output = ["---",
+                         f"title: {title}",
+                         "---",
+                         f"[Back to class documentation](/docs/api_docs/classes/{class_path.replace('.', '-')})",
+                         "",
+                         f"## {description}",
+                         "",
+                         "### Fully qualified path",
+                         "",
+                         f"`{class_path}.{method_name}`",
+                         "",
+                         f"[See it on GitHub]({github_path})"]
+
+    if synopsis:
+        inprogress_output.extend(["",
+                                  "### Synopsis",
+                                  "",
+                                  synopsis])
+
+    signature = inspect.signature(whitelisted_method)
+    pretty_docstring = prettify_docstring(docstring)
+    param_dict = parse_args(pretty_docstring)
+    arg_table = parse_signature(signature, param_dict)
+    if arg_table:
+        inprogress_output.extend(['### Parameters',
+                                  "",
+                                  'Parameter|Typing|Default|Description',
+                                  '---------|------|-------|-----------'])
+        described_lines = []
+        for line in arg_table:
+            described_lines.append([str(_) for _ in line])
+            described_lines[-1].append(param_dict.get(described_lines[-1][0], ""))
+        for line in described_lines:
+            inprogress_output.append("|".join([str(_) for _ in line]))
+
+    if method_docstring:
+        inprogress_output.extend(["",
+                                  "### Docstring",
+                                  "",
+                                  pretty_docstring])
+    output_file = f"{class_path}.{method_name}".replace(".", "-")
+    file_path = f'../docs/api_docs/methods/{output_file}'
+
+    with open(f"{file_path}.md", 'w') as f:
+        output = "\n".join(inprogress_output)
+        while "\n\n\n" in output:
+            output = output.replace("\n\n\n", "\n\n")
+        f.write(output)
+
+    abbreviated_output = ["",
+                          f"**[.{method_name}(...):](/docs/api_docs/methods/{output_file})** {synopsis}",
+                          ]
+    return abbreviated_output
+
+
+def build_class_document(class_name, imported_class, import_path, github_path):
+    qualified_class_path = f'{import_path}.{class_name}'
+    description = pydoc.describe(imported_class)
+    class_docstring = inspect.getdoc(imported_class)
+    synopsis, docstring = pydoc.splitdoc(class_docstring)
+
+    inprogress_output = ["---",
+                         f"title: {description}",
+                         "---",
+                         "### Import statement",
+                         "",
+                         "```python",
+                         f"from {import_path} import {class_name}",
+                         "```",
+                         "",
+                         f"[See it on GitHub]({github_path})"
+                         ]
+
+    if synopsis:
+        inprogress_output.extend(["",
+                                  "### Synopsis",
+                                  "",
+                                  synopsis])
+
+    if class_docstring:
+        inprogress_output.extend(["",
+                                  "### Docstring",
+                                  "",
+                                  prettify_docstring(docstring)])
+
+    whitelisted_methods = gather_whitelisted_methods(imported_class)
+    inprogress_methods = []
+    for method_name, whitelisted_method in whitelisted_methods:
+        inprogress_methods.append("")
+        inprogress_methods.extend(build_method_document(method_name, whitelisted_method, qualified_class_path,
+                                                        github_path))
+
+    if inprogress_methods:
+        inprogress_output.extend(["",
+                                  "### Public Methods (API documentation links)",
+                                  ""])
+        inprogress_output.extend(inprogress_methods)
+
+    output = "\n".join(inprogress_output)
+    while "\n\n\n" in output:
+        output = output.replace("\n\n\n", "\n\n")
+
+    output_file = f"{qualified_class_path}".replace(".", "-")
+    file_path = f'../docs/api_docs/classes/{output_file}.md'
+
+    with open(file_path, 'w') as f:
+        f.write("\n".join(inprogress_output))
+
+
+def prettify_args(docstring):
+    in_args = False
+    last_param = last_desc = ""
+    new_string = []
+
+    for line in docstring.split("\n"):
+        if line.strip() in ("Args:", "Returns:", "Raises:"):
+            if last_param and last_desc:
+                new_string.append(f"- **{last_param}:** {last_desc}")
+                last_param = last_desc = ""
+            in_args = True
+            new_string.append(line)
+            continue
+        if in_args:
+            if line.strip():
+                if ":" in line:
+                    if last_param and last_desc:
+                        new_string.append(f"- **{last_param}:** {last_desc}")
+                    elif last_desc:
+                        new_string.append(f"- {last_desc}")
+                    last_param, last_desc = line.strip().split(":")
                 else:
-                    # Append the line of code, minus the extra indentation from being written in an indented docstring.
-                    clean_docstr_list.append(original_line[first_code_indentation:])
-            elif ":" in line.replace(":ref:", "") and in_param:
-                # This indicates a parameter. arg. or other definition.
-                clean_docstr_list.append(f"- {line.strip()}")
+                    last_desc = f"{last_desc} {line.strip()}"
             else:
-                # This indicates a regular line of text.
-                clean_docstr_list.append(f"{line.strip()}")
-        prev_line = line.strip()
-        if clean_docstr_list[-1].startswith("- "):
-            pass
+                in_args = False
+                new_string.append(line)
         else:
-            doc_parts = clean_docstr_list[-1].replace("https:", "https").split(":")
-            if len(doc_parts) == 2 and doc_parts[1]:
-                doc_parts = clean_docstr_list[-1].split(":", 1)
-                clean_docstr_list[-1] = f"- **{doc_parts[0]}:** {doc_parts[1]} "
+            if last_param and last_desc:
+                new_string.append(f"- **{last_param}:** {last_desc}")
+                last_param = last_desc = ""
+            elif last_desc:
+                new_string.append(f"- {last_desc}")
+                last_desc = ""
             else:
-                pass
-    clean_docstr = "\n".join(clean_docstr_list)
-    clean_docstr = clean_docstr.replace("<", r"\<")
-    clean_docstr = clean_docstr.replace(">", r"\>")
-    return clean_docstr
+                new_string.append(line)
+    if last_param and last_desc:
+        new_string.append(f"- **{last_param}:** {last_desc}")
+    elif last_desc:
+        new_string.append(f"- {last_desc}")
+    return "\n".join(new_string)
 
 
-if __name__ == "__main__":
-    def main_run():
-        for relevant_source_file in get_relevant_source_files("../great_expectations"):
-            print(relevant_source_file)
-            print(get_top_level_classes_and_methods(relevant_source_file))
-            folder_path = get_or_create_doc_folder(relevant_source_file)
-            # TODO: Create an 'Overview' page for each source file. (display file docstring;
-            #  list and link classes, methods)
-            for ast_obj in get_top_level_classes_and_methods(relevant_source_file):
-                write_doc_file(get_doc_file_path(folder_path, ast_obj), ast_obj)
-            # TODO: Create an automatic update to the ToC.
-    main_run()
+def prettify_relevant_documentation_paths(docstring):
+    if '--Relevant Documentation--' in docstring:
+        prefix, paths = docstring.split("--Relevant Documentation--", 1)
+        paths, suffix = paths.split("--Relevant Documentation--", 1)
+        if paths:
+            docstring_constructor = [prefix,
+                                     "",
+                                     suffix,
+                                     "",
+                                     "### Related Documentation"]
+            for line in paths.split("\n"):
+                line = line.strip()
+                if line:
+                    docstring_constructor.append(f"- [{line.replace('@', '')}]({line})")
+            docstring = "\n".join(docstring_constructor)
+            print(docstring_constructor)
+    return docstring
+
+
+def prettify_docstring(docstring):
+    docstring = prettify_args(docstring)
+    for section in ("Args:", "Returns:", "Raises:"):
+        docstring = docstring.replace(section, f"\n**{section}**\n")
+    docstring = docstring.replace(PUBLIC_API_WHITELISTED, "")
+    docstring = prettify_relevant_documentation_paths(docstring)
+    return docstring
+
+
+
+if __name__ == '__main__':
+    def main_func():
+        for source_file_path in (get_relevant_source_files("../great_expectations")):
+            print("++")
+            print(source_file_path)
+            github_path = f"https://github.com/great-expectations/great_expectations/blob/develop{str(source_file_path).replace('..', '')}"
+            if check_file_for_whitelisted_elements(source_file_path):
+                import_path = convert_to_import_path(source_file_path)
+                whitelisted_classes = gather_classes_to_document(import_path)
+                for class_name, whitelisted_class in whitelisted_classes:
+                    build_class_document(class_name, whitelisted_class, import_path, github_path)
+    main_func()
+
+    test = """
+    Some Stuff Here
+    Args:
+        project_root_dir: path to the root directory in which to create a new great_expectations directory
+        usage_statistics_enabled: boolean directive specifying whether or not to gather usage statistics
+        runtime_environment: a dictionary of config variables that
+        override both those set in config_variables.yml and the environment
+
+    Returns:
+        Nothing Much
+    """
+    print(prettify_docstring(test))
