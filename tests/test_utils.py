@@ -639,17 +639,29 @@ def load_data_into_test_database(
 
 def load_data_into_test_bigquery_database_with_bigquery_client(
     dataframe: pd.DataFrame, table_name: str
-):
+) -> None:
+    """
+    Loads dataframe into bigquery table using BigQuery client. Follows pattern specified in the GCP documentation here:
+        - https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
+    Args:
+        dataframe (pd.DataFrame): DataFrame to load
+        table_name (str): table to load DataFrame to. Prefix containing project and dataset are loaded
+                        by helper function.
+    """
     prefix: str = get_bigquery_table_prefix()
     table_id: str = f"""{prefix}.{table_name}"""
-    # https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
     from google.cloud import bigquery
 
-    client: bigquery.Client = bigquery.Client()
+    gcp_project: Optional[str] = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+        )
+    client: bigquery.Client = bigquery.Client(project=gcp_project)
     job: bigquery.LoadJob = client.load_table_from_dataframe(
         dataframe, table_id
     )  # Make an API request.
-    job.result()  # Wait for the job to complete and return
+    job.result()  # Wait for the job to complete
 
 
 def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:

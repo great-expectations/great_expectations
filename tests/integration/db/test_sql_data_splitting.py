@@ -38,7 +38,6 @@ def _get_connection_string_and_dialect() -> Tuple[str, str]:
     if dialect == "snowflake":
         connection_string: str = get_snowflake_connection_url()
     elif dialect == "bigquery":
-        # still needed for loading the data we keep this
         connection_string: str = get_bigquery_connection_url()
     else:
         connection_string: str = db_config["connection_string"]
