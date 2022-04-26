@@ -2924,11 +2924,9 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_cha
 ) -> None:
     charts: List[dict] = volume_data_assistant_result.plot()
     assert len(charts) == 2
-    table_domain_chart: dict = charts[0]
-    breakpoint()
-    assert len(charts[1]["vconcat"]) == 18  # One for each column present
 
-    # assert find_strings_in_nested_obj(column_domain_chart, columns)
+    table_domain_chart: dict = charts[0]
+    assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
 
 
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
@@ -2936,6 +2934,7 @@ def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_ch
 ) -> None:
     charts: List[dict] = volume_data_assistant_result.plot()
     assert len(charts) == 2
+
     column_domain_chart: dict = charts[1]
     assert len(charts[1]["vconcat"]) == 18  # One for each column present
 
@@ -2970,6 +2969,7 @@ def test_volume_data_assistant_plot_include_column_names_filters_output(
         include_column_names=include_column_names
     )
     assert len(charts) == 2
+
     column_domain_chart: dict = charts[1]
     assert len(column_domain_chart["vconcat"]) == 2  # Normally 18 without filtering
     assert find_strings_in_nested_obj(column_domain_chart, include_column_names)
@@ -2983,6 +2983,7 @@ def test_volume_data_assistant_plot_exclude_column_names_filters_output(
         exclude_column_names=exclude_column_names
     )
     assert len(charts) == 2
+
     column_domain_chart: dict = charts[1]
     assert len(column_domain_chart["vconcat"]) == 16  # Normally 18 without filtering
     assert not find_strings_in_nested_obj(column_domain_chart, exclude_column_names)
@@ -2997,3 +2998,22 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
         )
 
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
+
+
+def test_volume_data_assistant_plot_captures_custom_theme(
+    volume_data_assistant_result: VolumeDataAssistantResult,
+) -> None:
+    font: str = "Comic Sans MS"
+    align: str = "left"
+
+    theme: dict = {
+        "font": font,
+        "title": {
+            "align": align,
+        },
+    }
+    charts: List[dict] = volume_data_assistant_result.plot(
+        theme=theme,
+    )
+
+    assert not find_strings_in_nested_obj(charts, [font, align])
