@@ -4,6 +4,7 @@ from typing import Dict, Optional
 import numpy as np
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import NP_EPSILON
@@ -288,7 +289,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
 but 1.0 was provided."""
     )
 
-    with pytest.raises(ValueError, match=error_message):
+    with pytest.raises(ge_exceptions.ProfilerExecutionError, match=error_message):
         numeric_metric_range_parameter_builder.build_parameters(
             domain=domain,
             variables=variables,
@@ -340,7 +341,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
 but -0.05 was provided."""
     )
 
-    with pytest.raises(ValueError, match=error_message):
+    with pytest.raises(ge_exceptions.ProfilerExecutionError, match=error_message):
         numeric_metric_range_parameter_builder.build_parameters(
             domain=domain,
             variables=variables,

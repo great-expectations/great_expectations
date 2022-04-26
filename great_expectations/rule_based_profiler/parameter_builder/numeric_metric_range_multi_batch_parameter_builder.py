@@ -220,7 +220,7 @@ detected.
         )
 
         if false_positive_rate < 0 or false_positive_rate >= 1:
-            raise ValueError(
+            raise ge_exceptions.ProfilerExecutionError(
                 f"""false_positive_rate must be a positive decimal number between 0 and 1 exclusive (0, 1),
 but {false_positive_rate} was provided."""
             )
