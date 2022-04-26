@@ -401,8 +401,6 @@ A false_positive_rate of {NP_EPSILON} has been selected instead."""
             batch_request=batch_request,
         )
 
-    assert numeric_metric_range_parameter_builder.false_positive_rate == NP_EPSILON
-
 
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_very_small(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -461,5 +459,3 @@ A false_positive_rate of {NP_EPSILON} has been selected instead."""
             parameters=parameters,
             batch_request=batch_request,
         )
-
-    assert numeric_metric_range_parameter_builder.false_positive_rate == NP_EPSILON
