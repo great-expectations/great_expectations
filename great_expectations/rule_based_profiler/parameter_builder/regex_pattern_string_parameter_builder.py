@@ -1,8 +1,7 @@
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -14,10 +13,13 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
     Domain,
     ParameterContainer,
 )
+from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)
 
@@ -57,11 +59,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             List[ParameterBuilderConfig]
         ] = None,
         json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     ):
         """
         Configure this RegexPatternStringParameterBuilder
@@ -75,16 +73,12 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: Optional[List[Batch]] = None,
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
         )
 
@@ -130,12 +124,15 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+        recompute_existing_parameter_values: bool = False,
+    ) -> Attributes:
         """
-        Check the percentage of values matching the REGEX string, and return the best fit, or None if no
-        string exceeds the configured threshold.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Check the percentage of values matching the REGEX string, and return the best fit, or None if no string exceeds
+        the configured threshold.
+
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
         """
         metric_computation_result: MetricComputationResult
 
@@ -149,17 +146,16 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         )
 
         # This should never happen.
-        if not (
-            isinstance(metric_computation_result.metric_values, list)
-            and len(metric_computation_result.metric_values) == 1
-        ):
+        if len(metric_computation_result.attributed_resolved_metrics) != 1:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.metric_values} found).'
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'
             )
 
         attributed_resolved_metrics: AttributedResolvedMetrics
 
-        attributed_resolved_metrics = metric_computation_result.metric_values[0]
+        attributed_resolved_metrics = (
+            metric_computation_result.attributed_resolved_metrics[0]
+        )
 
         metric_values: MetricValues
 
@@ -215,7 +211,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         regex_string_success_ratios: dict = {}
 
-        for attributed_resolved_metrics in metric_computation_result.metric_values:
+        for (
+            attributed_resolved_metrics
+        ) in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = attributed_resolved_metrics.metric_values[:, 0]
 
@@ -250,10 +248,12 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             )
         )
 
-        return (
-            best_regex_string,
+        return Attributes(
             {
-                "success_ratio": best_ratio,
-                "evaluated_regexes": sorted_regex_candidates_and_ratios,
-            },
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: best_regex_string,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: {
+                    "success_ratio": best_ratio,
+                    "evaluated_regexes": sorted_regex_candidates_and_ratios,
+                },
+            }
         )

@@ -27,11 +27,10 @@ def test_instantiate_with_cardinality_limit_modes(
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         exclude_column_name_suffixes="_id",
         limit_mode=CategoricalColumnDomainBuilder.cardinality_limit_modes.VERY_FEW,
-        batch_request=batch_request,
         data_context=data_context,
     )
 
-    domain_builder.get_domains()
+    domain_builder.get_domains(batch_request=batch_request)
 
 
 def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_context):
@@ -46,10 +45,9 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         exclude_column_name_suffixes="_id",
         limit_mode="very_few",
-        batch_request=batch_request,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(batch_request=batch_request)
 
     alice_all_column_names: List[str] = [
         "event_type",
@@ -84,10 +82,9 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         limit_mode="ONE",
-        batch_request=batch_request,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(batch_request=batch_request)
 
     alice_all_column_names: List[str] = [
         "user_agent",
@@ -122,9 +119,8 @@ def test_unsupported_cardinality_limit(
         # noinspection PyUnusedLocal,PyArgumentList
         domains: List[Domain] = CategoricalColumnDomainBuilder(
             limit_mode="&*#$&INVALID&*#$*&",
-            batch_request=batch_request,
             data_context=data_context,
-        ).get_domains()
+        ).get_domains(batch_request=batch_request)
 
     assert "specify a supported cardinality mode" in str(excinfo.value)
     assert "REL_1" in str(excinfo.value)
@@ -145,9 +141,8 @@ def test_unspecified_cardinality_limit(
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
         domains: List[Domain] = CategoricalColumnDomainBuilder(
-            batch_request=batch_request,
-            data_context=data_context,
-        ).get_domains()
+            data_context=data_context
+        ).get_domains(batch_request=batch_request)
 
     assert "Please pass ONE of the following parameters" in str(excinfo.value)
     assert "you passed 0 parameters" in str(excinfo.value)
@@ -171,10 +166,9 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
             "event_ts",
             "server_ts",
         ],
-        batch_request=batch_request,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(batch_request=batch_request)
 
     alice_all_column_names: List[str] = [
         "device_ts",
@@ -207,10 +201,9 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         limit_mode="VERY_FEW",
         exclude_column_names=[],
-        batch_request=batch_request,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(batch_request=batch_request)
 
     alice_all_column_names: List[str] = [
         "id",
@@ -251,10 +244,11 @@ def test_multi_batch_very_few_cardinality(
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         limit_mode="very_few",
-        batch_request=batch_request,
         data_context=data_context,
     )
-    observed_domains: List[Domain] = domain_builder.get_domains()
+    observed_domains: List[Domain] = domain_builder.get_domains(
+        batch_request=batch_request
+    )
 
     expected_domains: List[Domain] = [
         Domain(
@@ -326,10 +320,11 @@ def test_multi_batch_one_cardinality(
 
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         limit_mode="ONE",
-        batch_request=batch_request,
         data_context=data_context,
     )
-    observed_domains: List[Domain] = domain_builder.get_domains()
+    observed_domains: List[Domain] = domain_builder.get_domains(
+        batch_request=batch_request
+    )
 
     expected_domains: List[Domain] = []
 

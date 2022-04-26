@@ -4,6 +4,76 @@
 Changelog
 #########
 
+0.15.2
+-----------------
+* [FEATURE] Split data assets using sql datetime columns (#4871)
+* [FEATURE] Plot metrics with `DataAssistantResult.plot()` (#4873)
+* [FEATURE] RuleBasedProfiler/DataAssistant/MetricMultiBatchParameterBuilder: Enable Returning Metric Computation Results with batch_id Attribution (#4862)
+* [FEATURE] Enable variables to be specified at both Profiler and its constituent individual Rule levels (#4912)
+* [FEATURE] Enable self-initializing `ExpectColumnUniqueValueCountToBeBetween` (#4902)
+* [FEATURE] Improve diagnostic testing process (#4816)
+* [FEATURE] Add Azure CI/CD action to aid with style guide enforcement (type hints) (#4878)
+* [FEATURE] Add Azure CI/CD action to aid with style guide enforcement (docstrings) (#4617)
+* [FEATURE] Use formal interfaces to clean up DataAssistant and DataAssistantResult modules/classes (#4901)
+* [BUGFIX] fix validation issue for column domain type and implement expect_column_unique_value_count_to_be_between for VolumeDataAssistant (#4914)
+* [BUGFIX] Fix issue with not using the generated table name on read (#4905)
+* [BUGFIX] Add deprecation comment to RuntimeDataConnector
+* [BUGFIX] Ensure proper class_name within all RuleBasedProfilerConfig instantiations
+* [BUGFIX] fix rounding directive handling (#4887)
+* [BUGFIX] `great_expectations` import fails when SQL Alchemy is not installed (#4880)
+* [MAINTENANCE] Altair types cleanup (#4916)
+* [MAINTENANCE] test: update test time (#4911)
+* [MAINTENANCE] Add module docstring and simplify access to DatePart (#4910)
+* [MAINTENANCE] Chip away at type hint violations around data context (#4897)
+* [MAINTENANCE] Improve error message outputted to user in DocstringChecker action (#4895)
+* [MAINTENANCE] Re-enable bigquery tests (#4903)
+* [MAINTENANCE] Unit tests for sqlalchemy splitter methods, docs and other improvements (#4900)
+* [MAINTENANCE] Move plot logic from `DataAssistant` into `DataAssistantResult` (#4896)
+* [MAINTENANCE] Add condition to primary pipeline to ensure `import_ge` stage doesn't cause misleading Slack notifications (#4898)
+* [MAINTENANCE] Refactor `RuleBasedProfilerConfig` (#4882)
+* [MAINTENANCE] Refactor DataAssistant Access to Parameter Computation Results and Plotting Utilities (#4893)
+* [MAINTENANCE] Update `dgtest-overrides` list to include all test files not captured by primary strategy (#4891)
+* [MAINTENANCE] Add dgtest-overrides section to dependency_graph Azure pipeline
+* [MAINTENANCE] Datasource and DataContext-level tests for RuntimeDataConnector changes (#4866)
+* [MAINTENANCE] Temporarily disable bigquery tests. (#4888)
+* [MAINTENANCE] Import GE after running `ge init` in packaging CI pipeline (#4885)
+* [MAINTENANCE] Add CI stage importing GE with only required dependencies installed (#4884)
+* [MAINTENANCE] `DataAssistantResult.plot()` conditional formatting and tooltips (#4881)
+* [MAINTENANCE] split data context files (#4879)
+* [MAINTENANCE] Add Tanner to CODEOWNERS for schemas.py (#4875)
+* [MAINTENANCE]  Use defined constants for ParameterNode accessor keys (#4872)
+
+0.15.1
+-----------------
+* [FEATURE] Additional Rule-Based Profiler Parameter/Variable Access Methods (#4814)
+* [FEATURE] DataAssistant and VolumeDataAssistant classes (initial implementation -- to be enhanced as part of subsequent work) (#4844)
+* [FEATURE] Add Support for Returning Parameters and Metrics as DataAssistantResult class (#4848)
+* [FEATURE] DataAssistantResult Includes Underlying Profiler Execution Time (#4854)
+* [FEATURE] Add batch_id for every resolved metric_value to ParameterBuilder.get_metrics() result object (#4860)
+* [FEATURE] `RuntimeDataConnector` able to specify `Assets` (#4861)
+* [BUGFIX] Linting error from hackathon automerge (#4829)
+* [BUGFIX] Cleanup contrib (#4838)
+* [BUGFIX] Add `notebook` to `GE_REQUIRED_DEPENDENCIES` (#4842)
+* [BUGFIX] ParameterContainer return value formatting bug fix (#4840)
+* [BUGFIX] Ensure that Parameter Validation/Configuration Dependency Configurations are included in Serialization (#4843)
+* [BUGFIX] Correctly handle SQLA unexpected count metric for empty tables (#4618) (thanks @douglascook)
+* [BUGFIX] Temporarily adjust Deprecation Warning Count (#4869)
+* [DOCS] How to validate data with an in memory checkpoint (#4820)
+* [DOCS] Update all tutorial redirect fix (#4841)
+* [DOCS] redirect/remove dead links in docs (#4846)
+* [MAINTENANCE] Refactor Rule-Based Profiler instantiation in Validator to make it available as a public method (#4823)
+* [MAINTENANCE] String Type is not needed as Return Type from DomainBuilder.domain_type() (#4827)
+* [MAINTENANCE] Fix Typo in Checkpoint Readme (#4835) (thanks @andyjessen)
+* [MAINTENANCE] Modify conditional expectations readme (#4616) (thanks @andyjessen)
+* [MAINTENANCE] Fix links within datasource new notebook (#4833) (thanks @andyjessen)
+* [MAINTENANCE] Adds missing dependency, which is breaking CLI workflows (#4839)
+* [MAINTENANCE] Update testing and documentation for `oneshot` estimation method (#4852)
+* [MAINTENANCE] Refactor `Datasource` tests that work with `RuntimeDataConnector` by backend.  (#4853)
+* [MAINTENANCE] Update DataAssistant interfaces (#4857)
+* [MAINTENANCE] Improve types returned by DataAssistant interface methods (#4859)
+* [MAINTENANCE] Refactor `DataContext` tests that work with RuntimeDataConnector by backend (#4858)
+* [HACKATHON] `Hackathon PRs in this release <https://github.com/great-expectations/great_expectations/pulls?q=is%3Apr+label%3Ahackathon-2022+is%3Amerged+-updated%3A%3E%3D2022-04-14+-updated%3A%3C%3D2022-04-06>`
+
 0.15.0
 -----------------
 * [BREAKING] EOL Python 3.6 (#4567)

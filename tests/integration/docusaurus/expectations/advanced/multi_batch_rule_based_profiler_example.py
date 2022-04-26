@@ -22,18 +22,12 @@ rules:
     parameter_builders:
       - name: row_count_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
-        batch_request:
-            datasource_name: taxi_pandas
-            data_connector_name: monthly
-            data_asset_name: my_reports
-            data_connector_query:
-              index: "-6:-1"
         metric_name: table.row_count
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
-        round_decimals: 0
         truncate_values:
           lower_bound: 0
+        round_decimals: 0
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
@@ -48,34 +42,15 @@ rules:
       class_name: ColumnDomainBuilder
       include_semantic_types:
         - numeric
-      # BatchRequest yielding exactly one batch (March, 2019 trip data)
-      batch_request:
-        datasource_name: taxi_pandas
-        data_connector_name: monthly
-        data_asset_name: my_reports
-        data_connector_query:
-          index: -1
     parameter_builders:
       - name: min_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
-        batch_request:
-            datasource_name: taxi_pandas
-            data_connector_name: monthly
-            data_asset_name: my_reports
-            data_connector_query:
-              index: "-6:-1"
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
       - name: max_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
-        batch_request:
-            datasource_name: taxi_pandas
-            data_connector_name: monthly
-            data_asset_name: my_reports
-            data_connector_query:
-              index: "-6:-1"
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
@@ -113,7 +88,16 @@ rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
     data_context=data_context,
 )
 
-rule_based_profiler.run()
+batch_request: dict = {
+    "datasource_name": "taxi_pandas",
+    "data_connector_name": "monthly",
+    "data_asset_name": "my_reports",
+    "data_connector_query": {
+        "index": "-6:-1",
+    },
+}
+
+rule_based_profiler.run(batch_request=batch_request)
 suite: ExpectationSuite = rule_based_profiler.get_expectation_suite(
     expectation_suite_name="test_suite_name"
 )

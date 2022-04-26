@@ -1,14 +1,22 @@
 import copy
 import datetime
 import logging
+import random
+import string
 import traceback
 import warnings
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
+
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.execution_engine.sqlalchemy_data_splitter import (
+    SqlAlchemyDataSplitter,
+)
+
 del get_versions  # isort:skip
 
 
@@ -60,16 +68,25 @@ except ImportError:
     sa = None
 
 try:
+    from sqlalchemy.engine import LegacyRow
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import TextClause, quoted_name
+    from sqlalchemy.sql.elements import (
+        BooleanClauseList,
+        Label,
+        TextClause,
+        quoted_name,
+    )
 except ImportError:
+    LegacyRow = None
     reflection = None
     DefaultDialect = None
     Selectable = None
+    BooleanClauseList = None
     TextClause = None
     quoted_name = None
     OperationalError = None
+    Label = None
 
 
 try:
@@ -332,7 +349,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event="execution_engine.sqlalchemy.connect",
+                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
                 event_payload={
                     "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
@@ -355,6 +372,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         }
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
+
+        self._sqlalchemy_data_splitter = SqlAlchemyDataSplitter()
 
     @property
     def credentials(self) -> Optional[dict]:
@@ -851,9 +870,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
-            queries[domain_id]["select"].append(
-                engine_fn.label(metric_to_resolve.metric_name)
-            )
+            if self.engine.dialect.name == "clickhouse":
+                queries[domain_id]["select"].append(
+                    engine_fn.label(
+                        metric_to_resolve.metric_name.join(
+                            random.choices(string.ascii_lowercase, k=2)
+                        )
+                    )
+                )
+            else:
+                queries[domain_id]["select"].append(
+                    engine_fn.label(metric_to_resolve.metric_name)
+                )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             domain_kwargs = query["domain_kwargs"]
@@ -921,81 +949,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.engine.dispose()
 
-    ### Splitter methods for partitioning tables ###
-
-    def _split_on_whole_table(self, table_name: str, batch_identifiers: dict) -> bool:
-        """'Split' by returning the whole table"""
-
-        # return sa.column(column_name) == batch_identifiers[column_name]
-        return 1 == 1
-
-    def _split_on_column_value(
-        self, table_name: str, column_name: str, batch_identifiers: dict
-    ) -> bool:
-        """Split using the values in the named column"""
-
-        return sa.column(column_name) == batch_identifiers[column_name]
-
-    def _split_on_converted_datetime(
-        self,
-        table_name: str,
-        column_name: str,
-        batch_identifiers: dict,
-        date_format_string: str = "%Y-%m-%d",
-    ) -> bool:
-        """Convert the values in the named column to the given date_format, and split on that"""
-
-        return (
-            sa.func.strftime(
-                date_format_string,
-                sa.column(column_name),
-            )
-            == batch_identifiers[column_name]
-        )
-
-    def _split_on_divided_integer(
-        self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict
-    ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
-
-        return (
-            sa.cast(sa.column(column_name) / divisor, sa.Integer)
-            == batch_identifiers[column_name]
-        )
-
-    def _split_on_mod_integer(
-        self, table_name: str, column_name: str, mod: int, batch_identifiers: dict
-    ) -> bool:
-        """Divide the values in the named column by `divisor`, and split on that"""
-
-        return sa.column(column_name) % mod == batch_identifiers[column_name]
-
-    def _split_on_multi_column_values(
-        self, table_name: str, column_names: List[str], batch_identifiers: dict
-    ) -> bool:
-        """Split on the joint values in the named columns"""
-
-        return sa.and_(
-            *(
-                sa.column(column_name) == column_value
-                for column_name, column_value in batch_identifiers.items()
-            )
-        )
-
-    def _split_on_hashed_column(
-        self,
-        table_name: str,
-        column_name: str,
-        hash_digits: int,
-        batch_identifiers: dict,
-    ) -> bool:
-        """Split on the hashed value of the named column"""
-
-        return (
-            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
-            == batch_identifiers[column_name]
-        )
-
     ### Sampling methods ###
 
     # _sample_using_limit
@@ -1035,14 +988,36 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
+    def get_splitter_method(self, splitter_method_name: str) -> Callable:
+        """Get the appropriate splitter method from the method name.
+
+        Args:
+            splitter_method_name: name of the splitter to retrieve.
+
+        Returns:
+            splitter method.
+        """
+        return self._sqlalchemy_data_splitter.get_splitter_method(splitter_method_name)
+
+    def execute_split_query(self, split_query: Selectable) -> List[LegacyRow]:
+        """Use the execution engine to run the split query and fetch all of the results.
+
+        Args:
+            split_query: Query to be executed as a sqlalchemy Selectable.
+
+        Returns:
+            List of row results.
+        """
+        return self.engine.execute(split_query).fetchall()
+
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
-        table_name: str = batch_spec["table_name"]
         if "splitter_method" in batch_spec:
-            splitter_fn = getattr(self, batch_spec["splitter_method"])
+            splitter_fn: Callable = self._sqlalchemy_data_splitter.get_splitter_method(
+                splitter_method_name=batch_spec["splitter_method"]
+            )
             split_clause = splitter_fn(
-                table_name=table_name,
                 batch_identifiers=batch_spec["batch_identifiers"],
                 **batch_spec["splitter_kwargs"],
             )
@@ -1050,6 +1025,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             split_clause = True
 
+        table_name: str = batch_spec["table_name"]
         if "sampling_method" in batch_spec:
             if batch_spec["sampling_method"] == "_sample_using_limit":
                 # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,

@@ -160,6 +160,7 @@
 /en/latest/reference/core_concepts/data_discovery.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/data_discovery.html
 /en/latest/reference/core_concepts/datasource.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
 /en/latest/reference/core_concepts/validation.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/validation.html
+/en/latest/reference/core_concepts/data_docs.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/data_docs.html
 /en/latest/reference/glossary_of_expectations.html https://greatexpectations.io/expectations
 /en/latest/reference/supporting_resources.html https://legacy.docs.greatexpectations.io/en/latest/reference/supporting_resources.html
 /en/latest/reference/spare_parts/__doctest_example.html https://legacy.docs.greatexpectations.io/en/latest/reference/spare_parts/__doctest_example.html
@@ -177,13 +178,13 @@
 /docs/guides/setup/installation/spark_emr https://docs.greatexpectations.io/docs/guides/setup/installation/hosted_environment
 
 # Redirects for Universal Map getting started tutorial
-/docs/tutorials/getting_started/intro https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
-/docs/tutorials/getting_started/initialize_a_data_context https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_setup
-/docs/tutorials/getting_started/connect_to_data https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_connect_to_data
-/docs/tutorials/getting_started/create_your_first_expectations https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_create_expectations
-/docs/tutorials/getting_started/check_out_data_docs https://docs.greatexpectations.io/docs/reference/data_docs
-/docs/tutorials/getting_started/validate_your_data https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_validate_data
-/docs/tutorials/getting_started/customize_your_deployment https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_review
+/docs/tutorials/getting_started/intro /docs/tutorials/getting_started/tutorial_overview
+/docs/tutorials/getting_started/initialize_a_data_context /docs/tutorials/getting_started/tutorial_setup
+/docs/tutorials/getting_started/connect_to_data /docs/tutorials/getting_started/tutorial_connect_to_data
+/docs/tutorials/getting_started/create_your_first_expectations /docs/tutorials/getting_started/tutorial_create_expectations
+/docs/tutorials/getting_started/check_out_data_docs /docs/terms/data_docs
+/docs/tutorials/getting_started/validate_your_data /docs/tutorials/getting_started/tutorial_validate_data
+/docs/tutorials/getting_started/customize_your_deployment /docs/tutorials/getting_started/tutorial_review
 
 /docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
 /docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials

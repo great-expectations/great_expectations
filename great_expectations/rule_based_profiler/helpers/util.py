@@ -1,6 +1,7 @@
 import copy
 import itertools
 import logging
+import re
 import uuid
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -21,6 +22,7 @@ from great_expectations.rule_based_profiler.types import (
     VARIABLES_PREFIX,
     Domain,
     ParameterContainer,
+    ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
@@ -32,11 +34,17 @@ logger.setLevel(logging.INFO)
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
+TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX: str = "tmp"
+TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
+TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN: re.Pattern = re.compile(
+    rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\w{8}"
+)
+
 
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
@@ -91,7 +99,7 @@ def get_validator(
 
 
 def get_batch_ids(
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
@@ -125,7 +133,7 @@ def get_batch_ids(
 
 
 def build_batch_request(
-    batch_request: Optional[Union[str, BatchRequest, RuntimeBatchRequest, dict]] = None,
+    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -135,11 +143,11 @@ def build_batch_request(
 
     # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
     effective_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest, dict]
+        Union[BatchRequestBase, dict]
     ] = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=batch_request,
-        expected_return_type=(BatchRequest, RuntimeBatchRequest, dict),
+        expected_return_type=(BatchRequestBase, dict),
         variables=variables,
         parameters=parameters,
     )
@@ -381,15 +389,22 @@ def build_simple_domains_from_column_names(
 def convert_variables_to_dict(
     variables: Optional[ParameterContainer] = None,
 ) -> Dict[str, Any]:
-    variables: Optional[Dict[str, Any]] = get_parameter_value_and_validate_return_type(
+    variables_as_dict: Optional[
+        Union[ParameterNode, Dict[str, Any]]
+    ] = get_parameter_value_and_validate_return_type(
         domain=None,
         parameter_reference=VARIABLES_PREFIX,
         expected_return_type=None,
         variables=variables,
         parameters=None,
     )
+    if isinstance(variables_as_dict, ParameterNode):
+        return variables_as_dict.to_dict()
 
-    return variables or {}
+    if variables_as_dict is None:
+        return {}
+
+    return variables_as_dict
 
 
 def compute_quantiles(
@@ -545,3 +560,86 @@ def compute_bootstrap_quantiles_point_estimate(
         lower_quantile_bias_corrected_point_estimate,
         upper_quantile_bias_corrected_point_estimate,
     )
+
+
+def get_validator_with_expectation_suite(
+    batch_request: Union[BatchRequestBase, dict],
+    data_context: "BaseDataContext",  # noqa: F821
+    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    expectation_suite_name: Optional[str] = None,
+    component_name: str = "test",
+) -> "Validator":  # noqa: F821
+    """
+    Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
+    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
+    """
+    expectation_suite = get_or_create_expectation_suite(
+        data_context=data_context,
+        expectation_suite=expectation_suite,
+        expectation_suite_name=expectation_suite_name,
+        component_name=component_name,
+    )
+
+    batch_request = materialize_batch_request(batch_request=batch_request)
+    validator: "Validator" = data_context.get_validator(  # noqa: F821
+        batch_request=batch_request,
+        expectation_suite=expectation_suite,
+    )
+
+    return validator
+
+
+def get_or_create_expectation_suite(
+    data_context: "BaseDataContext",  # noqa: F821
+    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    expectation_suite_name: Optional[str] = None,
+    component_name: Optional[str] = None,
+) -> "ExpectationSuite":  # noqa: F821
+    """
+    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
+    """
+    suite: "ExpectationSuite"  # noqa: F821
+
+    generate_temp_expectation_suite_name: bool
+    create_expectation_suite: bool
+
+    if expectation_suite is not None and expectation_suite_name is not None:
+        if expectation_suite.expectation_suite_name != expectation_suite_name:
+            raise ValueError(
+                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
+            )
+
+        return expectation_suite
+    elif expectation_suite is None and expectation_suite_name is not None:
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = True
+    elif expectation_suite is not None and expectation_suite_name is None:
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = False
+    else:
+        generate_temp_expectation_suite_name = True
+        create_expectation_suite = True
+
+    if generate_temp_expectation_suite_name:
+        if not component_name:
+            component_name = "test"
+
+        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}{str(uuid.uuid4())[:8]}"
+
+    if create_expectation_suite:
+        try:
+            # noinspection PyUnusedLocal
+            expectation_suite = data_context.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+        except ge_exceptions.DataContextError:
+            expectation_suite = data_context.create_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+            print(
+                f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
+            )
+
+    return expectation_suite
