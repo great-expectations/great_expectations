@@ -3476,6 +3476,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         --Relevant Documentation--
         /docs/terms/data_context
+        /docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config
         --Relevant Documentation--
 
         Args:

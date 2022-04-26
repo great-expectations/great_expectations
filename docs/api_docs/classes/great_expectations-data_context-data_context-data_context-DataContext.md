@@ -44,8 +44,8 @@ Similarly, if no expectation suite name is provided, the DataContext will assume
 
 
 
-### Related Documentation
-- [/docs/terms/data_context](/docs/terms/data_context)
+### Related documentation
+- [Data Context](/docs/terms/data_context)
 ### Import statement
 
 ```python

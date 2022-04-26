@@ -50,5 +50,6 @@ test_yaml_config is mainly intended for use within notebooks and tests.
 
 -  The instantiated component (e.g. a Datasource) OR a json object containing metadata from the component's self_check method. The returned object is determined by return_mode.
 
-### Related Documentation
-- [/docs/terms/data_context](/docs/terms/data_context)
+### Related documentation
+- [Data Context](/docs/terms/data_context)
+- [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)

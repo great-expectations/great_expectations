@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List
 import importlib
 import inspect
+import shutil
 
 
 PUBLIC_API_WHITELISTED = "--Public API Whitelisted--"
@@ -168,6 +169,7 @@ def build_method_document(method_name, whitelisted_method, class_path, github_pa
                                   "",
                                   pretty_docstring])
     output_file = f"{class_path}.{method_name}".replace(".", "-")
+    build_relevant_api_reference_files(docstring, title, f'/docs/api_docs/methods/{output_file}')
     file_path = f'../docs/api_docs/methods/{output_file}'
 
     with open(f"{file_path}.md", 'w') as f:
@@ -187,6 +189,8 @@ def build_class_document(class_name, imported_class, import_path, github_path):
     description = pydoc.describe(imported_class)
     class_docstring = inspect.getdoc(imported_class)
     synopsis, docstring = pydoc.splitdoc(class_docstring)
+    output_file = f"{qualified_class_path}".replace(".", "-")
+    build_relevant_api_reference_files(docstring, f"class {class_name}", f'/docs/api_docs/classes/{output_file}')
 
     inprogress_output = ["---",
                          f"title: {description}",
@@ -231,9 +235,8 @@ def build_class_document(class_name, imported_class, import_path, github_path):
     while "\n\n\n" in output:
         output = output.replace("\n\n\n", "\n\n")
 
-    output_file = f"{qualified_class_path}".replace(".", "-")
-    file_path = f'../docs/api_docs/classes/{output_file}.md'
 
+    file_path = f'../docs/api_docs/classes/{output_file}.md'
     with open(file_path, 'w') as f:
         f.write("\n".join(inprogress_output))
 
@@ -289,11 +292,15 @@ def prettify_relevant_documentation_paths(docstring):
                                      "",
                                      suffix,
                                      "",
-                                     "### Related Documentation"]
+                                     "### Related documentation"]
             for line in paths.split("\n"):
                 line = line.strip()
                 if line:
-                    docstring_constructor.append(f"- [{line.replace('@', '')}]({line})")
+                    matching_doc = Path(f"..{line}.md")
+                    title = None
+                    if matching_doc.exists():
+                        title = get_title(matching_doc)
+                    docstring_constructor.append(f"- [{title or line}]({line})")
             docstring = "\n".join(docstring_constructor)
     return docstring
 
@@ -359,8 +366,57 @@ def build_sidebars_entry():
           )
 
 
+def build_relevant_api_reference_files(docstring, api_doc_id, api_doc_path):
+    if '--Relevant Documentation--' in docstring:
+        prefix, paths = docstring.split("--Relevant Documentation--", 1)
+        paths, suffix = paths.split("--Relevant Documentation--", 1)
+        for relevant_path in paths.split('\n'):
+            if relevant_path:
+                links_path = Path(f"..{relevant_path}__api_links.mdx")
+                if links_path.exists():
+                    with open(links_path, 'a') as f:
+                        f.write(f"- [{api_doc_id}]({api_doc_path})\n")
+                else:
+                    print(f"    - {links_path}")
+                    with open(links_path, 'w') as f:
+                        f.write(f"- [{api_doc_id}]({api_doc_path})\n")
+    pass
+
+
+def get_title(file_path):
+    with open(file_path, 'r') as f:
+        data = f.read()
+    if "---" in data:
+        prefix, titleblock = data.split("---", 1)
+        titleblock, suffix = titleblock.split("---", 1)
+        for line in titleblock.split("\n"):
+            if line.strip().startswith("title:"):
+                title = line .split(":",1)[1]
+                title = title.strip().strip("'").strip('"')
+                return title
+
+
+def remove_existing_api_reference_files(directory_path):
+    directory_path = Path(directory_path)
+    print(f"{directory_path}/**/*.mdx")
+    # paths = [Path(_) for _ in glob.glob(f"{directory_path}/**/*__api_links.mdx", recursive=True)]
+    paths = Path(directory_path).rglob("*__api_links.mdx")
+    print("Removing the following API links files:")
+    for api_links_file in paths:
+        print(f"    - {api_links_file}")
+        api_links_file.unlink()
+
+
 if __name__ == '__main__':
     def main_func():
+        # Remove the existing documentation.
+        shutil.rmtree("../docs/api_docs")
+        Path("../docs/api_docs/modules").mkdir(parents=True,exist_ok=True)
+        Path("../docs/api_docs/classes").mkdir(parents=True, exist_ok=True)
+        Path("../docs/api_docs/methods").mkdir(parents=True, exist_ok=True)
+        remove_existing_api_reference_files("../docs")
+
+        # Generate the new documentation.
         for source_file_path in (get_relevant_source_files("../great_expectations")):
             github_path = f"https://github.com/great-expectations/great_expectations/blob/develop{str(source_file_path).replace('..', '')}"
             if check_file_for_whitelisted_elements(source_file_path):
@@ -368,6 +424,7 @@ if __name__ == '__main__':
                 whitelisted_classes = gather_classes_to_document(import_path)
                 for class_name, whitelisted_class in whitelisted_classes:
                     build_class_document(class_name, whitelisted_class, import_path, github_path)
-    # main_func()
+        # Print the category to paste into sidebars.js:
+        build_sidebars_entry()
 
-    build_sidebars_entry()
+    main_func()

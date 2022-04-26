@@ -3,6 +3,7 @@ title: How to configure a new Checkpoint using test_yaml_config
 ---
 import Prerequsities from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import RelevantApiLinks from './how_to_configure_a_new_checkpoint_using_test_yaml_config__api_links.mdx'
 
 This how-to guide demonstrates advanced examples for configuring a <TechnicalTag tag="checkpoint" text="Checkpoint" /> using ``test_yaml_config``. **Note:** For a basic guide on creating a new Checkpoint, please see [How to create a new Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
@@ -321,3 +322,6 @@ checkpoint_run_result: CheckpointResult = data_context.run_checkpoint(
 )
  ```
 
+### Relevant API documentation (links)
+
+<RelevantApiLinks/>

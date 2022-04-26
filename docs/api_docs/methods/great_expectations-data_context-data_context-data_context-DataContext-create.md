@@ -36,5 +36,5 @@ already exist. Then, it will initialize a new DataContext in that folder and wri
 
 -  DataContext
 
-### Related Documentation
-- [/docs/terms/data_context](/docs/terms/data_context)
+### Related documentation
+- [Data Context](/docs/terms/data_context)
