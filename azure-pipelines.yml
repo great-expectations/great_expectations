@@ -143,6 +143,7 @@ stages:
     jobs:
       - job: compatibility_matrix
         condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
@@ -226,6 +227,7 @@ stages:
 
       - job: comprehensive
         condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
 
         services:
           postgres: postgres

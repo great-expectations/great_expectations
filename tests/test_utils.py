@@ -11,10 +11,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import BatchRequestBase, materialize_batch_request
-from great_expectations.core.util import get_or_create_expectation_suite
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store import (
     CheckpointStore,
     ProfilerStore,
@@ -46,7 +42,6 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 from great_expectations.rule_based_profiler.types import (
     build_parameter_container_for_variables,
 )
-from great_expectations.validator.validator import Validator
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 logger = logging.getLogger(__name__)
@@ -735,34 +730,6 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     finally:
         connection.close()
         engine.dispose()
-
-
-def get_validator_with_expectation_suite(
-    batch_request: Union[BatchRequestBase, dict],
-    data_context: BaseDataContext,
-    expectation_suite: Optional[ExpectationSuite] = None,
-    expectation_suite_name: Optional[str] = None,
-    component_name: str = "test",
-) -> Validator:
-    """
-    Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
-    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
-    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
-    """
-    expectation_suite = get_or_create_expectation_suite(
-        data_context=data_context,
-        expectation_suite=expectation_suite,
-        expectation_suite_name=expectation_suite_name,
-        component_name=component_name,
-    )
-
-    batch_request = materialize_batch_request(batch_request=batch_request)
-    validator: Validator = data_context.get_validator(
-        batch_request=batch_request,
-        expectation_suite=expectation_suite,
-    )
-
-    return validator
 
 
 def set_bootstrap_random_seed_variable(
