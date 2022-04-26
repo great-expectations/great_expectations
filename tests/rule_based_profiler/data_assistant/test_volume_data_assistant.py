@@ -2998,22 +2998,3 @@ def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_erro
         )
 
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
-
-
-def test_volume_data_assistant_plot_captures_custom_theme(
-    volume_data_assistant_result: VolumeDataAssistantResult,
-) -> None:
-    font: str = "Comic Sans MS"
-    align: str = "left"
-
-    theme: dict = {
-        "font": font,
-        "title": {
-            "align": align,
-        },
-    }
-    charts: List[dict] = volume_data_assistant_result.plot(
-        theme=theme,
-    )
-
-    assert not find_strings_in_nested_obj(charts, [font, align])
