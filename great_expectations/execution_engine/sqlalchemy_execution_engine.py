@@ -373,7 +373,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-        self._sqlalchemy_data_splitter = SqlAlchemyDataSplitter()
+        self._data_splitter = SqlAlchemyDataSplitter()
 
     @property
     def credentials(self) -> Optional[dict]:
@@ -997,7 +997,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             splitter method.
         """
-        return self._sqlalchemy_data_splitter.get_splitter_method(splitter_method_name)
+        return self._data_splitter.get_splitter_method(splitter_method_name)
 
     def execute_split_query(self, split_query: Selectable) -> List[LegacyRow]:
         """Use the execution engine to run the split query and fetch all of the results.
@@ -1014,7 +1014,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
         if "splitter_method" in batch_spec:
-            splitter_fn: Callable = self._sqlalchemy_data_splitter.get_splitter_method(
+            splitter_fn: Callable = self.get_splitter_method(
                 splitter_method_name=batch_spec["splitter_method"]
             )
             split_clause = splitter_fn(

@@ -28,6 +28,9 @@ from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.execution_engine.split_and_sample.sparkdf_data_splitter import (
+    SparkDataSplitter,
+)
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
@@ -187,6 +190,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
             }
         )
 
+        self._data_splitter = SparkDataSplitter()
+
     @property
     def dataframe(self):
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
@@ -307,7 +312,19 @@ Please check your config."""
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
-            splitter_fn = getattr(self, batch_spec.get("splitter_method"))
+            splitter_method_name: str = batch_spec.get("splitter_method")
+            # TODO: AJB 20220426 move all splitter methods to SparkDataSplitter
+            if splitter_method_name in [
+                "split_on_year",
+                "split_on_year_and_month",
+                "split_on_year_and_month_and_day",
+                "split_on_date_parts",
+            ]:
+                splitter_fn: Callable = self._data_splitter.get_splitter_method(
+                    splitter_method_name
+                )
+            else:
+                splitter_fn: Callable = getattr(self, batch_spec.get("splitter_method"))
             splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 

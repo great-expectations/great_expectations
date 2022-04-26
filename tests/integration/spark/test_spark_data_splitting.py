@@ -62,23 +62,21 @@ if __name__ == "test_script_module":
         data_connector_name: str = "test_data_connector"
         data_asset_name: str = "test_data_asset"
         column_name: str = taxi_splitting_test_cases.test_column_name
-        data_connector: ConfiguredAssetFilesystemDataConnector = (
-            ConfiguredAssetFilesystemDataConnector(
-                name=data_connector_name,
-                datasource_name=datasource_name,
-                execution_engine=context.datasources[datasource_name].execution_engine,
-                base_directory="../data/",
-                glob_directive="*.csv",
-                assets={
-                    data_asset_name: {
-                        "base_directory": "ten_trips_from_each_month",
-                        "pattern": "(.*)",
-                        "group_names": ["data_asset_name"],
-                        "splitter_method": test_case.splitter_method_name,
-                        "splitter_kwargs": test_case.splitter_kwargs,
-                    }
-                },
-            )
+        data_connector: ConfiguredAssetFilesystemDataConnector = ConfiguredAssetFilesystemDataConnector(
+            name=data_connector_name,
+            datasource_name=datasource_name,
+            execution_engine=context.datasources[datasource_name].execution_engine,
+            base_directory="../data/",
+            glob_directive="*.csv",
+            assets={
+                data_asset_name: {
+                    "base_directory": "ten_trips_from_each_month",
+                    "pattern": "(.*)",
+                    "group_names": ["data_asset_name"],
+                    # "splitter_method": test_case.splitter_method_name,
+                    # "splitter_kwargs": test_case.splitter_kwargs,
+                }
+            },
         )
 
         # 3. Check if resulting batches are as expected
@@ -87,6 +85,10 @@ if __name__ == "test_script_module":
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
+            batch_spec_passthrough={
+                "splitter_method": test_case.splitter_method_name,
+                "splitter_kwargs": test_case.splitter_kwargs,
+            },
         )
         batch_definition_list: List[
             BatchDefinition
