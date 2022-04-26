@@ -479,10 +479,13 @@ def get_snowflake_connection_url() -> str:
 
 
 def get_bigquery_table_prefix() -> str:
-    """Table name
+    """Get table_prefix that will be used by the BigQuery client in loading a BigQuery table from DataFrame.
+
+    Reference link
+        https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
 
     Returns:
-
+        String of table prefix, which is the gcp_project and dataset concatenated by a "."
     """
     gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
     if not gcp_project:
@@ -609,51 +612,44 @@ def load_data_into_test_database(
         )
         return return_value
     if engine.dialect.name.lower() == "bigquery":
-        load_data_into_test_bigquery_database(
+        # bigquery is handled in a special way
+        load_data_into_test_bigquery_database_with_bigquery_client(
             dataframe=all_dfs_concatenated, table_name=table_name
         )
         return return_value
-    try:
-        connection = engine.connect()
-        # print(f"Dropping table {table_name}")
-        # connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-        print(f"Creating table {table_name} and adding data from {csv_paths}")
-        # create then
-        # stmt = f"""CREATE OR REPLACE TABLE `{table_name}`
-        #         OPTIONS(
-        #             expiration_timestamp=TIMESTAMP_ADD(
-        #             CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
-        #         )"""
-        # engine.execute(stmt)
-        # we get this
-        all_dfs_concatenated.to_sql(
-            name=table_name, con=engine, index=False, if_exists="append"
-        )
-        return return_value
-    except SQLAlchemyError as e:
-        logger.error(
-            """Docs integration tests encountered an error while loading test-data into test-database."""
-        )
-        raise
-    finally:
-        connection.close()
-        engine.dispose()
+    else:
+        try:
+            connection = engine.connect()
+            print(f"Dropping table {table_name}")
+            connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+            print(f"Creating table {table_name} and adding data from {csv_paths}")
+            all_dfs_concatenated.to_sql(
+                name=table_name, con=engine, index=False, if_exists="append"
+            )
+            return return_value
+        except SQLAlchemyError as e:
+            logger.error(
+                """Docs integration tests encountered an error while loading test-data into test-database."""
+            )
+            raise
+        finally:
+            connection.close()
+            engine.dispose()
 
 
-def load_data_into_test_bigquery_database(dataframe: pd.DataFrame, table_name):
-    prefix = get_bigquery_table_prefix()
-    table_id = f"""{prefix}.{table_name}"""
+def load_data_into_test_bigquery_database_with_bigquery_client(
+    dataframe: pd.DataFrame, table_name: str
+):
+    prefix: str = get_bigquery_table_prefix()
+    table_id: str = f"""{prefix}.{table_name}"""
     # https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
-    # may need to convert datetime
-    import datetime
-
     from google.cloud import bigquery
 
-    client = bigquery.Client()
-    job = client.load_table_from_dataframe(
-        dataframe, table_id  # , job_config=job_config
+    client: bigquery.Client = bigquery.Client()
+    job: bigquery.LoadJob = client.load_table_from_dataframe(
+        dataframe, table_id
     )  # Make an API request.
-    job.result()  # Wait for the job to complete.
+    job.result()  # Wait for the job to complete and return
 
 
 def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:
