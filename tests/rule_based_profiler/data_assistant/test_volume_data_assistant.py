@@ -22,6 +22,7 @@ from great_expectations.validator.validator import Validator
 from tests.render.test_util import load_notebook_from_path
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 from tests.test_utils import (
+    get_or_create_expectation_suite,
     get_validator_with_expectation_suite,
     set_bootstrap_random_seed_variable,
 )
@@ -72,7 +73,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         expectation_suite_name: Optional[str] = None,
         component_name: Optional[str] = None,
     ) -> Validator:
-        suite: ExpectationSuite
+        expectation_suite: ExpectationSuite
 
         generate_temp_expectation_suite_name: bool
         create_expectation_suite: bool
@@ -2707,6 +2708,156 @@ def test_execution_time_within_proper_bounds(
 
     # Execution time (in seconds) must have non-trivial value.
     assert data_assistant_result.execution_time > 0.0
+
+
+def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_no(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
+        data_context=context,
+        expectation_suite=None,
+        expectation_suite_name="my_suite",
+        component_name=None,
+    )
+    assert len(expectation_suite.expectations) == 0
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=expectation_suite,
+        component_name="volume_data_assistant",
+    )
+    assert len(validator.batches) == 36
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
+        validator=validator,
+    )
+    data_assistant_result: DataAssistantResult = data_assistant.run()
+
+    expectation_suite.add_expectation_configurations(
+        expectation_configurations=data_assistant_result.expectation_suite.expectations,
+        send_usage_event=False,
+        match_type="domain",
+        overwrite_existing=True,
+    )
+    assert len(expectation_suite.expectations) == 19
+
+
+def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_yes_use_suite_name(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    expectation_suite_name: str = "my_suite"
+
+    expectation_suite: ExpectationSuite
+
+    expectation_suite = get_or_create_expectation_suite(
+        data_context=context,
+        expectation_suite=None,
+        expectation_suite_name=expectation_suite_name,
+        component_name=None,
+    )
+    assert len(expectation_suite.expectations) == 0
+
+    context.save_expectation_suite(expectation_suite=expectation_suite)
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=expectation_suite_name,
+        expectation_suite=expectation_suite,
+        component_name="volume_data_assistant",
+    )
+    assert len(validator.batches) == 36
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
+        validator=validator,
+    )
+
+    data_assistant_result: DataAssistantResult
+
+    data_assistant_result = data_assistant.run(
+        expectation_suite_name=expectation_suite_name,
+        save_updated_expectation_suite=False,
+    )
+    expectation_suite = get_or_create_expectation_suite(
+        data_context=context,
+        expectation_suite=None,
+        expectation_suite_name=expectation_suite_name,
+        component_name=None,
+    )
+    assert len(data_assistant_result.expectation_suite.expectations) == 19
+    assert len(expectation_suite.expectations) == 0
+
+    data_assistant_result = data_assistant.run(
+        expectation_suite_name=expectation_suite_name,
+        save_updated_expectation_suite=True,
+    )
+    expectation_suite = get_or_create_expectation_suite(
+        data_context=context,
+        expectation_suite=None,
+        expectation_suite_name=expectation_suite_name,
+        component_name=None,
+    )
+    assert len(data_assistant_result.expectation_suite.expectations) == 19
+    assert len(expectation_suite.expectations) == 19
+
+
+def test_volume_data_assistant_add_expectation_configurations_to_suite_inplace_yes_use_suite(
+    quentin_columnar_table_multi_batch_data_context,
+):
+    context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
+        data_context=context,
+        expectation_suite=None,
+        expectation_suite_name="my_suite",
+        component_name=None,
+    )
+    assert len(expectation_suite.expectations) == 0
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=expectation_suite,
+        component_name="volume_data_assistant",
+    )
+    assert len(validator.batches) == 36
+
+    data_assistant: DataAssistant = VolumeDataAssistant(
+        name="test_volume_data_assistant",
+        validator=validator,
+    )
+    # noinspection PyUnusedLocal
+    data_assistant_result: DataAssistantResult = data_assistant.run(
+        expectation_suite=expectation_suite
+    )
+    assert len(expectation_suite.expectations) == 19
 
 
 def test_volume_data_assistant_plot_descriptive_notebook_execution_fails(
