@@ -34,9 +34,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             exclude_column_names: A list of columns to avoid charting
         """
         assert not (
-            include_column_names and exclude_column_names,
-            "You may either use `include_column_names` or `exclude_column_names` (but not both).",
-        )
+            include_column_names is not None and exclude_column_names is not None
+        ), "You may either use `include_column_names` or `exclude_column_names` (but not both)."
 
         charts: List[Union[alt.Chart, alt.VConcatChart]] = []
 
