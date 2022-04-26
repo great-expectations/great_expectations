@@ -2873,3 +2873,23 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
     run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         context=context, new_cell=new_cell
     )
+
+
+def test_volume_data_assistant_plot_returns_dict_repr_of_charts():
+    pass
+
+
+def test_vlume_data_assistant_custom_theme_impacts_dict_repr_of_charts():
+    pass
+
+
+def test_volume_data_assistant_plot_include_column_names_filters_output():
+    pass
+
+
+def test_volume_data_assistant_plot_exclude_column_names_filters_output():
+    pass
+
+
+def test_volume_data_assistant_plot_include_and_exclude_column_names_raises_error():
+    pass

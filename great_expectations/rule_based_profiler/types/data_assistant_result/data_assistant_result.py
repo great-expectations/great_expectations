@@ -509,7 +509,7 @@ class DataAssistantResult(SerializableDictDot):
         self,
         prescriptive: bool = False,
         theme: Optional[Dict[str, Any]] = None,
-    ) -> None:
+    ) -> List[dict]:
         """
         Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
 

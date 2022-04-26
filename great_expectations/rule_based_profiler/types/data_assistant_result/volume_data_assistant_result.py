@@ -20,7 +20,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         theme: Optional[Dict[str, Any]] = None,
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
-    ) -> None:
+    ) -> List[dict]:
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
 
@@ -58,6 +58,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
         charts.append(column_domain_chart)
 
         self.display(charts=charts, theme=theme)
+
+        return [chart.to_dict() for chart in charts]
 
     def _plot_table_domain_charts(
         self,
