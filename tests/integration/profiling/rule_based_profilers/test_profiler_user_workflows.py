@@ -25,6 +25,9 @@ from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_validator_with_expectation_suite,
+)
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -35,7 +38,6 @@ from tests.core.usage_statistics.util import (
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
 from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
-from tests.test_utils import get_validator_with_expectation_suite
 
 yaml = YAML()
 
