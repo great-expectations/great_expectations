@@ -34,7 +34,7 @@ class DataAssistantDispatcher:
             data_assistant_type=DataAssistantDispatcher.DATA_ASSISTANT_TYPE_ALIASES.get(
                 name.lower(), ""
             )
-        )  # noqa: F821
+        )
         if data_assistant_cls is None:
             raise AttributeError(
                 f'"{type(self).__name__}" object has no attribute "{name}".'
