@@ -1132,7 +1132,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 "BigQuery tables that are created as the result of a query are no longer created as "
                 "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
                 "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
-                "v0.15.3 and will be removed in v0.16.",
+                "v0.15.3 and will be removed in v0.18.",
                 DeprecationWarning,
             )
 
