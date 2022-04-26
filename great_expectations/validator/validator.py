@@ -395,7 +395,7 @@ class Validator:
         meta: dict,
         expectation_impl: "Expectation",  # noqa: F821
     ) -> ExpectationConfiguration:
-        auto: Optional[bool] = expectation_kwargs.get("auto")
+        auto: bool = expectation_kwargs.get("auto", False)
         profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
             "profiler_config"
         )
