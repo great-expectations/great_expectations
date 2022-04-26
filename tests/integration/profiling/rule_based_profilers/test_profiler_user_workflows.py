@@ -1,5 +1,4 @@
 import datetime
-import uuid
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 from unittest import mock
@@ -12,7 +11,6 @@ from packaging import version
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite, ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest
