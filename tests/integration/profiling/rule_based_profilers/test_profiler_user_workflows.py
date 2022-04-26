@@ -2095,31 +2095,18 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
 ) -> None:
     context: DataContext = quentin_columnar_table_multi_batch_data_context
 
-    result: ExpectationValidationResult
-
-    suite: ExpectationSuite
-
-    expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
-    try:
-        # noinspection PyUnusedLocal
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-    except ge_exceptions.DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
-
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    validator: Validator = context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        expectation_suite_name=expectation_suite_name,
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
     )
     assert len(validator.batches) == 36
 
