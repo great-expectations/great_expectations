@@ -1,9 +1,7 @@
 import pydoc
-import re
-import ast
 import glob
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import List
 import importlib
 import inspect
 
@@ -87,7 +85,6 @@ def gather_whitelisted_methods(imported_class):
     for method_name, class_method in methods.items():
         synop, desc = pydoc.splitdoc(pydoc.getdoc(class_method))
         if PUBLIC_API_WHITELISTED in desc:
-            print(method_name, class_method)
             yield method_name, class_method
 
 
@@ -131,7 +128,6 @@ def build_method_document(method_name, whitelisted_method, class_path, github_pa
     else:
         synopsis = docstring = ""
 
-
     description = description.capitalize()
     inprogress_output = ["---",
                          f"title: {title}",
@@ -142,9 +138,7 @@ def build_method_document(method_name, whitelisted_method, class_path, github_pa
                          "",
                          "### Fully qualified path",
                          "",
-                         f"`{class_path}.{method_name}`",
-                         "",
-                         f"[See it on GitHub]({github_path})"]
+                         f"`{class_path}.{method_name}`"]
 
     if synopsis:
         inprogress_output.extend(["",
@@ -197,12 +191,7 @@ def build_class_document(class_name, imported_class, import_path, github_path):
     inprogress_output = ["---",
                          f"title: {description}",
                          "---",
-                         "### Import statement",
-                         "",
-                         "```python",
-                         f"from {import_path} import {class_name}",
-                         "```",
-                         "",
+
                          f"[See it on GitHub]({github_path})"
                          ]
 
@@ -217,6 +206,13 @@ def build_class_document(class_name, imported_class, import_path, github_path):
                                   "### Docstring",
                                   "",
                                   prettify_docstring(docstring)])
+
+    inprogress_output.extend(["### Import statement",
+                              "",
+                              "```python",
+                              f"from {import_path} import {class_name}",
+                              "```",
+                              ""])
 
     whitelisted_methods = gather_whitelisted_methods(imported_class)
     inprogress_methods = []
@@ -299,7 +295,6 @@ def prettify_relevant_documentation_paths(docstring):
                 if line:
                     docstring_constructor.append(f"- [{line.replace('@', '')}]({line})")
             docstring = "\n".join(docstring_constructor)
-            print(docstring_constructor)
     return docstring
 
 
@@ -312,29 +307,67 @@ def prettify_docstring(docstring):
     return docstring
 
 
+def build_sidebars_entry():
+    module_docs_dir = "../docs/api_docs/modules"
+    class_docs_dir = "../docs/api_docs/classes"
+    method_docs_dir = "../docs/api_docs/methods"
+
+    module_files = [Path(_) for _ in glob.glob(f"{module_docs_dir}/**/*.md", recursive=True)]
+    class_files = [Path(_) for _ in glob.glob(f"{class_docs_dir}/**/*.md", recursive=True)]
+    method_files = [Path(_) for _ in glob.glob(f"{method_docs_dir}/**/*.md", recursive=True)]
+
+    module_docs = []
+    for path in module_files:
+        path = str(path).replace('../docs/', '').replace('.md', '')
+        module_docs.append(f"{{ type: 'doc', id: '{path}' }}")
+
+    class_docs = []
+    for path in class_files:
+        path = str(path).replace('../docs/', '').replace('.md', '')
+        class_docs.append(f"{{ type: 'doc', id: '{path}' }}")
+
+    method_docs = []
+    for path in method_files:
+        path = str(path).replace('../docs/', '').replace('.md', '')
+        method_docs.append(f"{{ type: 'doc', id: '{path}' }}")
+
+    combined_categories = []
+    module_items = ",\n".join(module_docs)
+    combined_categories.append(f"{{"
+                               f"\ntype: 'category',"
+                               f"\nlabel: 'Modules',"
+                               f"\nitems: [{module_items}]"
+                               f"\n}}")
+    class_items = ",\n".join(class_docs)
+    combined_categories.append(f"{{"
+                               f"\ntype: 'category',"
+                               f"\nlabel: 'Classes',"
+                               f"\nitems: [{class_items}]"
+                               f"\n}}")
+    method_items = ",\n".join(method_docs)
+    combined_categories.append(f"{{"
+                               f"\ntype: 'category',"
+                               f"\nlabel: 'Methods',"
+                               f"\nitems: [{method_items}]"
+                               f"\n}}")
+    combined_items = ",\n".join(combined_categories)
+    print(f"{{"
+          f"\ntype: 'category',"
+          f"\nlabel: 'API documentation',"
+          f"\nitems: [{combined_items}]"
+          f"\n}}",
+          )
+
 
 if __name__ == '__main__':
     def main_func():
         for source_file_path in (get_relevant_source_files("../great_expectations")):
-            print("++")
-            print(source_file_path)
             github_path = f"https://github.com/great-expectations/great_expectations/blob/develop{str(source_file_path).replace('..', '')}"
             if check_file_for_whitelisted_elements(source_file_path):
                 import_path = convert_to_import_path(source_file_path)
                 whitelisted_classes = gather_classes_to_document(import_path)
                 for class_name, whitelisted_class in whitelisted_classes:
                     build_class_document(class_name, whitelisted_class, import_path, github_path)
-    main_func()
+    # main_func()
 
-    test = """
-    Some Stuff Here
-    Args:
-        project_root_dir: path to the root directory in which to create a new great_expectations directory
-        usage_statistics_enabled: boolean directive specifying whether or not to gather usage statistics
-        runtime_environment: a dictionary of config variables that
-        override both those set in config_variables.yml and the environment
-
-    Returns:
-        Nothing Much
-    """
-    print(prettify_docstring(test))
+    build_sidebars_entry()

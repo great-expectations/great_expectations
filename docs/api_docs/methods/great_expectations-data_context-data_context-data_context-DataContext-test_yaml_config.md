@@ -9,8 +9,6 @@ title: DataContext.test_yaml_config
 
 `great_expectations.data_context.data_context.data_context.DataContext.test_yaml_config`
 
-[See it on GitHub](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/data_context/data_context/data_context.py)
-
 ### Synopsis
 
 Convenience method for testing yaml configs

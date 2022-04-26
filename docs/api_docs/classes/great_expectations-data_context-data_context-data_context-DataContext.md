@@ -1,12 +1,6 @@
 ---
 title: class DataContext
 ---
-### Import statement
-
-```python
-from great_expectations.data_context.data_context.data_context import DataContext
-```
-
 [See it on GitHub](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/data_context/data_context/data_context.py)
 
 ### Docstring
@@ -52,6 +46,12 @@ Similarly, if no expectation suite name is provided, the DataContext will assume
 
 ### Related Documentation
 - [/docs/terms/data_context](/docs/terms/data_context)
+### Import statement
+
+```python
+from great_expectations.data_context.data_context.data_context import DataContext
+```
+
 
 ### Public Methods (API documentation links)
 

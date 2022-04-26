@@ -381,7 +381,26 @@ module.exports = {
             { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         },
-        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
+        {
+          type: 'category',
+          label: 'API documentation',
+          items: [{
+            type: 'category',
+            label: 'Modules',
+            items: []
+          },
+          {
+            type: 'category',
+            label: 'Classes',
+            items: [{ type: 'doc', id: 'api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext' }]
+          },
+          {
+            type: 'category',
+            label: 'Methods',
+            items: [{ type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config' },
+              { type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create' }]
+          }]
+        },
         'glossary',
         {
           type: 'category',
@@ -444,7 +463,7 @@ module.exports = {
       label: 'Updates and migration',
       items: [
         { type: 'doc', id: 'changelog' },
-        { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+        { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
       ]
     }
   ]

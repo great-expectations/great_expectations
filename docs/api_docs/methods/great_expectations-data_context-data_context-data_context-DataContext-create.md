@@ -9,8 +9,6 @@ title: DataContext.create
 
 `great_expectations.data_context.data_context.data_context.DataContext.create`
 
-[See it on GitHub](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/data_context/data_context/data_context.py)
-
 ### Synopsis
 
 Build a new great_expectations directory and DataContext object in the provided project_root_dir.
