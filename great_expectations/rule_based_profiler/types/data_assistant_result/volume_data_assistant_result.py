@@ -18,6 +18,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
         self,
         prescriptive: bool = False,
         theme: Optional[Dict[str, Any]] = None,
+        include_column_names: Optional[List[str]] = None,
+        exclude_column_names: Optional[List[str]] = None,
     ) -> None:
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
@@ -28,48 +30,54 @@ class VolumeDataAssistantResult(DataAssistantResult):
         Args:
             prescriptive: Type of plot to generate, prescriptive if True, descriptive if False
             theme: Altair top-level chart configuration dictionary
+            include_column_names: A list of columns to chart
+            exclude_column_names: A list of columns to avoid charting
         """
+        assert not (
+            include_column_names is not None and exclude_column_names is not None,
+            "You may either use `include_column_names` or `exclude_column_names` (but not both).",
+        )
+
         charts: List[Union[alt.Chart, alt.VConcatChart]] = []
 
         expectation_configurations: List[
             ExpectationConfiguration
         ] = self.expectation_suite.expectations
 
+        table_domain_charts: List[alt.Chart] = self._plot_table_domain(
+            expectation_configurations, prescriptive
+        )
+        charts.extend(table_domain_charts)
+
+        column_domain_chart: alt.VConcatChart = self._plot_column_domain(
+            expectation_configurations,
+            include_column_names,
+            exclude_column_names,
+            prescriptive,
+        )
+        charts.append(column_domain_chart)
+
+        self.display(charts=charts, theme=theme)
+
+    def _plot_table_domain_charts(
+        self,
+        expectation_configurations: List[ExpectationConfiguration],
+        prescriptive: bool,
+    ) -> List[alt.Chart]:
         table_based_expectations: List[ExpectationConfiguration] = list(
             filter(
                 lambda e: e.expectation_type == "expect_table_row_count_to_be_between",
                 expectation_configurations,
             )
         )
-        table_domain_charts: List[alt.Chart] = self._generate_table_domain_charts(
-            table_based_expectations, prescriptive
-        )
-        charts.extend(table_domain_charts)
 
-        column_based_expectations: List[ExpectationConfiguration] = list(
-            filter(
-                lambda e: e.expectation_type
-                == "expect_column_unique_value_count_to_be_between",
-                expectation_configurations,
-            )
-        )
-        column_domain_chart: alt.VConcatChart = self._generate_column_domain_chart(
-            column_based_expectations, prescriptive
-        )
-        charts.append(column_domain_chart)
-
-        self.display(charts=charts, theme=theme)
-
-    def _generate_table_domain_charts(
-        self,
-        table_based_expectations: List[ExpectationConfiguration],
-        prescriptive: bool,
-    ) -> List[alt.Chart]:
         attributed_metrics_by_table_domain: Dict[
             Domain, Dict[str, ParameterNode]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.TABLE)
 
         charts: List[alt.Chart] = []
+
+        expectation_configuration: ExpectationConfiguration
         for expectation_configuration in table_based_expectations:
             table_domain_chart: alt.Chart = (
                 self._create_chart_for_table_domain_expectation(
@@ -131,11 +139,30 @@ class VolumeDataAssistantResult(DataAssistantResult):
         )
         return chart
 
-    def _generate_column_domain_chart(
+    def _plot_column_domain_chart(
         self,
-        column_based_expectations: List[ExpectationConfiguration],
+        expectation_configurations: List[ExpectationConfiguration],
+        include_column_names: Optional[List[str]],
+        exclude_column_names: Optional[List[str]],
         prescriptive: bool,
     ) -> alt.VConcatChart:
+        def _filter(e: ExpectationConfiguration) -> bool:
+            if e.expectation_type != "expect_column_unique_value_count_to_be_between":
+                return False
+            column_name: str = e.kwargs["column"]
+            if exclude_column_names and column_name in exclude_column_names:
+                return False
+            if include_column_names and column_name not in include_column_names:
+                return False
+            return True
+
+        column_based_expectations: List[ExpectationConfiguration] = list(
+            filter(
+                lambda e: _filter(e),
+                expectation_configurations,
+            )
+        )
+
         attributed_metrics_by_column_domain: Dict[
             Domain, Dict[str, ParameterNode]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.COLUMN)
