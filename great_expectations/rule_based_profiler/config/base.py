@@ -295,11 +295,11 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
 class RuleConfig(SerializableDictDot):
     def __init__(
         self,
-        expectation_configuration_builders: List[
-            dict
-        ],  # see ExpectationConfigurationBuilderConfig
         domain_builder: Optional[dict] = None,  # see DomainBuilderConfig
         parameter_builders: Optional[List[dict]] = None,  # see ParameterBuilderConfig
+        expectation_configuration_builders: Optional[
+            List[dict]
+        ] = None,  # see ExpectationConfigurationBuilderConfig
     ):
         self.domain_builder = domain_builder
         self.parameter_builders = parameter_builders
@@ -375,8 +375,8 @@ class RuleConfigSchema(NotNullSchema):
             required=True,
             allow_none=False,
         ),
-        required=True,
-        allow_none=False,
+        required=False,
+        allow_none=True,
     )
 
 

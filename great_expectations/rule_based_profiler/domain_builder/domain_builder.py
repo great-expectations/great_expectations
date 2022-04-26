@@ -80,7 +80,7 @@ class DomainBuilder(Builder, ABC):
 
     @property
     @abstractmethod
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         pass
 
     @abstractmethod
