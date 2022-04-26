@@ -478,6 +478,21 @@ def get_snowflake_connection_url() -> str:
     return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 
 
+def get_bigquery_table_prefix() -> str:
+    """Table name
+
+    Returns:
+
+    """
+    gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+        )
+    bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "test_ci")
+    return f"""{gcp_project}.{bigquery_dataset}"""
+
+
 def get_bigquery_connection_url() -> str:
     """Get bigquery connection url from environment variables.
 
@@ -560,9 +575,7 @@ def load_data_into_test_database(
     return_value: LoadedTable = LoadedTable(
         table_name=table_name, inserted_dataframe=all_dfs_concatenated
     )
-
     connection = None
-
     if sa:
         engine = sa.create_engine(connection_string)
     else:
@@ -571,11 +584,24 @@ def load_data_into_test_database(
             "install optional sqlalchemy dependency for support."
         )
         return return_value
+    if engine.dialect.name.lower() == "bigquery":
+        load_data_into_test_bigquery_database(
+            dataframe=all_dfs_concatenated, table_name=table_name
+        )
+        return return_value
     try:
         connection = engine.connect()
-        print(f"Dropping table {table_name}")
-        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+        # print(f"Dropping table {table_name}")
+        # connection.execute(f"DROP TABLE IF EXISTS {table_name}")
         print(f"Creating table {table_name} and adding data from {csv_paths}")
+        # create then
+        # stmt = f"""CREATE OR REPLACE TABLE `{table_name}`
+        #         OPTIONS(
+        #             expiration_timestamp=TIMESTAMP_ADD(
+        #             CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+        #         )"""
+        # engine.execute(stmt)
+        # we get this
         all_dfs_concatenated.to_sql(
             name=table_name, con=engine, index=False, if_exists="append"
         )
@@ -588,6 +614,22 @@ def load_data_into_test_database(
     finally:
         connection.close()
         engine.dispose()
+
+
+def load_data_into_test_bigquery_database(dataframe: pd.DataFrame, table_name):
+    prefix = get_bigquery_table_prefix()
+    table_id = f"""{prefix}.{table_name}"""
+    # https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
+    # may need to convert datetime
+    import datetime
+
+    from google.cloud import bigquery
+
+    client = bigquery.Client()
+    job = client.load_table_from_dataframe(
+        dataframe, table_id  # , job_config=job_config
+    )  # Make an API request.
+    job.result()  # Wait for the job to complete.
 
 
 def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:
