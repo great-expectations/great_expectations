@@ -6,6 +6,7 @@ import pytest
 
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.helpers.util import NP_EPSILON
 from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
 )
@@ -31,13 +32,16 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "data_asset_name": "my_reports",
     }
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
-        name="row_count_range",
-        metric_name="table.row_count",
-        estimator="bootstrap",
-        false_positive_rate=1.0e-2,
-        round_decimals=0,
-        data_context=data_context,
+    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder
+    numeric_metric_range_parameter_builder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="row_count_range",
+            metric_name="table.row_count",
+            estimator="bootstrap",
+            false_positive_rate=1.0e-2,
+            round_decimals=0,
+            data_context=data_context,
+        )
     )
 
     variables: Optional[ParameterContainer] = None
@@ -293,6 +297,58 @@ but 1.0 was provided."""
         )
 
 
+def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_negative(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    data_context: DataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
+
+    # BatchRequest yielding three batches
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder
+    numeric_metric_range_parameter_builder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="row_count_range",
+            metric_name="table.row_count",
+            estimator="bootstrap",
+            false_positive_rate=-0.05,
+            round_decimals=0,
+            data_context=data_context,
+        )
+    )
+
+    variables: Optional[ParameterContainer] = None
+
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.TABLE,
+    )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
+    assert parameter_container.parameter_nodes is None
+
+    error_message: str = re.escape(
+        """false_positive_rate must be a positive decimal number between 0 and 1 exclusive (0, 1),
+but -0.05 was provided."""
+    )
+
+    with pytest.raises(ValueError, match=error_message):
+        numeric_metric_range_parameter_builder.build_parameters(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+            batch_request=batch_request,
+        )
+
+
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_zero(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -343,3 +399,66 @@ but 0.0 was provided. A false_positive_rate of 2.220446049250313e-16 has been se
             parameters=parameters,
             batch_request=batch_request,
         )
+
+    assert numeric_metric_range_parameter_builder.false_positive_rate == NP_EPSILON
+
+
+def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_very_small(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    data_context: DataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
+
+    # BatchRequest yielding three batches
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    # a commonly used defect rate in quality control that equates to 3.4 defects per million opportunities
+    six_sigma_false_positive_rate: float = 3.4 / 1000000.0
+    assert six_sigma_false_positive_rate > NP_EPSILON
+
+    # what if user tries a false positive rate smaller than NP_EPSILON (by an order of magnitude in this case)?
+    smaller_than_np_epsilon_false_positive_rate: float = NP_EPSILON / 10
+
+    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder
+    numeric_metric_range_parameter_builder = (
+        NumericMetricRangeMultiBatchParameterBuilder(
+            name="row_count_range",
+            metric_name="table.row_count",
+            estimator="bootstrap",
+            false_positive_rate=smaller_than_np_epsilon_false_positive_rate,
+            round_decimals=0,
+            data_context=data_context,
+        )
+    )
+
+    variables: Optional[ParameterContainer] = None
+
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.TABLE,
+    )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
+    assert parameter_container.parameter_nodes is None
+
+    warning_message: str = re.escape(
+        f"""You have chosen a false_positive_rate of {smaller_than_np_epsilon_false_positive_rate}, which is too small.
+A false_positive_rate of 2.220446049250313e-16 has been selected instead."""
+    )
+
+    with pytest.warns(UserWarning, match=warning_message):
+        numeric_metric_range_parameter_builder.build_parameters(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+            batch_request=batch_request,
+        )
+
+    assert numeric_metric_range_parameter_builder.false_positive_rate == NP_EPSILON

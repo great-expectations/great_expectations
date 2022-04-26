@@ -222,17 +222,23 @@ detected.
         if isinstance(false_positive_rate, str):
             false_positive_rate = float(false_positive_rate)
 
-        if false_positive_rate <= 0:
+        if false_positive_rate < 0 or false_positive_rate >= 1:
+            raise ValueError(
+                f"""false_positive_rate must be a positive decimal number between 0 and 1 exclusive (0, 1),
+but {false_positive_rate} was provided."""
+            )
+        elif false_positive_rate == 0:
             warnings.warn(
                 f"""false_positive_rate should be a positive decimal number between 0 and 1 exclusive (0, 1),
 but {false_positive_rate} was provided. A false_positive_rate of {NP_EPSILON} has been selected instead."""
             )
             self._false_positive_rate = NP_EPSILON
-        elif false_positive_rate >= 1:
-            raise ValueError(
-                f"""false_positive_rate must be a positive decimal number between 0 and 1 exclusive (0, 1),
-but {false_positive_rate} was provided."""
+        elif false_positive_rate <= NP_EPSILON:
+            warnings.warn(
+                f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too small.
+A false_positive_rate of {NP_EPSILON} has been selected instead."""
             )
+            self._false_positive_rate = NP_EPSILON
         else:
             self._false_positive_rate = false_positive_rate
 
