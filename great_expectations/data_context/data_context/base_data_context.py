@@ -23,6 +23,9 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+    DataAssistantDispatcher,
+)
 
 try:
     from typing import Literal
@@ -398,6 +401,8 @@ class BaseDataContext(ConfigPeer):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
+        self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -2467,6 +2472,10 @@ class BaseDataContext(ConfigPeer):
     @property
     def validations_store(self) -> ValidationsStore:
         return self.stores[self.validations_store_name]
+
+    @property
+    def assistants(self) -> DataAssistantDispatcher:
+        return self._assistants
 
     def _compile_evaluation_parameter_dependencies(self):
         self._evaluation_parameter_dependencies = {}

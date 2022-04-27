@@ -9,6 +9,7 @@ from great_expectations.core.metric import Metric
 logger = logging.getLogger(__name__)
 
 _registered_expectations = {}
+_registered_data_assistants = {}
 _registered_metrics = {}
 _registered_renderers = {}
 
@@ -89,8 +90,51 @@ def register_expectation(expectation: Type["Expectation"]) -> None:  # noqa: F82
             logger.warning(
                 f"Overwriting declaration of expectation {expectation_type}."
             )
+
     logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
+
+
+def register_data_assistant(
+    data_assistant: Type["DataAssistant"],  # noqa: F821
+) -> None:
+    """
+    This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
+
+    Args:
+        data_assistant: "DataAssistant" class to be registered
+    """
+    data_assistant_type = data_assistant.data_assistant_type
+    if data_assistant_type in _registered_data_assistants:
+        if _registered_data_assistants[data_assistant_type] == data_assistant:
+            logger.info(
+                f'Multiple declarations of DataAssistant "{data_assistant_type}" found.'
+            )
+            return
+        else:
+            logger.warning(
+                f'Overwriting the declaration of DataAssistant "{data_assistant_type}" took place.'
+            )
+
+    logger.debug(
+        f'Registering the declaration of DataAssistant "{data_assistant_type}" took place.'
+    )
+    _registered_data_assistants[data_assistant_type] = data_assistant
+
+
+def get_data_assistant_impl(
+    data_assistant_type: str,
+) -> Optional[Type["DataAssistant"]]:  # noqa: F821
+    """
+    This method obtains (previously registered) "DataAssistant" class from DataAssistant Registry
+
+    Args:
+        data_assistant_type: String representing "snake case" version of "DataAssistant" class type
+
+    Returns:
+        Class inheriting "DataAssistant" if found; otherwise, None
+    """
+    return _registered_data_assistants.get(data_assistant_type)
 
 
 def _add_response_key(res, key, value):
@@ -129,6 +173,7 @@ def register_metric(
                 "warning",
                 f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys",
             )
+
         current_value_keys = metric_definition.get("metric_value_keys", set())
         if set(current_value_keys) != set(metric_value_keys):
             logger.warning(
@@ -139,6 +184,7 @@ def register_metric(
                 "warning",
                 f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys",
             )
+
         providers = metric_definition.get("providers", {})
         if execution_engine_name in providers:
             current_provider_cls, current_provider_fn = providers[execution_engine_name]
@@ -171,7 +217,9 @@ def register_metric(
             "providers": {execution_engine_name: (metric_class, metric_provider)},
         }
         _registered_metrics[metric_name] = metric_definition
+
     res["success"] = True
+
     return res
 
 
@@ -262,8 +310,8 @@ def get_domain_metrics_dict_by_name(
     }
 
 
-def get_expectation_impl(expectation_name):
-    renamed = {
+def get_expectation_impl(expectation_name: str):
+    renamed: Dict[str, str] = {
         "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
         "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
         "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",

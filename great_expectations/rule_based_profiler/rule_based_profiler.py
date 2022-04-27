@@ -223,11 +223,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
     ) -> None:
         """
+        Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
+
         Args:
-            variables: attribute name/value pairs (overrides), commonly-used in Builder objects.
+            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
             rules: name/(configuration-dictionary) (overrides)
-            batch_list: Explicit list of Batch objects to supply data at runtime.
-            batch_request: Explicit batch_request used to supply data at runtime.
+            batch_list: Explicit list of Batch objects to supply data at runtime
+            batch_request: Explicit batch_request used to supply data at runtime
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
         """
