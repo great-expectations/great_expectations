@@ -1,6 +1,8 @@
+import hashlib
 import logging
 from typing import List, Union
 
+from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
@@ -11,9 +13,16 @@ logger = logging.getLogger(__name__)
 try:
     import pyspark
     import pyspark.sql.functions as F
+
+    # noinspection SpellCheckingInspection
+    import pyspark.sql.types as sparktypes
+    from pyspark.sql import DataFrame
 except ImportError:
     pyspark = None
     F = None
+    DataFrame = None
+    # noinspection SpellCheckingInspection
+    sparktypes = None
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
@@ -28,10 +37,10 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_year(
         self,
-        df: pyspark.sql.DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> pyspark.sql.DataFrame:
+    ) -> DataFrame:
         """Split on year values in column_name.
 
         Args:
@@ -54,10 +63,10 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_year_and_month(
         self,
-        df: pyspark.sql.DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> pyspark.sql.DataFrame:
+    ) -> DataFrame:
         """Split on year and month values in column_name.
 
         Args:
@@ -80,10 +89,10 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_year_and_month_and_day(
         self,
-        df: pyspark.sql.DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> pyspark.sql.DataFrame:
+    ) -> DataFrame:
         """Split on year and month and day values in column_name.
 
         Args:
@@ -106,11 +115,11 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_date_parts(
         self,
-        df: pyspark.sql.DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
         date_parts: Union[List[DatePart], List[str]],
-    ) -> pyspark.sql.DataFrame:
+    ) -> DataFrame:
         """Split on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
@@ -175,3 +184,105 @@ class SparkDataSplitter(DataSplitter):
             DatePart.SECOND: "second",
         }
         return spark_date_part_decoder[date_part]
+
+    @staticmethod
+    def split_on_whole_table(
+        df,
+    ):
+        return df
+
+    @staticmethod
+    def split_on_column_value(df, column_name: str, batch_identifiers: dict):
+        return df.filter(F.col(column_name) == batch_identifiers[column_name])
+
+    @staticmethod
+    def split_on_converted_datetime(
+        df,
+        column_name: str,
+        batch_identifiers: dict,
+        date_format_string: str = "yyyy-MM-dd",
+    ):
+        matching_string = batch_identifiers[column_name]
+        res = (
+            df.withColumn(
+                "date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)
+            )
+            .filter(F.col("date_time_tmp") == matching_string)
+            .drop("date_time_tmp")
+        )
+        return res
+
+    @staticmethod
+    def split_on_divided_integer(
+        df, column_name: str, divisor: int, batch_identifiers: dict
+    ):
+        """Divide the values in the named column by `divisor`, and split on that"""
+        matching_divisor = batch_identifiers[column_name]
+        res = (
+            df.withColumn(
+                "div_temp",
+                (F.col(column_name) / divisor).cast(sparktypes.IntegerType()),
+            )
+            .filter(F.col("div_temp") == matching_divisor)
+            .drop("div_temp")
+        )
+        return res
+
+    @staticmethod
+    def split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
+        """Divide the values in the named column by `divisor`, and split on that"""
+        matching_mod_value = batch_identifiers[column_name]
+        res = (
+            df.withColumn(
+                "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
+            )
+            .filter(F.col("mod_temp") == matching_mod_value)
+            .drop("mod_temp")
+        )
+        return res
+
+    @staticmethod
+    def split_on_multi_column_values(df, column_names: list, batch_identifiers: dict):
+        """Split on the joint values in the named columns"""
+        for column_name in column_names:
+            value = batch_identifiers.get(column_name)
+            if not value:
+                raise ValueError(
+                    f"In order for SparkDFExecutionEngine to `_split_on_multi_column_values`, "
+                    f"all values in  column_names must also exist in batch_identifiers. "
+                    f"{column_name} was not found in batch_identifiers."
+                )
+            df = df.filter(F.col(column_name) == value)
+        return df
+
+    @staticmethod
+    def split_on_hashed_column(
+        df,
+        column_name: str,
+        hash_digits: int,
+        batch_identifiers: dict,
+        hash_function_name: str = "sha256",
+    ):
+        """Split on the hashed value of the named column"""
+        try:
+            getattr(hashlib, hash_function_name)
+        except (TypeError, AttributeError):
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
+
+        def _encrypt_value(to_encode):
+            hash_func = getattr(hashlib, hash_function_name)
+            hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits :]
+            return hashed_value
+
+        encrypt_udf = F.udf(_encrypt_value, sparktypes.StringType())
+        res = (
+            df.withColumn("encrypted_value", encrypt_udf(column_name))
+            .filter(F.col("encrypted_value") == batch_identifiers["hash_value"])
+            .drop("encrypted_value")
+        )
+        return res
