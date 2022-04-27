@@ -34,11 +34,10 @@ class SqlAlchemyBatchData(BatchData):
         selectable=None,
         create_temp_table: bool = True,
         temp_table_schema_name: str = None,
-        temp_table_name: str = None,
         use_quoted_name: bool = False,
         source_schema_name: str = None,
         source_table_name: str = None,
-    ):
+    ) -> None:
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
 
@@ -61,8 +60,6 @@ class SqlAlchemyBatchData(BatchData):
                     When building the batch data object from a query, this flag determines whether a temporary table should
                     be created against which to validate data from the query. If False, a subselect statement will be used
                     in each validation.
-                temp_table_name (str or None): \
-                    The name to use for a temporary table if one should be created. If None, a default name will be generated.
                 temp_table_schema_name (str or None): \
                     The name of the schema in which a temporary table should be created. If None, the default schema will be
                     used if a temporary table is requested.
@@ -109,7 +106,6 @@ class SqlAlchemyBatchData(BatchData):
             raise ValueError(
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."
             )
-
         if table_name:
             # Suggestion: pull this block out as its own _function
             if use_quoted_name:
@@ -131,15 +127,11 @@ class SqlAlchemyBatchData(BatchData):
                     sa.MetaData(),
                     schema=schema_name,
                 )
-
         elif create_temp_table:
-            if temp_table_name:
-                generated_table_name = temp_table_name
-            else:
-                generated_table_name = generate_temporary_table_name()
-                # mssql expects all temporary table names to have a prefix '#'
-                if engine.dialect.name.lower() == "mssql":
-                    generated_table_name = f"#{generated_table_name}"
+            generated_table_name = generate_temporary_table_name()
+            # mssql expects all temporary table names to have a prefix '#'
+            if engine.dialect.name.lower() == "mssql":
+                generated_table_name = f"#{generated_table_name}"
             if selectable is not None:
                 if engine.dialect.name.lower() == "oracle":
                     # oracle query was already passed as a string
@@ -193,13 +185,20 @@ class SqlAlchemyBatchData(BatchData):
 
     def _create_temporary_table(
         self, temp_table_name, query, temp_table_schema_name=None
-    ):
+    ) -> None:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param query:
         """
         if self.sql_engine_dialect.name.lower() == "bigquery":
-            stmt = f"CREATE OR REPLACE TABLE `{temp_table_name}` AS {query}"
+            # BigQuery Table is created using with an expiration of 24 hours using Google's Data Definition Language
+            # https://stackoverflow.com/questions/20673986/how-to-create-temporary-table-in-google-bigquery
+            stmt = f"""CREATE OR REPLACE TABLE `{temp_table_name}`
+                    OPTIONS(
+                        expiration_timestamp=TIMESTAMP_ADD(
+                        CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+                    )
+                    AS {query}"""
         elif self.sql_engine_dialect.name.lower() == "dremio":
             stmt = f"CREATE OR REPLACE VDS {temp_table_name} AS {query}"
         elif self.sql_engine_dialect.name.lower() == "snowflake":

@@ -39,7 +39,7 @@ except ImportError:
 
 @click.group()
 @click.pass_context
-def suite(ctx):
+def suite(ctx) -> None:
     """Expectation Suite operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 

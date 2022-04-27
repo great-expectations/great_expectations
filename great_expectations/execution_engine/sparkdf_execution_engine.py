@@ -156,7 +156,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         spark_config=None,
         force_reuse_spark_context=False,
         **kwargs,
-    ):
+    ) -> None:
         # Creation of the Spark DataFrame is done outside this class
         self._persist = persist
 

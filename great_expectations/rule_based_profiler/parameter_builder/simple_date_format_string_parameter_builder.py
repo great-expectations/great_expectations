@@ -105,7 +105,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         ] = None,
         json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Configure this SimpleDateFormatStringParameterBuilder
         Args:

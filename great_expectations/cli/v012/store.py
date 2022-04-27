@@ -6,7 +6,7 @@ from great_expectations.core.usage_statistics.util import send_usage_message
 
 
 @click.group()
-def store():
+def store() -> None:
     """Store operations"""
     pass
 

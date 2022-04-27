@@ -42,7 +42,7 @@ class SqlAlchemyQueryStore(Store):
         store_backend=None,
         runtime_environment=None,
         store_name=None,
-    ):
+    ) -> None:
         if not sqlalchemy:
             raise ge_exceptions.DataContextError(
                 "sqlalchemy module not found, but is required for "
