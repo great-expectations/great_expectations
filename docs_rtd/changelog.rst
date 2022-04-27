@@ -4,6 +4,18 @@
 Changelog
 #########
 
+0.15.3
+-----------------
+* [FEATURE] Enable self-initializing capabilities for `ExpectColumnProportionOfUniqueValuesToBeBetween` (#4929)
+* [FEATURE] Enable support for plotting both Table and Column charts in `VolumeDataAssistant` (#4930)
+* [FEATURE] BigQuery Temp Table Support (#4925)
+* [FEATURE] Registry for DataAssistant classes with ability to execute from DataContext by registered name (#4966)
+* [BUGFIX] check contrib requirements (#4922)
+* [BUGFIX] Use `monkeypatch` to set a consistent bootstrap seed in tests (#4960)
+* [MAINTENANCE] Add timeout to `great_expectations` pipeline stages to prevent false positive build failures (#4957)
+* [MAINTENANCE] Defining Common Test Fixtures for DataAssistant Testing (#4959)
+* [MAINTENANCE] Temporarily pin `cryptography` package (#4963)
+
 0.15.2
 -----------------
 * [FEATURE] Split data assets using sql datetime columns (#4871)
