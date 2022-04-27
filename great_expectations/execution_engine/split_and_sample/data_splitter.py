@@ -101,6 +101,14 @@ class DataSplitter(abc.ABC):
 
     @staticmethod
     def _verify_all_strings_are_valid_date_parts(date_part_strings: List[str]) -> None:
+        """Verify date part strings by trying to load as DatePart instances.
+
+        Args:
+            date_part_strings: A list of strings that should correspond to DatePart.
+
+        Returns:
+            None, raises an exception if unable to convert.
+        """
         [DatePart(date_part_string) for date_part_string in date_part_strings]
 
     def _convert_datetime_batch_identifiers_to_date_parts_dict(
