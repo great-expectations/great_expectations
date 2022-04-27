@@ -55,13 +55,13 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 )
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
+    ReconciliationDirectives,
+    ReconciliationStrategy,
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
-    ReconciliationDirectives,
-    ReconciliationStrategy,
 )
 from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.types import ClassConfig
