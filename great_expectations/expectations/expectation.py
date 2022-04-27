@@ -167,7 +167,9 @@ class Expectation(metaclass=MetaExpectation):
     }
     args_keys = None
 
-    def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
+    def __init__(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         if configuration is not None:
             self.validate_configuration(configuration)
         self._configuration = configuration
@@ -177,7 +179,7 @@ class Expectation(metaclass=MetaExpectation):
         return isabstract(cls)
 
     @classmethod
-    def _register_renderer_functions(cls):
+    def _register_renderer_functions(cls) -> None:
         expectation_type = camel_to_snake(cls.__name__)
 
         for candidate_renderer_fn_name in dir(cls):
@@ -195,7 +197,7 @@ class Expectation(metaclass=MetaExpectation):
         metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-    ):
+    ) -> None:
         raise NotImplementedError
 
     @classmethod
@@ -825,7 +827,9 @@ class Expectation(metaclass=MetaExpectation):
             result_format = configuration_result_format
         return result_format
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         if configuration is None:
             configuration = self.configuration
         try:
@@ -1684,7 +1688,9 @@ class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         # Ensuring basic configuration parameters are properly set
         try:
             assert (
@@ -1712,7 +1718,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -1924,7 +1932,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
@@ -2121,7 +2131,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
     def is_abstract(cls):
         return cls.map_metric is None or super().is_abstract()
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (

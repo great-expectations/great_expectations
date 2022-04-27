@@ -108,7 +108,7 @@ class DomainBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         **kwargs,
-    ):
+    ) -> None:
         self.module_name = module_name
         self.class_name = class_name
 
@@ -148,7 +148,7 @@ class ParameterBuilderConfig(DictDot):
         evaluation_parameter_builder_configs: Optional[list] = None,
         json_serialize: bool = True,
         **kwargs,
-    ):
+    ) -> None:
         self.module_name = module_name
         self.class_name = class_name
 
@@ -212,7 +212,7 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         meta: Optional[dict] = None,
         validation_parameter_builder_configs: Optional[list] = None,
         **kwargs,
-    ):
+    ) -> None:
         self.module_name = module_name
         self.class_name = class_name
 
@@ -281,7 +281,7 @@ class RuleConfig(SerializableDictDot):
         expectation_configuration_builders: Optional[
             List[dict]
         ] = None,  # see ExpectationConfigurationBuilderConfig
-    ):
+    ) -> None:
         self.variables = variables
         self.domain_builder = domain_builder
         self.parameter_builders = parameter_builders
@@ -378,7 +378,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         rules: Dict[str, dict],  # see RuleConfig
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
-    ):
+    ) -> None:
         self.module_name = "great_expectations.rule_based_profiler"
         self.class_name = "RuleBasedProfiler"
 

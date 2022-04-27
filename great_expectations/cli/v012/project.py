@@ -12,7 +12,7 @@ from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
 
 @click.group()
-def project():
+def project() -> None:
     """Project operations"""
     pass
 
@@ -24,7 +24,7 @@ def project():
     default="./great_expectations",
     help="The project's great_expectations directory.",
 )
-def project_check_config(directory):
+def project_check_config(directory) -> None:
     """Check a config for validity and help with migrations."""
     cli_message("Checking your config files for validity...\n")
     is_config_ok, error_message, context = do_config_check(directory)
@@ -50,7 +50,7 @@ def project_check_config(directory):
     default="./great_expectations",
     help="The project's great_expectations directory.",
 )
-def project_upgrade(directory):
+def project_upgrade(directory) -> None:
     """Upgrade a project after installing the next Great Expectations major version."""
     cli_message("\nChecking project...")
     cli_message(SECTION_SEPARATOR)

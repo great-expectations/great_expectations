@@ -31,7 +31,7 @@ class VolumeDataAssistant(DataAssistant):
         self,
         name: str,
         validator: Validator,
-    ):
+    ) -> None:
         super().__init__(
             name=name,
             validator=validator,

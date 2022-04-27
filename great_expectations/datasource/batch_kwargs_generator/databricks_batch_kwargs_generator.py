@@ -18,7 +18,7 @@ except ImportError:
 class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
     """Meant to be used in a Databricks notebook"""
 
-    def __init__(self, name="default", datasource=None, database="default"):
+    def __init__(self, name="default", datasource=None, database="default") -> None:
         super().__init__(name, datasource=datasource)
         self.database = database
         try:

@@ -21,7 +21,7 @@ class MetaFileDataAsset(DataAsset):
     and FileDataset implements the expectation methods themselves.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -165,7 +165,7 @@ class FileDataAsset(MetaFileDataAsset):
 
     _data_asset_type = "FileDataAsset"
 
-    def __init__(self, file_path=None, *args, **kwargs):
+    def __init__(self, file_path=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._path = file_path
 

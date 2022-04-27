@@ -45,7 +45,7 @@ class FilePathDataConnector(DataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
         and sorters for filtering and sorting data_references.
@@ -282,13 +282,15 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         )
         return {"path": path}
 
-    def _validate_batch_request(self, batch_request: BatchRequestBase):
+    def _validate_batch_request(self, batch_request: BatchRequestBase) -> None:
         super()._validate_batch_request(batch_request=batch_request)
         self._validate_sorters_configuration(
             data_asset_name=batch_request.data_asset_name
         )
 
-    def _validate_sorters_configuration(self, data_asset_name: Optional[str] = None):
+    def _validate_sorters_configuration(
+        self, data_asset_name: Optional[str] = None
+    ) -> None:
         if self.sorters is not None and len(self.sorters) > 0:
             # data_asset_name: str = batch_request.data_asset_name
             regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
