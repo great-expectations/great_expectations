@@ -54,7 +54,7 @@ class Domain(SerializableDotDict):
         domain_type: Union[str, MetricDomainTypes],
         domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
         details: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> None:
         if isinstance(domain_type, str):
             try:
                 domain_type = MetricDomainTypes(domain_type)

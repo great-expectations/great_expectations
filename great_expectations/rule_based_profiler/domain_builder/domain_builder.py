@@ -28,7 +28,7 @@ class DomainBuilder(ABC, Builder):
     def __init__(
         self,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Args:
             data_context: BaseDataContext associated with DomainBuilder

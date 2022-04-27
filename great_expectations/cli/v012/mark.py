@@ -20,7 +20,7 @@ class Mark:
         """Apply as a decorator to CLI commands that are Experimental."""
 
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> None:
             cli_message(
                 "<yellow>Heads up! This feature is Experimental. It may change. "
                 "Please give us your feedback!</yellow>"
@@ -34,7 +34,7 @@ class Mark:
         """Apply as a decorator to CLI commands that are beta."""
 
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> None:
             cli_message(
                 "<yellow>Heads up! This feature is in Beta. Please give us "
                 "your feedback!</yellow>"
@@ -51,7 +51,7 @@ class Mark:
 
         def inner_decorator(func):
             @wraps(func)
-            def wrapped(*args, **kwargs):
+            def wrapped(*args, **kwargs) -> None:
                 cli_message(message)
                 func(*args, **kwargs)
 

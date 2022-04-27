@@ -100,7 +100,9 @@ def is_fully_qualified_parameter_name_literal_string_format(
     )
 
 
-def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
+def validate_fully_qualified_parameter_name(
+    fully_qualified_parameter_name: str,
+) -> None:
     if not is_fully_qualified_parameter_name_literal_string_format(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     ):
@@ -198,7 +200,7 @@ class ParameterContainer(SerializableDictDot):
 
     def set_parameter_node(
         self, parameter_name_root: str, parameter_node: ParameterNode
-    ):
+    ) -> None:
         if self.parameter_nodes is None:
             self.parameter_nodes = {}
 
@@ -291,7 +293,7 @@ def build_parameter_container_for_variables(
 def build_parameter_container(
     parameter_container: ParameterContainer,
     parameter_values: Dict[str, Any],
-):
+) -> None:
     """
     Builds the ParameterNode trees, corresponding to the fully_qualified_parameter_name first-level keys.
 
@@ -356,7 +358,7 @@ def _build_parameter_node_tree_for_one_parameter(
     parameter_node: ParameterNode,
     parameter_name_as_list: List[str],
     parameter_value: Any,
-):
+) -> None:
     """
     Recursively builds a tree of ParameterNode objects, creating new ParameterNode objects parsimoniously (i.e., only if
     ParameterNode object, corresponding to a part of fully-qualified parameter names in a "name space" does not exist).

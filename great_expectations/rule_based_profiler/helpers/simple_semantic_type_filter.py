@@ -22,7 +22,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         batch_ids: Optional[List[str]] = None,
         validator: Optional["Validator"] = None,  # noqa: F821
         column_names: Optional[List[str]] = None,
-    ):
+    ) -> None:
         self._table_column_name_to_inferred_semantic_domain_type_mapping = (
             self._get_table_column_name_to_inferred_semantic_domain_type_mapping(
                 batch_ids=batch_ids,

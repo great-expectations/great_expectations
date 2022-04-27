@@ -24,7 +24,7 @@ class DataAssistantRunner:
         self,
         data_assistant_cls: Type["DataAssistant"],  # noqa: F821
         data_context: "BaseDataContext",  # noqa: F821
-    ):
+    ) -> None:
         """
         Args:
             data_assistant_cls: DataAssistant class associated with this DataAssistantRunner

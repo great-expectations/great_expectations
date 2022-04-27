@@ -117,7 +117,7 @@ class SparkDFDatasource(LegacyDatasource):
         spark_config=None,
         force_reuse_spark_context=False,
         **kwargs,
-    ):
+    ) -> None:
         """Build a new SparkDFDatasource instance.
 
         Args:

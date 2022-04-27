@@ -77,7 +77,7 @@ def save_config_to_store_backend(
     store_backend: Union[StoreBackend, dict],
     configuration_key: str,
     configuration: BaseYamlConfig,
-):
+) -> None:
     config_store: ConfigurationStore = build_configuration_store(
         class_name=class_name,
         module_name=module_name,
@@ -117,7 +117,7 @@ def delete_config_from_store_backend(
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     configuration_key: str,
-):
+) -> None:
     config_store: ConfigurationStore = build_configuration_store(
         class_name=class_name,
         module_name=module_name,
@@ -136,7 +136,7 @@ def save_checkpoint_config_to_store_backend(
     store_backend: Union[StoreBackend, dict],
     checkpoint_name: str,
     checkpoint_configuration: CheckpointConfig,
-):
+) -> None:
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend,
@@ -173,7 +173,7 @@ def delete_checkpoint_config_from_store_backend(
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     checkpoint_name: str,
-):
+) -> None:
     config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend,

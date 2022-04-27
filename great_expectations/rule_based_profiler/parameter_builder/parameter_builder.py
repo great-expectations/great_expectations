@@ -121,7 +121,7 @@ class ParameterBuilder(ABC, Builder):
         ] = None,
         json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
 
