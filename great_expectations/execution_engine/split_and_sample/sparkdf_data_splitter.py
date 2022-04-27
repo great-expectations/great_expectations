@@ -29,7 +29,7 @@ except ImportError:
 
 
 class SparkDataSplitter(DataSplitter):
-    """Methods for splitting data accessible via SqlAlchemyExecutionEngine.
+    """Methods for splitting data accessible via SparkDFExecutionEngine.
 
     Note, for convenience, you can also access DatePart via the instance variable
     date_part e.g. SparkDataSplitter.date_part.MONTH
