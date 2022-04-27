@@ -1,4 +1,5 @@
 import itertools
+import warnings
 from numbers import Number
 from typing import Callable, Dict, List, Optional, Tuple, Union, cast
 
@@ -217,10 +218,24 @@ detected.
             variables=variables,
             parameters=parameters,
         )
+
         if not (0.0 <= false_positive_rate <= 1.0):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
+                f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1],
+but {false_positive_rate} was provided."""
             )
+        elif false_positive_rate <= NP_EPSILON:
+            warnings.warn(
+                f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 0.
+A false_positive_rate of {NP_EPSILON} has been selected instead."""
+            )
+            false_positive_rate = NP_EPSILON
+        elif false_positive_rate >= (1.0 - NP_EPSILON):
+            warnings.warn(
+                f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 1.
+A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
+            )
+            false_positive_rate = 1.0 - NP_EPSILON
 
         # Compute metric value for each Batch object.
         super().build_parameters(
@@ -267,7 +282,7 @@ detected.
             )
 
         estimator_func: Callable
-        etimator_kwargs: dict
+        estimator_kwargs: dict
         if estimator == "bootstrap":
             estimator_func = self._get_bootstrap_estimate
             estimator_kwargs = {
