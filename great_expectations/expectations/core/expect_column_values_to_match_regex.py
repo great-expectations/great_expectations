@@ -103,7 +103,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
             class_name="RegexPatternStringParameterBuilder",
-            name="regex_pattern_string_builder",
+            name="regex_pattern_string_parameter_builder",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=None,

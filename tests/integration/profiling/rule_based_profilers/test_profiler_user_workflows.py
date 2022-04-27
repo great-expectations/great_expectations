@@ -326,8 +326,61 @@ def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_con
         include_config=True,
         auto=True,
     )
-    __import__("pprint").pprint(result)
+
     assert result.success
+
+    expectation_config_kwargs: dict = result.expectation_config.kwargs
+    assert expectation_config_kwargs == {
+        "auto": True,
+        "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
+        "column": "id",
+        "include_config": True,
+        "mostly": 1.0,
+        "regex": "(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",
+        "result_format": "SUMMARY",
+    }
+
+
+@freeze_time(TIMESTAMP)
+def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    alice_columnar_table_single_batch_context: DataContext,
+) -> None:
+    context: DataContext = alice_columnar_table_single_batch_context
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    validator: Validator = get_validator_with_expectation_suite(
+        batch_request=batch_request,
+        data_context=context,
+        expectation_suite_name=None,
+        expectation_suite=None,
+        component_name="profiler",
+    )
+    assert len(validator.batches) == 1
+
+    result = validator.expect_column_values_to_not_match_regex(
+        column="id",
+        result_format="SUMMARY",
+        include_config=True,
+        auto=True,
+    )
+
+    assert not result.success
+
+    expectation_config_kwargs: dict = result.expectation_config.kwargs
+    assert expectation_config_kwargs == {
+        "auto": True,
+        "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
+        "column": "id",
+        "include_config": True,
+        "mostly": 1.0,
+        "regex": "(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",
+        "result_format": "SUMMARY",
+    }
 
 
 # noinspection PyUnusedLocal
