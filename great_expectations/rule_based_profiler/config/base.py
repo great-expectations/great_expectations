@@ -102,7 +102,7 @@ class NotNullSchema(Schema):
         return cleaned_output
 
 
-class DomainBuilderConfig(DictDot):
+class DomainBuilderConfig(SerializableDictDot):
     def __init__(
         self,
         class_name: str,
@@ -120,6 +120,49 @@ class DomainBuilderConfig(DictDot):
                 v,
                 self.__class__.__name__,
             )
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class DomainBuilderConfigSchema(NotNullSchema):
@@ -139,7 +182,7 @@ class DomainBuilderConfigSchema(NotNullSchema):
     )
 
 
-class ParameterBuilderConfig(DictDot):
+class ParameterBuilderConfig(SerializableDictDot):
     def __init__(
         self,
         name: str,
@@ -166,6 +209,49 @@ class ParameterBuilderConfig(DictDot):
                 v,
                 self.__class__.__name__,
             )
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class ParameterBuilderConfigSchema(NotNullSchema):
@@ -203,7 +289,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
     )
 
 
-class ExpectationConfigurationBuilderConfig(DictDot):
+class ExpectationConfigurationBuilderConfig(SerializableDictDot):
     def __init__(
         self,
         expectation_type: str,
@@ -230,6 +316,49 @@ class ExpectationConfigurationBuilderConfig(DictDot):
                 v,
                 self.__class__.__name__,
             )
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
