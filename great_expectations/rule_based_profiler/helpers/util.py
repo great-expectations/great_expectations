@@ -37,7 +37,7 @@ NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX: str = "tmp"
 TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
 TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN: re.Pattern = re.compile(
-    rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\w{8}"
+    rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\.\w{8}"
 )
 
 
@@ -627,7 +627,7 @@ def get_or_create_expectation_suite(
         if not component_name:
             component_name = "test"
 
-        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}{str(uuid.uuid4())[:8]}"
+        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"
 
     if create_expectation_suite:
         try:
