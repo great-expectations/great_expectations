@@ -1,5 +1,3 @@
-import datetime
-from typing import List
 from unittest import mock
 
 import pytest
@@ -9,6 +7,26 @@ from great_expectations.execution_engine.sqlalchemy_data_splitter import (
     DatePart,
     SqlAlchemyDataSplitter,
 )
+from tests.execution_engine.split_and_sample.split_and_sample_test_cases import (
+    MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
+    MULTIPLE_DATE_PART_DATE_PARTS,
+    SINGLE_DATE_PART_BATCH_IDENTIFIERS,
+    SINGLE_DATE_PART_DATE_PARTS,
+)
+
+# Add SqlAlchemyDataSplitter specific test cases
+SINGLE_DATE_PART_DATE_PARTS += [
+    pytest.param(
+        [SqlAlchemyDataSplitter.date_part.MONTH],
+        id="month getting date parts from SqlAlchemyDataSplitter.date_part",
+    )
+]
+MULTIPLE_DATE_PART_DATE_PARTS += [
+    pytest.param(
+        [SqlAlchemyDataSplitter.date_part.YEAR, SqlAlchemyDataSplitter.date_part.MONTH],
+        id="year_month getting date parts from SqlAlchemyDataSplitter.date_part",
+    )
+]
 
 
 @mock.patch(
@@ -80,70 +98,6 @@ def test_split_on_year_and_month_and_day(
     )
 
 
-SINGLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
-    pytest.param({"month": 10}, id="month_dict"),
-    pytest.param("10-31-2018", id="dateutil parseable date string"),
-    pytest.param(
-        datetime.datetime(2018, 10, 31, 0, 0, 0),
-        id="datetime",
-    ),
-    pytest.param(
-        {"month": 11},
-        marks=pytest.mark.xfail(strict=True),
-        id="incorrect month_dict should fail",
-    ),
-    pytest.param(
-        "not a real date",
-        marks=pytest.mark.xfail(strict=True),
-        id="non dateutil parseable date string",
-    ),
-    pytest.param(
-        datetime.datetime(2018, 11, 30, 0, 0, 0),
-        marks=pytest.mark.xfail(strict=True),
-        id="incorrect datetime should fail",
-    ),
-]
-
-SINGLE_DATE_PART_DATE_PARTS: List[pytest.param] = [
-    pytest.param(
-        [DatePart.MONTH],
-        id="month_with_DatePart",
-    ),
-    pytest.param(
-        [SqlAlchemyDataSplitter.date_part.MONTH],
-        id="month getting date parts from SqlAlchemyDataSplitter.date_part",
-    ),
-    pytest.param(
-        ["month"],
-        id="month_with_string_DatePart",
-    ),
-    pytest.param(
-        ["Month"],
-        id="month_with_string_mixed_case_DatePart",
-    ),
-    pytest.param(None, marks=pytest.mark.xfail(strict=True), id="date_parts=None"),
-    pytest.param([], marks=pytest.mark.xfail(strict=True), id="date_parts=[]"),
-    pytest.param(
-        ["invalid"], marks=pytest.mark.xfail(strict=True), id="invalid date_parts"
-    ),
-    pytest.param(
-        "invalid",
-        marks=pytest.mark.xfail(strict=True),
-        id="invalid date_parts (not a list)",
-    ),
-    pytest.param(
-        "month",
-        marks=pytest.mark.xfail(strict=True),
-        id="invalid date_parts (not a list but valid str)",
-    ),
-    pytest.param(
-        DatePart.MONTH,
-        marks=pytest.mark.xfail(strict=True),
-        id="invalid date_parts (not a list but valid DatePart)",
-    ),
-]
-
-
 @pytest.mark.parametrize(
     "batch_identifiers_for_column",
     SINGLE_DATE_PART_BATCH_IDENTIFIERS,
@@ -189,66 +143,6 @@ def test_split_on_date_parts_single_date_parts(
     assert result.left.field == "month"
     assert result.left.expr.name == column_name
     assert result.right.effective_value == 10
-
-
-MULTIPLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
-    pytest.param({"year": 2018, "month": 10}, id="year_and_month_dict"),
-    pytest.param("10-31-2018", id="dateutil parseable date string"),
-    pytest.param(
-        datetime.datetime(2018, 10, 30, 0, 0, 0),
-        id="datetime",
-    ),
-    pytest.param(
-        {"year": 2019, "month": 10},
-        marks=pytest.mark.xfail(strict=True),
-        id="incorrect year_and_month_dict should fail",
-    ),
-    pytest.param(
-        {"year": 2018, "month": 11},
-        marks=pytest.mark.xfail(strict=True),
-        id="incorrect year_and_month_dict should fail",
-    ),
-    pytest.param(
-        "not a real date",
-        marks=pytest.mark.xfail(strict=True),
-        id="non dateutil parseable date string",
-    ),
-    pytest.param(
-        datetime.datetime(2018, 11, 30, 0, 0, 0),
-        marks=pytest.mark.xfail(strict=True),
-        id="incorrect datetime should fail",
-    ),
-]
-
-MULTIPLE_DATE_PART_DATE_PARTS: List[pytest.param] = [
-    pytest.param(
-        [DatePart.YEAR, DatePart.MONTH],
-        id="year_month_with_DatePart",
-    ),
-    pytest.param(
-        [SqlAlchemyDataSplitter.date_part.YEAR, SqlAlchemyDataSplitter.date_part.MONTH],
-        id="year_month getting date parts from SqlAlchemyDataSplitter.date_part",
-    ),
-    pytest.param(
-        [DatePart.YEAR, "month"],
-        id="year_month_with_mixed_DatePart",
-    ),
-    pytest.param(
-        ["year", "month"],
-        id="year_month_with_string_DatePart",
-    ),
-    pytest.param(
-        ["YEAR", "Month"],
-        id="year_month_with_string_mixed_case_DatePart",
-    ),
-    pytest.param(None, marks=pytest.mark.xfail(strict=True), id="date_parts=None"),
-    pytest.param([], marks=pytest.mark.xfail(strict=True), id="date_parts=[]"),
-    pytest.param(
-        ["invalid", "date", "parts"],
-        marks=pytest.mark.xfail(strict=True),
-        id="invalid date_parts",
-    ),
-]
 
 
 @pytest.mark.parametrize(
