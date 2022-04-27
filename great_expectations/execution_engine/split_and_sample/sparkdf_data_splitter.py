@@ -187,12 +187,32 @@ class SparkDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_whole_table(
-        df,
-    ):
+        df: DataFrame,
+    ) -> DataFrame:
+        """No op. Return the same data that is passed in.
+
+        Args:
+            df: Spark DataFrame that will be returned
+
+        Returns:
+            Filtered spark DataFrame.
+        """
         return df
 
     @staticmethod
-    def split_on_column_value(df, column_name: str, batch_identifiers: dict):
+    def split_on_column_value(
+        df, column_name: str, batch_identifiers: dict
+    ) -> DataFrame:
+        """Return a dataframe where rows are filtered based on the specified column value.
+
+        Args:
+            df: Spark DataFrame to be filtered.
+            column_name: Column to use in comparison.
+            batch_identifiers: Value to use in comparison.
+
+        Returns:
+            Filtered spark DataFrame.
+        """
         return df.filter(F.col(column_name) == batch_identifiers[column_name])
 
     @staticmethod
@@ -201,7 +221,21 @@ class SparkDataSplitter(DataSplitter):
         column_name: str,
         batch_identifiers: dict,
         date_format_string: str = "yyyy-MM-dd",
-    ):
+    ) -> DataFrame:
+        """Return a dataframe where rows are filtered based on whether their converted
+        datetime (using date_format_string) matches the datetime string value provided
+        in batch_identifiers for the specified column.
+
+        Args:
+            df: Spark DataFrame to be filtered.
+            column_name: Column to use in comparison.
+            batch_identifiers: Value to use in comparison as {column_name: datetime string}.
+            date_format_string: Format used to convert datetime column for comparison to
+                batch identifiers.
+
+        Returns:
+            Filtered spark DataFrame.
+        """
         matching_string = batch_identifiers[column_name]
         res = (
             df.withColumn(
