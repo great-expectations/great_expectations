@@ -235,7 +235,7 @@ A false_positive_rate of {NP_EPSILON} has been selected instead."""
                 f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 1.
 A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
             )
-            false_positive_rate = 1.0 - NP_EPSILON
+            false_positive_rate = np.float64(1.0 - NP_EPSILON)
 
         # Compute metric value for each Batch object.
         super().build_parameters(
