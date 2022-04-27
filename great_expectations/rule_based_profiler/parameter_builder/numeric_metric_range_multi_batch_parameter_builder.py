@@ -413,7 +413,7 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
             )  # appends "[0]" element
             metric_value_range_max_idx = metric_value_idx + (
                 slice(1, 2, None),
-            )  # appends "[0]" element
+            )  # appends "[1]" element
 
             # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
             metric_value_range[metric_value_range_min_idx] = round(
