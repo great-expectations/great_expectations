@@ -574,6 +574,9 @@ def get_validator_with_expectation_suite(
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
     """
+    assert expectation_suite is None or isinstance(expectation_suite, ExpectationSuite)
+    assert expectation_suite_name is None or isinstance(expectation_suite_name, str)
+
     expectation_suite = get_or_create_expectation_suite(
         data_context=data_context,
         expectation_suite=expectation_suite,
@@ -600,8 +603,6 @@ def get_or_create_expectation_suite(
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
     """
-    suite: "ExpectationSuite"  # noqa: F821
-
     generate_temp_expectation_suite_name: bool
     create_expectation_suite: bool
 
