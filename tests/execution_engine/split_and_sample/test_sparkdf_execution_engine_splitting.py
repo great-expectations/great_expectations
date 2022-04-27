@@ -25,8 +25,7 @@ except ImportError:
     F = None
     DataFrame = None
 
-
-# Add SparkDataSplitter specific test cases
+# Here we add SparkDataSplitter specific test cases to the generic test cases:
 SINGLE_DATE_PART_DATE_PARTS += [
     pytest.param(
         [SparkDataSplitter.date_part.MONTH],

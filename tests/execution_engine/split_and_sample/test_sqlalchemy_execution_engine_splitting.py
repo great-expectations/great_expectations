@@ -15,7 +15,7 @@ from tests.execution_engine.split_and_sample.split_and_sample_test_cases import 
     SINGLE_DATE_PART_DATE_PARTS,
 )
 
-# Add SqlAlchemyDataSplitter specific test cases
+# Here we add SqlAlchemyDataSplitter specific test cases to the generic test cases:
 SINGLE_DATE_PART_DATE_PARTS += [
     pytest.param(
         [SqlAlchemyDataSplitter.date_part.MONTH],
