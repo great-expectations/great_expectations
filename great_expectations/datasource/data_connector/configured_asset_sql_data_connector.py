@@ -48,7 +48,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         assets: Optional[Dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         self._assets: dict = {}
         if assets:
             for asset_name, config in assets.items():
@@ -78,7 +78,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self,
         name: str,
         config: dict,
-    ):
+    ) -> None:
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset config as value.
         """
@@ -237,7 +237,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         return batch_identifiers_list
 
-    def _refresh_data_references_cache(self):
+    def _refresh_data_references_cache(self) -> None:
         self._data_references_cache = {}
 
         for data_asset_name in self.assets:

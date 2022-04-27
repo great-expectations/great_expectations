@@ -20,7 +20,7 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
         expectation_suite_name: str,
         profiler_name: str,
         batch_request: Union[str, Dict[str, Union[str, int, Dict[str, Any]]]],
-    ):
+    ) -> None:
         super().__init__(context=context)
 
         if batch_request is None:

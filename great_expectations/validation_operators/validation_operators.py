@@ -38,7 +38,7 @@ class ValidationOperator:
         self._validation_operator_config = None
 
     @property
-    def validation_operator_config(self):
+    def validation_operator_config(self) -> None:
         """
         This method builds the config dict of a particular validation operator. The "kwargs" key is what really
         distinguishes different validation operators.
@@ -77,7 +77,7 @@ class ValidationOperator:
         evaluation_parameters=None,
         run_name=None,
         run_time=None,
-    ):
+    ) -> None:
         raise NotImplementedError
 
 
@@ -193,7 +193,7 @@ class ActionListValidationOperator(ValidationOperator):
         action_list,
         name,
         result_format={"result_format": "SUMMARY"},
-    ):
+    ) -> None:
         super().__init__()
         self.data_context = data_context
         self.name = name
@@ -618,7 +618,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         notify_on="all",
         notify_with=None,
         result_format={"result_format": "SUMMARY"},
-    ):
+    ) -> None:
         super().__init__(data_context, action_list, name)
 
         if expectation_suite_name_suffixes is None:

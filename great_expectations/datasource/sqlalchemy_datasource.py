@@ -213,7 +213,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
         credentials=None,
         batch_kwargs_generators=None,
         **kwargs
-    ):
+    ) -> None:
         if not sqlalchemy:
             raise DatasourceInitializationError(
                 name, "ModuleNotFoundError: No module named 'sqlalchemy'"

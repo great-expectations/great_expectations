@@ -45,7 +45,7 @@ class ExpectationValidationResult(SerializableDictDot):
         result=None,
         meta=None,
         exception_info=None,
-    ):
+    ) -> None:
         if result and not self.validate_result_dict(result):
             raise ge_exceptions.InvalidCacheValueError(result)
         self.success = success
@@ -280,7 +280,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         statistics=None,
         meta=None,
         ge_cloud_id: Optional[UUID] = None,
-    ):
+    ) -> None:
         self.success = success
         if results is None:
             results = []

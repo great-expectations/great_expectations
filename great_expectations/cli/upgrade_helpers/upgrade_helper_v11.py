@@ -23,7 +23,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 
 
 class UpgradeHelperV11(BaseUpgradeHelper):
-    def __init__(self, data_context=None, context_root_dir=None, **kwargs):
+    def __init__(self, data_context=None, context_root_dir=None, **kwargs) -> None:
         assert (
             data_context or context_root_dir
         ), "Please provide a data_context object or a context_root_dir."
@@ -91,7 +91,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
 
         self._generate_upgrade_checklist()
 
-    def _generate_upgrade_checklist(self):
+    def _generate_upgrade_checklist(self) -> None:
         for (store_name, store) in self.data_context.stores.items():
             if not isinstance(store, (ValidationsStore, MetricStore)):
                 continue
@@ -108,7 +108,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             for site_name, site_config in sites.items():
                 self._process_docs_site_for_checklist(site_name, site_config)
 
-    def _process_docs_site_for_checklist(self, site_name, site_config):
+    def _process_docs_site_for_checklist(self, site_name, site_config) -> None:
         site_html_store = HtmlSiteStore(
             store_backend=site_config.get("store_backend"),
             runtime_environment={
@@ -138,7 +138,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 }
             )
 
-    def _process_validations_store_for_checklist(self, store_name, store):
+    def _process_validations_store_for_checklist(self, store_name, store) -> None:
         store_backend = store.store_backend
         if isinstance(store_backend, DatabaseStoreBackend):
             self.upgrade_log["skipped_validations_stores"][
@@ -163,7 +163,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 }
             )
 
-    def _process_metrics_store_for_checklist(self, store_name, store):
+    def _process_metrics_store_for_checklist(self, store_name, store) -> None:
         store_backend = store.store_backend
         if isinstance(store_backend, DatabaseStoreBackend):
             self.upgrade_log["skipped_metrics_stores"][
@@ -184,7 +184,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 }
             )
 
-    def _upgrade_store_backend(self, store_backend, store_name=None, site_name=None):
+    def _upgrade_store_backend(
+        self, store_backend, store_name=None, site_name=None
+    ) -> None:
         assert store_name or site_name, "Must pass either store_name or site_name."
         assert not (
             store_name and site_name
@@ -271,7 +273,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         store_name=None,
         site_name=None,
         exception_message=None,
-    ):
+    ) -> None:
         assert store_name or site_name, "Must pass either store_name or site_name."
         assert not (
             store_name and site_name
@@ -319,7 +321,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
 
     def _update_validation_result_json(
         self, source_key, dest_key, run_name, store_backend
-    ):
+    ) -> None:
         new_run_id_dict = {
             "run_name": run_name,
             "run_time": self.validation_run_times[run_name],
@@ -329,7 +331,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         store_backend.set(dest_key, json.dumps(validation_json_dict))
         store_backend.remove_key(source_key)
 
-    def _get_tuple_filesystem_store_backend_run_time(self, source_key, store_backend):
+    def _get_tuple_filesystem_store_backend_run_time(
+        self, source_key, store_backend
+    ) -> None:
         run_name = source_key[-2]
         try:
             self.validation_run_times[run_name] = parse(run_name).strftime(
@@ -346,7 +350,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             ).strftime("%Y%m%dT%H%M%S.%fZ")
             self.validation_run_times[run_name] = path_mod_iso_str
 
-    def _get_tuple_s3_store_backend_run_time(self, source_key, store_backend):
+    def _get_tuple_s3_store_backend_run_time(self, source_key, store_backend) -> None:
         import boto3
 
         s3 = boto3.resource("s3")
@@ -367,7 +371,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
 
             self.validation_run_times[run_name] = source_object_last_mod
 
-    def _get_tuple_gcs_store_backend_run_time(self, source_key, store_backend):
+    def _get_tuple_gcs_store_backend_run_time(self, source_key, store_backend) -> None:
         from google.cloud import storage
 
         gcs = storage.Client(project=store_backend.project)

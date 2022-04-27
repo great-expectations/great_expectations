@@ -25,7 +25,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         introspection: dict = None,
         tables: dict = None,
         **kwargs
-    ):
+    ) -> None:
         introspection = introspection or {}
         tables = tables or {}
 
@@ -56,7 +56,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         self,
         introspection_configs: dict,
         table_configs: dict,
-    ):
+    ) -> None:
 
         # Step-1: Build DataConnectors for introspected assets
         for name, config in introspection_configs.items():

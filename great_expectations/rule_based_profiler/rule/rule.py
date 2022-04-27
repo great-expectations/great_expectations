@@ -42,7 +42,7 @@ class Rule(SerializableDictDot):
         expectation_configuration_builders: Optional[
             List[ExpectationConfigurationBuilder]
         ] = None,
-    ):
+    ) -> None:
         """
         Sets Rule name, variables, domain builder, parameters builders, configuration builders, and other instance data.
 
@@ -168,7 +168,7 @@ class Rule(SerializableDictDot):
         return copy.deepcopy(self._variables)
 
     @variables.setter
-    def variables(self, value: Optional[ParameterContainer]):
+    def variables(self, value: Optional[ParameterContainer]) -> None:
         self._variables = value
 
     @property

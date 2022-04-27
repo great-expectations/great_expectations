@@ -102,7 +102,7 @@ Notes:
         "reader_options",
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
@@ -127,7 +127,7 @@ Notes:
             }
         )
 
-    def _instantiate_azure_client(self):
+    def _instantiate_azure_client(self) -> None:
         azure_options = self.config.get("azure_options", {})
         try:
             if "conn_str" in azure_options:
@@ -137,7 +137,7 @@ Notes:
         except (TypeError, AttributeError):
             self._azure = None
 
-    def _instantiate_s3_client(self):
+    def _instantiate_s3_client(self) -> None:
         # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
         boto3_options = self.config.get("boto3_options", {})
         try:
@@ -145,7 +145,7 @@ Notes:
         except (TypeError, AttributeError):
             self._s3 = None
 
-    def _instantiate_gcs_client(self):
+    def _instantiate_gcs_client(self) -> None:
         """
         Helper method for instantiating GCS client when GCSBatchSpec is passed in.
 
@@ -172,7 +172,7 @@ Notes:
         except (TypeError, AttributeError, DefaultCredentialsError):
             self._gcs = None
 
-    def configure_validator(self, validator):
+    def configure_validator(self, validator) -> None:
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
 

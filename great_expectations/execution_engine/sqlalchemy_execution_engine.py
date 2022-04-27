@@ -219,7 +219,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
-    ):
+    ) -> None:
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
 
