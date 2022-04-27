@@ -490,15 +490,16 @@ def compute_bootstrap_quantiles_point_estimate(
     sample_lower_quantile: np.ndarray = np.quantile(metric_values, q=lower_quantile_pct)
     sample_upper_quantile: np.ndarray = np.quantile(metric_values, q=upper_quantile_pct)
 
+    bootstraps: np.ndarray
     if random_seed:
         random_state: np.random.Generator = np.random.Generator(
             np.random.PCG64(random_seed)
         )
-        bootstraps: np.ndarray = random_state.choice(
+        bootstraps = random_state.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
     else:
-        bootstraps: np.ndarray = np.random.choice(
+        bootstraps = np.random.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
