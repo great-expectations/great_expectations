@@ -1,6 +1,7 @@
 import re
 from glob import glob
 
+import pkg_resources
 from setuptools import find_packages, setup
 
 import versioneer
@@ -27,21 +28,13 @@ def get_extras_require():
     )
     ignore_keys = ("contrib", "sqlalchemy", "test")
     rx_fname_part = re.compile(r"requirements-dev-(.*).txt")
-    rx_all_but_comment = re.compile(r"^([^#]*).*")
     for fname in sorted(glob("requirements-dev-*.txt")):
         key = rx_fname_part.match(fname).group(1)
         if key in ignore_keys:
             continue
         with open(fname) as f:
-            lines = f.read().splitlines()
-            lines_stripped = []
-            for line in lines:
-                match = rx_all_but_comment.match(line)
-                if match:
-                    text = match.group(1).strip()
-                    if text:
-                        lines_stripped.append(text)
-            results[key] = lines_stripped
+            parsed = [str(req) for req in pkg_resources.parse_requirements(f)]
+            results[key] = parsed
 
     lite = results.pop("lite")
     results["boto"] = [req for req in lite if req.startswith("boto")]
