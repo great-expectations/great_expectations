@@ -8,27 +8,49 @@ import versioneer
 
 def get_extras_require():
     results = {}
-    extra_keys = {
+    extra_key_mapping = {
         "aws_secrets": "boto",
         "azure_secrets": "azure",
         "gcp": "bigquery",
         "s3": "boto",
     }
+    sqla_keys = (
+        "athena",
+        "bigquery",
+        "dremio",
+        "mssql",
+        "mysql",
+        "postgresql",
+        "redshift",
+        "snowflake",
+        "teradata",
+    )
     ignore_keys = ("contrib", "sqlalchemy", "test")
-    rx = re.compile(r"requirements-dev-(.*).txt")
+    rx_fname_part = re.compile(r"requirements-dev-(.*).txt")
+    rx_all_but_comment = re.compile(r"^([^#]*).*")
     for fname in sorted(glob("requirements-dev-*.txt")):
-        key = rx.match(fname).group(1)
+        key = rx_fname_part.match(fname).group(1)
         if key in ignore_keys:
             continue
         with open(fname) as f:
-            results[key] = f.read().splitlines()
+            lines = f.read().splitlines()
+            lines_stripped = []
+            for line in lines:
+                match = rx_all_but_comment.match(line)
+                if match:
+                    text = match.group(1).strip()
+                    if text:
+                        lines_stripped.append(text)
+            results[key] = lines_stripped
 
     lite = results.pop("lite")
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
 
-    for new_key, existing_key in extra_keys.items():
+    for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]
+    for key in sqla_keys:
+        results[key] += results["sqlalchemy"]
 
     results.pop("boto")
     return results
