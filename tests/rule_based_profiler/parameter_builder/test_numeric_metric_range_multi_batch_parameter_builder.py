@@ -33,16 +33,13 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "data_asset_name": "my_reports",
     }
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="row_count_range",
-            metric_name="table.row_count",
-            estimator="bootstrap",
-            false_positive_rate=1.0e-2,
-            round_decimals=0,
-            data_context=data_context,
-        )
+    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
+        name="row_count_range",
+        metric_name="table.row_count",
+        estimator="bootstrap",
+        false_positive_rate=1.0e-2,
+        round_decimals=0,
+        data_context=data_context,
     )
 
     variables: Optional[ParameterContainer] = None
@@ -126,23 +123,19 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     metric_domain_kwargs: dict = {"column": "fare_amount"}
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder
-
     fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
 
     expected_value_dict: dict
     actual_value_dict: dict
 
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="column_min_range",
-            metric_name="column.min",
-            metric_domain_kwargs=metric_domain_kwargs,
-            estimator="oneshot",
-            false_positive_rate=1.0e-2,
-            round_decimals=1,
-            data_context=data_context,
-        )
+    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
+        name="column_min_range",
+        metric_name="column.min",
+        metric_domain_kwargs=metric_domain_kwargs,
+        estimator="oneshot",
+        false_positive_rate=1.0e-2,
+        round_decimals=1,
+        data_context=data_context,
     )
 
     variables: Optional[ParameterContainer] = None
@@ -260,16 +253,13 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         "data_asset_name": "my_reports",
     }
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="row_count_range",
-            metric_name="table.row_count",
-            estimator="bootstrap",
-            false_positive_rate=1.0,
-            round_decimals=0,
-            data_context=data_context,
-        )
+    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
+        name="row_count_range",
+        metric_name="table.row_count",
+        estimator="bootstrap",
+        false_positive_rate=1.0,
+        round_decimals=0,
+        data_context=data_context,
     )
 
     variables: Optional[ParameterContainer] = None
@@ -312,16 +302,13 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         "data_asset_name": "my_reports",
     }
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="row_count_range",
-            metric_name="table.row_count",
-            estimator="bootstrap",
-            false_positive_rate=-0.05,
-            round_decimals=0,
-            data_context=data_context,
-        )
+    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
+        name="row_count_range",
+        metric_name="table.row_count",
+        estimator="bootstrap",
+        false_positive_rate=-0.05,
+        round_decimals=0,
+        data_context=data_context,
     )
 
     variables: Optional[ParameterContainer] = None
@@ -364,16 +351,13 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
         "data_asset_name": "my_reports",
     }
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="row_count_range",
-            metric_name="table.row_count",
-            estimator="bootstrap",
-            false_positive_rate=0.0,
-            round_decimals=0,
-            data_context=data_context,
-        )
+    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
+        name="row_count_range",
+        metric_name="table.row_count",
+        estimator="bootstrap",
+        false_positive_rate=0.0,
+        round_decimals=0,
+        data_context=data_context,
     )
 
     variables: Optional[ParameterContainer] = None
@@ -423,16 +407,13 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     # what if user tries a false positive rate smaller than NP_EPSILON (by an order of magnitude in this case)?
     smaller_than_np_epsilon_false_positive_rate: float = NP_EPSILON / 10
 
-    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder
-    numeric_metric_range_parameter_builder = (
-        NumericMetricRangeMultiBatchParameterBuilder(
-            name="row_count_range",
-            metric_name="table.row_count",
-            estimator="bootstrap",
-            false_positive_rate=smaller_than_np_epsilon_false_positive_rate,
-            round_decimals=0,
-            data_context=data_context,
-        )
+    numeric_metric_range_parameter_builder: NumericMetricRangeMultiBatchParameterBuilder = NumericMetricRangeMultiBatchParameterBuilder(
+        name="row_count_range",
+        metric_name="table.row_count",
+        estimator="bootstrap",
+        false_positive_rate=smaller_than_np_epsilon_false_positive_rate,
+        round_decimals=0,
+        data_context=data_context,
     )
 
     variables: Optional[ParameterContainer] = None
