@@ -93,7 +93,7 @@ class DataSplitter(abc.ABC):
                 "date_parts are required when using split_on_date_parts."
             )
         if not all(
-            [(isinstance(dp, DatePart)) or (isinstance(dp, str)) for dp in date_parts]
+            (isinstance(dp, DatePart)) or (isinstance(dp, str)) for dp in date_parts
         ):
             raise ge_exceptions.InvalidConfigError(
                 "date_parts should be of type DatePart or str."
@@ -109,7 +109,12 @@ class DataSplitter(abc.ABC):
         Returns:
             None, raises an exception if unable to convert.
         """
-        [DatePart(date_part_string) for date_part_string in date_part_strings]
+        try:
+            [DatePart(date_part_string) for date_part_string in date_part_strings]
+        except ValueError as e:
+            raise ge_exceptions.InvalidConfigError(
+                f"{e} please only specify strings that are supported in DatePart: {[dp.value for dp in DatePart]}"
+            )
 
     def _convert_datetime_batch_identifiers_to_date_parts_dict(
         self,

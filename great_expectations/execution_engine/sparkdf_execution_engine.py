@@ -311,9 +311,9 @@ Please check your config."""
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
-        if batch_spec.get("splitter_method"):
-            splitter_method_name: str = batch_spec.get("splitter_method")
 
+        splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
+        if splitter_method_name:
             splitter_fn: Callable = self._data_splitter.get_splitter_method(
                 splitter_method_name
             )
