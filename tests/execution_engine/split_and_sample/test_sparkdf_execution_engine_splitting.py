@@ -54,7 +54,7 @@ def simple_multi_year_spark_df(spark_session):
         ("2020-12-04 12:00:00.000",),
     ]
 
-    spark_df: pyspark.sql.DataFrame = spark_session.createDataFrame(
+    spark_df: DataFrame = spark_session.createDataFrame(
         data=spark_df_data, schema=["input_timestamp"]
     )
     spark_df = spark_df.withColumn("timestamp", F.to_timestamp("input_timestamp"))
@@ -78,7 +78,7 @@ def test_get_batch_with_split_on_year(
     simple_multi_year_spark_df: DataFrame,
 ):
 
-    split_df: pyspark.sql.DataFrame = basic_spark_df_execution_engine.get_batch_data(
+    split_df: DataFrame = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=simple_multi_year_spark_df,
             splitter_method="split_on_year",
@@ -113,7 +113,7 @@ def test_get_batch_with_split_on_date_parts_day(
     simple_multi_year_spark_df: DataFrame,
 ):
 
-    split_df: pyspark.sql.DataFrame = basic_spark_df_execution_engine.get_batch_data(
+    split_df: DataFrame = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=simple_multi_year_spark_df,
             splitter_method="split_on_date_parts",
