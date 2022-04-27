@@ -62,7 +62,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         max_results: Optional[int] = None,
         gcs_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
+    ) -> None:
         """
         InferredAssetDataConnector for connecting to GCS.
 

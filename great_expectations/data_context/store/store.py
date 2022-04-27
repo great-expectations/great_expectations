@@ -30,7 +30,7 @@ class Store:
 
     def __init__(
         self, store_backend=None, runtime_environment=None, store_name="no_store_name"
-    ):
+    ) -> None:
         """
         Runtime environment may be necessary to instantiate store backend elements.
         Args:
@@ -177,7 +177,7 @@ class Store:
                 return self._store_backend.has_key(key.to_fixed_length_tuple())
             return self._store_backend.has_key(key.to_tuple())
 
-    def self_check(self, pretty_print):
+    def self_check(self, pretty_print) -> None:
         NotImplementedError(
             f"The test method is not implemented for Store class {self.__class__.__name__}."
         )

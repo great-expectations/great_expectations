@@ -52,7 +52,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
         context: Optional[DataContext] = None,
-    ):
+    ) -> None:
         super().__init__(context=context)
         custom_loader: list = []
 
@@ -217,7 +217,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         batch_request: Optional[
             Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
         ] = None,
-    ):
+    ) -> None:
         expectations_by_column: Dict[
             str, List[ExpectationConfiguration]
         ] = self._get_expectations_by_column(expectations=expectations)
@@ -423,7 +423,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         batch_request: Optional[
             Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
         ] = None,
-    ):
+    ) -> None:
         markdown: str = self.render_with_overwrite(
             notebook_config=self.authoring_intro_markdown,
             default_file_name="AUTHORING_INTRO.md",

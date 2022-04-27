@@ -318,7 +318,7 @@ class DataContext(BaseDataContext):
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
         ge_cloud_organization_id: Optional[str] = None,
-    ):
+    ) -> None:
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = None
         ge_cloud_config = None
@@ -467,7 +467,7 @@ class DataContext(BaseDataContext):
 
         return new_datasource
 
-    def delete_datasource(self, name: str):
+    def delete_datasource(self, name: str) -> None:
         logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
 
         super().delete_datasource(datasource_name=name)

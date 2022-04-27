@@ -16,14 +16,14 @@ from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
 
 @click.group()
-def project():
+def project() -> None:
     """Project operations"""
     pass
 
 
 @project.command(name="check-config")
 @click.pass_context
-def project_check_config(ctx):
+def project_check_config(ctx) -> None:
     """Check a config for validity and help with migrations."""
     cli_message("Checking your config files for validity...\n")
     directory = toolkit.parse_cli_config_file_location(
@@ -48,7 +48,7 @@ def project_check_config(ctx):
 
 @project.command(name="upgrade")
 @click.pass_context
-def project_upgrade(ctx):
+def project_upgrade(ctx) -> None:
     """Upgrade a project after installing the next Great Expectations major version."""
     cli_message("\nChecking project...")
     cli_message(SECTION_SEPARATOR)

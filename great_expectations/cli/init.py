@@ -41,7 +41,7 @@ except ImportError:
     default=True,
 )
 @click.pass_context
-def init(ctx, usage_stats):
+def init(ctx, usage_stats) -> None:
     """
     Initialize a new Great Expectations project.
 

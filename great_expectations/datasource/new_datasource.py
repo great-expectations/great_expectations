@@ -32,7 +32,7 @@ class BaseDatasource:
         execution_engine=None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
-    ):
+    ) -> None:
         """
         Build a new Datasource.
 
@@ -352,7 +352,7 @@ class BaseDatasource:
 
     def _validate_batch_request(
         self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
-    ):
+    ) -> None:
         if not (
             batch_request.datasource_name is None
             or batch_request.datasource_name == self.name
@@ -403,7 +403,7 @@ class Datasource(BaseDatasource):
         data_connectors=None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
-    ):
+    ) -> None:
         """
         Build a new Datasource with data connectors.
 
@@ -434,7 +434,7 @@ class Datasource(BaseDatasource):
     def _init_data_connectors(
         self,
         data_connector_configs: Dict[str, Dict[str, Any]],
-    ):
+    ) -> None:
         for name, config in data_connector_configs.items():
             self._build_data_connector_from_config(
                 name=name,
