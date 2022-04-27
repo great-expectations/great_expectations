@@ -1,3 +1,4 @@
+from typing import List
 from unittest import mock
 
 import pytest
@@ -32,61 +33,30 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
 @mock.patch(
     "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
 )
-def test_split_on_year(
-    mock_split_on_date_parts: mock.MagicMock,
-):
-    """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params."""
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
-    column_name: str = "column_name"
-    batch_identifiers: dict = {column_name: {"year": 2018, "month": 10}}
-
-    sqlalchemy_data_splitter.split_on_year(
-        column_name=column_name,
-        batch_identifiers=batch_identifiers,
-    )
-
-    mock_split_on_date_parts.assert_called_with(
-        column_name=column_name,
-        batch_identifiers=batch_identifiers,
-        date_parts=[DatePart.YEAR],
-    )
-
-
-@mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
+@pytest.mark.parametrize(
+    "splitter_method_name,called_with_date_parts",
+    [
+        ("split_on_year", [DatePart.YEAR]),
+        ("split_on_year_and_month", [DatePart.YEAR, DatePart.MONTH]),
+        (
+            "split_on_year_and_month_and_day",
+            [DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
+        ),
+    ],
 )
-def test_split_on_year_and_month(
+def test_named_date_part_methods(
     mock_split_on_date_parts: mock.MagicMock,
+    splitter_method_name: str,
+    called_with_date_parts: List[DatePart],
 ):
-    """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params."""
-    sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
-    column_name: str = "column_name"
-    batch_identifiers: dict = {column_name: {"year": 2018, "month": 10}}
-
-    sqlalchemy_data_splitter.split_on_year_and_month(
-        column_name=column_name,
-        batch_identifiers=batch_identifiers,
-    )
-
-    mock_split_on_date_parts.assert_called_with(
-        column_name=column_name,
-        batch_identifiers=batch_identifiers,
-        date_parts=[DatePart.YEAR, DatePart.MONTH],
-    )
-
-
-@mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
-)
-def test_split_on_year_and_month_and_day(
-    mock_split_on_date_parts: mock.MagicMock,
-):
-    """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params."""
+    """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params.
+    For example, split_on_year.
+    """
     sqlalchemy_data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter()
     column_name: str = "column_name"
     batch_identifiers: dict = {column_name: {"year": 2018, "month": 10, "day": 31}}
 
-    sqlalchemy_data_splitter.split_on_year_and_month_and_day(
+    getattr(sqlalchemy_data_splitter, splitter_method_name)(
         column_name=column_name,
         batch_identifiers=batch_identifiers,
     )
@@ -94,7 +64,7 @@ def test_split_on_year_and_month_and_day(
     mock_split_on_date_parts.assert_called_with(
         column_name=column_name,
         batch_identifiers=batch_identifiers,
-        date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
+        date_parts=called_with_date_parts,
     )
 
 
