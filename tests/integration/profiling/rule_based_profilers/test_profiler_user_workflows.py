@@ -1689,6 +1689,13 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
+        variables={
+            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+            "allow_relative_error": "linear",
+            "num_bootstrap_samples": 9139,
+            "bootstrap_random_seed": 43792,
+            "false_positive_rate": 5.0e-2,
+        },
         rules={
             "column_quantiles_rule": {
                 "domain_builder": {
@@ -1779,6 +1786,13 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
+        variables={
+            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+            "allow_relative_error": "linear",
+            "num_bootstrap_samples": 9139,
+            "bootstrap_random_seed": 43792,
+            "false_positive_rate": 5.0e-2,
+        },
         rules={
             "column_quantiles_rule": {
                 "domain_builder": {
