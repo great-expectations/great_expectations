@@ -13,6 +13,11 @@ SINGLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
         id="datetime",
     ),
     pytest.param(
+        {"month": 10, "unsupported": 5},
+        marks=pytest.mark.xfail(strict=True),
+        id="month_dict, unsupported batch identifier",
+    ),
+    pytest.param(
         {"month": 11},
         marks=pytest.mark.xfail(strict=True),
         id="incorrect month_dict should fail",
@@ -71,6 +76,11 @@ MULTIPLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
     pytest.param(
         datetime.datetime(2018, 10, 30, 0, 0, 0),
         id="datetime",
+    ),
+    pytest.param(
+        {"year": 2018, "month": 10, "unsupported": 5},
+        marks=pytest.mark.xfail(strict=True),
+        id="year_and_month_dict, unsupported batch identifier",
     ),
     pytest.param(
         {"year": 2021, "month": 10},

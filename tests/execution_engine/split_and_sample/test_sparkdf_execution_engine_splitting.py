@@ -174,9 +174,6 @@ def test_split_on_date_parts_multiple_date_parts(
     assert result.count() == 1
 
 
-# TODO: AJB 20220426 Test with unrelated batch_identifiers
-
-
 @mock.patch(
     "great_expectations.execution_engine.split_and_sample.sparkdf_data_splitter.SparkDataSplitter.split_on_date_parts"
 )

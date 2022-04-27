@@ -100,7 +100,11 @@ class DataSplitter(abc.ABC):
             )
 
     @staticmethod
+    def _verify_all_strings_are_valid_date_parts(date_part_strings: List[str]) -> None:
+        [DatePart(date_part_string) for date_part_string in date_part_strings]
+
     def _convert_datetime_batch_identifiers_to_date_parts_dict(
+        self,
         column_batch_identifiers: Union[datetime.datetime, str, dict],
         date_parts: List[DatePart],
     ) -> dict:
@@ -125,4 +129,7 @@ class DataSplitter(abc.ABC):
                 for date_part in date_parts
             }
         else:
+            self._verify_all_strings_are_valid_date_parts(
+                list(column_batch_identifiers.keys())
+            )
             return column_batch_identifiers
