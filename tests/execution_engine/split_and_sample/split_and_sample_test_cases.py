@@ -73,14 +73,14 @@ MULTIPLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
         id="datetime",
     ),
     pytest.param(
-        {"year": 2019, "month": 10},
+        {"year": 2021, "month": 10},
         marks=pytest.mark.xfail(strict=True),
-        id="incorrect year_and_month_dict should fail",
+        id="incorrect year in year_and_month_dict should fail",
     ),
     pytest.param(
         {"year": 2018, "month": 11},
         marks=pytest.mark.xfail(strict=True),
-        id="incorrect year_and_month_dict should fail",
+        id="incorrect month in year_and_month_dict should fail",
     ),
     pytest.param(
         "not a real date",

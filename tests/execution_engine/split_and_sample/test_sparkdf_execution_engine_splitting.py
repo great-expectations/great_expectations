@@ -8,6 +8,12 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import D
 from great_expectations.execution_engine.split_and_sample.sparkdf_data_splitter import (
     SparkDataSplitter,
 )
+from tests.execution_engine.split_and_sample.split_and_sample_test_cases import (
+    MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
+    MULTIPLE_DATE_PART_DATE_PARTS,
+    SINGLE_DATE_PART_BATCH_IDENTIFIERS,
+    SINGLE_DATE_PART_DATE_PARTS,
+)
 
 try:
     pyspark = pytest.importorskip("pyspark")
@@ -85,7 +91,7 @@ def test_get_batch_with_split_on_year(
         }.items()
     ],
 )
-def test_get_batch_with_split_on_date_parts(
+def test_get_batch_with_split_on_date_parts_day(
     column_batch_identifier,
     num_values_in_df,
     spark_session,
@@ -109,9 +115,66 @@ def test_get_batch_with_split_on_date_parts(
     assert len(split_df.columns) == 2
 
 
-# TODO: AJB 20220426 Test with different style batch_identifiers (str, datetime)
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "batch_identifiers_for_column",
+    SINGLE_DATE_PART_BATCH_IDENTIFIERS,
+)
+@pytest.mark.parametrize(
+    "date_parts",
+    SINGLE_DATE_PART_DATE_PARTS,
+)
+def test_split_on_date_parts_single_date_parts(
+    batch_identifiers_for_column, date_parts, simple_multi_year_spark_df
+):
+    """What does this test and why?
+
+    split_on_date_parts should still filter the correct rows from the input dataframe when passed a single element list
+     date_parts that is a string, DatePart enum objects, mixed case string.
+     To match our interface it should accept a dateutil parseable string as the batch identifier
+     or a datetime and also fail when parameters are invalid.
+    """
+    data_splitter: SparkDataSplitter = SparkDataSplitter()
+    column_name: str = "timestamp"
+    result: DataFrame = data_splitter.split_on_date_parts(
+        df=simple_multi_year_spark_df,
+        column_name=column_name,
+        batch_identifiers={column_name: batch_identifiers_for_column},
+        date_parts=date_parts,
+    )
+    assert result.count() == 3
+
+
+@pytest.mark.parametrize(
+    "batch_identifiers_for_column",
+    MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
+)
+@pytest.mark.parametrize(
+    "date_parts",
+    MULTIPLE_DATE_PART_DATE_PARTS,
+)
+def test_split_on_date_parts_multiple_date_parts(
+    batch_identifiers_for_column, date_parts, simple_multi_year_spark_df
+):
+    """What does this test and why?
+
+    split_on_date_parts should still filter the correct rows from the input dataframe when passed
+     date parts that are strings, DatePart enum objects, a mixture and mixed case.
+     To match our interface it should accept a dateutil parseable string as the batch identifier
+     or a datetime and also fail when parameters are invalid.
+    """
+    data_splitter: SparkDataSplitter = SparkDataSplitter()
+    column_name: str = "timestamp"
+    result: DataFrame = data_splitter.split_on_date_parts(
+        df=simple_multi_year_spark_df,
+        column_name=column_name,
+        batch_identifiers={column_name: batch_identifiers_for_column},
+        date_parts=date_parts,
+    )
+    assert result.count() == 1
+
+
 # TODO: AJB 20220426 Test with unrelated batch_identifiers
-# TODO: AJB 20220426 Test with multiple dateparts, mix of dateparts (use just splitter for this?)
 
 
 @mock.patch(
