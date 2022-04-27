@@ -16,10 +16,10 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
-    Attributes,
     Domain,
     ParameterContainer,
 )
+from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         ] = None,
         json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Configure this RegexPatternStringParameterBuilder
         Args:

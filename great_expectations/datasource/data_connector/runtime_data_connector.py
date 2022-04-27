@@ -44,7 +44,7 @@ class RuntimeDataConnector(DataConnector):
         batch_identifiers: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
         assets: Optional[dict] = None,
-    ):
+    ) -> None:
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
         super().__init__(
@@ -337,7 +337,9 @@ class RuntimeDataConnector(DataConnector):
         return data_reference_name
 
     @staticmethod
-    def _validate_runtime_parameters(runtime_parameters: Union[dict, type(None)]):
+    def _validate_runtime_parameters(
+        runtime_parameters: Union[dict, type(None)]
+    ) -> None:
         if not isinstance(runtime_parameters, dict):
             raise TypeError(
                 f"""The type of runtime_parameters must be a dict object. The type given is
@@ -355,7 +357,7 @@ class RuntimeDataConnector(DataConnector):
                 "'query', 'path'."
             )
 
-    def _validate_batch_request(self, batch_request: RuntimeBatchRequest):
+    def _validate_batch_request(self, batch_request: RuntimeBatchRequest) -> None:
         super()._validate_batch_request(batch_request=batch_request)
 
         runtime_parameters = batch_request.runtime_parameters
@@ -377,7 +379,7 @@ class RuntimeDataConnector(DataConnector):
 
     def _validate_batch_identifiers(
         self, data_asset_name: str, batch_identifiers: dict
-    ):
+    ) -> None:
         """
         Called by _get_batch_definition_list_from_batch_request() ie, when a RuntimeBatchRequest is passed in.
 
@@ -408,7 +410,7 @@ class RuntimeDataConnector(DataConnector):
 
     def _validate_asset_level_batch_identifiers(
         self, data_asset_name: str, batch_identifiers: dict
-    ):
+    ) -> None:
         """
         Check that batch_identifiers passed in are an exact match to the ones configured at the Asset-level
         """
@@ -421,7 +423,9 @@ class RuntimeDataConnector(DataConnector):
                 """
             )
 
-    def _validate_data_connector_level_batch_identifiers(self, batch_identifiers: dict):
+    def _validate_data_connector_level_batch_identifiers(
+        self, batch_identifiers: dict
+    ) -> None:
         """
         Check that batch_identifiers passed in are a subset of the ones configured at the DataConnector-level
         """

@@ -94,7 +94,9 @@ class ValidationsStore(Store):
 
     _key_class = ValidationResultIdentifier
 
-    def __init__(self, store_backend=None, runtime_environment=None, store_name=None):
+    def __init__(
+        self, store_backend=None, runtime_environment=None, store_name=None
+    ) -> None:
         self._expectationSuiteValidationResultSchema = (
             ExpectationSuiteValidationResultSchema()
         )

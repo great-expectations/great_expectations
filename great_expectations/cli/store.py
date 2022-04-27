@@ -8,7 +8,7 @@ from great_expectations.core.usage_statistics.util import send_usage_message
 
 @click.group()
 @click.pass_context
-def store(ctx):
+def store(ctx) -> None:
     """Store operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 

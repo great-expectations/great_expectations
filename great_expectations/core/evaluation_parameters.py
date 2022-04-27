@@ -71,21 +71,21 @@ class EvaluationParameterParser:
         "timedelta": datetime.timedelta,
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.exprStack = []
         self._parser = None
 
-    def push_first(self, toks):
+    def push_first(self, toks) -> None:
         self.exprStack.append(toks[0])
 
-    def push_unary_minus(self, toks):
+    def push_unary_minus(self, toks) -> None:
         for t in toks:
             if t == "-":
                 self.exprStack.append("unary -")
             else:
                 break
 
-    def clear_stack(self):
+    def clear_stack(self) -> None:
         del self.exprStack[:]
 
     def get_parser(self):

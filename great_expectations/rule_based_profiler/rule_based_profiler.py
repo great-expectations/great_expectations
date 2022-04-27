@@ -21,11 +21,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     get_profiler_run_usage_statistics,
     usage_statistics_enabled_method,
 )
-from great_expectations.core.util import (
-    TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN,
-    get_or_create_expectation_suite,
-    nested_update,
-)
+from great_expectations.core.util import nested_update
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -55,7 +51,9 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     reconcile_rule_variables,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
+    TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN,
     convert_variables_to_dict,
+    get_or_create_expectation_suite,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
@@ -91,7 +89,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
-    ):
+    ) -> None:
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
 
@@ -225,11 +223,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
     ) -> None:
         """
+        Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
+
         Args:
-            variables: attribute name/value pairs (overrides), commonly-used in Builder objects.
+            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
             rules: name/(configuration-dictionary) (overrides)
-            batch_list: Explicit list of Batch objects to supply data at runtime.
-            batch_request: Explicit batch_request used to supply data at runtime.
+            batch_list: Explicit list of Batch objects to supply data at runtime
+            batch_request: Explicit batch_request used to supply data at runtime
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
         """
@@ -1150,7 +1150,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return copy.deepcopy(self._variables)
 
     @variables.setter
-    def variables(self, value: Optional[ParameterContainer]):
+    def variables(self, value: Optional[ParameterContainer]) -> None:
         self._variables = value
         self.config.variables = convert_variables_to_dict(variables=value)
 
@@ -1159,7 +1159,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._rules
 
     @rules.setter
-    def rules(self, value: List[Rule]):
+    def rules(self, value: List[Rule]) -> None:
         self._rules = value
 
     @property
@@ -1167,7 +1167,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._citation
 
     @citation.setter
-    def citation(self, value: Optional[Dict[str, Any]]):
+    def citation(self, value: Optional[Dict[str, Any]]) -> None:
         self._citation = value
 
     @property
@@ -1279,7 +1279,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Create a new Profiler using configured rules.
         For a Rule or an item in a Rule configuration, instantiates the following if
@@ -1312,7 +1312,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         )
 
 
-def _validate_builder_override_config(builder_config: dict):
+def _validate_builder_override_config(builder_config: dict) -> None:
     """
     In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
     candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.

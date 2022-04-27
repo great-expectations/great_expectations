@@ -78,7 +78,7 @@ class SupportedDatabases(enum.Enum):
 
 
 @click.group()
-def datasource():
+def datasource() -> None:
     """Datasource operations"""
     pass
 
@@ -90,7 +90,7 @@ def datasource():
     default=None,
     help="The project's great_expectations directory.",
 )
-def datasource_new(directory):
+def datasource_new(directory) -> None:
     """Add a new datasource to the data context."""
     context = toolkit.load_data_context_with_error_handling(directory)
     datasource_name, data_source_type = add_datasource(context)
@@ -121,7 +121,7 @@ def datasource_new(directory):
     help="The project's great_expectations directory.",
 )
 @click.argument("datasource")
-def delete_datasource(directory, datasource):
+def delete_datasource(directory, datasource) -> None:
     """Delete the datasource specified as an argument"""
     context = toolkit.load_data_context_with_error_handling(directory)
     try:
@@ -146,7 +146,7 @@ def delete_datasource(directory, datasource):
     default=None,
     help="The project's great_expectations directory.",
 )
-def datasource_list(directory):
+def datasource_list(directory) -> None:
     """List known datasources."""
     context = toolkit.load_data_context_with_error_handling(directory)
     datasources = context.list_datasources()
@@ -235,7 +235,7 @@ def datasource_profile(
     view,
     additional_batch_kwargs,
     assume_yes,
-):
+) -> None:
     """
     Profile a datasource (Experimental)
 
@@ -1373,16 +1373,6 @@ Would you like to continue?"""
         if len(data_asset_name.split(".")) < 3:
             project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
             data_asset_name = f"{project_id}.{data_asset_name}"
-
-        # bigquery also requires special handling
-        bigquery_temp_table = click.prompt(
-            "Great Expectations will create a table to use for "
-            "validation." + os.linesep + "Please enter a name for this table: ",
-            default=f"SOME_PROJECT.SOME_DATASET.ge_tmp_{str(uuid.uuid4())[:8]}",
-        )
-        temp_table_kwargs = {
-            "bigquery_temp_table": bigquery_temp_table,
-        }
 
     # now building the actual batch_kwargs
     if sql_query is None:

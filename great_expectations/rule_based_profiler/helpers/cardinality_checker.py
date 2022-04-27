@@ -117,7 +117,7 @@ class CardinalityChecker:
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[int] = None,
         max_proportion_unique: Optional[float] = None,
-    ):
+    ) -> None:
         self._limit_mode = self._convert_to_cardinality_mode(
             limit_mode=limit_mode,
             max_unique_values=max_unique_values,

@@ -45,7 +45,7 @@ class SupportedDatabaseBackends(enum.Enum):
 
 @click.group()
 @click.pass_context
-def datasource(ctx):
+def datasource(ctx) -> None:
     """Datasource operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
@@ -98,7 +98,7 @@ def datasource_new(ctx, name, jupyter):
 @datasource.command(name="delete")
 @click.argument("datasource")
 @click.pass_context
-def delete_datasource(ctx, datasource):
+def delete_datasource(ctx, datasource) -> None:
     """Delete the datasource specified as an argument"""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -244,7 +244,7 @@ class BaseDatasourceNewYamlHelper:
         datasource_type: DatasourceTypes,
         usage_stats_payload: dict,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         self.datasource_type: DatasourceTypes = datasource_type
         self.datasource_name: Optional[str] = datasource_name
         self.usage_stats_payload: dict = usage_stats_payload
@@ -298,7 +298,7 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
         class_name: str,
         context_root_dir: str,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(datasource_type, usage_stats_payload, datasource_name)
         self.class_name: str = class_name
         self.base_path: str = ""
@@ -351,7 +351,7 @@ class PandasYamlHelper(FilesYamlHelper):
         self,
         context_root_dir: str,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.PANDAS,
             usage_stats_payload={
@@ -372,7 +372,7 @@ class SparkYamlHelper(FilesYamlHelper):
         self,
         context_root_dir: str,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.SPARK,
             usage_stats_payload={
@@ -404,7 +404,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         password: str = "YOUR_PASSWORD",
         database: str = "YOUR_DATABASE",
         schema_name: str = "YOUR_SCHEMA",
-    ):
+    ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.SQL,
             usage_stats_payload=usage_stats_payload,
@@ -471,7 +471,7 @@ data_connectors:
 
 
 class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         # We are insisting on pymysql driver when adding a MySQL datasource
         # through the CLI to avoid over-complication of this flow. If user wants
         # to use another driver, they must use a sqlalchemy connection string.
@@ -495,7 +495,7 @@ class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
 
 
 class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -523,7 +523,7 @@ class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
 
 
 class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         # We are insisting on psycopg2 driver when adding a Redshift datasource
         # through the CLI to avoid over-complication of this flow. If user wants
         # to use another driver, they must use a sqlalchemy connection string.
@@ -575,7 +575,7 @@ class SnowflakeAuthMethod(enum.IntEnum):
 
 
 class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -644,7 +644,7 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
 
 
 class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -678,7 +678,7 @@ connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
 
 
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={

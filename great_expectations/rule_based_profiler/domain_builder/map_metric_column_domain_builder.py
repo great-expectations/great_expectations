@@ -38,7 +38,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         max_unexpected_ratio: Optional[Union[str, float]] = None,
         min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Create column domains using tolerance for inter-Batch proportion of adherence to intra-Batch "unexpected_count"
         value of specified "map_metric_name" as criterion for emitting Domain for column under consideration.
