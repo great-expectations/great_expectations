@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import datetime
 import enum
@@ -19,10 +21,10 @@ class DatePart(enum.Enum):
     MINUTE = "minute"
     SECOND = "second"
 
-    def __eq__(self, other):
+    def __eq__(self, other: DatePart):
         return self.value == other.value
 
-    def __hash__(self):
+    def __hash__(self: DatePart):
         return hash(self.value)
 
 
