@@ -26,6 +26,21 @@ except ImportError:
     DataFrame = None
 
 
+# Add SparkDataSplitter specific test cases
+SINGLE_DATE_PART_DATE_PARTS += [
+    pytest.param(
+        [SparkDataSplitter.date_part.MONTH],
+        id="month getting date parts from SparkDataSplitter.date_part",
+    )
+]
+MULTIPLE_DATE_PART_DATE_PARTS += [
+    pytest.param(
+        [SparkDataSplitter.date_part.YEAR, SparkDataSplitter.date_part.MONTH],
+        id="year_month getting date parts from SparkDataSplitter.date_part",
+    )
+]
+
+
 @pytest.fixture
 def simple_multi_year_spark_df(spark_session):
     spark_df_data: List[Tuple] = [

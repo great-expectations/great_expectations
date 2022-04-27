@@ -14,12 +14,8 @@ not by itself.
             split_query_or_clause = splitter()
 """
 
-import datetime
 from typing import List, Union
 
-from dateutil.parser import parse
-
-from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
