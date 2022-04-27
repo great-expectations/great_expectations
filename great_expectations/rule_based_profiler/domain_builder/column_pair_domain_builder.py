@@ -15,7 +15,7 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
         self,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Args:
             include_column_names: Explicitly specified exactly two desired columns

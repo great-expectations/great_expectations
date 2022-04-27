@@ -83,7 +83,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         self,
         name: str,
         validator: Validator,
-    ):
+    ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
         corresponding to indended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields

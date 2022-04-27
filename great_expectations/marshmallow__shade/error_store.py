@@ -10,11 +10,11 @@ from great_expectations.marshmallow__shade.exceptions import SCHEMA
 
 
 class ErrorStore:
-    def __init__(self):
+    def __init__(self) -> None:
         #: Dictionary of errors stored during serialization
         self.errors = {}
 
-    def store_error(self, messages, field_name=SCHEMA, index=None):
+    def store_error(self, messages, field_name=SCHEMA, index=None) -> None:
         # field error  -> store/merge error messages under field name key
         # schema error -> if string or list, store/merge under _schema key
         #              -> if dict, store/merge with other top-level keys

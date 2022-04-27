@@ -38,7 +38,7 @@ class ValidationResultsPageRenderer(Renderer):
         column_section_renderer=None,
         run_info_at_end: bool = False,
         data_context=None,
-    ):
+    ) -> None:
         """
         Args:
             column_section_renderer:
@@ -643,7 +643,7 @@ class ValidationResultsPageRenderer(Renderer):
 
 
 class ExpectationSuitePageRenderer(Renderer):
-    def __init__(self, column_section_renderer=None):
+    def __init__(self, column_section_renderer=None) -> None:
         super().__init__()
         if column_section_renderer is None:
             column_section_renderer = {
@@ -895,7 +895,9 @@ class ExpectationSuitePageRenderer(Renderer):
 
 
 class ProfilingResultsPageRenderer(Renderer):
-    def __init__(self, overview_section_renderer=None, column_section_renderer=None):
+    def __init__(
+        self, overview_section_renderer=None, column_section_renderer=None
+    ) -> None:
         super().__init__()
         if overview_section_renderer is None:
             overview_section_renderer = {
