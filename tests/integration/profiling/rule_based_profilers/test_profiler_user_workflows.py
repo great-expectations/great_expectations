@@ -344,11 +344,11 @@ def test_alice_profiler_user_workflow_single_batch(
 
 @freeze_time(TIMESTAMP)
 def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
-    alice_validator,
+    alice_validator: Validator,
 ) -> None:
-    validator = alice_validator
+    validator: Validator = alice_validator
 
-    result = validator.expect_column_values_to_match_regex(
+    result: ExpectationValidationResult = validator.expect_column_values_to_match_regex(
         column="id",
         result_format="SUMMARY",
         include_config=True,
@@ -371,15 +371,17 @@ def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_con
 
 @freeze_time(TIMESTAMP)
 def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
-    alice_validator,
+    alice_validator: Validator,
 ) -> None:
-    validator = alice_validator
+    validator: Validator = alice_validator
 
-    result = validator.expect_column_values_to_not_match_regex(
-        column="id",
-        result_format="SUMMARY",
-        include_config=True,
-        auto=True,
+    result: ExpectationValidationResult = (
+        validator.expect_column_values_to_not_match_regex(
+            column="id",
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
     )
 
     assert not result.success
