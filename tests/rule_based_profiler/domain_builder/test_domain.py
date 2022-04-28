@@ -1,6 +1,10 @@
 import pytest
 
-from great_expectations.rule_based_profiler.types import Domain, SemanticDomainTypes
+from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 
 
 def test_semantic_domain_serialization():
@@ -30,7 +34,7 @@ def test_semantic_domain_serialization():
         details={
             "estimator": "categorical",
             "cardinality": "low",
-            "inferred_semantic_domain_type": SemanticDomainTypes.CURRENCY,
+            INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.CURRENCY,
         },
     )
 
@@ -42,7 +46,7 @@ def test_semantic_domain_serialization():
         "details": {
             "estimator": "categorical",
             "cardinality": "low",
-            "inferred_semantic_domain_type": SemanticDomainTypes.CURRENCY.value,
+            INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.CURRENCY.value,
         },
     }
 
@@ -52,7 +56,7 @@ def test_semantic_domain_serialization():
         details={
             "estimator": "categorical",
             "cardinality": "low",
-            "inferred_semantic_domain_type": "currency",
+            INFERRED_SEMANTIC_TYPE_KEY: "currency",
         },
     )
 
@@ -64,7 +68,7 @@ def test_semantic_domain_serialization():
         "details": {
             "estimator": "categorical",
             "cardinality": "low",
-            "inferred_semantic_domain_type": SemanticDomainTypes.CURRENCY.value,
+            INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.CURRENCY.value,
         },
     }
 
@@ -77,17 +81,17 @@ def test_semantic_domain_comparisons():
     domain_a = Domain(
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
-        details={"inferred_semantic_domain_type": "numeric"},
+        details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
     )
     domain_b = Domain(
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
-        details={"inferred_semantic_domain_type": "numeric"},
+        details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
     )
     domain_c = Domain(
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
-        details={"inferred_semantic_domain_type": "numeric"},
+        details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
     )
 
     assert not (domain_a == domain_b)
@@ -96,17 +100,17 @@ def test_semantic_domain_comparisons():
     domain_a = Domain(
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
-        details={"inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC},
+        details={INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC},
     )
     domain_b = Domain(
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
-        details={"inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC},
+        details={INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC},
     )
     domain_c = Domain(
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
-        details={"inferred_semantic_domain_type": SemanticDomainTypes.NUMERIC},
+        details={INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC},
     )
 
     assert not (domain_a == domain_b)
@@ -115,7 +119,7 @@ def test_semantic_domain_comparisons():
     domain_d: Domain = Domain(
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
-        details={"inferred_semantic_domain_type": "unknown_semantic_type_as_string"},
+        details={INFERRED_SEMANTIC_TYPE_KEY: "unknown_semantic_type_as_string"},
     )
 
     with pytest.raises(ValueError) as excinfo:
@@ -133,7 +137,7 @@ def test_semantic_domain_comparisons():
         details={
             "estimator": "categorical",
             "cardinality": "low",
-            "inferred_semantic_domain_type": "unknown_semantic_type_as_string",
+            INFERRED_SEMANTIC_TYPE_KEY: "unknown_semantic_type_as_string",
         },
     )
 

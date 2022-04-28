@@ -14,6 +14,7 @@ from great_expectations.rule_based_profiler.domain_builder import (
     TableDomainBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     ParameterContainer,
     build_parameter_container_for_variables,
@@ -238,7 +239,7 @@ def test_column_domain_builder_with_simple_semantic_type_included(
                 "column": "event_type",
             },
             "details": {
-                "inferred_semantic_domain_type": "numeric",
+                INFERRED_SEMANTIC_TYPE_KEY: "numeric",
             },
         },
         {
@@ -247,7 +248,7 @@ def test_column_domain_builder_with_simple_semantic_type_included(
                 "column": "user_id",
             },
             "details": {
-                "inferred_semantic_domain_type": "numeric",
+                INFERRED_SEMANTIC_TYPE_KEY: "numeric",
             },
         },
     ]

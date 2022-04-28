@@ -55,7 +55,11 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    ParameterNode,
+)
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -4453,7 +4457,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "VendorID"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4462,7 +4466,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "passenger_count"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4471,7 +4475,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "trip_distance"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4480,7 +4484,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "RatecodeID"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4489,7 +4493,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "PULocationID"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4498,7 +4502,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "DOLocationID"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4507,7 +4511,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "payment_type"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4516,7 +4520,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "fare_amount"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4525,7 +4529,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "extra"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4534,7 +4538,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "mta_tax"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4543,7 +4547,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "tip_amount"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4552,7 +4556,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "tolls_amount"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4561,7 +4565,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "improvement_surcharge"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4570,7 +4574,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "total_amount"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4579,7 +4583,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         Domain(
             domain_type="column",
             domain_kwargs={"column": "congestion_surcharge"},
-            details={"inferred_semantic_domain_type": "numeric"},
+            details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
         ): [
             "$variables",
             "$parameter.min_range",
@@ -4669,7 +4673,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "VendorID"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -4706,7 +4710,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "passenger_count"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -4743,7 +4747,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "trip_distance"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -4780,7 +4784,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "RatecodeID"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -4817,7 +4821,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "PULocationID"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -4854,7 +4858,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "DOLocationID"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -4891,7 +4895,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "payment_type"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -4928,7 +4932,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "fare_amount"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -4965,7 +4969,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "extra"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -5002,7 +5006,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "mta_tax"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -5039,7 +5043,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "tip_amount"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -5076,7 +5080,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "tolls_amount"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -5113,7 +5117,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "improvement_surcharge"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -5150,7 +5154,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "total_amount"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
@@ -5187,7 +5191,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             **{
                 "domain_type": "column",
                 "domain_kwargs": {"column": "congestion_surcharge"},
-                "details": {"inferred_semantic_domain_type": "numeric"},
+                "details": {INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
             }
         ): {
             "$variables": {
