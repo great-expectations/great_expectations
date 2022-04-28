@@ -3,6 +3,7 @@ from typing import Dict, Optional
 
 import numpy as np
 import pytest
+import scipy.stats as stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
@@ -39,6 +40,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         estimator="bootstrap",
         false_positive_rate=1.0e-2,
         round_decimals=0,
+        json_serialize=False,
         data_context=data_context,
     )
 
@@ -80,18 +82,24 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    actual_value_dict: dict = get_parameter_value_by_fully_qualified_parameter_name(
-        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-        domain=domain,
-        parameters=parameters,
+    actual_value_parameter_node: ParameterNode = (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+            parameters=parameters,
+        )
     )
 
-    actual_value = actual_value_dict.pop("value")
-    actual_value_dict["value"] = None
+    actual_value: np.ndarray = actual_value_parameter_node.pop("value")
+    actual_value_parameter_node["value"] = None
 
-    assert actual_value_dict == expected_value_dict
+    actual_estimation_histogram: np.ndarray = actual_value_parameter_node.details.pop(
+        "estimation_histogram"
+    )
 
-    expected_value = np.array([7510, 8806])
+    assert actual_value_parameter_node == expected_value_dict
+
+    expected_value: np.ndarray = np.array([7510, 8806])
 
     # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
     # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
@@ -106,6 +114,28 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         atol=atol,
         err_msg=f"Actual value of {actual_value} differs from expected value of {expected_value} by more than {atol + rtol * abs(expected_value)} tolerance.",
     )
+
+    expected_estimation_histogram: np.ndarray = np.array(
+        [
+            10100.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            9889.0,
+            0.0,
+            0.0,
+            10008.0,
+        ]
+    )
+
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    ks_result: tuple = stats.ks_2samp(
+        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+    )
+    p_value: float = ks_result[1]
+    assert p_value > 9.5e-1
 
 
 def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
@@ -135,6 +165,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         estimator="oneshot",
         false_positive_rate=1.0e-2,
         round_decimals=1,
+        json_serialize=False,
         data_context=data_context,
     )
 
@@ -176,16 +207,22 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         },
     }
 
-    actual_value_dict = get_parameter_value_by_fully_qualified_parameter_name(
-        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-        domain=domain,
-        parameters=parameters,
+    actual_value_parameter_node: ParameterNode = (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+            parameters=parameters,
+        )
     )
 
-    actual_values_01 = actual_value_dict.pop("value")
-    actual_value_dict["value"] = None
+    actual_values_01: np.ndarray = actual_value_parameter_node.pop("value")
+    actual_value_parameter_node["value"] = None
 
-    assert actual_value_dict == expected_value_dict
+    actual_estimation_histogram: np.ndarray = actual_value_parameter_node.details.pop(
+        "estimation_histogram"
+    )
+
+    assert actual_value_parameter_node == expected_value_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -195,6 +232,28 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert actual_value_01_lower == expected_value_01_lower
     assert actual_value_01_upper == expected_value_01_upper
 
+    expected_estimation_histogram: np.ndarray = np.array(
+        [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            2.0,
+        ]
+    )
+
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    ks_result: tuple = stats.ks_2samp(
+        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+    )
+    p_value: float = ks_result[1]
+    assert p_value > 9.5e-1
+
     numeric_metric_range_parameter_builder = (
         NumericMetricRangeMultiBatchParameterBuilder(
             name="column_min_range",
@@ -203,6 +262,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             estimator="oneshot",
             false_positive_rate=5.0e-2,
             round_decimals=1,
+            json_serialize=False,
             data_context=data_context,
         )
     )
@@ -215,16 +275,22 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         batch_request=batch_request,
     )
 
-    actual_value_dict = get_parameter_value_by_fully_qualified_parameter_name(
-        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-        domain=domain,
-        parameters=parameters,
+    actual_value_parameter_node: ParameterNode = (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+            parameters=parameters,
+        )
     )
 
-    actual_values_05 = actual_value_dict.pop("value")
-    actual_value_dict["value"] = None
+    actual_values_05 = actual_value_parameter_node.pop("value")
+    actual_value_parameter_node["value"] = None
 
-    assert actual_value_dict == expected_value_dict
+    actual_estimation_histogram: np.ndarray = actual_value_parameter_node.details.pop(
+        "estimation_histogram"
+    )
+
+    assert actual_value_parameter_node == expected_value_dict
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
@@ -237,6 +303,28 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     # if false positive rate is higher, our range should be more narrow
     assert actual_value_01_lower < actual_value_05_lower
     assert actual_value_01_upper > actual_value_05_upper
+
+    expected_estimation_histogram: np.ndarray = np.array(
+        [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            2.0,
+        ]
+    )
+
+    # Assert no significant difference between expected (null hypothesis) and actual estimation histograms.
+    ks_result: tuple = stats.ks_2samp(
+        data1=actual_estimation_histogram, data2=expected_estimation_histogram
+    )
+    p_value: float = ks_result[1]
+    assert p_value > 9.5e-1
 
 
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_one(
