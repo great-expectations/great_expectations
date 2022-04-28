@@ -195,7 +195,7 @@ class SparkDataSplitter(DataSplitter):
             df: Spark DataFrame that will be returned
 
         Returns:
-            Filtered spark DataFrame.
+            Unfiltered DataFrame.
         """
         return df
 
@@ -208,7 +208,7 @@ class SparkDataSplitter(DataSplitter):
         Args:
             df: Spark DataFrame to be filtered.
             column_name: Column to use in comparison.
-            batch_identifiers: Value to use in comparison.
+            batch_identifiers: Contains value to use in comparison e.g. batch_identifiers={ 'col': value }.
 
         Returns:
             Filtered spark DataFrame.

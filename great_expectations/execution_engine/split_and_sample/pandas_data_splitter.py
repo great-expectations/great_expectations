@@ -142,12 +142,30 @@ class PandasDataSplitter(DataSplitter):
     def split_on_whole_table(
         df,
     ) -> pd.DataFrame:
+        """No op. Return the same data that is passed in.
+
+        Args:
+            df: DataFrame that will be returned
+
+        Returns:
+            Unfiltered DataFrame.
+        """
         return df
 
     @staticmethod
     def split_on_column_value(
         df, column_name: str, batch_identifiers: dict
     ) -> pd.DataFrame:
+        """Return a dataframe where rows are filtered based on the specified column value.
+
+        Args:
+            df: DataFrame to be filtered.
+            column_name: Column to use in comparison.
+            batch_identifiers: Contains value to use in comparison e.g. batch_identifiers={ 'col': value }.
+
+        Returns:
+            Filtered spark DataFrame.
+        """
         return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
