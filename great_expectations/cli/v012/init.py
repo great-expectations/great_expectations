@@ -57,7 +57,7 @@ except ImportError:
     help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
     default=True,
 )
-def init(target_directory, view, usage_stats):
+def init(target_directory, view, usage_stats) -> None:
     """
     Initialize a new Great Expectations project.
 

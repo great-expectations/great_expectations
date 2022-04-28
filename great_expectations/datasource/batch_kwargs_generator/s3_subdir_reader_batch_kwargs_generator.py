@@ -58,7 +58,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_options=None,
         known_extensions=None,
         reader_method=None,
-    ):
+    ) -> None:
         super().__init__(name, datasource=datasource)
 
         if not s3fs:
@@ -276,7 +276,9 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 ),
             )
 
-    def _build_batch_kwargs_path_iter(self, path_list, reader_options=None, limit=None):
+    def _build_batch_kwargs_path_iter(
+        self, path_list, reader_options=None, limit=None
+    ) -> None:
         for path in path_list:
             yield self._build_batch_kwargs_from_path(
                 path, reader_options=reader_options, limit=limit

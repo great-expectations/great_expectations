@@ -91,7 +91,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-class ParameterBuilder(Builder, ABC):
+class ParameterBuilder(ABC, Builder):
     """
     A ParameterBuilder implementation provides support for building Expectation Configuration Parameters suitable for
     use in other ParameterBuilders or in ConfigurationBuilders as part of profiling.
@@ -121,7 +121,7 @@ class ParameterBuilder(Builder, ABC):
         ] = None,
         json_serialize: Union[str, bool] = True,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
 

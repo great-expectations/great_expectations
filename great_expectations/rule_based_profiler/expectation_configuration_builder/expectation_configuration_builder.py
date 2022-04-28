@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class ExpectationConfigurationBuilder(Builder, ABC):
+class ExpectationConfigurationBuilder(ABC, Builder):
     exclude_field_names: Set[str] = Builder.exclude_field_names | {
         "validation_parameter_builders",
     }
@@ -33,7 +33,7 @@ class ExpectationConfigurationBuilder(Builder, ABC):
         ] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         **kwargs
-    ):
+    ) -> None:
         """
         The ExpectationConfigurationBuilder will build ExpectationConfiguration objects for a Domain from the Rule.
 
