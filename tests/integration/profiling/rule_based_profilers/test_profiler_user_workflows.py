@@ -1946,26 +1946,9 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
 )
 @freeze_time(TIMESTAMP)
 def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
-    quentin_columnar_table_multi_batch_data_context,
+    quentin_validator: Validator,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    custom_profiler_config: RuleBasedProfilerConfig
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="profiler",
-    )
-    assert len(validator.batches) == 36
+    validator: Validator = quentin_validator
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     result: ExpectationValidationResult = validator.expect_column_values_to_be_in_set(
@@ -2004,26 +1987,9 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
 )
 @freeze_time(TIMESTAMP)
 def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
-    quentin_columnar_table_multi_batch_data_context,
+    quentin_validator: Validator,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    custom_profiler_config: RuleBasedProfilerConfig
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="profiler",
-    )
-    assert len(validator.batches) == 36
+    validator: Validator = quentin_validator
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     result: ExpectationValidationResult = validator.expect_column_min_to_be_between(
@@ -2061,24 +2027,9 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
 )
 @freeze_time(TIMESTAMP)
 def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
-    quentin_columnar_table_multi_batch_data_context,
+    quentin_validator: Validator,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="profiler",
-    )
-    assert len(validator.batches) == 36
+    validator: Validator = quentin_validator
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     result: ExpectationValidationResult = validator.expect_column_max_to_be_between(
@@ -2141,27 +2092,9 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
 )
 @freeze_time(TIMESTAMP)
 def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
-    quentin_columnar_table_multi_batch_data_context,
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+    quentin_validator: Validator,
 ) -> None:
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    result: ExpectationValidationResult
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="profiler",
-    )
-    assert len(validator.batches) == 36
+    validator: Validator = quentin_validator
 
     test_cases: Tuple[Tuple[str, int, int], ...] = (
         ("pickup_location_id", 118, 212),
@@ -2210,11 +2143,11 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
+@freeze_time(TIMESTAMP)
 def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
-    quentin_validator,
+    quentin_validator: Validator,
 ) -> None:
-    validator = quentin_validator
+    validator: Validator = quentin_validator
 
     test_cases: Tuple[Tuple[str, float, float], ...] = (
         ("pickup_datetime", 0.0, 1.0),
@@ -2227,6 +2160,62 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
     for column_name, min_value_expected, max_value_expected in test_cases:
         # Use all batches, loaded by Validator, for estimating Expectation argument values.
         result = validator.expect_column_proportion_of_unique_values_to_be_between(
+            column=column_name,
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
+        assert result.success
+
+        key: str
+        value: Any
+        expectation_config_kwargs: dict = {
+            key: value
+            for key, value in result.expectation_config["kwargs"].items()
+            if key
+            not in [
+                "min_value",
+                "max_value",
+            ]
+        }
+        assert expectation_config_kwargs == {
+            "column": column_name,
+            "strict_min": False,
+            "strict_max": False,
+            "result_format": "SUMMARY",
+            "include_config": True,
+            "auto": True,
+            "batch_id": "84000630d1b69a0fe870c94fb26a32bc",
+        }
+
+        min_value_actual: int = result.expectation_config["kwargs"]["min_value"]
+        assert min_value_expected <= min_value_actual
+
+        max_value_actual: int = result.expectation_config["kwargs"]["max_value"]
+        assert max_value_expected >= max_value_actual
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+@freeze_time("09/26/2019 13:42:41")
+def test_quentin_expect_column_mean_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_validator,
+) -> None:
+    validator: Validator = quentin_validator
+
+    test_cases: Tuple[Tuple[str, float, float], ...] = (
+        ("passenger_count", 1.0, 6.0),
+        ("total_amount", 10.0, 30.0),
+    )
+
+    column_name: str
+    min_value_expected: float
+    max_value_expected: float
+    for column_name, min_value_expected, max_value_expected in test_cases:
+        # Use all batches, loaded by Validator, for estimating Expectation argument values.
+        result = validator.expect_column_mean_to_be_between(
             column=column_name,
             result_format="SUMMARY",
             include_config=True,
