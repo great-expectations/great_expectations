@@ -22,7 +22,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         data_context: Optional[DataContext] = None,
         context_root_dir: Optional[str] = None,
         update_version: bool = False,
-    ):
+    ) -> None:
         assert (
             data_context or context_root_dir
         ), "Please provide a data_context object or a context_root_dir."
@@ -56,13 +56,13 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 
         self._generate_upgrade_checklist()
 
-    def _generate_upgrade_checklist(self):
+    def _generate_upgrade_checklist(self) -> None:
         self._process_checkpoint_store_for_checklist()
         self._process_checkpoint_config_for_checklist()
         self._process_datasources_for_checklist()
         self._process_validation_operators_for_checklist()
 
-    def _process_checkpoint_store_for_checklist(self):
+    def _process_checkpoint_store_for_checklist(self) -> None:
         if CheckpointStore.default_checkpoints_exist(
             directory_path=self.data_context.root_directory
         ):
@@ -98,7 +98,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         else:
             self.upgrade_log["skipped_checkpoint_store_upgrade"] = True
 
-    def _process_checkpoint_config_for_checklist(self):
+    def _process_checkpoint_config_for_checklist(self) -> None:
         legacy_checkpoints: List[Union[Checkpoint, LegacyCheckpoint]] = []
         checkpoint: Union[Checkpoint, LegacyCheckpoint]
         checkpoint_name: str
@@ -119,7 +119,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
             self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
 
     # noinspection SpellCheckingInspection
-    def _process_datasources_for_checklist(self):
+    def _process_datasources_for_checklist(self) -> None:
         config_commented_map: CommentedMap = (
             self.data_context.get_config().commented_map
         )
@@ -139,7 +139,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         if len(self.upgrade_checklist["manual"]["datasources"]) == 0:
             self.upgrade_log["skipped_datasources_upgrade"] = True
 
-    def _process_validation_operators_for_checklist(self):
+    def _process_validation_operators_for_checklist(self) -> None:
         config_commented_map: CommentedMap = (
             self.data_context.get_config().commented_map
         )
@@ -343,7 +343,7 @@ No manual upgrade steps are required.
         ) = self._generate_upgrade_report()
         return upgrade_report, increment_version, exception_occurred
 
-    def _upgrade_configuration_automatically(self):
+    def _upgrade_configuration_automatically(self) -> None:
         if not self.upgrade_log["skipped_checkpoint_store_upgrade"]:
             config_commented_map: CommentedMap = (
                 self.data_context.get_config().commented_map

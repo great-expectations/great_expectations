@@ -61,7 +61,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         return sorted(custom_columns)
 
     @classmethod
-    def _process_content_block(cls, content_block, has_failed_evr, render_object=None):
+    def _process_content_block(
+        cls, content_block, has_failed_evr, render_object=None
+    ) -> None:
         super()._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}

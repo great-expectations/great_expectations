@@ -13,8 +13,6 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     SemanticDomainTypes,
-)
-from great_expectations.rule_based_profiler.types.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -40,7 +38,7 @@ class ColumnDomainBuilder(DomainBuilder):
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         A semantic type is distinguished from the structured column type;
         An example structured column type would be "integer".  The inferred semantic type would be "id".
@@ -115,7 +113,7 @@ class ColumnDomainBuilder(DomainBuilder):
     @include_column_name_suffixes.setter
     def include_column_name_suffixes(
         self, value: Optional[Union[str, Iterable, List[str]]]
-    ):
+    ) -> None:
         self._include_column_name_suffixes = value
 
     @property
@@ -127,7 +125,7 @@ class ColumnDomainBuilder(DomainBuilder):
     @exclude_column_name_suffixes.setter
     def exclude_column_name_suffixes(
         self, value: Optional[Union[str, Iterable, List[str]]]
-    ):
+    ) -> None:
         self._exclude_column_name_suffixes = value
 
     @property
@@ -152,7 +150,7 @@ class ColumnDomainBuilder(DomainBuilder):
         value: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ],
-    ):
+    ) -> None:
         self._include_semantic_types = value
 
     @property
@@ -169,7 +167,7 @@ class ColumnDomainBuilder(DomainBuilder):
         value: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ],
-    ):
+    ) -> None:
         self._exclude_semantic_types = value
 
     @property

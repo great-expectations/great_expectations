@@ -60,7 +60,7 @@ class MetaSparkDFDataset(Dataset):
     and SparkDFDataset implements the expectation methods themselves.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     @classmethod
@@ -609,7 +609,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         else:
             raise ValueError("from_dataset requires a SparkDFDataset dataset")
 
-    def __init__(self, spark_df, *args, **kwargs):
+    def __init__(self, spark_df, *args, **kwargs) -> None:
         # Creation of the Spark DataFrame is done outside this class
         self.spark_df = spark_df
         self._persist = kwargs.pop("persist", True)
@@ -653,7 +653,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         return self.spark_df.select(column).groupBy().sum().collect()[0][0]
 
     # TODO: consider getting all basic statistics in one go:
-    def _describe_column(self, column):
+    def _describe_column(self, column) -> None:
         # temp_column = self.spark_df.select(column).where(col(column).isNotNull())
         # return self.spark_df.select(
         #     [

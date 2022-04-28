@@ -41,7 +41,7 @@ class CheckpointStore(ConfigurationStore):
 
         return checkpoint_config_dict
 
-    def serialization_self_check(self, pretty_print: bool):
+    def serialization_self_check(self, pretty_print: bool) -> None:
         test_checkpoint_name: str = "test-name-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )

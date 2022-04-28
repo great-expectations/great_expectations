@@ -38,7 +38,7 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(TableExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass
 
     @classmethod
@@ -50,5 +50,5 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(TableExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass

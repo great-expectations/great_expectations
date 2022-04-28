@@ -1,9 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
+from inspect import isabstract
 from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.expectations.registry import register_data_assistant
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -24,11 +26,34 @@ from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.util import measure_execution_time
+from great_expectations.util import camel_to_snake, measure_execution_time
 from great_expectations.validator.validator import Validator
 
 
-class DataAssistant(ABC):
+# noinspection PyMethodParameters
+class MetaDataAssistant(ABCMeta):
+    """
+    MetaDataAssistant registers every DataAssistant class as it is defined, it them to the DataAssistant registry.
+
+    Any class inheriting from DataAssistant will be registered by snake-casing the name of the class.
+    """
+
+    def __new__(cls, clsname, bases, attrs):
+        """
+        Instantiate class as part of descentants calling "__init__()" and register its type in "DataAssistant" registry.
+        """
+        newclass = super().__new__(cls, clsname, bases, attrs)
+
+        # noinspection PyUnresolvedReferences
+        if not newclass.is_abstract():
+            # Only particular "DataAssistant" implementations must be registered.
+            newclass.data_assistant_type = camel_to_snake(name=clsname)
+            register_data_assistant(data_assistant=newclass)
+
+        return newclass
+
+
+class DataAssistant(metaclass=MetaDataAssistant):
     """
     DataAssistant is an application built on top of the Rule-Based Profiler component.
     DataAssistant subclasses provide exploration and validation of particular aspects of specified data Batch objects.
@@ -39,7 +64,12 @@ class DataAssistant(ABC):
         name="my_volume_data_assistant",
         validator=validator,
     )
-    result: DataAssistantResult = data_assistant.run()
+    result: DataAssistantResult = data_assistant.run(
+        expectation_suite=None,
+        expectation_suite_name="my_suite",
+        include_citation=True,
+        save_updated_expectation_suite=False,
+    )
 
     Then:
         metrics: Dict[Domain, Dict[str, ParameterNode]] = result.metrics
@@ -53,7 +83,7 @@ class DataAssistant(ABC):
         self,
         name: str,
         validator: Validator,
-    ):
+    ) -> None:
         """
         DataAssistant subclasses guide "RuleBasedProfiler" to contain Rule configurations to embody profiling behaviors,
         corresponding to indended exploration and validation goals.  Then executing "RuleBasedProfiler.run()" yields
@@ -140,6 +170,7 @@ class DataAssistant(ABC):
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
+        save_updated_expectation_suite: bool = False,
     ) -> DataAssistantResult:
         """
         Run the DataAssistant as it is currently configured.
@@ -149,6 +180,7 @@ class DataAssistant(ABC):
             expectation_suite_name: A name for returned "ExpectationSuite"
             include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
             as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
+            save_updated_expectation_suite: Flag, constrolling whether or not updated "ExpectationSuite" must be saved
 
         Returns:
             DataAssistantResult: The result object for the DataAssistant
@@ -167,6 +199,7 @@ class DataAssistant(ABC):
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
+            save_updated_expectation_suite=save_updated_expectation_suite,
         )
         return self._build_data_assistant_result(
             data_assistant_result=data_assistant_result
@@ -179,6 +212,16 @@ class DataAssistant(ABC):
     @property
     def profiler(self) -> BaseRuleBasedProfiler:
         return self._profiler
+
+    @classmethod
+    def is_abstract(cls) -> bool:
+        """
+        This method inspects the present class and determines whether or not it contains abstract methods.
+
+        Returns:
+            Boolean value (True if all interface methods are implemented; otherwise, False)
+        """
+        return isabstract(cls)
 
     @property
     @abstractmethod
@@ -296,28 +339,6 @@ class DataAssistant(ABC):
 
         return parameter_values_for_fully_qualified_parameter_names_by_domain
 
-    def get_expectation_suite(
-        self,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-        include_citation: bool = True,
-    ) -> ExpectationSuite:
-        """
-        Args:
-            expectation_suite: An existing "ExpectationSuite" to update
-            expectation_suite_name: A name for returned "ExpectationSuite"
-            include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
-            as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
-
-        Returns:
-            "ExpectationSuite" using "ExpectationConfiguration" objects, computed by "RuleBasedProfiler" state
-        """
-        return self.profiler.get_expectation_suite(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            include_citation=include_citation,
-        )
-
 
 @measure_execution_time(
     execution_time_holder_object_reference_name="data_assistant_result",
@@ -335,7 +356,25 @@ def run_profiler_on_data(
     expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
     include_citation: bool = True,
+    save_updated_expectation_suite: bool = False,
 ) -> None:
+    """
+    This method executes "run()" of effective "RuleBasedProfiler" and fills "DataAssistantResult" object with outputs.
+
+    Args:
+        data_assistant: Containing "DataAssistant" object, which defines interfaces for computing "DataAssistantResult"
+        data_assistant_result: Destination "DataAssistantResult" object to hold outputs of executing "RuleBasedProfiler"
+        profiler: Effective "RuleBasedProfiler", representing containing "DataAssistant" object
+        variables: attribute name/value pairs (overrides), commonly-used in Builder objects
+        rules: name/(configuration-dictionary) (overrides)
+        batch_list: Explicit list of Batch objects to supply data at runtime
+        batch_request: Explicit batch_request used to supply data at runtime
+        expectation_suite: An existing "ExpectationSuite" to update
+        expectation_suite_name: A name for returned "ExpectationSuite"
+        include_citation: Flag, which controls whether or not to effective Profiler configuration should be included
+        as a citation in metadata of the "ExpectationSuite" computeds and returned by "RuleBasedProfiler"
+        save_updated_expectation_suite: Flag, constrolling whether or not updated "ExpectationSuite" must be saved
+    """
     if rules is None:
         rules = []
 
@@ -354,8 +393,9 @@ def run_profiler_on_data(
     result: DataAssistantResult = data_assistant_result
     result.profiler_config = profiler.config
     result.metrics_by_domain = data_assistant.get_metrics_by_domain()
-    result.expectation_suite = data_assistant.get_expectation_suite(
+    result.expectation_suite = profiler.get_expectation_suite(
         expectation_suite=expectation_suite,
         expectation_suite_name=expectation_suite_name,
         include_citation=include_citation,
+        save_updated_expectation_suite=save_updated_expectation_suite,
     )

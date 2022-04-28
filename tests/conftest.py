@@ -52,6 +52,9 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
+    NumericMetricRangeMultiBatchParameterBuilder,
+)
 from great_expectations.rule_based_profiler.types import Domain, ParameterNode
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
@@ -61,6 +64,7 @@ from great_expectations.self_check.util import (
     get_dataset,
 )
 from great_expectations.util import is_library_loadable
+from tests.rule_based_profiler.parameter_builder.conftest import RANDOM_SEED
 
 yaml = YAML()
 ###
@@ -2396,7 +2400,7 @@ def profiler_config_with_placeholder_args(
                         "my_arg": "$parameter.my_parameter.value[0]",
                         "my_other_arg": "$parameter.my_parameter.value[1]",
                         "meta": {
-                            "details": {
+                            "profiler_details": {
                                 "my_parameter_estimator": "$parameter.my_parameter.details",
                                 "note": "Important remarks about estimation algorithm.",
                             },
@@ -2674,23 +2678,21 @@ def alice_columnar_table_single_batch(empty_data_context):
                     expectation_type="expect_column_values_to_match_strftime_format",
                     kwargs={
                         "column": column_data["column_name"],
-                        "strftime_format": {
-                            "value": event_ts_column_data[
-                                "observed_strftime_format"
-                            ],  # Pin to event_ts column
-                            "details": {
-                                "success_ratio": 1.0,
-                                "candidate_strings": expected_candidate_strings_dict,
-                            },
-                        },
+                        "strftime_format": event_ts_column_data[
+                            "observed_strftime_format"
+                        ],  # Pin to event_ts column
                     },
                     meta={
+                        "profiler_details": {
+                            "success_ratio": 1.0,
+                            "candidate_strings": expected_candidate_strings_dict,
+                        },
                         "notes": {
                             "format": "markdown",
                             "content": [
                                 "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                             ],
-                        }
+                        },
                     },
                 ),
             ]
@@ -3026,17 +3028,18 @@ def alice_columnar_table_single_batch(empty_data_context):
                     {
                         "column": "$domain.domain_kwargs.column",
                         "meta": {
+                            "profiler_details": "$parameter.my_date_format.details",
                             "notes": {
                                 "format": "markdown",
                                 "content": [
                                     "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                                 ],
-                            }
+                            },
                         },
                         "expectation_type": "expect_column_values_to_match_strftime_format",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "strftime_format": "$parameter.my_date_format",
+                        "strftime_format": "$parameter.my_date_format.value",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "validation_parameter_builder_configs": None,
                     },
@@ -3920,7 +3923,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "expectation_type": "expect_column_values_to_match_strftime_format",
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "success_ratio": 1.0,
                         "candidate_strings": {
                             "%Y-%m-%d %H:%M:%S": 1.0,
@@ -3944,7 +3947,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "expectation_type": "expect_column_values_to_match_strftime_format",
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "success_ratio": 1.0,
                         "candidate_strings": {
                             "%Y-%m-%d %H:%M:%S": 1.0,
@@ -3973,7 +3976,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "strftime_format": "%Y-%m-%d %H:%M:%S",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "success_ratio": 1.0,
                         "candidate_strings": {
                             "%Y-%m-%d %H:%M:%S": 1.0,
@@ -3997,7 +4000,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "strftime_format": "%Y-%m-%d %H:%M:%S",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "success_ratio": 1.0,
                         "candidate_strings": {
                             "%Y-%m-%d %H:%M:%S": 1.0,
@@ -4026,7 +4029,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "regex": r"^\d{1}$",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
                         "success_ratio": 1.0,
                     },
@@ -4047,7 +4050,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "regex": r"^\d{1}$",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
                         "success_ratio": 1.0,
                     },
@@ -4068,7 +4071,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "regex": r"^\d{1}$",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
                         "success_ratio": 1.0,
                     },
@@ -4089,7 +4092,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "regex": r"^\d{1}$",
                 },
                 "meta": {
-                    "details": {
+                    "profiler_details": {
                         "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
                         "success_ratio": 1.0,
                     },
@@ -4325,7 +4328,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     {
                         "column": "$domain.domain_kwargs.column",
                         "meta": {
-                            "details": "$parameter.my_date_format.details",
+                            "profiler_details": "$parameter.my_date_format.details",
                             "notes": {
                                 "format": "markdown",
                                 "content": [
@@ -4373,7 +4376,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     {
                         "column": "$domain.domain_kwargs.column",
                         "meta": {
-                            "details": "$parameter.my_regex.details",
+                            "profiler_details": "$parameter.my_regex.details",
                             "notes": {
                                 "format": "markdown",
                                 "content": [
@@ -5959,3 +5962,23 @@ def taxi_test_file_directory():
 def test_df_pandas():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     return test_df
+
+
+@pytest.fixture
+def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder(
+    monkeypatch,
+) -> None:
+    """Utility to ensure that the probabilistic nature of the
+    NumericMetricRangeMultiBatchParameterBuilder is made deterministic for the
+    purposes of testing.
+
+    Usage: Simply put this fixture as an arg of a given test (function-scoped)
+    """
+    monkeypatch.setattr(
+        NumericMetricRangeMultiBatchParameterBuilder,
+        "bootstrap_random_seed",
+        RANDOM_SEED,
+    )
+    logger.info(
+        "Set the bootstrap_random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
+    )
