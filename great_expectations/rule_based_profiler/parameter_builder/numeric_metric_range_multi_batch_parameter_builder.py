@@ -27,6 +27,9 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
+)
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_numeric
 
@@ -397,7 +400,9 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
             if np.all(np.isclose(metric_value_vector, metric_value_vector[0])):
                 # Computation is unnecessary if distribution is degenerate.
                 numeric_range_estimation_result = NumericRangeEstimationResult(
-                    estimation_histogram=np.histogram(a=metric_value_vector)[0],
+                    estimation_histogram=np.histogram(
+                        a=metric_value_vector, bins=NUM_HISTOGRAM_BINS
+                    )[0],
                     value_range=np.array(
                         [metric_value_vector[0], metric_value_vector[0]]
                     ),

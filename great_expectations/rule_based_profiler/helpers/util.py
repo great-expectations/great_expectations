@@ -27,6 +27,9 @@ from great_expectations.rule_based_profiler.types import (
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
+from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
+)
 from great_expectations.types import safe_deep_copy
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -423,7 +426,7 @@ def compute_quantiles(
         axis=0,
     )
     return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(a=metric_values)[0],
+        estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
         value_range=np.array([lower_quantile, upper_quantile]),
     )
 
@@ -562,7 +565,9 @@ def compute_bootstrap_quantiles_point_estimate(
         )
 
     return NumericRangeEstimationResult(
-        estimation_histogram=np.histogram(a=bootstraps.flatten())[0],
+        estimation_histogram=np.histogram(
+            a=bootstraps.flatten(), bins=NUM_HISTOGRAM_BINS
+        )[0],
         value_range=[
             lower_quantile_bias_corrected_point_estimate,
             upper_quantile_bias_corrected_point_estimate,
