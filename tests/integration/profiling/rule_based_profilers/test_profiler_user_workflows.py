@@ -1776,30 +1776,9 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
 )
 @freeze_time(TIMESTAMP)
 def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes(
-    quentin_columnar_table_multi_batch_data_context,
+    quentin_validator: Validator,
 ):
-    context: DataContext = quentin_columnar_table_multi_batch_data_context
-
-    result: ExpectationValidationResult
-
-    custom_profiler_config: RuleBasedProfilerConfig
-
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-    }
-
-    validator: Validator = get_validator_with_expectation_suite(
-        batch_request=batch_request,
-        data_context=context,
-        expectation_suite_name=None,
-        expectation_suite=None,
-        component_name="profiler",
-    )
-    assert len(validator.batches) == 36
-
-    parameter_builder_batch_request: dict
+    validator: Validator = quentin_validator
 
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
