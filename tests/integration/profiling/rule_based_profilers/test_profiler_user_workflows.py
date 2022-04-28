@@ -398,6 +398,35 @@ def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler
     }
 
 
+@freeze_time(TIMESTAMP)
+def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    alice_validator: Validator,
+) -> None:
+    validator: Validator = alice_validator
+
+    result: ExpectationValidationResult = (
+        validator.expect_column_values_to_match_strftime_format(
+            column="event_ts",
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
+    )
+
+    assert result.success
+
+    expectation_config_kwargs: dict = result.expectation_config.kwargs
+    assert expectation_config_kwargs == {
+        "auto": True,
+        "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
+        "column": "event_ts",
+        "include_config": True,
+        "mostly": 1.0,
+        "strftime_format": "%Y-%m-%d %H:%M:%S",
+        "result_format": "SUMMARY",
+    }
+
+
 # noinspection PyUnusedLocal
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     monkeypatch,
