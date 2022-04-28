@@ -42,7 +42,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.core.util import nested_update
+from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -53,7 +53,6 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
-    get_expectation_impl,
     get_metric_kwargs,
     register_expectation,
     register_renderer,
@@ -71,7 +70,6 @@ from great_expectations.render.types import (
     renderedAtomicValueSchema,
 )
 from great_expectations.render.util import num_to_str
-from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
