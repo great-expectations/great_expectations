@@ -61,7 +61,9 @@ validation_notification_slack_webhook: [address to web hook]
 
 ### 2. Include the `send_slack_notification_on_validation_result` Action in your Checkpoint configuration
 
-Open the `.yml` file in `great_expectations/checkpoints` that corresponds to the checkpoint you want to add Slack notifications to.  Add the `send_slack_notification_on_validation_result` Action to the `action_list` section of the configuration. Make sure the following section exists in the Checkpoint configuration.
+Open the `.yml` configuration file in `great_expectations/checkpoints` that corresponds to the <TechnicalTag tag="checkpoint" text="Checkpoint" /> you want to add Slack notifications to.  
+
+Add the `send_slack_notification_on_validation_result` Action to the `action_list` section of the configuration. Make sure the following section exists in the Checkpoint configuration.
 
 <Tabs
   groupId="webhook-or-app"
