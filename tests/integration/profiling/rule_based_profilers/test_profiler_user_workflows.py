@@ -12,7 +12,11 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations import DataContext
-from great_expectations.core import ExpectationSuite, ExpectationValidationResult
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationValidationResult,
+)
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.expectations.registry import get_expectation_impl
@@ -181,6 +185,13 @@ def test_alice_profiler_user_workflow_single_batch(
         ],
         include_citation=True,
     )
+
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in expectation_suite.expectations:
+        if "profiler_details" in expectation_configuration.meta:
+            expectation_configuration.meta["profiler_details"].pop(
+                "estimation_histogram", None
+            )
 
     assert (
         expectation_suite.expectations
@@ -398,6 +409,35 @@ def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler
     }
 
 
+@freeze_time(TIMESTAMP)
+def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    alice_validator: Validator,
+) -> None:
+    validator: Validator = alice_validator
+
+    result: ExpectationValidationResult = (
+        validator.expect_column_values_to_match_strftime_format(
+            column="event_ts",
+            result_format="SUMMARY",
+            include_config=True,
+            auto=True,
+        )
+    )
+
+    assert result.success
+
+    expectation_config_kwargs: dict = result.expectation_config.kwargs
+    assert expectation_config_kwargs == {
+        "auto": True,
+        "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
+        "column": "event_ts",
+        "include_config": True,
+        "mostly": 1.0,
+        "strftime_format": "%Y-%m-%d %H:%M:%S",
+        "result_format": "SUMMARY",
+    }
+
+
 # noinspection PyUnusedLocal
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     monkeypatch,
@@ -526,6 +566,13 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     fixture_expectation_suite: ExpectationSuite = bobby_columnar_table_multi_batch[
         "test_configuration_oneshot_estimator"
     ]["expected_expectation_suite"]
+
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in profiled_expectation_suite.expectations:
+        if "profiler_details" in expectation_configuration.meta:
+            expectation_configuration.meta["profiler_details"].pop(
+                "estimation_histogram", None
+            )
 
     assert (
         profiled_expectation_suite.expectations
