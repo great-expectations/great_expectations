@@ -72,7 +72,7 @@ def test_get_batch_with_split_on_year(
     num_values_in_df,
     simple_multi_year_pandas_df: pd.DataFrame,
 ):
-    engine = PandasExecutionEngine()
+    engine: PandasExecutionEngine = PandasExecutionEngine()
 
     split_df: pd.DataFrame = engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -86,11 +86,6 @@ def test_get_batch_with_split_on_year(
     ).dataframe
     assert len(split_df) == num_values_in_df
     assert len(split_df.columns) == 2
-
-
-# TODO: AJB 20220428 Change these e.g. (test_get_batch_with_split_on_year)
-#  integration tests to unit tests by mocking and just
-#  checking that the correct method was called with the correct params.
 
 
 @pytest.mark.integration
@@ -111,7 +106,7 @@ def test_get_batch_with_split_on_date_parts_day(
     num_values_in_df,
     simple_multi_year_pandas_df: pd.DataFrame,
 ):
-    engine = PandasExecutionEngine()
+    engine: PandasExecutionEngine = PandasExecutionEngine()
 
     split_df: pd.DataFrame = engine.get_batch_data(
         RuntimeDataBatchSpec(
