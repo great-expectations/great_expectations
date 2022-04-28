@@ -1,6 +1,5 @@
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     build_simple_domains_from_column_names,
@@ -38,12 +37,8 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         max_unexpected_values: Union[str, int] = 0,
         max_unexpected_ratio: Optional[Union[str, float]] = None,
         min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         Create column domains using tolerance for inter-Batch proportion of adherence to intra-Batch "unexpected_count"
         value of specified "map_metric_name" as criterion for emitting Domain for column under consideration.
@@ -64,11 +59,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             max_unexpected_values: maximum "unexpected_count" value of "map_metric_name" (intra-Batch)
             max_unexpected_ratio: maximum "unexpected_count" value of "map_metric_name" divided by number of records
             (intra-Batch); if both "max_unexpected_values" and "max_unexpected_ratio" are specified, then
-            "max_unexpected_ratio" is used (and "max_unexpected_values" is ignored).
+            "max_unexpected_ratio" is used (and "max_unexpected_values" is ignored)
             min_max_unexpected_values_proportion: minimum fraction of Batch objects adhering to "max_unexpected_values"
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: BatchRequest to be optionally used to define batches to consider for this domain builder.
-            data_context: DataContext associated with this profiler.
+            data_context: BaseDataContext associated with this DomainBuilder
 
         For example (using default values of "max_unexpected_values" and "min_max_unexpected_values_proportion"):
         Suppose that "map_metric_name" is "column_values.nonnull" and consider the following three Batches of data:
@@ -103,8 +96,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             semantic_type_filter_class_name=semantic_type_filter_class_name,
             include_semantic_types=include_semantic_types,
             exclude_semantic_types=exclude_semantic_types,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
         )
 

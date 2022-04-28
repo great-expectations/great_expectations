@@ -3,7 +3,6 @@ from typing import Dict
 import pytest
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.core.batch import BatchRequest
 from great_expectations.marshmallow__shade.exceptions import ValidationError
 from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
@@ -369,21 +368,10 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
     profiler_with_placeholder_args: RuleBasedProfiler,
 ) -> None:
-    datasource_name: str = "my_datasource"
-    data_connector_name: str = "my_basic_data_connector"
-    data_asset_name: str = "my_data_asset"
-
-    batch_request: BatchRequest = BatchRequest(
-        datasource_name=datasource_name,
-        data_connector_name=data_connector_name,
-        data_asset_name=data_asset_name,
-    )
-
     runtime_override_rule: dict = {
         "domain_builder": {
             "class_name": "TableDomainBuilder",
             "module_name": "great_expectations.rule_based_profiler.domain_builder",
-            "batch_request": batch_request,
         },
         "parameter_builders": [
             {
@@ -420,8 +408,8 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
     )
 
     domain_builder: dict = config.rules[runtime_override_rule_name]["domain_builder"]
-    converted_batch_request: dict = domain_builder["batch_request"]
 
-    assert converted_batch_request["datasource_name"] == datasource_name
-    assert converted_batch_request["data_connector_name"] == data_connector_name
-    assert converted_batch_request["data_asset_name"] == data_asset_name
+    assert domain_builder == {
+        "class_name": "TableDomainBuilder",
+        "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
+    }

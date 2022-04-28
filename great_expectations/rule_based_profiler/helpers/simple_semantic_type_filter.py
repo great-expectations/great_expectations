@@ -5,8 +5,6 @@ from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.rule_based_profiler.types import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
-)
-from great_expectations.rule_based_profiler.types.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -22,7 +20,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         batch_ids: Optional[List[str]] = None,
         validator: Optional["Validator"] = None,  # noqa: F821
         column_names: Optional[List[str]] = None,
-    ):
+    ) -> None:
         self._table_column_name_to_inferred_semantic_domain_type_mapping = (
             self._get_table_column_name_to_inferred_semantic_domain_type_mapping(
                 batch_ids=batch_ids,

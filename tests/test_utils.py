@@ -31,7 +31,6 @@ from great_expectations.data_context.util import (
     build_store_from_config,
     instantiate_class_from_config,
 )
-from great_expectations.datasource.data_connector import InferredAssetSqlDataConnector
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -463,6 +462,24 @@ def get_snowflake_connection_url() -> str:
     return f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 
 
+def get_bigquery_table_prefix() -> str:
+    """Get table_prefix that will be used by the BigQuery client in loading a BigQuery table from DataFrame.
+
+    Reference link
+        https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
+
+    Returns:
+        String of table prefix, which is the gcp_project and dataset concatenated by a "."
+    """
+    gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+        )
+    bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "test_ci")
+    return f"""{gcp_project}.{bigquery_dataset}"""
+
+
 def get_bigquery_connection_url() -> str:
     """Get bigquery connection url from environment variables.
 
@@ -489,6 +506,45 @@ class LoadedTable:
     inserted_dataframe: pd.DataFrame
 
 
+def load_and_concatenate_csvs(
+    csv_paths: List[str],
+    load_full_dataset: bool = False,
+    convert_column_names_to_datetime: Optional[List[str]] = None,
+) -> pd.DataFrame:
+    """Utility method that is used in loading test data into a pandas dataframe.
+
+    It includes several parameters used to describe the output data.
+
+    Args:
+        csv_paths: list of paths of csvs to write, can be a single path. These should all be the same shape.
+        load_full_dataset: if False, load only the first 10 rows.
+        convert_column_names_to_datetime: List of column names to convert to datetime before writing to db.
+
+    Returns:
+        A pandas dataframe concatenating data loaded from all csvs.
+    """
+
+    if convert_column_names_to_datetime is None:
+        convert_column_names_to_datetime = []
+
+    import pandas as pd
+
+    dfs: List[pd.DataFrame] = []
+    for csv_path in csv_paths:
+        df = pd.read_csv(csv_path)
+        for column_name_to_convert in convert_column_names_to_datetime:
+            df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
+        if not load_full_dataset:
+            # Improving test performance by only loading the first 10 rows of our test data into the db
+            df = df.head(10)
+
+        dfs.append(df)
+
+    all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
+
+    return all_dfs_concatenated
+
+
 def load_data_into_test_database(
     table_name: str,
     connection_string: str,
@@ -513,41 +569,24 @@ def load_data_into_test_database(
             same prefix.
 
     Returns:
-        For convenience, the pandas dataframe that was used to load the data.
+        LoadedTable which for convenience, contains the pandas dataframe that was used to load the data.
     """
     if csv_path and csv_paths:
         csv_paths.append(csv_path)
     elif csv_path and not csv_paths:
         csv_paths = [csv_path]
 
-    if convert_colnames_to_datetime is None:
-        convert_colnames_to_datetime = []
+    all_dfs_concatenated: pd.DataFrame = load_and_concatenate_csvs(
+        csv_paths, load_full_dataset, convert_colnames_to_datetime
+    )
 
     if random_table_suffix:
         table_name: str = f"{table_name}_{str(uuid.uuid4())[:8]}"
 
-    import pandas as pd
-
-    print("Generating dataframe of all csv data")
-    dfs: List[pd.DataFrame] = []
-    for csv_path in csv_paths:
-        df = pd.read_csv(csv_path)
-        for colname_to_convert in convert_colnames_to_datetime:
-            df[colname_to_convert] = pd.to_datetime(df[colname_to_convert])
-        if not load_full_dataset:
-            # Improving test performance by only loading the first 10 rows of our test data into the db
-            df = df.head(10)
-
-        dfs.append(df)
-
-    all_dfs_concatenated: pd.DataFrame = pd.concat(dfs)
-
     return_value: LoadedTable = LoadedTable(
         table_name=table_name, inserted_dataframe=all_dfs_concatenated
     )
-
     connection = None
-
     if sa:
         engine = sa.create_engine(connection_string)
     else:
@@ -556,23 +595,57 @@ def load_data_into_test_database(
             "install optional sqlalchemy dependency for support."
         )
         return return_value
-    try:
-        connection = engine.connect()
-        print(f"Dropping table {table_name}")
-        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-        print(f"Creating table {table_name} and adding data from {csv_paths}")
-        all_dfs_concatenated.to_sql(
-            name=table_name, con=engine, index=False, if_exists="append"
+    if engine.dialect.name.lower() == "bigquery":
+        # bigquery is handled in a special way
+        load_data_into_test_bigquery_database_with_bigquery_client(
+            dataframe=all_dfs_concatenated, table_name=table_name
         )
         return return_value
-    except SQLAlchemyError as e:
-        logger.error(
-            """Docs integration tests encountered an error while loading test-data into test-database."""
+    else:
+        try:
+            connection = engine.connect()
+            print(f"Dropping table {table_name}")
+            connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+            print(f"Creating table {table_name} and adding data from {csv_paths}")
+            all_dfs_concatenated.to_sql(
+                name=table_name, con=engine, index=False, if_exists="append"
+            )
+            return return_value
+        except SQLAlchemyError as e:
+            logger.error(
+                """Docs integration tests encountered an error while loading test-data into test-database."""
+            )
+            raise
+        finally:
+            connection.close()
+            engine.dispose()
+
+
+def load_data_into_test_bigquery_database_with_bigquery_client(
+    dataframe: pd.DataFrame, table_name: str
+) -> None:
+    """
+    Loads dataframe into bigquery table using BigQuery client. Follows pattern specified in the GCP documentation here:
+        - https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
+    Args:
+        dataframe (pd.DataFrame): DataFrame to load
+        table_name (str): table to load DataFrame to. Prefix containing project and dataset are loaded
+                        by helper function.
+    """
+    prefix: str = get_bigquery_table_prefix()
+    table_id: str = f"""{prefix}.{table_name}"""
+    from google.cloud import bigquery
+
+    gcp_project: Optional[str] = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
         )
-        raise
-    finally:
-        connection.close()
-        engine.dispose()
+    client: bigquery.Client = bigquery.Client(project=gcp_project)
+    job: bigquery.LoadJob = client.load_table_from_dataframe(
+        dataframe, table_id
+    )  # Make an API request.
+    job.result()  # Wait for the job to complete
 
 
 def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> List[str]:

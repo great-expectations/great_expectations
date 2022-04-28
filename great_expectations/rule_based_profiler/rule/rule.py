@@ -42,7 +42,7 @@ class Rule(SerializableDictDot):
         expectation_configuration_builders: Optional[
             List[ExpectationConfigurationBuilder]
         ] = None,
-    ):
+    ) -> None:
         """
         Sets Rule name, variables, domain builder, parameters builders, configuration builders, and other instance data.
 
@@ -78,7 +78,6 @@ class Rule(SerializableDictDot):
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
         recompute_existing_parameter_values: bool = False,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
     ) -> RuleState:
@@ -90,7 +89,6 @@ class Rule(SerializableDictDot):
             variables: Attribute name/value pairs, commonly-used in Builder objects
             batch_list: Explicit list of Batch objects to supply data at runtime
             batch_request: Explicit batch_request used to supply data at runtime
-            force_batch_data: Whether or not to overwrite any existing batch_request value in Builder components
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
             reconciliation_directives: directives for how each rule component should be overwritten
 
@@ -111,7 +109,6 @@ class Rule(SerializableDictDot):
                 variables=variables,
                 batch_list=batch_list,
                 batch_request=batch_request,
-                force_batch_data=force_batch_data,
             )
         )
         rule_state: RuleState = RuleState(
@@ -136,7 +133,6 @@ class Rule(SerializableDictDot):
                     json_serialize=None,
                     batch_list=batch_list,
                     batch_request=batch_request,
-                    force_batch_data=force_batch_data,
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
                 )
 
@@ -153,7 +149,6 @@ class Rule(SerializableDictDot):
                     parameters=rule_state.parameters,
                     batch_list=batch_list,
                     batch_request=batch_request,
-                    force_batch_data=force_batch_data,
                     recompute_existing_parameter_values=recompute_existing_parameter_values,
                 )
 
@@ -173,7 +168,7 @@ class Rule(SerializableDictDot):
         return copy.deepcopy(self._variables)
 
     @variables.setter
-    def variables(self, value: Optional[ParameterContainer]):
+    def variables(self, value: Optional[ParameterContainer]) -> None:
         self._variables = value
 
     @property

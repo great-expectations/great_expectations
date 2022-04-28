@@ -153,7 +153,7 @@ stages:
            displayName: 'Import Great Expectations'
 
   - stage: required
-    dependsOn: [scope_check, lint, import_ge]
+    dependsOn: [scope_check, lint, import_ge, custom_checks]
     pool:
       vmImage: 'ubuntu-18.04'
 
@@ -318,15 +318,16 @@ stages:
               # These are tests that are missed by the dgtest dependency graph.
               # In order to ensure coverage, we run them during each CI/CD cycle.
               pytest \
-                tests/test_deprecation.py \
+                tests/core/test_urn.py \
                 tests/data_asset/test_data_asset_util.py \
+                tests/data_context/test_data_context_store_configs.py \
+                tests/data_context/test_templates.py \
+                tests/dataset/test_pandas_dataset_conditionals.py \
                 tests/datasource/test_batch_kwargs.py \
                 tests/datasource/test_sqlalchemy_datasource_workarounds.py \
-                tests/data_context/test_templates.py \
-                tests/data_context/test_data_context_store_configs.py \
-                tests/core/test_urn.py \
-                tests/dataset/test_pandas_dataset_conditionals.py \
-                tests/expectations/test_generate_diagnostic_checklist.py
+                tests/expectations/test_generate_diagnostic_checklist.py \
+                tests/test_deprecation.py \
+                tests/test_packaging.py
 
             displayName: 'dgtest-overrides'
 
@@ -343,7 +344,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint, import_ge]
+    dependsOn: [scope_check, lint, import_ge, custom_checks]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -379,7 +380,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint, import_ge]
+    dependsOn: [scope_check, lint, import_ge, custom_checks]
 
     jobs:
       - job: mysql
@@ -472,7 +473,7 @@ stages:
             displayName: 'dgtest'
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint, import_ge]
+    dependsOn: [scope_check, lint, import_ge, custom_checks]
     pool:
       vmImage: 'ubuntu-latest'
 

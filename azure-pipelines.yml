@@ -81,6 +81,25 @@ stages:
               pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
+  - stage: custom_checks
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+    - job: type_hint_checker
+      condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+      steps:
+      - script: |
+          pip install mypy # Prereq for type hint script
+          python scripts/check_type_hint_coverage.py
+        name: TypeHintChecker
+
+    - job: docstring_checker
+      condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+      steps:
+      - bash: python scripts/check_docstring_coverage.py
+        name: DocstringChecker
+
   - stage: import_ge
     dependsOn: [lint]
     pool:
@@ -117,13 +136,14 @@ stages:
            displayName: 'Import Great Expectations'
 
   - stage: required
-    dependsOn: [lint, import_ge]
+    dependsOn: [lint, import_ge, custom_checks]
     pool:
       vmImage: 'ubuntu-18.04'
 
     jobs:
       - job: compatibility_matrix
         condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
         variables:
           GE_pytest_opts: '--no-sqlalchemy'
         strategy:
@@ -207,6 +227,7 @@ stages:
 
       - job: comprehensive
         condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true), eq(variables.isManual, true))
+        timeoutInMinutes: 75
 
         services:
           postgres: postgres
@@ -276,7 +297,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [lint, import_ge]
+    dependsOn: [lint, import_ge, custom_checks]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -310,7 +331,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [lint, import_ge]
+    dependsOn: [lint, import_ge, custom_checks]
 
     jobs:
       - job: mysql
@@ -389,7 +410,7 @@ stages:
             displayName: 'pytest'
 
   - stage: cli_integration
-    dependsOn: [lint, import_ge]
+    dependsOn: [lint, import_ge, custom_checks]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -432,7 +453,7 @@ stages:
     condition: and(succeeded(), eq(variables.isMain, true))
     pool:
       vmImage: 'ubuntu-18.04'
-    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
+    dependsOn: [import_ge, custom_checks, required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
       - job: build_gallery
@@ -524,7 +545,7 @@ stages:
     condition: and(succeeded(), eq(variables.isMain, true))
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
+    dependsOn: [import_ge, custom_checks, required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
       - job: deploy

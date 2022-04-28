@@ -1,6 +1,8 @@
 import copy
 import datetime
 import logging
+import random
+import string
 import traceback
 import warnings
 from pathlib import Path
@@ -10,6 +12,7 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
@@ -216,7 +219,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
-    ):
+    ) -> None:
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
 
@@ -346,7 +349,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event="execution_engine.sqlalchemy.connect",
+                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
                 event_payload={
                     "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
@@ -867,9 +870,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
-            queries[domain_id]["select"].append(
-                engine_fn.label(metric_to_resolve.metric_name)
-            )
+            if self.engine.dialect.name == "clickhouse":
+                queries[domain_id]["select"].append(
+                    engine_fn.label(
+                        metric_to_resolve.metric_name.join(
+                            random.choices(string.ascii_lowercase, k=2)
+                        )
+                    )
+                )
+            else:
+                queries[domain_id]["select"].append(
+                    engine_fn.label(metric_to_resolve.metric_name)
+                )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
             domain_kwargs = query["domain_kwargs"]
@@ -1113,7 +1125,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_table_name: str = batch_spec.get("table_name", None)
 
         temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
-        temp_table_name: Optional[str] = batch_spec.get("bigquery_temp_table")
+
+        if batch_spec.get("bigquery_temp_table"):
+            # deprecated-v0.15.3
+            warnings.warn(
+                "BigQuery tables that are created as the result of a query are no longer created as "
+                "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
+                "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
+                "v0.15.3 and will be removed in v0.18.",
+                DeprecationWarning,
+            )
 
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
@@ -1128,7 +1149,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=self,
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
-                temp_table_name=temp_table_name,
                 create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,
@@ -1146,7 +1166,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,
-                temp_table_name=temp_table_name,
                 create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,

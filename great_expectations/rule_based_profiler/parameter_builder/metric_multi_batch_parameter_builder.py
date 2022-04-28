@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional, Union
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -15,10 +14,10 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
-    Attributes,
     Domain,
     ParameterContainer,
 )
+from great_expectations.types.attributes import Attributes
 
 
 class MetricMultiBatchParameterBuilder(ParameterBuilder):
@@ -40,12 +39,8 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             List[ParameterBuilderConfig]
         ] = None,
         json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         Args:
             name: the name of this parameter -- this is user-specified parameter name (from configuration);
@@ -62,16 +57,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
-            batch_list=batch_list,
-            batch_request=batch_request,
             data_context=data_context,
         )
 

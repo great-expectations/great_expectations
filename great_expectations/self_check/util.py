@@ -273,6 +273,7 @@ except (ImportError, KeyError):
     mssqlDialect = None
     MSSQL_TYPES = {}
 
+import tempfile
 
 SQL_DIALECT_NAMES = (
     "sqlite",
@@ -284,7 +285,7 @@ SQL_DIALECT_NAMES = (
 
 
 class SqlAlchemyConnectionManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self.lock = threading.Lock()
         self._connections = {}
 
@@ -309,7 +310,7 @@ connection_manager = SqlAlchemyConnectionManager()
 
 
 class LockingConnectionCheck:
-    def __init__(self, sa, connection_string):
+    def __init__(self, sa, connection_string) -> None:
         self.lock = threading.Lock()
         self.sa = sa
         self.connection_string = connection_string
@@ -1084,7 +1085,7 @@ def build_sa_validator_with_data(
 
 def modify_locale(func):
     @wraps(func)
-    def locale_wrapper(*args, **kwargs):
+    def locale_wrapper(*args, **kwargs) -> None:
         old_locale = locale.setlocale(locale.LC_TIME, None)
         print(old_locale)
         # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
@@ -1580,10 +1581,26 @@ def generate_expectation_tests(
 
         for c in backends:
 
+            datasets = []
+
             try:
-                validator_with_data = get_test_validator_with_data(
-                    c, d["data"], d["schemas"]
-                )
+                if isinstance(d["data"], list):
+                    sqlite_db_path = generate_sqlite_db_path()
+                    for dataset in d["data"]:
+                        datasets.append(
+                            get_test_validator_with_data(
+                                c,
+                                dataset["data"],
+                                dataset.get("schemas"),
+                                table_name=dataset.get("dataset_name"),
+                                sqlite_db_path=sqlite_db_path,
+                            )
+                        )
+                    validator_with_data = datasets[0]
+                else:
+                    validator_with_data = get_test_validator_with_data(
+                        c, d["data"], d["schemas"]
+                    )
             except Exception as e:
                 # Adding these print statements for build_gallery.py's console output
                 print("\n\n[[ Problem calling get_test_validator_with_data ]]")
@@ -1689,7 +1706,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test(data_asset, expectation_type, test):
+def evaluate_json_test(data_asset, expectation_type, test) -> None:
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -1840,7 +1857,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
     return (result, error_message, stack_trace)
 
 
-def check_json_test_result(test, result, data_asset=None):
+def check_json_test_result(test, result, data_asset=None) -> None:
     # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
     if "unexpected_list" in result["result"]:
         if ("result" in test["output"]) and (
@@ -2052,3 +2069,25 @@ def _bigquery_dataset() -> str:
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
         )
     return dataset
+
+
+def generate_sqlite_db_path():
+    """Creates a temporary directory and absolute path to an ephemeral sqlite_db within that temp directory.
+
+    Used to support testing of multi-table expectations without creating temp directories at import.
+
+    Returns:
+        str: An absolute path to the ephemeral db within the created temporary directory.
+    """
+    tmp_dir = str(tempfile.mkdtemp())
+    abspath = os.path.abspath(
+        os.path.join(
+            tmp_dir,
+            "sqlite_db"
+            + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+            + ".db",
+        )
+    )
+    return abspath
