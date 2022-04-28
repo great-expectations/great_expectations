@@ -13,8 +13,6 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     SemanticDomainTypes,
-)
-from great_expectations.rule_based_profiler.types.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration

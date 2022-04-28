@@ -2504,6 +2504,16 @@ def test_get_metrics_and_expectations_using_explicit_instantiation(
     )
 
     assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
+
+    expectation_configuration: ExpectationConfiguration
+    for (
+        expectation_configuration
+    ) in data_assistant_result.expectation_suite.expectations:
+        if "profiler_details" in expectation_configuration.meta:
+            expectation_configuration.meta["profiler_details"].pop(
+                "estimation_histogram", None
+            )
+
     assert (
         data_assistant_result.expectation_suite.expectations
         == expected_expectation_suite.expectations
@@ -2561,6 +2571,16 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
     )
 
     assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
+
+    expectation_configuration: ExpectationConfiguration
+    for (
+        expectation_configuration
+    ) in data_assistant_result.expectation_suite.expectations:
+        if "profiler_details" in expectation_configuration.meta:
+            expectation_configuration.meta["profiler_details"].pop(
+                "estimation_histogram", None
+            )
+
     assert (
         data_assistant_result.expectation_suite.expectations
         == expected_expectation_suite.expectations

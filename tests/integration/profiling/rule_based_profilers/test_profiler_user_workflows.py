@@ -12,7 +12,11 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations import DataContext
-from great_expectations.core import ExpectationSuite, ExpectationValidationResult
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+    ExpectationValidationResult,
+)
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.expectations.registry import get_expectation_impl
@@ -181,6 +185,13 @@ def test_alice_profiler_user_workflow_single_batch(
         ],
         include_citation=True,
     )
+
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in expectation_suite.expectations:
+        if "profiler_details" in expectation_configuration.meta:
+            expectation_configuration.meta["profiler_details"].pop(
+                "estimation_histogram", None
+            )
 
     assert (
         expectation_suite.expectations
@@ -555,6 +566,13 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     fixture_expectation_suite: ExpectationSuite = bobby_columnar_table_multi_batch[
         "test_configuration_oneshot_estimator"
     ]["expected_expectation_suite"]
+
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in profiled_expectation_suite.expectations:
+        if "profiler_details" in expectation_configuration.meta:
+            expectation_configuration.meta["profiler_details"].pop(
+                "estimation_histogram", None
+            )
 
     assert (
         profiled_expectation_suite.expectations

@@ -21,10 +21,14 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.rule_based_profiler.types import (
     VARIABLES_PREFIX,
     Domain,
+    NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
+)
+from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -410,7 +414,7 @@ def convert_variables_to_dict(
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-) -> Tuple[Number, Number]:
+) -> NumericRangeEstimationResult:
     lower_quantile = np.quantile(
         metric_values,
         q=(false_positive_rate / 2),
@@ -421,7 +425,10 @@ def compute_quantiles(
         q=1.0 - (false_positive_rate / 2),
         axis=0,
     )
-    return lower_quantile, upper_quantile
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
+        value_range=np.array([lower_quantile, upper_quantile]),
+    )
 
 
 def compute_bootstrap_quantiles_point_estimate(
@@ -429,7 +436,7 @@ def compute_bootstrap_quantiles_point_estimate(
     false_positive_rate: np.float64,
     n_resamples: int,
     random_seed: Optional[int] = None,
-) -> Tuple[Number, Number]:
+) -> NumericRangeEstimationResult:
     """
     ML Flow Experiment: parameter_builders_bootstrap/bootstrap_quantiles
     ML Flow Experiment ID: 4129654509298109
@@ -557,9 +564,14 @@ def compute_bootstrap_quantiles_point_estimate(
             bootstrap_upper_quantile_point_estimate - bootstrap_upper_quantile_bias
         )
 
-    return (
-        lower_quantile_bias_corrected_point_estimate,
-        upper_quantile_bias_corrected_point_estimate,
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(
+            a=bootstraps.flatten(), bins=NUM_HISTOGRAM_BINS
+        )[0],
+        value_range=[
+            lower_quantile_bias_corrected_point_estimate,
+            upper_quantile_bias_corrected_point_estimate,
+        ],
     )
 
 
