@@ -174,7 +174,7 @@ class PandasDataSplitter(DataSplitter):
         column_name: str,
         batch_identifiers: dict,
         date_format_string: str = "%Y-%m-%d",
-    ):
+    ) -> pd.DataFrame:
         """Convert the values in the named column to the given date_format, and split on that"""
         stringified_datetime_series = df[column_name].map(
             lambda x: x.strftime(date_format_string)
@@ -185,7 +185,7 @@ class PandasDataSplitter(DataSplitter):
     @staticmethod
     def split_on_divided_integer(
         df, column_name: str, divisor: int, batch_identifiers: dict
-    ):
+    ) -> pd.DataFrame:
         """Divide the values in the named column by `divisor`, and split on that"""
 
         matching_divisor = batch_identifiers[column_name]
@@ -196,7 +196,9 @@ class PandasDataSplitter(DataSplitter):
         return df[matching_rows]
 
     @staticmethod
-    def split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
+    def split_on_mod_integer(
+        df, column_name: str, mod: int, batch_identifiers: dict
+    ) -> pd.DataFrame:
         """Divide the values in the named column by `divisor`, and split on that"""
 
         matching_mod_value = batch_identifiers[column_name]
@@ -207,7 +209,7 @@ class PandasDataSplitter(DataSplitter):
     @staticmethod
     def split_on_multi_column_values(
         df, column_names: List[str], batch_identifiers: dict
-    ):
+    ) -> pd.DataFrame:
         """Split on the joint values in the named columns"""
 
         subset_df = df.copy()
@@ -229,7 +231,7 @@ class PandasDataSplitter(DataSplitter):
         hash_digits: int,
         batch_identifiers: dict,
         hash_function_name: str = "md5",
-    ):
+    ) -> pd.DataFrame:
         """Split on the hashed value of the named column"""
         try:
             hash_method = getattr(hashlib, hash_function_name)
