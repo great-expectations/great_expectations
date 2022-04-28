@@ -139,7 +139,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -152,7 +152,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -203,7 +203,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -216,7 +216,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -252,7 +252,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "my_arg": "$parameter.my_parameter.value[0]",
                     "my_other_arg": "$parameter.my_parameter.value[1]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -323,7 +323,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
                     "my_arg": "$parameter.my_parameter.value[0]",
                     "my_other_arg": "$parameter.my_parameter.value[1]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -419,7 +419,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "my_arg": "$parameter.my_parameter.value[0]",
                     "my_other_arg": "$parameter.my_parameter.value[1]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -456,7 +456,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -469,7 +469,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -507,7 +507,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -520,7 +520,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -578,7 +578,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -591,7 +591,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -644,7 +644,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "my_other_arg": "$parameter.my_parameter.value[1]",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -657,7 +657,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -714,7 +714,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -754,7 +754,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -819,7 +819,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -832,7 +832,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -883,7 +883,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -896,7 +896,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
                     "column": "$domain.domain_kwargs.column",
                     "my_another_arg": "$parameter.my_other_parameter.value[0]",
                     "meta": {
-                        "details": {
+                        "profiler_details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
                             "note": "Important remarks about estimation algorithm.",
                         },
@@ -1117,7 +1117,7 @@ def test_serialize_profiler_config(
         "my_arg": "$parameter.my_parameter.value[0]",
         "my_other_arg": "$parameter.my_parameter.value[1]",
         "meta": {
-            "details": {
+            "profiler_details": {
                 "my_parameter_estimator": "$parameter.my_parameter.details",
                 "note": "Important remarks about estimation algorithm.",
             },
