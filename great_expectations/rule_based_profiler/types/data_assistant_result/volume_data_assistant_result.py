@@ -11,6 +11,9 @@ from great_expectations.rule_based_profiler.types.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
+from great_expectations.rule_based_profiler.types.data_assistant_result.chart import (
+    Chart,
+)
 
 
 class VolumeDataAssistantResult(DataAssistantResult):
@@ -20,7 +23,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         theme: Optional[Dict[str, Any]] = None,
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
-    ) -> List[dict]:
+    ) -> Chart:
         """
         VolumeDataAssistant-specific plots are defined with Altair and passed to "display()" for presentation.
 
@@ -59,7 +62,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         self.display(charts=charts, theme=theme)
 
-        return [chart.to_dict() for chart in charts]
+        return Chart(
+            table_domain_charts=table_domain_charts,
+            column_domain_chart=column_domain_chart,
+        )
 
     def _plot_table_domain_charts(
         self,

@@ -18,6 +18,9 @@ from great_expectations.rule_based_profiler.types.altair import (
     AltairDataTypes,
     AltairThemes,
 )
+from great_expectations.rule_based_profiler.types.data_assistant_result.chart import (
+    Chart,
+)
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
 
@@ -509,7 +512,7 @@ class DataAssistantResult(SerializableDictDot):
         self,
         prescriptive: bool = False,
         theme: Optional[Dict[str, Any]] = None,
-    ) -> List[dict]:
+    ) -> Chart:
         """
         Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
 

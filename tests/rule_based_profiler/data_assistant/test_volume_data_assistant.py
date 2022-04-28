@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List
 
 import nbconvert
 import nbformat
@@ -20,6 +20,9 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
+)
+from great_expectations.rule_based_profiler.types.data_assistant_result.chart import (
+    Chart,
 )
 from great_expectations.rule_based_profiler.types.data_assistant_result.volume_data_assistant_result import (
     VolumeDataAssistantResult,
@@ -2922,21 +2925,19 @@ def test_volume_data_assistant_plot_prescriptive_theme_notebook_execution(
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_table_domain_chart(
     volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    charts: List[dict] = volume_data_assistant_result.plot()
-    assert len(charts) == 2
+    chart: Chart = volume_data_assistant_result.plot()
 
-    table_domain_chart: dict = charts[0]
+    table_domain_chart: dict = chart.table_domain_charts[0].to_dict()
     assert find_strings_in_nested_obj(table_domain_chart, ["Table Row Count per Batch"])
 
 
 def test_volume_data_assistant_plot_returns_proper_dict_repr_of_column_domain_chart(
     volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
-    charts: List[dict] = volume_data_assistant_result.plot()
-    assert len(charts) == 2
+    chart: Chart = volume_data_assistant_result.plot()
 
-    column_domain_chart: dict = charts[1]
-    assert len(charts[1]["vconcat"]) == 18  # One for each column present
+    column_domain_chart: dict = chart.column_domain_chart.to_dict()
+    assert len(column_domain_chart["vconcat"]) == 18  # One for each column present
 
     columns: List[str] = [
         "VendorID",
@@ -2965,12 +2966,11 @@ def test_volume_data_assistant_plot_include_column_names_filters_output(
     volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     include_column_names: List[str] = ["VendorID", "pickup_datetime"]
-    charts: List[dict] = volume_data_assistant_result.plot(
+    chart: Chart = volume_data_assistant_result.plot(
         include_column_names=include_column_names
     )
-    assert len(charts) == 2
 
-    column_domain_chart: dict = charts[1]
+    column_domain_chart: dict = chart.column_domain_chart.to_dict()
     assert len(column_domain_chart["vconcat"]) == 2  # Normally 18 without filtering
     assert find_strings_in_nested_obj(column_domain_chart, include_column_names)
 
@@ -2979,12 +2979,11 @@ def test_volume_data_assistant_plot_exclude_column_names_filters_output(
     volume_data_assistant_result: VolumeDataAssistantResult,
 ) -> None:
     exclude_column_names: List[str] = ["VendorID", "pickup_datetime"]
-    charts: List[dict] = volume_data_assistant_result.plot(
+    chart: Chart = volume_data_assistant_result.plot(
         exclude_column_names=exclude_column_names
     )
-    assert len(charts) == 2
 
-    column_domain_chart: dict = charts[1]
+    column_domain_chart: dict = chart.column_domain_chart.to_dict()
     assert len(column_domain_chart["vconcat"]) == 16  # Normally 18 without filtering
     assert not find_strings_in_nested_obj(column_domain_chart, exclude_column_names)
 
