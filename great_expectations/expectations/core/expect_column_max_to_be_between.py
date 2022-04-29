@@ -115,26 +115,25 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
-    max_range_estimator_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="NumericMetricRangeMultiBatchParameterBuilder",
-            name="max_range_estimator",
-            metric_name="column.max",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-            estimator=f"{VARIABLES_KEY}estimator",
-            num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
-            bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
-            truncate_values=f"{VARIABLES_KEY}truncate_values",
-            round_decimals=f"{VARIABLES_KEY}round_decimals",
-            evaluation_parameter_builder_configs=None,
-            json_serialize=True,
-        )
+    max_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="NumericMetricRangeMultiBatchParameterBuilder",
+        name="max_range_estimator",
+        metric_name="column.max",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        enforce_numeric_metric=True,
+        replace_nan_with_zero=True,
+        reduce_scalar_metric=True,
+        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        quantilie_statistic_interpolation_method=f"{VARIABLES_KEY}quantilie_statistic_interpolation_method",
+        estimator=f"{VARIABLES_KEY}estimator",
+        num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
+        bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
+        truncate_values=f"{VARIABLES_KEY}truncate_values",
+        round_decimals=f"{VARIABLES_KEY}round_decimals",
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         max_range_estimator_parameter_builder_config,
@@ -149,6 +148,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                     "strict_min": False,
                     "strict_max": False,
                     "false_positive_rate": 0.05,
+                    "quantilie_statistic_interpolation_method": "auto",
                     "estimator": "bootstrap",
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,

@@ -1579,7 +1579,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 2,
+                "variable_count": 4,
             },
             "event": "profiler.run",
             "success": True,
@@ -1752,7 +1752,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                     }
                 ],
                 "rule_count": 1,
-                "variable_count": 5,
+                "variable_count": 6,
             },
             "event": "profiler.run",
             "success": True,
@@ -1784,6 +1784,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             "num_bootstrap_samples": 9139,
             "bootstrap_random_seed": 43792,
             "false_positive_rate": 5.0e-2,
+            "quantilie_statistic_interpolation_method": "auto",
         },
         rules={
             "column_quantiles_rule": {
@@ -1805,6 +1806,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
                         "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
+                        "quantilie_statistic_interpolation_method": "$variables.quantilie_statistic_interpolation_method",
                         "round_decimals": 2,
                     }
                 ],
@@ -1881,6 +1883,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             "num_bootstrap_samples": 9139,
             "bootstrap_random_seed": 43792,
             "false_positive_rate": 5.0e-2,
+            "quantilie_statistic_interpolation_method": "auto",
         },
         rules={
             "column_quantiles_rule": {
@@ -1902,6 +1905,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
                         "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
+                        "quantilie_statistic_interpolation_method": "$variables.quantilie_statistic_interpolation_method",
                         "round_decimals": "$variables.round_decimals",
                     }
                 ],
@@ -2059,22 +2063,22 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
     rtol: float = 2.0e1 * RTOL
     atol: float = 2.0e1 * ATOL
 
-    min_value_actual: float = result.expectation_config["kwargs"]["min_value"]
-    min_value_expected: float = 1.5438e2
+    min_value_actual: int = result.expectation_config["kwargs"]["min_value"]
+    min_value_expected: int = 155
 
     np.testing.assert_allclose(
-        actual=min_value_actual,
-        desired=min_value_expected,
+        actual=float(min_value_actual),
+        desired=float(min_value_expected),
         rtol=rtol,
         atol=atol,
         err_msg=f"Actual value of {min_value_actual} differs from expected value of {min_value_expected} by more than {atol + rtol * abs(min_value_expected)} tolerance.",
     )
 
-    max_value_actual: float = result.expectation_config["kwargs"]["max_value"]
-    max_value_expected: float = 5.6314775e4
+    max_value_actual: int = result.expectation_config["kwargs"]["max_value"]
+    max_value_expected: int = 3004
     np.testing.assert_allclose(
-        actual=max_value_actual,
-        desired=max_value_expected,
+        actual=float(max_value_actual),
+        desired=float(max_value_expected),
         rtol=rtol,
         atol=atol,
         err_msg=f"Actual value of {max_value_actual} differs from expected value of {max_value_expected} by more than {atol + rtol * abs(max_value_expected)} tolerance.",
