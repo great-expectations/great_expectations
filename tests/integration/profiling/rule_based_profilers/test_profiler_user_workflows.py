@@ -93,6 +93,7 @@ def bobster_validator(
     bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 ) -> Validator:
+    """Utilizes a consistent bootstrap seed in its RBP NumericMetricRangeMultiBatchParameterBuilder."""
     context: DataContext = (
         bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context
     )
