@@ -16,7 +16,7 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
-from great_expectations.execution_engine.sqlalchemy_data_splitter import (
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
 
@@ -975,11 +975,33 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self.engine.execute(split_query).fetchall()
 
+    def get_data_for_batch_identifiers(
+        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
+    ) -> List[dict]:
+        """Build data used to construct batch identifiers for the input table using the provided splitter config.
+
+        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
+
+        Args:
+            table_name: Table to split.
+            splitter_method_name: Desired splitter method to use.
+            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
+
+        Returns:
+            List of dicts of the form [{column_name: {"key": value}}]
+        """
+        return self._data_splitter.get_data_for_batch_identifiers(
+            execution_engine=self,
+            table_name=table_name,
+            splitter_method_name=splitter_method_name,
+            splitter_kwargs=splitter_kwargs,
+        )
+
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
         if "splitter_method" in batch_spec:
-            splitter_fn: Callable = self.get_splitter_method(
+            splitter_fn: Callable = self._get_splitter_method(
                 splitter_method_name=batch_spec["splitter_method"]
             )
             split_clause = splitter_fn(
