@@ -953,45 +953,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             self.engine.dispose()
 
-    ### Sampling methods ###
-
-    # _sample_using_limit
-    # _sample_using_random
-    # _sample_using_mod
-    # _sample_using_a_list
-    # _sample_using_md5
-
-    # def _sample_using_mod(
-    #     self,
-    #     column_name: str,
-    #     mod: int,
-    #     value: int,
-    # ) -> bool:
-    #     """Take the mod of named column, and only keep rows that match the given value"""
-    #     return sa.column(column_name) % mod == value
-    #
-    # def _sample_using_a_list(
-    #     self,
-    #     column_name: str,
-    #     value_list: list,
-    # ) -> bool:
-    #     """Match the values in the named column against value_list, and only keep the matches"""
-    #     return sa.column(column_name).in_(value_list)
-    #
-    # def _sample_using_md5(
-    #     self,
-    #     column_name: str,
-    #     hash_digits: int = 1,
-    #     hash_value: str = "f",
-    # ) -> bool:
-    #     """Hash the values in the named column, and split on that"""
-    #     return (
-    #         sa.func.right(
-    #             sa.func.md5(sa.cast(sa.column(column_name), sa.Text)), hash_digits
-    #         )
-    #         == hash_value
-    #     )
-
     def get_splitter_method(self, splitter_method_name: str) -> Callable:
         """Get the appropriate splitter method from the method name.
 
