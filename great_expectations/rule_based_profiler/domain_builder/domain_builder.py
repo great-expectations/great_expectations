@@ -28,7 +28,7 @@ class DomainBuilder(ABC, Builder):
     def __init__(
         self,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Args:
             data_context: BaseDataContext associated with DomainBuilder
@@ -37,12 +37,14 @@ class DomainBuilder(ABC, Builder):
 
     def get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> List[Domain]:
         """
         Args:
+            rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: attribute name/value pairs
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
@@ -58,7 +60,7 @@ class DomainBuilder(ABC, Builder):
             batch_request=batch_request,
         )
 
-        return self._get_domains(variables=variables)
+        return self._get_domains(rule_name=rule_name, variables=variables)
 
     @property
     @abstractmethod
@@ -68,6 +70,7 @@ class DomainBuilder(ABC, Builder):
     @abstractmethod
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """

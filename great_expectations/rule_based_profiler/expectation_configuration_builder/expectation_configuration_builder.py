@@ -33,7 +33,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         ] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         **kwargs
-    ):
+    ) -> None:
         """
         The ExpectationConfigurationBuilder will build ExpectationConfiguration objects for a Domain from the Rule.
 

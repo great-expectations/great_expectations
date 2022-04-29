@@ -285,7 +285,7 @@ SQL_DIALECT_NAMES = (
 
 
 class SqlAlchemyConnectionManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self.lock = threading.Lock()
         self._connections = {}
 
@@ -310,7 +310,7 @@ connection_manager = SqlAlchemyConnectionManager()
 
 
 class LockingConnectionCheck:
-    def __init__(self, sa, connection_string):
+    def __init__(self, sa, connection_string) -> None:
         self.lock = threading.Lock()
         self.sa = sa
         self.connection_string = connection_string
@@ -1085,7 +1085,7 @@ def build_sa_validator_with_data(
 
 def modify_locale(func):
     @wraps(func)
-    def locale_wrapper(*args, **kwargs):
+    def locale_wrapper(*args, **kwargs) -> None:
         old_locale = locale.setlocale(locale.LC_TIME, None)
         print(old_locale)
         # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
@@ -1706,7 +1706,7 @@ def sort_unexpected_values(test_value_list, result_value_list):
     return test_value_list, result_value_list
 
 
-def evaluate_json_test(data_asset, expectation_type, test):
+def evaluate_json_test(data_asset, expectation_type, test) -> None:
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
@@ -1857,7 +1857,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test, raise_exception=Tr
     return (result, error_message, stack_trace)
 
 
-def check_json_test_result(test, result, data_asset=None):
+def check_json_test_result(test, result, data_asset=None) -> None:
     # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
     if "unexpected_list" in result["result"]:
         if ("result" in test["output"]) and (

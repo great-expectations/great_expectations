@@ -89,7 +89,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         usage_statistics_handler: Optional[UsageStatisticsHandler] = None,
-    ):
+    ) -> None:
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
 
@@ -1150,7 +1150,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return copy.deepcopy(self._variables)
 
     @variables.setter
-    def variables(self, value: Optional[ParameterContainer]):
+    def variables(self, value: Optional[ParameterContainer]) -> None:
         self._variables = value
         self.config.variables = convert_variables_to_dict(variables=value)
 
@@ -1159,7 +1159,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._rules
 
     @rules.setter
-    def rules(self, value: List[Rule]):
+    def rules(self, value: List[Rule]) -> None:
         self._rules = value
 
     @property
@@ -1167,7 +1167,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._citation
 
     @citation.setter
-    def citation(self, value: Optional[Dict[str, Any]]):
+    def citation(self, value: Optional[Dict[str, Any]]) -> None:
         self._citation = value
 
     @property
@@ -1279,7 +1279,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Create a new Profiler using configured rules.
         For a Rule or an item in a Rule configuration, instantiates the following if
@@ -1312,7 +1312,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         )
 
 
-def _validate_builder_override_config(builder_config: dict):
+def _validate_builder_override_config(builder_config: dict) -> None:
     """
     In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
     candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.
