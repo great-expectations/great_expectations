@@ -1786,6 +1786,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                                     "json_serialize": True,
                                     "estimator": "$variables.estimator",
+                                    # "interpolation_method": "linear",
                                     "reduce_scalar_metric": True,
                                     "metric_name": "table.row_count",
                                     "false_positive_rate": "$variables.false_positive_rate",
@@ -1812,6 +1813,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
                         "truncate_values": {"lower_bound": 0},
+                        # "interpolation_method": "linear",
                         "round_decimals": 0,
                     },
                     "domain_builder": {
@@ -2588,6 +2590,7 @@ def test_get_metrics_and_expectations_using_implicit_invocation(
 
     data_assistant_result.expectation_suite.meta.pop("great_expectations_version", None)
 
+    print(data_assistant_result.profiler_config)
     assert deep_filter_properties_iterable(
         properties=data_assistant_result.profiler_config.to_json_dict(),
         delete_fields={"bootstrap_random_seed"},

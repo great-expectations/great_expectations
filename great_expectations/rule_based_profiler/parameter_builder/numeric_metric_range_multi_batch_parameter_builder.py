@@ -62,6 +62,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         "lower_bound",
         "upper_bound",
     }
+    # https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
+    RECOGNIZED_INTERPOLATION_METHOD_NAMES: set = {"auto", "linear", "nearest"}
 
     def __init__(
         self,
@@ -73,6 +75,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         replace_nan_with_zero: Union[str, bool] = True,
         reduce_scalar_metric: Union[str, bool] = True,
         false_positive_rate: Union[str, float] = 5.0e-2,
+        interpolation_method="linear",
         estimator: str = "bootstrap",
         num_bootstrap_samples: Optional[Union[str, int]] = None,
         bootstrap_random_seed: Optional[Union[str, int]] = None,
@@ -137,6 +140,16 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
 
         self._round_decimals = round_decimals
 
+        # interpolation method can be one of these 3 values:
+        if (
+            interpolation_method
+            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_INTERPOLATION_METHOD_NAMES
+        ):
+            raise ge_exceptions.ProfilerConfigurationError(
+                "interpolation method needs to be either auto (default), linear or nearest"
+            )
+
+        self._interpolation_method = interpolation_method
         if not truncate_values:
             truncate_values = {
                 "lower_bound": None,
@@ -183,6 +196,10 @@ detected.
         self,
     ) -> Optional[Union[str, Dict[str, Union[Optional[int], Optional[float]]]]]:
         return self._truncate_values
+
+    @property
+    def interpolation_method(self) -> Optional[str]:
+        return self._interpolation_method
 
     @property
     def round_decimals(self) -> Optional[Union[str, int]]:
@@ -293,11 +310,13 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
                 "false_positive_rate": false_positive_rate,
                 "num_bootstrap_samples": self.num_bootstrap_samples,
                 "bootstrap_random_seed": self.bootstrap_random_seed,
+                "interpolation_method": self.interpolation_method,
             }
         else:
             estimator_func = self._get_deterministic_estimate
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
+                "interpolation_method": self.interpolation_method,
             }
 
         numeric_range_estimation_result: NumericRangeEstimationResult = (
@@ -350,6 +369,15 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
         )
         lower_bound: Optional[float] = truncate_values.get("lower_bound")
         upper_bound: Optional[float] = truncate_values.get("upper_bound")
+
+        # this is the method that is passed on
+        interpolation_method: str = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.interpolation_method,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
+        )
 
         round_decimals: int = self._get_round_decimals_using_heuristics(
             metric_values=metric_values,
@@ -468,6 +496,7 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        interpolation_method: str = "linear",
     ) -> Dict[str, Union[Optional[int], Optional[float]]]:
         # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         truncate_values: Dict[
@@ -544,6 +573,7 @@ positive integer, or must be omitted (or set to None).
     def _get_bootstrap_estimate(
         metric_values: np.ndarray,
         domain: Domain,
+        interpolation_method: str,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
@@ -581,11 +611,13 @@ positive integer, or must be omitted (or set to None).
             false_positive_rate=false_positive_rate,
             n_resamples=n_resamples,
             random_seed=random_seed,
+            interpolation_method=interpolation_method,
         )
 
     @staticmethod
     def _get_deterministic_estimate(
         metric_values: np.ndarray,
+        interpolation_method: str,
         **kwargs,
     ) -> NumericRangeEstimationResult:
         false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
@@ -593,4 +625,5 @@ positive integer, or must be omitted (or set to None).
         return compute_quantiles(
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
+            interpolation_method=interpolation_method,
         )

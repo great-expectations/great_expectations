@@ -167,6 +167,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         round_decimals=1,
         json_serialize=False,
         data_context=data_context,
+        interpolation_method="linear",
     )
 
     variables: Optional[ParameterContainer] = None

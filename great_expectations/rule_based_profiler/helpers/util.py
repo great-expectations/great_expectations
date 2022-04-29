@@ -414,16 +414,16 @@ def convert_variables_to_dict(
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
+    interpolation_method: str,
 ) -> NumericRangeEstimationResult:
     lower_quantile = np.quantile(
-        metric_values,
-        q=(false_positive_rate / 2),
-        axis=0,
+        metric_values, q=(false_positive_rate / 2), axis=0, method=interpolation_method
     )
     upper_quantile = np.quantile(
         metric_values,
         q=1.0 - (false_positive_rate / 2),
         axis=0,
+        method=interpolation_method,
     )
     return NumericRangeEstimationResult(
         estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
@@ -435,6 +435,7 @@ def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
+    interpolation_method: str,
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
     """
@@ -494,8 +495,12 @@ def compute_bootstrap_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2
 
-    sample_lower_quantile: np.ndarray = np.quantile(metric_values, q=lower_quantile_pct)
-    sample_upper_quantile: np.ndarray = np.quantile(metric_values, q=upper_quantile_pct)
+    sample_lower_quantile: np.ndarray = np.quantile(
+        metric_values, q=lower_quantile_pct, method=interpolation_method
+    )
+    sample_upper_quantile: np.ndarray = np.quantile(
+        metric_values, q=upper_quantile_pct, method=interpolation_method
+    )
 
     bootstraps: np.ndarray
     if random_seed:
@@ -511,9 +516,7 @@ def compute_bootstrap_quantiles_point_estimate(
         )
 
     bootstrap_lower_quantiles: Union[np.ndarray, Number] = np.quantile(
-        bootstraps,
-        q=lower_quantile_pct,
-        axis=1,
+        bootstraps, q=lower_quantile_pct, axis=1, method=interpolation_method
     )
     bootstrap_lower_quantile_point_estimate: float = np.mean(bootstrap_lower_quantiles)
     bootstrap_lower_quantile_standard_error: float = np.std(bootstrap_lower_quantiles)
@@ -536,9 +539,7 @@ def compute_bootstrap_quantiles_point_estimate(
         )
 
     bootstrap_upper_quantiles: Union[np.ndarray, Number] = np.quantile(
-        bootstraps,
-        q=upper_quantile_pct,
-        axis=1,
+        bootstraps, q=upper_quantile_pct, axis=1, method=interpolation_method
     )
     bootstrap_upper_quantile_point_estimate: np.ndarray = np.mean(
         bootstrap_upper_quantiles

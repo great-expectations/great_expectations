@@ -49,6 +49,7 @@ def test_bootstrap_point_estimate_efficacy(
             metric_values=distribution_samples[distribution],
             false_positive_rate=false_positive_rate,
             n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+            interpolation_method="linear",
         )
         lower_quantile_point_estimate = numeric_range_estimation_result.value_range[0]
         upper_quantile_point_estimate = numeric_range_estimation_result.value_range[1]
