@@ -433,9 +433,9 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
     """
     This method examines "INFERRED_SEMANTIC_TYPE_KEY" attribute of "Domain" argument to check whether or not underlying
     "SemanticDomainTypes" enum value is an "integer".  Because explicitly designated "SemanticDomainTypes.INTEGER" type
-    is unavaiable, "SemanticDomainTypes.LOGIC",  "SemanticDomainTypes.BINARY",  and "SemanticDomainTypes.IDENTIFIER",
-    are intepreted as taking on "integer" values.  Note: In certain settings, this method should be used as pre-filter
-    to "NumericMetricRangeMultiBatchParameterBuilder._get_round_decimals_using_heuristics()".
+    is unavaiable, "SemanticDomainTypes.LOGIC" and "SemanticDomainTypes.IDENTIFIER" are intepreted as "integer" values.
+
+    This method can be used "NumericMetricRangeMultiBatchParameterBuilder._get_round_decimals_using_heuristics()".
 
     Note: Inability to assess underlying "SemanticDomainTypes" details of "Domain" object produces "False" return value.
 
@@ -457,7 +457,6 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
             semantic_domain_type
             in [
                 SemanticDomainTypes.LOGIC,
-                SemanticDomainTypes.BINARY,
                 SemanticDomainTypes.IDENTIFIER,
             ]
             for semantic_domain_type in (inferred_semantic_domain_type.values())
