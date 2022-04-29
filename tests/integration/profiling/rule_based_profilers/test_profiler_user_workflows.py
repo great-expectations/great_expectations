@@ -19,6 +19,7 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
@@ -613,7 +614,8 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     domain = Domain(
-        domain_type="table",
+        rule_name="row_count_range_rule",
+        domain_type=MetricDomainTypes.TABLE,
     )
 
     profiled_fully_qualified_parameter_names_for_domain_id: List[
@@ -651,6 +653,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     domain = Domain(
+        rule_name="column_ranges_rule",
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
         details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},

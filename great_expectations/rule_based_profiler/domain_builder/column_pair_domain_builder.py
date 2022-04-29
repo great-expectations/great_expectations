@@ -39,11 +39,13 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """Return domains matching the specified tolerance limits.
 
         Args:
+            rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
 
         Returns:
@@ -78,6 +80,7 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
 
         domains: List[Domain] = [
             Domain(
+                rule_name=rule_name,
                 domain_type=self.domain_type,
                 domain_kwargs=domain_kwargs,
             ),

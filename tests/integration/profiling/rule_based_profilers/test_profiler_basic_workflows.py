@@ -8,6 +8,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
     DomainBuilder,
@@ -20,6 +21,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 )
 from great_expectations.rule_based_profiler.rule.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    SemanticDomainTypes,
+)
 
 
 @pytest.fixture
@@ -84,13 +89,51 @@ def test_domain_builder(data_context_with_taxi_data):
         include_column_name_suffixes=["_amount"],
         data_context=context,
     )
-    domains: list = domain_builder.get_domains(batch_request=batch_request)
+    domains: list = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
     assert len(domains) == 4
     assert domains == [
-        {"domain_type": "column", "domain_kwargs": {"column": "fare_amount"}},
-        {"domain_type": "column", "domain_kwargs": {"column": "tip_amount"}},
-        {"domain_type": "column", "domain_kwargs": {"column": "tolls_amount"}},
-        {"domain_type": "column", "domain_kwargs": {"column": "total_amount"}},
+        {
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
+            "domain_kwargs": {
+                "column": "fare_amount",
+            },
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC.value,
+            },
+        },
+        {
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
+            "domain_kwargs": {
+                "column": "tip_amount",
+            },
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC.value,
+            },
+        },
+        {
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
+            "domain_kwargs": {
+                "column": "tolls_amount",
+            },
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC.value,
+            },
+        },
+        {
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
+            "domain_kwargs": {
+                "column": "total_amount",
+            },
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC.value,
+            },
+        },
     ]
 
 

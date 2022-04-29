@@ -47,6 +47,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -172,6 +173,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
     )
@@ -353,6 +355,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -402,6 +405,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -451,6 +455,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -507,6 +512,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     variables: Optional[ParameterContainer] = None
 
     domain: Domain = Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)

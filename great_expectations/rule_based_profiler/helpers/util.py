@@ -19,11 +19,13 @@ from great_expectations.core.batch import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
     VARIABLES_PREFIX,
     Domain,
     NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
+    SemanticDomainTypes,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
 )
@@ -365,23 +367,37 @@ def get_resolved_metrics_by_key(
     return resolved_metrics_by_key
 
 
-def build_simple_domains_from_column_names(
+def build_domains_from_column_names(
+    rule_name: str,
     column_names: List[str],
-    domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN,
+    domain_type: MetricDomainTypes,
+    table_column_name_to_inferred_semantic_domain_type_map: Optional[
+        Dict[str, SemanticDomainTypes]
+    ] = None,
 ) -> List[Domain]:
     """
     This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
 
+    :param rule_name: name of Rule object, for which "Domain" objects are obtained.
     :param column_names: list of column names to serve as values for "column" keys in "domain_kwargs" dictionary
     :param domain_type: type of Domain objects (same "domain_type" must be applicable to all Domain objects returned)
+    :param table_column_name_to_inferred_semantic_domain_type_map: map from column name to inferred semantic type
     :return: list of resulting Domain objects
     """
     column_name: str
     domains: List[Domain] = [
         Domain(
+            rule_name=rule_name,
             domain_type=domain_type,
             domain_kwargs={
                 "column": column_name,
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: table_column_name_to_inferred_semantic_domain_type_map[
+                    column_name
+                ]
+                if table_column_name_to_inferred_semantic_domain_type_map
+                else None,
             },
         )
         for column_name in column_names

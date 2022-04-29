@@ -11,6 +11,7 @@ def test_semantic_domain_serialization():
     domain: Domain
 
     domain = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={
@@ -20,6 +21,7 @@ def test_semantic_domain_serialization():
     )
 
     assert domain.to_json_dict() == {
+        "rule_name": "my_rule",
         "domain_type": "column",
         "domain_kwargs": {"column": "passenger_count"},
         "details": {
@@ -29,6 +31,7 @@ def test_semantic_domain_serialization():
     }
 
     domain = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={
@@ -39,6 +42,7 @@ def test_semantic_domain_serialization():
     )
 
     assert domain.to_json_dict() == {
+        "rule_name": "my_rule",
         "domain_type": "column",
         "domain_kwargs": {
             "column": "passenger_count",
@@ -51,6 +55,7 @@ def test_semantic_domain_serialization():
     }
 
     domain = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={
@@ -61,6 +66,7 @@ def test_semantic_domain_serialization():
     )
 
     assert domain.to_json_dict() == {
+        "rule_name": "my_rule",
         "domain_type": "column",
         "domain_kwargs": {
             "column": "passenger_count",
@@ -79,16 +85,19 @@ def test_semantic_domain_comparisons():
     domain_c: Domain
 
     domain_a = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
         details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
     )
     domain_b = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
     )
     domain_c = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
@@ -98,16 +107,19 @@ def test_semantic_domain_comparisons():
     assert domain_b == domain_c
 
     domain_a = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
         details={INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC},
     )
     domain_b = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC},
     )
     domain_c = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC},
@@ -117,6 +129,7 @@ def test_semantic_domain_comparisons():
     assert domain_b == domain_c
 
     domain_d: Domain = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={INFERRED_SEMANTIC_TYPE_KEY: "unknown_semantic_type_as_string"},
@@ -132,6 +145,7 @@ def test_semantic_domain_comparisons():
     )
 
     domain_e: Domain = Domain(
+        rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={
