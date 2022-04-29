@@ -101,7 +101,9 @@ def test_domain_builder(data_context_with_taxi_data):
                 "column": "fare_amount",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "fare_amount": SemanticDomainTypes.NUMERIC.value,
+                },
             },
         },
         {
@@ -111,7 +113,9 @@ def test_domain_builder(data_context_with_taxi_data):
                 "column": "tip_amount",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "tip_amount": SemanticDomainTypes.NUMERIC.value,
+                },
             },
         },
         {
@@ -121,7 +125,9 @@ def test_domain_builder(data_context_with_taxi_data):
                 "column": "tolls_amount",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "tolls_amount": SemanticDomainTypes.NUMERIC.value,
+                },
             },
         },
         {
@@ -131,7 +137,9 @@ def test_domain_builder(data_context_with_taxi_data):
                 "column": "total_amount",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "total_amount": SemanticDomainTypes.NUMERIC.value,
+                },
             },
         },
     ]

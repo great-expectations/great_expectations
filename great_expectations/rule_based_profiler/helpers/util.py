@@ -393,9 +393,11 @@ def build_domains_from_column_names(
                 "column": column_name,
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: table_column_name_to_inferred_semantic_domain_type_map[
-                    column_name
-                ]
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    column_name: table_column_name_to_inferred_semantic_domain_type_map[
+                        column_name
+                    ],
+                }
                 if table_column_name_to_inferred_semantic_domain_type_map
                 else None,
             },

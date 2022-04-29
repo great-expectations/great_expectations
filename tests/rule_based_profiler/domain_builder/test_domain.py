@@ -37,7 +37,9 @@ def test_semantic_domain_serialization():
         details={
             "estimator": "categorical",
             "cardinality": "low",
-            INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.CURRENCY,
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC,
+            },
         },
     )
 
@@ -50,7 +52,9 @@ def test_semantic_domain_serialization():
         "details": {
             "estimator": "categorical",
             "cardinality": "low",
-            INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.CURRENCY.value,
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+            },
         },
     }
 
@@ -61,7 +65,9 @@ def test_semantic_domain_serialization():
         details={
             "estimator": "categorical",
             "cardinality": "low",
-            INFERRED_SEMANTIC_TYPE_KEY: "currency",
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+            },
         },
     )
 
@@ -74,7 +80,9 @@ def test_semantic_domain_serialization():
         "details": {
             "estimator": "categorical",
             "cardinality": "low",
-            INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.CURRENCY.value,
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+            },
         },
     }
 
@@ -88,19 +96,31 @@ def test_semantic_domain_comparisons():
         rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
-        details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "VendorID": SemanticDomainTypes.NUMERIC.value,
+            },
+        },
     )
     domain_b = Domain(
         rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
-        details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+            },
+        },
     )
     domain_c = Domain(
         rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
-        details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+            },
+        },
     )
 
     assert not (domain_a == domain_b)
@@ -110,19 +130,31 @@ def test_semantic_domain_comparisons():
         rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
-        details={INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "VendorID": SemanticDomainTypes.NUMERIC.value,
+            },
+        },
     )
     domain_b = Domain(
         rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
-        details={INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+            },
+        },
     )
     domain_c = Domain(
         rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
-        details={INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+            },
+        },
     )
 
     assert not (domain_a == domain_b)
@@ -132,7 +164,11 @@ def test_semantic_domain_comparisons():
         rule_name="my_rule",
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
-        details={INFERRED_SEMANTIC_TYPE_KEY: "unknown_semantic_type_as_string"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": "unknown_semantic_type_as_string",
+            },
+        },
     )
 
     with pytest.raises(ValueError) as excinfo:
@@ -151,7 +187,9 @@ def test_semantic_domain_comparisons():
         details={
             "estimator": "categorical",
             "cardinality": "low",
-            INFERRED_SEMANTIC_TYPE_KEY: "unknown_semantic_type_as_string",
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "passenger_count": "unknown_semantic_type_as_string",
+            },
         },
     )
 

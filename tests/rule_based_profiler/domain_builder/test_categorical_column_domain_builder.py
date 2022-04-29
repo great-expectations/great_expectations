@@ -298,7 +298,9 @@ def test_multi_batch_very_few_cardinality(
                 "column": "VendorID",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "VendorID": SemanticDomainTypes.NUMERIC,
+                },
             },
         ),
         Domain(
@@ -308,7 +310,9 @@ def test_multi_batch_very_few_cardinality(
                 "column": "passenger_count",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "passenger_count": SemanticDomainTypes.NUMERIC,
+                },
             },
         ),
         Domain(
@@ -318,7 +322,9 @@ def test_multi_batch_very_few_cardinality(
                 "column": "RatecodeID",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "RatecodeID": SemanticDomainTypes.NUMERIC,
+                },
             },
         ),
         Domain(
@@ -328,7 +334,9 @@ def test_multi_batch_very_few_cardinality(
                 "column": "store_and_fwd_flag",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.TEXT,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "store_and_fwd_flag": SemanticDomainTypes.TEXT,
+                },
             },
         ),
         Domain(
@@ -338,7 +346,9 @@ def test_multi_batch_very_few_cardinality(
                 "column": "payment_type",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "payment_type": SemanticDomainTypes.NUMERIC,
+                }
             },
         ),
         Domain(
@@ -348,7 +358,9 @@ def test_multi_batch_very_few_cardinality(
                 "column": "mta_tax",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "mta_tax": SemanticDomainTypes.NUMERIC,
+                },
             },
         ),
         Domain(
@@ -358,7 +370,9 @@ def test_multi_batch_very_few_cardinality(
                 "column": "improvement_surcharge",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "improvement_surcharge": SemanticDomainTypes.NUMERIC,
+                },
             },
         ),
         Domain(
@@ -368,7 +382,9 @@ def test_multi_batch_very_few_cardinality(
                 "column": "congestion_surcharge",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "congestion_surcharge": SemanticDomainTypes.NUMERIC,
+                },
             },
         ),
     ]

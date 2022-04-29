@@ -134,14 +134,14 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         for key, value in self["details"].items():
             if value:
                 if key == INFERRED_SEMANTIC_TYPE_KEY:
+                    column_name: str
                     semantic_type: Union[str, SemanticDomainTypes]
-                    if isinstance(value, str):
-                        semantic_type = value.lower()
-                        semantic_type = SemanticDomainTypes(semantic_type)
-                    else:
-                        semantic_type = value
-
-                    value = semantic_type.value
+                    value = {
+                        column_name: SemanticDomainTypes(semantic_type.lower()).value
+                        if isinstance(semantic_type, str)
+                        else semantic_type.value
+                        for column_name, semantic_type in value.items()
+                    }
 
             details[key] = convert_to_json_serializable(data=value)
 

@@ -33,6 +33,7 @@ from great_expectations.rule_based_profiler.types import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     ParameterNode,
+    SemanticDomainTypes,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -710,7 +711,11 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         rule_name="column_ranges_rule",
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
-        details={INFERRED_SEMANTIC_TYPE_KEY: "numeric"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "VendorID": SemanticDomainTypes.NUMERIC,
+            },
+        },
     )
 
     profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[

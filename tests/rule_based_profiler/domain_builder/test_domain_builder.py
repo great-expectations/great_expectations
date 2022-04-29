@@ -114,7 +114,9 @@ def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
                 "column": "a",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.TEXT.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "a": SemanticDomainTypes.TEXT.value,
+                },
             },
         },
     ]
@@ -158,7 +160,9 @@ def test_column_domain_builder(
                 "column": "id",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.TEXT.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "id": SemanticDomainTypes.TEXT.value,
+                },
             },
         },
         {
@@ -168,7 +172,9 @@ def test_column_domain_builder(
                 "column": "event_type",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "event_type": SemanticDomainTypes.NUMERIC.value,
+                },
             },
         },
         {
@@ -178,7 +184,9 @@ def test_column_domain_builder(
                 "column": "user_id",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "user_id": SemanticDomainTypes.NUMERIC.value,
+                },
             },
         },
         {
@@ -188,7 +196,9 @@ def test_column_domain_builder(
                 "column": "event_ts",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.TEXT.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "event_ts": SemanticDomainTypes.TEXT.value,
+                },
             },
         },
         {
@@ -198,7 +208,9 @@ def test_column_domain_builder(
                 "column": "server_ts",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.TEXT.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "server_ts": SemanticDomainTypes.TEXT.value,
+                },
             },
         },
         {
@@ -208,7 +220,9 @@ def test_column_domain_builder(
                 "column": "device_ts",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.TEXT.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "device_ts": SemanticDomainTypes.TEXT.value,
+                },
             },
         },
         {
@@ -218,7 +232,9 @@ def test_column_domain_builder(
                 "column": "user_agent",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.TEXT.value,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "user_agent": SemanticDomainTypes.TEXT.value,
+                },
             },
         },
     ]
@@ -268,7 +284,9 @@ def test_column_domain_builder_with_simple_semantic_type_included(
                 "column": "event_type",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: "numeric",
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "event_type": SemanticDomainTypes.NUMERIC.value,
+                },
             },
         },
         {
@@ -278,7 +296,9 @@ def test_column_domain_builder_with_simple_semantic_type_included(
                 "column": "user_id",
             },
             "details": {
-                INFERRED_SEMANTIC_TYPE_KEY: "numeric",
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "user_id": SemanticDomainTypes.NUMERIC.value,
+                },
             },
         },
     ]
@@ -374,7 +394,12 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
                 "column_A": "event_type",
                 "column_B": "user_id",
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "event_type": SemanticDomainTypes.NUMERIC.value,
+                    "user_id": SemanticDomainTypes.NUMERIC.value,
+                },
+            },
         }
     ]
 
@@ -485,7 +510,13 @@ def test_multi_column_domain_builder_correct_column_list(
                     "user_agent",
                 ],
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "event_type": SemanticDomainTypes.NUMERIC.value,
+                    "user_id": SemanticDomainTypes.NUMERIC.value,
+                    "user_agent": SemanticDomainTypes.TEXT.value,
+                },
+            },
         }
     ]
 

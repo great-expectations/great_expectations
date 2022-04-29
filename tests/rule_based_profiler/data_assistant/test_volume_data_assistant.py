@@ -133,7 +133,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "vendor_id",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "vendor_id": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -231,7 +233,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "pickup_datetime",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.TEXT,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "pickup_datetime": SemanticDomainTypes.TEXT,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -329,7 +333,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "dropoff_datetime",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.TEXT,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "dropoff_datetime": SemanticDomainTypes.TEXT,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -427,7 +433,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "passenger_count",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "passenger_count": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -525,7 +533,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "trip_distance",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "trip_distance": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -623,7 +633,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "rate_code_id",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "rate_code_id": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -721,7 +733,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "store_and_fwd_flag",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.TEXT,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "store_and_fwd_flag": SemanticDomainTypes.TEXT,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -819,7 +833,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "pickup_location_id",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "pickup_location_id": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -917,7 +933,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "dropoff_location_id",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "dropoff_location_id": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1015,7 +1033,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "payment_type",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "payment_type": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1113,7 +1133,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "fare_amount",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "fare_amount": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1211,7 +1233,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "extra",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "extra": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1309,7 +1333,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "mta_tax",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "mta_tax": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1407,7 +1433,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "tip_amount",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "tip_amount": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1505,7 +1533,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "tolls_amount",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "tolls_amount": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1603,7 +1633,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "improvement_surcharge",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "improvement_surcharge": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1701,7 +1733,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "total_amount",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "total_amount": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1799,7 +1833,9 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 "column": "congestion_surcharge",
             },
             details={
-                INFERRED_SEMANTIC_TYPE_KEY: SemanticDomainTypes.NUMERIC,
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "congestion_surcharge": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
