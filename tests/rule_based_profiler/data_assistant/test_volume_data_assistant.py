@@ -1941,7 +1941,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                 "default_expect_table_row_count_to_be_between_rule": {
                     "variables": {
                         "false_positive_rate": 0.05,
-                        "quantilie_statistic_interpolation_method": "auto",
+                        "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
                         "truncate_values": {"lower_bound": 0},
@@ -1981,7 +1981,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "reduce_scalar_metric": True,
                                     "metric_name": "table.row_count",
                                     "false_positive_rate": "$variables.false_positive_rate",
-                                    "quantilie_statistic_interpolation_method": "$variables.quantilie_statistic_interpolation_method",
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                                     "round_decimals": "$variables.round_decimals",
                                 }
@@ -2002,7 +2002,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "strict_min": False,
                         "strict_max": False,
                         "false_positive_rate": 0.05,
-                        "quantilie_statistic_interpolation_method": "auto",
+                        "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
                         "truncate_values": {"lower_bound": 0},
@@ -2043,7 +2043,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "reduce_scalar_metric": True,
                                     "metric_name": "column.distinct_values.count",
                                     "false_positive_rate": "$variables.false_positive_rate",
-                                    "quantilie_statistic_interpolation_method": "$variables.quantilie_statistic_interpolation_method",
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                                     "round_decimals": "$variables.round_decimals",
                                 }

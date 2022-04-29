@@ -16,7 +16,7 @@ variables:
   allow_relative_error: linear
 
   false_positive_rate: 5.0e-2
-  quantilie_statistic_interpolation_method: auto
+  quantile_statistic_interpolation_method: auto
 
 rules:
   column_quantiles_rule:
@@ -33,7 +33,7 @@ rules:
           quantiles: $variables.quantiles
           allow_relative_error: $variables.allow_relative_error
         false_positive_rate: $variables.false_positive_rate
-        quantilie_statistic_interpolation_method: $variables.quantilie_statistic_interpolation_method
+        quantile_statistic_interpolation_method: $variables.quantile_statistic_interpolation_method
         num_bootstrap_samples: $variables.num_bootstrap_samples
         bootstrap_random_seed: $variables.bootstrap_random_seed
     expectation_configuration_builders:

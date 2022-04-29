@@ -467,19 +467,19 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-    quantilie_statistic_interpolation_method: str,
+    quantile_statistic_interpolation_method: str,
 ) -> NumericRangeEstimationResult:
     lower_quantile = np.quantile(
         metric_values,
         q=(false_positive_rate / 2),
         axis=0,
-        method=quantilie_statistic_interpolation_method,
+        method=quantile_statistic_interpolation_method,
     )
     upper_quantile = np.quantile(
         metric_values,
         q=1.0 - (false_positive_rate / 2),
         axis=0,
-        method=quantilie_statistic_interpolation_method,
+        method=quantile_statistic_interpolation_method,
     )
     return NumericRangeEstimationResult(
         estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
@@ -490,7 +490,7 @@ def compute_quantiles(
 def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-    quantilie_statistic_interpolation_method: str,
+    quantile_statistic_interpolation_method: str,
     n_resamples: int,
     random_seed: Optional[int] = None,
 ) -> NumericRangeEstimationResult:
@@ -554,12 +554,12 @@ def compute_bootstrap_quantiles_point_estimate(
     sample_lower_quantile: np.ndarray = np.quantile(
         metric_values,
         q=lower_quantile_pct,
-        method=quantilie_statistic_interpolation_method,
+        method=quantile_statistic_interpolation_method,
     )
     sample_upper_quantile: np.ndarray = np.quantile(
         metric_values,
         q=upper_quantile_pct,
-        method=quantilie_statistic_interpolation_method,
+        method=quantile_statistic_interpolation_method,
     )
 
     bootstraps: np.ndarray
@@ -579,7 +579,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps,
         q=lower_quantile_pct,
         axis=1,
-        method=quantilie_statistic_interpolation_method,
+        method=quantile_statistic_interpolation_method,
     )
     bootstrap_lower_quantile_point_estimate: float = np.mean(bootstrap_lower_quantiles)
     bootstrap_lower_quantile_standard_error: float = np.std(bootstrap_lower_quantiles)
@@ -605,7 +605,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps,
         q=upper_quantile_pct,
         axis=1,
-        method=quantilie_statistic_interpolation_method,
+        method=quantile_statistic_interpolation_method,
     )
     bootstrap_upper_quantile_point_estimate: np.ndarray = np.mean(
         bootstrap_upper_quantiles

@@ -98,7 +98,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
         false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-        quantilie_statistic_interpolation_method=f"{VARIABLES_KEY}quantilie_statistic_interpolation_method",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
         estimator=f"{VARIABLES_KEY}estimator",
         num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
         bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
@@ -118,7 +118,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "default_expect_table_row_count_to_be_between_rule": {
                 "variables": {
                     "false_positive_rate": 0.05,
-                    "quantilie_statistic_interpolation_method": "auto",
+                    "quantile_statistic_interpolation_method": "auto",
                     "estimator": "bootstrap",
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,

@@ -1784,7 +1784,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             "num_bootstrap_samples": 9139,
             "bootstrap_random_seed": 43792,
             "false_positive_rate": 5.0e-2,
-            "quantilie_statistic_interpolation_method": "auto",
+            "quantile_statistic_interpolation_method": "auto",
         },
         rules={
             "column_quantiles_rule": {
@@ -1806,7 +1806,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
                         "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
-                        "quantilie_statistic_interpolation_method": "$variables.quantilie_statistic_interpolation_method",
+                        "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                         "round_decimals": 2,
                     }
                 ],
@@ -1883,7 +1883,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             "num_bootstrap_samples": 9139,
             "bootstrap_random_seed": 43792,
             "false_positive_rate": 5.0e-2,
-            "quantilie_statistic_interpolation_method": "auto",
+            "quantile_statistic_interpolation_method": "auto",
         },
         rules={
             "column_quantiles_rule": {
@@ -1905,7 +1905,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                         "num_bootstrap_samples": "$variables.num_bootstrap_samples",
                         "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                         "false_positive_rate": "$variables.false_positive_rate",
-                        "quantilie_statistic_interpolation_method": "$variables.quantilie_statistic_interpolation_method",
+                        "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                         "round_decimals": "$variables.round_decimals",
                     }
                 ],
