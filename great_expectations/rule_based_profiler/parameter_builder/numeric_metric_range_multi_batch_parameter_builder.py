@@ -75,10 +75,10 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         replace_nan_with_zero: Union[str, bool] = True,
         reduce_scalar_metric: Union[str, bool] = True,
         false_positive_rate: Union[str, float] = 5.0e-2,
-        interpolation_method="linear",
         estimator: str = "bootstrap",
         num_bootstrap_samples: Optional[Union[str, int]] = None,
         bootstrap_random_seed: Optional[Union[str, int]] = None,
+        interpolation_method: Optional[str] = "linear",
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
@@ -138,8 +138,6 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
 
         self._bootstrap_random_seed = bootstrap_random_seed
 
-        self._round_decimals = round_decimals
-
         # interpolation method can be one of these 3 values:
         if (
             interpolation_method
@@ -150,6 +148,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             )
 
         self._interpolation_method = interpolation_method
+
+        self._round_decimals = round_decimals
+
         if not truncate_values:
             truncate_values = {
                 "lower_bound": None,
@@ -192,14 +193,14 @@ detected.
         return self._bootstrap_random_seed
 
     @property
+    def interpolation_method(self) -> Optional[str]:
+        return self._interpolation_method
+
+    @property
     def truncate_values(
         self,
     ) -> Optional[Union[str, Dict[str, Union[Optional[int], Optional[float]]]]]:
         return self._truncate_values
-
-    @property
-    def interpolation_method(self) -> Optional[str]:
-        return self._interpolation_method
 
     @property
     def round_decimals(self) -> Optional[Union[str, int]]:
@@ -316,7 +317,7 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
             estimator_func = self._get_deterministic_estimate
             estimator_kwargs = {
                 "false_positive_rate": false_positive_rate,
-                "interpolation_method": self.interpolation_method,
+                # "interpolation_method": self.interpolation_method,
             }
 
         numeric_range_estimation_result: NumericRangeEstimationResult = (
@@ -370,11 +371,22 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
         lower_bound: Optional[float] = truncate_values.get("lower_bound")
         upper_bound: Optional[float] = truncate_values.get("upper_bound")
 
-        # this is the method that is passed on
         interpolation_method: str = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.interpolation_method,
             expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        round_decimals: int
+
+        # if integer_semantic_domain_type(domain=domain):
+        # round_decimals = 0
+        # else:
+        round_decimals = self._get_round_decimals_using_heuristics(
+            metric_values=metric_values,
+            domain=domain,
             variables=variables,
             parameters=parameters,
         )
@@ -601,6 +613,16 @@ positive integer, or must be omitted (or set to None).
         random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=kwargs.get("bootstrap_random_seed"),
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        interpolation_method: Optional[
+            str
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=kwargs.get("interpolation_method"),
             expected_return_type=None,
             variables=variables,
             parameters=parameters,

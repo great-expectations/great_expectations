@@ -435,8 +435,8 @@ def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
-    interpolation_method: str,
     random_seed: Optional[int] = None,
+    interpolation_method: Optional[str] = None,
 ) -> NumericRangeEstimationResult:
     """
     ML Flow Experiment: parameter_builders_bootstrap/bootstrap_quantiles
