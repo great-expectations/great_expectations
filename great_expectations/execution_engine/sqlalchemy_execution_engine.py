@@ -988,7 +988,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def get_splitter_method(self, splitter_method_name: str) -> Callable:
+    def _get_splitter_method(self, splitter_method_name: str) -> Callable:
         """Get the appropriate splitter method from the method name.
 
         Args:
@@ -1010,20 +1010,22 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self.engine.execute(split_query).fetchall()
 
-    def get_data_for_batch_identifiers_for_other_splitters(
+    def get_data_for_batch_identifiers(
         self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
     ) -> List[dict]:
-        """
-        # TODO: AJB 20220429 Fill me in
+        """Build data used to construct batch identifiers for the input table using the provided splitter config.
+
+        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
+
         Args:
-            table_name:
-            splitter_method_name:
-            splitter_kwargs:
+            table_name: Table to split.
+            splitter_method_name: Desired splitter method to use.
+            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
 
         Returns:
-
+            List of dicts of the form [{column_name: {"key": value}}]
         """
-        return self._data_splitter.get_data_for_batch_identifiers_for_other_splitters(
+        return self._data_splitter.get_data_for_batch_identifiers(
             execution_engine=self,
             table_name=table_name,
             splitter_method_name=splitter_method_name,
@@ -1034,7 +1036,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
         if "splitter_method" in batch_spec:
-            splitter_fn: Callable = self.get_splitter_method(
+            splitter_fn: Callable = self._get_splitter_method(
                 splitter_method_name=batch_spec["splitter_method"]
             )
             split_clause = splitter_fn(

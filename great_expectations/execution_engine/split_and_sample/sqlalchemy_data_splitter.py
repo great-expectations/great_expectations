@@ -10,7 +10,7 @@ not by itself.
             self._sqlalchemy_data_splitter = SqlAlchemyDataSplitter()
 
         elsewhere():
-            splitter = self._sqlalchemy_data_splitter.get_splitter_method()
+            splitter = self._sqlalchemy_data_splitter._get_splitter_method()
             split_query_or_clause = splitter()
 """
 
@@ -45,6 +45,23 @@ class SqlAlchemyDataSplitter(DataSplitter):
     Note, for convenience, you can also access DatePart via the instance variable
     date_part e.g. SqlAlchemyDataSplitter.date_part.MONTH
     """
+
+    DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
+        "split_on_year": "get_data_for_batch_identifiers_year",
+        "split_on_year_and_month": "get_data_for_batch_identifiers_year_and_month",
+        "split_on_year_and_month_and_day": "get_data_for_batch_identifiers_year_and_month_and_day",
+        "split_on_date_parts": "get_data_for_batch_identifiers_for_split_on_date_parts",
+    }
+
+    SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
+        "split_on_whole_table": "get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table",
+        "split_on_column_value": "get_split_query_for_data_for_batch_identifiers_for_split_on_column_value",
+        "split_on_converted_datetime": "get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime",
+        "split_on_divided_integer": "get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer",
+        "split_on_mod_integer": "get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer",
+        "split_on_multi_column_values": "get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values",
+        "split_on_hashed_column": "get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column",
+    }
 
     def split_on_year(
         self,
@@ -228,6 +245,55 @@ class SqlAlchemyDataSplitter(DataSplitter):
         return (
             sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
             == batch_identifiers[column_name]
+        )
+
+    def get_data_for_batch_identifiers(
+        self,
+        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        table_name: str,
+        splitter_method_name: str,
+        splitter_kwargs: dict,
+    ) -> List[dict]:
+        """Build data used to construct batch identifiers for the input table using the provided splitter config.
+
+        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
+
+        Args:
+            execution_engine: Used to introspect the data.
+            table_name: Table to split.
+            splitter_method_name: Desired splitter method to use.
+            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
+
+        Returns:
+            List of dicts of the form [{column_name: {"key": value}}]
+        """
+        if self._is_datetime_splitter(splitter_method_name):
+            splitter_fn_name: str = self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
+                splitter_method_name
+            ]
+            batch_identifiers_list: List[dict] = getattr(self, splitter_fn_name)(
+                execution_engine, table_name, **splitter_kwargs
+            )
+        else:
+            batch_identifiers_list: List[
+                dict
+            ] = self.get_data_for_batch_identifiers_for_non_date_part_splitters(
+                execution_engine, table_name, splitter_method_name, splitter_kwargs
+            )
+
+        return batch_identifiers_list
+
+    def _is_datetime_splitter(self, splitter_method_name: str) -> bool:
+        """Whether the splitter method is a datetime splitter.
+
+        Args:
+            splitter_method_name: Name of the splitter method
+
+        Returns:
+            Boolean
+        """
+        return splitter_method_name in list(
+            self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING.keys()
         )
 
     def get_data_for_batch_identifiers_year(
@@ -447,54 +513,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
         ]
         return data_for_batch_identifiers
 
-    SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING: dict = {
-        "split_on_whole_table": "get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table",
-        "split_on_column_value": "get_split_query_for_data_for_batch_identifiers_for_split_on_column_value",
-        "split_on_converted_datetime": "get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime",
-        "split_on_divided_integer": "get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer",
-        "split_on_mod_integer": "get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer",
-        "split_on_multi_column_values": "get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values",
-        "split_on_hashed_column": "get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column",
-    }
-
-    def get_data_for_batch_identifiers_method_name(self, splitter_method_name: str):
-        """
-        # TODO: AJB 20220429 Add docstring
-        Args:
-            splitter_method_name:
-
-        Returns:
-
-        """
-        processed_splitter_method_name: str = self._get_splitter_method_name(
-            splitter_method_name
-        )
-        try:
-            return self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING[
-                processed_splitter_method_name
-            ]
-        except ValueError as e:
-            raise ge_exceptions.InvalidConfigError(
-                f"Please provide a supported splitter method name, you provided: {splitter_method_name}"
-            )
-
-    def _get_params_for_batch_identifiers_from_other_splitters(
-        self,
-        column_names: List[str],
-        rows: List[LegacyRow],
-    ) -> List[dict]:
-        """
-        # TODO: AJB 20220429 Fill me in
-        Args:
-            column_names:
-            rows:
-
-        Returns:
-
-        """
-        # Zip up split parameters with column names
-        return [dict(zip(column_names, row)) for row in rows]
-
     def _get_column_names_from_splitter_kwargs(self, splitter_kwargs) -> List[str]:
         column_names: List[str] = []
 
@@ -505,27 +523,30 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
         return column_names
 
-    def get_data_for_batch_identifiers_for_other_splitters(
+    def get_data_for_batch_identifiers_for_non_date_part_splitters(
         self,
         execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
         table_name: str,
         splitter_method_name: str,
         splitter_kwargs: dict,
     ) -> List[dict]:
-        """
-        # TODO: AJB 20220429 Fill me in
+        """Build data used to construct batch identifiers for the input table using the provided splitter config.
+
+        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
+
         Args:
-            execution_engine:
-            table_name:
-            splitter_method_name:
-            splitter_kwargs:
+            execution_engine: Used to introspect the data.
+            table_name: Table to split.
+            splitter_method_name: Desired splitter method to use.
+            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
 
         Returns:
-
+            List of dicts of the form [{column_name: {"key": value}}]
         """
-
         get_split_query_method_name: str = (
-            self.get_data_for_batch_identifiers_method_name(splitter_method_name)
+            self._get_method_name_for_get_data_for_batch_identifiers_method(
+                splitter_method_name
+            )
         )
         split_query: Selectable = getattr(self, get_split_query_method_name)(
             table_name=table_name, **splitter_kwargs
@@ -534,9 +555,48 @@ class SqlAlchemyDataSplitter(DataSplitter):
         column_names: List[str] = self._get_column_names_from_splitter_kwargs(
             splitter_kwargs
         )
-        return self._get_params_for_batch_identifiers_from_other_splitters(
+        return self._get_params_for_batch_identifiers_from_non_date_part_splitters(
             column_names, rows
         )
+
+    def _get_method_name_for_get_data_for_batch_identifiers_method(
+        self, splitter_method_name: str
+    ):
+        """Get the matching method name to get the data for batch identifiers from the input splitter method name.
+
+        Args:
+            splitter_method_name: Configured splitter name.
+
+        Returns:
+            Name of the corresponding method to get data for building batch identifiers.
+        """
+        processed_splitter_method_name: str = self._get_splitter_method_name(
+            splitter_method_name
+        )
+        try:
+            return self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
+                processed_splitter_method_name
+            ]
+        except ValueError as e:
+            raise ge_exceptions.InvalidConfigError(
+                f"Please provide a supported splitter method name, you provided: {splitter_method_name}"
+            )
+
+    def _get_params_for_batch_identifiers_from_non_date_part_splitters(
+        self,
+        column_names: List[str],
+        rows: List[LegacyRow],
+    ) -> List[dict]:
+        """Get params used in batch identifiers from output of executing query for non date part splitters.
+
+        Args:
+            column_names: Column names referenced in splitter_kwargs.
+            rows: Rows from execution of split query.
+
+        Returns:
+            Dict of {column_name: row, column_name: row, ...}
+        """
+        return [dict(zip(column_names, row)) for row in rows]
 
     def get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table(
         self,

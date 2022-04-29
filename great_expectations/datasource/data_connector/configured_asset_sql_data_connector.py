@@ -111,85 +111,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         return data_asset_name
 
-    SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING: dict = {
-        "split_on_year": "get_data_for_batch_identifiers_year",
-        "split_on_year_and_month": "get_data_for_batch_identifiers_year_and_month",
-        "split_on_year_and_month_and_day": "get_data_for_batch_identifiers_year_and_month_and_day",
-        "split_on_date_parts": "get_data_for_batch_identifiers_for_split_on_date_parts",
-    }
-
-    def _is_splitter_accessible_from_execution_engine(
-        self, splitter_method_name: str
-    ) -> bool:
-        """Whether the splitter method resides on the execution engine.
-
-        Note: 20220415 AJB this method should be deprecated in favor of moving
-            splitter methods from the data connector to the ExecutionEngine (via SqlAlchemyDataSplitter).
-
-        Args:
-            splitter_method_name: Name of the splitter method
-
-        Returns:
-            Boolean
-        """
-        return splitter_method_name in list(
-            self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING.keys()
-        )
-
-    def _get_batch_identifiers_from_execution_engine_method(
-        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
-    ) -> List[dict]:
-        """Get batch identifiers from a splitter method that resides on the execution engine.
-
-        Args:
-            table_name: Name of the table being split.
-            splitter_method_name: Name of the method used for splitting.
-            splitter_kwargs: Dict of key-pair arguments to provide to the splitter method e.g.
-                {"column_name": "my_column"}
-
-        Returns:
-            List of dicts containing data for creating batch identifiers.
-                For example, [{column_name: {"year": 2022, "month": 4, "day": 14}}]
-
-        """
-        splitter_fn_name: str = (
-            self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING[
-                splitter_method_name
-            ]
-        )
-        splitter_fn: Callable = self.execution_engine.get_splitter_method(
-            splitter_fn_name
-        )
-        batch_identifiers_list: List[dict] = splitter_fn(
-            execution_engine=self.execution_engine,
-            table_name=table_name,
-            **splitter_kwargs,
-        )
-        return batch_identifiers_list
-
-    def _get_batch_identifiers_from_data_connector_method(
-        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
-    ) -> List[dict]:
-        """Get batch identifiers from a splitter method that resides on the current DataConnector.
-
-        Note: 20220415 AJB this method should be deprecated in favor of moving
-            splitter methods from the data connector to the ExecutionEngine (via SqlAlchemyDataSplitter).
-
-        Args:
-            table_name: Name of the table being split.
-            splitter_method_name: Name of the method used for splitting.
-            splitter_kwargs: Dict of key-pair arguments to provide to the splitter method e.g.
-                {"column_name": "my_column"}
-
-        Returns:
-            List of dicts containing data for creating batch identifiers.
-                For example, [{column_name: {"year": 2022, "month": 4, "day": 14}}]
-        """
-
-        return self.execution_engine.get_data_for_batch_identifiers_for_other_splitters(
-            table_name, splitter_method_name, splitter_kwargs
-        )
-
     def _get_batch_identifiers_list_from_data_asset_config(
         self,
         data_asset_name,
@@ -205,18 +126,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             splitter_method_name: str = data_asset_config["splitter_method"]
             splitter_kwargs: dict = data_asset_config["splitter_kwargs"]
 
-            if self._is_splitter_accessible_from_execution_engine(splitter_method_name):
-                batch_identifiers_list: List[
-                    dict
-                ] = self._get_batch_identifiers_from_execution_engine_method(
-                    table_name, splitter_method_name, splitter_kwargs
-                )
-            else:
-                batch_identifiers_list: List[
-                    dict
-                ] = self.execution_engine.get_data_for_batch_identifiers_for_other_splitters(
-                    table_name, splitter_method_name, splitter_kwargs
-                )
+            batch_identifiers_list: List[
+                dict
+            ] = self.execution_engine.get_data_for_batch_identifiers(
+                table_name, splitter_method_name, splitter_kwargs
+            )
 
         else:
             batch_identifiers_list = [{}]
