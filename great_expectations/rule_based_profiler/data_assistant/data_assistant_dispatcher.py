@@ -31,11 +31,12 @@ class DataAssistantDispatcher:
 
         # Attempt to utilize data_assistant_type name for invocation first.
         data_assistant_cls: Optional[
-            Type["DataAssistant"]
+            Type[DataAssistant]
         ] = DataAssistantDispatcher.get_data_assistant_impl(data_assistant_type=name)
 
         # If no registered data_assistant_type exists, try aliases for invocation.
         if data_assistant_cls is None:
+            type_: Type[DataAssistant]
             for type_ in DataAssistantDispatcher._registered_data_assistants.values():
                 if type_.__alias__ == name:
                     data_assistant_cls = type_

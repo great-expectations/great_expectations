@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod, abstractstaticmethod
+from abc import ABCMeta, abstractmethod
 from inspect import isabstract
 from typing import Any, Dict, List, Optional, Union
 
@@ -276,14 +276,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         Returns:
             Optional custom list of "Rule" objects (overrides) can be added by subclasses (return "None" if not needed).
-        """
-        pass
-
-    @abstractstaticmethod
-    def alias(self) -> Optional[str]:
-        """
-        Returns:
-            Optional alias to retrieve the assistant from the registry defined by the DataAssistantDispatcher.
         """
         pass
 

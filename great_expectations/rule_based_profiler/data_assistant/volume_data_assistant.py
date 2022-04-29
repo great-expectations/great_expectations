@@ -97,10 +97,6 @@ class VolumeDataAssistant(DataAssistant):
     def rules(self) -> Optional[List[Rule]]:
         return None
 
-    @staticmethod
-    def alias() -> Optional[str]:
-        return "volume"
-
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
     ) -> DataAssistantResult:
