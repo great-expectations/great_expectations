@@ -21,10 +21,14 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.rule_based_profiler.types import (
     VARIABLES_PREFIX,
     Domain,
+    NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
+)
+from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -37,7 +41,7 @@ NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX: str = "tmp"
 TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
 TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN: re.Pattern = re.compile(
-    rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\w{8}"
+    rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\.\w{8}"
 )
 
 
@@ -410,7 +414,7 @@ def convert_variables_to_dict(
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-) -> Tuple[Number, Number]:
+) -> NumericRangeEstimationResult:
     lower_quantile = np.quantile(
         metric_values,
         q=(false_positive_rate / 2),
@@ -421,7 +425,10 @@ def compute_quantiles(
         q=1.0 - (false_positive_rate / 2),
         axis=0,
     )
-    return lower_quantile, upper_quantile
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
+        value_range=np.array([lower_quantile, upper_quantile]),
+    )
 
 
 def compute_bootstrap_quantiles_point_estimate(
@@ -429,7 +436,7 @@ def compute_bootstrap_quantiles_point_estimate(
     false_positive_rate: np.float64,
     n_resamples: int,
     random_seed: Optional[int] = None,
-) -> Tuple[Number, Number]:
+) -> NumericRangeEstimationResult:
     """
     ML Flow Experiment: parameter_builders_bootstrap/bootstrap_quantiles
     ML Flow Experiment ID: 4129654509298109
@@ -490,15 +497,16 @@ def compute_bootstrap_quantiles_point_estimate(
     sample_lower_quantile: np.ndarray = np.quantile(metric_values, q=lower_quantile_pct)
     sample_upper_quantile: np.ndarray = np.quantile(metric_values, q=upper_quantile_pct)
 
+    bootstraps: np.ndarray
     if random_seed:
         random_state: np.random.Generator = np.random.Generator(
             np.random.PCG64(random_seed)
         )
-        bootstraps: np.ndarray = random_state.choice(
+        bootstraps = random_state.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
     else:
-        bootstraps: np.ndarray = np.random.choice(
+        bootstraps = np.random.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
@@ -556,9 +564,14 @@ def compute_bootstrap_quantiles_point_estimate(
             bootstrap_upper_quantile_point_estimate - bootstrap_upper_quantile_bias
         )
 
-    return (
-        lower_quantile_bias_corrected_point_estimate,
-        upper_quantile_bias_corrected_point_estimate,
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(
+            a=bootstraps.flatten(), bins=NUM_HISTOGRAM_BINS
+        )[0],
+        value_range=[
+            lower_quantile_bias_corrected_point_estimate,
+            upper_quantile_bias_corrected_point_estimate,
+        ],
     )
 
 
@@ -574,6 +587,9 @@ def get_validator_with_expectation_suite(
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
     """
+    assert expectation_suite is None or isinstance(expectation_suite, ExpectationSuite)
+    assert expectation_suite_name is None or isinstance(expectation_suite_name, str)
+
     expectation_suite = get_or_create_expectation_suite(
         data_context=data_context,
         expectation_suite=expectation_suite,
@@ -600,8 +616,6 @@ def get_or_create_expectation_suite(
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
     """
-    suite: "ExpectationSuite"  # noqa: F821
-
     generate_temp_expectation_suite_name: bool
     create_expectation_suite: bool
 
@@ -626,7 +640,7 @@ def get_or_create_expectation_suite(
         if not component_name:
             component_name = "test"
 
-        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}{str(uuid.uuid4())[:8]}"
+        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"
 
     if create_expectation_suite:
         try:

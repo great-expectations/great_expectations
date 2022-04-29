@@ -53,7 +53,7 @@ except ImportError:
 
 @click.group(short_help="Checkpoint operations")
 @click.pass_context
-def checkpoint(ctx):
+def checkpoint(ctx) -> None:
     """
     Checkpoint operations
 
@@ -93,7 +93,7 @@ def checkpoint(ctx):
     default=True,
 )
 @click.pass_context
-def checkpoint_new(ctx, name, jupyter):
+def checkpoint_new(ctx, name, jupyter) -> None:
     """Create a new Checkpoint for easy deployments.
 
     NAME is the name of the Checkpoint to create.
@@ -172,7 +172,7 @@ def _get_notebook_path(context, notebook_name):
 
 @checkpoint.command(name="list")
 @click.pass_context
-def checkpoint_list(ctx):
+def checkpoint_list(ctx) -> None:
     """List configured checkpoints."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -308,7 +308,7 @@ def print_validation_operator_results_details(
 @checkpoint.command(name="script")
 @click.argument("checkpoint")
 @click.pass_context
-def checkpoint_script(ctx, checkpoint):
+def checkpoint_script(ctx, checkpoint) -> None:
     """
     Create a python script to run a Checkpoint.
 

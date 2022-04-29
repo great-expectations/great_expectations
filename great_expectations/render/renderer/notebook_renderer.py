@@ -15,7 +15,7 @@ class BaseNotebookRenderer(Renderer):
     Abstract base class for methods that help with rendering a jupyter notebook.
     """
 
-    def __init__(self, context: Optional[DataContext] = None):
+    def __init__(self, context: Optional[DataContext] = None) -> None:
         super().__init__()
         self.context = context
         # Add cells to this notebook, then render by implementing a
@@ -68,7 +68,7 @@ class BaseNotebookRenderer(Renderer):
         with open(notebook_file_path, "w") as f:
             nbformat.write(notebook, f)
 
-    def render(self):
+    def render(self) -> None:
         """
         Render a notebook from parameters.
         """

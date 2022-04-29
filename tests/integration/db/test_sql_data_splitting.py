@@ -56,12 +56,11 @@ def _load_data(
     return load_data_into_test_database(
         table_name=table_name,
         csv_paths=[
-            f"./data/yellow_tripdata_sample_{year}-{month}.csv"
-            for year in ["2018", "2019", "2020"]
-            for month in [f"{mo:02d}" for mo in range(1, 12 + 1)]
+            f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
         ],
         connection_string=connection_string,
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
+        load_full_dataset=True,
         random_table_suffix=True,
     )
 

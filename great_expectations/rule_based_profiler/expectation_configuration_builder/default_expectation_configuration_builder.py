@@ -72,7 +72,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         ] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             expectation_type: the "expectation_type" argument of "ExpectationConfiguration" object to be emitted.

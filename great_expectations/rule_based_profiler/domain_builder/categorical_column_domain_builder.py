@@ -53,7 +53,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """Create column domains where cardinality is within the specified limit.
 
         Cardinality refers to the number of unique values in a given domain.
@@ -145,7 +145,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         value: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ],
-    ):
+    ) -> None:
         self._allowed_semantic_types_passthrough = value
 
     @property

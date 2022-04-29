@@ -9,7 +9,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 class MetricEdge:
     def __init__(
         self, left: MetricConfiguration, right: Optional[MetricConfiguration] = None
-    ):
+    ) -> None:
         self._left = left
         self._right = right
 
@@ -29,7 +29,7 @@ class MetricEdge:
 
 
 class ValidationGraph:
-    def __init__(self, edges: Optional[List[MetricEdge]] = None):
+    def __init__(self, edges: Optional[List[MetricEdge]] = None) -> None:
         if edges:
             self._edges = edges
         else:
@@ -37,7 +37,7 @@ class ValidationGraph:
 
         self._edge_ids = {edge.id for edge in self._edges}
 
-    def add(self, edge: MetricEdge):
+    def add(self, edge: MetricEdge) -> None:
         if edge.id not in self._edge_ids:
             self._edges.append(edge)
             self._edge_ids.add(edge.id)
@@ -52,11 +52,11 @@ class ValidationGraph:
 
 
 class ExpectationValidationGraph:
-    def __init__(self, configuration: ExpectationConfiguration):
+    def __init__(self, configuration: ExpectationConfiguration) -> None:
         self._configuration = configuration
         self._graph = ValidationGraph()
 
-    def update(self, graph: ValidationGraph):
+    def update(self, graph: ValidationGraph) -> None:
         edge: MetricEdge
         for edge in graph.edges:
             self.graph.add(edge=edge)

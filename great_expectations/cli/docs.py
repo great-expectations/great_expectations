@@ -11,7 +11,7 @@ from great_expectations.exceptions import DataContextError
 
 @click.group()
 @click.pass_context
-def docs(ctx):
+def docs(ctx) -> None:
     """Data Docs operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
@@ -46,7 +46,7 @@ def docs(ctx):
     default=False,
 )
 @click.pass_context
-def docs_build(ctx, site_name=None, no_view=False):
+def docs_build(ctx, site_name=None, no_view=False) -> None:
     """Build Data Docs for a project."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -128,7 +128,7 @@ def docs_list(ctx):
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
 @click.pass_context
-def docs_clean(ctx, site_name=None, all_sites=False):
+def docs_clean(ctx, site_name=None, all_sites=False) -> None:
     """
     Remove all files from a Data Docs site.
 

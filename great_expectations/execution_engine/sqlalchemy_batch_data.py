@@ -37,7 +37,7 @@ class SqlAlchemyBatchData(BatchData):
         use_quoted_name: bool = False,
         source_schema_name: str = None,
         source_table_name: str = None,
-    ):
+    ) -> None:
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
 
@@ -185,7 +185,7 @@ class SqlAlchemyBatchData(BatchData):
 
     def _create_temporary_table(
         self, temp_table_name, query, temp_table_schema_name=None
-    ):
+    ) -> None:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param query:

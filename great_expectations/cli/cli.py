@@ -29,7 +29,7 @@ class CLIState:
         config_file_location: Optional[str] = None,
         data_context: Optional[DataContext] = None,
         assume_yes: bool = False,
-    ):
+    ) -> None:
         self.v3_api = v3_api
         self.config_file_location = config_file_location
         self._data_context = data_context
@@ -50,7 +50,7 @@ class CLIState:
         return self._data_context
 
     @data_context.setter
-    def data_context(self, data_context):
+    def data_context(self, data_context) -> None:
         assert isinstance(data_context, DataContext)
         self._data_context = data_context
 
@@ -92,7 +92,7 @@ class CLI(click.MultiCommand):
             return None
 
     @staticmethod
-    def print_ctx_debugging(ctx):
+    def print_ctx_debugging(ctx) -> None:
         print(f"ctx.args: {ctx.args}")
         print(f"ctx.params: {ctx.params}")
         print(f"ctx.obj: {ctx.obj}")
@@ -148,7 +148,7 @@ class CLI(click.MultiCommand):
     help='Assume "yes" for all prompts.',
 )
 @click.pass_context
-def cli(ctx, v3_api, verbose, config_file_location, assume_yes):
+def cli(ctx, v3_api, verbose, config_file_location, assume_yes) -> None:
     """
     Welcome to the great_expectations CLI!
 
@@ -180,7 +180,7 @@ def cli(ctx, v3_api, verbose, config_file_location, assume_yes):
             )
 
 
-def main():
+def main() -> None:
     cli()
 
 
