@@ -16,6 +16,7 @@ not by itself.
 
 from typing import List, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
@@ -445,3 +446,186 @@ class SqlAlchemyDataSplitter(DataSplitter):
             for row in result
         ]
         return data_for_batch_identifiers
+
+    SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING: dict = {
+        "split_on_whole_table": "get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table",
+        "split_on_column_value": "get_split_query_for_data_for_batch_identifiers_for_split_on_column_value",
+        "split_on_converted_datetime": "get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime",
+        "split_on_divided_integer": "get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer",
+        "split_on_mod_integer": "get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer",
+        "split_on_multi_column_values": "get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values",
+        "split_on_hashed_column": "get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column",
+    }
+
+    def get_data_for_batch_identifiers_method_name(self, splitter_method_name: str):
+        """
+        # TODO: AJB 20220429 Add docstring
+        Args:
+            splitter_method_name:
+
+        Returns:
+
+        """
+        processed_splitter_method_name: str = self._get_splitter_method_name(
+            splitter_method_name
+        )
+        try:
+            return self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_MAPPING[
+                processed_splitter_method_name
+            ]
+        except ValueError as e:
+            raise ge_exceptions.InvalidConfigError(
+                f"Please provide a supported splitter method name, you provided: {splitter_method_name}"
+            )
+
+    def _get_params_for_batch_identifiers_from_other_splitters(
+        self,
+        column_names: List[str],
+        rows: List[LegacyRow],
+    ) -> List[dict]:
+        """
+        # TODO: AJB 20220429 Fill me in
+        Args:
+            column_names:
+            rows:
+
+        Returns:
+
+        """
+        # Zip up split parameters with column names
+        return [dict(zip(column_names, row)) for row in rows]
+
+    def _get_column_names_from_splitter_kwargs(self, splitter_kwargs) -> List[str]:
+        column_names: List[str] = []
+
+        if "column_names" in splitter_kwargs:
+            column_names = splitter_kwargs["column_names"]
+        elif "column_name" in splitter_kwargs:
+            column_names = [splitter_kwargs["column_name"]]
+
+        return column_names
+
+    def get_data_for_batch_identifiers_for_other_splitters(
+        self,
+        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        table_name: str,
+        splitter_method_name: str,
+        splitter_kwargs: dict,
+    ) -> List[dict]:
+        """
+        # TODO: AJB 20220429 Fill me in
+        Args:
+            execution_engine:
+            table_name:
+            splitter_method_name:
+            splitter_kwargs:
+
+        Returns:
+
+        """
+
+        get_split_query_method_name: str = (
+            self.get_data_for_batch_identifiers_method_name(splitter_method_name)
+        )
+        split_query: Selectable = getattr(self, get_split_query_method_name)(
+            table_name=table_name, **splitter_kwargs
+        )
+        rows: List[LegacyRow] = self._execute_split_query(execution_engine, split_query)
+        column_names: List[str] = self._get_column_names_from_splitter_kwargs(
+            splitter_kwargs
+        )
+        return self._get_params_for_batch_identifiers_from_other_splitters(
+            column_names, rows
+        )
+
+    def get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table(
+        self,
+        table_name: str,
+    ) -> Selectable:
+        """
+        'Split' by returning the whole table
+
+        Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
+        """
+        return sa.select([sa.true()])
+
+    def get_split_query_for_data_for_batch_identifiers_for_split_on_column_value(
+        self,
+        table_name: str,
+        column_name: str,
+    ) -> Selectable:
+        """Split using the values in the named column"""
+        # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
+
+        return (
+            sa.select([sa.func.distinct(sa.column(column_name))])
+            .select_from(sa.text(table_name))
+            .order_by(sa.column(column_name).asc())
+        )
+
+    def get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime(
+        self,
+        table_name: str,
+        column_name: str,
+        date_format_string: str = "%Y-%m-%d",
+    ) -> Selectable:
+        """Convert the values in the named column to the given date_format, and split on that"""
+        # query = f"SELECT DISTINCT( strftime(\"{date_format_string}\", \"{self.column_name}\")) as my_var FROM {self.table_name}"
+
+        return sa.select(
+            [
+                sa.func.distinct(
+                    sa.func.strftime(
+                        date_format_string,
+                        sa.column(column_name),
+                    )
+                )
+            ]
+        ).select_from(sa.text(table_name))
+
+    def get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer(
+        self, table_name: str, column_name: str, divisor: int
+    ) -> Selectable:
+        """Divide the values in the named column by `divisor`, and split on that"""
+        # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
+
+        return sa.select(
+            [sa.func.distinct(sa.cast(sa.column(column_name) / divisor, sa.Integer))]
+        ).select_from(sa.text(table_name))
+
+    def get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer(
+        self, table_name: str, column_name: str, mod: int
+    ) -> Selectable:
+        """Divide the values in the named column by `divisor`, and split on that"""
+        # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
+
+        return sa.select(
+            [sa.func.distinct(sa.cast(sa.column(column_name) % mod, sa.Integer))]
+        ).select_from(sa.text(table_name))
+
+    def get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values(
+        self,
+        table_name: str,
+        column_names: List[str],
+    ) -> Selectable:
+        """Split on the joint values in the named columns"""
+        # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
+
+        return (
+            sa.select([sa.column(column_name) for column_name in column_names])
+            .distinct()
+            .select_from(sa.text(table_name))
+        )
+
+    def get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column(
+        self,
+        table_name: str,
+        column_name: str,
+        hash_digits: int,
+    ) -> Selectable:
+        """Note: this method is experimental. It does not work with all SQL dialects."""
+        # query = f"SELECT MD5(\"{self.column_name}\") = {matching_hash}) AS hashed_var FROM {self.table_name}"
+
+        return sa.select([sa.func.md5(sa.column(column_name))]).select_from(
+            sa.text(table_name)
+        )

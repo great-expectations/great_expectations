@@ -1010,6 +1010,26 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self.engine.execute(split_query).fetchall()
 
+    def get_data_for_batch_identifiers_for_other_splitters(
+        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
+    ) -> List[dict]:
+        """
+        # TODO: AJB 20220429 Fill me in
+        Args:
+            table_name:
+            splitter_method_name:
+            splitter_kwargs:
+
+        Returns:
+
+        """
+        return self._data_splitter.get_data_for_batch_identifiers_for_other_splitters(
+            execution_engine=self,
+            table_name=table_name,
+            splitter_method_name=splitter_method_name,
+            splitter_kwargs=splitter_kwargs,
+        )
+
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:

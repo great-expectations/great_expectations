@@ -186,25 +186,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 For example, [{column_name: {"year": 2022, "month": 4, "day": 14}}]
         """
 
-        splitter_fn: Callable = self.execution_engine.get_splitter_method(
-            splitter_method_name
+        return self.execution_engine.get_data_for_batch_identifiers_for_other_splitters(
+            table_name, splitter_method_name, splitter_kwargs
         )
-        split_query: Selectable = splitter_fn(table_name=table_name, **splitter_kwargs)
-
-        sqlalchemy_execution_engine: SqlAlchemyExecutionEngine = cast(
-            SqlAlchemyExecutionEngine, self._execution_engine
-        )
-        rows = sqlalchemy_execution_engine.engine.execute(split_query).fetchall()
-
-        # Zip up split parameters with column names
-        column_names: List[str] = self._get_column_names_from_splitter_kwargs(
-            splitter_kwargs
-        )
-        batch_identifiers_list: List[dict] = [
-            dict(zip(column_names, row)) for row in rows
-        ]
-
-        return batch_identifiers_list
 
     def _get_batch_identifiers_list_from_data_asset_config(
         self,
@@ -230,7 +214,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             else:
                 batch_identifiers_list: List[
                     dict
-                ] = self._get_batch_identifiers_from_data_connector_method(
+                ] = self.execution_engine.get_data_for_batch_identifiers_for_other_splitters(
                     table_name, splitter_method_name, splitter_kwargs
                 )
 
@@ -254,16 +238,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             # TODO Abe 20201029 : Apply sorters to batch_identifiers_list here
             # TODO Will 20201102 : add sorting code here
             self._data_references_cache[data_asset_name] = batch_identifiers_list
-
-    def _get_column_names_from_splitter_kwargs(self, splitter_kwargs) -> List[str]:
-        column_names: List[str] = []
-
-        if "column_names" in splitter_kwargs:
-            column_names = splitter_kwargs["column_names"]
-        elif "column_name" in splitter_kwargs:
-            column_names = [splitter_kwargs["column_name"]]
-
-        return column_names
 
     def get_available_data_asset_names(self) -> List[str]:
         """
@@ -411,95 +385,3 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 table_name = table_name.split(f"{schema_name_str}.")[1]
 
         return table_name
-
-    # Splitter methods for listing partitions
-
-    def _split_on_whole_table(
-        self,
-        table_name: str,
-    ):
-        """
-        'Split' by returning the whole table
-
-        Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
-        """
-        return sa.select([sa.true()])
-
-    def _split_on_column_value(
-        self,
-        table_name: str,
-        column_name: str,
-    ):
-        """Split using the values in the named column"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
-
-        return (
-            sa.select([sa.func.distinct(sa.column(column_name))])
-            .select_from(sa.text(table_name))
-            .order_by(sa.column(column_name).asc())
-        )
-
-    def _split_on_converted_datetime(
-        self,
-        table_name: str,
-        column_name: str,
-        date_format_string: str = "%Y-%m-%d",
-    ):
-        """Convert the values in the named column to the given date_format, and split on that"""
-        # query = f"SELECT DISTINCT( strftime(\"{date_format_string}\", \"{self.column_name}\")) as my_var FROM {self.table_name}"
-
-        return sa.select(
-            [
-                sa.func.distinct(
-                    sa.func.strftime(
-                        date_format_string,
-                        sa.column(column_name),
-                    )
-                )
-            ]
-        ).select_from(sa.text(table_name))
-
-    def _split_on_divided_integer(
-        self, table_name: str, column_name: str, divisor: int
-    ):
-        """Divide the values in the named column by `divisor`, and split on that"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
-
-        return sa.select(
-            [sa.func.distinct(sa.cast(sa.column(column_name) / divisor, sa.Integer))]
-        ).select_from(sa.text(table_name))
-
-    def _split_on_mod_integer(self, table_name: str, column_name: str, mod: int):
-        """Divide the values in the named column by `divisor`, and split on that"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\" / {divisor}) AS my_var FROM {self.table_name}"
-
-        return sa.select(
-            [sa.func.distinct(sa.cast(sa.column(column_name) % mod, sa.Integer))]
-        ).select_from(sa.text(table_name))
-
-    def _split_on_multi_column_values(
-        self,
-        table_name: str,
-        column_names: List[str],
-    ):
-        """Split on the joint values in the named columns"""
-        # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
-
-        return (
-            sa.select([sa.column(column_name) for column_name in column_names])
-            .distinct()
-            .select_from(sa.text(table_name))
-        )
-
-    def _split_on_hashed_column(
-        self,
-        table_name: str,
-        column_name: str,
-        hash_digits: int,
-    ):
-        """Note: this method is experimental. It does not work with all SQL dialects."""
-        # query = f"SELECT MD5(\"{self.column_name}\") = {matching_hash}) AS hashed_var FROM {self.table_name}"
-
-        return sa.select([sa.func.md5(sa.column(column_name))]).select_from(
-            sa.text(table_name)
-        )
