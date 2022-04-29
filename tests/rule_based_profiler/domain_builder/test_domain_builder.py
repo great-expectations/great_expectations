@@ -6,6 +6,7 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
     ColumnPairDomainBuilder,
@@ -14,8 +15,10 @@ from great_expectations.rule_based_profiler.domain_builder import (
     TableDomainBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     ParameterContainer,
+    SemanticDomainTypes,
     build_parameter_container_for_variables,
 )
 
@@ -30,12 +33,13 @@ def test_table_domain_builder(
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     domain_builder: DomainBuilder = TableDomainBuilder(data_context=data_context)
-    domains: List[Domain] = domain_builder.get_domains()
+    domains: List[Domain] = domain_builder.get_domains(rule_name="my_rule")
 
     assert len(domains) == 1
     assert domains == [
         {
-            "domain_type": "table",
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.TABLE.value,
         }
     ]
 
@@ -96,6 +100,7 @@ def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule",
         variables=variables,
         batch_request=batch_request,
     )
@@ -103,11 +108,16 @@ def test_builder_executed_with_runtime_batch_request_does_not_raise_error(
     assert len(domains) == 1
     assert domains == [
         {
-            "domain_type": "column",
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
             "domain_kwargs": {
                 "column": "a",
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "a": SemanticDomainTypes.TEXT.value,
+                },
+            },
         },
     ]
 
@@ -138,59 +148,94 @@ def test_column_domain_builder(
 
     domain_builder: DomainBuilder = ColumnDomainBuilder(data_context=data_context)
     domains: List[Domain] = domain_builder.get_domains(
-        variables=variables, batch_request=batch_request
+        rule_name="my_rule", variables=variables, batch_request=batch_request
     )
 
     assert len(domains) == 7
     assert domains == [
         {
-            "domain_type": "column",
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
             "domain_kwargs": {
                 "column": "id",
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "id": SemanticDomainTypes.TEXT.value,
+                },
+            },
         },
         {
-            "domain_type": "column",
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
             "domain_kwargs": {
                 "column": "event_type",
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "event_type": SemanticDomainTypes.NUMERIC.value,
+                },
+            },
         },
         {
-            "domain_type": "column",
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
             "domain_kwargs": {
                 "column": "user_id",
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "user_id": SemanticDomainTypes.NUMERIC.value,
+                },
+            },
         },
         {
-            "domain_type": "column",
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
             "domain_kwargs": {
                 "column": "event_ts",
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "event_ts": SemanticDomainTypes.TEXT.value,
+                },
+            },
         },
         {
-            "domain_type": "column",
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
             "domain_kwargs": {
                 "column": "server_ts",
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "server_ts": SemanticDomainTypes.TEXT.value,
+                },
+            },
         },
         {
-            "domain_type": "column",
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
             "domain_kwargs": {
                 "column": "device_ts",
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "device_ts": SemanticDomainTypes.TEXT.value,
+                },
+            },
         },
         {
-            "domain_type": "column",
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
             "domain_kwargs": {
                 "column": "user_agent",
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "user_agent": SemanticDomainTypes.TEXT.value,
+                },
+            },
         },
     ]
 
@@ -226,28 +271,34 @@ def test_column_domain_builder_with_simple_semantic_type_included(
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(
-        variables=variables, batch_request=batch_request
+        rule_name="my_rule", variables=variables, batch_request=batch_request
     )
 
     assert len(domains) == 2
     # Assert Domain object equivalence.
     assert domains == [
         {
+            "rule_name": "my_rule",
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "event_type",
             },
             "details": {
-                "inferred_semantic_domain_type": "numeric",
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "event_type": SemanticDomainTypes.NUMERIC.value,
+                },
             },
         },
         {
+            "rule_name": "my_rule",
             "domain_type": "column",
             "domain_kwargs": {
                 "column": "user_id",
             },
             "details": {
-                "inferred_semantic_domain_type": "numeric",
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "user_id": SemanticDomainTypes.NUMERIC.value,
+                },
             },
         },
     ]
@@ -289,7 +340,7 @@ def test_column_pair_domain_builder_wrong_column_names(
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyArgumentList
         domains: List[Domain] = domain_builder.get_domains(
-            variables=variables, batch_request=batch_request
+            rule_name="my_rule", variables=variables, batch_request=batch_request
         )
 
     assert (
@@ -330,19 +381,25 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(
-        variables=variables, batch_request=batch_request
+        rule_name="my_rule", variables=variables, batch_request=batch_request
     )
 
     assert len(domains) == 1
     # Assert Domain object equivalence.
     assert domains == [
         {
+            "rule_name": "my_rule",
             "domain_type": "column_pair",
             "domain_kwargs": {
                 "column_A": "event_type",
                 "column_B": "user_id",
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "event_type": SemanticDomainTypes.NUMERIC.value,
+                    "user_id": SemanticDomainTypes.NUMERIC.value,
+                },
+            },
         }
     ]
 
@@ -386,7 +443,7 @@ def test_multi_column_domain_builder_wrong_column_list(
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyArgumentList
         domains: List[Domain] = domain_builder.get_domains(
-            variables=variables, batch_request=batch_request
+            rule_name="my_rule", variables=variables, batch_request=batch_request
         )
 
     assert 'Error: "column_list" in MultiColumnDomainBuilder must not be empty.' in str(
@@ -396,7 +453,7 @@ def test_multi_column_domain_builder_wrong_column_list(
     with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyArgumentList
         domains: List[Domain] = domain_builder.get_domains(
-            variables=variables, batch_request=batch_request
+            rule_name="my_rule", variables=variables, batch_request=batch_request
         )
 
     assert 'Error: "column_list" in MultiColumnDomainBuilder must not be empty.' in str(
@@ -437,13 +494,14 @@ def test_multi_column_domain_builder_correct_column_list(
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(
-        variables=variables, batch_request=batch_request
+        rule_name="my_rule", variables=variables, batch_request=batch_request
     )
 
     assert len(domains) == 1
     # Assert Domain object equivalence.
     assert domains == [
         {
+            "rule_name": "my_rule",
             "domain_type": "multicolumn",
             "domain_kwargs": {
                 "column_list": [
@@ -452,7 +510,13 @@ def test_multi_column_domain_builder_correct_column_list(
                     "user_agent",
                 ],
             },
-            "details": {},
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "event_type": SemanticDomainTypes.NUMERIC.value,
+                    "user_id": SemanticDomainTypes.NUMERIC.value,
+                    "user_agent": SemanticDomainTypes.TEXT.value,
+                },
+            },
         }
     ]
 
