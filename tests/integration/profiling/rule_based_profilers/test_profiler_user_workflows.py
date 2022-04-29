@@ -19,6 +19,7 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
@@ -28,7 +29,12 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.types import Domain, ParameterNode
+from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    ParameterNode,
+    SemanticDomainTypes,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.core.usage_statistics.util import (
@@ -663,7 +669,8 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     domain = Domain(
-        domain_type="table",
+        rule_name="row_count_range_rule",
+        domain_type=MetricDomainTypes.TABLE,
     )
 
     profiled_fully_qualified_parameter_names_for_domain_id: List[
@@ -701,9 +708,14 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     )
 
     domain = Domain(
+        rule_name="column_ranges_rule",
         domain_type="column",
         domain_kwargs={"column": "VendorID"},
-        details={"inferred_semantic_domain_type": "numeric"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "VendorID": SemanticDomainTypes.NUMERIC,
+            },
+        },
     )
 
     profiled_parameter_values_for_fully_qualified_parameter_names_for_domain_id: Dict[
