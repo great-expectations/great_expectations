@@ -95,7 +95,8 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
         "min_value",
         "strict_min",
         "max_value",
-        "strict_max" "auto",
+        "strict_max",
+        "auto",
         "profiler_config",
     )
 
@@ -148,7 +149,7 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
                 },
                 "expectation_configuration_builders": [
                     {
-                        "expectation_type": "expect_column_value_lengths_to_be_between",
+                        "expectation_type": "expect_column_sum_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                         "validation_parameter_builder_configs": validation_parameter_builder_configs,
