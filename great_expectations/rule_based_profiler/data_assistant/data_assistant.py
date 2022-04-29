@@ -83,6 +83,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         profiler_config: RuleBasedProfilerConfig = result.profiler_config
     """
 
+    __alias__: Optional[str] = None
+
     def __init__(
         self,
         name: str,
@@ -108,13 +110,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
             data_context=self._validator.data_context,
         )
         self._build_profiler()
-
-    @classmethod
-    def __init_subclass__(cls) -> None:
-        if not hasattr(cls, "__alias__"):
-            raise NotImplementedError(
-                f"Class {cls} lacks required `__alias__` class attribute of type Optional[str]"
-            )
 
     def _build_profiler(self) -> None:
         """

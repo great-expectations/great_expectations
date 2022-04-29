@@ -29,24 +29,27 @@ class DataAssistantDispatcher:
     def __getattr__(self, name: str) -> DataAssistantRunner:
         # Both, registered data_assistant_type and alias name are supported for invocation.
 
-        # Attempt to utilize data_assistant_type name for invocation first.
-        data_assistant_cls: Optional[
-            Type[DataAssistant]
-        ] = DataAssistantDispatcher.get_data_assistant_impl(data_assistant_type=name)
+        data_assistant_cls: Optional[Type[DataAssistant]] = None
 
-        # If no registered data_assistant_type exists, try aliases for invocation.
-        if data_assistant_cls is None:
-            type_: Type[DataAssistant]
-            for type_ in DataAssistantDispatcher._registered_data_assistants.values():
-                if type_.__alias__ == name:
-                    data_assistant_cls = type_
-                    break
-
-        # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".
-        if data_assistant_cls is None:
-            raise AttributeError(
-                f'"{type(self).__name__}" object has no attribute "{name}".'
+        # Attempt to utilize alias for invocation first.
+        type_: Type[DataAssistant]
+        for type_ in DataAssistantDispatcher._registered_data_assistants.values():
+            data_assistant_cls = DataAssistantDispatcher.get_data_assistant_impl(
+                name=type_.__alias__
             )
+            if data_assistant_cls is not None:
+                break
+
+        # If no registered alias exists, try data_assistant_type for invocation.
+        if data_assistant_cls is None:
+            data_assistant_cls = DataAssistantDispatcher.get_data_assistant_impl(
+                name=name
+            )
+            # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".
+            if data_assistant_cls is None:
+                raise AttributeError(
+                    f'"{type(self).__name__}" object has no attribute "{name}".'
+                )
 
         data_assistant_name: str = data_assistant_cls.data_assistant_type
         data_assistant_runner: Optional[
@@ -63,8 +66,9 @@ class DataAssistantDispatcher:
 
         return data_assistant_runner
 
-    @staticmethod
+    @classmethod
     def register_data_assistant(
+        cls,
         data_assistant: Type[DataAssistant],  # noqa: F821
     ) -> None:
         """
@@ -74,29 +78,34 @@ class DataAssistantDispatcher:
             data_assistant: "DataAssistant" class to be registered
         """
         data_assistant_type = data_assistant.data_assistant_type
-        registered_data_assistants: Dict[
-            str, Type[DataAssistant]
-        ] = DataAssistantDispatcher._registered_data_assistants
+        cls._register(data_assistant_type, data_assistant)
 
-        if data_assistant_type in registered_data_assistants:
-            if registered_data_assistants[data_assistant_type] == data_assistant:
-                logger.info(
-                    f'Multiple declarations of DataAssistant "{data_assistant_type}" found.'
-                )
+        alias: Optional[str] = data_assistant.__alias__
+        if alias is not None:
+            cls._register(alias, data_assistant)
+
+    @classmethod
+    def _register(cls, name: str, data_assistant: Type[DataAssistant]) -> None:
+        registered_data_assistants = cls._registered_data_assistants
+
+        if name in registered_data_assistants:
+            if registered_data_assistants[name] == data_assistant:
+                logger.info(f'Multiple declarations of DataAssistant "{name}" found.')
                 return
             else:
                 logger.warning(
-                    f'Overwriting the declaration of DataAssistant "{data_assistant_type}" took place.'
+                    f'Overwriting the declaration of DataAssistant "{name}" took place.'
                 )
 
         logger.debug(
-            f'Registering the declaration of DataAssistant "{data_assistant_type}" took place.'
+            f'Registering the declaration of DataAssistant "{name}" took place.'
         )
-        registered_data_assistants[data_assistant_type] = data_assistant
+        registered_data_assistants[name] = data_assistant
 
-    @staticmethod
+    @classmethod
     def get_data_assistant_impl(
-        data_assistant_type: str,
+        cls,
+        name: Optional[str],
     ) -> Optional[Type[DataAssistant]]:  # noqa: F821
         """
         This method obtains (previously registered) "DataAssistant" class from DataAssistant Registry.
@@ -109,7 +118,7 @@ class DataAssistantDispatcher:
         Returns:
             Class inheriting "DataAssistant" if found; otherwise, None
         """
-        data_assistant_type = data_assistant_type.lower()
-        return DataAssistantDispatcher._registered_data_assistants.get(
-            data_assistant_type
-        )
+        if name is None:
+            return None
+        name = name.lower()
+        return cls._registered_data_assistants.get(name)
