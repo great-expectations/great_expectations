@@ -553,6 +553,7 @@ def load_data_into_test_database(
     load_full_dataset: bool = False,
     convert_colnames_to_datetime: Optional[List[str]] = None,
     random_table_suffix: bool = False,
+    to_sql_method: Optional[str] = None,
 ) -> LoadedTable:
     """Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
 
@@ -567,6 +568,7 @@ def load_data_into_test_database(
         convert_colnames_to_datetime: List of column names to convert to datetime before writing to db.
         random_table_suffix: If true, add 8 random characters to the table suffix and remove other tables with the
             same prefix.
+        to_sql_method: Method to pass to method param of pd.to_sql()
 
     Returns:
         LoadedTable which for convenience, contains the pandas dataframe that was used to load the data.
@@ -608,7 +610,11 @@ def load_data_into_test_database(
             connection.execute(f"DROP TABLE IF EXISTS {table_name}")
             print(f"Creating table {table_name} and adding data from {csv_paths}")
             all_dfs_concatenated.to_sql(
-                name=table_name, con=engine, index=False, if_exists="append"
+                name=table_name,
+                con=engine,
+                index=False,
+                if_exists="append",
+                method=to_sql_method,
             )
             return return_value
         except SQLAlchemyError as e:
