@@ -41,10 +41,24 @@ def test_rule_output_get_fully_qualified_parameter_names_by_domain(
     rule_output_for_rule_state_with_domains_and_parameters,
 ):
     expected_fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = {
-        Domain(domain_type="column", domain_kwargs={"column": "Age",}, details={},): [
+        Domain(
+            rule_name="my_rule",
+            domain_type="column",
+            domain_kwargs={
+                "column": "Age",
+            },
+            details={},
+        ): [
             "$mean",
         ],
-        Domain(domain_type="column", domain_kwargs={"column": "Date",}, details={},): [
+        Domain(
+            rule_name="my_rule",
+            domain_type="column",
+            domain_kwargs={
+                "column": "Date",
+            },
+            details={},
+        ): [
             "$parameter.weekly_taxi_fairs.mean_values",
             "$parameter.tolerances.mostly",
             "$parameter.tolerances.financial.usd",
@@ -96,8 +110,12 @@ def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_by
     expected_parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
         Domain, Dict[str, ParameterNode]
     ] = {
-        Domain(domain_type="column", domain_kwargs={"column": "Age"}): {"$mean": 5.0},
-        Domain(domain_type="column", domain_kwargs={"column": "Date"}): {
+        Domain(
+            rule_name="my_rule", domain_type="column", domain_kwargs={"column": "Age"}
+        ): {"$mean": 5.0},
+        Domain(
+            rule_name="my_rule", domain_type="column", domain_kwargs={"column": "Date"}
+        ): {
             "$parameter.weekly_taxi_fairs.mean_values": {
                 "value": [
                     {
