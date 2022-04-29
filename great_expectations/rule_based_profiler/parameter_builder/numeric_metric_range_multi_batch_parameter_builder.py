@@ -12,6 +12,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     compute_bootstrap_quantiles_point_estimate,
     compute_quantiles,
     get_parameter_value_and_validate_return_type,
+    integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     AttributedResolvedMetrics,
@@ -371,32 +372,17 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
         lower_bound: Optional[float] = truncate_values.get("lower_bound")
         upper_bound: Optional[float] = truncate_values.get("upper_bound")
 
-        interpolation_method: str = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.interpolation_method,
-            expected_return_type=str,
-            variables=variables,
-            parameters=parameters,
-        )
-
         round_decimals: int
 
-        # if integer_semantic_domain_type(domain=domain):
-        # round_decimals = 0
-        # else:
-        round_decimals = self._get_round_decimals_using_heuristics(
-            metric_values=metric_values,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        round_decimals: int = self._get_round_decimals_using_heuristics(
-            metric_values=metric_values,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
+        if integer_semantic_domain_type(domain=domain):
+            round_decimals = 0
+        else:
+            round_decimals = self._get_round_decimals_using_heuristics(
+                metric_values=metric_values,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
 
         min_value: Number
         max_value: Number
