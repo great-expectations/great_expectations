@@ -27,6 +27,8 @@ class VolumeDataAssistant(DataAssistant):
         - Others in the future.
     """
 
+    __alias__: str = "volume"
+
     def __init__(
         self,
         name: str,
@@ -94,6 +96,10 @@ class VolumeDataAssistant(DataAssistant):
     @property
     def rules(self) -> Optional[List[Rule]]:
         return None
+
+    @staticmethod
+    def alias() -> Optional[str]:
+        return "volume"
 
     def _build_data_assistant_result(
         self, data_assistant_result: DataAssistantResult
