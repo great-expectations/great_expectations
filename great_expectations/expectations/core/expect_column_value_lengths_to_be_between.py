@@ -150,7 +150,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,
                     "truncate_values": {
-                        "lower_bound": None,
+                        "lower_bound": 0,
                         "upper_bound": None,
                     },
                     "round_decimals": 0,
