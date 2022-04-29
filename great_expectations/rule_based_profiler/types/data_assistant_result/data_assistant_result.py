@@ -18,8 +18,8 @@ from great_expectations.rule_based_profiler.types.altair import (
     AltairDataTypes,
     AltairThemes,
 )
-from great_expectations.rule_based_profiler.types.data_assistant_result.chart import (
-    Chart,
+from great_expectations.rule_based_profiler.types.data_assistant_result.plot_result import (
+    PlotResult,
 )
 from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
 
@@ -91,7 +91,7 @@ class DataAssistantResult(SerializableDictDot):
             chart.configure(**altair_theme).display()
 
     @staticmethod
-    def get_line_chart(
+    def get_table_line_chart(
         df: pd.DataFrame,
         metric_name: str,
         metric_type: alt.StandardType,
@@ -231,7 +231,7 @@ class DataAssistantResult(SerializableDictDot):
             )
         )
 
-        line: alt.Chart = DataAssistantResult.get_line_chart(
+        line: alt.Chart = DataAssistantResult.get_table_line_chart(
             df=df,
             metric_name=metric_name,
             metric_type=metric_type,
@@ -247,49 +247,49 @@ class DataAssistantResult(SerializableDictDot):
 
         return band + lower_limit + upper_limit + anomaly_coded_line
 
+    # @staticmethod
+    # def get_column_line_chart(
+    #     column_dfs: List[Tuple[str, pd.DataFrame]],
+    #     metric_name: str,
+    #     metric_type: alt.StandardType,
+    #     domain_name: str,
+    #     domain_type: alt.StandardType,
+    # ) -> alt.VConcatChart:
+    #     """
+    #     Args:
+    #         column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
+    #         metric_name: The name of the metric as it exists in the pandas dataframe
+    #         metric_type: The altair data type for the metric being plotted
+    #         domain_name: The name of the domain as it exists in the pandas dataframe
+    #         domain_type: The altair data type for the domain being plotted
+
+    #     Returns:
+    #         A vertically concatenated (vconcat) altair line chart
+    #     """
+    #     charts: List[alt.Chart] = []
+
+    #     i: int
+    #     column_name: str
+    #     df: pd.DataFrame
+    #     for i, (column_name, df) in enumerate(column_dfs):
+    #         include_title: bool = i == 0
+    #         chart: alt.Chart = (
+    #             DataAssistantResult._get_column_line_chart(
+    #                 df=df,
+    #                 column_name=column_name,
+    #                 metric_name=metric_name,
+    #                 metric_type=metric_type,
+    #                 domain_name=domain_name,
+    #                 domain_type=domain_type,
+    #                 include_title=include_title,
+    #             )
+    #         )
+    #         charts.append(chart)
+
+    #     return alt.vconcat(*charts)
+
     @staticmethod
-    def get_vertically_concatenated_line_chart(
-        column_dfs: List[Tuple[str, pd.DataFrame]],
-        metric_name: str,
-        metric_type: alt.StandardType,
-        domain_name: str,
-        domain_type: alt.StandardType,
-    ) -> alt.VConcatChart:
-        """
-        Args:
-            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
-            metric_type: The altair data type for the metric being plotted
-            domain_name: The name of the domain as it exists in the pandas dataframe
-            domain_type: The altair data type for the domain being plotted
-
-        Returns:
-            A vertically concatenated (vconcat) altair line chart
-        """
-        charts: List[alt.Chart] = []
-
-        i: int
-        column_name: str
-        df: pd.DataFrame
-        for i, (column_name, df) in enumerate(column_dfs):
-            include_title: bool = i == 0
-            chart: alt.Chart = (
-                DataAssistantResult._get_vertically_concatenated_line_chart(
-                    df=df,
-                    column_name=column_name,
-                    metric_name=metric_name,
-                    metric_type=metric_type,
-                    domain_name=domain_name,
-                    domain_type=domain_type,
-                    include_title=include_title,
-                )
-            )
-            charts.append(chart)
-
-        return alt.vconcat(*charts)
-
-    @staticmethod
-    def _get_vertically_concatenated_line_chart(
+    def get_column_line_chart(
         df: pd.DataFrame,
         column_name: str,
         metric_name: str,
@@ -348,49 +348,49 @@ class DataAssistantResult(SerializableDictDot):
 
         return line + points
 
+    # @staticmethod
+    # def get_expect_column_values_to_be_between_chart(
+    #     column_dfs: List[Tuple[str, pd.DataFrame]],
+    #     metric_name: str,
+    #     metric_type: alt.StandardType,
+    #     domain_name: str,
+    #     domain_type: alt.StandardType,
+    # ) -> alt.VConcatChart:
+    #     """
+    #     Args:
+    #         column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
+    #         metric_name: The name of the metric as it exists in the pandas dataframe
+    #         metric_type: The altair data type for the metric being plotted
+    #         domain_name: The name of the domain as it exists in the pandas dataframe
+    #         domain_type: The altair data type for the domain being plotted
+
+    #     Returns:
+    #         A vertically concatenated (vconcat) altair line chart with confidence intervals corresponding to "between" expectations
+    #     """
+    #     charts: List[alt.Chart] = []
+
+    #     i: int
+    #     column_name: str
+    #     df: pd.DataFrame
+    #     for i, (column_name, df) in enumerate(column_dfs):
+    #         include_title: bool = i == 0
+    #         chart: alt.Chart = (
+    #             DataAssistantResult._get_expect_column_values_to_be_between_chart(
+    #                 df=df,
+    #                 column_name=column_name,
+    #                 metric_name=metric_name,
+    #                 metric_type=metric_type,
+    #                 domain_name=domain_name,
+    #                 domain_type=domain_type,
+    #                 include_title=include_title,
+    #             )
+    #         )
+    #         charts.append(chart)
+
+    #     return alt.vconcat(*charts)
+
     @staticmethod
     def get_expect_column_values_to_be_between_chart(
-        column_dfs: List[Tuple[str, pd.DataFrame]],
-        metric_name: str,
-        metric_type: alt.StandardType,
-        domain_name: str,
-        domain_type: alt.StandardType,
-    ) -> alt.VConcatChart:
-        """
-        Args:
-            column_dfs: A list of tuples pairing pandas dataframes with the columns they correspond to
-            metric_name: The name of the metric as it exists in the pandas dataframe
-            metric_type: The altair data type for the metric being plotted
-            domain_name: The name of the domain as it exists in the pandas dataframe
-            domain_type: The altair data type for the domain being plotted
-
-        Returns:
-            A vertically concatenated (vconcat) altair line chart with confidence intervals corresponding to "between" expectations
-        """
-        charts: List[alt.Chart] = []
-
-        i: int
-        column_name: str
-        df: pd.DataFrame
-        for i, (column_name, df) in enumerate(column_dfs):
-            include_title: bool = i == 0
-            chart: alt.Chart = (
-                DataAssistantResult._get_expect_column_values_to_be_between_chart(
-                    df=df,
-                    column_name=column_name,
-                    metric_name=metric_name,
-                    metric_type=metric_type,
-                    domain_name=domain_name,
-                    domain_type=domain_type,
-                    include_title=include_title,
-                )
-            )
-            charts.append(chart)
-
-        return alt.vconcat(*charts)
-
-    @staticmethod
-    def _get_expect_column_values_to_be_between_chart(
         df: pd.DataFrame,
         column_name: str,
         metric_name: str,
@@ -466,7 +466,7 @@ class DataAssistantResult(SerializableDictDot):
             .properties(height=chart_height)
         )
 
-        line: alt.Chart = DataAssistantResult._get_vertically_concatenated_line_chart(
+        line: alt.Chart = DataAssistantResult.get_column_line_chart(
             df=df,
             column_name=column_name,
             metric_name=metric_name,
@@ -512,7 +512,7 @@ class DataAssistantResult(SerializableDictDot):
         self,
         prescriptive: bool = False,
         theme: Optional[Dict[str, Any]] = None,
-    ) -> Chart:
+    ) -> PlotResult:
         """
         Use contents of "DataAssistantResult" object to display mentrics and other detail for visualization purposes.
 
