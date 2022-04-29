@@ -186,7 +186,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 For example, [{column_name: {"year": 2022, "month": 4, "day": 14}}]
         """
 
-        splitter_fn: Callable = getattr(self, splitter_method_name)
+        splitter_fn: Callable = self.execution_engine.get_splitter_method(
+            splitter_method_name
+        )
         split_query: Selectable = splitter_fn(table_name=table_name, **splitter_kwargs)
 
         sqlalchemy_execution_engine: SqlAlchemyExecutionEngine = cast(
