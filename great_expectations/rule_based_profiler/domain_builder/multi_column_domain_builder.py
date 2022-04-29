@@ -72,17 +72,12 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
             )
 
         column_name: str
-        semantic_types_by_column_name: Dict[str, SemanticDomainTypes] = dict(
-            zip(
-                effective_column_names,
-                [
-                    self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
-                        column_name
-                    ]
-                    for column_name in effective_column_names
-                ],
-            )
-        )
+        semantic_types_by_column_name: Dict[str, SemanticDomainTypes] = {
+            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
+                column_name
+            ]
+            for column_name in effective_column_names
+        }
 
         domains: List[Domain] = [
             Domain(

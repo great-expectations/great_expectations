@@ -429,6 +429,42 @@ def convert_variables_to_dict(
     return variables_as_dict
 
 
+def integer_semantic_domain_type(domain: Domain) -> bool:
+    """
+    This method examines "INFERRED_SEMANTIC_TYPE_KEY" attribute of "Domain" argument to check whether or not underlying
+    "SemanticDomainTypes" enum value is an "integer".  Because explicitly designated "SemanticDomainTypes.INTEGER" type
+    is unavaiable, "SemanticDomainTypes.LOGIC",  "SemanticDomainTypes.BINARY",  and "SemanticDomainTypes.IDENTIFIER",
+    are intepreted as taking on "integer" values.  Note: In certain settings, this method should be used as pre-filter
+    to "NumericMetricRangeMultiBatchParameterBuilder._get_round_decimals_using_heuristics()".
+
+    Note: Inability to assess underlying "SemanticDomainTypes" details of "Domain" object produces "False" return value.
+
+    Args:
+        domain: "Domain" object to inspect for underlying "SemanticDomainTypes" details
+
+    Returns:
+        Boolean value indicating whether or not specified "Domain" is inferred to denote "integer" values
+
+    """
+
+    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
+        INFERRED_SEMANTIC_TYPE_KEY
+    )
+
+    semantic_domain_type: SemanticDomainTypes
+    return inferred_semantic_domain_type and all(
+        [
+            semantic_domain_type
+            in [
+                SemanticDomainTypes.LOGIC,
+                SemanticDomainTypes.BINARY,
+                SemanticDomainTypes.IDENTIFIER,
+            ]
+            for semantic_domain_type in (inferred_semantic_domain_type.values())
+        ]
+    )
+
+
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,

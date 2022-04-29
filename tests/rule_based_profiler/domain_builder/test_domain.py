@@ -1,5 +1,8 @@
 import pytest
 
+from great_expectations.rule_based_profiler.helpers.util import (
+    integer_semantic_domain_type,
+)
 from great_expectations.rule_based_profiler.types import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
@@ -66,7 +69,7 @@ def test_semantic_domain_serialization():
             "estimator": "categorical",
             "cardinality": "low",
             INFERRED_SEMANTIC_TYPE_KEY: {
-                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+                "passenger_count": SemanticDomainTypes.NUMERIC,
             },
         },
     )
@@ -98,7 +101,7 @@ def test_semantic_domain_comparisons():
         domain_kwargs={"column": "VendorID"},
         details={
             INFERRED_SEMANTIC_TYPE_KEY: {
-                "VendorID": SemanticDomainTypes.NUMERIC.value,
+                "VendorID": SemanticDomainTypes.NUMERIC,
             },
         },
     )
@@ -108,7 +111,7 @@ def test_semantic_domain_comparisons():
         domain_kwargs={"column": "passenger_count"},
         details={
             INFERRED_SEMANTIC_TYPE_KEY: {
-                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+                "passenger_count": SemanticDomainTypes.NUMERIC,
             },
         },
     )
@@ -118,7 +121,7 @@ def test_semantic_domain_comparisons():
         domain_kwargs={"column": "passenger_count"},
         details={
             INFERRED_SEMANTIC_TYPE_KEY: {
-                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+                "passenger_count": SemanticDomainTypes.NUMERIC,
             },
         },
     )
@@ -132,7 +135,7 @@ def test_semantic_domain_comparisons():
         domain_kwargs={"column": "VendorID"},
         details={
             INFERRED_SEMANTIC_TYPE_KEY: {
-                "VendorID": SemanticDomainTypes.NUMERIC.value,
+                "VendorID": SemanticDomainTypes.NUMERIC,
             },
         },
     )
@@ -142,7 +145,7 @@ def test_semantic_domain_comparisons():
         domain_kwargs={"column": "passenger_count"},
         details={
             INFERRED_SEMANTIC_TYPE_KEY: {
-                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+                "passenger_count": SemanticDomainTypes.NUMERIC,
             },
         },
     )
@@ -152,7 +155,7 @@ def test_semantic_domain_comparisons():
         domain_kwargs={"column": "passenger_count"},
         details={
             INFERRED_SEMANTIC_TYPE_KEY: {
-                "passenger_count": SemanticDomainTypes.NUMERIC.value,
+                "passenger_count": SemanticDomainTypes.NUMERIC,
             },
         },
     )
@@ -201,3 +204,31 @@ def test_semantic_domain_comparisons():
         "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"
         in str(excinfo.value)
     )
+
+
+def test_integer_semantic_domain_type():
+    domain: Domain
+
+    domain = Domain(
+        rule_name="my_rule",
+        domain_type="column",
+        domain_kwargs={"column": "passenger_count"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "VendorID": SemanticDomainTypes.NUMERIC,
+            },
+        },
+    )
+    assert not integer_semantic_domain_type(domain=domain)
+
+    domain = Domain(
+        rule_name="my_rule",
+        domain_type="column",
+        domain_kwargs={"column": "VendorID"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "VendorID": SemanticDomainTypes.IDENTIFIER,
+            },
+        },
+    )
+    assert integer_semantic_domain_type(domain=domain)
