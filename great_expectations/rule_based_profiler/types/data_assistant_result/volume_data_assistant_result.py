@@ -232,9 +232,11 @@ class VolumeDataAssistantResult(DataAssistantResult):
         ]
 
         if prescriptive:
-            plot_impl = self.get_expect_column_values_to_be_between_chart
+            plot_impl = (
+                self.get_interactive_detail_expect_column_values_to_be_between_chart
+            )
         else:
-            plot_impl = self.get_vertically_concatenated_line_chart
+            plot_impl = self.get_interactive_detail_multi_line_chart
 
         chart: alt.VConcatChart = plot_impl(
             column_dfs=column_dfs,
