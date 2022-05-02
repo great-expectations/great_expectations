@@ -97,6 +97,9 @@ class AltairThemes(Enum):
             "labelFlush": x_axis_label_flush,
             "grid": x_axis_grid,
         },
+        "legend": {
+            "titleColor": legend_title_color,
+        },
         "range": {
             "category": category_color_scheme,
             "diverging": diverging_color_scheme,
