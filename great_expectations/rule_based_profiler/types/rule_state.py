@@ -18,7 +18,7 @@ class RuleState:
         variables: Optional[ParameterContainer] = None,
         domains: Optional[List[Domain]] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> None:
         """
         Args:
             rule: Rule object for which present RuleState object corresponds (needed for various Rule properties).

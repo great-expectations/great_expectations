@@ -99,7 +99,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
     default_kwarg_values = {}
 
     @classmethod
-    def _register_metric_functions(cls):
+    def _register_metric_functions(cls) -> None:
         metric_name = getattr(cls, "metric_name", None)
         metric_domain_keys = cls.domain_keys
         metric_value_keys = cls.value_keys
