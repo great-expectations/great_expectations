@@ -75,6 +75,7 @@ def pandas_test_df():
 @pytest.fixture
 def table_Users_domain():
     return Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
         domain_kwargs=None,
         details=None,
@@ -85,6 +86,7 @@ def table_Users_domain():
 @pytest.fixture
 def column_Age_domain():
     return Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Age",
@@ -97,6 +99,7 @@ def column_Age_domain():
 @pytest.fixture
 def column_Date_domain():
     return Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Date",
@@ -109,6 +112,7 @@ def column_Date_domain():
 @pytest.fixture
 def column_Description_domain():
     return Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
             "column": "Description",
@@ -121,6 +125,7 @@ def column_Description_domain():
 @pytest.fixture
 def column_pair_Age_Date_domain():
     return Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN_PAIR,
         domain_kwargs={
             "column_A": "Age",
@@ -134,6 +139,7 @@ def column_pair_Age_Date_domain():
 @pytest.fixture
 def multi_column_Age_Date_Description_domain():
     return Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.MULTICOLUMN,
         domain_kwargs={
             "column_list": [

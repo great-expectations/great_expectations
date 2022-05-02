@@ -5,7 +5,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
-    build_simple_domains_from_column_names,
+    build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.types import (
@@ -371,7 +371,7 @@ class ColumnDomainBuilder(DomainBuilder):
         if include_semantic_types:
             effective_column_names = list(
                 filter(
-                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
+                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
                         candidate_column_name
                     ]
                     in include_semantic_types,
@@ -382,7 +382,7 @@ class ColumnDomainBuilder(DomainBuilder):
         if exclude_semantic_types:
             effective_column_names = list(
                 filter(
-                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
+                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
                         candidate_column_name
                     ]
                     not in exclude_semantic_types,
@@ -394,6 +394,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """
@@ -409,26 +410,12 @@ class ColumnDomainBuilder(DomainBuilder):
             variables=variables,
         )
 
-        domains: List[Domain]
-        if self.include_semantic_types or self.exclude_semantic_types:
-            domains = [
-                Domain(
-                    domain_type=self.domain_type,
-                    domain_kwargs={
-                        "column": column_name,
-                    },
-                    details={
-                        INFERRED_SEMANTIC_TYPE_KEY: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_mapping[
-                            column_name
-                        ],
-                    },
-                )
-                for column_name in effective_column_names
-            ]
-        else:
-            domains = build_simple_domains_from_column_names(
-                column_names=effective_column_names,
-                domain_type=self.domain_type,
-            )
+        column_name: str
+        domains: List[Domain] = build_domains_from_column_names(
+            rule_name=rule_name,
+            column_names=effective_column_names,
+            domain_type=self.domain_type,
+            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,
+        )
 
         return domains
