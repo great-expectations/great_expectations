@@ -2198,9 +2198,9 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
     version.parse(np.version.version) < version.parse("1.21.0"),
     reason="requires numpy version 1.21.0 or newer",
 )
-@freeze_time("09/26/2019 13:42:41")
-def test_quentin_expect_column_mean_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
-    quentin_validator,
+@freeze_time(TIMESTAMP)
+def test_quentin_expect_column_median_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
+    quentin_validator: Validator,
 ) -> None:
     validator: Validator = quentin_validator
 
@@ -2214,7 +2214,7 @@ def test_quentin_expect_column_mean_to_be_between_auto_yes_default_profiler_conf
     max_value_expected: float
     for column_name, min_value_expected, max_value_expected in test_cases:
         # Use all batches, loaded by Validator, for estimating Expectation argument values.
-        result = validator.expect_column_mean_to_be_between(
+        result = validator.expect_column_median_to_be_between(
             column=column_name,
             result_format="SUMMARY",
             include_config=True,
