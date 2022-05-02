@@ -29,27 +29,16 @@ class DataAssistantDispatcher:
     def __getattr__(self, name: str) -> DataAssistantRunner:
         # Both, registered data_assistant_type and alias name are supported for invocation.
 
-        data_assistant_cls: Optional[Type[DataAssistant]] = None
+        # _registered_data_assistants has both aliases and full names
+        data_assistant_cls: Optional[
+            Type[DataAssistant]
+        ] = DataAssistantDispatcher.get_data_assistant_impl(name=name)
 
-        # Attempt to utilize alias for invocation first.
-        type_: Type[DataAssistant]
-        for type_ in DataAssistantDispatcher._registered_data_assistants.values():
-            data_assistant_cls = DataAssistantDispatcher.get_data_assistant_impl(
-                name=type_.__alias__
-            )
-            if data_assistant_cls is not None:
-                break
-
-        # If no registered alias exists, try data_assistant_type for invocation.
+        # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".
         if data_assistant_cls is None:
-            data_assistant_cls = DataAssistantDispatcher.get_data_assistant_impl(
-                name=name
+            raise AttributeError(
+                f'"{type(self).__name__}" object has no attribute "{name}".'
             )
-            # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".
-            if data_assistant_cls is None:
-                raise AttributeError(
-                    f'"{type(self).__name__}" object has no attribute "{name}".'
-                )
 
         data_assistant_name: str = data_assistant_cls.data_assistant_type
         data_assistant_runner: Optional[
@@ -89,13 +78,7 @@ class DataAssistantDispatcher:
         registered_data_assistants = cls._registered_data_assistants
 
         if name in registered_data_assistants:
-            if registered_data_assistants[name] == data_assistant:
-                logger.info(f'Multiple declarations of DataAssistant "{name}" found.')
-                return
-            else:
-                logger.warning(
-                    f'Overwriting the declaration of DataAssistant "{name}" took place.'
-                )
+            raise ValueError(f'Multiple declarations of DataAssistant "{name}" found.')
 
         logger.debug(
             f'Registering the declaration of DataAssistant "{name}" took place.'
