@@ -264,6 +264,11 @@ class DataAssistantResult(SerializableDictDot):
             A interactive detail altair multi-line chart
         """
         metric_title: str = metric_name.replace("_", " ").title()
+        metric_title_words: list[str] = metric_name.replace("_", " ").title().split()
+        metric_label_title: str = [
+            " ".join([metric_title_words[0], metric_title_words[1]]),
+            " ".join([metric_title_words[2], metric_title_words[3]]),
+        ]
         domain_title: str = domain_name.title()
         title: str = f"{metric_title} per {domain_title}"
 
@@ -272,6 +277,8 @@ class DataAssistantResult(SerializableDictDot):
 
         column_name: str = "Column Name"
         column_name_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+
+        detail_title: str = "Detail"
 
         line_chart_height: int = 150
         detail_line_chart_height: int = 75
@@ -308,7 +315,7 @@ class DataAssistantResult(SerializableDictDot):
                     type=domain_type,
                     axis=alt.Axis(ticks=False, title=None, labels=False),
                 ),
-                y=alt.Y(metric_name, type=metric_type, title=None),
+                y=alt.Y(metric_name, type=metric_type, title=metric_label_title),
                 color=alt.condition(
                     selector,
                     alt.Color(
@@ -337,7 +344,7 @@ class DataAssistantResult(SerializableDictDot):
                     type=domain_type,
                     axis=alt.Axis(ticks=False, title=None, labels=False),
                 ),
-                y=alt.Y(metric_name, type=metric_type, title=None),
+                y=alt.Y(metric_name, type=metric_type, title=metric_label_title),
                 color=alt.condition(
                     selector,
                     alt.value(Colors.GREEN.value),
@@ -362,7 +369,7 @@ class DataAssistantResult(SerializableDictDot):
                     type=domain_type,
                     title=domain_title,
                 ),
-                y=alt.Y(metric_name, type=metric_type, title=None),
+                y=alt.Y(metric_name, type=metric_type, title=detail_title),
                 color=alt.condition(
                     selector,
                     alt.Color(
@@ -392,7 +399,7 @@ class DataAssistantResult(SerializableDictDot):
                     type=domain_type,
                     title=domain_title,
                 ),
-                y=alt.Y(metric_name, type=metric_type, title=None),
+                y=alt.Y(metric_name, type=metric_type, title=detail_title),
                 color=alt.condition(
                     selector,
                     alt.value(Colors.GREEN.value),
