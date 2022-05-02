@@ -473,6 +473,7 @@ anonymized_run_validation_operator_payload_schema = {
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_batch": anonymized_batch_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
     },
     "type": "object",
     "properties": {

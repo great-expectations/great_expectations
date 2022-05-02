@@ -26,7 +26,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
-    Attributes,
     Builder,
     Domain,
     ParameterContainer,
@@ -34,6 +33,7 @@ from great_expectations.rule_based_profiler.types import (
     get_fully_qualified_parameter_names,
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.types.attributes import Attributes
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 # TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
@@ -54,14 +54,14 @@ class AttributedResolvedMetrics(SerializableDictDot):
     with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
     """
 
+    metric_attributes: Optional[Attributes] = None
+    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
+
     @staticmethod
     def get_metric_values_from_attributed_metric_values(
         attributed_metric_values: Optional[Dict[str, MetricValue]] = None,
     ) -> MetricValues:
         return np.array(list(attributed_metric_values.values()))
-
-    metric_attributes: Optional[Attributes] = None
-    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
 
     def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
         if self.metric_values_by_batch_id is None:
@@ -91,7 +91,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-class ParameterBuilder(Builder, ABC):
+class ParameterBuilder(ABC, Builder):
     """
     A ParameterBuilder implementation provides support for building Expectation Configuration Parameters suitable for
     use in other ParameterBuilders or in ConfigurationBuilders as part of profiling.
@@ -120,8 +120,8 @@ class ParameterBuilder(Builder, ABC):
             List[ParameterBuilderConfig]
         ] = None,
         json_serialize: Union[str, bool] = True,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
 
@@ -133,7 +133,7 @@ class ParameterBuilder(Builder, ABC):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            data_context: DataContext
+            data_context: BaseDataContext associated with ParameterBuilder
         """
         super().__init__(data_context=data_context)
 
@@ -667,7 +667,7 @@ class ParameterBuilder(Builder, ABC):
 
 def init_rule_parameter_builders(
     parameter_builder_configs: Optional[List[dict]] = None,
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
 ) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
     if parameter_builder_configs is None:
         return None
@@ -683,7 +683,7 @@ def init_rule_parameter_builders(
 
 def init_parameter_builder(
     parameter_builder_config: Union["ParameterBuilderConfig", dict],  # noqa: F821
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
 ) -> "ParameterBuilder":  # noqa: F821
     if not isinstance(parameter_builder_config, dict):
         parameter_builder_config = parameter_builder_config.to_dict()
