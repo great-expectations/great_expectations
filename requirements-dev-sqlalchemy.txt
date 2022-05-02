@@ -1,7 +1,6 @@
 --requirement requirements-dev-lite.txt
 
 --requirement requirements-dev-athena.txt
---requirement requirements-dev-azure.txt
 --requirement requirements-dev-bigquery.txt
 --requirement requirements-dev-dremio.txt
 --requirement requirements-dev-mssql.txt

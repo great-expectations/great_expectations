@@ -26,7 +26,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 from great_expectations.rule_based_profiler.types import (
     PARAMETER_KEY,
-    Attributes,
     Builder,
     Domain,
     ParameterContainer,
@@ -34,6 +33,7 @@ from great_expectations.rule_based_profiler.types import (
     get_fully_qualified_parameter_names,
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.types.attributes import Attributes
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 # TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
@@ -54,14 +54,14 @@ class AttributedResolvedMetrics(SerializableDictDot):
     with uniquely identifiable attribution object so that receivers can filter them from overall resolved metrics.
     """
 
+    metric_attributes: Optional[Attributes] = None
+    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
+
     @staticmethod
     def get_metric_values_from_attributed_metric_values(
         attributed_metric_values: Optional[Dict[str, MetricValue]] = None,
     ) -> MetricValues:
         return np.array(list(attributed_metric_values.values()))
-
-    metric_attributes: Optional[Attributes] = None
-    metric_values_by_batch_id: Optional[Dict[str, MetricValue]] = None
 
     def add_resolved_metric(self, batch_id: str, value: MetricValue) -> None:
         if self.metric_values_by_batch_id is None:
@@ -91,7 +91,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-class ParameterBuilder(Builder, ABC):
+class ParameterBuilder(ABC, Builder):
     """
     A ParameterBuilder implementation provides support for building Expectation Configuration Parameters suitable for
     use in other ParameterBuilders or in ConfigurationBuilders as part of profiling.
@@ -120,10 +120,8 @@ class ParameterBuilder(Builder, ABC):
             List[ParameterBuilderConfig]
         ] = None,
         json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
 
@@ -135,15 +133,9 @@ class ParameterBuilder(Builder, ABC):
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            data_context: BaseDataContext associated with ParameterBuilder
         """
-        super().__init__(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            data_context=data_context,
-        )
+        super().__init__(data_context=data_context)
 
         self._name = name
 
@@ -167,7 +159,6 @@ class ParameterBuilder(Builder, ABC):
         json_serialize: Optional[bool] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        force_batch_data: bool = False,
         recompute_existing_parameter_values: bool = False,
     ) -> None:
         """
@@ -179,7 +170,6 @@ class ParameterBuilder(Builder, ABC):
             json_serialize: If absent, use property value (in standard way, supporting variables look-up).
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            force_batch_data: Whether or not to overwrite existing batch_request value in ParameterBuilder components.
             recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
         """
         fully_qualified_parameter_names: List[
@@ -197,7 +187,6 @@ class ParameterBuilder(Builder, ABC):
             self.set_batch_list_or_batch_request(
                 batch_list=batch_list,
                 batch_request=batch_request,
-                force_batch_data=force_batch_data,
             )
 
             resolve_evaluation_dependencies(
@@ -678,7 +667,7 @@ class ParameterBuilder(Builder, ABC):
 
 def init_rule_parameter_builders(
     parameter_builder_configs: Optional[List[dict]] = None,
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
 ) -> Optional[List["ParameterBuilder"]]:  # noqa: F821
     if parameter_builder_configs is None:
         return None
@@ -694,7 +683,7 @@ def init_rule_parameter_builders(
 
 def init_parameter_builder(
     parameter_builder_config: Union["ParameterBuilderConfig", dict],  # noqa: F821
-    data_context: Optional["DataContext"] = None,  # noqa: F821
+    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
 ) -> "ParameterBuilder":  # noqa: F821
     if not isinstance(parameter_builder_config, dict):
         parameter_builder_config = parameter_builder_config.to_dict()
@@ -754,7 +743,6 @@ def resolve_evaluation_dependencies(
             evaluation_parameter_builder.set_batch_list_or_batch_request(
                 batch_list=parameter_builder.batch_list,
                 batch_request=parameter_builder.batch_request,
-                force_batch_data=False,
             )
 
             evaluation_parameter_builder.build_parameters(

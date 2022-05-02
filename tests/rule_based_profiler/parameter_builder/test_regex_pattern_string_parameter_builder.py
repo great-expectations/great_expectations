@@ -68,16 +68,16 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
     data_context: DataContext = mock_data_context
 
     candidate_regexes: Set[str] = {
-        r"/\d+/",  # whole number with 1 or more digits
-        r"/-?\d+/",  # negative whole numbers
-        r"/-?\d+(\.\d*)?/",  # decimal numbers with . (period) separator
-        r"/[A-Za-z0-9\.,;:!?()\"'%\-]+/",  # general text
-        r"^\s+/",  # leading space
-        r"\s+/$",  # trailing space
-        r"/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/",  # Matching URL (including http(s) protocol)
-        r"/<\/?(?:p|a|b|img)(?: \/)?>/",  # HTML tags
-        r"/(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}/",  # IPv4 IP address
-        r"/(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}/",  # IPv6 IP address,
+        r"\d+",  # whole number with 1 or more digits
+        r"-?\d+",  # negative whole numbers
+        r"-?\d+(\.\d*)?",  # decimal numbers with . (period) separator
+        r"[A-Za-z0-9\.,;:!?()\"'%\-]+",  # general text
+        r"^\s+",  # leading space
+        r"\s+$",  # trailing space
+        r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  #  Matching URL (including http(s) protocol)
+        r"<\/?(?:p|a|b|img)(?: \/)?>",  # HTML tags
+        r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}",  # IPv4 IP address
+        r"(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",  # IPv6 IP address,
         r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ",  # UUID
     }
 
@@ -139,13 +139,14 @@ def test_regex_pattern_string_parameter_builder_alice(
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
-            batch_request=batch_request,
             data_context=data_context,
         )
     )
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -157,6 +158,7 @@ def test_regex_pattern_string_parameter_builder_alice(
     regex_pattern_string_parameter.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_request=batch_request,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
@@ -212,7 +214,6 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
             threshold=threshold,
-            batch_request=batch_request,
             data_context=data_context,
         )
     )
@@ -222,7 +223,9 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     assert regex_parameter.threshold == 0.9
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -234,6 +237,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     regex_parameter.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     fully_qualified_parameter_name_for_value: str = (
@@ -288,12 +292,13 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
             threshold=threshold,
-            batch_request=batch_request,
             data_context=data_context,
         )
     )
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -305,28 +310,29 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
     regex_parameter.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_request=batch_request,
     )
 
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": None,
+        "value": "(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}",
         "details": {
             "evaluated_regexes": {
-                r"/\d+/": 0,
-                r"/-?\d+/": 0,
-                r"/-?\d+(\.\d*)?/": 0,
-                r"/[A-Za-z0-9\.,;:!?()\"'%\-]+/": 0,
-                r"^\s+/": 0,
-                r"\s+/$": 0,
-                r"/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/": 0,
-                r"/<\/?(?:p|a|b|img)(?: \/)?>/": 0,
-                r"/(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}/": 0,
-                r"/(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}/": 0,
-                r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ": 0,
+                r"\d+": 1.0,
+                r"-?\d+": 1.0,
+                r"-?\d+(\.\d*)?": 1.0,
+                r"[A-Za-z0-9\.,;:!?()\"'%\-]+": 1.0,
+                r"^\s+": 0.0,
+                r"\s+$": 0.0,
+                r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)": 0.0,
+                r"<\/?(?:p|a|b|img)(?: \/)?>": 0.0,
+                r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}": 0.0,
+                r"(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}": 1.0,
+                r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ": 0.0,
             },
-            "success_ratio": 0.0,
+            "success_ratio": 1.0,
         },
     }
 
@@ -359,13 +365,14 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
-            batch_list=[batch],
             data_context=data_context,
         )
     )
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -376,6 +383,7 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
         regex_pattern_string_parameter_builder.build_parameters(
             domain=domain,
             parameters=parameters,
+            batch_list=[batch],
         )
 
     assert (
@@ -404,13 +412,14 @@ def test_regex_single_candidate(
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
-            batch_list=[batch],
             data_context=data_context,
         )
     )
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -422,6 +431,7 @@ def test_regex_single_candidate(
     regex_pattern_string_parameter_builder.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_list=[batch],
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"
@@ -469,13 +479,14 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
             candidate_regexes=candidate_regexes,
-            batch_list=[batch],
             data_context=data_context,
         )
     )
 
     domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+        rule_name="my_rule",
+        domain_type=MetricDomainTypes.COLUMN,
+        domain_kwargs=metric_domain_kwargs,
     )
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
@@ -487,6 +498,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
     regex_pattern_string_parameter_builder.build_parameters(
         domain=domain,
         parameters=parameters,
+        batch_list=[batch],
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"

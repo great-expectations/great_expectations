@@ -68,7 +68,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 To configure `Splitting`, specify a dimension (i.e., `column_name` or `column_names`), the method of `Splitting`, and
 parameters to be used by the specified `Splitting` method.  In the present example, the <TechnicalTag tag="data_connector" text="Data Connectors" /> named
 `by_num_riders` and `by_num_riders_random_sample` split the table `yellow_tripdata_sample_2019_01` on the column name
-`passenger_count` using the `_split_on_column_value` method of `Splitting`.
+`passenger_count` using the `split_on_column_value` method of `Splitting`.
 
 To configure `Sampling`, specify the method of `Sampling`, and parameters to be used by the specified `Sampling` method.
 In the present example, the `Data Connector` named `by_num_riders_random_sample` samples the table

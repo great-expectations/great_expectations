@@ -192,7 +192,7 @@ batch_request.data_connector_query["batch_filter_parameters"] = {
     "year": "2020",
     "month": "01",
 }
-batch_request.batch_spec_passthrough["splitter_method"] = "_split_on_column_value"
+batch_request.batch_spec_passthrough["splitter_method"] = "split_on_column_value"
 batch_request.batch_spec_passthrough["splitter_kwargs"] = {
     "column_name": "passenger_count",
     "batch_identifiers": {"passenger_count": 2},
