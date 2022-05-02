@@ -1941,6 +1941,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                 "default_expect_table_row_count_to_be_between_rule": {
                     "variables": {
                         "false_positive_rate": 0.05,
+                        "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
                         "truncate_values": {"lower_bound": 0},
@@ -1980,6 +1981,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "reduce_scalar_metric": True,
                                     "metric_name": "table.row_count",
                                     "false_positive_rate": "$variables.false_positive_rate",
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                                     "round_decimals": "$variables.round_decimals",
                                 }
@@ -2000,6 +2002,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "strict_min": False,
                         "strict_max": False,
                         "false_positive_rate": 0.05,
+                        "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
                         "truncate_values": {"lower_bound": 0},
@@ -2040,6 +2043,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "reduce_scalar_metric": True,
                                     "metric_name": "column.distinct_values.count",
                                     "false_positive_rate": "$variables.false_positive_rate",
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                                     "round_decimals": "$variables.round_decimals",
                                 }
@@ -2135,7 +2139,7 @@ def quentin_expected_expectation_suite(
                         "max_value": 9983,
                         "strict_min": False,
                         "column": "pickup_datetime",
-                        "min_value": 9944,
+                        "min_value": 9945,
                     },
                 }
             ),
@@ -2158,7 +2162,7 @@ def quentin_expected_expectation_suite(
                         "max_value": 9985,
                         "strict_min": False,
                         "column": "dropoff_datetime",
-                        "min_value": 9957,
+                        "min_value": 9958,
                     },
                 }
             ),
@@ -2201,10 +2205,10 @@ def quentin_expected_expectation_suite(
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
                         "strict_max": False,
-                        "max_value": 1439,
+                        "max_value": 1430,
                         "strict_min": False,
                         "column": "trip_distance",
-                        "min_value": 1157,
+                        "min_value": 1159,
                     },
                 }
             ),
@@ -2270,7 +2274,7 @@ def quentin_expected_expectation_suite(
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
                         "strict_max": False,
-                        "max_value": 212,
+                        "max_value": 211,
                         "strict_min": False,
                         "column": "pickup_location_id",
                         "min_value": 118,
@@ -2339,10 +2343,10 @@ def quentin_expected_expectation_suite(
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
                         "strict_max": False,
-                        "max_value": 899,
+                        "max_value": 813,
                         "strict_min": False,
                         "column": "fare_amount",
-                        "min_value": 152,
+                        "min_value": 153,
                     },
                 }
             ),
@@ -2477,10 +2481,10 @@ def quentin_expected_expectation_suite(
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
                         "strict_max": False,
-                        "max_value": 1562,
+                        "max_value": 1440,
                         "strict_min": False,
                         "column": "total_amount",
-                        "min_value": 896,
+                        "min_value": 898,
                     },
                 }
             ),

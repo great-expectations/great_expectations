@@ -49,8 +49,17 @@ TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
 
 
 def _load_data(
-    connection_string: str, table_name: str = TAXI_DATA_TABLE_NAME
+    connection_string: str, dialect: str, table_name: str = TAXI_DATA_TABLE_NAME
 ) -> LoadedTable:
+
+    dialects_supporting_multiple_values_in_single_insert_clause: List[str] = [
+        "redshift"
+    ]
+    to_sql_method: str = (
+        "multi"
+        if dialect in dialects_supporting_multiple_values_in_single_insert_clause
+        else None
+    )
 
     # Load the first 10 rows of each month of taxi data
     return load_data_into_test_database(
@@ -62,6 +71,7 @@ def _load_data(
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
         load_full_dataset=True,
         random_table_suffix=True,
+        to_sql_method=to_sql_method,
     )
 
 
@@ -75,7 +85,9 @@ if __name__ == "test_script_module":
         connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
     )
 
-    loaded_table: LoadedTable = _load_data(connection_string=connection_string)
+    loaded_table: LoadedTable = _load_data(
+        connection_string=connection_string, dialect=dialect
+    )
     test_df: pd.DataFrame = loaded_table.inserted_dataframe
     table_name: str = loaded_table.table_name
 
