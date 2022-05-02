@@ -503,7 +503,7 @@ class DataAssistantResult(SerializableDictDot):
         if include_title:
             title = f"{metric_title} per {domain_title}"
 
-        batch_id: str = "batch_id"
+        batch_id: str = "Batch ID"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         tooltip: List[alt.Tooltip] = [
@@ -599,7 +599,7 @@ class DataAssistantResult(SerializableDictDot):
 
         domain_title: str = domain_name.title()
 
-        batch_id: str = "batch_id"
+        batch_id: str = "Batch ID"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
         min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
@@ -737,7 +737,7 @@ class DataAssistantResult(SerializableDictDot):
         if include_title:
             title = f"{metric_title} per {domain_title}"
 
-        batch_id: str = "batch_id"
+        batch_id: str = "Batch ID"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         tooltip: List[alt.Tooltip] = [
@@ -835,7 +835,7 @@ class DataAssistantResult(SerializableDictDot):
 
         domain_title: str = domain_name.title()
 
-        batch_id: str = "batch_id"
+        batch_id: str = "Batch ID"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
         min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value

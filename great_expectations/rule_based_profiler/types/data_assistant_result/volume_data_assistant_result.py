@@ -263,7 +263,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         batch_numbers: List[int] = [idx + 1 for idx in range(len(batch_ids))]
 
         df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[domain_name])
-        df["batch_id"] = batch_ids
+        df["Batch ID"] = batch_ids
         df[metric_name] = metric_values
 
         return df
