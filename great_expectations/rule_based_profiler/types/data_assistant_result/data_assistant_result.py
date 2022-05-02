@@ -303,7 +303,12 @@ class DataAssistantResult(SerializableDictDot):
                     type=AltairDataTypes.NOMINAL.value,
                     scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                 ),
-                alt.Color(alt.value("lightgray"), opacity=0.3),
+                alt.value("lightgray"),
+            ),
+            opacity=alt.condition(
+                selector,
+                alt.value(1.0),
+                alt.value(0.3),
             ),
         )
 
@@ -334,14 +339,19 @@ class DataAssistantResult(SerializableDictDot):
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.CATEGORY_5.value),
                     ),
-                    alt.Color(alt.value("lightgray"), opacity=0.3),
+                    alt.value("lightgray"),
+                ),
+                opacity=alt.condition(
+                    selector,
+                    alt.value(1.0),
+                    alt.value(0.4),
                 ),
             )
             .properties(height=75)
             .transform_filter(selector)
         )
 
-        return alt.VConcatChart(vconcat=[line, detail_line], spacing=5)
+        return line & detail_line
 
     @staticmethod
     def _get_interactive_detail_multi_line_chart(

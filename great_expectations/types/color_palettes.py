@@ -37,10 +37,10 @@ class ColorPalettes(Enum):
     ]
     ORDINAL_7 = [
         Colors.PURPLE.value,
-        "#6f75E0",
-        "#5966C2",
-        "#4657A3",
-        "#354886",
-        "#273969",
-        Colors.BLUE_1.value,
+        "#747CE8",
+        "#6373D1",
+        "#5569BA",
+        "#495FA2",
+        "#3F558B",
+        Colors.BLUE_2.value,
     ]
