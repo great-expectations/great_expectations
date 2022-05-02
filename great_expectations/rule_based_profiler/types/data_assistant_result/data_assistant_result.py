@@ -261,29 +261,87 @@ class DataAssistantResult(SerializableDictDot):
             domain_type: The altair data type for the domain being plotted
 
         Returns:
-            A vertically concatenated (vconcat) altair line chart
+            A interactive detail altair multi-line chart
         """
-        charts: List[alt.Chart] = []
+        metric_title: str = metric_name.replace("_", " ").title()
+        domain_title: str = domain_name.title()
+        title: str = f"{metric_title} per {domain_title}"
 
-        i: int
+        batch_id: str = "batch_id"
+        batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+
+        tooltip: List[alt.Tooltip] = [
+            alt.Tooltip(field=batch_id, type=batch_id_type),
+            alt.Tooltip(field=metric_name, type=metric_type, format=","),
+        ]
+
         column_name: str
-        df: pd.DataFrame
-        for i, (column_name, df) in enumerate(column_dfs):
-            include_title: bool = i == 0
-            chart: alt.Chart = (
-                DataAssistantResult._get_vertically_concatenated_line_chart(
-                    df=df,
-                    column_name=column_name,
-                    metric_name=metric_name,
-                    metric_type=metric_type,
-                    domain_name=domain_name,
-                    domain_type=domain_type,
-                    include_title=include_title,
-                )
-            )
-            charts.append(chart)
+        df: pd.DataFrame = pd.DataFrame(
+            columns=["column_name", "batch", batch_id, metric_name]
+        )
+        for column_name, column_df in column_dfs:
+            column_df["column_name"] = column_name
+            df = pd.concat([df, column_df], axis=0)
 
-        return alt.vconcat(*charts)
+        selector = alt.selection_single(
+            empty="all", fields=["column_name"], bind="legend"
+        )
+
+        base = alt.Chart(df, title=title).properties(height=150).add_selection(selector)
+
+        line: alt.Chart = base.mark_line().encode(
+            x=alt.X(
+                domain_name,
+                type=domain_type,
+                axis=alt.Axis(ticks=False, title=None, labels=False),
+            ),
+            y=alt.Y(metric_name, type=metric_type, title=None),
+            color=alt.condition(
+                selector,
+                alt.Color(
+                    "column_name",
+                    type=AltairDataTypes.NOMINAL.value,
+                    scale=alt.Scale(range=ColorPalettes.ORDINAL.value),
+                ),
+                alt.value("lightgray"),
+            ),
+        )
+
+        # points: alt.Chart = base.mark_point().encode(
+        #     x=alt.X(
+        #         domain_name,
+        #         type=domain_type,
+        #         title=domain_title,
+        #     ),
+        #     y=alt.Y(metric_name, type=metric_type, title=metric_title),
+        #     tooltip=tooltip,
+        # )
+
+        detail_line: alt.Chart = (
+            alt.Chart(df)
+            .mark_line()
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=None),
+                color=alt.condition(
+                    selector,
+                    alt.Color(
+                        "column_name",
+                        type=AltairDataTypes.NOMINAL.value,
+                        scale=alt.Scale(range=ColorPalettes.CATEGORY.value),
+                    ),
+                    alt.value("lightgray"),
+                ),
+            )
+            .properties(height=75)
+            .transform_filter(selector)
+        )
+
+        return alt.VConcatChart(vconcat=[line, detail_line], spacing=5)
 
     @staticmethod
     def _get_interactive_detail_multi_line_chart(

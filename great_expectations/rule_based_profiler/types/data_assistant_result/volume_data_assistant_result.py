@@ -238,7 +238,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
         else:
             plot_impl = self.get_interactive_detail_multi_line_chart
 
-        chart: alt.VConcatChart = plot_impl(
+        chart: alt.Chart = plot_impl(
             column_dfs=column_dfs,
             metric_name=metric_name,
             metric_type=metric_type,
