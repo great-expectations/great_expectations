@@ -5,8 +5,10 @@ class_name: RuleBasedProfiler
 config_version: 1.0
 
 variables:
-  false_positive_rate: 5.0e-2
+  num_bootstrap_samples: 9999
   bootstrap_random_seed: 43792
+  false_positive_rate: 5.0e-2
+  quantile_statistic_interpolation_method: auto
 
 rules:
   row_count_range_rule:
@@ -17,6 +19,8 @@ rules:
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         metric_name: table.row_count
         false_positive_rate: $variables.false_positive_rate
+        quantile_statistic_interpolation_method: $variables.quantile_statistic_interpolation_method
+        num_bootstrap_samples: $variables.num_bootstrap_samples
         bootstrap_random_seed: $variables.bootstrap_random_seed
         truncate_values:
           lower_bound: 0

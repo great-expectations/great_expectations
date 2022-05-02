@@ -16,7 +16,7 @@ class SemanticTypeFilter(ABC):
 
     @property
     @abstractmethod
-    def table_column_name_to_inferred_semantic_domain_type_mapping(
+    def table_column_name_to_inferred_semantic_domain_type_map(
         self,
     ) -> Dict[str, SemanticDomainTypes]:
         pass

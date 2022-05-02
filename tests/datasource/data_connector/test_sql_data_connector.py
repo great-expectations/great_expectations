@@ -74,20 +74,22 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
     }
 
 
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_get_batch_definition_list_from_batch_request(
+    splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
-        """
+        f"""
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
     assets:
         table_partitioned_by_date_column__A:
-            splitter_method: _split_on_column_value
+            splitter_method: {splitter_method_name_prefix}split_on_column_value
             splitter_kwargs:
                 column_name: date
 
@@ -229,18 +231,22 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     }
 
 
-def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+def test_example_B(
+    splitter_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
-        """
+        f"""
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
     assets:
         table_partitioned_by_timestamp_column__B:
-            splitter_method: _split_on_converted_datetime
+            splitter_method: {splitter_method_name_prefix}split_on_converted_datetime
             splitter_kwargs:
                 column_name: timestamp
     """
@@ -282,18 +288,22 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
     }
 
 
-def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+def test_example_C(
+    splitter_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
-        """
+        f"""
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
     assets:
         table_partitioned_by_regularly_spaced_incrementing_id_column__C:
-            splitter_method: _split_on_divided_integer
+            splitter_method: {splitter_method_name_prefix}split_on_divided_integer
             splitter_kwargs:
                 column_name: id
                 divisor: 10
@@ -445,18 +455,22 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
     }
 
 
-def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
+def test_example_G(
+    splitter_method_name_prefix,
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     config = yaml.load(
-        """
+        f"""
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
     assets:
         table_partitioned_by_multiple_columns__G:
-            splitter_method: _split_on_multi_column_values
+            splitter_method: {splitter_method_name_prefix}split_on_multi_column_values
             splitter_kwargs:
                 column_names:
                     - y
@@ -1064,7 +1078,9 @@ def test_basic_instantiation_of_ConfiguredAssetSqlDataConnector(
     }
 
 
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector(
+    splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     my_data_connector = instantiate_class_from_config(
@@ -1073,7 +1089,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector(
             "name": "my_sql_data_connector",
             "assets": {
                 "main.table_partitioned_by_date_column__A": {
-                    "splitter_method": "_split_on_column_value",
+                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
                     "splitter_kwargs": {"column_name": "date"},
                 },
             },
@@ -1104,7 +1120,9 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector(
     }
 
 
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name(
+    splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
@@ -1113,7 +1131,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
         execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
         assets={
             "table_partitioned_by_date_column__A": {
-                "splitter_method": "_split_on_column_value",
+                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
                 "splitter_kwargs": {"column_name": "date"},
                 "include_schema_name": True,
                 "schema_name": "main",
@@ -1130,7 +1148,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
             execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
             assets={
                 "table_partitioned_by_date_column__A": {
-                    "splitter_method": "_split_on_column_value",
+                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
                     "splitter_kwargs": {"column_name": "date"},
                     "include_schema_name": False,
                     "schema_name": "main",
@@ -1144,7 +1162,9 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     )
 
 
+@pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix(
+    splitter_method_name_prefix,
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
@@ -1153,7 +1173,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
         execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
         assets={
             "table_partitioned_by_date_column__A": {
-                "splitter_method": "_split_on_column_value",
+                "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
                 "splitter_kwargs": {"column_name": "date"},
                 "include_schema_name": True,
                 "schema_name": "main",
@@ -1175,7 +1195,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
             execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
             assets={
                 "table_partitioned_by_date_column__A": {
-                    "splitter_method": "_split_on_column_value",
+                    "splitter_method": f"{splitter_method_name_prefix}split_on_column_value",
                     "splitter_kwargs": {"column_name": "date"},
                     "include_schema_name": False,
                     "schema_name": "main",
