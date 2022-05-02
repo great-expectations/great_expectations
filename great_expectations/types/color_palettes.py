@@ -11,14 +11,14 @@ class Colors(Enum):
 
 
 class ColorPalettes(Enum):
-    CATEGORY = [
+    CATEGORY_5 = [
         Colors.BLUE_1.value,
         Colors.GREEN.value,
         Colors.PURPLE.value,
         Colors.PINK.value,
         Colors.BLUE_3.value,
     ]
-    DIVERGING = [
+    DIVERGING_7 = [
         Colors.GREEN.value,
         "#7AD3BD",
         "#B8E2D6",
@@ -27,7 +27,7 @@ class ColorPalettes(Enum):
         "#FF8FA6",
         Colors.PINK.value,
     ]
-    HEATMAP = [
+    HEATMAP_6 = [
         Colors.BLUE_2.value,
         "#56678E",
         "#7584A9",
@@ -35,12 +35,12 @@ class ColorPalettes(Enum):
         "#B5C2E2",
         "#D6E2FF",
     ]
-    ORDINAL = [
-        Colors.BLUE_1.value,
-        "#273969",
-        "#354886",
-        "#4657A3",
-        "#5966C2",
-        "#6f75E0",
+    ORDINAL_7 = [
         Colors.PURPLE.value,
+        "#6f75E0",
+        "#5966C2",
+        "#4657A3",
+        "#354886",
+        "#273969",
+        Colors.BLUE_1.value,
     ]

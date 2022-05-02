@@ -42,10 +42,10 @@ x_axis_grid: bool = True
 # Color Palettes
 #
 
-category_color_scheme: List[str] = ColorPalettes.CATEGORY.value
-diverging_color_scheme: List[str] = ColorPalettes.DIVERGING.value
-heatmap_color_scheme: List[str] = ColorPalettes.HEATMAP.value
-ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
+category_color_scheme: List[str] = ColorPalettes.CATEGORY_5.value
+diverging_color_scheme: List[str] = ColorPalettes.DIVERGING_7.value
+heatmap_color_scheme: List[str] = ColorPalettes.HEATMAP_6.value
+ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL_7.value
 
 #
 # Chart Types
@@ -53,7 +53,7 @@ ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL.value
 
 # Area
 fill_opacity: float = 0.5
-fill_color: str = ColorPalettes.HEATMAP.value[5]
+fill_color: str = ColorPalettes.HEATMAP_6.value[5]
 
 # Line Chart
 line_color: str = Colors.BLUE_1.value

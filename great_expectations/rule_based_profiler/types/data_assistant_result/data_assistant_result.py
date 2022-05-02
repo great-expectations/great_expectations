@@ -167,7 +167,7 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
-        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
+        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
         metric_title: str = metric_name.replace("_", " ").title()
         domain_title: str = domain_name.title()
@@ -301,9 +301,9 @@ class DataAssistantResult(SerializableDictDot):
                 alt.Color(
                     "column_name",
                     type=AltairDataTypes.NOMINAL.value,
-                    scale=alt.Scale(range=ColorPalettes.ORDINAL.value),
+                    scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                 ),
-                alt.value("lightgray"),
+                alt.Color(alt.value("lightgray"), opacity=0.3),
             ),
         )
 
@@ -332,9 +332,9 @@ class DataAssistantResult(SerializableDictDot):
                     alt.Color(
                         "column_name",
                         type=AltairDataTypes.NOMINAL.value,
-                        scale=alt.Scale(range=ColorPalettes.CATEGORY.value),
+                        scale=alt.Scale(range=ColorPalettes.CATEGORY_5.value),
                     ),
-                    alt.value("lightgray"),
+                    alt.Color(alt.value("lightgray"), opacity=0.3),
                 ),
             )
             .properties(height=75)
@@ -452,7 +452,7 @@ class DataAssistantResult(SerializableDictDot):
         domain_type: alt.StandardType,
         include_title: bool,
     ) -> alt.Chart:
-        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
+        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
         domain_title: str = domain_name.title()
 
@@ -688,7 +688,7 @@ class DataAssistantResult(SerializableDictDot):
         domain_type: alt.StandardType,
         include_title: bool,
     ) -> alt.Chart:
-        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP.value[4])
+        line_color: alt.HexColor = alt.HexColor(ColorPalettes.HEATMAP_6.value[4])
 
         domain_title: str = domain_name.title()
 
