@@ -4,7 +4,7 @@ from typing import List
 from great_expectations.types import ColorPalettes, Colors
 
 # Size
-chart_width: int = 800
+chart_width: int = 700
 chart_height: int = 250
 
 # Font
@@ -18,7 +18,7 @@ font: str = "Verdana"
 title_align: str = "center"
 title_font_size: int = 15
 title_color: str = Colors.GREEN.value
-title_dy: int = -15
+title_dy: int = -10
 
 # Both Axes
 axis_title_color: str = Colors.PURPLE.value
@@ -38,6 +38,9 @@ x_axis_grid: bool = True
 
 # Y-Axis Only
 
+# Legend
+legend_title_color: str = Colors.PURPLE.value
+
 #
 # Color Palettes
 #
@@ -56,7 +59,7 @@ fill_opacity: float = 0.5
 fill_color: str = ColorPalettes.HEATMAP_6.value[5]
 
 # Line Chart
-line_color: str = Colors.BLUE_1.value
+line_color: str = Colors.BLUE_2.value
 line_stroke_width: int = 3
 line_opacity: float = 0.9
 # Known vega-lite bug: https://github.com/vega/vega-lite/issues/5732

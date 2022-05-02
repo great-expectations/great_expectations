@@ -270,57 +270,88 @@ class DataAssistantResult(SerializableDictDot):
         batch_id: str = "batch_id"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
+        column_name: str = "Column Name"
+        column_name_type: alt.StandardType = AltairDataTypes.NOMINAL.value
+
+        line_chart_height: int = 150
+        detail_line_chart_height: int = 75
+
+        point_size: int = 50
+
+        selected_opacity: float = 1.0
+        unselected_opacity: float = 0.4
+
         tooltip: List[alt.Tooltip] = [
+            alt.Tooltip(field=column_name, type=column_name_type),
             alt.Tooltip(field=batch_id, type=batch_id_type),
             alt.Tooltip(field=metric_name, type=metric_type, format=","),
         ]
 
         column_name: str
         df: pd.DataFrame = pd.DataFrame(
-            columns=["column_name", "batch", batch_id, metric_name]
+            columns=[column_name, "batch", batch_id, metric_name]
         )
-        for column_name, column_df in column_dfs:
-            column_df["column_name"] = column_name
+        for column, column_df in column_dfs:
+            column_df[column_name] = column
             df = pd.concat([df, column_df], axis=0)
 
         selector = alt.selection_single(
-            empty="all", fields=["column_name"], bind="legend"
+            empty="all", fields=[column_name], bind="legend"
         )
 
-        base = alt.Chart(df, title=title).properties(height=150).add_selection(selector)
-
-        line: alt.Chart = base.mark_line().encode(
-            x=alt.X(
-                domain_name,
-                type=domain_type,
-                axis=alt.Axis(ticks=False, title=None, labels=False),
-            ),
-            y=alt.Y(metric_name, type=metric_type, title=None),
-            color=alt.condition(
-                selector,
-                alt.Color(
-                    "column_name",
-                    type=AltairDataTypes.NOMINAL.value,
-                    scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
+        line: alt.Chart = (
+            alt.Chart(df, title=title)
+            .mark_line()
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    axis=alt.Axis(ticks=False, title=None, labels=False),
                 ),
-                alt.value("lightgray"),
-            ),
-            opacity=alt.condition(
-                selector,
-                alt.value(1.0),
-                alt.value(0.3),
-            ),
+                y=alt.Y(metric_name, type=metric_type, title=None),
+                color=alt.condition(
+                    selector,
+                    alt.Color(
+                        column_name,
+                        type=AltairDataTypes.NOMINAL.value,
+                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
+                    ),
+                    alt.value("lightgray"),
+                ),
+                opacity=alt.condition(
+                    selector,
+                    alt.value(selected_opacity),
+                    alt.value(unselected_opacity),
+                ),
+                tooltip=tooltip,
+            )
+            .properties(height=line_chart_height)
         )
 
-        # points: alt.Chart = base.mark_point().encode(
-        #     x=alt.X(
-        #         domain_name,
-        #         type=domain_type,
-        #         title=domain_title,
-        #     ),
-        #     y=alt.Y(metric_name, type=metric_type, title=metric_title),
-        #     tooltip=tooltip,
-        # )
+        points: alt.Chart = (
+            alt.Chart(df, title=title)
+            .mark_point(size=point_size)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    axis=alt.Axis(ticks=False, title=None, labels=False),
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=None),
+                color=alt.condition(
+                    selector,
+                    alt.value(Colors.GREEN.value),
+                    alt.value("lightgray"),
+                ),
+                opacity=alt.condition(
+                    selector,
+                    alt.value(selected_opacity),
+                    alt.value(unselected_opacity),
+                ),
+                tooltip=tooltip,
+            )
+            .properties(height=line_chart_height)
+        )
 
         detail_line: alt.Chart = (
             alt.Chart(df)
@@ -335,23 +366,53 @@ class DataAssistantResult(SerializableDictDot):
                 color=alt.condition(
                     selector,
                     alt.Color(
-                        "column_name",
+                        column_name,
                         type=AltairDataTypes.NOMINAL.value,
-                        scale=alt.Scale(range=ColorPalettes.CATEGORY_5.value),
+                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
                     alt.value("lightgray"),
                 ),
                 opacity=alt.condition(
                     selector,
-                    alt.value(1.0),
-                    alt.value(0.4),
+                    alt.value(selected_opacity),
+                    alt.value(unselected_opacity),
                 ),
+                tooltip=tooltip,
             )
-            .properties(height=75)
+            .properties(height=detail_line_chart_height)
             .transform_filter(selector)
         )
 
-        return line & detail_line
+        detail_points: alt.Chart = (
+            alt.Chart(df)
+            .mark_point(size=point_size)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    title=domain_title,
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=None),
+                color=alt.condition(
+                    selector,
+                    alt.value(Colors.GREEN.value),
+                    alt.value("lightgray"),
+                ),
+                opacity=alt.condition(
+                    selector,
+                    alt.value(selected_opacity),
+                    alt.value(unselected_opacity),
+                ),
+                tooltip=tooltip,
+            )
+            .properties(height=detail_line_chart_height)
+            .transform_filter(selector)
+        )
+
+        return alt.VConcatChart(
+            vconcat=[line + points, detail_line + detail_points],
+            padding=0,
+        ).add_selection(selector)
 
     @staticmethod
     def _get_interactive_detail_multi_line_chart(
