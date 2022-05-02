@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 from mock_alchemy.comparison import ExpressionMatcher
 
-from great_expectations.execution_engine.sqlalchemy_data_splitter import (
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     DatePart,
     SqlAlchemyDataSplitter,
 )
@@ -31,7 +31,7 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
 
 
 @mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
+    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"
 )
 @pytest.mark.parametrize(
     "splitter_method_name,called_with_date_parts",
@@ -166,7 +166,7 @@ def test_split_on_date_parts_multiple_date_parts(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
+    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 def test_get_data_for_batch_identifiers_year(
@@ -193,7 +193,7 @@ def test_get_data_for_batch_identifiers_year(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
+    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 def test_get_data_for_batch_identifiers_year_and_month(
@@ -220,7 +220,7 @@ def test_get_data_for_batch_identifiers_year_and_month(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
+    "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.get_data_for_batch_identifiers_for_split_on_date_parts"
 )
 @mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
 def test_get_data_for_batch_identifiers_year_and_month_and_day(

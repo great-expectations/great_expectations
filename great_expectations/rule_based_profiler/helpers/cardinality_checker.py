@@ -139,7 +139,7 @@ class CardinalityChecker:
                 of unique values.
 
         Returns:
-            boolean of whether the cardinality is within the configured limit
+            Boolean of whether the cardinality is within the configured limit
         """
         self._validate_metric_value(metric_value=metric_value)
         if isinstance(self._limit_mode, AbsoluteCardinalityLimit):

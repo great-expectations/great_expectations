@@ -187,6 +187,12 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_type: str = AltairDataTypes.QUANTITATIVE.value
         domain_type: str = AltairDataTypes.ORDINAL.value
 
+        domain: Domain
+        domains_by_column_name: Dict[str, Domain] = {
+            domain.domain_kwargs["column"]: domain
+            for domain in list(attributed_metrics.keys())
+        }
+
         column_dfs: List[Tuple[str, pd.DataFrame]] = []
         for expectation_configuration in expectation_configurations:
             metric_configuration: dict = expectation_configuration.meta[
@@ -194,10 +200,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
             ]["metric_configuration"]
             domain_kwargs: dict = metric_configuration["domain_kwargs"]
 
-            domain: Domain = Domain(
-                domain_type=MetricDomainTypes.COLUMN,
-                domain_kwargs=domain_kwargs,
-            )
+            domain = domains_by_column_name[domain_kwargs["column"]]
+
             attributed_values_by_metric_name: Dict[
                 str, ParameterNode
             ] = attributed_metrics[domain]
