@@ -315,7 +315,7 @@ class DataAssistantResult(SerializableDictDot):
                     type=domain_type,
                     axis=alt.Axis(ticks=False, title=None, labels=False),
                 ),
-                y=alt.Y(metric_name, type=metric_type, title=metric_label_title),
+                y=alt.Y(metric_name, type=metric_type, title=None),
                 color=alt.condition(
                     selector,
                     alt.Color(
@@ -344,7 +344,7 @@ class DataAssistantResult(SerializableDictDot):
                     type=domain_type,
                     axis=alt.Axis(ticks=False, title=None, labels=False),
                 ),
-                y=alt.Y(metric_name, type=metric_type, title=metric_label_title),
+                y=alt.Y(metric_name, type=metric_type, title=None),
                 color=alt.condition(
                     selector,
                     alt.value(Colors.GREEN.value),
@@ -369,7 +369,7 @@ class DataAssistantResult(SerializableDictDot):
                     type=domain_type,
                     title=domain_title,
                 ),
-                y=alt.Y(metric_name, type=metric_type, title=detail_title),
+                y=alt.Y(metric_name, type=metric_type, title=None),
                 color=alt.condition(
                     selector,
                     alt.Color(
@@ -399,7 +399,7 @@ class DataAssistantResult(SerializableDictDot):
                     type=domain_type,
                     title=domain_title,
                 ),
-                y=alt.Y(metric_name, type=metric_type, title=detail_title),
+                y=alt.Y(metric_name, type=metric_type, title=None),
                 color=alt.condition(
                     selector,
                     alt.value(Colors.GREEN.value),
@@ -416,10 +416,24 @@ class DataAssistantResult(SerializableDictDot):
             .transform_filter(selector)
         )
 
-        return alt.VConcatChart(
-            vconcat=[line + points, detail_line + detail_points],
-            padding=0,
-        ).add_selection(selector)
+        y_axis_title = alt.TitleParams(
+            metric_title,
+            color=Colors.PURPLE.value,
+            orient="left",
+            angle=270,
+            fontSize=14,
+            dx=55,
+            dy=-5,
+        )
+
+        return (
+            alt.VConcatChart(
+                vconcat=[line + points, detail_line + detail_points],
+                padding=5,
+            )
+            .properties(title=y_axis_title)
+            .add_selection(selector)
+        )
 
     @staticmethod
     def _get_interactive_detail_multi_line_chart(
