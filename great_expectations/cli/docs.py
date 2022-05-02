@@ -4,23 +4,31 @@ from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.build_docs import build_docs
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.exceptions import DataContextError
 
 
 @click.group()
 @click.pass_context
-def docs(ctx):
+def docs(ctx) -> None:
     """Data Docs operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
-    usage_stats_prefix = f"cli.docs.{ctx.invoked_subcommand}"
+    cli_event_noun: str = "docs"
+    (
+        begin_event_name,
+        end_event_name,
+    ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
+        noun=cli_event_noun,
+        verb=ctx.invoked_subcommand,
+    )
     send_usage_message(
         data_context=ctx.obj.data_context,
-        event=f"{usage_stats_prefix}.begin",
+        event=begin_event_name,
         success=True,
     )
-    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
+    ctx.obj.usage_event_end = end_event_name
 
 
 @docs.command(name="build")
@@ -38,7 +46,7 @@ def docs(ctx):
     default=False,
 )
 @click.pass_context
-def docs_build(ctx, site_name=None, no_view=False):
+def docs_build(ctx, site_name=None, no_view=False) -> None:
     """Build Data Docs for a project."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -120,7 +128,7 @@ def docs_list(ctx):
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
 @click.pass_context
-def docs_clean(ctx, site_name=None, all_sites=False):
+def docs_clean(ctx, site_name=None, all_sites=False) -> None:
     """
     Remove all files from a Data Docs site.
 

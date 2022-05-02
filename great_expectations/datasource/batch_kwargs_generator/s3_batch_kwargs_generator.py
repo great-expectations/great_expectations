@@ -71,7 +71,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_method=None,
         boto3_options=None,
         max_keys=1000,
-    ):
+    ) -> None:
         """Initialize a new S3GlobReaderBatchKwargsGenerator
 
         Args:
@@ -157,7 +157,9 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             limit=limit,
         )
 
-    def _build_batch_kwargs_path_iter(self, path_list, reader_options=None, limit=None):
+    def _build_batch_kwargs_path_iter(
+        self, path_list, reader_options=None, limit=None
+    ) -> None:
         for path in path_list:
             yield self._build_batch_kwargs(
                 path, reader_options=reader_options, limit=limit
@@ -245,7 +247,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
         return S3BatchKwargs(batch_kwargs)
 
-    def _get_asset_options(self, asset_config, iterator_dict):
+    def _get_asset_options(self, asset_config, iterator_dict) -> None:
         query_options = {
             "Bucket": self.bucket,
             "Delimiter": asset_config.get("delimiter", self._delimiter),
@@ -318,7 +320,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_method=None,
         reader_options=None,
         limit=None,
-    ):
+    ) -> None:
         for key in self._get_asset_options(asset_config, iterator_dict):
             yield self._build_batch_kwargs_from_key(
                 key,

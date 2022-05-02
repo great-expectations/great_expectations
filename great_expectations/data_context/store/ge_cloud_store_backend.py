@@ -43,7 +43,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         suppress_store_backend_id: bool = True,
         manually_initialize_store_backend_id: str = "",
         store_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(
             fixed_length_key=True,
             suppress_store_backend_id=suppress_store_backend_id,
@@ -112,7 +112,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to get object in GE Cloud Store Backend: {jsonError}"
             )
 
-    def _move(self):
+    def _move(self) -> None:
         pass
 
     def _update(self, ge_cloud_id, value, **kwargs):

@@ -18,9 +18,13 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
+)
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+    DataAssistantDispatcher,
 )
 
 try:
@@ -310,7 +314,7 @@ class BaseDataContext(ConfigPeer):
         return True
 
     @usage_statistics_enabled_method(
-        event_name="data_context.__init__",
+        event_name=UsageStatsEvents.DATA_CONTEXT___INIT__.value,
     )
     def __init__(
         self,
@@ -397,6 +401,8 @@ class BaseDataContext(ConfigPeer):
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
+
+        self._assistants = DataAssistantDispatcher(data_context=self)
 
     @property
     def ge_cloud_config(self) -> Optional[GeCloudConfig]:
@@ -775,7 +781,7 @@ class BaseDataContext(ConfigPeer):
         return site_builder
 
     @usage_statistics_enabled_method(
-        event_name="data_context.open_data_docs",
+        event_name=UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS.value,
     )
     def open_data_docs(
         self,
@@ -1108,7 +1114,7 @@ class BaseDataContext(ConfigPeer):
 
     def save_config_variable(
         self, config_variable_name, value, skip_if_substitution_variable: bool = True
-    ):
+    ) -> None:
         r"""Save config variable value
         Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
 
@@ -1152,7 +1158,7 @@ class BaseDataContext(ConfigPeer):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self, datasource_name: str):
+    def delete_datasource(self, datasource_name: str) -> None:
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
@@ -1444,7 +1450,7 @@ class BaseDataContext(ConfigPeer):
         return batch_list[0]
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_validation_operator",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR.value,
         args_payload_fn=run_validation_operator_usage_statistics,
     )
     def run_validation_operator(
@@ -1647,7 +1653,7 @@ class BaseDataContext(ConfigPeer):
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.get_batch_list",
+        event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST.value,
         args_payload_fn=get_batch_list_usage_statistics,
     )
     def get_batch_list(
@@ -1896,7 +1902,7 @@ class BaseDataContext(ConfigPeer):
         return list(self.validation_operators.keys())
 
     @usage_statistics_enabled_method(
-        event_name="data_context.add_datasource",
+        event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE.value,
         args_payload_fn=add_datasource_usage_statistics,
     )
     def add_datasource(
@@ -2006,7 +2012,7 @@ class BaseDataContext(ConfigPeer):
         )
         return generator
 
-    def set_config(self, project_config: DataContextConfig):
+    def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
 
     def _build_datasource_from_config(
@@ -2161,7 +2167,7 @@ class BaseDataContext(ConfigPeer):
 
     def send_usage_message(
         self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
-    ):
+    ) -> None:
         """helper method to send a usage method using DataContext. Used when sending usage events from
             classes like ExpectationSuite.
             event
@@ -2303,7 +2309,7 @@ class BaseDataContext(ConfigPeer):
         return sorted_expectation_suite_names
 
     @usage_statistics_enabled_method(
-        event_name="data_context.save_expectation_suite",
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE.value,
         args_payload_fn=save_expectation_suite_usage_statistics,
     )
     def save_expectation_suite(
@@ -2359,7 +2365,9 @@ class BaseDataContext(ConfigPeer):
         self._evaluation_parameter_dependencies_compiled = False
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
-    def _store_metrics(self, requested_metrics, validation_results, target_store_name):
+    def _store_metrics(
+        self, requested_metrics, validation_results, target_store_name
+    ) -> None:
         """
         requested_metrics is a dictionary like this:
 
@@ -2433,10 +2441,12 @@ class BaseDataContext(ConfigPeer):
 
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
-    ):
+    ) -> None:
         self._store_metrics(requested_metrics, validation_results, target_store_name)
 
-    def store_evaluation_parameters(self, validation_results, target_store_name=None):
+    def store_evaluation_parameters(
+        self, validation_results, target_store_name=None
+    ) -> None:
         if not self._evaluation_parameter_dependencies_compiled:
             self._compile_evaluation_parameter_dependencies()
 
@@ -2467,7 +2477,11 @@ class BaseDataContext(ConfigPeer):
     def validations_store(self) -> ValidationsStore:
         return self.stores[self.validations_store_name]
 
-    def _compile_evaluation_parameter_dependencies(self):
+    @property
+    def assistants(self) -> DataAssistantDispatcher:
+        return self._assistants
+
+    def _compile_evaluation_parameter_dependencies(self) -> None:
         self._evaluation_parameter_dependencies = {}
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
@@ -2566,7 +2580,7 @@ class BaseDataContext(ConfigPeer):
         return return_obj
 
     @usage_statistics_enabled_method(
-        event_name="data_context.build_data_docs",
+        event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS.value,
     )
     def build_data_docs(
         self,
@@ -3217,7 +3231,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_checkpoint",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT.value,
     )
     def run_checkpoint(
         self,
@@ -3361,7 +3375,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_profiler_with_dynamic_arguments",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_PROFILER_WITH_DYNAMIC_ARGUMENTS.value,
     )
     def run_profiler_with_dynamic_arguments(
         self,
@@ -3404,7 +3418,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_profiler_on_data",
+        event_name=UsageStatsEvents.DATA_CONTEXT_RUN_PROFILER_ON_DATA.value,
     )
     def run_profiler_on_data(
         self,

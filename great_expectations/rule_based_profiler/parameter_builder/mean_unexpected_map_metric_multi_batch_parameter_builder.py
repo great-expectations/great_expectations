@@ -14,11 +14,11 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     PARAMETER_KEY,
-    Attributes,
     Domain,
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.types.attributes import Attributes
 
 
 class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
@@ -49,8 +49,8 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             List[ParameterBuilderConfig]
         ] = None,
         json_serialize: Union[str, bool] = True,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    ) -> None:
         """
         Args:
             name: the name of this parameter -- this is user-specified parameter name (from configuration);
@@ -66,7 +66,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            data_context: DataContext
+            data_context: BaseDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
