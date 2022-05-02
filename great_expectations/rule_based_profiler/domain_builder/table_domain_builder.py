@@ -29,10 +29,12 @@ class TableDomainBuilder(DomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         domains: List[Domain] = [
             Domain(
+                rule_name=rule_name,
                 domain_type=self.domain_type,
             ),
         ]
