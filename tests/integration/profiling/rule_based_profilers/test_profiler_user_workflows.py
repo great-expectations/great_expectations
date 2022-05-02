@@ -2205,8 +2205,8 @@ def test_quentin_expect_column_median_to_be_between_auto_yes_default_profiler_co
     validator: Validator = quentin_validator
 
     test_cases: Tuple[Tuple[str, float, float], ...] = (
-        ("passenger_count", 0.0, 2.0),
-        ("total_amount", 0.0, 20.0),
+        ("passenger_count", 1.0, 6.0),
+        ("total_amount", 10.0, 30.0),
     )
 
     column_name: str
