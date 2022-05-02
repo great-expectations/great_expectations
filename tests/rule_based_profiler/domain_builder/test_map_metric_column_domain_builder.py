@@ -25,7 +25,15 @@ def test_column_values_unique_single_batch(alice_columnar_table_single_batch_con
         min_max_unexpected_values_proportion=9.75e-1,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(batch_request=batch_request)
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     alice_compliant_column_names: List[str] = [
@@ -40,6 +48,7 @@ def test_column_values_unique_single_batch(alice_columnar_table_single_batch_con
     column_name: str
     alice_expected_column_domains: List[Domain] = [
         Domain(
+            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
@@ -75,7 +84,15 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted(
         min_max_unexpected_values_proportion=9.75e-1,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(batch_request=batch_request)
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     bobby_compliant_column_names: List[str] = [
@@ -101,6 +118,7 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted(
     column_name: str
     bobby_expected_column_domains: List[Domain] = [
         Domain(
+            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
@@ -136,7 +154,15 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
         min_max_unexpected_values_proportion=1.0,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(batch_request=batch_request)
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     bobby_compliant_column_names: List[str] = [
@@ -163,6 +189,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
     column_name: str
     bobby_expected_column_domains: List[Domain] = [
         Domain(
+            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
@@ -198,7 +225,15 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_une
         min_max_unexpected_values_proportion=6.66e-1,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(batch_request=batch_request)
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     bobby_compliant_column_names: List[str] = [
@@ -225,6 +260,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_min_max_une
     column_name: str
     bobby_expected_column_domains: List[Domain] = [
         Domain(
+            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
@@ -260,7 +296,15 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted_tight_max_unex
         min_max_unexpected_values_proportion=1.0,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(batch_request=batch_request)
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     bobby_compliant_column_names: List[str] = [
@@ -286,6 +330,7 @@ def test_column_values_nonnull_multi_batch_one_column_not_emitted_tight_max_unex
     column_name: str
     bobby_expected_column_domains: List[Domain] = [
         Domain(
+            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,
@@ -321,7 +366,15 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
         min_max_unexpected_values_proportion=1.0,
         data_context=data_context,
     )
-    domains: List[Domain] = domain_builder.get_domains(batch_request=batch_request)
+    domains: List[Domain] = domain_builder.get_domains(
+        rule_name="my_rule", batch_request=batch_request
+    )
+
+    # Unit Tests for "inferred_semantic_domain_type" are provided separately.
+    domain: Domain
+    for domain in domains:
+        domain.details = {}
+
     domains = sorted(domains, key=lambda x: x.domain_kwargs["column"])
 
     bobby_compliant_column_names: List[str] = [
@@ -348,6 +401,7 @@ def test_column_values_nonnull_multi_batch_all_columns_emitted_loose_max_unexpec
     column_name: str
     bobby_expected_column_domains: List[Domain] = [
         Domain(
+            rule_name="my_rule",
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": column_name,

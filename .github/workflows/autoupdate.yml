@@ -1,9 +1,9 @@
 # https://github.com/marketplace/actions/auto-update
 name: autoupdate
 on:
-  pull_request:
-    types:
-      - auto_merge_enabled
+ push:
+   branches:
+     - develop # Whenever the base changes, this action should run
 
 jobs:
   autoupdate:

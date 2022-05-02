@@ -12,7 +12,8 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
-from great_expectations.execution_engine.sqlalchemy_data_splitter import (
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
 
@@ -218,7 +219,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
-    ):
+    ) -> None:
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
         desired database. Also initializes the dialect to be used and configures usage statistics.
 
@@ -348,7 +349,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event="execution_engine.sqlalchemy.connect",
+                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
                 event_payload={
                     "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
@@ -372,7 +373,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-        self._sqlalchemy_data_splitter = SqlAlchemyDataSplitter()
+        self._data_splitter = SqlAlchemyDataSplitter()
 
     @property
     def credentials(self) -> Optional[dict]:
@@ -987,7 +988,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def get_splitter_method(self, splitter_method_name: str) -> Callable:
+    def _get_splitter_method(self, splitter_method_name: str) -> Callable:
         """Get the appropriate splitter method from the method name.
 
         Args:
@@ -996,7 +997,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             splitter method.
         """
-        return self._sqlalchemy_data_splitter.get_splitter_method(splitter_method_name)
+        return self._data_splitter.get_splitter_method(splitter_method_name)
 
     def execute_split_query(self, split_query: Selectable) -> List[LegacyRow]:
         """Use the execution engine to run the split query and fetch all of the results.
@@ -1009,11 +1010,33 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self.engine.execute(split_query).fetchall()
 
+    def get_data_for_batch_identifiers(
+        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
+    ) -> List[dict]:
+        """Build data used to construct batch identifiers for the input table using the provided splitter config.
+
+        Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
+
+        Args:
+            table_name: Table to split.
+            splitter_method_name: Desired splitter method to use.
+            splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
+
+        Returns:
+            List of dicts of the form [{column_name: {"key": value}}]
+        """
+        return self._data_splitter.get_data_for_batch_identifiers(
+            execution_engine=self,
+            table_name=table_name,
+            splitter_method_name=splitter_method_name,
+            splitter_kwargs=splitter_kwargs,
+        )
+
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
         if "splitter_method" in batch_spec:
-            splitter_fn: Callable = self._sqlalchemy_data_splitter.get_splitter_method(
+            splitter_fn: Callable = self._get_splitter_method(
                 splitter_method_name=batch_spec["splitter_method"]
             )
             split_clause = splitter_fn(
@@ -1124,7 +1147,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_table_name: str = batch_spec.get("table_name", None)
 
         temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
-        temp_table_name: Optional[str] = batch_spec.get("bigquery_temp_table")
+
+        if batch_spec.get("bigquery_temp_table"):
+            # deprecated-v0.15.3
+            warnings.warn(
+                "BigQuery tables that are created as the result of a query are no longer created as "
+                "permanent tables. Thus, a named permanent table through the `bigquery_temp_table`"
+                "parameter is not required. The `bigquery_temp_table` parameter is deprecated as of"
+                "v0.15.3 and will be removed in v0.18.",
+                DeprecationWarning,
+            )
 
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
@@ -1139,7 +1171,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=self,
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
-                temp_table_name=temp_table_name,
                 create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,
@@ -1157,7 +1188,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,
-                temp_table_name=temp_table_name,
                 create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,

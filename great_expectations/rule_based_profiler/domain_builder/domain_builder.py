@@ -20,7 +20,7 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class DomainBuilder(Builder, ABC):
+class DomainBuilder(ABC, Builder):
     """
     A DomainBuilder provides methods to get domains based on one or more batches of data.
     """
@@ -28,7 +28,7 @@ class DomainBuilder(Builder, ABC):
     def __init__(
         self,
         data_context: Optional["BaseDataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Args:
             data_context: BaseDataContext associated with DomainBuilder
@@ -37,12 +37,14 @@ class DomainBuilder(Builder, ABC):
 
     def get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> List[Domain]:
         """
         Args:
+            rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: attribute name/value pairs
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
@@ -58,7 +60,7 @@ class DomainBuilder(Builder, ABC):
             batch_request=batch_request,
         )
 
-        return self._get_domains(variables=variables)
+        return self._get_domains(rule_name=rule_name, variables=variables)
 
     @property
     @abstractmethod
@@ -68,6 +70,7 @@ class DomainBuilder(Builder, ABC):
     @abstractmethod
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
         """

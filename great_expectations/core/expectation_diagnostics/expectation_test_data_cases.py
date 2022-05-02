@@ -26,7 +26,7 @@ class TestBackend:
 
     __test__ = False  # Tell pytest not to try to collect this class as a test
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         allowed_backend_names = ("pandas", "spark", "sqlalchemy")
         allowed_sql_dialects = ("sqlite", "postgresql", "mysql", "mssql", "bigquery")
         assert (
@@ -80,7 +80,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
         out,
         suppress_test_for=[],
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(
             title=title,
             input=kwargs["in"],

@@ -87,7 +87,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass
 
     @classmethod
@@ -99,5 +99,5 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         language=None,
         runtime_configuration=None,
         **kwargs,
-    ):
+    ) -> None:
         pass

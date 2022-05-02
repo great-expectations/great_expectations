@@ -1,6 +1,7 @@
 import copy
 import itertools
 import logging
+import re
 import uuid
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -18,12 +19,18 @@ from great_expectations.core.batch import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
     VARIABLES_PREFIX,
     Domain,
+    NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
+    SemanticDomainTypes,
     get_parameter_value_by_fully_qualified_parameter_name,
     is_fully_qualified_parameter_name_literal_string_format,
+)
+from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -32,6 +39,12 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
+
+TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX: str = "tmp"
+TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
+TEMPORARY_EXPECTATION_SUITE_NAME_PATTERN: re.Pattern = re.compile(
+    rf"^{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}\..+\.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}\.\w{8}"
+)
 
 
 def get_validator(
@@ -354,23 +367,39 @@ def get_resolved_metrics_by_key(
     return resolved_metrics_by_key
 
 
-def build_simple_domains_from_column_names(
+def build_domains_from_column_names(
+    rule_name: str,
     column_names: List[str],
-    domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN,
+    domain_type: MetricDomainTypes,
+    table_column_name_to_inferred_semantic_domain_type_map: Optional[
+        Dict[str, SemanticDomainTypes]
+    ] = None,
 ) -> List[Domain]:
     """
     This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
 
+    :param rule_name: name of Rule object, for which "Domain" objects are obtained.
     :param column_names: list of column names to serve as values for "column" keys in "domain_kwargs" dictionary
     :param domain_type: type of Domain objects (same "domain_type" must be applicable to all Domain objects returned)
+    :param table_column_name_to_inferred_semantic_domain_type_map: map from column name to inferred semantic type
     :return: list of resulting Domain objects
     """
     column_name: str
     domains: List[Domain] = [
         Domain(
+            rule_name=rule_name,
             domain_type=domain_type,
             domain_kwargs={
                 "column": column_name,
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    column_name: table_column_name_to_inferred_semantic_domain_type_map[
+                        column_name
+                    ],
+                }
+                if table_column_name_to_inferred_semantic_domain_type_map
+                else None,
             },
         )
         for column_name in column_names
@@ -400,29 +429,71 @@ def convert_variables_to_dict(
     return variables_as_dict
 
 
+def integer_semantic_domain_type(domain: Domain) -> bool:
+    """
+    This method examines "INFERRED_SEMANTIC_TYPE_KEY" attribute of "Domain" argument to check whether or not underlying
+    "SemanticDomainTypes" enum value is an "integer".  Because explicitly designated "SemanticDomainTypes.INTEGER" type
+    is unavaiable, "SemanticDomainTypes.LOGIC" and "SemanticDomainTypes.IDENTIFIER" are intepreted as "integer" values.
+
+    This method can be used "NumericMetricRangeMultiBatchParameterBuilder._get_round_decimals_using_heuristics()".
+
+    Note: Inability to assess underlying "SemanticDomainTypes" details of "Domain" object produces "False" return value.
+
+    Args:
+        domain: "Domain" object to inspect for underlying "SemanticDomainTypes" details
+
+    Returns:
+        Boolean value indicating whether or not specified "Domain" is inferred to denote "integer" values
+
+    """
+
+    inferred_semantic_domain_type: Dict[str, SemanticDomainTypes] = domain.details.get(
+        INFERRED_SEMANTIC_TYPE_KEY
+    )
+
+    semantic_domain_type: SemanticDomainTypes
+    return inferred_semantic_domain_type and all(
+        [
+            semantic_domain_type
+            in [
+                SemanticDomainTypes.LOGIC,
+                SemanticDomainTypes.IDENTIFIER,
+            ]
+            for semantic_domain_type in (inferred_semantic_domain_type.values())
+        ]
+    )
+
+
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-) -> Tuple[Number, Number]:
+    quantile_statistic_interpolation_method: str,
+) -> NumericRangeEstimationResult:
     lower_quantile = np.quantile(
         metric_values,
         q=(false_positive_rate / 2),
         axis=0,
+        interpolation=quantile_statistic_interpolation_method,
     )
     upper_quantile = np.quantile(
         metric_values,
         q=1.0 - (false_positive_rate / 2),
         axis=0,
+        interpolation=quantile_statistic_interpolation_method,
     )
-    return lower_quantile, upper_quantile
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(a=metric_values, bins=NUM_HISTOGRAM_BINS)[0],
+        value_range=np.array([lower_quantile, upper_quantile]),
+    )
 
 
 def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
+    quantile_statistic_interpolation_method: str,
     n_resamples: int,
     random_seed: Optional[int] = None,
-) -> Tuple[Number, Number]:
+) -> NumericRangeEstimationResult:
     """
     ML Flow Experiment: parameter_builders_bootstrap/bootstrap_quantiles
     ML Flow Experiment ID: 4129654509298109
@@ -480,18 +551,27 @@ def compute_bootstrap_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2
 
-    sample_lower_quantile: np.ndarray = np.quantile(metric_values, q=lower_quantile_pct)
-    sample_upper_quantile: np.ndarray = np.quantile(metric_values, q=upper_quantile_pct)
+    sample_lower_quantile: np.ndarray = np.quantile(
+        metric_values,
+        q=lower_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
+    sample_upper_quantile: np.ndarray = np.quantile(
+        metric_values,
+        q=upper_quantile_pct,
+        interpolation=quantile_statistic_interpolation_method,
+    )
 
+    bootstraps: np.ndarray
     if random_seed:
         random_state: np.random.Generator = np.random.Generator(
             np.random.PCG64(random_seed)
         )
-        bootstraps: np.ndarray = random_state.choice(
+        bootstraps = random_state.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
     else:
-        bootstraps: np.ndarray = np.random.choice(
+        bootstraps = np.random.choice(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
@@ -499,6 +579,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps,
         q=lower_quantile_pct,
         axis=1,
+        interpolation=quantile_statistic_interpolation_method,
     )
     bootstrap_lower_quantile_point_estimate: float = np.mean(bootstrap_lower_quantiles)
     bootstrap_lower_quantile_standard_error: float = np.std(bootstrap_lower_quantiles)
@@ -524,6 +605,7 @@ def compute_bootstrap_quantiles_point_estimate(
         bootstraps,
         q=upper_quantile_pct,
         axis=1,
+        interpolation=quantile_statistic_interpolation_method,
     )
     bootstrap_upper_quantile_point_estimate: np.ndarray = np.mean(
         bootstrap_upper_quantiles
@@ -549,7 +631,96 @@ def compute_bootstrap_quantiles_point_estimate(
             bootstrap_upper_quantile_point_estimate - bootstrap_upper_quantile_bias
         )
 
-    return (
-        lower_quantile_bias_corrected_point_estimate,
-        upper_quantile_bias_corrected_point_estimate,
+    return NumericRangeEstimationResult(
+        estimation_histogram=np.histogram(
+            a=bootstraps.flatten(), bins=NUM_HISTOGRAM_BINS
+        )[0],
+        value_range=[
+            lower_quantile_bias_corrected_point_estimate,
+            upper_quantile_bias_corrected_point_estimate,
+        ],
     )
+
+
+def get_validator_with_expectation_suite(
+    batch_request: Union[BatchRequestBase, dict],
+    data_context: "BaseDataContext",  # noqa: F821
+    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    expectation_suite_name: Optional[str] = None,
+    component_name: str = "test",
+) -> "Validator":  # noqa: F821
+    """
+    Instantiates and returns "Validator" object using "data_context", "batch_request", and other available information.
+    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
+    """
+    assert expectation_suite is None or isinstance(expectation_suite, ExpectationSuite)
+    assert expectation_suite_name is None or isinstance(expectation_suite_name, str)
+
+    expectation_suite = get_or_create_expectation_suite(
+        data_context=data_context,
+        expectation_suite=expectation_suite,
+        expectation_suite_name=expectation_suite_name,
+        component_name=component_name,
+    )
+
+    batch_request = materialize_batch_request(batch_request=batch_request)
+    validator: "Validator" = data_context.get_validator(  # noqa: F821
+        batch_request=batch_request,
+        expectation_suite=expectation_suite,
+    )
+
+    return validator
+
+
+def get_or_create_expectation_suite(
+    data_context: "BaseDataContext",  # noqa: F821
+    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    expectation_suite_name: Optional[str] = None,
+    component_name: Optional[str] = None,
+) -> "ExpectationSuite":  # noqa: F821
+    """
+    Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
+    "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
+    """
+    generate_temp_expectation_suite_name: bool
+    create_expectation_suite: bool
+
+    if expectation_suite is not None and expectation_suite_name is not None:
+        if expectation_suite.expectation_suite_name != expectation_suite_name:
+            raise ValueError(
+                'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'
+            )
+
+        return expectation_suite
+    elif expectation_suite is None and expectation_suite_name is not None:
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = True
+    elif expectation_suite is not None and expectation_suite_name is None:
+        generate_temp_expectation_suite_name = False
+        create_expectation_suite = False
+    else:
+        generate_temp_expectation_suite_name = True
+        create_expectation_suite = True
+
+    if generate_temp_expectation_suite_name:
+        if not component_name:
+            component_name = "test"
+
+        expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"
+
+    if create_expectation_suite:
+        try:
+            # noinspection PyUnusedLocal
+            expectation_suite = data_context.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+        except ge_exceptions.DataContextError:
+            expectation_suite = data_context.create_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
+            print(
+                f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
+            )
+
+    return expectation_suite
