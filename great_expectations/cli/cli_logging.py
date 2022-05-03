@@ -12,7 +12,7 @@ warnings.filterwarnings("ignore")
 logger = logging.getLogger("great_expectations.cli")
 
 
-def _set_up_logger():
+def _set_up_logger() -> logging.Logger:
     # Log to console with a simple formatter; used by CLI
     formatter = logging.Formatter("%(message)s")
     handler = logging.StreamHandler()

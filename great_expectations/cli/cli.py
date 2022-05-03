@@ -1,6 +1,6 @@
 import importlib
 import logging
-from typing import Optional
+from typing import List, Optional
 
 import click
 
@@ -46,20 +46,20 @@ class CLIState:
         return context
 
     @property
-    def data_context(self):
+    def data_context(self) -> Optional[DataContext]:
         return self._data_context
 
     @data_context.setter
-    def data_context(self, data_context) -> None:
+    def data_context(self, data_context: DataContext) -> None:
         assert isinstance(data_context, DataContext)
         self._data_context = data_context
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"CLIState(v3_api={self.v3_api}, config_file_location={self.config_file_location})"
 
 
 class CLI(click.MultiCommand):
-    def list_commands(self, ctx):
+    def list_commands(self, ctx: click.Context) -> List[str]:
         # note that if --help is called this method is invoked before any flags
         # are parsed or context set.
         commands = [
@@ -74,7 +74,7 @@ class CLI(click.MultiCommand):
 
         return commands
 
-    def get_command(self, ctx, name):
+    def get_command(self, ctx: click.Context, name: str) -> Optional[str]:
         module_name = name.replace("-", "_")
         legacy_module = ""
         if not self.is_v3_api(ctx):
@@ -92,7 +92,7 @@ class CLI(click.MultiCommand):
             return None
 
     @staticmethod
-    def print_ctx_debugging(ctx) -> None:
+    def print_ctx_debugging(ctx: click.Context) -> None:
         print(f"ctx.args: {ctx.args}")
         print(f"ctx.params: {ctx.params}")
         print(f"ctx.obj: {ctx.obj}")
@@ -103,7 +103,7 @@ class CLI(click.MultiCommand):
         print(f"ctx.find_root().protected_args: {ctx.find_root().protected_args}")
 
     @staticmethod
-    def is_v3_api(ctx):
+    def is_v3_api(ctx: click.Context) -> bool:
         """Determine if v3 api is requested by searching context params."""
         if ctx.params:
             return ctx.params and "v3_api" in ctx.params.keys() and ctx.params["v3_api"]
@@ -148,7 +148,13 @@ class CLI(click.MultiCommand):
     help='Assume "yes" for all prompts.',
 )
 @click.pass_context
-def cli(ctx, v3_api, verbose, config_file_location, assume_yes) -> None:
+def cli(
+    ctx: click.Context,
+    v3_api: bool,
+    verbose: bool,
+    config_file_location: Optional[str],
+    assume_yes: bool,
+) -> None:
     """
     Welcome to the great_expectations CLI!
 

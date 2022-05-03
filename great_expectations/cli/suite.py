@@ -39,7 +39,7 @@ except ImportError:
 
 @click.group()
 @click.pass_context
-def suite(ctx) -> None:
+def suite(ctx: click.Context) -> None:
     """Expectation Suite operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
@@ -965,7 +965,7 @@ def suite_list(ctx: click.Context) -> None:
     )
 
 
-def _get_notebook_path(context: DataContext, notebook_name: str):
+def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
     return os.path.abspath(
         os.path.join(
             context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
