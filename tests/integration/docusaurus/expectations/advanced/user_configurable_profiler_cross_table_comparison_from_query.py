@@ -11,7 +11,7 @@ from great_expectations.profile.user_configurable_profiler import (
 # This utility is not for general use. It is only to support testing.
 from tests.test_utils import load_data_into_test_database
 
-MY_CONNECTION_STRING = "mysql+pymysql://root:root@localhost:3306/test_ci"
+MY_CONNECTION_STRING = "mysql+pymysql://root:root@localhost/test_ci"
 
 PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
@@ -107,7 +107,7 @@ context.save_expectation_suite(
     expectation_suite=suite, expectation_suite_name=expectation_suite_name
 )
 
-my_checkpoint_name = "test"
+my_checkpoint_name = "comparison_checkpoint"
 
 yaml_config = f"""
 name: {my_checkpoint_name}
@@ -122,3 +122,14 @@ context.add_checkpoint(**yaml.load(yaml_config))
 results = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name, batch_request=pg_runtime_batch_request
 )
+
+# Note to users: code below this line is only for integration testing -- ignore!
+
+assert results["success"] is True
+statistics = results["run_results"][list(results["run_results"].keys())[0]][
+    "validation_result"
+]["statistics"]
+assert statistics["evaluated_expectations"] != 0
+assert statistics["evaluated_expectations"] == statistics["successful_expectations"]
+assert statistics["unsuccessful_expectations"] == 0
+assert statistics["success_percent"] == 100.0
