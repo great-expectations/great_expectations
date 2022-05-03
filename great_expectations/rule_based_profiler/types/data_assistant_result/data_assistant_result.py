@@ -267,10 +267,12 @@ class DataAssistantResult(SerializableDictDot):
         domain_title: str = domain_name.title()
         title: str = f"{metric_title} per {domain_title}"
 
-        batch_id: str = "Batch ID"
+        batch_id: str = "batch_id"
+        batch_id_title: str = batch_id.replace("_", " ").title().replace("Id", "ID")
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
-        column_name: str = "Column Name"
+        legend_title: str = "Select Column:"
+        column_name_title: str = "Column Name"
         column_name_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         line_chart_height: int = 150
@@ -282,21 +284,28 @@ class DataAssistantResult(SerializableDictDot):
         unselected_opacity: float = 0.4
 
         tooltip: List[alt.Tooltip] = [
-            alt.Tooltip(field=column_name, type=column_name_type),
-            alt.Tooltip(field=batch_id, type=batch_id_type),
-            alt.Tooltip(field=metric_name, type=metric_type, format=","),
+            alt.Tooltip(
+                field=legend_title, type=column_name_type, title=column_name_title
+            ),
+            alt.Tooltip(field=batch_id, type=batch_id_type, title=batch_id_title),
+            alt.Tooltip(
+                field=metric_name, type=metric_type, title=metric_title, format=","
+            ),
         ]
 
-        column_name: str
         df: pd.DataFrame = pd.DataFrame(
-            columns=[column_name, "batch", batch_id, metric_name]
+            columns=[legend_title, "batch", batch_id, metric_name]
         )
         for column, column_df in column_dfs:
-            column_df[column_name] = column
+            column_df[legend_title] = column
             df = pd.concat([df, column_df], axis=0)
 
-        selector = alt.selection_single(
-            empty="all", fields=[column_name], bind="legend"
+        selector = alt.selection_multi(
+            empty="all",
+            fields=[legend_title],
+            bind="legend",
+            on="click",
+            clear="click",
         )
 
         line: alt.Chart = (
@@ -312,7 +321,7 @@ class DataAssistantResult(SerializableDictDot):
                 color=alt.condition(
                     selector,
                     alt.Color(
-                        column_name,
+                        legend_title,
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
@@ -355,7 +364,7 @@ class DataAssistantResult(SerializableDictDot):
 
         highlight_line: alt.Chart = (
             alt.Chart(df, title=title)
-            .mark_line()
+            .mark_line(strokeWidth=2.5)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -366,7 +375,7 @@ class DataAssistantResult(SerializableDictDot):
                 color=alt.condition(
                     selector,
                     alt.Color(
-                        column_name,
+                        legend_title,
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
@@ -385,7 +394,7 @@ class DataAssistantResult(SerializableDictDot):
 
         highlight_points: alt.Chart = (
             alt.Chart(df, title=title)
-            .mark_point(size=point_size)
+            .mark_point(size=40)
             .encode(
                 x=alt.X(
                     domain_name,
@@ -410,7 +419,12 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         detail_line: alt.Chart = (
-            alt.Chart(df)
+            alt.Chart(
+                df,
+                title=alt.TitleParams(
+                    "Column Selection Detail", color=Colors.PURPLE.value, fontSize=14
+                ),
+            )
             .mark_line()
             .encode(
                 x=alt.X(
@@ -422,7 +436,7 @@ class DataAssistantResult(SerializableDictDot):
                 color=alt.condition(
                     selector,
                     alt.Color(
-                        column_name,
+                        legend_title,
                         type=AltairDataTypes.NOMINAL.value,
                         scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
                     ),
@@ -440,7 +454,12 @@ class DataAssistantResult(SerializableDictDot):
         )
 
         detail_points: alt.Chart = (
-            alt.Chart(df)
+            alt.Chart(
+                df,
+                title=alt.TitleParams(
+                    "Column Selection Detail", color=Colors.PURPLE.value, fontSize=14
+                ),
+            )
             .mark_point(size=point_size)
             .encode(
                 x=alt.X(
@@ -471,7 +490,7 @@ class DataAssistantResult(SerializableDictDot):
             orient="left",
             angle=270,
             fontSize=14,
-            dx=55,
+            dx=70,
             dy=-5,
         )
 
@@ -503,7 +522,7 @@ class DataAssistantResult(SerializableDictDot):
         if include_title:
             title = f"{metric_title} per {domain_title}"
 
-        batch_id: str = "Batch ID"
+        batch_id: str = "batch_id"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         tooltip: List[alt.Tooltip] = [
@@ -599,7 +618,7 @@ class DataAssistantResult(SerializableDictDot):
 
         domain_title: str = domain_name.title()
 
-        batch_id: str = "Batch ID"
+        batch_id: str = "batch_id"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
         min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
@@ -737,7 +756,7 @@ class DataAssistantResult(SerializableDictDot):
         if include_title:
             title = f"{metric_title} per {domain_title}"
 
-        batch_id: str = "Batch ID"
+        batch_id: str = "batch_id"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
 
         tooltip: List[alt.Tooltip] = [
@@ -835,7 +854,7 @@ class DataAssistantResult(SerializableDictDot):
 
         domain_title: str = domain_name.title()
 
-        batch_id: str = "Batch ID"
+        batch_id: str = "batch_id"
         batch_id_type: alt.StandardType = AltairDataTypes.NOMINAL.value
         min_value: str = "min_value"
         min_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value

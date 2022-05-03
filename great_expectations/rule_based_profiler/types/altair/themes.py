@@ -40,6 +40,7 @@ x_axis_grid: bool = True
 
 # Legend
 legend_title_color: str = Colors.PURPLE.value
+legend_title_font_size: str = 12
 
 #
 # Color Palettes
@@ -99,6 +100,7 @@ class AltairThemes(Enum):
         },
         "legend": {
             "titleColor": legend_title_color,
+            "titleFontSize": legend_title_font_size,
         },
         "range": {
             "category": category_color_scheme,
