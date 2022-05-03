@@ -719,7 +719,7 @@ def get_or_create_expectation_suite(
             expectation_suite = data_context.create_expectation_suite(
                 expectation_suite_name=expectation_suite_name
             )
-            print(
+            logger.info(
                 f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
             )
 
