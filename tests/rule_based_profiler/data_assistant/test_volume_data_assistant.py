@@ -8,6 +8,7 @@ from freezegun import freeze_time
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,
@@ -17,7 +18,11 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
     get_validator_with_expectation_suite,
 )
-from great_expectations.rule_based_profiler.types import Domain
+from great_expectations.rule_based_profiler.types import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.rule_based_profiler.types.data_assistant_result import (
     DataAssistantResult,
 )
@@ -36,7 +41,10 @@ from tests.test_utils import find_strings_in_nested_obj
 @pytest.fixture
 def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
-        Domain(domain_type="table",): {
+        Domain(
+            rule_name="default_expect_table_row_count_to_be_between_rule",
+            domain_type=MetricDomainTypes.TABLE,
+        ): {
             "$parameter.table_row_count": {
                 "value": [
                     10000,
@@ -125,7 +133,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             },
         },
-        Domain(domain_type="column", domain_kwargs={"column": "vendor_id",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "vendor_id",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "vendor_id": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     3,
@@ -214,7 +233,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "pickup_datetime",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "pickup_datetime",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "pickup_datetime": SemanticDomainTypes.TEXT,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     9973,
@@ -303,7 +333,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "dropoff_datetime",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "dropoff_datetime",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "dropoff_datetime": SemanticDomainTypes.TEXT,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     9972,
@@ -392,7 +433,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "passenger_count",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "passenger_count",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "passenger_count": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     6,
@@ -481,7 +533,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "trip_distance",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "trip_distance",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "trip_distance": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     1184,
@@ -570,7 +633,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "rate_code_id",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "rate_code_id",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "rate_code_id": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     7,
@@ -659,7 +733,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "store_and_fwd_flag",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "store_and_fwd_flag",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "store_and_fwd_flag": SemanticDomainTypes.TEXT,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     2,
@@ -748,7 +833,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "pickup_location_id",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "pickup_location_id",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "pickup_location_id": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     151,
@@ -838,9 +934,15 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            domain_type="column",
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "dropoff_location_id",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "dropoff_location_id": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -931,7 +1033,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "payment_type",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "payment_type",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "payment_type": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     4,
@@ -1020,7 +1133,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "fare_amount",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "fare_amount",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "fare_amount": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     187,
@@ -1109,7 +1233,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "extra",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "extra",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "extra": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     8,
@@ -1198,7 +1333,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "mta_tax",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "mta_tax",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "mta_tax": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     4,
@@ -1287,7 +1433,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "tip_amount",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "tip_amount",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "tip_amount": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     535,
@@ -1376,7 +1533,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "tolls_amount",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "tolls_amount",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "tolls_amount": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     22,
@@ -1466,9 +1634,15 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            domain_type="column",
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "improvement_surcharge",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "improvement_surcharge": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1559,7 +1733,18 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
                 },
             }
         },
-        Domain(domain_type="column", domain_kwargs={"column": "total_amount",}): {
+        Domain(
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": "total_amount",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "total_amount": SemanticDomainTypes.NUMERIC,
+                },
+            },
+        ): {
             "$parameter.column_distinct_values.count": {
                 "value": [
                     942,
@@ -1649,9 +1834,15 @@ def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
             }
         },
         Domain(
-            domain_type="column",
+            rule_name="default_expect_column_unique_values_to_be_between_rule",
+            domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
                 "column": "congestion_surcharge",
+            },
+            details={
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "congestion_surcharge": SemanticDomainTypes.NUMERIC,
+                },
             },
         ): {
             "$parameter.column_distinct_values.count": {
@@ -1757,6 +1948,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                 "default_expect_table_row_count_to_be_between_rule": {
                     "variables": {
                         "false_positive_rate": 0.05,
+                        "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
                         "truncate_values": {"lower_bound": 0},
@@ -1796,6 +1988,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "reduce_scalar_metric": True,
                                     "metric_name": "table.row_count",
                                     "false_positive_rate": "$variables.false_positive_rate",
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                                     "round_decimals": "$variables.round_decimals",
                                 }
@@ -1816,6 +2009,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         "strict_min": False,
                         "strict_max": False,
                         "false_positive_rate": 0.05,
+                        "quantile_statistic_interpolation_method": "auto",
                         "estimator": "bootstrap",
                         "num_bootstrap_samples": 9999,
                         "truncate_values": {"lower_bound": 0},
@@ -1856,6 +2050,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "reduce_scalar_metric": True,
                                     "metric_name": "column.distinct_values.count",
                                     "false_positive_rate": "$variables.false_positive_rate",
+                                    "quantile_statistic_interpolation_method": "$variables.quantile_statistic_interpolation_method",
                                     "bootstrap_random_seed": "$variables.bootstrap_random_seed",
                                     "round_decimals": "$variables.round_decimals",
                                 }
@@ -1951,7 +2146,7 @@ def quentin_expected_expectation_suite(
                         "max_value": 9983,
                         "strict_min": False,
                         "column": "pickup_datetime",
-                        "min_value": 9944,
+                        "min_value": 9945,
                     },
                 }
             ),
@@ -1974,7 +2169,7 @@ def quentin_expected_expectation_suite(
                         "max_value": 9985,
                         "strict_min": False,
                         "column": "dropoff_datetime",
-                        "min_value": 9957,
+                        "min_value": 9958,
                     },
                 }
             ),
@@ -2017,10 +2212,10 @@ def quentin_expected_expectation_suite(
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
                         "strict_max": False,
-                        "max_value": 1439,
+                        "max_value": 1430,
                         "strict_min": False,
                         "column": "trip_distance",
-                        "min_value": 1157,
+                        "min_value": 1159,
                     },
                 }
             ),
@@ -2086,7 +2281,7 @@ def quentin_expected_expectation_suite(
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
                         "strict_max": False,
-                        "max_value": 212,
+                        "max_value": 211,
                         "strict_min": False,
                         "column": "pickup_location_id",
                         "min_value": 118,
@@ -2155,10 +2350,10 @@ def quentin_expected_expectation_suite(
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
                         "strict_max": False,
-                        "max_value": 899,
+                        "max_value": 813,
                         "strict_min": False,
                         "column": "fare_amount",
-                        "min_value": 152,
+                        "min_value": 153,
                     },
                 }
             ),
@@ -2293,10 +2488,10 @@ def quentin_expected_expectation_suite(
                     "expectation_type": "expect_column_unique_value_count_to_be_between",
                     "kwargs": {
                         "strict_max": False,
-                        "max_value": 1562,
+                        "max_value": 1440,
                         "strict_min": False,
                         "column": "total_amount",
-                        "min_value": 896,
+                        "min_value": 898,
                     },
                 }
             ),

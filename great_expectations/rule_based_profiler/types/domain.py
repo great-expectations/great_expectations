@@ -51,6 +51,7 @@ class Domain(SerializableDotDict):
     # Adding an explicit constructor to highlight the specific properties that will be used.
     def __init__(
         self,
+        rule_name: str,
         domain_type: Union[str, MetricDomainTypes],
         domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
         details: Optional[Dict[str, Any]] = None,
@@ -84,6 +85,7 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
             details = {}
 
         super().__init__(
+            rule_name=rule_name,
             domain_type=domain_type,
             domain_kwargs=domain_kwargs_dot_dict,
             details=details,
@@ -103,7 +105,9 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
             )
             or (
                 isinstance(other, dict)
-                and self.to_json_dict()
+                and filter_properties_dict(
+                    properties=self.to_json_dict(), clean_falsy=True
+                )
                 == filter_properties_dict(properties=other, clean_falsy=True)
             )
             or (self.__str__() == str(other))
@@ -128,19 +132,21 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         key: str
         value: Any
         for key, value in self["details"].items():
-            if key == INFERRED_SEMANTIC_TYPE_KEY:
-                semantic_type: Union[str, SemanticDomainTypes]
-                if isinstance(value, str):
-                    semantic_type = value.lower()
-                    semantic_type = SemanticDomainTypes(semantic_type)
-                else:
-                    semantic_type = value
+            if value:
+                if key == INFERRED_SEMANTIC_TYPE_KEY:
+                    column_name: str
+                    semantic_type: Union[str, SemanticDomainTypes]
+                    value = {
+                        column_name: SemanticDomainTypes(semantic_type.lower()).value
+                        if isinstance(semantic_type, str)
+                        else semantic_type.value
+                        for column_name, semantic_type in value.items()
+                    }
 
-                details[key] = semantic_type.value
-            else:
-                details[key] = convert_to_json_serializable(data=value)
+            details[key] = convert_to_json_serializable(data=value)
 
         json_dict: dict = {
+            "rule_name": self["rule_name"],
             "domain_type": self["domain_type"].value,
             "domain_kwargs": self["domain_kwargs"].to_json_dict(),
             "details": details,

@@ -87,26 +87,25 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "profiler_config",
     )
 
-    row_count_range_estimator_parameter_builder_config: ParameterBuilderConfig = (
-        ParameterBuilderConfig(
-            module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="NumericMetricRangeMultiBatchParameterBuilder",
-            name="row_count_range_estimator",
-            metric_name="table.row_count",
-            metric_domain_kwargs=None,
-            metric_value_kwargs=None,
-            enforce_numeric_metric=True,
-            replace_nan_with_zero=True,
-            reduce_scalar_metric=True,
-            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
-            estimator=f"{VARIABLES_KEY}estimator",
-            num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
-            bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
-            truncate_values=f"{VARIABLES_KEY}truncate_values",
-            round_decimals=f"{VARIABLES_KEY}round_decimals",
-            evaluation_parameter_builder_configs=None,
-            json_serialize=True,
-        )
+    row_count_range_estimator_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="NumericMetricRangeMultiBatchParameterBuilder",
+        name="row_count_range_estimator",
+        metric_name="table.row_count",
+        metric_domain_kwargs=None,
+        metric_value_kwargs=None,
+        enforce_numeric_metric=True,
+        replace_nan_with_zero=True,
+        reduce_scalar_metric=True,
+        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        estimator=f"{VARIABLES_KEY}estimator",
+        num_bootstrap_samples=f"{VARIABLES_KEY}num_bootstrap_samples",
+        bootstrap_random_seed=f"{VARIABLES_KEY}bootstrap_random_seed",
+        truncate_values=f"{VARIABLES_KEY}truncate_values",
+        round_decimals=f"{VARIABLES_KEY}round_decimals",
+        evaluation_parameter_builder_configs=None,
+        json_serialize=True,
     )
     validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
         row_count_range_estimator_parameter_builder_config,
@@ -119,6 +118,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "default_expect_table_row_count_to_be_between_rule": {
                 "variables": {
                     "false_positive_rate": 0.05,
+                    "quantile_statistic_interpolation_method": "auto",
                     "estimator": "bootstrap",
                     "num_bootstrap_samples": 9999,
                     "bootstrap_random_seed": None,

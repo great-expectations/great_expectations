@@ -90,14 +90,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         self._candidate_regexes = candidate_regexes
 
     @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"{PARAMETER_KEY}{self.name}"
-
-    """
-    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
-    """
-
-    @property
     def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
         return self._metric_domain_kwargs
 

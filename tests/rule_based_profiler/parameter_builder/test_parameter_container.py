@@ -34,6 +34,7 @@ def test_get_fully_qualified_parameter_names(
     )
 
     domain: Domain = Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=None,
         details=None,
@@ -89,6 +90,7 @@ def test_get_parameter_values_for_fully_qualified_parameter_names(
     )
 
     domain: Domain = Domain(
+        rule_name="my_rule",
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=None,
         details=None,
