@@ -7,6 +7,9 @@ from great_expectations.types import ColorPalettes, Colors
 chart_width: int = 700
 chart_height: int = 250
 
+# View
+chart_border_opacity: float = 0
+
 # Font
 font: str = "Verdana"
 
@@ -78,7 +81,11 @@ point_tooltip_content: str = "data"
 class AltairThemes(Enum):
     # https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
     DEFAULT_THEME = {
-        "view": {"width": chart_width, "height": chart_height},
+        "view": {
+            "width": chart_width,
+            "height": chart_height,
+            "strokeOpacity": chart_border_opacity,
+        },
         "font": font,
         "title": {
             "align": title_align,

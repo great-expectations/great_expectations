@@ -1,7 +1,7 @@
 import copy
 from abc import abstractmethod
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import altair as alt
 import pandas as pd
@@ -179,7 +179,7 @@ class DataAssistantResult(SerializableDictDot):
         max_value: str = "max_value"
         max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
-        tooltip: list[alt.Tooltip] = [
+        tooltip: List[alt.Tooltip] = [
             alt.Tooltip(field=batch_id, type=batch_id_type),
             alt.Tooltip(field=metric_name, type=metric_type, format=","),
             alt.Tooltip(field=min_value, type=min_value_type, format=","),
@@ -599,22 +599,43 @@ class DataAssistantResult(SerializableDictDot):
         detail_title_column_names: pd.DataFrame = pd.DataFrame(
             {column_name: pd.unique(df[column_name])}
         )
-
         detail_title_column_titles: str = "column_title"
         detail_title_column_names[
             detail_title_column_titles
         ] = detail_title_column_names[column_name].apply(
             lambda x: f"Column ({x}) Selection Detail"
         )
+        detail_title_text: alt.condition = alt.condition(
+            selection, detail_title_column_titles, alt.value("")
+        )
 
         detail_title = (
             alt.Chart(detail_title_column_names)
-            .mark_text(color=Colors.PURPLE.value, fontSize=14)
-            .encode(
-                text=alt.condition(selection, detail_title_column_titles, alt.value(""))
-            )
+            .mark_text(color=Colors.PURPLE.value, fontSize=14, fontWeight="bold")
+            .encode(text=detail_title_text)
             .transform_filter(selection)
-            .properties(height=50)
+            .properties(height=10)
+        )
+
+        detail_empty_selection_title_column_names: pd.DataFrame = pd.DataFrame(
+            {column_name: pd.unique(empty_selection_df[column_name])}
+        )
+        detail_empty_selection_title_column_titles: str = detail_title_column_titles
+        detail_empty_selection_title_column_names[
+            detail_empty_selection_title_column_titles
+        ] = detail_empty_selection_title_column_names[column_name].apply(
+            lambda x: f"Column ({x}) Selection Detail"
+        )
+        detail_empty_selection_title_text: alt.condition = alt.condition(
+            empty_selection, detail_empty_selection_title_column_titles, alt.value("")
+        )
+
+        detail_empty_selection_title = (
+            alt.Chart(detail_empty_selection_title_column_names)
+            .mark_text(color=Colors.PURPLE.value, fontSize=14, fontWeight="bold")
+            .encode(text=detail_empty_selection_title_text)
+            .transform_filter(empty_selection)
+            .properties(height=10)
         )
 
         return (
@@ -626,7 +647,7 @@ class DataAssistantResult(SerializableDictDot):
                     + highlight_points
                     + empty_selection_line
                     + empty_selection_points,
-                    detail_title,
+                    detail_title + detail_empty_selection_title,
                     detail_line
                     + detail_points
                     + detail_empty_selection_line
@@ -758,7 +779,7 @@ class DataAssistantResult(SerializableDictDot):
         max_value: str = "max_value"
         max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
-        tooltip: list[alt.Tooltip] = [
+        tooltip: List[alt.Tooltip] = [
             alt.Tooltip(field=batch_id, type=batch_id_type),
             alt.Tooltip(field=metric_name, type=metric_type, format=","),
             alt.Tooltip(field=min_value, type=min_value_type, format=","),
@@ -994,7 +1015,7 @@ class DataAssistantResult(SerializableDictDot):
         max_value: str = "max_value"
         max_value_type: alt.StandardType = AltairDataTypes.QUANTITATIVE.value
 
-        tooltip: list[alt.Tooltip] = [
+        tooltip: List[alt.Tooltip] = [
             alt.Tooltip(field=batch_id, type=batch_id_type),
             alt.Tooltip(field=metric_name, type=metric_type, format=","),
             alt.Tooltip(field=min_value, type=min_value_type, format=","),
