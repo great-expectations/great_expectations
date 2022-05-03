@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional, Union
 
+import numpy as np
+
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -13,7 +15,6 @@ from great_expectations.rule_based_profiler.types import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    PARAMETER_KEY,
     Domain,
     ParameterContainer,
 )
@@ -145,6 +146,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
             if (
                 reduce_scalar_metric
+                and isinstance(
+                    metric_computation_result.attributed_resolved_metrics[
+                        0
+                    ].metric_values,
+                    np.ndarray,
+                )
                 and metric_computation_result.attributed_resolved_metrics[
                     0
                 ].metric_values.shape[1]

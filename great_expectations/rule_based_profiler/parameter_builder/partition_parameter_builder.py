@@ -45,7 +45,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
 
         self._column_partition_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricSinglBatchParameterBuilder",
+            class_name="MetricSingleBatchParameterBuilder",
             name="column_partition_metric_parameter_builder",
             metric_name="column.partition",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -55,35 +55,35 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             },
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
-            reduce_scalar_metric=True,
+            reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=None,
             json_serialize=False,
         )
         self._column_value_counts_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricSinglBatchParameterBuilder",
+            class_name="MetricSingleBatchParameterBuilder",
             name="column_value_counts_metric_single_batch_parameter_builder",
-            metric_name="column_value.counts",
+            metric_name="column.value_counts",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs={
                 "sort": "value",
             },
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
-            reduce_scalar_metric=True,
+            reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=None,
             json_serialize=False,
         )
         self._column_values_nonnull_count_metric_single_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
             module_name="great_expectations.rule_based_profiler.parameter_builder",
-            class_name="MetricSinglBatchParameterBuilder",
+            class_name="MetricSingleBatchParameterBuilder",
             name="column_values_nonnull_count_metric_single_batch_parameter_builder",
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
-            reduce_scalar_metric=True,
+            reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=None,
             json_serialize=False,
         )
@@ -101,7 +101,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
             metric_value_kwargs=None,
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
-            reduce_scalar_metric=True,
+            reduce_scalar_metric=False,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             json_serialize=json_serialize,
             data_context=data_context,
@@ -169,7 +169,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
 
         if is_categorical:
             fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
-            # Obtain "column_value.counts" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            # Obtain "column.value_counts" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
             column_value_counts_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
                 domain=domain,
                 parameter_reference=fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name,

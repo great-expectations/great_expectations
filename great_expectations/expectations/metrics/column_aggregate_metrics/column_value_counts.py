@@ -46,19 +46,24 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         column = accessor_domain_kwargs["column"]
 
         counts = df[column].value_counts()
+        # print(f'\n[ALEX_TEST] [COLUMN_VALUE_COUNTS._PANDAS()] COUNTS-0:\n{counts} ; TYPE: {str(type(counts))}')
         if sort == "value":
             try:
                 counts.sort_index(inplace=True)
+                # print(f'\n[ALEX_TEST] [COLUMN_VALUE_COUNTS._PANDAS()] COUNTS-1:\n{counts} ; TYPE: {str(type(counts))}')
+                # print(f'\n[ALEX_TEST] [COLUMN_VALUE_COUNTS._PANDAS()] COUNTS-1.INDEX:\n{counts.index} ; TYPE: {str(type(counts.index))}')
             except TypeError:
                 # Having values of multiple types in a object dtype column (e.g., strings and floats)
                 # raises a TypeError when the sorting method performs comparisons.
                 if df[column].dtype == object:
                     counts.index = counts.index.astype(str)
                     counts.sort_index(inplace=True)
+                # print(f'\n[ALEX_TEST] [COLUMN_VALUE_COUNTS._PANDAS()] COUNTS-2:\n{counts} ; TYPE: {str(type(counts))}')
         elif sort == "counts":
             counts.sort_values(inplace=True)
         counts.name = "count"
         counts.index.name = "value"
+        # print(f'\n[ALEX_TEST] [COLUMN_VALUE_COUNTS._PANDAS()] COUNTS-RETURNING:\n{counts} ; TYPE: {str(type(counts))}')
         return counts
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
