@@ -406,7 +406,9 @@ class ExecutionEngine(ABC):
 
         return resolved_metrics
 
-    def resolve_metric_bundle(self, metric_fn_bundle) -> None:
+    def resolve_metric_bundle(
+        self, metric_fn_bundle
+    ) -> Dict[Tuple[str, str, str], Any]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 

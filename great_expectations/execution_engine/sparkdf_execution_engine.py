@@ -608,7 +608,7 @@ Please check your config."""
     def resolve_metric_bundle(
         self,
         metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
-    ) -> dict:
+    ) -> Dict[Tuple[str, str, str], Any]:
         """For each metric name in the given metric_fn_bundle, finds the domain of the metric and calculates it using a
         metric function from the given provider class.
 

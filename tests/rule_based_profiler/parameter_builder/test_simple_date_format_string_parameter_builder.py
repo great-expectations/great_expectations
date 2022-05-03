@@ -59,7 +59,7 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
 
     assert (
         str(e.value)
-        == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of batch identifiers."
+        == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of Batch identifiers."
     )
 
 
