@@ -48,15 +48,16 @@ class VolumeDataAssistantResult(DataAssistantResult):
         ] = self.expectation_suite.expectations
 
         table_domain_charts: List[alt.Chart] = self._plot_table_domain_charts(
-            expectation_configurations, prescriptive
+            expectation_configurations=expectation_configurations,
+            prescriptive=prescriptive,
         )
         charts.extend(table_domain_charts)
 
         column_domain_chart: List[alt.Chart] = self._plot_column_domain_charts(
-            expectation_configurations,
-            include_column_names,
-            exclude_column_names,
-            prescriptive,
+            expectation_configurations=expectation_configurations,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+            prescriptive=prescriptive,
         )
         charts.extend(column_domain_chart)
 
@@ -95,57 +96,6 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         return charts
 
-    def _create_chart_for_table_domain_expectation(
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
-        prescriptive: bool,
-    ) -> alt.Chart:
-        attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
-            attributed_metrics.values()
-        )[0]
-
-        # Altair does not accept periods.
-        metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
-            ".", "_"
-        )
-        domain_name: str = "batch"
-        metric_type: str = AltairDataTypes.QUANTITATIVE.value
-        domain_type: str = AltairDataTypes.ORDINAL.value
-
-        df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
-            metric_name, domain_name, attributed_values_by_metric_name
-        )
-
-        plot_impl: Callable[
-            [
-                pd.DataFrame,
-                str,
-                alt.StandardType,
-                str,
-                alt.StandardType,
-                Optional[str],
-            ],
-            alt.Chart,
-        ]
-
-        if prescriptive:
-            for kwarg_name in expectation_configuration.kwargs:
-                df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
-            plot_impl = self.get_expect_values_to_be_between_chart
-        else:
-            plot_impl = self.get_line_chart
-
-        chart: alt.Chart = plot_impl(
-            df=df,
-            metric_name=metric_name,
-            metric_type=metric_type,
-            domain_name=domain_name,
-            domain_type=domain_type,
-            subtitle=None,
-        )
-        return chart
-
     def _plot_column_domain_charts(
         self,
         expectation_configurations: List[ExpectationConfiguration],
@@ -176,16 +126,54 @@ class VolumeDataAssistantResult(DataAssistantResult):
 
         charts: List[alt.Chart] = []
 
-        for column_based_expectation in column_based_expectations:
+        expectation_configuration: ExpectationConfiguration
+        for expectation_configuration in column_based_expectations:
             column_domain_chart: alt.Chart = (
                 self._create_chart_for_column_domain_expectation(
-                    expectation_configuration=column_based_expectation,
+                    expectation_configuration=expectation_configuration,
                     attributed_metrics=attributed_metrics_by_column_domain,
                     prescriptive=prescriptive,
                 )
             )
             charts.append(column_domain_chart)
+
         return charts
+
+    def _create_chart_for_table_domain_expectation(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        attributed_metrics: Dict[Domain, Dict[str, ParameterNode]],
+        prescriptive: bool,
+    ) -> alt.Chart:
+        attributed_values_by_metric_name: Dict[str, ParameterNode] = list(
+            attributed_metrics.values()
+        )[0]
+
+        # Altair does not accept periods.
+        metric_name: str = list(attributed_values_by_metric_name.keys())[0].replace(
+            ".", "_"
+        )
+        domain_name: str = "batch"
+        metric_type: str = AltairDataTypes.QUANTITATIVE.value
+        domain_type: str = AltairDataTypes.ORDINAL.value
+
+        df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
+            metric_name=metric_name,
+            domain_name=domain_name,
+            attributed_values_by_metric_name=attributed_values_by_metric_name,
+            expectation_configuration=expectation_configuration,
+            prescriptive=prescriptive,
+        )
+
+        return self._chart_values(
+            df=df,
+            metric_name=metric_name,
+            metric_type=metric_type,
+            domain_name=domain_name,
+            domain_type=domain_type,
+            prescriptive=prescriptive,
+            subtitle=None,
+        )
 
     def _create_chart_for_column_domain_expectation(
         self,
@@ -220,15 +208,36 @@ class VolumeDataAssistantResult(DataAssistantResult):
         )
 
         df: pd.DataFrame = VolumeDataAssistantResult._create_df_for_charting(
-            metric_name, domain_name, attributed_values_by_metric_name
+            metric_name=metric_name,
+            domain_name=domain_name,
+            attributed_values_by_metric_name=attributed_values_by_metric_name,
+            expectation_configuration=expectation_configuration,
+            prescriptive=prescriptive,
         )
 
-        if prescriptive:
-            for kwarg_name in expectation_configuration.kwargs:
-                df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
-
         column_name: str = expectation_configuration.kwargs["column"]
+        subtitle = f"Column: {column_name}"
 
+        return self._chart_values(
+            df=df,
+            metric_name=metric_name,
+            metric_type=metric_type,
+            domain_name=domain_name,
+            domain_type=domain_type,
+            prescriptive=prescriptive,
+            subtitle=subtitle,
+        )
+
+    def _chart_values(
+        self,
+        df: pd.DataFrame,
+        metric_name: str,
+        metric_type: alt.StandardType,
+        domain_name: str,
+        domain_type: alt.StandardType,
+        prescriptive: bool,
+        subtitle: Optional[str],
+    ) -> alt.Chart:
         plot_impl: Callable[
             [
                 pd.DataFrame,
@@ -240,10 +249,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             ],
             alt.Chart,
         ]
-
         if prescriptive:
-            for kwarg_name in expectation_configuration.kwargs:
-                df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
             plot_impl = self.get_expect_values_to_be_between_chart
         else:
             plot_impl = self.get_line_chart
@@ -254,7 +260,7 @@ class VolumeDataAssistantResult(DataAssistantResult):
             metric_type=metric_type,
             domain_name=domain_name,
             domain_type=domain_type,
-            subtitle=f"Column: {column_name}",
+            subtitle=subtitle,
         )
         return chart
 
@@ -263,6 +269,8 @@ class VolumeDataAssistantResult(DataAssistantResult):
         metric_name: str,
         domain_name: str,
         attributed_values_by_metric_name: Dict[str, ParameterNode],
+        expectation_configuration: ExpectationConfiguration,
+        prescriptive: bool,
     ) -> pd.DataFrame:
         batch_ids: KeysView[str]
         metric_values: MetricValues
@@ -276,6 +284,10 @@ class VolumeDataAssistantResult(DataAssistantResult):
         df: pd.DataFrame = pd.DataFrame(batch_numbers, columns=[domain_name])
         df["batch_id"] = batch_ids
         df[metric_name] = metric_values
+
+        if prescriptive:
+            for kwarg_name in expectation_configuration.kwargs:
+                df[kwarg_name] = expectation_configuration.kwargs[kwarg_name]
 
         return df
 
