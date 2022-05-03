@@ -308,10 +308,9 @@ class DataAssistantResult(SerializableDictDot):
 
         selection = alt.selection_single(
             empty="none",
-            fields=[column_name],
             bind="legend",
-            on="click",
-            clear="click",
+            fields=[column_name],
+            on="mouseover",
         )
 
         line: alt.Chart = (
@@ -424,63 +423,6 @@ class DataAssistantResult(SerializableDictDot):
             .transform_filter(selection)
         )
 
-        empty_selection = alt.selection_single(
-            empty="all",
-            fields=[column_name],
-            bind="legend",
-            on="click",
-            clear="click",
-        )
-
-        # only display the column in the first row of the dataframe if nothing is selected
-        empty_selection_df = df[df[column_name] == df[column_name].iloc[0]]
-
-        empty_selection_line: alt.Chart = (
-            alt.Chart(empty_selection_df, title=title)
-            .mark_line(strokeWidth=2.5)
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                ),
-                y=alt.Y(metric_name, type=metric_type, title=None),
-                color=alt.condition(
-                    empty_selection,
-                    alt.Color(
-                        column_name,
-                        type=AltairDataTypes.NOMINAL.value,
-                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
-                    ),
-                    unselected_color,
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=line_chart_height)
-            .transform_filter(empty_selection)
-        )
-
-        empty_selection_points: alt.Chart = (
-            alt.Chart(empty_selection_df, title=title)
-            .mark_point(size=40)
-            .encode(
-                x=alt.X(
-                    domain_name,
-                    type=domain_type,
-                    axis=alt.Axis(ticks=False, title=None, labels=False),
-                ),
-                y=alt.Y(metric_name, type=metric_type, title=None),
-                color=alt.condition(
-                    empty_selection,
-                    alt.value(Colors.GREEN.value),
-                    unselected_color,
-                ),
-                tooltip=tooltip,
-            )
-            .properties(height=line_chart_height)
-            .transform_filter(empty_selection)
-        )
-
         detail_line: alt.Chart = (
             alt.Chart(
                 df,
@@ -541,6 +483,87 @@ class DataAssistantResult(SerializableDictDot):
             .transform_filter(selection)
         )
 
+        detail_title_column_names: pd.DataFrame = pd.DataFrame(
+            {column_name: pd.unique(df[column_name])}
+        )
+        detail_title_column_titles: str = "column_title"
+        detail_title_column_names[
+            detail_title_column_titles
+        ] = detail_title_column_names[column_name].apply(
+            lambda x: f"Column ({x}) Selection Detail"
+        )
+        detail_title_text: alt.condition = alt.condition(
+            selection, detail_title_column_titles, alt.value("")
+        )
+
+        detail_title = (
+            alt.Chart(detail_title_column_names)
+            .mark_text(
+                color=Colors.PURPLE.value,
+                fontSize=detail_title_font_size,
+                fontWeight=detail_title_font_weight,
+            )
+            .encode(text=detail_title_text)
+            .transform_filter(selection)
+            .properties(height=10)
+        )
+
+        empty_selection = alt.selection_single(
+            empty="all",
+            bind="legend",
+            fields=[column_name],
+            on="mouseover",
+        )
+
+        # only display the column in the first row of the dataframe if nothing is selected
+        empty_selection_df = df[df[column_name] == df[column_name].iloc[0]]
+
+        empty_selection_line: alt.Chart = (
+            alt.Chart(empty_selection_df, title=title)
+            .mark_line(strokeWidth=2.5)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    axis=alt.Axis(ticks=False, title=None, labels=False),
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=None),
+                color=alt.condition(
+                    empty_selection,
+                    alt.Color(
+                        column_name,
+                        type=AltairDataTypes.NOMINAL.value,
+                        scale=alt.Scale(range=ColorPalettes.ORDINAL_7.value),
+                    ),
+                    unselected_color,
+                ),
+                tooltip=tooltip,
+            )
+            .properties(height=line_chart_height)
+            .transform_filter(empty_selection)
+        )
+
+        empty_selection_points: alt.Chart = (
+            alt.Chart(empty_selection_df, title=title)
+            .mark_point(size=40)
+            .encode(
+                x=alt.X(
+                    domain_name,
+                    type=domain_type,
+                    axis=alt.Axis(ticks=False, title=None, labels=False),
+                ),
+                y=alt.Y(metric_name, type=metric_type, title=None),
+                color=alt.condition(
+                    empty_selection,
+                    alt.value(Colors.GREEN.value),
+                    unselected_color,
+                ),
+                tooltip=tooltip,
+            )
+            .properties(height=line_chart_height)
+            .transform_filter(empty_selection)
+        )
+
         detail_empty_selection_line: alt.Chart = (
             alt.Chart(
                 empty_selection_df,
@@ -589,31 +612,6 @@ class DataAssistantResult(SerializableDictDot):
             )
             .properties(height=detail_line_chart_height)
             .transform_filter(empty_selection)
-        )
-
-        detail_title_column_names: pd.DataFrame = pd.DataFrame(
-            {column_name: pd.unique(df[column_name])}
-        )
-        detail_title_column_titles: str = "column_title"
-        detail_title_column_names[
-            detail_title_column_titles
-        ] = detail_title_column_names[column_name].apply(
-            lambda x: f"Column ({x}) Selection Detail"
-        )
-        detail_title_text: alt.condition = alt.condition(
-            selection, detail_title_column_titles, alt.value("")
-        )
-
-        detail_title = (
-            alt.Chart(detail_title_column_names)
-            .mark_text(
-                color=Colors.PURPLE.value,
-                fontSize=detail_title_font_size,
-                fontWeight=detail_title_font_weight,
-            )
-            .encode(text=detail_title_text)
-            .transform_filter(selection)
-            .properties(height=10)
         )
 
         detail_empty_selection_title_column_names: pd.DataFrame = pd.DataFrame(
