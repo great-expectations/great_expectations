@@ -909,6 +909,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             return self._get_column_quantiles_bigquery(
                 column=column, quantiles=quantiles
             )
+        elif self.sql_engine_dialect.name.lower() == "trino":
+            return self._get_column_quantiles_trino(column=column, quantiles=quantiles)
         elif self.sql_engine_dialect.name.lower() == "mysql":
             return self._get_column_quantiles_mysql(column=column, quantiles=quantiles)
         elif self.sql_engine_dialect.name.lower() == "snowflake":
@@ -992,6 +994,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             quantiles_results = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
+        except ProgrammingError as pe:
+            self._treat_quantiles_exception(pe)
+
+    def _get_column_quantiles_trino(self, column: str, quantiles: Iterable) -> list:
+        #  ref: https://docs.starburst.io/latest/language.html
+        try:
+            return quantiles
         except ProgrammingError as pe:
             self._treat_quantiles_exception(pe)
 

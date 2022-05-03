@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v4.2.0
     hooks:
       - id: check-yaml
         exclude: docs/.*|tests/data_context/fixtures/bad_yml/great_expectations\.yml
@@ -11,22 +11,22 @@ repos:
       - id: requirements-txt-fixer
         exclude: docs/.*
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.5.2
+    rev: 5.10.1
     hooks:
       - id: isort
         exclude: venv/.*\|docs/.*|tests/test_sets/broken_excel_file\.xls
   - repo: https://github.com/psf/black
-    rev: 22.1.0
+    rev: 22.3.0
     hooks:
       - id: black
         exclude: docs/.*|tests/.*.fixture|.*.ge_store_backend_id
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.3
+    rev: 3.9.2
     hooks:
       - id: flake8
         files: ^(great_expectations/core)
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.7.2
+    rev: v2.32.0
     hooks:
       - id: pyupgrade
         args: ["--py3-plus"]
