@@ -41,7 +41,7 @@ except ImportError:
     default=True,
 )
 @click.pass_context
-def init(ctx, usage_stats) -> None:
+def init(ctx: click.Context, usage_stats: bool) -> None:
     """
     Initialize a new Great Expectations project.
 
@@ -118,5 +118,5 @@ def init(ctx, usage_stats) -> None:
     sys.exit(0)
 
 
-def _get_full_path_to_ge_dir(target_directory):
+def _get_full_path_to_ge_dir(target_directory: str) -> str:
     return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))

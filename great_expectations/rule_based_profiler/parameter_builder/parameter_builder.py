@@ -343,6 +343,12 @@ class ParameterBuilder(ABC, Builder):
         significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
+        if not metric_name:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""Utilizing "{self.__class__.__name__}.get_metrics()" requires valid "metric_name" to be \
+specified (empty "metric_name" value detected)."""
+            )
+
         batch_ids: Optional[List[str]] = self.get_batch_ids(
             domain=domain,
             variables=variables,
