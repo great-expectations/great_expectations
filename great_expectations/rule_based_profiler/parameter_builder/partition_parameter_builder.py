@@ -137,23 +137,20 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
 
         is_categorical: bool = not bucketize_data
 
-        bins: Optional[list] = None
+        fully_qualified_column_partition_metric_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
+        # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=fully_qualified_column_partition_metric_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+        bins: list = column_partition_parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+        ]
 
-        if not is_categorical:
-            fully_qualified_column_partition_metric_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_partition_metric_single_batch_parameter_builder_config.name}"
-            # Obtain "column.partition" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-            column_partition_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=fully_qualified_column_partition_metric_parameter_builder_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
-            bins = column_partition_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ]
-            if not np.all(np.diff(bins) > 0.0):
-                is_categorical = True
+        is_categorical = is_categorical or not np.all(np.diff(bins) > 0.0)
 
         fully_qualified_column_values_nonnull_count_metric_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_values_nonnull_count_metric_single_batch_parameter_builder_config.name}"
         # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -166,6 +163,9 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
         )
 
         partition_object: dict
+        details: dict
+
+        weights: list
 
         if is_categorical:
             fully_qualified_column_value_counts_metric_single_batch_parameter_builder_name: str = f"{PARAMETER_KEY}{self._column_value_counts_metric_single_batch_parameter_builder_config.name}"
@@ -178,23 +178,29 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
                 parameters=parameters,
             )
 
-            partition_object = {
-                "values": list(
+            values: list = list(
+                column_value_counts_parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+                ].index
+            )
+            weights = list(
+                np.array(
                     column_value_counts_parameter_node[
                         FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-                    ].index
-                ),
-                "weights": list(
-                    np.array(
-                        column_value_counts_parameter_node[
-                            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-                        ]
-                    )
-                    / column_values_nonnull_count_parameter_node[
-                        FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
                     ]
-                ),
+                )
+                / column_values_nonnull_count_parameter_node[
+                    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+                ]
+            )
+
+            partition_object = {
+                "values": values,
+                "weights": weights,
             }
+            details = column_value_counts_parameter_node[
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+            ]
         else:
             self.metric_name = "column.histogram"
             self.metric_value_kwargs = {
@@ -224,7 +230,7 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
 
             # in this case, we have requested a partition, histogram using said partition, and nonnull count
             bins = list(bins)
-            weights: list = list(
+            weights = list(
                 np.array(parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY])
                 / column_values_nonnull_count_parameter_node[
                     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
@@ -237,12 +243,11 @@ class PartitionParameterBuilder(MetricSingleBatchParameterBuilder):
                 "weights": weights,
                 "tail_weights": [tail_weights, tail_weights],
             }
+            details = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
 
         return Attributes(
             {
                 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: partition_object,
-                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ],
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
             }
         )
