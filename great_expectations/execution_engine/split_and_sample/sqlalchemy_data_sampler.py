@@ -53,7 +53,7 @@ class SqlAlchemyDataSampler(DataSampler):
         # so the business logic for building the query needs to be different.
         dialect: str = execution_engine.engine.dialect.name.lower()
         if dialect == "oracle":
-            # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS UNTESTED
+            # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
             # limit doesn't compile properly for oracle so we will append rownum to query string later
             raw_query = (
                 sa.select("*")
@@ -69,6 +69,18 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
+        elif dialect == "mssql":
+            query: Selectable = (
+                sa.select("*")
+                .select_from(
+                    sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                )
+                .where(where_clause)
+                .limit(batch_spec["sampling_kwargs"]["n"])
+            )
+            return str(
+                query.compile(execution_engine, compile_kwargs={"literal_binds": True})
+            )
         else:
             return (
                 sa.select("*")
@@ -100,7 +112,7 @@ class SqlAlchemyDataSampler(DataSampler):
             Sqlalchemy selectable.
         """
 
-        # TODO: AJB 20220429 WARNING THIS METHOD IS UNTESTED
+        # TODO: AJB 20220429 WARNING THIS METHOD IS NOT COVERED BY TESTS
 
         table_name: str = batch_spec["table_name"]
 
