@@ -275,7 +275,7 @@ def test_alice_profiler_user_workflow_single_batch(
         == alice_columnar_table_single_batch["expected_expectation_suite"]
     )
 
-    assert mock_emit.call_count == 43
+    assert mock_emit.call_count == 54
 
     assert all(
         payload[0][0]["event"] == "data_context.get_batch_list"
@@ -297,11 +297,11 @@ def test_alice_profiler_user_workflow_single_batch(
                         },
                         "anonymized_parameter_builders": [
                             {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "parent_class": "MetricSingleBatchParameterBuilder",
                                 "anonymized_name": "2b4df3c7cf39207db3e08477e1ea8f79",
                             },
                             {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "parent_class": "MetricSingleBatchParameterBuilder",
                                 "anonymized_name": "bea5e4c3943006d008899cdb1ebc3fb4",
                             },
                         ],
@@ -321,12 +321,12 @@ def test_alice_profiler_user_workflow_single_batch(
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
                                 "anonymized_expectation_type": "49e0013b377d4c7d9604d73fd672aa63",
-                                "anonymized_condition": "a2e517a17f9590295b4210da954796cf",
+                                "anonymized_condition": "5191ecaeb23644e402e68b1c641b1342",
                             },
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
                                 "anonymized_expectation_type": "5a4993ff394c8cf957dbe7964798f5a5",
-                                "anonymized_condition": "567ccfc06fecff803aa8533476b84936",
+                                "anonymized_condition": "a7f49ffeced7b75c9e0d958e9d010ddd",
                             },
                         ],
                     },
@@ -337,15 +337,15 @@ def test_alice_profiler_user_workflow_single_batch(
                         },
                         "anonymized_parameter_builders": [
                             {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "parent_class": "MetricSingleBatchParameterBuilder",
                                 "anonymized_name": "fa3ce9b81f1acc2f2730005e05737ea7",
                             },
                             {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "parent_class": "MetricSingleBatchParameterBuilder",
                                 "anonymized_name": "0bb947e516b26696a66787dc936570b7",
                             },
                             {
-                                "parent_class": "MetricMultiBatchParameterBuilder",
+                                "parent_class": "MetricSingleBatchParameterBuilder",
                                 "anonymized_name": "66093b34c0c2e4ff275edf1752bcd27e",
                             },
                             {
