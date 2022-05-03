@@ -122,7 +122,7 @@ action_list:
 
 </Tabs>
 
-### 4. Test your Slack notifications
+### 3. Test your Slack notifications
 
 Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and receive Slack notification on the success or failure of the <TechnicalTag tag="expectation_suite" text="Expectation Suite's" /> Validation.  
 
