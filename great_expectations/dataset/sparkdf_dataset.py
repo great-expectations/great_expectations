@@ -43,7 +43,6 @@ try:
         struct,
         udf,
         when,
-        year,
     )
 except ImportError as e:
     logger.debug(str(e))
